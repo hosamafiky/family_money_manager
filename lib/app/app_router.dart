@@ -1,27 +1,22 @@
-import 'package:family_money_manager/core/navigation/app_route.dart';
-import 'package:family_money_manager/features/smoke_screen/smoke_screen.dart';
+import 'package:family_money_manager/core/navigation/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
 ///
-/// Phase 1 defines one route only: the foundation smoke screen.
-/// Feature routes are added in later phases as their screens are implemented.
+/// Route definitions live in [routes.dart] as typed [GoRouteData] subclasses.
+/// Navigation calls use `const SmokeRouteData().go(context)` (or the relevant
+/// typed route) — never raw string paths.
 ///
-/// Navigation is typed: use `const SmokeRoute().go(context)` instead of
-/// raw string paths.
+/// Phase 1.5 defines two routes: [SmokeRouteData] and [FoundationDetailRouteData].
+/// Feature routes are added in later phases as their screens are implemented.
 abstract final class AppRouter {
   static GoRouter create() {
     return GoRouter(
-      initialLocation: const SmokeRoute().path,
+      initialLocation: const SmokeRouteData().location,
       debugLogDiagnostics: false,
       errorBuilder: (context, state) => AppErrorScreen(error: state.error),
-      routes: [
-        GoRoute(
-          path: const SmokeRoute().path,
-          builder: (context, state) => const SmokeScreen(),
-        ),
-      ],
+      routes: $appRoutes,
     );
   }
 }
@@ -46,7 +41,7 @@ class AppErrorScreen extends StatelessWidget {
             Text(error?.toString() ?? 'Page not found'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => const SmokeRoute().go(context),
+              onPressed: () => const SmokeRouteData().go(context),
               child: const Text('Go home'),
             ),
           ],

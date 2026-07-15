@@ -83,18 +83,49 @@ SQLCipher is deferred to v2. The OS provides full-disk encryption on modern Andr
 
 ---
 
-## DECISION-004 — SQLCipher (At-Rest Encryption)
+## DECISION-004 — Local Database At-Rest Encryption
 
-**Status:** Open — **must be decided before Phase 2 begins**
+**Status:** Evidence collected (Phase 1.5). Four product-owner decisions (PO-1 through PO-4) required before Phase 2 begins. See `docs/DECISION_004_ASSESSMENT.md` for full evidence.
 
-**Deadline:** Before Phase 2 database implementation. Changing the database driver after financial tables are created requires migrating an existing plaintext database to an encrypted format, which is a significant and risky operation. This decision cannot be deferred to Phase 11.
+**Deadline:** Before Phase 2 database implementation.
+
+**Correction (Phase 1.5):** Earlier versions of this entry incorrectly stated that
+encrypted databases were unavailable because `sqlite3_flutter_libs` and
+`sqlcipher_flutter_libs` were EOL. That was wrong. Those packages are obsolete
+compatibility stubs under the old `sqlite3` 2.x scheme. Under `sqlite3` 3.x, the
+encryption library is selected via pub build hooks and those stubs are no-op
+transitive dependencies that do not affect the encryption outcome.
+
+**Terminology correction:** The recommended implementation is **SQLite3MultipleCiphers**
+(sqlite3mc), not SQLCipher. They are distinct implementations. Do not use the term
+"SQLCipher" to describe the sqlite3mc build.
 
 **Context:** Should the local SQLite database be encrypted at the application level?
 
-**Options:**
+**Recommended option (Phase 1.5 evidence supports this):**
 
-1. **Option A — OS-level FDE only (no SQLCipher):** Rely on Android full-disk encryption (API 26+) and iOS hardware encryption. No application-level database encryption. Simple; no native library dependency.
-2. **Option B — SQLCipher from Phase 2:** Use `drift` with the `drift_sqflite` package replaced by `drift` + `sqlcipher_flutter_libs`. The database file is AES-256 encrypted. A per-user encryption key is derived from the user's biometric-protected device key and stored in `flutter_secure_storage`.
+Use `drift 2.34.2` + `drift_flutter 0.3.1` + `sqlite3 3.4.0` with:
+
+```yaml
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc   # SQLite3MultipleCiphers
+```
+
+The database key is a cryptographically random 256-bit value protected by
+Android Keystore / iOS Keychain. The PIN gates access to the key rather than
+serving as the key. See `docs/LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`.
+
+**Verified in Phase 1.5 spike:**
+- Compilation: Android debug/release/aab ✓, iOS debug/release ✓
+- Runtime (macOS host): all 11 checks pass ✓
+- Runtime (iOS simulator, iPhone 17 Pro): all 5 integration checks pass ✓
+- Android emulator runtime: unverified (sandbox instability during spike)
+
+**Fallback option (not recommended for V1 per product-owner security policy):**
+
+OS-level FDE only (no application-level encryption).
 
 **Impact of deferring (Option A):**
 

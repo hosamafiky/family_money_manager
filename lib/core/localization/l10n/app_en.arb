@@ -67,5 +67,16 @@
   "errorUnknown": "An unexpected error occurred. Please try again.",
   "@errorUnknown": {
     "description": "User-facing message for an unknown error."
+  },
+  "foundationDetailTitle": "Foundation Detail",
+  "@foundationDetailTitle": {
+    "description": "Title for the typed-route parameter demo screen (Phase 1 only)."
+  },
+  "foundationDetailProbeLabel": "Probe: {probeId}",
+  "@foundationDetailProbeLabel": {
+    "description": "Label showing the typed-route probe parameter on the detail screen.",
+    "placeholders": {
+      "probeId": { "type": "String" }
+    }
   }
 }

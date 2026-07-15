@@ -60,4 +60,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorUnknown => 'حدث خطأ غير متوقع. يرجى المحاولة مجدداً.';
+
+  @override
+  String get foundationDetailTitle => 'تفاصيل البنية';
+
+  @override
+  String foundationDetailProbeLabel(String probeId) {
+    return 'مسبار: $probeId';
+  }
 }

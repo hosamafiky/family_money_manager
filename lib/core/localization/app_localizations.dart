@@ -199,6 +199,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred. Please try again.'**
   String get errorUnknown;
+
+  /// Title for the typed-route parameter demo screen (Phase 1 only).
+  ///
+  /// In en, this message translates to:
+  /// **'Foundation Detail'**
+  String get foundationDetailTitle;
+
+  /// Label showing the typed-route probe parameter on the detail screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Probe: {probeId}'**
+  String foundationDetailProbeLabel(String probeId);
 }
 
 class _AppLocalizationsDelegate

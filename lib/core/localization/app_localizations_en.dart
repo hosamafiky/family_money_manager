@@ -61,4 +61,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUnknown => 'An unexpected error occurred. Please try again.';
+
+  @override
+  String get foundationDetailTitle => 'Foundation Detail';
+
+  @override
+  String foundationDetailProbeLabel(String probeId) {
+    return 'Probe: $probeId';
+  }
 }

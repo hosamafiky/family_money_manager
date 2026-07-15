@@ -1,234 +1,205 @@
 # DECISION-004 Assessment — Local Database Encryption
 
-**Date:** 2026-07-15  
-**Flutter:** 3.44.4 · **Dart:** 3.12.2 · **Platform:** macOS arm64  
-**Status:** Open — product-owner decision required before Phase 2 begins  
-**Evidence basis:** `flutter pub add --dry-run` resolution checks + disposable spike compilation  
+**Phase:** 1.5 — Encrypted local-database feasibility  
+**Assessment date:** 2026-07-15  
+**Status:** Evidence collected. Four product-owner decisions required before Phase 2.  
+**Preceding version:** Phase 1 (incomplete — contained EOL-package misinterpretation corrected below)
 
 ---
 
-## 1. What this decision controls
+## 1. Correction: EOL Packages Are Not a Blocker
 
-Every piece of local financial data — account balances, ledger entries, transfer records, gold positions, certificate timelines, and child-fund histories — will be stored in a SQLite database on the device. This decision determines whether and how that database file is encrypted at rest.
+The Phase 1 version of this document incorrectly stated that encrypted Drift databases
+were "unavailable" because `sqlite3_flutter_libs` and `sqlcipher_flutter_libs` were
+end-of-life (EOL).
 
-The choice affects:
+**That conclusion was wrong. Here is the accurate picture.**
 
-- Which ORM or database driver is used (`drift_flutter` vs `sqflite_sqlcipher`)
-- Whether a PIN / biometric credential is required to derive the encryption key
-- What happens when the user loses their device PIN
-- Whether automated tests can run against a real database or require a special testing key
-- Build complexity on Android and iOS
-- CI pipeline requirements
+`sqlite3_flutter_libs` and `sqlcipher_flutter_libs` are **obsolete compatibility packages**
+that existed under the old `sqlite3` 2.x scheme. They are marked `+eol` on pub.dev because
+the mechanism they provided — platform-specific build scripts — has been superseded.
+
+Under `sqlite3` 3.x, SQLite is bundled via Dart's **pub build hooks** (native assets).
+The two EOL packages have been replaced by configuration inside `pubspec.yaml`. They
+may still appear as transitive dependencies (`sqlcipher_flutter_libs 0.7.0+eol`,
+`sqlite3_flutter_libs 0.6.0+eol`) when `drift_flutter` is resolved, but they are
+**no-op stubs only** — they do not provide the encryption implementation and do not
+affect the native binary that is actually compiled and linked.
 
 ---
 
-## 2. Package landscape (as of 2026-07-15)
+## 2. Evaluated Approach: sqlite3 3.x + SQLite3MultipleCiphers via Build Hooks
 
-### 2.1 What is end-of-life
+### References consulted (accessed 2026-07-15)
 
-Both previously popular native-library packages are explicitly marked end-of-life on pub.dev:
+| Source | URL |
+|---|---|
+| Drift encryption guide | https://drift.simonbinder.eu/platforms/encryption/ |
+| sqlite3 hook options | https://pub.dev/documentation/sqlite3/latest/topics/hook-topic.html |
+| sqlite3.dart upgrade guide | https://github.com/simolus3/sqlite3.dart/blob/main/UPGRADING_TO_V3.md |
+| Drift encryption example | https://github.com/simolus3/drift/blob/develop/examples/encryption/lib/database.dart |
+| Drift 2.32.0 release notes | https://github.com/simolus3/drift/releases/tag/drift-2.32.0 |
 
-| Package | Latest version | Note |
+### Package versions used in Phase 1.5 spike
+
+| Package | Version |
+|---|---|
+| `drift` | 2.34.2 |
+| `drift_flutter` | 0.3.1 |
+| `sqlite3` | 3.4.0 |
+| `hooks` (transitive) | 2.0.2 |
+| `code_assets` (transitive) | 1.2.1 |
+| `sqlcipher_flutter_libs` (transitive, no-op EOL stub) | 0.7.0+eol |
+| `sqlite3_flutter_libs` (transitive, no-op EOL stub) | 0.6.0+eol |
+
+### How it works
+
+1. Add the following to `pubspec.yaml` (app or pub workspace root):
+
+   ```yaml
+   hooks:
+     user_defines:
+       sqlite3:
+         source: sqlite3mc   # selects SQLite3MultipleCiphers; default is sqlite3
+   ```
+
+2. On first build, the `sqlite3` build hook downloads and compiles the
+   SQLite3MultipleCiphers binary for the target platform using Dart native assets.
+
+3. Use `NativeDatabase` from `package:drift/native.dart` (unchanged API).
+   The encryption-aware binary is linked automatically.
+
+4. Set the encryption key **inside the `setup` callback** before Drift accesses
+   the schema:
+
+   ```dart
+   NativeDatabase(
+     file,
+     setup: (db) {
+       // Fail-closed check — release-safe, not debug-only.
+       final cipher = db.select('pragma cipher');
+       if (cipher.isEmpty) throw StateError('sqlite3mc not present');
+       db.execute("pragma key = '$escapedKey'");
+       db.execute('select count(*) from sqlite_master'); // verify key
+     },
+   );
+   ```
+
+5. Verify the correct implementation is present at runtime using `pragma cipher`,
+   which returns a non-empty result only when SQLite3MultipleCiphers is the active
+   engine. Standard SQLite ignores this pragma and returns empty.
+
+### Important terminology
+
+**SQLite3MultipleCiphers is not SQLCipher.** They are distinct encryption
+implementations from different authors with different codebase histories.
+SQLite3MultipleCiphers includes a SQLCipher-compatibility mode, but the two are
+not interchangeable. This document does not use the term "SQLCipher" to describe
+the `sqlite3mc` build.
+
+---
+
+## 3. Phase 1.5 Spike Results
+
+All verification was performed in `spike/enc_probe/`, which uses:
+- `drift 2.34.2` + `drift_flutter 0.3.1` + `sqlite3 3.4.0`
+- `hooks.user_defines.sqlite3.source: sqlite3mc` in `pubspec.yaml`
+- A non-financial probe table (`probe_id`, `probe_value`) — no financial schema
+
+### Host tests (macOS arm64) — `flutter test test/`
+
+| Check | Description | Result |
 |---|---|---|
-| `sqlite3_flutter_libs` | `0.6.0+eol` | Replaced by `drift_flutter` native assets approach |
-| `sqlcipher_flutter_libs` | `0.7.0+eol` | No maintained replacement on pub.dev |
+| 6 | sqlite3mc cipher pragma present at runtime | PASS |
+| 7 | Database opens with correct key | PASS |
+| 8 | Database rejects incorrect key | PASS |
+| 9 | Probe value absent from raw file bytes | PASS |
+| 10 | Data persists across close/reopen | PASS |
+| 11 | Encryption init before Drift schema access | PASS |
+| 12a | Key not emitted through logger | PASS (by design: no log sink in path) |
+| 12b | Ephemeral keys are unique per generation | PASS |
+| 13 | Fail-closed when cipher absent (unit test) | PASS |
 
-The `+eol` suffix is a publishing convention used by the Drift team to signal the package has been superseded. These packages **must not** be used in new projects.
+All 11 host tests passed. Exit code 0.
 
-### 2.2 Current maintained options
+### Build compilation (all platforms)
 
-| Package | Version | Description |
+| Target | Command | Exit code |
 |---|---|---|
-| `drift` | `2.34.2` | ORM / query builder (maintained) |
-| `drift_flutter` | `0.3.1` | Flutter-specific SQLite provider via Dart native assets (replaces `sqlite3_flutter_libs`) |
-| `drift_dev` | `2.34.4` | Code generation for Drift |
-| `sqflite_sqlcipher` | `3.4.0` | SQLCipher-backed sqflite fork (SQLCipher 4.x) |
-| `sqflite` | (transitive) | Standard unencrypted sqflite |
+| Android debug APK | `flutter build apk --debug` | 0 |
+| Android release APK | `flutter build apk --release` | 0 |
+| Android App Bundle | `flutter build appbundle --release` | 0 |
+| iOS debug (no codesign) | `flutter build ios --debug --no-codesign` | 0 |
+| iOS release (no codesign) | `flutter build ios --release --no-codesign` | 0 |
 
----
+### iOS simulator — `flutter test integration_test/` — iPhone 17 Pro
 
-## 3. Options evaluated
-
-### Option A — Unencrypted SQLite via `drift_flutter`
-
-**Architecture:** `drift 2.34.2` + `drift_flutter 0.3.1`
-
-**How it works:** `drift_flutter` uses Dart's native assets system (introduced in Dart 3.x) to compile and link the standard SQLite amalgamation directly into the application. It replaces both `sqlite3_flutter_libs` (EOL) and `sqflite`. No native build script is required.
-
-**Evaluation:**
-
-| Criterion | Result |
+| Simulator | iPhone 17 Pro (94E682A6-E8DC-413C-8A97-BC53FBC4873D) |
 |---|---|
-| Flutter 3.44.4 compatibility | Confirmed — resolves and compiles |
-| Drift compatibility | Native — `drift_flutter` is the Drift team's own package |
-| Android support | Confirmed |
-| iOS support | Confirmed |
-| Native build requirements | None — handled by Dart native assets |
-| Maintenance status | Actively maintained by Drift author (simolus3) |
-| Encryption | None |
-| Secure key storage | Not applicable |
-| PIN / biometric relationship | Not applicable |
-| Key rotation | Not applicable |
-| Lost-key behaviour | Not applicable |
-| Backup and restore | Standard file copy; data readable if device is not locked |
-| Migration (plain → encrypted) | N/A |
-| Automated test support | Full — in-memory database via `NativeDatabase.memory()` |
-| CI implications | No special native toolchain required |
-| License | SQLite is public domain; drift is MIT |
-| Operational risk | Low |
+| Runtime | iOS 26.5 / com.apple.CoreSimulator.SimRuntime.iOS-26-5 |
+| Architecture | arm64 (Apple Silicon host) |
+| Classification | iOS-simulator-tested (not physical-device-tested) |
 
-**Spike result:** `drift_flutter 0.3.1` + `drift 2.34.2` + `drift_dev 2.34.4` resolve, code-generate, and analyze clean. See `spike/db_options/`.
-
-**Security note:** Without encryption, anyone with physical access to a rooted Android device or a jailbroken iOS device can extract the database file and read all financial data in plain text. On non-rooted/non-jailbroken devices, the OS sandbox protects the file.
-
----
-
-### Option B — SQLCipher via `sqflite_sqlcipher`
-
-**Architecture:** `sqflite_sqlcipher 3.4.0` (wraps SQLCipher 4.x)
-
-**How it works:** `sqflite_sqlcipher` is a drop-in replacement for `sqflite` that links SQLCipher instead of standard SQLite. All databases are transparently encrypted with AES-256. A passphrase (key) is required to open the database.
-
-**Evaluation:**
-
-| Criterion | Result |
+| Check | Result |
 |---|---|
-| Flutter 3.44.4 compatibility | Resolves — `flutter pub add --dry-run` succeeds |
-| Drift compatibility | **Uncertain** — drift 2.x dropped the `sqflite` backend in favour of native `sqlite3`. Using `sqflite_sqlcipher` as a Drift backend requires either (a) the older `drift_sqflite` adapter (removed from drift 2.x) or (b) a custom `QueryExecutor` wrapping sqflite_sqlcipher. This requires a non-trivial spike before the path can be confirmed. |
-| Android support | Confirmed — native `.so` bundled by package |
-| iOS support | Confirmed — SQLCipher compiled into `.framework` |
-| Native build requirements | Pre-built binaries are included. Android NDK not required by the package itself, but the binaries are compiled with specific ABIs. |
-| Maintenance status | Moderate — last published 2024; no governance statement |
-| Encryption | AES-256-CBC (SQLCipher 4 default) |
-| Secure key storage | Key must be derived from a source. Options: (1) `flutter_secure_storage` (device keychain / keystore), (2) user PIN (key = PBKDF2(PIN, salt)), (3) both combined |
-| PIN / biometric relationship | If key = PIN-derived, biometric can protect the PIN but does not eliminate it |
-| Key rotation | Supported by SQLCipher `rekey` pragma, but requires re-encrypting the entire database |
-| Lost-key behaviour | **Unrecoverable** unless backup is encrypted separately with an escrow key. No built-in recovery path. If the PIN is forgotten and no backup exists, all data is lost. |
-| Backup and restore | Backup file must also be encrypted. A second key (backup key) or the same device key can be used — policy must be chosen before implementation |
-| Migration (plain → encrypted) | SQLCipher provides `sqlcipher_export` / `ATTACH` to migrate, but requires device downtime and careful rollback planning |
-| Automated test support | Tests require a key to open the database. CI must inject a test key (e.g., `--dart-define=TEST_DB_KEY=testkey`). In-memory databases do not use SQLCipher by default — tests must explicitly open named databases. |
-| CI implications | CI pipeline must pass a non-secret test key. The test key must differ from the device key. Test isolation requires careful teardown. |
-| License | SQLCipher is BSD-licensed (open source edition); no royalties for mobile use |
-| Operational risk | Medium — Drift + sqflite_sqlcipher path unconfirmed; key management adds complexity |
+| 6 | cipher pragma present on iOS simulator | PASS |
+| 7 | Correct-key open + write | PASS |
+| 8 | Wrong-key rejection | PASS |
+| 9 | Sentinel absent from raw bytes | PASS |
+| 10 | Persist across reopen | PASS |
 
-**Compilation spike:** NOT completed for this option because the Drift + sqflite_sqlcipher path requires additional investigation. If this option is chosen, a Phase 1.5 spike must:
+All 5 integration checks passed. Exit code 0.
 
-1. Confirm whether drift 2.34.2 can use sqflite_sqlcipher as a backend
-2. If not, evaluate: (a) use sqflite_sqlcipher without Drift (raw SQL), or (b) compile SQLCipher natively and provide it to drift's `NativeDatabase`
-3. Measure the APK size impact of SQLCipher binaries on Android and iOS
+### Android emulator
+
+The Android emulator (`Medium_Phone_API_36.1`, Android 14 / API 34) launched
+successfully but went offline before integration tests could be submitted in the
+sandbox environment. Compilation was verified (debug APK exit 0). Runtime behavior
+on the iOS simulator serves as the primary device-class runtime evidence.
+
+**Classification:** Build-verified (Android). iOS-simulator-tested (runtime checks).
+Android emulator runtime is **Unverified** due to sandbox instability.
 
 ---
 
-### Option C — `drift_flutter` with custom SQLCipher binary (native assets)
+## 4. EOL Transitive Dependencies — Accurate Report
 
-**Architecture:** Custom SQLCipher amalgamation compiled via Dart native assets, provided to `drift`'s `NativeDatabase`
+When resolving `drift_flutter 0.3.1`, pub resolves:
+- `sqlcipher_flutter_libs 0.7.0+eol` — no-op stub; provides no native binary
+- `sqlite3_flutter_libs 0.6.0+eol` — no-op stub; provides no native binary
 
-**How it works:** Drift's native assets approach allows substituting a custom SQLite implementation. SQLCipher is a drop-in replacement for the SQLite amalgamation. Building it as a native asset would give encrypted storage with full Drift compatibility.
-
-**Evaluation:**
-
-| Criterion | Result |
-|---|---|
-| Flutter / Drift compatibility | Theoretically compatible; no pub.dev package exists for this approach |
-| Native build requirements | Must write a `build.dart` hook that downloads and compiles SQLCipher source for each ABI (arm64-v8a, armeabi-v7a, x86_64, arm64 iOS). High build complexity. |
-| Maintenance status | Self-maintained; team owns the SQLCipher compilation script |
-| Operational risk | High — native toolchain dependency, per-platform build, no community support |
-
-**Recommendation:** Do not pursue Option C in V1. The build complexity and maintenance burden are disproportionate for a V1 product.
+These stubs exist for backward compatibility. They do not conflict with the
+sqlite3mc build hook and do not affect the encryption result. They are not the
+encryption provider. The actual encrypted SQLite binary is compiled and linked
+by the `sqlite3` 3.x build hook based on the `source: sqlite3mc` configuration.
 
 ---
 
-## 4. Comparison matrix
+## 5. Product-Owner Decisions Required Before Phase 2
 
-| Criterion | A: Unencrypted (`drift_flutter`) | B: SQLCipher (`sqflite_sqlcipher`) | C: Custom native SQLCipher |
-|---|---|---|---|
-| Compilation verified | Yes (spike) | Resolution only | No |
-| Drift 2.x native support | Yes | Uncertain | Theoretical |
-| EOL risk | None | Low–Medium | N/A |
-| Encryption at rest | No | AES-256 | AES-256 |
-| Test complexity | Low | Medium | High |
-| CI complexity | Low | Medium | High |
-| Lost-key recovery | N/A | None built-in | None built-in |
-| Key storage design required | No | Yes | Yes |
-| Build complexity | Low | Low–Medium | High |
-| Time to Phase 2 confidence | 0 | 1–2 days spike | 1+ week |
-| Recommended | If encryption deferred | If encryption required V1 | Do not use |
+The Phase 1.5 evidence confirms that the sqlite3mc approach is technically feasible.
+The following decisions must be made before Phase 2 begins:
+
+| ID | Question | Notes |
+|---|---|---|
+| **PO-1** | Confirm V1 will use SQLite3MultipleCiphers via sqlite3 3.x build hooks | Feasibility verified. Compilation and runtime confirmed on macOS host and iOS simulator. |
+| **PO-2** | Confirm the production database key management policy (see `LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`) | Random key, Android Keystore + iOS Keychain-backed. PIN gates key access, not key derivation. |
+| **PO-3** | Confirm that lost-key behavior (unrecoverable local data without backup) is acceptable | Users must be informed during onboarding. |
+| **PO-4** | Confirm that unencrypted fallback (OS-level FDE only) is not acceptable for V1 | V1 security policy states local financial data must be encrypted. |
 
 ---
 
-## 5. Recommendation
+## 6. What Remains for Later Phases
 
-**Use Option A (`drift_flutter`) for V1** unless the product owner explicitly requires encryption at rest before the first production release.
+The following are **not** part of Phase 1.5 and are deferred:
 
-Rationale:
-1. `drift_flutter` is compilation-verified and maintained.
-2. The SQLCipher path (Option B) has an **unconfirmed Drift 2.x integration path** that requires a separate spike before Phase 2 can begin.
-3. Encryption can be added in a later phase by migrating the database via `ATTACH` + `sqlcipher_export`. This is a known SQLCipher pattern.
-4. iOS and Android OS-level sandbox protection provides meaningful protection against casual access on non-jailbroken/non-rooted devices.
-5. Lost-key recovery (a real household risk) is unsolvable without a backup encryption policy — which also needs to be decided regardless of Option A or B.
-
-**If the product owner requires encryption in V1,** a follow-up spike must be completed before Phase 2 begins:
-1. Confirm whether drift 2.34.2 can use `sqflite_sqlcipher` as its backend (or determine the correct adapter)
-2. Design key derivation (device keychain only vs PIN-derived)
-3. Define lost-key and backup encryption policies
-
----
-
-## 6. Product-owner choices required
-
-The following decisions block Phase 2. They cannot be defaulted by the development team.
-
----
-
-### PO-1: Encryption required in V1?
-
-> **Yes** — database file must be encrypted before the first production build  
-> **No** — unencrypted SQLite is acceptable for V1; encryption added in a later phase
-
-*Impact:* If **Yes**, a Drift + SQLCipher integration spike (estimated 1–2 days) is required before Phase 2. If **No**, Phase 2 can begin immediately with `drift_flutter`.
-
----
-
-### PO-2: Key protection model (if encryption required)
-
-> **Device keychain only** — the encryption key is stored in Android Keystore / iOS Keychain. Accessible when the device is unlocked. No user PIN required to open the app.
->
-> **PIN-derived + device keychain** — the encryption key is derived from the user's app-level PIN using PBKDF2. Biometric can unlock the PIN. Losing the PIN with no backup means losing all data.
-
-*Impact:* If PIN-derived, PIN reset and biometric UX must be designed before Phase 3 (authentication). The key management code is Phase 3 scope, but the database engine choice must be compatible.
-
----
-
-### PO-3: Lost-key policy (if encryption required)
-
-> **Accept full data loss** — if the encryption key is lost (device wiped, PIN forgotten, keychain corrupted), all local data is irrecoverable.
->
-> **Require cloud backup with separate encryption key** — a copy of the database (or ledger state) is encrypted with a backup key and stored in cloud backup. Lost-device recovery restores from backup.
-
-*Impact:* If cloud backup is required, Firestore sync design (Phase 3) must accommodate the backup key separately from the local database key.
-
----
-
-### PO-4: Backup file encryption policy
-
-> **Same key as local database** — backup files use the same encryption key. Convenient but loses any separation between device and backup.
->
-> **Separate backup passphrase** — backup files encrypted with a user-provided passphrase separate from the device key. Allows restoring to a new device without sharing device credentials.
->
-> **Unencrypted backup** — backup file is plain text. Acceptable only if transport encryption (e.g., cloud provider TLS + server-side encryption) is considered sufficient.
-
-*Impact:* Determines the backup-restore implementation in Phase 5+.
-
----
-
-## 7. Spike artefact
-
-The disposable spike is at `spike/db_options/`. It contains:
-
-- `pubspec.yaml` — `drift 2.34.2` + `drift_flutter 0.3.1` + `drift_dev 2.34.4`
-- `lib/main.dart` + `lib/main.g.dart` — empty-schema database, no financial data
-- Evidence: `flutter pub get` succeeds, `build_runner build` succeeds, `flutter analyze` reports zero issues
-
-**This spike determines the production architecture by confirming compilation only.** The architecture decisions above (Option A vs B vs C) remain the product owner's choice.
-
-**Delete `spike/` after DECISION-004 is resolved.** It must not be imported into `lib/` under any circumstances.
+- Production database class (financial tables)
+- Secure key generation and storage (`flutter_secure_storage` or equivalent)
+- Android Keystore key wrapping implementation
+- iOS Keychain key storage implementation
+- PIN and biometric gating of the database key
+- App-lock UI
+- Database rekey procedure
+- Backup encryption with recovery passphrase
+- Cloud-sync key recovery path
+- On-device automated test on a physical Android device
