@@ -1,0 +1,71 @@
+{
+  "@@locale": "en",
+  "appTitle": "Family Money Manager",
+  "@appTitle": {
+    "description": "The main application title shown in the header and title bar."
+  },
+  "foundationTitle": "Foundation Phase",
+  "@foundationTitle": {
+    "description": "Title shown on the Phase 1 smoke screen."
+  },
+  "foundationSubtitle": "Project infrastructure is ready.",
+  "@foundationSubtitle": {
+    "description": "Subtitle on the Phase 1 smoke screen."
+  },
+  "foundationLanguageLabel": "Language",
+  "@foundationLanguageLabel": {
+    "description": "Label for the language selector on the smoke screen."
+  },
+  "foundationThemeLabel": "Theme",
+  "@foundationThemeLabel": {
+    "description": "Label for the theme toggle on the smoke screen."
+  },
+  "foundationDirectionLabel": "Direction",
+  "@foundationDirectionLabel": {
+    "description": "Label showing the current text direction."
+  },
+  "foundationSwitchToArabic": "العربية",
+  "@foundationSwitchToArabic": {
+    "description": "Button text to switch the language to Arabic."
+  },
+  "foundationSwitchToEnglish": "English",
+  "@foundationSwitchToEnglish": {
+    "description": "Button text to switch the language to English."
+  },
+  "foundationThemeLight": "Light",
+  "@foundationThemeLight": {
+    "description": "Label for the light theme option."
+  },
+  "foundationThemeDark": "Dark",
+  "@foundationThemeDark": {
+    "description": "Label for the dark theme option."
+  },
+  "foundationDirectionLtr": "LTR",
+  "@foundationDirectionLtr": {
+    "description": "Label indicating left-to-right text direction."
+  },
+  "foundationDirectionRtl": "RTL",
+  "@foundationDirectionRtl": {
+    "description": "Label indicating right-to-left text direction."
+  },
+  "foundationNote": "No financial features exist yet. Phase 2 will introduce the ledger.",
+  "@foundationNote": {
+    "description": "Informational note on the smoke screen explaining the current phase."
+  },
+  "errorNetwork": "A network error occurred. Please check your connection and try again.",
+  "@errorNetwork": {
+    "description": "User-facing message for a network error."
+  },
+  "errorAuth": "Your session is invalid. Please sign in again.",
+  "@errorAuth": {
+    "description": "User-facing message for an authentication error."
+  },
+  "errorStorage": "A local storage error occurred. Please try again.",
+  "@errorStorage": {
+    "description": "User-facing message for a local storage error."
+  },
+  "errorUnknown": "An unexpected error occurred. Please try again.",
+  "@errorUnknown": {
+    "description": "User-facing message for an unknown error."
+  }
+}

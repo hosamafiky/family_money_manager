@@ -1,0 +1,20 @@
+{
+  "@@locale": "ar",
+  "appTitle": "مدير مالية الأسرة",
+  "foundationTitle": "مرحلة البنية التحتية",
+  "foundationSubtitle": "البنية التحتية للمشروع جاهزة.",
+  "foundationLanguageLabel": "اللغة",
+  "foundationThemeLabel": "المظهر",
+  "foundationDirectionLabel": "اتجاه النص",
+  "foundationSwitchToArabic": "العربية",
+  "foundationSwitchToEnglish": "English",
+  "foundationThemeLight": "فاتح",
+  "foundationThemeDark": "داكن",
+  "foundationDirectionLtr": "يسار إلى يمين",
+  "foundationDirectionRtl": "يمين إلى يسار",
+  "foundationNote": "لا توجد ميزات مالية حتى الآن. المرحلة الثانية ستُضيف سجل الحسابات.",
+  "errorNetwork": "حدث خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مجدداً.",
+  "errorAuth": "جلستك منتهية الصلاحية. يرجى تسجيل الدخول مجدداً.",
+  "errorStorage": "حدث خطأ في التخزين المحلي. يرجى المحاولة مجدداً.",
+  "errorUnknown": "حدث خطأ غير متوقع. يرجى المحاولة مجدداً."
+}
