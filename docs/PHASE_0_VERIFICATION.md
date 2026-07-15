@@ -76,13 +76,29 @@ git diff --name-status HEAD: (no output)
 Path:   /Users/hussam/Desktop/hussam/money_tracker_next/
 Branch: main
 HEAD:   4271241 fix: close certificate lifecycle application audit gaps
-git diff HEAD: (empty — no modifications)
-git diff --name-status HEAD: (no output)
+
+git status --short:
+ M lib/core/financial/application/use_cases/record_certificate_funding_use_case.dart
+ M lib/core/financial/application/use_cases/record_certificate_maturity_use_case.dart
+ M test/helpers/financial_application_test_support.dart
+
+git diff --name-status HEAD:
+M  lib/core/financial/application/use_cases/record_certificate_funding_use_case.dart
+M  lib/core/financial/application/use_cases/record_certificate_maturity_use_case.dart
+M  test/helpers/financial_application_test_support.dart
+
+SHA-256 hashes (recorded at Phase 0 verification time, 2026-07-15):
+  875ab96d...  record_certificate_funding_use_case.dart
+  460fe863...  record_certificate_maturity_use_case.dart
+  adb0ca09...  financial_application_test_support.dart
 ```
 
-**Status: Unmodified. Verified via git diff.**
+**Status: 3 uncommitted local modifications exist in money_tracker_next.**
 
-Neither reference project was modified during Phase 0. This is confirmed by the clean `git diff HEAD` output for both repositories. The Phase 0 documents were authored from first principles and the original specification, not copied from these projects.
+These modifications were present in the working tree at the time Phase 0 verification was performed. The cause of these modifications is **unknown and cannot be attributed from the available evidence**. Phase 0 work wrote only to `/Users/hussam/Desktop/hussam/family_money_manager/docs/`. No write, format, generate, stage, commit, revert, or cleanup tool call was made against any file in either reference repository during Phase 0 or Phase 0 verification.
+
+money_tracker: **Unmodified.** Verified via clean `git diff HEAD` output.  
+money_tracker_next: **3 local modifications of unknown cause.** SHA-256 hashes recorded above for Phase 1 comparison.
 
 ---
 
