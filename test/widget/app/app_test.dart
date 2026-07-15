@@ -1,5 +1,9 @@
+import 'package:family_money_manager/app/app_config.dart';
+import 'package:family_money_manager/app/app_providers.dart';
+import 'package:family_money_manager/app/app_router.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_helpers.dart';
@@ -90,6 +94,65 @@ void main() {
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.themeMode, ThemeMode.dark);
+    });
+  });
+
+  group('App widget — unknown route (AppErrorScreen)', () {
+    testWidgets('renders error icon and back button when error is null', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appConfigProvider.overrideWithValue(AppConfig.development),
+          ],
+          child: const MaterialApp(home: AppErrorScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.text('Go home'), findsOneWidget);
+    });
+
+    testWidgets('displays error message when exception provided', (
+      tester,
+    ) async {
+      final error = Exception('not-found');
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appConfigProvider.overrideWithValue(AppConfig.development),
+          ],
+          child: MaterialApp(home: AppErrorScreen(error: error)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('not-found'), findsOneWidget);
+    });
+
+    testWidgets('AppRouter.create() initialises without error', (tester) async {
+      // Verifies that the router can be constructed and wired up.
+      // The errorBuilder is exercised by the AppErrorScreen tests above.
+      await tester.pumpWidget(buildTestApp());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('App widget — Riverpod overrides', () {
+    testWidgets('appConfigProvider override is respected', (tester) async {
+      await tester.pumpWidget(buildTestApp(config: AppConfig.development));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('locale override drives displayed language', (tester) async {
+      await tester.pumpWidget(buildTestApp(locale: const Locale('en', 'US')));
+      await tester.pumpAndSettle();
+      final context = tester.element(find.byType(Scaffold).first);
+      expect(AppLocalizations.of(context).appTitle, 'Family Money Manager');
     });
   });
 }

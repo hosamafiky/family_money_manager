@@ -49,8 +49,9 @@ class SmokeScreen extends ConsumerWidget {
                       child: OutlinedButton(
                         onPressed: isArabic
                             ? null
-                            : () => ref.read(appLocaleProvider.notifier).state =
-                                  const Locale('ar', 'EG'),
+                            : () => ref
+                                  .read(appLocaleProvider.notifier)
+                                  .setLocale(const Locale('ar', 'EG')),
                         child: Text(l10n.foundationSwitchToArabic),
                       ),
                     ),
@@ -58,8 +59,9 @@ class SmokeScreen extends ConsumerWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: isArabic
-                            ? () => ref.read(appLocaleProvider.notifier).state =
-                                  const Locale('en', 'US')
+                            ? () => ref
+                                  .read(appLocaleProvider.notifier)
+                                  .setLocale(const Locale('en', 'US'))
                             : null,
                         child: Text(l10n.foundationSwitchToEnglish),
                       ),
@@ -76,11 +78,9 @@ class SmokeScreen extends ConsumerWidget {
                       child: OutlinedButton(
                         onPressed: themeMode == ThemeMode.light
                             ? null
-                            : () =>
-                                  ref
-                                          .read(appThemeModeProvider.notifier)
-                                          .state =
-                                      ThemeMode.light,
+                            : () => ref
+                                  .read(appThemeModeProvider.notifier)
+                                  .setThemeMode(ThemeMode.light),
                         child: Text(l10n.foundationThemeLight),
                       ),
                     ),
@@ -89,11 +89,9 @@ class SmokeScreen extends ConsumerWidget {
                       child: OutlinedButton(
                         onPressed: themeMode == ThemeMode.dark
                             ? null
-                            : () =>
-                                  ref
-                                          .read(appThemeModeProvider.notifier)
-                                          .state =
-                                      ThemeMode.dark,
+                            : () => ref
+                                  .read(appThemeModeProvider.notifier)
+                                  .setThemeMode(ThemeMode.dark),
                         child: Text(l10n.foundationThemeDark),
                       ),
                     ),

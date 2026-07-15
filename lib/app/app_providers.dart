@@ -1,7 +1,6 @@
 import 'package:family_money_manager/app/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 /// Provides the [AppConfig] for the current environment.
 ///
@@ -15,15 +14,36 @@ final appConfigProvider = Provider<AppConfig>(
   ),
 );
 
-/// The currently active [Locale].
-///
-/// Initialised from [AppConfig.defaultLocale] and updated when the user
-/// changes the language.
-final appLocaleProvider = StateProvider<Locale>((ref) {
-  return ref.watch(appConfigProvider).defaultLocale;
-});
+// ─── Locale ────────────────────────────────────────────────────────────────
 
-/// The current [ThemeMode] preference.
-final appThemeModeProvider = StateProvider<ThemeMode>(
-  (ref) => ThemeMode.system,
+/// Manages the currently active [Locale].
+///
+/// Initialised from [AppConfig.defaultLocale].
+/// Call `ref.read(appLocaleProvider.notifier).setLocale(locale)` to change.
+class LocaleNotifier extends Notifier<Locale> {
+  @override
+  Locale build() => ref.watch(appConfigProvider).defaultLocale;
+
+  void setLocale(Locale locale) => state = locale;
+}
+
+final appLocaleProvider = NotifierProvider<LocaleNotifier, Locale>(
+  LocaleNotifier.new,
+);
+
+// ─── Theme mode ────────────────────────────────────────────────────────────
+
+/// Manages the current [ThemeMode] preference.
+///
+/// Defaults to [ThemeMode.system].
+/// Call `ref.read(appThemeModeProvider.notifier).setThemeMode(mode)` to change.
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() => ThemeMode.system;
+
+  void setThemeMode(ThemeMode mode) => state = mode;
+}
+
+final appThemeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
 );

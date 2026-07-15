@@ -1,4 +1,4 @@
-import 'package:family_money_manager/core/navigation/route_paths.dart';
+import 'package:family_money_manager/core/navigation/app_route.dart';
 import 'package:family_money_manager/features/smoke_screen/smoke_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -7,15 +7,18 @@ import 'package:go_router/go_router.dart';
 ///
 /// Phase 1 defines one route only: the foundation smoke screen.
 /// Feature routes are added in later phases as their screens are implemented.
+///
+/// Navigation is typed: use `const SmokeRoute().go(context)` instead of
+/// raw string paths.
 abstract final class AppRouter {
   static GoRouter create() {
     return GoRouter(
-      initialLocation: RoutePaths.smoke,
+      initialLocation: const SmokeRoute().path,
       debugLogDiagnostics: false,
-      errorBuilder: (context, state) => _ErrorScreen(state.error),
+      errorBuilder: (context, state) => AppErrorScreen(error: state.error),
       routes: [
         GoRoute(
-          path: RoutePaths.smoke,
+          path: const SmokeRoute().path,
           builder: (context, state) => const SmokeScreen(),
         ),
       ],
@@ -25,9 +28,10 @@ abstract final class AppRouter {
 
 /// Minimal error screen shown when no route matches.
 ///
-/// Provides a back button to return to the initial route.
-class _ErrorScreen extends StatelessWidget {
-  const _ErrorScreen(this.error);
+/// Exposed as a public class so it can be widget-tested directly without
+/// requiring a live router instance.
+class AppErrorScreen extends StatelessWidget {
+  const AppErrorScreen({this.error, super.key});
   final Exception? error;
 
   @override
@@ -42,7 +46,7 @@ class _ErrorScreen extends StatelessWidget {
             Text(error?.toString() ?? 'Page not found'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go(RoutePaths.smoke),
+              onPressed: () => const SmokeRoute().go(context),
               child: const Text('Go home'),
             ),
           ],

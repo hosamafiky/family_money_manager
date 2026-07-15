@@ -31,6 +31,15 @@ final class AppConfig {
     isProduction: true,
   );
 
+  static const AppConfig staging = AppConfig(
+    appName: 'Family Money Manager (Staging)',
+    appNameAr: 'مدير مالية الأسرة (تجريبي)',
+    packageName: 'com.familymoney.manager',
+    currencyCode: 'EGP',
+    defaultLocale: Locale('ar', 'EG'),
+    isProduction: false,
+  );
+
   static const AppConfig development = AppConfig(
     appName: 'Family Money Manager (Dev)',
     appNameAr: 'مدير مالية الأسرة (تطوير)',

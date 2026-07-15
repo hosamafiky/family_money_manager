@@ -23,7 +23,8 @@ import 'package:family_money_manager/core/logging/log_sink.dart';
 /// [RedactedLogger] and write directly to [print] or a crash reporter
 /// receive no protection. See SECURITY_THREAT_MODEL.md T-07.
 final class RedactedLogger {
-  RedactedLogger(this._tag, {LogSink? sink}) : _sink = sink ?? const DebugPrintSink();
+  RedactedLogger(this._tag, {LogSink? sink})
+    : _sink = sink ?? const DebugPrintSink();
 
   final String _tag;
   final LogSink _sink;
@@ -34,8 +35,14 @@ final class RedactedLogger {
   ///
   /// Only [operationType] and [operationId] are accepted. Amounts, account
   /// names, balances, and user data are explicitly excluded from this API.
-  void logOperation({required String operationType, required String operationId}) {
-    _emit(LogLevel.info, 'op=${_sanitize(operationType)} id=${_sanitize(operationId)}');
+  void logOperation({
+    required String operationType,
+    required String operationId,
+  }) {
+    _emit(
+      LogLevel.info,
+      'op=${_sanitize(operationType)} id=${_sanitize(operationId)}',
+    );
   }
 
   /// Logs a navigation event (route name only, no financial context).
@@ -67,9 +74,25 @@ final class RedactedLogger {
   }
 
   /// Removes characters that could form log-injection payloads.
-  static String _sanitize(String input) => input.replaceAll(RegExp(r'[\n\r\t]'), ' ').trim();
+  static String _sanitize(String input) =>
+      input.replaceAll(RegExp(r'[\n\r\t]'), ' ').trim();
 
   /// Replaces known sensitive patterns with placeholder text.
+  ///
+  /// ## Scope of this scanner
+  ///
+  /// This method is a best-effort passive filter applied to freeform
+  /// [warning] message strings. It covers the most common patterns that
+  /// could accidentally embed financial or authentication data.
+  ///
+  /// It does NOT protect data that bypasses [RedactedLogger] entirely (e.g.
+  /// direct calls to `print`, `debugPrint`, or a crash reporter). See
+  /// SECURITY_THREAT_MODEL.md T-07.
+  ///
+  /// Backup body content and AI response bodies are not accepted anywhere in
+  /// the logger API — the typed methods have no payload or body parameter —
+  /// so they cannot leak through this class. No regex pattern is required for
+  /// those cases.
   static String _redact(String message) {
     return message
         // Currency amounts: "1500 EGP", "١٥٠٠ ج.م", "EGP 1,500.00"
@@ -83,9 +106,25 @@ final class RedactedLogger {
           (_) => '[AMOUNT_REDACTED]',
         )
         // Bearer tokens
-        .replaceAllMapped(RegExp(r'Bearer\s+[\w\-\.]+', caseSensitive: false), (_) => 'Bearer [TOKEN_REDACTED]')
+        .replaceAllMapped(
+          RegExp(r'Bearer\s+[\w\-\.]+', caseSensitive: false),
+          (_) => 'Bearer [TOKEN_REDACTED]',
+        )
         // balance: <number>
-        .replaceAllMapped(RegExp(r'balance\s*:?\s*[\d,]+\.?\d*', caseSensitive: false), (_) => 'balance:[BALANCE_REDACTED]')
+        .replaceAllMapped(
+          RegExp(r'balance\s*:?\s*[\d,]+\.?\d*', caseSensitive: false),
+          (_) => 'balance:[BALANCE_REDACTED]',
+        )
+        // transaction: <number> — catches accidental amount-in-message leakage
+        .replaceAllMapped(
+          RegExp(r'transaction\s*:?\s*[\d,]+\.?\d*', caseSensitive: false),
+          (_) => 'transaction:[AMOUNT_REDACTED]',
+        )
+        // child_fund: <number> or child fund: <number>
+        .replaceAllMapped(
+          RegExp(r'child[_\s]fund\s*:?\s*[\d,]+\.?\d*', caseSensitive: false),
+          (_) => 'child_fund:[AMOUNT_REDACTED]',
+        )
         // Sanitize injection characters
         .replaceAll(RegExp(r'[\n\r]'), ' ');
   }

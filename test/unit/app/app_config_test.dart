@@ -26,6 +26,24 @@ void main() {
       });
     });
 
+    group('staging config', () {
+      test('validates without throwing', () {
+        expect(() => AppConfig.staging.validate(), returnsNormally);
+      });
+
+      test('isProduction is false', () {
+        expect(AppConfig.staging.isProduction, isFalse);
+      });
+
+      test('package name matches production', () {
+        expect(AppConfig.staging.packageName, AppConfig.production.packageName);
+      });
+
+      test('appName contains Staging marker', () {
+        expect(AppConfig.staging.appName, contains('Staging'));
+      });
+    });
+
     group('development config', () {
       test('validates without throwing', () {
         expect(() => AppConfig.development.validate(), returnsNormally);
@@ -41,6 +59,18 @@ void main() {
         const invalid = AppConfig(
           appName: '',
           appNameAr: 'اسم',
+          packageName: 'com.test.app',
+          currencyCode: 'EGP',
+          defaultLocale: Locale('ar'),
+          isProduction: false,
+        );
+        expect(invalid.validate, throwsStateError);
+      });
+
+      test('throws StateError when appNameAr is empty', () {
+        const invalid = AppConfig(
+          appName: 'Test',
+          appNameAr: '',
           packageName: 'com.test.app',
           currencyCode: 'EGP',
           defaultLocale: Locale('ar'),

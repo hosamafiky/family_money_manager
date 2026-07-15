@@ -105,4 +105,91 @@ void main() {
       expect(sink.lastMessage, isNot(contains('\r\n')));
     });
   });
+
+  group('RedactedLogger — logLifecycle', () {
+    test('logLifecycle emits a record', () {
+      logger.logLifecycle('app_start');
+      expect(sink.records, hasLength(1));
+    });
+
+    test('logLifecycle emits at INFO level', () {
+      logger.logLifecycle('app_resume');
+      expect(sink.records.last.level, LogLevel.info);
+    });
+
+    test('logLifecycle output contains event name', () {
+      logger.logLifecycle('app_pause');
+      expect(sink.lastMessage, contains('app_pause'));
+    });
+
+    test('logLifecycle sanitizes injection characters in event name', () {
+      logger.logLifecycle('start\ninjection');
+      expect(sink.lastMessage, isNot(contains('\n')));
+    });
+  });
+
+  group('RedactedLogger — financial keyword masking', () {
+    test('transaction keyword with number is masked', () {
+      logger.warning('failed transaction: 5000 exceeded limit');
+      expect(sink.lastMessage, isNot(contains('5000')));
+      expect(sink.lastMessage, contains('[AMOUNT_REDACTED]'));
+    });
+
+    test('transaction with colon and decimal is masked', () {
+      logger.warning('retry transaction:12500.50 pending');
+      expect(sink.lastMessage, isNot(contains('12500.50')));
+      expect(sink.lastMessage, contains('[AMOUNT_REDACTED]'));
+    });
+
+    test('child_fund keyword with number is masked', () {
+      logger.warning('child_fund: 3000 withdrawal blocked');
+      expect(sink.lastMessage, isNot(contains('3000')));
+      expect(sink.lastMessage, contains('[AMOUNT_REDACTED]'));
+    });
+
+    test('child fund (space-separated) with number is masked', () {
+      logger.warning('child fund 8500 check failed');
+      expect(sink.lastMessage, isNot(contains('8500')));
+      expect(sink.lastMessage, contains('[AMOUNT_REDACTED]'));
+    });
+  });
+
+  group('RedactedLogger — typed API prevents unstructured metadata', () {
+    test('API accepts only operationType and operationId strings', () {
+      // The logger deliberately has no Map or Object parameter.
+      // This test documents that the typed API enforces the constraint at
+      // compile time: callers cannot pass arbitrary key-value pairs.
+      //
+      // Attempting to add a named parameter like `metadata: {'key': 'val'}`
+      // does not compile; this test verifies the documented behavior.
+      logger.logOperation(operationType: 'sync', operationId: 'run-001');
+      expect(sink.records, hasLength(1));
+    });
+
+    test('error() accepts only a code string, not an exception object', () {
+      // Raw exception messages are excluded from the API by design.
+      // Only opaque error codes may be logged.
+      logger.error('STORAGE_IO_ERROR');
+      expect(sink.lastMessage, contains('STORAGE_IO_ERROR'));
+      expect(sink.lastMessage, isNot(contains('Exception')));
+    });
+
+    test(
+      'backup and AI bodies cannot be passed — no body parameter exists',
+      () {
+        // The logger has no payload, body, or Map parameter.
+        // Backup content and AI response bodies cannot enter this class.
+        // This test documents the design constraint by confirming the only
+        // accepted inputs are opaque string codes and message strings.
+        logger.logOperation(
+          operationType: 'backup_complete',
+          operationId: 'bk-001',
+        );
+        expect(sink.records, hasLength(1));
+        // The message contains only the operation type and ID — no body.
+        expect(sink.lastMessage, isNot(contains('{')));
+        expect(sink.lastMessage, isNot(contains('payload')));
+      },
+    );
+  });
 }

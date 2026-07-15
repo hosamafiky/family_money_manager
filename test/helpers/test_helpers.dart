@@ -10,6 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///
 /// All providers are overridden so tests never hit the unimplemented
 /// [appConfigProvider] guard.
+///
+/// When [locale] is provided, a fixed-locale notifier is used so that
+/// [App] renders in the requested language from the first frame.
 Widget buildTestApp({
   AppConfig config = AppConfig.development,
   Locale? locale,
@@ -18,11 +21,34 @@ Widget buildTestApp({
   return ProviderScope(
     overrides: [
       appConfigProvider.overrideWithValue(config),
-      if (locale != null) appLocaleProvider.overrideWith((ref) => locale),
-      appThemeModeProvider.overrideWith((ref) => themeMode),
+      if (locale != null)
+        appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(themeMode),
+      ),
     ],
     child: const App(),
   );
+}
+
+/// A [LocaleNotifier] that always returns a fixed locale, ignoring
+/// [AppConfig.defaultLocale]. Used in widget tests.
+class _FixedLocaleNotifier extends LocaleNotifier {
+  _FixedLocaleNotifier(this._locale);
+  final Locale _locale;
+
+  @override
+  Locale build() => _locale;
+}
+
+/// A [ThemeModeNotifier] that always returns a fixed theme mode.
+/// Used in widget tests.
+class _FixedThemeModeNotifier extends ThemeModeNotifier {
+  _FixedThemeModeNotifier(this._themeMode);
+  final ThemeMode _themeMode;
+
+  @override
+  ThemeMode build() => _themeMode;
 }
 
 /// A [LogSink] that captures all writes for assertion in unit tests.
