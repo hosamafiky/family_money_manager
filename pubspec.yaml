@@ -7,6 +7,8 @@ environment:
   sdk: ">=3.12.2 <4.0.0"
 
 dependencies:
+  drift: ^2.34.2
+  drift_flutter: ^0.3.1
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -20,6 +22,10 @@ dependencies:
 
   # Internationalisation (version constrained by flutter_localizations)
   intl: any
+  meta: ^1.18.0
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
@@ -27,7 +33,17 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   go_router_builder: ^4.3.1
   build_runner: ^2.15.1
+  drift_dev: ^2.34.0
 
 flutter:
   uses-material-design: true
   generate: true
+
+# sqlite3mc hook: build the sqlite3 native library with SQLite3MultipleCiphers
+# encryption support. Accepted in DECISION-004 / PO-2.
+# The database key injection is deferred to the security hardening phase.
+# Phase 2 opens without a key (unencrypted at rest) but the binary is encryption-ready.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
