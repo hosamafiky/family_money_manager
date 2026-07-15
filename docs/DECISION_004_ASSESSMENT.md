@@ -175,17 +175,63 @@ by the `sqlite3` 3.x build hook based on the `source: sqlite3mc` configuration.
 
 ---
 
-## 5. Product-Owner Decisions Required Before Phase 2
+## 5. Approved Product-Owner Decisions (PO-1 through PO-10) — Phase 1.5A
 
-The Phase 1.5 evidence confirms that the sqlite3mc approach is technically feasible.
-The following decisions must be made before Phase 2 begins:
+**Status:** ACCEPTED — 2026-07-15. DECISION-004 is closed.
 
-| ID | Question | Notes |
+| # | Decision |
+|---|---|
+| PO-1 | V1 requires encrypted local financial storage. |
+| PO-2 | Selected: Drift `NativeDatabase` + `sqlite3` 3.x + SQLite3MultipleCiphers via pub build hooks. |
+| PO-3 | Database encryption key will be cryptographically random. |
+| PO-4 | App PIN will not be used as database key or sole entropy source. |
+| PO-5 | Android Keystore + iOS Keychain will protect the key (security phase). |
+| PO-6 | PIN and biometrics will gate access to the protected key. |
+| PO-7 | Loss of device-bound key makes local data unrecoverable without encrypted backup or cloud sync. |
+| PO-8 | Local-only mode is fully supported. |
+| PO-9 | Portable backups use a separate recovery passphrase or recovery key. |
+| PO-10 | Plaintext database fallback and plaintext financial backups are prohibited. |
+
+**Not implemented in Phase 1.5A:** Key storage, PIN, biometrics, backup encryption,
+cloud-sync recovery, and production database opening remain deferred.
+
+---
+
+## 6. Phase 1.5A Additional Evidence
+
+### Negative-provider test (standard SQLite, no sqlite3mc hook)
+
+`spike/plain_sqlite_probe/` used `sqlite3 3.4.0` WITHOUT `hooks.user_defines.sqlite3.source: sqlite3mc`.
+
+| Test | Result | Classification |
 |---|---|---|
-| **PO-1** | Confirm V1 will use SQLite3MultipleCiphers via sqlite3 3.x build hooks | Feasibility verified. Compilation and runtime confirmed on macOS host and iOS simulator. |
-| **PO-2** | Confirm the production database key management policy (see `LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`) | Random key, Android Keystore + iOS Keychain-backed. PIN gates key access, not key derivation. |
-| **PO-3** | Confirm that lost-key behavior (unrecoverable local data without backup) is acceptable | Users must be informed during onboarding. |
-| **PO-4** | Confirm that unencrypted fallback (OS-level FDE only) is not acceptable for V1 | V1 security policy states local financial data must be encrypted. |
+| PRAGMA cipher returns empty from standard SQLite | PASS | Host-runtime-tested |
+| verifyEncryptionPresent([]) → StateError | PASS | Host-runtime-tested |
+| End-to-end: real empty pragma → fail-closed StateError | PASS | Host-runtime-tested |
+| Non-empty result → no throw | PASS | Host-runtime-tested |
+
+### android_probe host unit tests
+
+| Test | Result | Classification |
+|---|---|---|
+| verifyEncryptionPresent uses if/throw, not assert | PASS | Host-runtime-tested |
+| empty pragma → safe StateError with category string | PASS | Host-runtime-tested |
+| classifyKeyFailure → safe string, no raw SQL | PASS | Host-runtime-tested |
+| Key never appears in log sink | PASS | Host-runtime-tested |
+
+### Android emulator
+
+The emulator launched (cold boot, `swiftshader_indirect`, `no-snapshot-load`) but went offline before integration tests could be submitted. Builds were not run in Phase 1.5A at product-owner direction. See Phase 1.5 for Android APK/AAB build-verified evidence.
+
+**Android emulator runtime remains Unverified.**
+
+---
+
+## 7. Open Product-Owner Decisions (Now Closed)
+
+All four original open decisions (PO-1 through PO-4) have been superseded by the
+expanded PO-1 through PO-10 set accepted in Section 5 above (Phase 1.5A, 2026-07-15).
+DECISION-004 is closed.
 
 ---
 

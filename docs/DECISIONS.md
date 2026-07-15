@@ -85,47 +85,65 @@ SQLCipher is deferred to v2. The OS provides full-disk encryption on modern Andr
 
 ## DECISION-004 — Local Database At-Rest Encryption
 
-**Status:** Evidence collected (Phase 1.5). Four product-owner decisions (PO-1 through PO-4) required before Phase 2 begins. See `docs/DECISION_004_ASSESSMENT.md` for full evidence.
-
+**Status:** ACCEPTED — Phase 1.5A  
+**Accepted:** 2026-07-15  
 **Deadline:** Before Phase 2 database implementation.
 
-**Correction (Phase 1.5):** Earlier versions of this entry incorrectly stated that
-encrypted databases were unavailable because `sqlite3_flutter_libs` and
-`sqlcipher_flutter_libs` were EOL. That was wrong. Those packages are obsolete
+### Approved product-owner decisions (PO-1 through PO-10)
+
+Recorded 2026-07-15. All ten decisions are accepted. Implementation of key storage,
+PIN, biometrics, backups, and production database opening remains deferred to the
+approved security phase.
+
+| # | Decision |
+|---|---|
+| PO-1 | V1 requires encrypted local financial storage. |
+| PO-2 | The selected candidate is Drift `NativeDatabase` with `sqlite3` 3.x and SQLite3MultipleCiphers selected through pub build hooks. |
+| PO-3 | The database encryption key will be cryptographically random. |
+| PO-4 | The app PIN will not be used as the database key or as its sole entropy source. |
+| PO-5 | Android Keystore and iOS Keychain-backed storage will protect the random key in the later security phase. |
+| PO-6 | PIN and biometrics will gate access to the protected key. |
+| PO-7 | Loss of the device-bound key makes local data unrecoverable unless an encrypted portable backup or optional synchronized copy exists. |
+| PO-8 | Local-only mode remains fully supported. |
+| PO-9 | Portable backups will use a separate recovery passphrase or recovery key. |
+| PO-10 | Plaintext database fallback and plaintext financial backups are prohibited. |
+
+### Not implemented in Phase 1.5A
+
+Key storage, PIN, biometrics, backup encryption, cloud-sync recovery, and
+production database opening are not implemented. These are deferred to the
+approved security phase.
+
+### Technical details
+
+**Terminology:** The implementation is **SQLite3MultipleCiphers** (sqlite3mc), not SQLCipher.
+They are distinct encryption implementations. Do not use "SQLCipher" to describe the sqlite3mc build.
+
+**EOL package correction:** `sqlite3_flutter_libs` and `sqlcipher_flutter_libs` are no-op
 compatibility stubs under the old `sqlite3` 2.x scheme. Under `sqlite3` 3.x, the
-encryption library is selected via pub build hooks and those stubs are no-op
-transitive dependencies that do not affect the encryption outcome.
+encryption library is selected via pub build hooks. These stubs are transitive dependencies
+that provide no native binary.
 
-**Terminology correction:** The recommended implementation is **SQLite3MultipleCiphers**
-(sqlite3mc), not SQLCipher. They are distinct implementations. Do not use the term
-"SQLCipher" to describe the sqlite3mc build.
-
-**Context:** Should the local SQLite database be encrypted at the application level?
-
-**Recommended option (Phase 1.5 evidence supports this):**
-
-Use `drift 2.34.2` + `drift_flutter 0.3.1` + `sqlite3 3.4.0` with:
-
+**Selected stack:**
 ```yaml
+drift: 2.34.2
+drift_flutter: 0.3.1
+sqlite3: 3.4.0
+
 hooks:
   user_defines:
     sqlite3:
-      source: sqlite3mc   # SQLite3MultipleCiphers
+      source: sqlite3mc
 ```
 
-The database key is a cryptographically random 256-bit value protected by
-Android Keystore / iOS Keychain. The PIN gates access to the key rather than
-serving as the key. See `docs/LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`.
+**Runtime evidence (Phase 1.5 + 1.5A):**
+- macOS host: 11/11 tests pass (cipher present, correct key, wrong key, plaintext absent, reopen, init order, logging, fail-closed)
+- iOS simulator (iPhone 17 Pro): 5/5 integration checks pass
+- Android host unit tests: 7/7 pass (fail-closed, logging, non-assert check)
+- Negative provider (plain SQLite, no sqlite3mc): 4/4 tests pass — PRAGMA cipher returns empty, fail-closed triggers
+- Android emulator runtime: unverified (sandbox instability; builds verified)
 
-**Verified in Phase 1.5 spike:**
-- Compilation: Android debug/release/aab ✓, iOS debug/release ✓
-- Runtime (macOS host): all 11 checks pass ✓
-- Runtime (iOS simulator, iPhone 17 Pro): all 5 integration checks pass ✓
-- Android emulator runtime: unverified (sandbox instability during spike)
-
-**Fallback option (not recommended for V1 per product-owner security policy):**
-
-OS-level FDE only (no application-level encryption).
+See `docs/DECISION_004_ASSESSMENT.md` and `docs/PHASE_1_5_ANDROID_REPORT.md` for full evidence.
 
 **Impact of deferring (Option A):**
 
