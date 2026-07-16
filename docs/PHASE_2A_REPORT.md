@@ -263,10 +263,11 @@ Every financial write executes inside `_db.transaction(...)`:
 | Phase | Description | Tests |
 |-------|------------|-------|
 | Phase 1 | Foundation: app config, error model, logger, navigation, widget smoke | 106 |
-| Phase 2 | Financial domain and ledger DB integration | 253 |
-| Phase 2A | Hardening: append-only, idempotency, isolation, ordering, classification, randomized, boundary | 390 |
+| Phase 2 (commit 7d4a9b9) | Financial domain and ledger DB integration | 259 |
+| Phase 2A partial (previous session, not committed separately) | 7 new test files created | ~369 |
+| Phase 2A complete (commit 52e814d) | Full hardening suite | 390 |
 
-The jump from 369 (pre-session) to 390 was introduced by Phase 2A new test files.
+The 259→369 growth was from 7 new test files created during Phase 2A (append_only, idempotency, ledger_repository_db updates, ordering, profile_isolation, protected_account, money_boundary, validation_release_safe) but those were committed as one commit (52e814d). The jump from ~369 to 390 was introduced by the remaining Phase 2A new test files in the same session.
 
 ### Test File Inventory
 

@@ -694,6 +694,535 @@ class HouseholdsCompanion extends UpdateCompanion<DbHousehold> {
   }
 }
 
+class $HouseholdMembersTable extends HouseholdMembers
+    with TableInfo<$HouseholdMembersTable, DbHouseholdMember> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES households (id)',
+    ),
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lifecycleMeta = const VerificationMeta(
+    'lifecycle',
+  );
+  @override
+  late final GeneratedColumn<String> lifecycle = GeneratedColumn<String>(
+    'lifecycle',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('active'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_archived" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    householdId,
+    displayName,
+    role,
+    lifecycle,
+    createdAt,
+    updatedAt,
+    isArchived,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'household_members';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbHouseholdMember> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_displayNameMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('lifecycle')) {
+      context.handle(
+        _lifecycleMeta,
+        lifecycle.isAcceptableOrUnknown(data['lifecycle']!, _lifecycleMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbHouseholdMember map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbHouseholdMember(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      lifecycle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lifecycle'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
+    );
+  }
+
+  @override
+  $HouseholdMembersTable createAlias(String alias) {
+    return $HouseholdMembersTable(attachedDatabase, alias);
+  }
+}
+
+class DbHouseholdMember extends DataClass
+    implements Insertable<DbHouseholdMember> {
+  final String id;
+  final String householdId;
+  final String displayName;
+
+  /// role: 'primary_user' | 'spouse' | 'child'
+  final String role;
+
+  /// lifecycle: 'active' | 'archived'
+  final String lifecycle;
+  final String createdAt;
+  final String updatedAt;
+  final bool isArchived;
+  const DbHouseholdMember({
+    required this.id,
+    required this.householdId,
+    required this.displayName,
+    required this.role,
+    required this.lifecycle,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isArchived,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['display_name'] = Variable<String>(displayName);
+    map['role'] = Variable<String>(role);
+    map['lifecycle'] = Variable<String>(lifecycle);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['is_archived'] = Variable<bool>(isArchived);
+    return map;
+  }
+
+  HouseholdMembersCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdMembersCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      displayName: Value(displayName),
+      role: Value(role),
+      lifecycle: Value(lifecycle),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isArchived: Value(isArchived),
+    );
+  }
+
+  factory DbHouseholdMember.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbHouseholdMember(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      displayName: serializer.fromJson<String>(json['displayName']),
+      role: serializer.fromJson<String>(json['role']),
+      lifecycle: serializer.fromJson<String>(json['lifecycle']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'displayName': serializer.toJson<String>(displayName),
+      'role': serializer.toJson<String>(role),
+      'lifecycle': serializer.toJson<String>(lifecycle),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'isArchived': serializer.toJson<bool>(isArchived),
+    };
+  }
+
+  DbHouseholdMember copyWith({
+    String? id,
+    String? householdId,
+    String? displayName,
+    String? role,
+    String? lifecycle,
+    String? createdAt,
+    String? updatedAt,
+    bool? isArchived,
+  }) => DbHouseholdMember(
+    id: id ?? this.id,
+    householdId: householdId ?? this.householdId,
+    displayName: displayName ?? this.displayName,
+    role: role ?? this.role,
+    lifecycle: lifecycle ?? this.lifecycle,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isArchived: isArchived ?? this.isArchived,
+  );
+  DbHouseholdMember copyWithCompanion(HouseholdMembersCompanion data) {
+    return DbHouseholdMember(
+      id: data.id.present ? data.id.value : this.id,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      role: data.role.present ? data.role.value : this.role,
+      lifecycle: data.lifecycle.present ? data.lifecycle.value : this.lifecycle,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbHouseholdMember(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('displayName: $displayName, ')
+          ..write('role: $role, ')
+          ..write('lifecycle: $lifecycle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isArchived: $isArchived')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    householdId,
+    displayName,
+    role,
+    lifecycle,
+    createdAt,
+    updatedAt,
+    isArchived,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbHouseholdMember &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.displayName == this.displayName &&
+          other.role == this.role &&
+          other.lifecycle == this.lifecycle &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isArchived == this.isArchived);
+}
+
+class HouseholdMembersCompanion extends UpdateCompanion<DbHouseholdMember> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> displayName;
+  final Value<String> role;
+  final Value<String> lifecycle;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<bool> isArchived;
+  final Value<int> rowid;
+  const HouseholdMembersCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.role = const Value.absent(),
+    this.lifecycle = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdMembersCompanion.insert({
+    required String id,
+    required String householdId,
+    required String displayName,
+    required String role,
+    this.lifecycle = const Value.absent(),
+    required String createdAt,
+    required String updatedAt,
+    this.isArchived = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       householdId = Value(householdId),
+       displayName = Value(displayName),
+       role = Value(role),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<DbHouseholdMember> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? displayName,
+    Expression<String>? role,
+    Expression<String>? lifecycle,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<bool>? isArchived,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (displayName != null) 'display_name': displayName,
+      if (role != null) 'role': role,
+      if (lifecycle != null) 'lifecycle': lifecycle,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isArchived != null) 'is_archived': isArchived,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdMembersCompanion copyWith({
+    Value<String>? id,
+    Value<String>? householdId,
+    Value<String>? displayName,
+    Value<String>? role,
+    Value<String>? lifecycle,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<bool>? isArchived,
+    Value<int>? rowid,
+  }) {
+    return HouseholdMembersCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      displayName: displayName ?? this.displayName,
+      role: role ?? this.role,
+      lifecycle: lifecycle ?? this.lifecycle,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isArchived: isArchived ?? this.isArchived,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (lifecycle.present) {
+      map['lifecycle'] = Variable<String>(lifecycle.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<bool>(isArchived.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('displayName: $displayName, ')
+          ..write('role: $role, ')
+          ..write('lifecycle: $lifecycle, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $FinancialAccountsTable extends FinancialAccounts
     with TableInfo<$FinancialAccountsTable, DbFinancialAccount> {
   @override
@@ -5098,6 +5627,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $HouseholdsTable households = $HouseholdsTable(this);
+  late final $HouseholdMembersTable householdMembers = $HouseholdMembersTable(
+    this,
+  );
   late final $FinancialAccountsTable financialAccounts =
       $FinancialAccountsTable(this);
   late final $LedgerEntriesTable ledgerEntries = $LedgerEntriesTable(this);
@@ -5110,6 +5642,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     households,
+    householdMembers,
     financialAccounts,
     ledgerEntries,
     operations,
@@ -5151,6 +5684,26 @@ typedef $$HouseholdsTableUpdateCompanionBuilder =
 final class $$HouseholdsTableReferences
     extends BaseReferences<_$AppDatabase, $HouseholdsTable, DbHousehold> {
   $$HouseholdsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$HouseholdMembersTable, List<DbHouseholdMember>>
+  _householdMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.householdMembers,
+    aliasName: 'households__id__household_members__household_id',
+  );
+
+  $$HouseholdMembersTableProcessedTableManager get householdMembersRefs {
+    final manager = $$HouseholdMembersTableTableManager(
+      $_db,
+      $_db.householdMembers,
+    ).filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _householdMembersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 
   static MultiTypedResultKey<$FinancialAccountsTable, List<DbFinancialAccount>>
   _financialAccountsRefsTable(_$AppDatabase db) =>
@@ -5298,6 +5851,31 @@ class $$HouseholdsTableFilterComposer
     column: $table.schemaVersion,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> householdMembersRefs(
+    Expression<bool> Function($$HouseholdMembersTableFilterComposer f) f,
+  ) {
+    final $$HouseholdMembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.householdMembers,
+      getReferencedColumn: (t) => t.householdId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdMembersTableFilterComposer(
+            $db: $db,
+            $table: $db.householdMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> financialAccountsRefs(
     Expression<bool> Function($$FinancialAccountsTableFilterComposer f) f,
@@ -5522,6 +6100,31 @@ class $$HouseholdsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  Expression<T> householdMembersRefs<T extends Object>(
+    Expression<T> Function($$HouseholdMembersTableAnnotationComposer a) f,
+  ) {
+    final $$HouseholdMembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.householdMembers,
+      getReferencedColumn: (t) => t.householdId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdMembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.householdMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> financialAccountsRefs<T extends Object>(
     Expression<T> Function($$FinancialAccountsTableAnnotationComposer a) f,
   ) {
@@ -5639,6 +6242,7 @@ class $$HouseholdsTableTableManager
           (DbHousehold, $$HouseholdsTableReferences),
           DbHousehold,
           PrefetchHooks Function({
+            bool householdMembersRefs,
             bool financialAccountsRefs,
             bool ledgerEntriesRefs,
             bool operationsRefs,
@@ -5722,6 +6326,7 @@ class $$HouseholdsTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
+                householdMembersRefs = false,
                 financialAccountsRefs = false,
                 ledgerEntriesRefs = false,
                 operationsRefs = false,
@@ -5730,6 +6335,7 @@ class $$HouseholdsTableTableManager
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (householdMembersRefs) db.householdMembers,
                     if (financialAccountsRefs) db.financialAccounts,
                     if (ledgerEntriesRefs) db.ledgerEntries,
                     if (operationsRefs) db.operations,
@@ -5738,6 +6344,27 @@ class $$HouseholdsTableTableManager
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (householdMembersRefs)
+                        await $_getPrefetchedData<
+                          DbHousehold,
+                          $HouseholdsTable,
+                          DbHouseholdMember
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HouseholdsTableReferences
+                              ._householdMembersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HouseholdsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).householdMembersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.householdId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (financialAccountsRefs)
                         await $_getPrefetchedData<
                           DbHousehold,
@@ -5843,11 +6470,403 @@ typedef $$HouseholdsTableProcessedTableManager =
       (DbHousehold, $$HouseholdsTableReferences),
       DbHousehold,
       PrefetchHooks Function({
+        bool householdMembersRefs,
         bool financialAccountsRefs,
         bool ledgerEntriesRefs,
         bool operationsRefs,
         bool childWithdrawalAuditsRefs,
       })
+    >;
+typedef $$HouseholdMembersTableCreateCompanionBuilder =
+    HouseholdMembersCompanion Function({
+      required String id,
+      required String householdId,
+      required String displayName,
+      required String role,
+      Value<String> lifecycle,
+      required String createdAt,
+      required String updatedAt,
+      Value<bool> isArchived,
+      Value<int> rowid,
+    });
+typedef $$HouseholdMembersTableUpdateCompanionBuilder =
+    HouseholdMembersCompanion Function({
+      Value<String> id,
+      Value<String> householdId,
+      Value<String> displayName,
+      Value<String> role,
+      Value<String> lifecycle,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<bool> isArchived,
+      Value<int> rowid,
+    });
+
+final class $$HouseholdMembersTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $HouseholdMembersTable,
+          DbHouseholdMember
+        > {
+  $$HouseholdMembersTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) => db.households
+      .createAlias('household_members__household_id__households__id');
+
+  $$HouseholdsTableProcessedTableManager get householdId {
+    final $_column = $_itemColumn<String>('household_id')!;
+
+    final manager = $$HouseholdsTableTableManager(
+      $_db,
+      $_db.households,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_householdIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$HouseholdMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lifecycle => $composableBuilder(
+    column: $table.lifecycle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$HouseholdsTableFilterComposer get householdId {
+    final $$HouseholdsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableFilterComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HouseholdMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lifecycle => $composableBuilder(
+    column: $table.lifecycle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HouseholdsTableOrderingComposer get householdId {
+    final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableOrderingComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HouseholdMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HouseholdMembersTable> {
+  $$HouseholdMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get lifecycle =>
+      $composableBuilder(column: $table.lifecycle, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
+
+  $$HouseholdsTableAnnotationComposer get householdId {
+    final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$HouseholdMembersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HouseholdMembersTable,
+          DbHouseholdMember,
+          $$HouseholdMembersTableFilterComposer,
+          $$HouseholdMembersTableOrderingComposer,
+          $$HouseholdMembersTableAnnotationComposer,
+          $$HouseholdMembersTableCreateCompanionBuilder,
+          $$HouseholdMembersTableUpdateCompanionBuilder,
+          (DbHouseholdMember, $$HouseholdMembersTableReferences),
+          DbHouseholdMember,
+          PrefetchHooks Function({bool householdId})
+        > {
+  $$HouseholdMembersTableTableManager(
+    _$AppDatabase db,
+    $HouseholdMembersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HouseholdMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HouseholdMembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HouseholdMembersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> displayName = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<String> lifecycle = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HouseholdMembersCompanion(
+                id: id,
+                householdId: householdId,
+                displayName: displayName,
+                role: role,
+                lifecycle: lifecycle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isArchived: isArchived,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String householdId,
+                required String displayName,
+                required String role,
+                Value<String> lifecycle = const Value.absent(),
+                required String createdAt,
+                required String updatedAt,
+                Value<bool> isArchived = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HouseholdMembersCompanion.insert(
+                id: id,
+                householdId: householdId,
+                displayName: displayName,
+                role: role,
+                lifecycle: lifecycle,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isArchived: isArchived,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$HouseholdMembersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({householdId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (householdId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.householdId,
+                                referencedTable:
+                                    $$HouseholdMembersTableReferences
+                                        ._householdIdTable(db),
+                                referencedColumn:
+                                    $$HouseholdMembersTableReferences
+                                        ._householdIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$HouseholdMembersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HouseholdMembersTable,
+      DbHouseholdMember,
+      $$HouseholdMembersTableFilterComposer,
+      $$HouseholdMembersTableOrderingComposer,
+      $$HouseholdMembersTableAnnotationComposer,
+      $$HouseholdMembersTableCreateCompanionBuilder,
+      $$HouseholdMembersTableUpdateCompanionBuilder,
+      (DbHouseholdMember, $$HouseholdMembersTableReferences),
+      DbHouseholdMember,
+      PrefetchHooks Function({bool householdId})
     >;
 typedef $$FinancialAccountsTableCreateCompanionBuilder =
     FinancialAccountsCompanion Function({
@@ -9238,6 +10257,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$HouseholdsTableTableManager get households =>
       $$HouseholdsTableTableManager(_db, _db.households);
+  $$HouseholdMembersTableTableManager get householdMembers =>
+      $$HouseholdMembersTableTableManager(_db, _db.householdMembers);
   $$FinancialAccountsTableTableManager get financialAccounts =>
       $$FinancialAccountsTableTableManager(_db, _db.financialAccounts);
   $$LedgerEntriesTableTableManager get ledgerEntries =>

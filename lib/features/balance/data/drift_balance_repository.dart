@@ -4,6 +4,7 @@ import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/ledger_calculator.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/balance/domain/balance_repository.dart';
+import 'package:family_money_manager/features/balance/domain/balance_result.dart';
 
 /// Drift-backed implementation of [BalanceRepository].
 ///
@@ -46,6 +47,26 @@ final class DriftBalanceRepository implements BalanceRepository {
       currency: currency,
       asOfDate: asOfDate,
     ).minorUnits;
+  }
+
+  @override
+  Future<BalanceQueryResult> balanceForAccount({
+    required String accountId,
+    required String householdId,
+  }) async {
+    final account = await _getAccount(accountId, householdId);
+    if (account == null) return const BalanceAccountNotFound();
+    final entries = await _loadEntries(accountId, householdId);
+    final currency = Currency.fromCode(account.currencyCode);
+    final balance = LedgerCalculator.balance(
+      accountId: accountId,
+      entries: entries,
+      currency: currency,
+    );
+    return BalanceFound(
+      minorUnits: balance.minorUnits,
+      currencyCode: account.currencyCode,
+    );
   }
 
   @override

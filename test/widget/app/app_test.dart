@@ -18,20 +18,22 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('displays Arabic app title when locale is Arabic', (
+    testWidgets('displays Arabic accounts title when locale is Arabic', (
       tester,
     ) async {
       await tester.pumpWidget(buildTestApp(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
-      expect(find.text('مدير مالية الأسرة'), findsWidgets);
+      // Phase 3A: initial route is /accounts — shows AccountsScreen title 'الحسابات'.
+      expect(find.text('الحسابات'), findsWidgets);
     });
 
-    testWidgets('displays English app title when locale is English', (
+    testWidgets('displays English accounts title when locale is English', (
       tester,
     ) async {
       await tester.pumpWidget(buildTestApp(locale: const Locale('en', 'US')));
       await tester.pumpAndSettle();
-      expect(find.text('Family Money Manager'), findsWidgets);
+      // Phase 3A: initial route is /accounts — shows AccountsScreen title 'Accounts'.
+      expect(find.text('Accounts'), findsWidgets);
     });
   });
 

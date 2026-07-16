@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/ledger_calculator.dart';
+import 'package:family_money_manager/features/balance/domain/balance_result.dart';
 
 /// Repository abstraction for balance queries.
 ///
@@ -12,7 +13,20 @@ abstract interface class BalanceRepository {
   ///
   /// Includes all ledger entries regardless of direction or reversal status.
   /// Reversal entries cancel their originals arithmetically.
+  ///
+  /// Returns 0 for unknown or cross-household accounts (legacy behaviour).
+  /// Prefer [balanceForAccount] for typed results that distinguish zero-balance
+  /// from account-not-found.
   Future<int> currentBalanceMinorUnits({
+    required String accountId,
+    required String householdId,
+  });
+
+  /// Returns a typed balance result for [accountId] within [householdId].
+  ///
+  /// - [BalanceFound] — account exists in this household; [minorUnits] may be 0.
+  /// - [BalanceAccountNotFound] — account not found in this household.
+  Future<BalanceQueryResult> balanceForAccount({
     required String accountId,
     required String householdId,
   });

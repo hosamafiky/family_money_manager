@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:family_money_manager/core/database/tables/child_withdrawal_audits_table.dart';
 import 'package:family_money_manager/core/database/tables/financial_accounts_table.dart';
+import 'package:family_money_manager/core/database/tables/household_members_table.dart';
 import 'package:family_money_manager/core/database/tables/households_table.dart';
 import 'package:family_money_manager/core/database/tables/ledger_entries_table.dart';
 import 'package:family_money_manager/core/database/tables/operations_table.dart';
@@ -35,9 +36,11 @@ part 'app_database.g.dart';
 ///                 operations; FK-enforcement trigger on ledger_entries;
 ///                 CHECK-enforcement triggers for amount_minor_units > 0,
 ///                 warning_shown = 1, reason non-empty; scoped idempotency index.
+///   3 — Phase 3A: household_members table for named household members.
 @DriftDatabase(
   tables: [
     Households,
+    HouseholdMembers,
     FinancialAccounts,
     LedgerEntries,
     Operations,
@@ -57,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,6 +80,10 @@ class AppDatabase extends _$AppDatabase {
         await _applyCheckEnforcementTriggers();
         await _applyForeignKeyEnforcementTriggers();
         await _applyScopedIdempotencyIndex();
+      }
+      if (from <= 2) {
+        // v2 → v3: create household_members table.
+        await m.createTable(householdMembers);
       }
     },
     beforeOpen: (details) async {
