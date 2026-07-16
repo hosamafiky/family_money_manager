@@ -107,23 +107,28 @@ final class Money implements Comparable<Money> {
   // ── Allocation ───────────────────────────────────────────────────────────────
 
   /// Splits this value into [parts] equal shares, returning a list where the
-  /// first element is the larger share if there is a remainder.
+  /// first element absorbs the remainder.
   ///
-  /// Uses truncate-toward-zero division. The remainder (modulo) is added to
-  /// the first element so that the total of all parts equals [minorUnits].
+  /// Uses truncate-toward-zero division (`~/` and `remainder()`). The
+  /// remainder is added to the first element so that the sum of all parts
+  /// always equals [minorUnits], including for negative values.
   ///
   /// Example: 100 EGP split into 3 → [34, 33, 33].
+  /// Example: -100 EGP split into 3 → [-34, -33, -33].
   ///
   /// Throws [ArgumentError] if [parts] < 1.
   List<Money> allocate(int parts) {
     if (parts < 1) {
       throw ArgumentError.value(parts, 'parts', 'Must be at least 1');
     }
+    // Use truncating division so that the remainder carries the same sign as
+    // the dividend (e.g. -100 / 3 → base -33, remainder -1).
+    // Dart's `%` is Euclidean (always ≥ 0 when divisor > 0), so we must use
+    // `remainder()` which truncates toward zero.
     final base = minorUnits ~/ parts;
-    final remainder =
-        minorUnits % parts; // always same sign as minorUnits in Dart
+    final rem = minorUnits.remainder(parts);
     return List.generate(parts, (i) {
-      final extra = i == 0 ? remainder : 0;
+      final extra = i == 0 ? rem : 0;
       return Money(minorUnits: base + extra, currency: currency);
     });
   }

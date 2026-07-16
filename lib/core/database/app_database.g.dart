@@ -2814,6 +2814,17 @@ class $OperationsTable extends Operations
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _householdIdMeta = const VerificationMeta(
     'householdId',
   );
@@ -3082,6 +3093,7 @@ class $OperationsTable extends Operations
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    idempotencyKey,
     householdId,
     type,
     effectiveDate,
@@ -3122,6 +3134,15 @@ class $OperationsTable extends Operations
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -3329,6 +3350,10 @@ class $OperationsTable extends Operations
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      ),
       householdId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}household_id'],
@@ -3431,8 +3456,19 @@ class $OperationsTable extends Operations
 }
 
 class DbOperation extends DataClass implements Insertable<DbOperation> {
-  /// Stable client-generated UUID. Serves as the idempotency key.
+  /// Stable client-generated UUID. Primary key.
   final String id;
+
+  /// Explicit idempotency key scoped by [householdId].
+  ///
+  /// Defaults to [id] at the application layer when not supplied by the caller.
+  /// A UNIQUE(household_id, idempotency_key) constraint is enforced via a
+  /// custom index in [AppDatabase.onCreate] / schema-v2 migration.
+  ///
+  /// Distinguishes:
+  /// - Same key + same operation_id → alreadyExists (safe retry)
+  /// - Same key + different operation_id → conflict (caller error)
+  final String? idempotencyKey;
   final String householdId;
 
   /// OperationType code.
@@ -3489,6 +3525,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   final String syncStatus;
   const DbOperation({
     required this.id,
+    this.idempotencyKey,
     required this.householdId,
     required this.type,
     required this.effectiveDate,
@@ -3517,6 +3554,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || idempotencyKey != null) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey);
+    }
     map['household_id'] = Variable<String>(householdId);
     map['type'] = Variable<String>(type);
     map['effective_date'] = Variable<String>(effectiveDate);
@@ -3568,6 +3608,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   OperationsCompanion toCompanion(bool nullToAbsent) {
     return OperationsCompanion(
       id: Value(id),
+      idempotencyKey: idempotencyKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idempotencyKey),
       householdId: Value(householdId),
       type: Value(type),
       effectiveDate: Value(effectiveDate),
@@ -3621,6 +3664,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbOperation(
       id: serializer.fromJson<String>(json['id']),
+      idempotencyKey: serializer.fromJson<String?>(json['idempotencyKey']),
       householdId: serializer.fromJson<String>(json['householdId']),
       type: serializer.fromJson<String>(json['type']),
       effectiveDate: serializer.fromJson<String>(json['effectiveDate']),
@@ -3655,6 +3699,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'idempotencyKey': serializer.toJson<String?>(idempotencyKey),
       'householdId': serializer.toJson<String>(householdId),
       'type': serializer.toJson<String>(type),
       'effectiveDate': serializer.toJson<String>(effectiveDate),
@@ -3683,6 +3728,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
 
   DbOperation copyWith({
     String? id,
+    Value<String?> idempotencyKey = const Value.absent(),
     String? householdId,
     String? type,
     String? effectiveDate,
@@ -3708,6 +3754,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     String? syncStatus,
   }) => DbOperation(
     id: id ?? this.id,
+    idempotencyKey: idempotencyKey.present
+        ? idempotencyKey.value
+        : this.idempotencyKey,
     householdId: householdId ?? this.householdId,
     type: type ?? this.type,
     effectiveDate: effectiveDate ?? this.effectiveDate,
@@ -3743,6 +3792,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   DbOperation copyWithCompanion(OperationsCompanion data) {
     return DbOperation(
       id: data.id.present ? data.id.value : this.id,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
       householdId: data.householdId.present
           ? data.householdId.value
           : this.householdId,
@@ -3807,6 +3859,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   String toString() {
     return (StringBuffer('DbOperation(')
           ..write('id: $id, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
           ..write('householdId: $householdId, ')
           ..write('type: $type, ')
           ..write('effectiveDate: $effectiveDate, ')
@@ -3837,6 +3890,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
   @override
   int get hashCode => Object.hashAll([
     id,
+    idempotencyKey,
     householdId,
     type,
     effectiveDate,
@@ -3866,6 +3920,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
       identical(this, other) ||
       (other is DbOperation &&
           other.id == this.id &&
+          other.idempotencyKey == this.idempotencyKey &&
           other.householdId == this.householdId &&
           other.type == this.type &&
           other.effectiveDate == this.effectiveDate &&
@@ -3893,6 +3948,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
 
 class OperationsCompanion extends UpdateCompanion<DbOperation> {
   final Value<String> id;
+  final Value<String?> idempotencyKey;
   final Value<String> householdId;
   final Value<String> type;
   final Value<String> effectiveDate;
@@ -3919,6 +3975,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   final Value<int> rowid;
   const OperationsCompanion({
     this.id = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
     this.householdId = const Value.absent(),
     this.type = const Value.absent(),
     this.effectiveDate = const Value.absent(),
@@ -3946,6 +4003,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   });
   OperationsCompanion.insert({
     required String id,
+    this.idempotencyKey = const Value.absent(),
     required String householdId,
     required String type,
     required String effectiveDate,
@@ -3981,6 +4039,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
        updatedAt = Value(updatedAt);
   static Insertable<DbOperation> custom({
     Expression<String>? id,
+    Expression<String>? idempotencyKey,
     Expression<String>? householdId,
     Expression<String>? type,
     Expression<String>? effectiveDate,
@@ -4008,6 +4067,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
       if (householdId != null) 'household_id': householdId,
       if (type != null) 'type': type,
       if (effectiveDate != null) 'effective_date': effectiveDate,
@@ -4039,6 +4099,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
 
   OperationsCompanion copyWith({
     Value<String>? id,
+    Value<String?>? idempotencyKey,
     Value<String>? householdId,
     Value<String>? type,
     Value<String>? effectiveDate,
@@ -4066,6 +4127,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   }) {
     return OperationsCompanion(
       id: id ?? this.id,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
       householdId: householdId ?? this.householdId,
       type: type ?? this.type,
       effectiveDate: effectiveDate ?? this.effectiveDate,
@@ -4099,6 +4161,9 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -4183,6 +4248,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   String toString() {
     return (StringBuffer('OperationsCompanion(')
           ..write('id: $id, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
           ..write('householdId: $householdId, ')
           ..write('type: $type, ')
           ..write('effectiveDate: $effectiveDate, ')
@@ -7450,6 +7516,7 @@ typedef $$LedgerEntriesTableProcessedTableManager =
 typedef $$OperationsTableCreateCompanionBuilder =
     OperationsCompanion Function({
       required String id,
+      Value<String?> idempotencyKey,
       required String householdId,
       required String type,
       required String effectiveDate,
@@ -7478,6 +7545,7 @@ typedef $$OperationsTableCreateCompanionBuilder =
 typedef $$OperationsTableUpdateCompanionBuilder =
     OperationsCompanion Function({
       Value<String> id,
+      Value<String?> idempotencyKey,
       Value<String> householdId,
       Value<String> type,
       Value<String> effectiveDate,
@@ -7601,6 +7669,11 @@ class $$OperationsTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7814,6 +7887,11 @@ class $$OperationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
@@ -7995,6 +8073,11 @@ class $$OperationsTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -8216,6 +8299,7 @@ class $$OperationsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
                 Value<String> householdId = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> effectiveDate = const Value.absent(),
@@ -8242,6 +8326,7 @@ class $$OperationsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => OperationsCompanion(
                 id: id,
+                idempotencyKey: idempotencyKey,
                 householdId: householdId,
                 type: type,
                 effectiveDate: effectiveDate,
@@ -8270,6 +8355,7 @@ class $$OperationsTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> idempotencyKey = const Value.absent(),
                 required String householdId,
                 required String type,
                 required String effectiveDate,
@@ -8296,6 +8382,7 @@ class $$OperationsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => OperationsCompanion.insert(
                 id: id,
+                idempotencyKey: idempotencyKey,
                 householdId: householdId,
                 type: type,
                 effectiveDate: effectiveDate,

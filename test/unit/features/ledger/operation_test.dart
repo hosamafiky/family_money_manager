@@ -48,9 +48,11 @@ void main() {
     });
   });
 
+  // ── RecordIncomeParams ─────────────────────────────────────────────────────
+
   group('RecordIncomeParams', () {
     test('creates with positive amount', () {
-      const params = RecordIncomeParams(
+      final params = RecordIncomeParams(
         operationId: 'op-inc-1',
         householdId: 'hh-1',
         destinationAccountId: 'acc-1',
@@ -60,24 +62,40 @@ void main() {
         createdBy: 'user-1',
       );
       expect(params.amountMinorUnits, 5000);
+      expect(params.resolvedIdempotencyKey, 'op-inc-1');
     });
 
-    test('assert fires for zero amount', () {
+    test('explicit idempotencyKey overrides operationId', () {
+      final params = RecordIncomeParams(
+        operationId: 'op-inc-2',
+        householdId: 'hh-1',
+        destinationAccountId: 'acc-1',
+        amountMinorUnits: 100,
+        currencyCode: 'EGP',
+        effectiveDate: '2024-06-01',
+        createdBy: 'user-1',
+        idempotencyKey: 'custom-key',
+      );
+      expect(params.resolvedIdempotencyKey, 'custom-key');
+    });
+
+    // Phase 2A: validates in release mode (ArgumentError, not AssertionError)
+    test('throws ArgumentError for zero amount', () {
       expect(
         () => RecordIncomeParams(
           operationId: 'op-1',
           householdId: 'hh-1',
           destinationAccountId: 'acc-1',
-          amountMinorUnits: 0, // must be > 0
+          amountMinorUnits: 0,
           currencyCode: 'EGP',
           effectiveDate: '2024-06-01',
           createdBy: 'user-1',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
 
-    test('assert fires for negative amount', () {
+    test('throws ArgumentError for negative amount', () {
       expect(
         () => RecordIncomeParams(
           operationId: 'op-1',
@@ -88,14 +106,46 @@ void main() {
           effectiveDate: '2024-06-01',
           createdBy: 'user-1',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for empty operationId', () {
+      expect(
+        () => RecordIncomeParams(
+          operationId: '',
+          householdId: 'hh-1',
+          destinationAccountId: 'acc-1',
+          amountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-06-01',
+          createdBy: 'user-1',
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for empty destinationAccountId', () {
+      expect(
+        () => RecordIncomeParams(
+          operationId: 'op-1',
+          householdId: 'hh-1',
+          destinationAccountId: '',
+          amountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-06-01',
+          createdBy: 'user-1',
+        ),
+        throwsArgumentError,
       );
     });
   });
 
+  // ── RecordExpenseParams ────────────────────────────────────────────────────
+
   group('RecordExpenseParams', () {
     test('creates with positive amount', () {
-      const params = RecordExpenseParams(
+      final params = RecordExpenseParams(
         operationId: 'op-exp-1',
         householdId: 'hh-1',
         sourceAccountId: 'acc-1',
@@ -107,7 +157,7 @@ void main() {
       expect(params.amountMinorUnits, 2000);
     });
 
-    test('assert fires for non-positive amount', () {
+    test('throws ArgumentError for non-positive amount', () {
       expect(
         () => RecordExpenseParams(
           operationId: 'op-1',
@@ -118,14 +168,16 @@ void main() {
           effectiveDate: '2024-06-01',
           createdBy: 'user-1',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
   });
 
+  // ── ExecuteTransferParams ─────────────────────────────────────────────────
+
   group('ExecuteTransferParams', () {
     test('creates with positive amount', () {
-      const params = ExecuteTransferParams(
+      final params = ExecuteTransferParams(
         operationId: 'op-t-1',
         householdId: 'hh-1',
         sourceAccountId: 'acc-src',
@@ -140,7 +192,7 @@ void main() {
       expect(params.amountMinorUnits, 3000);
     });
 
-    test('assert fires for zero amount', () {
+    test('throws ArgumentError for zero amount', () {
       expect(
         () => ExecuteTransferParams(
           operationId: 'op-1',
@@ -152,14 +204,32 @@ void main() {
           effectiveDate: '2024-06-01',
           createdBy: 'user-1',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for empty source', () {
+      expect(
+        () => ExecuteTransferParams(
+          operationId: 'op-1',
+          householdId: 'hh-1',
+          sourceAccountId: '',
+          destinationAccountId: 'acc-dst',
+          amountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-06-01',
+          createdBy: 'user-1',
+        ),
+        throwsArgumentError,
       );
     });
   });
 
+  // ── RecordOpeningBalanceParams ────────────────────────────────────────────
+
   group('RecordOpeningBalanceParams', () {
     test('accepts zero amount (accounts can start at zero)', () {
-      const params = RecordOpeningBalanceParams(
+      final params = RecordOpeningBalanceParams(
         operationId: 'op-ob-1',
         householdId: 'hh-1',
         accountId: 'acc-1',
@@ -171,7 +241,7 @@ void main() {
       expect(params.amountMinorUnits, 0);
     });
 
-    test('assert fires for negative amount', () {
+    test('throws ArgumentError for negative amount', () {
       expect(
         () => RecordOpeningBalanceParams(
           operationId: 'op-ob-2',
@@ -182,14 +252,31 @@ void main() {
           effectiveDate: '2024-01-01',
           createdBy: 'user-1',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for empty accountId', () {
+      expect(
+        () => RecordOpeningBalanceParams(
+          operationId: 'op-ob-3',
+          householdId: 'hh-1',
+          accountId: '',
+          amountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+        throwsArgumentError,
       );
     });
   });
 
+  // ── RecordAdjustmentParams ────────────────────────────────────────────────
+
   group('RecordAdjustmentParams', () {
-    test('creates with positive signed amount', () {
-      const params = RecordAdjustmentParams(
+    test('creates with positive signed amount (credit)', () {
+      final params = RecordAdjustmentParams(
         operationId: 'op-adj-1',
         householdId: 'hh-1',
         accountId: 'acc-1',
@@ -202,8 +289,8 @@ void main() {
       expect(params.isCredit, isTrue);
     });
 
-    test('isCredit is false for negative amount', () {
-      const params = RecordAdjustmentParams(
+    test('isCredit is false for negative amount (debit)', () {
+      final params = RecordAdjustmentParams(
         operationId: 'op-adj-2',
         householdId: 'hh-1',
         accountId: 'acc-1',
@@ -216,7 +303,7 @@ void main() {
       expect(params.isCredit, isFalse);
     });
 
-    test('assert fires for zero adjustment amount', () {
+    test('throws ArgumentError for zero adjustment amount', () {
       expect(
         () => RecordAdjustmentParams(
           operationId: 'op-adj-3',
@@ -228,10 +315,28 @@ void main() {
           createdBy: 'user-1',
           reason: 'Should fail',
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('throws ArgumentError for empty reason', () {
+      expect(
+        () => RecordAdjustmentParams(
+          operationId: 'op-adj-4',
+          householdId: 'hh-1',
+          accountId: 'acc-1',
+          adjustmentAmountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-06-01',
+          createdBy: 'user-1',
+          reason: '',
+        ),
+        throwsArgumentError,
       );
     });
   });
+
+  // ── ReverseOperationParams ────────────────────────────────────────────────
 
   group('ReverseOperationParams', () {
     test('creates with required fields', () {
@@ -259,6 +364,8 @@ void main() {
     });
   });
 
+  // ── OperationType enum ────────────────────────────────────────────────────
+
   group('OperationType enum', () {
     test('fromCode round-trips all values', () {
       for (final t in OperationType.values) {
@@ -283,6 +390,8 @@ void main() {
     });
   });
 
+  // ── LedgerDirection enum ──────────────────────────────────────────────────
+
   group('LedgerDirection enum', () {
     test('opposite of credit is debit and vice-versa', () {
       expect(LedgerDirection.credit.opposite, LedgerDirection.debit);
@@ -298,6 +407,8 @@ void main() {
       expect(() => LedgerDirection.fromCode('sideways'), throwsArgumentError);
     });
   });
+
+  // ── LedgerEntryType enum ──────────────────────────────────────────────────
 
   group('LedgerEntryType enum', () {
     test('fromCode round-trips all values', () {

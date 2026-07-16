@@ -26,7 +26,8 @@ void main() {
       expect(audit.reason, 'School supplies');
     });
 
-    test('warningShown=false is an assertion error', () {
+    // Phase 2A: release-safe validation (ArgumentError, not AssertionError)
+    test('warningShown=false throws ArgumentError in all modes', () {
       expect(
         () => ChildWithdrawalAudit(
           id: 'audit-2',
@@ -38,15 +39,15 @@ void main() {
           beneficiary: HouseholdMemberRole.child,
           confirmedAt: now,
           confirmedBy: 'user-1',
-          warningShown: false, // must be true
+          warningShown: false,
           biometricConfirmed: false,
           createdAt: now,
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
 
-    test('empty reason is an assertion error', () {
+    test('empty reason throws ArgumentError in all modes', () {
       expect(
         () => ChildWithdrawalAudit(
           id: 'audit-3',
@@ -54,7 +55,7 @@ void main() {
           householdId: 'hh-1',
           accountId: 'acc-1',
           amountMinorUnits: 100,
-          reason: '', // must not be empty
+          reason: '',
           beneficiary: HouseholdMemberRole.child,
           confirmedAt: now,
           confirmedBy: 'user-1',
@@ -62,18 +63,18 @@ void main() {
           biometricConfirmed: false,
           createdAt: now,
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
 
-    test('amountMinorUnits=0 is an assertion error', () {
+    test('amountMinorUnits=0 throws ArgumentError in all modes', () {
       expect(
         () => ChildWithdrawalAudit(
           id: 'audit-4',
           operationId: 'op-4',
           householdId: 'hh-1',
           accountId: 'acc-1',
-          amountMinorUnits: 0, // must be positive
+          amountMinorUnits: 0,
           reason: 'reason',
           beneficiary: HouseholdMemberRole.child,
           confirmedAt: now,
@@ -82,7 +83,47 @@ void main() {
           biometricConfirmed: false,
           createdAt: now,
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('negative amountMinorUnits throws ArgumentError', () {
+      expect(
+        () => ChildWithdrawalAudit(
+          id: 'audit-5',
+          operationId: 'op-5',
+          householdId: 'hh-1',
+          accountId: 'acc-1',
+          amountMinorUnits: -1,
+          reason: 'reason',
+          beneficiary: HouseholdMemberRole.child,
+          confirmedAt: now,
+          confirmedBy: 'user-1',
+          warningShown: true,
+          biometricConfirmed: false,
+          createdAt: now,
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('empty id throws ArgumentError', () {
+      expect(
+        () => ChildWithdrawalAudit(
+          id: '',
+          operationId: 'op-6',
+          householdId: 'hh-1',
+          accountId: 'acc-1',
+          amountMinorUnits: 100,
+          reason: 'reason',
+          beneficiary: HouseholdMemberRole.child,
+          confirmedAt: now,
+          confirmedBy: 'user-1',
+          warningShown: true,
+          biometricConfirmed: false,
+          createdAt: now,
+        ),
+        throwsArgumentError,
       );
     });
 
@@ -120,7 +161,7 @@ void main() {
   });
 
   group('ChildWithdrawalAuditParams – construction', () {
-    test('warningShown=false throws AssertionError', () {
+    test('warningShown=false throws ArgumentError in all modes', () {
       expect(
         () => ChildWithdrawalAuditParams(
           auditId: 'a1',
@@ -134,7 +175,43 @@ void main() {
           confirmedBy: 'user-1',
           warningShown: false,
         ),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
+      );
+    });
+
+    test('empty reason throws ArgumentError', () {
+      expect(
+        () => ChildWithdrawalAuditParams(
+          auditId: 'a1',
+          operationId: 'op-1',
+          householdId: 'hh-1',
+          accountId: 'acc-1',
+          amountMinorUnits: 100,
+          reason: '',
+          beneficiary: HouseholdMemberRole.child,
+          confirmedAt: now,
+          confirmedBy: 'user-1',
+          warningShown: true,
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('zero amount throws ArgumentError', () {
+      expect(
+        () => ChildWithdrawalAuditParams(
+          auditId: 'a1',
+          operationId: 'op-1',
+          householdId: 'hh-1',
+          accountId: 'acc-1',
+          amountMinorUnits: 0,
+          reason: 'reason',
+          beneficiary: HouseholdMemberRole.child,
+          confirmedAt: now,
+          confirmedBy: 'user-1',
+          warningShown: true,
+        ),
+        throwsArgumentError,
       );
     });
 
@@ -156,9 +233,33 @@ void main() {
     });
   });
 
+  // ── Error types ─────────────────────────────────────────────────────────
+
   group('MissingProtectedWithdrawalAuditError', () {
     test('has accountId in message', () {
       final err = MissingProtectedWithdrawalAuditError('acc-protected');
+      expect(err.toString(), contains('acc-protected'));
+    });
+  });
+
+  group('AuditOperationMismatchError', () {
+    test('has both operation IDs in message', () {
+      final err = AuditOperationMismatchError(
+        auditOperationId: 'op-audit',
+        expectedOperationId: 'op-expected',
+      );
+      expect(err.toString(), contains('op-audit'));
+      expect(err.toString(), contains('op-expected'));
+    });
+  });
+
+  group('AuditAccountMismatchError', () {
+    test('has both account IDs in message', () {
+      final err = AuditAccountMismatchError(
+        auditAccountId: 'acc-audit',
+        expectedAccountId: 'acc-protected',
+      );
+      expect(err.toString(), contains('acc-audit'));
       expect(err.toString(), contains('acc-protected'));
     });
   });

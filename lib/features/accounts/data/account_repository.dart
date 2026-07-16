@@ -51,10 +51,22 @@ abstract interface class AccountRepository {
     required String updatedAt,
   });
 
-  /// Updates the mutable metadata of an account.
+  /// Updates the mutable display metadata of an account.
   ///
-  /// The [type] and [currencyCode] fields are intentionally excluded; this
-  /// method cannot change them. Throws [AccountNotFoundError] when not found.
+  /// **Classification-immutability policy (FINANCIAL_MODEL §Historical):**
+  /// After an account has any ledger entries, the following classification
+  /// fields become immutable:
+  ///   - [isProtected]       – changes the child-fund protection status
+  ///   - [includeInNetWorth] – changes net-worth historical aggregation
+  ///   - [includeInZakat]    – changes Zakat historical aggregation
+  ///
+  /// Attempting to change these on an account with existing entries throws
+  /// [ClassificationImmutabilityError].
+  ///
+  /// Always immutable (never in this method): type, currencyCode, ownerType,
+  /// fundPurpose.
+  ///
+  /// Throws [AccountNotFoundError] when not found.
   Future<FinancialAccount> updateAccount({
     required String id,
     required String householdId,
@@ -93,4 +105,19 @@ final class AccountAlreadyArchivedError extends Error {
   @override
   String toString() =>
       'AccountAlreadyArchivedError: account $accountId is already archived';
+}
+
+/// Thrown when attempting to mutate a classification field (isProtected,
+/// includeInNetWorth, includeInZakat) on an account that already has ledger
+/// entries.  Historical report correctness requires these fields to remain
+/// stable once financial use begins.
+final class ClassificationImmutabilityError extends Error {
+  ClassificationImmutabilityError(this.accountId, this.field);
+  final String accountId;
+  final String field;
+  @override
+  String toString() =>
+      'ClassificationImmutabilityError: cannot change "$field" on account '
+      '$accountId after ledger entries have been recorded. '
+      'Use a reversal, new account, or dated-reclassification event instead.';
 }

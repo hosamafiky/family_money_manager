@@ -29,8 +29,12 @@ part 'app_database.g.dart';
 /// before the first query, using a key derived from the Android Keystore /
 /// iOS Keychain (see docs/LOCAL_ENCRYPTION_KEY_MANAGEMENT.md).
 ///
-/// SCHEMA VERSION: 1.
-/// Every migration increment must be added to [migration.onUpgrade].
+/// SCHEMA VERSIONS:
+///   1 — Phase 2:  Initial schema (5 tables, immutability triggers, indexes)
+///   2 — Phase 2A: idempotency_key column; restricted-update trigger on
+///                 operations; FK-enforcement trigger on ledger_entries;
+///                 CHECK-enforcement triggers for amount_minor_units > 0,
+///                 warning_shown = 1, reason non-empty; scoped idempotency index.
 @DriftDatabase(
   tables: [
     Households,
@@ -53,18 +57,27 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
       await _applyImmutabilityTriggers();
-      await _applyCheckConstraints();
+      await _applyAppendOnlyTriggers();
+      await _applyCheckEnforcementTriggers();
+      await _applyForeignKeyEnforcementTriggers();
       await _applyIndexes();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // Phase 2 starts at version 1. Future migrations go here.
+      if (from == 1) {
+        // v1 → v2: add idempotency_key column and new triggers/indexes.
+        await m.addColumn(operations, operations.idempotencyKey);
+        await _applyAppendOnlyTriggers();
+        await _applyCheckEnforcementTriggers();
+        await _applyForeignKeyEnforcementTriggers();
+        await _applyScopedIdempotencyIndex();
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA journal_mode = WAL');
@@ -72,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 
-  // ── SQLite triggers for immutability (INV-002, INV-006) ───────────────────
+  // ── Immutability triggers (INV-002, INV-006) — no update or delete ────────
 
   Future<void> _applyImmutabilityTriggers() async {
     // Ledger entries are immutable once written.
@@ -110,28 +123,134 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
-  // ── CHECK constraints not expressible in Drift column DSL ────────────────
+  // ── Restricted-update trigger for operations (Phase 2A) ───────────────────
+  //
+  // Operations may only have [is_reversed], [reversed_by], and [updated_at]
+  // mutated after creation. All other columns are append-only in practice.
+  // This trigger enforces that restriction at the database engine level.
 
-  Future<void> _applyCheckConstraints() async {
-    // SQLite does not enforce CHECK constraints added after table creation.
-    // These constraints are only valid here as documentation; they are
-    // enforced by the domain layer and the triggers above.
-    // In a future migration, recreate the tables with CHECK constraints
-    // if SQLite version guarantees them.
-    //
-    // Documented constraints:
-    //   ledger_entries:         amount_minor_units > 0
-    //   child_withdrawal_audits: amount_minor_units > 0
-    //                            length(reason) > 0
-    //                            warning_shown = 1
+  Future<void> _applyAppendOnlyTriggers() async {
+    // Only is_reversed, reversed_by, and updated_at may change.
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS restrict_operations_update '
+      'BEFORE UPDATE ON operations '
+      'WHEN NEW.id != OLD.id OR NEW.household_id != OLD.household_id '
+      '  OR NEW.type != OLD.type OR NEW.effective_date != OLD.effective_date '
+      '  OR NEW.recorded_at != OLD.recorded_at '
+      '  OR NEW.total_amount_minor_units != OLD.total_amount_minor_units '
+      '  OR NEW.currency_code != OLD.currency_code '
+      '  OR NEW.created_by != OLD.created_by OR NEW.created_at != OLD.created_at '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Operations are append-only: only is_reversed, reversed_by, and updated_at may change'); "
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS no_delete_operations '
+      'BEFORE DELETE ON operations '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Operations cannot be deleted; use a reversal operation instead'); "
+      'END',
+    );
   }
 
-  // ── Additional indexes ────────────────────────────────────────────────────
+  // ── CHECK-enforcement triggers (Phase 2A) ─────────────────────────────────
+  //
+  // SQLite CHECK constraints added after table creation are not enforced.
+  // These BEFORE INSERT triggers enforce the same rules reliably.
+
+  Future<void> _applyCheckEnforcementTriggers() async {
+    // ledger_entries: amount_minor_units > 0
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_ledger_entry_amount
+      BEFORE INSERT ON ledger_entries
+      WHEN NEW.amount_minor_units <= 0
+      BEGIN
+        SELECT RAISE(ABORT, 'ledger_entries.amount_minor_units must be > 0');
+      END
+    ''');
+
+    // child_withdrawal_audits: amount_minor_units > 0
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_audit_amount
+      BEFORE INSERT ON child_withdrawal_audits
+      WHEN NEW.amount_minor_units <= 0
+      BEGIN
+        SELECT RAISE(ABORT, 'child_withdrawal_audits.amount_minor_units must be > 0');
+      END
+    ''');
+
+    // child_withdrawal_audits: warning_shown must be 1 (true)
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_audit_warning_shown
+      BEFORE INSERT ON child_withdrawal_audits
+      WHEN NEW.warning_shown != 1
+      BEGIN
+        SELECT RAISE(ABORT, 'child_withdrawal_audits.warning_shown must be true (1)');
+      END
+    ''');
+
+    // child_withdrawal_audits: reason must be non-empty
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_audit_reason
+      BEFORE INSERT ON child_withdrawal_audits
+      WHEN length(trim(NEW.reason)) = 0
+      BEGIN
+        SELECT RAISE(ABORT, 'child_withdrawal_audits.reason must not be empty');
+      END
+    ''');
+
+    // operations: total_amount_minor_units must be >= 0
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_operation_amount
+      BEFORE INSERT ON operations
+      WHEN NEW.total_amount_minor_units < 0
+      BEGIN
+        SELECT RAISE(ABORT, 'operations.total_amount_minor_units must be >= 0');
+      END
+    ''');
+  }
+
+  // ── Foreign-key enforcement triggers (Phase 2A) ───────────────────────────
+  //
+  // Drift does not add FK from ledger_entries.operation_id → operations.id
+  // because the column was defined as a plain TextColumn without .references().
+  // A BEFORE INSERT trigger enforces the referential integrity at runtime.
+  // (The FK from ledger_entries.account_id → financial_accounts is defined via
+  // the Drift table DSL and enforced by PRAGMA foreign_keys = ON.)
+
+  Future<void> _applyForeignKeyEnforcementTriggers() async {
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS fk_ledger_entry_operation_id '
+      'BEFORE INSERT ON ledger_entries '
+      'WHEN NOT EXISTS ('
+      '  SELECT 1 FROM operations '
+      '  WHERE id = NEW.operation_id AND household_id = NEW.household_id'
+      ') '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'ledger_entries.operation_id must reference an existing operations.id in the same household'); "
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS fk_audit_operation_household '
+      'BEFORE INSERT ON child_withdrawal_audits '
+      'WHEN NOT EXISTS ('
+      '  SELECT 1 FROM operations '
+      '  WHERE id = NEW.operation_id AND household_id = NEW.household_id'
+      ') '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'child_withdrawal_audits.operation_id must reference an operation in the same household'); "
+      'END',
+    );
+  }
+
+  // ── Indexes ───────────────────────────────────────────────────────────────
 
   Future<void> _applyIndexes() async {
-    // Idempotency constraint for ledger entries (INV-008).
-    // Prevents duplicate (operation_id, account_id, direction, entry_type)
-    // from the same operation.
+    // The leg-level unique index prevents duplicate entries per operation leg.
+    // It is NOT the primary idempotency mechanism (that is the PK on operations.id
+    // and the scoped idempotency_key index below).
     await customStatement('''
       CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_idempotency
       ON ledger_entries(operation_id, account_id, direction, entry_type)
@@ -173,6 +292,20 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE INDEX IF NOT EXISTS idx_financial_accounts_archived
       ON financial_accounts(is_archived)
+    ''');
+
+    await _applyScopedIdempotencyIndex();
+  }
+
+  /// Scoped idempotency: (household_id, idempotency_key) must be unique
+  /// for all operations that provide an explicit idempotency key.
+  /// NULL idempotency_key is excluded from the unique constraint
+  /// (partial index using WHERE idempotency_key IS NOT NULL).
+  Future<void> _applyScopedIdempotencyIndex() async {
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_operations_idempotency_key
+      ON operations(household_id, idempotency_key)
+      WHERE idempotency_key IS NOT NULL
     ''');
   }
 }

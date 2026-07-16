@@ -147,6 +147,24 @@ final class DriftAccountRepository implements AccountRepository {
     final existing = await findById(id: id, householdId: householdId);
     if (existing == null) throw AccountNotFoundError(id);
 
+    // Classification-immutability guard (FINANCIAL_MODEL §Historical):
+    // Once an account has ledger entries, protection / net-worth / Zakat flags
+    // must not be changed.  Changing them would silently alter historical
+    // reports without any audit trail.
+    final hasEntries = await _hasLedgerEntries(id, householdId);
+    if (hasEntries) {
+      if (isProtected != null && isProtected != existing.isProtected) {
+        throw ClassificationImmutabilityError(id, 'isProtected');
+      }
+      if (includeInNetWorth != null &&
+          includeInNetWorth != existing.includeInNetWorth) {
+        throw ClassificationImmutabilityError(id, 'includeInNetWorth');
+      }
+      if (includeInZakat != null && includeInZakat != existing.includeInZakat) {
+        throw ClassificationImmutabilityError(id, 'includeInZakat');
+      }
+    }
+
     await (_db.update(
       _db.financialAccounts,
     )..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).write(
@@ -180,6 +198,21 @@ final class DriftAccountRepository implements AccountRepository {
         _db.financialAccounts,
       )..where((t) => t.id.equals(id))).getSingle(),
     );
+  }
+
+  // ── Classification guard helper ───────────────────────────────────────────
+
+  Future<bool> _hasLedgerEntries(String accountId, String householdId) async {
+    final rows =
+        await (_db.select(_db.ledgerEntries)
+              ..where(
+                (t) =>
+                    t.accountId.equals(accountId) &
+                    t.householdId.equals(householdId),
+              )
+              ..limit(1))
+            .get();
+    return rows.isNotEmpty;
   }
 
   // ── Mapper ────────────────────────────────────────────────────────────────

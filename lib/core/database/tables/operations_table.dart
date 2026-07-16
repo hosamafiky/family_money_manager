@@ -20,8 +20,19 @@ import 'package:family_money_manager/core/database/tables/households_table.dart'
 /// Row type: [DbOperation].
 @DataClassName('DbOperation')
 class Operations extends Table {
-  /// Stable client-generated UUID. Serves as the idempotency key.
+  /// Stable client-generated UUID. Primary key.
   TextColumn get id => text()();
+
+  /// Explicit idempotency key scoped by [householdId].
+  ///
+  /// Defaults to [id] at the application layer when not supplied by the caller.
+  /// A UNIQUE(household_id, idempotency_key) constraint is enforced via a
+  /// custom index in [AppDatabase.onCreate] / schema-v2 migration.
+  ///
+  /// Distinguishes:
+  /// - Same key + same operation_id → alreadyExists (safe retry)
+  /// - Same key + different operation_id → conflict (caller error)
+  TextColumn get idempotencyKey => text().nullable()();
 
   TextColumn get householdId => text().references(Households, #id)();
 

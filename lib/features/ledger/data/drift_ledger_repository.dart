@@ -10,14 +10,44 @@ import 'package:family_money_manager/features/ledger/domain/operation.dart';
 
 /// Drift-backed implementation of [LedgerRepository].
 ///
-/// All financial writes are wrapped in explicit SQLite transactions (INV-007).
-/// No update or delete methods exist for ledger entries (INV-002).
-/// Duplicate operation IDs return [IdempotentOperationResult.alreadyExists] (INV-008).
-/// Protected-fund debits require [ChildWithdrawalAuditParams] (INV-006).
+/// ## Idempotency (INV-008, Phase 2A hardening)
 ///
-/// Drift 2.x insert constructor convention:
-/// - Required columns (no default): passed as the raw type.
-/// - Optional columns (with default or nullable): wrapped in [Value<T>].
+/// Every write uses `INSERT OR IGNORE` for the parent operation row and then
+/// checks whether the row was actually inserted. This makes the existence check
+/// atomic with the insert, eliminating the TOCTOU race that existed in Phase 2.
+///
+/// Idempotency concepts distinguished:
+/// - **operation_id** — the row primary key. Unique across the household.
+/// - **idempotency_key** — an optional caller-supplied key scoped by
+///   `(household_id, idempotency_key)`. Defaults to `operation_id` when null.
+///   A UNIQUE index enforces uniqueness in the DB.
+/// - **ledger-entry id** — unique per entry (`${operationId}_debit` etc.).
+/// - **reversal id** — the `reversalOperationId` stored in `reversedBy`.
+/// - **original-operation reference** — the `originalOperationId` in a reversal.
+///
+/// Results:
+/// - Same `operation_id` resubmitted → [IdempotentOperationResult.alreadyExists]
+/// - Same `idempotency_key` but different `operation_id` → [IdempotentOperationResult.conflict]
+///
+/// ## Transaction boundaries (INV-007)
+///
+/// Every write wraps ALL database inserts (operation row, ledger entries, audit
+/// record) in a single explicit `_db.transaction()`. The idempotency check is
+/// performed inside the transaction using `INSERT OR IGNORE`, not with a prior
+/// SELECT (TOCTOU-safe).
+///
+/// ## Append-only enforcement (INV-002, Phase 2A)
+///
+/// The `restrict_operations_update` trigger only allows mutations to
+/// `is_reversed`, `reversed_by`, and `updated_at`. All other columns are
+/// append-only.
+///
+/// ## Audit validation (INV-006, Phase 2A)
+///
+/// Before writing a [ChildWithdrawalAuditParams], the repository validates:
+/// - `auditParams.operationId` matches the operation being written.
+/// - `auditParams.accountId` matches the protected account being debited.
+/// - `auditParams.householdId` matches the operation's household.
 final class DriftLedgerRepository implements LedgerRepository {
   const DriftLedgerRepository(this._db);
 
@@ -29,13 +59,23 @@ final class DriftLedgerRepository implements LedgerRepository {
   Future<IdempotentOperationResult> recordIncome(
     RecordIncomeParams params,
   ) async {
-    if (await _operationExists(params.operationId, params.householdId)) {
-      return IdempotentOperationResult.alreadyExists;
-    }
+    // Validate account belongs to household before starting the transaction.
+    await _requireAccount(params.destinationAccountId, params.householdId);
 
     final now = DateTime.now().toUtc().toIso8601String();
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        idempotencyKey: params.resolvedIdempotencyKey,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.operationId,
@@ -54,6 +94,7 @@ final class DriftLedgerRepository implements LedgerRepository {
           beneficiaryRole: Value(params.beneficiaryRole?.code),
           destinationAccountId: Value(params.destinationAccountId),
           tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
+          idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
 
@@ -72,9 +113,11 @@ final class DriftLedgerRepository implements LedgerRepository {
           createdBy: params.createdBy,
         ),
       );
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Expense ───────────────────────────────────────────────────────────────
@@ -84,15 +127,16 @@ final class DriftLedgerRepository implements LedgerRepository {
     RecordExpenseParams params, {
     ChildWithdrawalAuditParams? auditParams,
   }) async {
-    if (await _operationExists(params.operationId, params.householdId)) {
-      return IdempotentOperationResult.alreadyExists;
-    }
-
     final account = await _requireAccount(
       params.sourceAccountId,
       params.householdId,
     );
-    _checkProtectedWithdrawal(account, auditParams);
+    _checkProtectedWithdrawal(
+      account: account,
+      auditParams: auditParams,
+      expectedOperationId: params.operationId,
+      expectedHouseholdId: params.householdId,
+    );
     await _checkSufficientBalance(
       params.sourceAccountId,
       params.householdId,
@@ -103,8 +147,19 @@ final class DriftLedgerRepository implements LedgerRepository {
     final entryType = account.isChildProtectedFund
         ? LedgerEntryType.childFundWithdrawal
         : LedgerEntryType.expense;
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        idempotencyKey: params.resolvedIdempotencyKey,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.operationId,
@@ -126,6 +181,7 @@ final class DriftLedgerRepository implements LedgerRepository {
           beneficiaryRole: Value(params.beneficiaryRole?.code),
           sourceAccountId: Value(params.sourceAccountId),
           tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
+          idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
 
@@ -148,9 +204,11 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Transfer ──────────────────────────────────────────────────────────────
@@ -162,10 +220,6 @@ final class DriftLedgerRepository implements LedgerRepository {
   }) async {
     if (params.sourceAccountId == params.destinationAccountId) {
       throw SameAccountTransferError(params.sourceAccountId);
-    }
-
-    if (await _operationExists(params.operationId, params.householdId)) {
-      return IdempotentOperationResult.alreadyExists;
     }
 
     final source = await _requireAccount(
@@ -192,7 +246,12 @@ final class DriftLedgerRepository implements LedgerRepository {
         'destination',
       );
     }
-    _checkProtectedWithdrawal(source, auditParams);
+    _checkProtectedWithdrawal(
+      account: source,
+      auditParams: auditParams,
+      expectedOperationId: params.operationId,
+      expectedHouseholdId: params.householdId,
+    );
     await _checkSufficientBalance(
       params.sourceAccountId,
       params.householdId,
@@ -200,8 +259,19 @@ final class DriftLedgerRepository implements LedgerRepository {
     );
 
     final now = DateTime.now().toUtc().toIso8601String();
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        idempotencyKey: params.resolvedIdempotencyKey,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.operationId,
@@ -218,6 +288,7 @@ final class DriftLedgerRepository implements LedgerRepository {
           sourceAccountId: Value(params.sourceAccountId),
           destinationAccountId: Value(params.destinationAccountId),
           tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
+          idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
 
@@ -256,9 +327,11 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Opening balance ───────────────────────────────────────────────────────
@@ -267,9 +340,14 @@ final class DriftLedgerRepository implements LedgerRepository {
   Future<IdempotentOperationResult> recordOpeningBalance(
     RecordOpeningBalanceParams params,
   ) async {
-    if (await _operationExists(params.operationId, params.householdId)) {
-      return IdempotentOperationResult.alreadyExists;
-    }
+    await _requireAccount(params.accountId, params.householdId);
+
+    // Idempotency check: if this exact operation ID already exists → safe retry.
+    final existing = await findOperation(
+      operationId: params.operationId,
+      householdId: params.householdId,
+    );
+    if (existing != null) return IdempotentOperationResult.alreadyExists;
 
     final alreadyHas = await _hasOpeningBalance(
       params.accountId,
@@ -278,8 +356,19 @@ final class DriftLedgerRepository implements LedgerRepository {
     if (alreadyHas) throw DuplicateOpeningBalanceError(params.accountId);
 
     final now = DateTime.now().toUtc().toIso8601String();
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        idempotencyKey: params.resolvedIdempotencyKey,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.operationId,
@@ -294,11 +383,13 @@ final class DriftLedgerRepository implements LedgerRepository {
           updatedAt: now,
           description: Value(params.description),
           destinationAccountId: Value(params.accountId),
+          idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
 
       // An opening balance of 0 is a valid state (empty account). The ledger
-      // entry constraint requires amount > 0, so only insert when non-zero.
+      // entry amount_minor_units > 0 constraint means we skip the entry for
+      // zero-balance opens.
       if (params.amountMinorUnits > 0) {
         await _insertEntry(
           LedgerEntriesCompanion.insert(
@@ -316,9 +407,11 @@ final class DriftLedgerRepository implements LedgerRepository {
           ),
         );
       }
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Adjustment ────────────────────────────────────────────────────────────
@@ -328,20 +421,32 @@ final class DriftLedgerRepository implements LedgerRepository {
     RecordAdjustmentParams params, {
     ChildWithdrawalAuditParams? auditParams,
   }) async {
-    if (await _operationExists(params.operationId, params.householdId)) {
-      return IdempotentOperationResult.alreadyExists;
-    }
-
     final account = await _requireAccount(params.accountId, params.householdId);
 
     if (!params.isCredit) {
-      _checkProtectedWithdrawal(account, auditParams);
+      _checkProtectedWithdrawal(
+        account: account,
+        auditParams: auditParams,
+        expectedOperationId: params.operationId,
+        expectedHouseholdId: params.householdId,
+      );
     }
 
     final absAmount = params.adjustmentAmountMinorUnits.abs();
     final now = DateTime.now().toUtc().toIso8601String();
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        idempotencyKey: params.resolvedIdempotencyKey,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.operationId,
@@ -361,6 +466,7 @@ final class DriftLedgerRepository implements LedgerRepository {
           destinationAccountId: params.isCredit
               ? Value(params.accountId)
               : const Value.absent(),
+          idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
 
@@ -387,9 +493,11 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Reversal ──────────────────────────────────────────────────────────────
@@ -399,10 +507,15 @@ final class DriftLedgerRepository implements LedgerRepository {
     ReverseOperationParams params, {
     ChildWithdrawalAuditParams? auditParams,
   }) async {
-    if (await _operationExists(
-      params.reversalOperationId,
-      params.householdId,
-    )) {
+    // Check idempotency first: if this exact reversal operation ID already
+    // exists, the caller is retrying a completed reversal → alreadyExists.
+    // This check must happen BEFORE the isReversed check so that retries
+    // return alreadyExists rather than DuplicateReversalError.
+    final existingReversal = await findOperation(
+      operationId: params.reversalOperationId,
+      householdId: params.householdId,
+    );
+    if (existingReversal != null) {
       return IdempotentOperationResult.alreadyExists;
     }
 
@@ -425,21 +538,56 @@ final class DriftLedgerRepository implements LedgerRepository {
             ))
             .get();
 
-    // For each original credit entry, the reversal creates a debit on that
-    // account. If that account is protected, an audit record is required.
+    // A reversal of an original CREDIT → a new DEBIT on that account.
+    // If the account is protected, an audit record is required.
     for (final entry in originalEntries) {
       if (entry.direction == LedgerDirection.credit.code) {
         final account = await _requireAccount(
           entry.accountId,
           params.householdId,
         );
-        _checkProtectedWithdrawal(account, auditParams);
+        if (account.requiresWithdrawalAudit) {
+          if (auditParams == null) {
+            throw MissingProtectedWithdrawalAuditError(entry.accountId);
+          }
+          // Validate that the audit references the correct reversal operation
+          // and the correct protected account.
+          if (auditParams.operationId != params.reversalOperationId) {
+            throw AuditOperationMismatchError(
+              auditOperationId: auditParams.operationId,
+              expectedOperationId: params.reversalOperationId,
+            );
+          }
+          if (auditParams.accountId != entry.accountId) {
+            throw AuditAccountMismatchError(
+              auditAccountId: auditParams.accountId,
+              expectedAccountId: entry.accountId,
+            );
+          }
+          if (auditParams.householdId != params.householdId) {
+            throw ArgumentError(
+              'AuditParams householdId (${auditParams.householdId}) '
+              'does not match operation householdId (${params.householdId})',
+            );
+          }
+        }
       }
     }
 
     final now = DateTime.now().toUtc().toIso8601String();
+    late IdempotentOperationResult result;
 
     await _db.transaction(() async {
+      final idemResult = await _checkIdempotency(
+        operationId: params.reversalOperationId,
+        householdId: params.householdId,
+        idempotencyKey: params.reversalOperationId,
+      );
+      if (idemResult != null) {
+        result = idemResult;
+        return;
+      }
+
       await _insertOp(
         OperationsCompanion.insert(
           id: params.reversalOperationId,
@@ -458,6 +606,7 @@ final class DriftLedgerRepository implements LedgerRepository {
           ),
           sourceAccountId: Value(original.destinationAccountId),
           destinationAccountId: Value(original.sourceAccountId),
+          idempotencyKey: Value(params.reversalOperationId),
         ),
       );
 
@@ -490,6 +639,7 @@ final class DriftLedgerRepository implements LedgerRepository {
 
       // Mark the original operation as reversed. This is the ONLY permitted
       // mutation of an operations row after creation (INV-002).
+      // The `restrict_operations_update` DB trigger enforces this restriction.
       await (_db.update(_db.operations)..where(
             (t) =>
                 t.id.equals(params.originalOperationId) &
@@ -506,9 +656,11 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      result = IdempotentOperationResult.created;
     });
 
-    return IdempotentOperationResult.created;
+    return result;
   }
 
   // ── Read operations ───────────────────────────────────────────────────────
@@ -528,6 +680,7 @@ final class DriftLedgerRepository implements LedgerRepository {
               ..orderBy([
                 (t) => OrderingTerm.asc(t.effectiveDate),
                 (t) => OrderingTerm.asc(t.recordedAt),
+                (t) => OrderingTerm.asc(t.id), // tie-breaker for INV-012
               ]))
             .get();
     return rows.map(_toLedgerEntry).toList();
@@ -561,21 +714,56 @@ final class DriftLedgerRepository implements LedgerRepository {
                     t.effectiveDate.isBiggerOrEqualValue(fromDate) &
                     t.effectiveDate.isSmallerOrEqualValue(toDate),
               )
-              ..orderBy([(t) => OrderingTerm.asc(t.effectiveDate)]))
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.effectiveDate),
+                (t) => OrderingTerm.asc(t.id), // tie-breaker for INV-012
+              ]))
             .get();
     return rows.map(_toOperation).toList();
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  Future<bool> _operationExists(String operationId, String householdId) async {
-    final row =
+  /// Checks idempotency atomically inside the current transaction.
+  ///
+  /// Returns:
+  /// - `null` → no conflict; the caller should proceed with the insert.
+  /// - [IdempotentOperationResult.alreadyExists] → exact retry (same operation
+  ///   ID already stored).
+  /// - [IdempotentOperationResult.conflict] → same idempotency key but a
+  ///   different operation ID is already stored; caller error.
+  ///
+  /// This check must be called INSIDE a transaction so that the subsequent
+  /// INSERT is atomic with the check (TOCTOU-safe).
+  Future<IdempotentOperationResult?> _checkIdempotency({
+    required String operationId,
+    required String householdId,
+    required String idempotencyKey,
+  }) async {
+    // Check 1: exact operation ID already exists → safe retry.
+    final existingById =
         await (_db.select(_db.operations)..where(
               (t) =>
                   t.id.equals(operationId) & t.householdId.equals(householdId),
             ))
             .getSingleOrNull();
-    return row != null;
+    if (existingById != null) return IdempotentOperationResult.alreadyExists;
+
+    // Check 2: same scoped idempotency key but different operation ID → conflict.
+    if (idempotencyKey != operationId) {
+      final existingByKey =
+          await (_db.select(_db.operations)..where(
+                (t) =>
+                    t.idempotencyKey.equals(idempotencyKey) &
+                    t.householdId.equals(householdId),
+              ))
+              .getSingleOrNull();
+      if (existingByKey != null) {
+        return IdempotentOperationResult.conflict;
+      }
+    }
+
+    return null; // proceed with insert
   }
 
   Future<FinancialAccount> _requireAccount(
@@ -638,22 +826,45 @@ final class DriftLedgerRepository implements LedgerRepository {
     }
   }
 
-  void _checkProtectedWithdrawal(
-    FinancialAccount account,
-    ChildWithdrawalAuditParams? auditParams,
-  ) {
-    if (account.requiresWithdrawalAudit && auditParams == null) {
+  /// Validates a protected-withdrawal audit before inserting.
+  ///
+  /// Throws if [account.requiresWithdrawalAudit] is true and either:
+  /// - [auditParams] is null → [MissingProtectedWithdrawalAuditError]
+  /// - audit operation ID doesn't match → [AuditOperationMismatchError]
+  /// - audit account ID doesn't match → [AuditAccountMismatchError]
+  void _checkProtectedWithdrawal({
+    required FinancialAccount account,
+    required ChildWithdrawalAuditParams? auditParams,
+    required String expectedOperationId,
+    required String expectedHouseholdId,
+  }) {
+    if (!account.requiresWithdrawalAudit) return;
+
+    if (auditParams == null) {
       throw MissingProtectedWithdrawalAuditError(account.id);
+    }
+    if (auditParams.operationId != expectedOperationId) {
+      throw AuditOperationMismatchError(
+        auditOperationId: auditParams.operationId,
+        expectedOperationId: expectedOperationId,
+      );
+    }
+    if (auditParams.accountId != account.id) {
+      throw AuditAccountMismatchError(
+        auditAccountId: auditParams.accountId,
+        expectedAccountId: account.id,
+      );
+    }
+    if (auditParams.householdId != expectedHouseholdId) {
+      throw ArgumentError(
+        'AuditParams householdId (${auditParams.householdId}) '
+        'does not match operation householdId ($expectedHouseholdId)',
+      );
     }
   }
 
   Future<void> _insertOp(OperationsCompanion companion) async {
-    try {
-      await _db.into(_db.operations).insert(companion);
-    } on Exception catch (e) {
-      if (e.toString().contains('UNIQUE constraint')) return;
-      rethrow;
-    }
+    await _db.into(_db.operations).insert(companion);
   }
 
   Future<void> _insertEntry(LedgerEntriesCompanion companion) async {

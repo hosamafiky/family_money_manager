@@ -11,9 +11,13 @@ import 'package:meta/meta.dart';
 /// - [operationId] groups all entries belonging to the same financial operation.
 /// - [effectiveDate] is the user-chosen date (may be backdated).
 /// - [recordedAt] is the system UTC timestamp of persistence.
+///
+/// VALIDATION: The public factory always executes validation regardless of
+/// Dart compilation mode. [ArgumentError] is thrown if invariants are violated.
 @immutable
 final class LedgerEntry {
-  const LedgerEntry({
+  // Private constructor — only reachable through the validated factory.
+  const LedgerEntry._({
     required this.id,
     required this.operationId,
     required this.householdId,
@@ -29,7 +33,79 @@ final class LedgerEntry {
     this.notes,
     this.reversalOfEntryId,
     this.metadata,
-  }) : assert(amountMinorUnits > 0, 'amountMinorUnits must be positive');
+  });
+
+  /// Creates a validated [LedgerEntry].
+  ///
+  /// Throws [ArgumentError] if [amountMinorUnits] is not strictly positive.
+  /// This validation executes in all Dart compilation modes (debug and release).
+  factory LedgerEntry({
+    required String id,
+    required String operationId,
+    required String householdId,
+    required String accountId,
+    required LedgerDirection direction,
+    required int amountMinorUnits,
+    required String currencyCode,
+    required LedgerEntryType entryType,
+    required String effectiveDate,
+    required DateTime recordedAt,
+    required String createdBy,
+    required bool isReversal,
+    String? notes,
+    String? reversalOfEntryId,
+    Map<String, dynamic>? metadata,
+  }) {
+    if (amountMinorUnits <= 0) {
+      throw ArgumentError.value(
+        amountMinorUnits,
+        'amountMinorUnits',
+        'LedgerEntry amount must be a positive integer (> 0). '
+            'Use LedgerDirection to express debit/credit direction.',
+      );
+    }
+    if (id.isEmpty) {
+      throw ArgumentError.value(id, 'id', 'LedgerEntry id must not be empty');
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'LedgerEntry operationId must not be empty',
+      );
+    }
+    if (householdId.isEmpty) {
+      throw ArgumentError.value(
+        householdId,
+        'householdId',
+        'LedgerEntry householdId must not be empty',
+      );
+    }
+    if (accountId.isEmpty) {
+      throw ArgumentError.value(
+        accountId,
+        'accountId',
+        'LedgerEntry accountId must not be empty',
+      );
+    }
+    return LedgerEntry._(
+      id: id,
+      operationId: operationId,
+      householdId: householdId,
+      accountId: accountId,
+      direction: direction,
+      amountMinorUnits: amountMinorUnits,
+      currencyCode: currencyCode,
+      entryType: entryType,
+      effectiveDate: effectiveDate,
+      recordedAt: recordedAt,
+      createdBy: createdBy,
+      isReversal: isReversal,
+      notes: notes,
+      reversalOfEntryId: reversalOfEntryId,
+      metadata: metadata,
+    );
+  }
 
   final String id;
   final String operationId;

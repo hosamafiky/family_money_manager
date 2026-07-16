@@ -406,7 +406,7 @@ void main() {
       );
       expect(
         () => ledgerRepo.executeTransfer(
-          const ExecuteTransferParams(
+          ExecuteTransferParams(
             operationId: 'op-cross',
             householdId: _householdId,
             sourceAccountId: 'egp-acc',
@@ -428,7 +428,7 @@ void main() {
     test('records opening balance and balance reflects it', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-ob'));
       await ledgerRepo.recordOpeningBalance(
-        const RecordOpeningBalanceParams(
+        RecordOpeningBalanceParams(
           operationId: 'op-ob-1',
           householdId: _householdId,
           accountId: 'acc-ob',
@@ -449,7 +449,7 @@ void main() {
     test('duplicate opening balance operation returns alreadyExists', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-ob2'));
       await ledgerRepo.recordOpeningBalance(
-        const RecordOpeningBalanceParams(
+        RecordOpeningBalanceParams(
           operationId: 'op-ob-dup',
           householdId: _householdId,
           accountId: 'acc-ob2',
@@ -460,7 +460,7 @@ void main() {
         ),
       );
       final second = await ledgerRepo.recordOpeningBalance(
-        const RecordOpeningBalanceParams(
+        RecordOpeningBalanceParams(
           operationId: 'op-ob-dup',
           householdId: _householdId,
           accountId: 'acc-ob2',
@@ -493,7 +493,7 @@ void main() {
         ),
       );
       await ledgerRepo.recordAdjustment(
-        const RecordAdjustmentParams(
+        RecordAdjustmentParams(
           operationId: 'op-adj-1',
           householdId: _householdId,
           accountId: 'acc-adj',
@@ -522,7 +522,7 @@ void main() {
         ),
       );
       await ledgerRepo.recordAdjustment(
-        const RecordAdjustmentParams(
+        RecordAdjustmentParams(
           operationId: 'op-adj-2',
           householdId: _householdId,
           accountId: 'acc-adj2',
@@ -853,7 +853,7 @@ void main() {
     test('returns true after opening balance is recorded', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-ob3'));
       await ledgerRepo.recordOpeningBalance(
-        const RecordOpeningBalanceParams(
+        RecordOpeningBalanceParams(
           operationId: 'op-ob-has',
           householdId: _householdId,
           accountId: 'acc-ob3',

@@ -113,9 +113,13 @@ final class Operation {
 // ── Params types ─────────────────────────────────────────────────────────────
 
 /// Parameters for recording an income operation.
+///
+/// VALIDATION: The factory constructor validates all required invariants and
+/// throws [ArgumentError] in all compilation modes (debug and release).
 @immutable
 final class RecordIncomeParams {
-  const RecordIncomeParams({
+  // Private constructor — only reachable through the validated factory.
+  const RecordIncomeParams._({
     required this.operationId,
     required this.householdId,
     required this.destinationAccountId,
@@ -123,12 +127,66 @@ final class RecordIncomeParams {
     required this.currencyCode,
     required this.effectiveDate,
     required this.createdBy,
+    required this.tags,
+    this.idempotencyKey,
     this.categoryCode,
     this.description,
     this.scope,
     this.beneficiaryRole,
-    this.tags = const [],
-  }) : assert(amountMinorUnits > 0, 'Income amount must be positive');
+  });
+
+  factory RecordIncomeParams({
+    required String operationId,
+    required String householdId,
+    required String destinationAccountId,
+    required int amountMinorUnits,
+    required String currencyCode,
+    required String effectiveDate,
+    required String createdBy,
+    String? idempotencyKey,
+    String? categoryCode,
+    String? description,
+    ExpenseScope? scope,
+    HouseholdMemberRole? beneficiaryRole,
+    List<String> tags = const [],
+  }) {
+    if (amountMinorUnits <= 0) {
+      throw ArgumentError.value(
+        amountMinorUnits,
+        'amountMinorUnits',
+        'Income amount must be a positive integer (> 0)',
+      );
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
+    }
+    if (destinationAccountId.isEmpty) {
+      throw ArgumentError.value(
+        destinationAccountId,
+        'destinationAccountId',
+        'must not be empty',
+      );
+    }
+    return RecordIncomeParams._(
+      operationId: operationId,
+      householdId: householdId,
+      destinationAccountId: destinationAccountId,
+      amountMinorUnits: amountMinorUnits,
+      currencyCode: currencyCode,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      idempotencyKey: idempotencyKey,
+      categoryCode: categoryCode,
+      description: description,
+      scope: scope,
+      beneficiaryRole: beneficiaryRole,
+      tags: tags,
+    );
+  }
 
   final String operationId;
   final String householdId;
@@ -137,17 +195,25 @@ final class RecordIncomeParams {
   final String currencyCode;
   final String effectiveDate;
   final String createdBy;
+
+  /// Optional explicit idempotency key. Defaults to [operationId] when null.
+  /// Scoped by [householdId] at the database level.
+  final String? idempotencyKey;
+
   final String? categoryCode;
   final String? description;
   final ExpenseScope? scope;
   final HouseholdMemberRole? beneficiaryRole;
   final List<String> tags;
+
+  /// The resolved idempotency key. Falls back to [operationId].
+  String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
 
 /// Parameters for recording an expense operation.
 @immutable
 final class RecordExpenseParams {
-  const RecordExpenseParams({
+  const RecordExpenseParams._({
     required this.operationId,
     required this.householdId,
     required this.sourceAccountId,
@@ -155,13 +221,69 @@ final class RecordExpenseParams {
     required this.currencyCode,
     required this.effectiveDate,
     required this.createdBy,
+    required this.tags,
+    this.idempotencyKey,
     this.categoryCode,
     this.description,
     this.scope,
     this.spenderRole,
     this.beneficiaryRole,
-    this.tags = const [],
-  }) : assert(amountMinorUnits > 0, 'Expense amount must be positive');
+  });
+
+  factory RecordExpenseParams({
+    required String operationId,
+    required String householdId,
+    required String sourceAccountId,
+    required int amountMinorUnits,
+    required String currencyCode,
+    required String effectiveDate,
+    required String createdBy,
+    String? idempotencyKey,
+    String? categoryCode,
+    String? description,
+    ExpenseScope? scope,
+    HouseholdMemberRole? spenderRole,
+    HouseholdMemberRole? beneficiaryRole,
+    List<String> tags = const [],
+  }) {
+    if (amountMinorUnits <= 0) {
+      throw ArgumentError.value(
+        amountMinorUnits,
+        'amountMinorUnits',
+        'Expense amount must be a positive integer (> 0)',
+      );
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
+    }
+    if (sourceAccountId.isEmpty) {
+      throw ArgumentError.value(
+        sourceAccountId,
+        'sourceAccountId',
+        'must not be empty',
+      );
+    }
+    return RecordExpenseParams._(
+      operationId: operationId,
+      householdId: householdId,
+      sourceAccountId: sourceAccountId,
+      amountMinorUnits: amountMinorUnits,
+      currencyCode: currencyCode,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      idempotencyKey: idempotencyKey,
+      categoryCode: categoryCode,
+      description: description,
+      scope: scope,
+      spenderRole: spenderRole,
+      beneficiaryRole: beneficiaryRole,
+      tags: tags,
+    );
+  }
 
   final String operationId;
   final String householdId;
@@ -170,18 +292,21 @@ final class RecordExpenseParams {
   final String currencyCode;
   final String effectiveDate;
   final String createdBy;
+  final String? idempotencyKey;
   final String? categoryCode;
   final String? description;
   final ExpenseScope? scope;
   final HouseholdMemberRole? spenderRole;
   final HouseholdMemberRole? beneficiaryRole;
   final List<String> tags;
+
+  String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
 
 /// Parameters for executing a transfer between two accounts.
 @immutable
 final class ExecuteTransferParams {
-  const ExecuteTransferParams({
+  const ExecuteTransferParams._({
     required this.operationId,
     required this.householdId,
     required this.sourceAccountId,
@@ -190,9 +315,66 @@ final class ExecuteTransferParams {
     required this.currencyCode,
     required this.effectiveDate,
     required this.createdBy,
+    required this.tags,
+    this.idempotencyKey,
     this.description,
-    this.tags = const [],
-  }) : assert(amountMinorUnits > 0, 'Transfer amount must be positive');
+  });
+
+  factory ExecuteTransferParams({
+    required String operationId,
+    required String householdId,
+    required String sourceAccountId,
+    required String destinationAccountId,
+    required int amountMinorUnits,
+    required String currencyCode,
+    required String effectiveDate,
+    required String createdBy,
+    String? idempotencyKey,
+    String? description,
+    List<String> tags = const [],
+  }) {
+    if (amountMinorUnits <= 0) {
+      throw ArgumentError.value(
+        amountMinorUnits,
+        'amountMinorUnits',
+        'Transfer amount must be a positive integer (> 0)',
+      );
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
+    }
+    if (sourceAccountId.isEmpty) {
+      throw ArgumentError.value(
+        sourceAccountId,
+        'sourceAccountId',
+        'must not be empty',
+      );
+    }
+    if (destinationAccountId.isEmpty) {
+      throw ArgumentError.value(
+        destinationAccountId,
+        'destinationAccountId',
+        'must not be empty',
+      );
+    }
+    return ExecuteTransferParams._(
+      operationId: operationId,
+      householdId: householdId,
+      sourceAccountId: sourceAccountId,
+      destinationAccountId: destinationAccountId,
+      amountMinorUnits: amountMinorUnits,
+      currencyCode: currencyCode,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      idempotencyKey: idempotencyKey,
+      description: description,
+      tags: tags,
+    );
+  }
 
   final String operationId;
   final String householdId;
@@ -202,14 +384,17 @@ final class ExecuteTransferParams {
   final String currencyCode;
   final String effectiveDate;
   final String createdBy;
+  final String? idempotencyKey;
   final String? description;
   final List<String> tags;
+
+  String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
 
 /// Parameters for recording an opening balance.
 @immutable
 final class RecordOpeningBalanceParams {
-  const RecordOpeningBalanceParams({
+  const RecordOpeningBalanceParams._({
     required this.operationId,
     required this.householdId,
     required this.accountId,
@@ -217,8 +402,55 @@ final class RecordOpeningBalanceParams {
     required this.currencyCode,
     required this.effectiveDate,
     required this.createdBy,
+    this.idempotencyKey,
     this.description,
-  }) : assert(amountMinorUnits >= 0, 'Opening balance must be non-negative');
+  });
+
+  factory RecordOpeningBalanceParams({
+    required String operationId,
+    required String householdId,
+    required String accountId,
+    required int amountMinorUnits,
+    required String currencyCode,
+    required String effectiveDate,
+    required String createdBy,
+    String? idempotencyKey,
+    String? description,
+  }) {
+    if (amountMinorUnits < 0) {
+      throw ArgumentError.value(
+        amountMinorUnits,
+        'amountMinorUnits',
+        'Opening balance must be non-negative (>= 0). '
+            'Use a liability record for negative starting positions.',
+      );
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
+    }
+    if (accountId.isEmpty) {
+      throw ArgumentError.value(
+        accountId,
+        'accountId',
+        'accountId must not be empty',
+      );
+    }
+    return RecordOpeningBalanceParams._(
+      operationId: operationId,
+      householdId: householdId,
+      accountId: accountId,
+      amountMinorUnits: amountMinorUnits,
+      currencyCode: currencyCode,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      idempotencyKey: idempotencyKey,
+      description: description,
+    );
+  }
 
   final String operationId;
   final String householdId;
@@ -230,13 +462,16 @@ final class RecordOpeningBalanceParams {
   final String currencyCode;
   final String effectiveDate;
   final String createdBy;
+  final String? idempotencyKey;
   final String? description;
+
+  String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
 
 /// Parameters for recording an adjustment.
 @immutable
 final class RecordAdjustmentParams {
-  const RecordAdjustmentParams({
+  const RecordAdjustmentParams._({
     required this.operationId,
     required this.householdId,
     required this.accountId,
@@ -245,10 +480,54 @@ final class RecordAdjustmentParams {
     required this.effectiveDate,
     required this.createdBy,
     required this.reason,
-  }) : assert(
-         adjustmentAmountMinorUnits != 0,
-         'Adjustment amount must be non-zero',
-       );
+    this.idempotencyKey,
+  });
+
+  factory RecordAdjustmentParams({
+    required String operationId,
+    required String householdId,
+    required String accountId,
+    required int adjustmentAmountMinorUnits,
+    required String currencyCode,
+    required String effectiveDate,
+    required String createdBy,
+    required String reason,
+    String? idempotencyKey,
+  }) {
+    if (adjustmentAmountMinorUnits == 0) {
+      throw ArgumentError.value(
+        adjustmentAmountMinorUnits,
+        'adjustmentAmountMinorUnits',
+        'Adjustment amount must be non-zero. '
+            'Positive = credit (balance increases), negative = debit (balance decreases).',
+      );
+    }
+    if (operationId.isEmpty) {
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
+    }
+    if (reason.isEmpty) {
+      throw ArgumentError.value(
+        reason,
+        'reason',
+        'Adjustment reason must not be empty',
+      );
+    }
+    return RecordAdjustmentParams._(
+      operationId: operationId,
+      householdId: householdId,
+      accountId: accountId,
+      adjustmentAmountMinorUnits: adjustmentAmountMinorUnits,
+      currencyCode: currencyCode,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      reason: reason,
+      idempotencyKey: idempotencyKey,
+    );
+  }
 
   final String operationId;
   final String householdId;
@@ -263,8 +542,11 @@ final class RecordAdjustmentParams {
 
   /// Mandatory reason for the adjustment (auditable).
   final String reason;
+  final String? idempotencyKey;
 
   bool get isCredit => adjustmentAmountMinorUnits > 0;
+
+  String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
 
 /// Parameters for reversing a prior operation.

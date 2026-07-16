@@ -19,8 +19,9 @@ final class DriftBalanceRepository implements BalanceRepository {
     required String accountId,
     required String householdId,
   }) async {
-    final entries = await _loadEntries(accountId, householdId);
     final account = await _getAccount(accountId, householdId);
+    if (account == null) return 0; // unknown account in this household → 0
+    final entries = await _loadEntries(accountId, householdId);
     final currency = Currency.fromCode(account.currencyCode);
     return LedgerCalculator.balance(
       accountId: accountId,
@@ -35,8 +36,9 @@ final class DriftBalanceRepository implements BalanceRepository {
     required String householdId,
     required String asOfDate,
   }) async {
-    final entries = await _loadEntries(accountId, householdId);
     final account = await _getAccount(accountId, householdId);
+    if (account == null) return 0;
+    final entries = await _loadEntries(accountId, householdId);
     final currency = Currency.fromCode(account.currencyCode);
     return LedgerCalculator.historicalBalance(
       accountId: accountId,
@@ -104,13 +106,13 @@ final class DriftBalanceRepository implements BalanceRepository {
         .toList();
   }
 
-  Future<DbFinancialAccount> _getAccount(
+  Future<DbFinancialAccount?> _getAccount(
     String accountId,
     String householdId,
   ) async {
     return (_db.select(_db.financialAccounts)..where(
           (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
         ))
-        .getSingle();
+        .getSingleOrNull();
   }
 }

@@ -95,8 +95,13 @@ abstract interface class LedgerRepository {
   /// Returns all ledger entries for [accountId] within [householdId].
   ///
   /// Includes reversal entries (they are part of the permanent record).
-  /// Ordered by [effectiveDate] ascending, then [recordedAt] ascending for
-  /// deterministic ordering within the same date (INV-012).
+  /// Ordering is deterministic (INV-012):
+  ///   1. [effectiveDate] ascending (user-chosen date)
+  ///   2. [recordedAt] ascending (system UTC timestamp; ISO 8601 lexicographic)
+  ///   3. [id] ascending (tie-breaker: stable UUID)
+  ///
+  /// This ordering ensures that a query executed twice returns exactly the same
+  /// sequence regardless of insertion order or row storage position.
   Future<List<LedgerEntry>> entriesForAccount({
     required String accountId,
     required String householdId,
@@ -124,8 +129,16 @@ enum IdempotentOperationResult {
   /// The operation was newly created and persisted.
   created,
 
-  /// The operation already existed; no change was made.
+  /// The same idempotency key (and the same operation ID) was submitted again.
+  /// No change was made. The caller may safely treat the original result
+  /// as authoritative.
   alreadyExists,
+
+  /// The same idempotency key was submitted with a different operation ID,
+  /// indicating the caller is trying to create a new operation with a key
+  /// that already belongs to another operation. The caller must use a new
+  /// idempotency key or resolve the conflicting operation ID.
+  conflict,
 }
 
 // ── Domain errors ────────────────────────────────────────────────────────────
