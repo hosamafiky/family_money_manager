@@ -1,12 +1,141 @@
 # Phase 4A Report — Arabic-First Dashboard and Core Financial Summaries
 
 **Date:** 2026-07-16  
-**Branch:** (current)  
+**Branch:** main  
+**Commit:** 17fb3d2  
+**Base commit (Phase 3B.1):** 004cbbe  
 **Test count before:** 614  
 **Test count after:** 685 (+71)  
 **dart format exit:** 0  
 **flutter analyze exit:** 0  
 **flutter test exit:** 0  
+
+---
+
+## Exact Test-Count Reconciliation
+
+### Per-file test declarations (`grep -c "^\s*test\b\|^\s*testWidgets\b"`)
+
+#### Database tests — 256 declared tests across 25 files
+
+| File | Count |
+|------|------:|
+| `account_atomicity_db_test.dart` | 5 |
+| `account_classification_immutability_db_test.dart` | 23 |
+| `account_classification_migration_db_test.dart` | 3 |
+| `account_creation_idempotency_db_test.dart` | 6 |
+| `append_only_db_test.dart` | 18 |
+| `archive_rules_db_test.dart` | 9 |
+| `balance_semantics_db_test.dart` | 5 |
+| `classification_immutability_db_test.dart` | 8 |
+| `dashboard_balance_db_test.dart` *(Phase 4A)* | 34 |
+| `dashboard_period_db_test.dart` *(Phase 4A)* | 7 |
+| `expense_persistence_db_test.dart` | 11 |
+| `historical_metadata_db_test.dart` | 4 |
+| `household_cardinality_db_test.dart` | 7 |
+| `idempotency_db_test.dart` | 8 |
+| `income_persistence_db_test.dart` | 10 |
+| `ledger_repository_db_test.dart` | 29 |
+| `migration_db_test.dart` | 8 |
+| `operation_context_db_test.dart` | 8 |
+| `operation_context_migration_db_test.dart` | 6 |
+| `ordering_determinism_db_test.dart` | 7 |
+| `profile_isolation_db_test.dart` | 5 |
+| `protected_account_db_test.dart` | 10 |
+| `transaction_boundary_db_test.dart` | 6 |
+| `transaction_history_db_test.dart` | 8 |
+| `transfer_persistence_db_test.dart` | 11 |
+| **Subtotal** | **256** |
+
+#### Unit tests — 370 declared tests across 22 files
+
+| File | Count |
+|------|------:|
+| `app_config_test.dart` | 15 |
+| `app_result_test.dart` | 17 |
+| `app_error_test.dart` | 7 |
+| `ledger_calculator_test.dart` | 22 |
+| `ledger_invariants_test.dart` | 12 |
+| `money_boundary_test.dart` | 21 |
+| `money_test.dart` | 48 |
+| `validation_release_safe_test.dart` | 29 |
+| `redacted_logger_test.dart` | 26 |
+| `app_route_test.dart` | 8 |
+| `money_input_formatter_test.dart` | 26 |
+| `account_totals_service_test.dart` | 10 |
+| `create_account_use_case_test.dart` | 7 |
+| `financial_account_test.dart` | 19 |
+| `dashboard_period_test.dart` *(Phase 4A)* | 6 |
+| `dashboard_summary_test.dart` *(Phase 4A)* | 6 |
+| `household_member_test.dart` | 19 |
+| `household_use_cases_test.dart` | 10 |
+| `initialize_household_use_case_test.dart` | 5 |
+| `child_withdrawal_audit_test.dart` | 15 |
+| `ledger_invariants_randomized_test.dart` | 7 |
+| `operation_test.dart` | 35 |
+| **Subtotal** | **370** |
+
+#### Widget tests — 59 declared tests across 5 files
+
+| File | Count |
+|------|------:|
+| `app_test.dart` | 14 |
+| `accounts_screen_test.dart` | 6 |
+| `dashboard_screen_test.dart` *(Phase 4A)* | 18 |
+| `foundation_detail_screen_test.dart` | 6 |
+| `smoke_screen_test.dart` | 15 |
+| **Subtotal** | **59** |
+
+**Grand total: 256 + 370 + 59 = 685 ✓**
+
+### Phase 4A additions since commit 004cbbe (+71 tests)
+
+| File | Tests added |
+|------|------------:|
+| `test/database/dashboard_balance_db_test.dart` (new) | +34 |
+| `test/database/dashboard_period_db_test.dart` (new) | +7 |
+| `test/unit/features/dashboard/dashboard_period_test.dart` (new) | +6 |
+| `test/unit/features/dashboard/dashboard_summary_test.dart` (new) | +6 |
+| `test/widget/features/dashboard/dashboard_screen_test.dart` (new) | +18 |
+| **Total added** | **+71** |
+
+No tests were removed or renamed. No parameterized loops inflate the count. 614 + 71 = **685 ✓**
+
+### Assertion quality inspection (manual)
+
+The "meaningful assertion" check was **manual**: each Phase 4A test file was read in full before running. No `expect(true, true)` stubs or empty `test('…', () {})` bodies exist. Every DB test inserts real data, calls real repository methods, and asserts financial outcomes (amounts, currency codes, inclusion/exclusion). Widget tests assert `find.text(...)`, `find.byIcon(...)`, and Semantics node presence.
+
+---
+
+## Date and Timezone Policy (exact)
+
+From `lib/core/financial/dashboard_period.dart`:
+
+```dart
+/// TIMEZONE POLICY (V1):
+/// All effective dates are stored as 'YYYY-MM-DD' strings without timezone offset.
+/// Period calculations use the device's local timezone for UI display, but persisted
+/// effectiveDate strings are compared lexicographically in SQL.
+/// Household-specific timezone selection is deferred.
+///
+/// BACKDATING POLICY:
+/// Period inclusion is determined by effectiveDate (user-chosen date),
+/// NOT by recordedAt (system UTC timestamp).
+```
+
+### Period boundaries (tested in `dashboard_period_test.dart`)
+
+| Period | startDate (inclusive) | endDate (exclusive) |
+|--------|----------------------|---------------------|
+| Current month (June 2025) | `2025-06-01` | `2025-07-01` |
+| Previous month — **January 2025** | `2024-12-01` | `2025-01-01` |
+| Current year (2025) | `2025-01-01` | `2026-01-01` |
+
+**January→December rollover** tested: `previousMonth` from January 2025 uses `DateTime(2025, 0, 1)` which Dart normalizes to `2024-12-01`. Confirmed by test 2 in `dashboard_period_test.dart`.
+
+**Inclusive start, exclusive end** confirmed: `contains('2025-03-01')` → true, `contains('2025-04-01')` → false (test 4).
+
+**Backdated operations** appear in their `effectiveDate` period regardless of `recordedAt` — confirmed by DB test 18 in `dashboard_balance_db_test.dart`.
 
 ---
 
