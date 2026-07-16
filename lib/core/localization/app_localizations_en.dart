@@ -271,4 +271,239 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorMoneyOverflow => 'Amount is too large.';
+
+  @override
+  String get navTransactions => 'Transactions';
+
+  @override
+  String get transactionsTitle => 'Transactions';
+
+  @override
+  String get transactionsEmpty => 'No transactions yet.';
+
+  @override
+  String get transactionsFilterAll => 'All';
+
+  @override
+  String get transactionTypeIncome => 'Income';
+
+  @override
+  String get transactionTypeExpense => 'Expense';
+
+  @override
+  String get transactionTypeTransfer => 'Transfer';
+
+  @override
+  String get transactionTypeOpeningBalance => 'Opening Balance';
+
+  @override
+  String get transactionTypeAdjustment => 'Adjustment';
+
+  @override
+  String get transactionTypeReversal => 'Reversal';
+
+  @override
+  String get transactionReversed => 'Reversed';
+
+  @override
+  String get createTransactionTitle => 'New Transaction';
+
+  @override
+  String get createIncomeTitle => 'Record Income';
+
+  @override
+  String get createExpenseTitle => 'Record Expense';
+
+  @override
+  String get createTransferTitle => 'Transfer Money';
+
+  @override
+  String get incomeFormTitle => 'Income Details';
+
+  @override
+  String get expenseFormTitle => 'Expense Details';
+
+  @override
+  String get transferFormTitle => 'Transfer Details';
+
+  @override
+  String get reviewTitle => 'Review & Confirm';
+
+  @override
+  String get fieldDestinationAccount => 'Destination Account';
+
+  @override
+  String get fieldSourceAccount => 'Source Account';
+
+  @override
+  String get fieldPaymentAccount => 'Payment Account';
+
+  @override
+  String get fieldAmount => 'Amount';
+
+  @override
+  String get fieldCategory => 'Category';
+
+  @override
+  String get fieldSpender => 'Spender';
+
+  @override
+  String get fieldBeneficiary => 'Beneficiary';
+
+  @override
+  String get fieldScope => 'Scope';
+
+  @override
+  String get fieldEffectiveDate => 'Date';
+
+  @override
+  String get fieldNote => 'Note (optional)';
+
+  @override
+  String get fieldRecurring => 'Recurring';
+
+  @override
+  String get recurringOneTime => 'One-time';
+
+  @override
+  String get recurringYes => 'Recurring (scheduling not yet active)';
+
+  @override
+  String get scopePersonal => 'Personal';
+
+  @override
+  String get scopeSpouse => 'Spouse';
+
+  @override
+  String get scopeHousehold => 'Household';
+
+  @override
+  String get scopeChild => 'Child';
+
+  @override
+  String get catGroceries => 'Groceries';
+
+  @override
+  String get catHousing => 'Housing';
+
+  @override
+  String get catUtilities => 'Utilities';
+
+  @override
+  String get catTransportation => 'Transportation';
+
+  @override
+  String get catHealth => 'Health';
+
+  @override
+  String get catEducation => 'Education';
+
+  @override
+  String get catChildExpenses => 'Child Expenses';
+
+  @override
+  String get catPersonalSpending => 'Personal Spending';
+
+  @override
+  String get catSpouseSpending => 'Spouse Spending';
+
+  @override
+  String get catGiftsAndDonations => 'Gifts & Donations';
+
+  @override
+  String get catOtherExpense => 'Other Expense';
+
+  @override
+  String get catSalary => 'Salary';
+
+  @override
+  String get catBusinessIncome => 'Business Income';
+
+  @override
+  String get catGiftReceived => 'Gift Received';
+
+  @override
+  String get catInterestIncome => 'Interest Income';
+
+  @override
+  String get catOtherIncome => 'Other Income';
+
+  @override
+  String get protectedWithdrawalWarning =>
+      'Warning: This is a protected fund. Withdrawals require justification.';
+
+  @override
+  String get fieldWithdrawalReason => 'Reason for withdrawal';
+
+  @override
+  String get fieldAcknowledgeWarning => 'I understand this is a protected fund';
+
+  @override
+  String get fieldConfirmWithdrawal => 'I confirm this withdrawal is necessary';
+
+  @override
+  String get errorCategoryRequired => 'Please select a category.';
+
+  @override
+  String get errorSpenderRequired => 'Please select a spender.';
+
+  @override
+  String get errorBeneficiaryRequired => 'Please select a beneficiary.';
+
+  @override
+  String get errorScopeRequired => 'Please select a scope.';
+
+  @override
+  String get errorInsufficientFunds =>
+      'Insufficient funds in the selected account.';
+
+  @override
+  String get errorSameAccount =>
+      'Source and destination must be different accounts.';
+
+  @override
+  String get errorCurrencyMismatch => 'Accounts must use the same currency.';
+
+  @override
+  String get errorAccountArchived =>
+      'This account is archived and cannot receive new transactions.';
+
+  @override
+  String get errorWithdrawalReasonRequired =>
+      'A non-empty reason is required for protected fund withdrawals.';
+
+  @override
+  String get errorWithdrawalAcknowledgmentRequired =>
+      'You must acknowledge the protected fund warning.';
+
+  @override
+  String get errorWithdrawalConfirmationRequired =>
+      'You must confirm the withdrawal.';
+
+  @override
+  String get spouseWalletSummaryTitle => 'Spouse Wallet Summary';
+
+  @override
+  String get spouseWalletFunded => 'Total Funded';
+
+  @override
+  String get spouseWalletSpent => 'Total Spent';
+
+  @override
+  String get spouseWalletReturned => 'Total Returned';
+
+  @override
+  String get spouseWalletDerivedBalance => 'Derived Balance';
+
+  @override
+  String get actionRecordIncome => 'Record Income';
+
+  @override
+  String get actionRecordExpense => 'Record Expense';
+
+  @override
+  String get actionTransfer => 'Transfer Money';
+
+  @override
+  String get transactionDetailTitle => 'Transaction Detail';
 }

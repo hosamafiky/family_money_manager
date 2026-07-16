@@ -5744,6 +5744,697 @@ class ChildWithdrawalAuditsCompanion
   }
 }
 
+class $OperationContextsTable extends OperationContexts
+    with TableInfo<$OperationContextsTable, DbOperationContext> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OperationContextsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _operationIdMeta = const VerificationMeta(
+    'operationId',
+  );
+  @override
+  late final GeneratedColumn<String> operationId = GeneratedColumn<String>(
+    'operation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _spenderMemberIdMeta = const VerificationMeta(
+    'spenderMemberId',
+  );
+  @override
+  late final GeneratedColumn<String> spenderMemberId = GeneratedColumn<String>(
+    'spender_member_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _beneficiaryMemberIdMeta =
+      const VerificationMeta('beneficiaryMemberId');
+  @override
+  late final GeneratedColumn<String> beneficiaryMemberId =
+      GeneratedColumn<String>(
+        'beneficiary_member_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _expenseScopeMeta = const VerificationMeta(
+    'expenseScope',
+  );
+  @override
+  late final GeneratedColumn<String> expenseScope = GeneratedColumn<String>(
+    'expense_scope',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isRecurringMeta = const VerificationMeta(
+    'isRecurring',
+  );
+  @override
+  late final GeneratedColumn<bool> isRecurring = GeneratedColumn<bool>(
+    'is_recurring',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_recurring" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _recurringNoteMeta = const VerificationMeta(
+    'recurringNote',
+  );
+  @override
+  late final GeneratedColumn<String> recurringNote = GeneratedColumn<String>(
+    'recurring_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryCodeMeta = const VerificationMeta(
+    'categoryCode',
+  );
+  @override
+  late final GeneratedColumn<String> categoryCode = GeneratedColumn<String>(
+    'category_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    operationId,
+    householdId,
+    spenderMemberId,
+    beneficiaryMemberId,
+    expenseScope,
+    isRecurring,
+    recurringNote,
+    categoryCode,
+    note,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'operation_contexts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbOperationContext> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('operation_id')) {
+      context.handle(
+        _operationIdMeta,
+        operationId.isAcceptableOrUnknown(
+          data['operation_id']!,
+          _operationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_operationIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('spender_member_id')) {
+      context.handle(
+        _spenderMemberIdMeta,
+        spenderMemberId.isAcceptableOrUnknown(
+          data['spender_member_id']!,
+          _spenderMemberIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('beneficiary_member_id')) {
+      context.handle(
+        _beneficiaryMemberIdMeta,
+        beneficiaryMemberId.isAcceptableOrUnknown(
+          data['beneficiary_member_id']!,
+          _beneficiaryMemberIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('expense_scope')) {
+      context.handle(
+        _expenseScopeMeta,
+        expenseScope.isAcceptableOrUnknown(
+          data['expense_scope']!,
+          _expenseScopeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_recurring')) {
+      context.handle(
+        _isRecurringMeta,
+        isRecurring.isAcceptableOrUnknown(
+          data['is_recurring']!,
+          _isRecurringMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recurring_note')) {
+      context.handle(
+        _recurringNoteMeta,
+        recurringNote.isAcceptableOrUnknown(
+          data['recurring_note']!,
+          _recurringNoteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('category_code')) {
+      context.handle(
+        _categoryCodeMeta,
+        categoryCode.isAcceptableOrUnknown(
+          data['category_code']!,
+          _categoryCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {operationId};
+  @override
+  DbOperationContext map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbOperationContext(
+      operationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}operation_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      spenderMemberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spender_member_id'],
+      ),
+      beneficiaryMemberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}beneficiary_member_id'],
+      ),
+      expenseScope: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}expense_scope'],
+      ),
+      isRecurring: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_recurring'],
+      )!,
+      recurringNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recurring_note'],
+      ),
+      categoryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_code'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OperationContextsTable createAlias(String alias) {
+    return $OperationContextsTable(attachedDatabase, alias);
+  }
+}
+
+class DbOperationContext extends DataClass
+    implements Insertable<DbOperationContext> {
+  /// The parent operation's ID. Primary key.
+  final String operationId;
+
+  /// The household this operation belongs to.
+  final String householdId;
+
+  /// Stable member UUID for the person who spent / initiated the transaction.
+  /// Not a role code — this never changes when members are renamed.
+  final String? spenderMemberId;
+
+  /// Stable member UUID for the person who benefits from the transaction.
+  final String? beneficiaryMemberId;
+
+  /// [ExpenseScope] code for expense and child-fund operations.
+  final String? expenseScope;
+
+  /// True when the user flagged this as a recurring transaction.
+  /// Automatic scheduling is deferred to a future phase.
+  final bool isRecurring;
+
+  /// Human-readable note about recurring intent, e.g. 'recurring_marker_not_scheduled'.
+  final String? recurringNote;
+
+  /// Stable category code, mirrors [operations.category_code] for query
+  /// convenience without a JOIN.
+  final String? categoryCode;
+
+  /// Optional free-text note from the user. Mirrors the [operations.description]
+  /// field for structured-query access.
+  final String? note;
+
+  /// UTC ISO 8601 creation timestamp.
+  final String createdAt;
+  const DbOperationContext({
+    required this.operationId,
+    required this.householdId,
+    this.spenderMemberId,
+    this.beneficiaryMemberId,
+    this.expenseScope,
+    required this.isRecurring,
+    this.recurringNote,
+    this.categoryCode,
+    this.note,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['operation_id'] = Variable<String>(operationId);
+    map['household_id'] = Variable<String>(householdId);
+    if (!nullToAbsent || spenderMemberId != null) {
+      map['spender_member_id'] = Variable<String>(spenderMemberId);
+    }
+    if (!nullToAbsent || beneficiaryMemberId != null) {
+      map['beneficiary_member_id'] = Variable<String>(beneficiaryMemberId);
+    }
+    if (!nullToAbsent || expenseScope != null) {
+      map['expense_scope'] = Variable<String>(expenseScope);
+    }
+    map['is_recurring'] = Variable<bool>(isRecurring);
+    if (!nullToAbsent || recurringNote != null) {
+      map['recurring_note'] = Variable<String>(recurringNote);
+    }
+    if (!nullToAbsent || categoryCode != null) {
+      map['category_code'] = Variable<String>(categoryCode);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  OperationContextsCompanion toCompanion(bool nullToAbsent) {
+    return OperationContextsCompanion(
+      operationId: Value(operationId),
+      householdId: Value(householdId),
+      spenderMemberId: spenderMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spenderMemberId),
+      beneficiaryMemberId: beneficiaryMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(beneficiaryMemberId),
+      expenseScope: expenseScope == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expenseScope),
+      isRecurring: Value(isRecurring),
+      recurringNote: recurringNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recurringNote),
+      categoryCode: categoryCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryCode),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DbOperationContext.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbOperationContext(
+      operationId: serializer.fromJson<String>(json['operationId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      spenderMemberId: serializer.fromJson<String?>(json['spenderMemberId']),
+      beneficiaryMemberId: serializer.fromJson<String?>(
+        json['beneficiaryMemberId'],
+      ),
+      expenseScope: serializer.fromJson<String?>(json['expenseScope']),
+      isRecurring: serializer.fromJson<bool>(json['isRecurring']),
+      recurringNote: serializer.fromJson<String?>(json['recurringNote']),
+      categoryCode: serializer.fromJson<String?>(json['categoryCode']),
+      note: serializer.fromJson<String?>(json['note']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'operationId': serializer.toJson<String>(operationId),
+      'householdId': serializer.toJson<String>(householdId),
+      'spenderMemberId': serializer.toJson<String?>(spenderMemberId),
+      'beneficiaryMemberId': serializer.toJson<String?>(beneficiaryMemberId),
+      'expenseScope': serializer.toJson<String?>(expenseScope),
+      'isRecurring': serializer.toJson<bool>(isRecurring),
+      'recurringNote': serializer.toJson<String?>(recurringNote),
+      'categoryCode': serializer.toJson<String?>(categoryCode),
+      'note': serializer.toJson<String?>(note),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  DbOperationContext copyWith({
+    String? operationId,
+    String? householdId,
+    Value<String?> spenderMemberId = const Value.absent(),
+    Value<String?> beneficiaryMemberId = const Value.absent(),
+    Value<String?> expenseScope = const Value.absent(),
+    bool? isRecurring,
+    Value<String?> recurringNote = const Value.absent(),
+    Value<String?> categoryCode = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? createdAt,
+  }) => DbOperationContext(
+    operationId: operationId ?? this.operationId,
+    householdId: householdId ?? this.householdId,
+    spenderMemberId: spenderMemberId.present
+        ? spenderMemberId.value
+        : this.spenderMemberId,
+    beneficiaryMemberId: beneficiaryMemberId.present
+        ? beneficiaryMemberId.value
+        : this.beneficiaryMemberId,
+    expenseScope: expenseScope.present ? expenseScope.value : this.expenseScope,
+    isRecurring: isRecurring ?? this.isRecurring,
+    recurringNote: recurringNote.present
+        ? recurringNote.value
+        : this.recurringNote,
+    categoryCode: categoryCode.present ? categoryCode.value : this.categoryCode,
+    note: note.present ? note.value : this.note,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DbOperationContext copyWithCompanion(OperationContextsCompanion data) {
+    return DbOperationContext(
+      operationId: data.operationId.present
+          ? data.operationId.value
+          : this.operationId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      spenderMemberId: data.spenderMemberId.present
+          ? data.spenderMemberId.value
+          : this.spenderMemberId,
+      beneficiaryMemberId: data.beneficiaryMemberId.present
+          ? data.beneficiaryMemberId.value
+          : this.beneficiaryMemberId,
+      expenseScope: data.expenseScope.present
+          ? data.expenseScope.value
+          : this.expenseScope,
+      isRecurring: data.isRecurring.present
+          ? data.isRecurring.value
+          : this.isRecurring,
+      recurringNote: data.recurringNote.present
+          ? data.recurringNote.value
+          : this.recurringNote,
+      categoryCode: data.categoryCode.present
+          ? data.categoryCode.value
+          : this.categoryCode,
+      note: data.note.present ? data.note.value : this.note,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbOperationContext(')
+          ..write('operationId: $operationId, ')
+          ..write('householdId: $householdId, ')
+          ..write('spenderMemberId: $spenderMemberId, ')
+          ..write('beneficiaryMemberId: $beneficiaryMemberId, ')
+          ..write('expenseScope: $expenseScope, ')
+          ..write('isRecurring: $isRecurring, ')
+          ..write('recurringNote: $recurringNote, ')
+          ..write('categoryCode: $categoryCode, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    operationId,
+    householdId,
+    spenderMemberId,
+    beneficiaryMemberId,
+    expenseScope,
+    isRecurring,
+    recurringNote,
+    categoryCode,
+    note,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbOperationContext &&
+          other.operationId == this.operationId &&
+          other.householdId == this.householdId &&
+          other.spenderMemberId == this.spenderMemberId &&
+          other.beneficiaryMemberId == this.beneficiaryMemberId &&
+          other.expenseScope == this.expenseScope &&
+          other.isRecurring == this.isRecurring &&
+          other.recurringNote == this.recurringNote &&
+          other.categoryCode == this.categoryCode &&
+          other.note == this.note &&
+          other.createdAt == this.createdAt);
+}
+
+class OperationContextsCompanion extends UpdateCompanion<DbOperationContext> {
+  final Value<String> operationId;
+  final Value<String> householdId;
+  final Value<String?> spenderMemberId;
+  final Value<String?> beneficiaryMemberId;
+  final Value<String?> expenseScope;
+  final Value<bool> isRecurring;
+  final Value<String?> recurringNote;
+  final Value<String?> categoryCode;
+  final Value<String?> note;
+  final Value<String> createdAt;
+  final Value<int> rowid;
+  const OperationContextsCompanion({
+    this.operationId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.spenderMemberId = const Value.absent(),
+    this.beneficiaryMemberId = const Value.absent(),
+    this.expenseScope = const Value.absent(),
+    this.isRecurring = const Value.absent(),
+    this.recurringNote = const Value.absent(),
+    this.categoryCode = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OperationContextsCompanion.insert({
+    required String operationId,
+    required String householdId,
+    this.spenderMemberId = const Value.absent(),
+    this.beneficiaryMemberId = const Value.absent(),
+    this.expenseScope = const Value.absent(),
+    this.isRecurring = const Value.absent(),
+    this.recurringNote = const Value.absent(),
+    this.categoryCode = const Value.absent(),
+    this.note = const Value.absent(),
+    required String createdAt,
+    this.rowid = const Value.absent(),
+  }) : operationId = Value(operationId),
+       householdId = Value(householdId),
+       createdAt = Value(createdAt);
+  static Insertable<DbOperationContext> custom({
+    Expression<String>? operationId,
+    Expression<String>? householdId,
+    Expression<String>? spenderMemberId,
+    Expression<String>? beneficiaryMemberId,
+    Expression<String>? expenseScope,
+    Expression<bool>? isRecurring,
+    Expression<String>? recurringNote,
+    Expression<String>? categoryCode,
+    Expression<String>? note,
+    Expression<String>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (operationId != null) 'operation_id': operationId,
+      if (householdId != null) 'household_id': householdId,
+      if (spenderMemberId != null) 'spender_member_id': spenderMemberId,
+      if (beneficiaryMemberId != null)
+        'beneficiary_member_id': beneficiaryMemberId,
+      if (expenseScope != null) 'expense_scope': expenseScope,
+      if (isRecurring != null) 'is_recurring': isRecurring,
+      if (recurringNote != null) 'recurring_note': recurringNote,
+      if (categoryCode != null) 'category_code': categoryCode,
+      if (note != null) 'note': note,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OperationContextsCompanion copyWith({
+    Value<String>? operationId,
+    Value<String>? householdId,
+    Value<String?>? spenderMemberId,
+    Value<String?>? beneficiaryMemberId,
+    Value<String?>? expenseScope,
+    Value<bool>? isRecurring,
+    Value<String?>? recurringNote,
+    Value<String?>? categoryCode,
+    Value<String?>? note,
+    Value<String>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return OperationContextsCompanion(
+      operationId: operationId ?? this.operationId,
+      householdId: householdId ?? this.householdId,
+      spenderMemberId: spenderMemberId ?? this.spenderMemberId,
+      beneficiaryMemberId: beneficiaryMemberId ?? this.beneficiaryMemberId,
+      expenseScope: expenseScope ?? this.expenseScope,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurringNote: recurringNote ?? this.recurringNote,
+      categoryCode: categoryCode ?? this.categoryCode,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (operationId.present) {
+      map['operation_id'] = Variable<String>(operationId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (spenderMemberId.present) {
+      map['spender_member_id'] = Variable<String>(spenderMemberId.value);
+    }
+    if (beneficiaryMemberId.present) {
+      map['beneficiary_member_id'] = Variable<String>(
+        beneficiaryMemberId.value,
+      );
+    }
+    if (expenseScope.present) {
+      map['expense_scope'] = Variable<String>(expenseScope.value);
+    }
+    if (isRecurring.present) {
+      map['is_recurring'] = Variable<bool>(isRecurring.value);
+    }
+    if (recurringNote.present) {
+      map['recurring_note'] = Variable<String>(recurringNote.value);
+    }
+    if (categoryCode.present) {
+      map['category_code'] = Variable<String>(categoryCode.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OperationContextsCompanion(')
+          ..write('operationId: $operationId, ')
+          ..write('householdId: $householdId, ')
+          ..write('spenderMemberId: $spenderMemberId, ')
+          ..write('beneficiaryMemberId: $beneficiaryMemberId, ')
+          ..write('expenseScope: $expenseScope, ')
+          ..write('isRecurring: $isRecurring, ')
+          ..write('recurringNote: $recurringNote, ')
+          ..write('categoryCode: $categoryCode, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5757,6 +6448,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OperationsTable operations = $OperationsTable(this);
   late final $ChildWithdrawalAuditsTable childWithdrawalAudits =
       $ChildWithdrawalAuditsTable(this);
+  late final $OperationContextsTable operationContexts =
+      $OperationContextsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5768,6 +6461,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ledgerEntries,
     operations,
     childWithdrawalAudits,
+    operationContexts,
   ];
 }
 
@@ -10414,6 +11108,330 @@ typedef $$ChildWithdrawalAuditsTableProcessedTableManager =
         bool accountId,
       })
     >;
+typedef $$OperationContextsTableCreateCompanionBuilder =
+    OperationContextsCompanion Function({
+      required String operationId,
+      required String householdId,
+      Value<String?> spenderMemberId,
+      Value<String?> beneficiaryMemberId,
+      Value<String?> expenseScope,
+      Value<bool> isRecurring,
+      Value<String?> recurringNote,
+      Value<String?> categoryCode,
+      Value<String?> note,
+      required String createdAt,
+      Value<int> rowid,
+    });
+typedef $$OperationContextsTableUpdateCompanionBuilder =
+    OperationContextsCompanion Function({
+      Value<String> operationId,
+      Value<String> householdId,
+      Value<String?> spenderMemberId,
+      Value<String?> beneficiaryMemberId,
+      Value<String?> expenseScope,
+      Value<bool> isRecurring,
+      Value<String?> recurringNote,
+      Value<String?> categoryCode,
+      Value<String?> note,
+      Value<String> createdAt,
+      Value<int> rowid,
+    });
+
+class $$OperationContextsTableFilterComposer
+    extends Composer<_$AppDatabase, $OperationContextsTable> {
+  $$OperationContextsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spenderMemberId => $composableBuilder(
+    column: $table.spenderMemberId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get beneficiaryMemberId => $composableBuilder(
+    column: $table.beneficiaryMemberId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get expenseScope => $composableBuilder(
+    column: $table.expenseScope,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRecurring => $composableBuilder(
+    column: $table.isRecurring,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recurringNote => $composableBuilder(
+    column: $table.recurringNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryCode => $composableBuilder(
+    column: $table.categoryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OperationContextsTableOrderingComposer
+    extends Composer<_$AppDatabase, $OperationContextsTable> {
+  $$OperationContextsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get spenderMemberId => $composableBuilder(
+    column: $table.spenderMemberId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get beneficiaryMemberId => $composableBuilder(
+    column: $table.beneficiaryMemberId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get expenseScope => $composableBuilder(
+    column: $table.expenseScope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRecurring => $composableBuilder(
+    column: $table.isRecurring,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recurringNote => $composableBuilder(
+    column: $table.recurringNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryCode => $composableBuilder(
+    column: $table.categoryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OperationContextsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OperationContextsTable> {
+  $$OperationContextsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get operationId => $composableBuilder(
+    column: $table.operationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get spenderMemberId => $composableBuilder(
+    column: $table.spenderMemberId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get beneficiaryMemberId => $composableBuilder(
+    column: $table.beneficiaryMemberId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get expenseScope => $composableBuilder(
+    column: $table.expenseScope,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isRecurring => $composableBuilder(
+    column: $table.isRecurring,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recurringNote => $composableBuilder(
+    column: $table.recurringNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryCode => $composableBuilder(
+    column: $table.categoryCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$OperationContextsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OperationContextsTable,
+          DbOperationContext,
+          $$OperationContextsTableFilterComposer,
+          $$OperationContextsTableOrderingComposer,
+          $$OperationContextsTableAnnotationComposer,
+          $$OperationContextsTableCreateCompanionBuilder,
+          $$OperationContextsTableUpdateCompanionBuilder,
+          (
+            DbOperationContext,
+            BaseReferences<
+              _$AppDatabase,
+              $OperationContextsTable,
+              DbOperationContext
+            >,
+          ),
+          DbOperationContext,
+          PrefetchHooks Function()
+        > {
+  $$OperationContextsTableTableManager(
+    _$AppDatabase db,
+    $OperationContextsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OperationContextsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OperationContextsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OperationContextsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> operationId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String?> spenderMemberId = const Value.absent(),
+                Value<String?> beneficiaryMemberId = const Value.absent(),
+                Value<String?> expenseScope = const Value.absent(),
+                Value<bool> isRecurring = const Value.absent(),
+                Value<String?> recurringNote = const Value.absent(),
+                Value<String?> categoryCode = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OperationContextsCompanion(
+                operationId: operationId,
+                householdId: householdId,
+                spenderMemberId: spenderMemberId,
+                beneficiaryMemberId: beneficiaryMemberId,
+                expenseScope: expenseScope,
+                isRecurring: isRecurring,
+                recurringNote: recurringNote,
+                categoryCode: categoryCode,
+                note: note,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String operationId,
+                required String householdId,
+                Value<String?> spenderMemberId = const Value.absent(),
+                Value<String?> beneficiaryMemberId = const Value.absent(),
+                Value<String?> expenseScope = const Value.absent(),
+                Value<bool> isRecurring = const Value.absent(),
+                Value<String?> recurringNote = const Value.absent(),
+                Value<String?> categoryCode = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => OperationContextsCompanion.insert(
+                operationId: operationId,
+                householdId: householdId,
+                spenderMemberId: spenderMemberId,
+                beneficiaryMemberId: beneficiaryMemberId,
+                expenseScope: expenseScope,
+                isRecurring: isRecurring,
+                recurringNote: recurringNote,
+                categoryCode: categoryCode,
+                note: note,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OperationContextsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OperationContextsTable,
+      DbOperationContext,
+      $$OperationContextsTableFilterComposer,
+      $$OperationContextsTableOrderingComposer,
+      $$OperationContextsTableAnnotationComposer,
+      $$OperationContextsTableCreateCompanionBuilder,
+      $$OperationContextsTableUpdateCompanionBuilder,
+      (
+        DbOperationContext,
+        BaseReferences<
+          _$AppDatabase,
+          $OperationContextsTable,
+          DbOperationContext
+        >,
+      ),
+      DbOperationContext,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10430,4 +11448,6 @@ class $AppDatabaseManager {
       $$OperationsTableTableManager(_db, _db.operations);
   $$ChildWithdrawalAuditsTableTableManager get childWithdrawalAudits =>
       $$ChildWithdrawalAuditsTableTableManager(_db, _db.childWithdrawalAudits);
+  $$OperationContextsTableTableManager get operationContexts =>
+      $$OperationContextsTableTableManager(_db, _db.operationContexts);
 }

@@ -128,11 +128,14 @@ final class RecordIncomeParams {
     required this.effectiveDate,
     required this.createdBy,
     required this.tags,
+    required this.isRecurring,
     this.idempotencyKey,
     this.categoryCode,
     this.description,
     this.scope,
     this.beneficiaryRole,
+    this.spenderMemberId,
+    this.beneficiaryMemberId,
   });
 
   factory RecordIncomeParams({
@@ -149,6 +152,9 @@ final class RecordIncomeParams {
     ExpenseScope? scope,
     HouseholdMemberRole? beneficiaryRole,
     List<String> tags = const [],
+    bool isRecurring = false,
+    String? spenderMemberId,
+    String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
       throw ArgumentError.value(
@@ -185,6 +191,9 @@ final class RecordIncomeParams {
       scope: scope,
       beneficiaryRole: beneficiaryRole,
       tags: tags,
+      isRecurring: isRecurring,
+      spenderMemberId: spenderMemberId,
+      beneficiaryMemberId: beneficiaryMemberId,
     );
   }
 
@@ -206,6 +215,15 @@ final class RecordIncomeParams {
   final HouseholdMemberRole? beneficiaryRole;
   final List<String> tags;
 
+  /// True when flagged as a recurring transaction (scheduling deferred).
+  final bool isRecurring;
+
+  /// Stable member UUID for the spender (not a role code).
+  final String? spenderMemberId;
+
+  /// Stable member UUID for the beneficiary (not a role code).
+  final String? beneficiaryMemberId;
+
   /// The resolved idempotency key. Falls back to [operationId].
   String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
@@ -222,12 +240,15 @@ final class RecordExpenseParams {
     required this.effectiveDate,
     required this.createdBy,
     required this.tags,
+    required this.isRecurring,
     this.idempotencyKey,
     this.categoryCode,
     this.description,
     this.scope,
     this.spenderRole,
     this.beneficiaryRole,
+    this.spenderMemberId,
+    this.beneficiaryMemberId,
   });
 
   factory RecordExpenseParams({
@@ -245,6 +266,9 @@ final class RecordExpenseParams {
     HouseholdMemberRole? spenderRole,
     HouseholdMemberRole? beneficiaryRole,
     List<String> tags = const [],
+    bool isRecurring = false,
+    String? spenderMemberId,
+    String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
       throw ArgumentError.value(
@@ -282,6 +306,9 @@ final class RecordExpenseParams {
       spenderRole: spenderRole,
       beneficiaryRole: beneficiaryRole,
       tags: tags,
+      isRecurring: isRecurring,
+      spenderMemberId: spenderMemberId,
+      beneficiaryMemberId: beneficiaryMemberId,
     );
   }
 
@@ -299,6 +326,15 @@ final class RecordExpenseParams {
   final HouseholdMemberRole? spenderRole;
   final HouseholdMemberRole? beneficiaryRole;
   final List<String> tags;
+
+  /// True when flagged as a recurring transaction (scheduling deferred).
+  final bool isRecurring;
+
+  /// Stable member UUID for the spender.
+  final String? spenderMemberId;
+
+  /// Stable member UUID for the beneficiary.
+  final String? beneficiaryMemberId;
 
   String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }
@@ -318,6 +354,8 @@ final class ExecuteTransferParams {
     required this.tags,
     this.idempotencyKey,
     this.description,
+    this.spenderMemberId,
+    this.beneficiaryMemberId,
   });
 
   factory ExecuteTransferParams({
@@ -332,6 +370,8 @@ final class ExecuteTransferParams {
     String? idempotencyKey,
     String? description,
     List<String> tags = const [],
+    String? spenderMemberId,
+    String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
       throw ArgumentError.value(
@@ -373,6 +413,8 @@ final class ExecuteTransferParams {
       idempotencyKey: idempotencyKey,
       description: description,
       tags: tags,
+      spenderMemberId: spenderMemberId,
+      beneficiaryMemberId: beneficiaryMemberId,
     );
   }
 
@@ -387,6 +429,12 @@ final class ExecuteTransferParams {
   final String? idempotencyKey;
   final String? description;
   final List<String> tags;
+
+  /// Stable member UUID for the initiator of the transfer.
+  final String? spenderMemberId;
+
+  /// Stable member UUID for the beneficiary of the transfer.
+  final String? beneficiaryMemberId;
 
   String get resolvedIdempotencyKey => idempotencyKey ?? operationId;
 }

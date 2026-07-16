@@ -38,9 +38,18 @@ final class InitializeHouseholdUseCase {
     }
 
     try {
-      // Idempotency: return existing household if already initialised.
+      // Idempotency: if the same household already exists with the same name,
+      // return it (safe retry). If names differ, reject with a duplicate conflict
+      // so callers know the household was already configured differently.
       final existing = await _repo.findHousehold(defaultHouseholdId);
-      if (existing != null) return AppOk(existing);
+      if (existing != null) {
+        if (existing.displayName == householdName.trim()) {
+          return AppOk(existing);
+        }
+        return const AppDuplicateConflict(
+          messageKey: 'error_household_already_initialized',
+        );
+      }
 
       final household = await _repo.createHousehold(
         id: defaultHouseholdId,

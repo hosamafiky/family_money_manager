@@ -115,6 +115,23 @@ final class DriftLedgerRepository implements LedgerRepository {
         ),
       );
 
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.operationId,
+          householdId: params.householdId,
+          spenderMemberId: Value(params.spenderMemberId),
+          beneficiaryMemberId: Value(params.beneficiaryMemberId),
+          expenseScope: Value(params.scope?.code),
+          isRecurring: Value(params.isRecurring),
+          recurringNote: params.isRecurring
+              ? const Value('recurring_marker_not_scheduled')
+              : const Value.absent(),
+          categoryCode: Value(params.categoryCode),
+          note: Value(params.description),
+          createdAt: now,
+        ),
+      );
+
       result = IdempotentOperationResult.created;
     });
 
@@ -205,6 +222,23 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.operationId,
+          householdId: params.householdId,
+          spenderMemberId: Value(params.spenderMemberId),
+          beneficiaryMemberId: Value(params.beneficiaryMemberId),
+          expenseScope: Value(params.scope?.code),
+          isRecurring: Value(params.isRecurring),
+          recurringNote: params.isRecurring
+              ? const Value('recurring_marker_not_scheduled')
+              : const Value.absent(),
+          categoryCode: Value(params.categoryCode),
+          note: Value(params.description),
+          createdAt: now,
+        ),
+      );
 
       result = IdempotentOperationResult.created;
     });
@@ -329,6 +363,19 @@ final class DriftLedgerRepository implements LedgerRepository {
         await _insertAudit(auditParams, now);
       }
 
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.operationId,
+          householdId: params.householdId,
+          spenderMemberId: Value(params.spenderMemberId),
+          beneficiaryMemberId: Value(params.beneficiaryMemberId),
+          expenseScope: const Value.absent(),
+          isRecurring: const Value(false),
+          note: Value(params.description),
+          createdAt: now,
+        ),
+      );
+
       result = IdempotentOperationResult.created;
     });
 
@@ -408,6 +455,15 @@ final class DriftLedgerRepository implements LedgerRepository {
           ),
         );
       }
+
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.operationId,
+          householdId: params.householdId,
+          note: Value(params.description),
+          createdAt: now,
+        ),
+      );
 
       result = IdempotentOperationResult.created;
     });
@@ -495,6 +551,15 @@ final class DriftLedgerRepository implements LedgerRepository {
         await _insertAudit(auditParams, now);
       }
 
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.operationId,
+          householdId: params.householdId,
+          note: Value(params.reason),
+          createdAt: now,
+        ),
+      );
+
       result = IdempotentOperationResult.created;
     });
 
@@ -541,12 +606,11 @@ final class DriftLedgerRepository implements LedgerRepository {
 
     // A reversal of an original CREDIT → a new DEBIT on that account.
     // If the account is protected, an audit record is required.
+    // REVERSAL EXCEPTION: Reversals are permitted on archived accounts
+    // (append-only correction principle). Use _loadAccount (no archived check).
     for (final entry in originalEntries) {
       if (entry.direction == LedgerDirection.credit.code) {
-        final account = await _requireAccount(
-          entry.accountId,
-          params.householdId,
-        );
+        final account = await _loadAccount(entry.accountId, params.householdId);
         if (account.requiresWithdrawalAudit) {
           if (auditParams == null) {
             throw MissingProtectedWithdrawalAuditError(entry.accountId);
@@ -657,6 +721,18 @@ final class DriftLedgerRepository implements LedgerRepository {
       if (auditParams != null) {
         await _insertAudit(auditParams, now);
       }
+
+      await _insertContext(
+        OperationContextsCompanion.insert(
+          operationId: params.reversalOperationId,
+          householdId: params.householdId,
+          note: Value(
+            params.reason ??
+                'Reversal of operation ${params.originalOperationId}',
+          ),
+          createdAt: now,
+        ),
+      );
 
       result = IdempotentOperationResult.created;
     });
@@ -785,6 +861,27 @@ final class DriftLedgerRepository implements LedgerRepository {
     return _rowToAccount(row);
   }
 
+  /// Loads an account without checking whether it is archived.
+  ///
+  /// Used for reversal operations only — reversals may correct entries on
+  /// archived accounts (append-only correction principle).
+  Future<FinancialAccount> _loadAccount(
+    String accountId,
+    String householdId,
+  ) async {
+    final row =
+        await (_db.select(_db.financialAccounts)..where(
+              (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
+    if (row == null) {
+      throw ArgumentError(
+        'Account $accountId not found in household $householdId',
+      );
+    }
+    return _rowToAccount(row);
+  }
+
   Future<bool> _hasOpeningBalance(String accountId, String householdId) async {
     final rows =
         await (_db.select(_db.ledgerEntries)..where(
@@ -871,6 +968,10 @@ final class DriftLedgerRepository implements LedgerRepository {
 
   Future<void> _insertEntry(LedgerEntriesCompanion companion) async {
     await _db.into(_db.ledgerEntries).insert(companion);
+  }
+
+  Future<void> _insertContext(OperationContextsCompanion companion) async {
+    await _db.into(_db.operationContexts).insert(companion);
   }
 
   Future<void> _insertAudit(

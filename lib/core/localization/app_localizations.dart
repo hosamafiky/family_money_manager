@@ -595,6 +595,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount is too large.'**
   String get errorMoneyOverflow;
+
+  /// Bottom navigation label for transactions tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get navTransactions;
+
+  /// Title for the transactions screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsTitle;
+
+  /// Empty-state message on the transactions screen.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet.'**
+  String get transactionsEmpty;
+
+  /// Filter option to show all transaction types.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get transactionsFilterAll;
+
+  /// Label for income operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transactionTypeIncome;
+
+  /// Label for expense operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transactionTypeExpense;
+
+  /// Label for transfer operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transactionTypeTransfer;
+
+  /// Label for opening balance operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Balance'**
+  String get transactionTypeOpeningBalance;
+
+  /// Label for adjustment operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get transactionTypeAdjustment;
+
+  /// Label for reversal operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal'**
+  String get transactionTypeReversal;
+
+  /// Badge shown on reversed transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversed'**
+  String get transactionReversed;
+
+  /// Title for the create transaction screen.
+  ///
+  /// In en, this message translates to:
+  /// **'New Transaction'**
+  String get createTransactionTitle;
+
+  /// Action to record income.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Income'**
+  String get createIncomeTitle;
+
+  /// Action to record expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Expense'**
+  String get createExpenseTitle;
+
+  /// Action to transfer money.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Money'**
+  String get createTransferTitle;
+
+  /// Title for the income form screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Income Details'**
+  String get incomeFormTitle;
+
+  /// Title for the expense form screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Details'**
+  String get expenseFormTitle;
+
+  /// Title for the transfer form screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Details'**
+  String get transferFormTitle;
+
+  /// Title for review screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Confirm'**
+  String get reviewTitle;
+
+  /// Label for destination account field.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination Account'**
+  String get fieldDestinationAccount;
+
+  /// Label for source account field.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Account'**
+  String get fieldSourceAccount;
+
+  /// Label for payment account field.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Account'**
+  String get fieldPaymentAccount;
+
+  /// Label for amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get fieldAmount;
+
+  /// Label for category field.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get fieldCategory;
+
+  /// Label for spender field.
+  ///
+  /// In en, this message translates to:
+  /// **'Spender'**
+  String get fieldSpender;
+
+  /// Label for beneficiary field.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary'**
+  String get fieldBeneficiary;
+
+  /// Label for expense scope field.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get fieldScope;
+
+  /// Label for effective date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get fieldEffectiveDate;
+
+  /// Label for optional note field.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get fieldNote;
+
+  /// Label for recurring toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get fieldRecurring;
+
+  /// Label for one-time (non-recurring) option.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get recurringOneTime;
+
+  /// Label for recurring option with disclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring (scheduling not yet active)'**
+  String get recurringYes;
+
+  /// Expense scope: personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get scopePersonal;
+
+  /// Expense scope: spouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse'**
+  String get scopeSpouse;
+
+  /// Expense scope: household.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get scopeHousehold;
+
+  /// Expense scope: child.
+  ///
+  /// In en, this message translates to:
+  /// **'Child'**
+  String get scopeChild;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries'**
+  String get catGroceries;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get catHousing;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get catUtilities;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Transportation'**
+  String get catTransportation;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get catHealth;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get catEducation;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Expenses'**
+  String get catChildExpenses;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Spending'**
+  String get catPersonalSpending;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Spending'**
+  String get catSpouseSpending;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Gifts & Donations'**
+  String get catGiftsAndDonations;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Expense'**
+  String get catOtherExpense;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get catSalary;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Income'**
+  String get catBusinessIncome;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift Received'**
+  String get catGiftReceived;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest Income'**
+  String get catInterestIncome;
+
+  /// Category label.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Income'**
+  String get catOtherIncome;
+
+  /// Warning for protected-fund withdrawals.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: This is a protected fund. Withdrawals require justification.'**
+  String get protectedWithdrawalWarning;
+
+  /// Label for withdrawal reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for withdrawal'**
+  String get fieldWithdrawalReason;
+
+  /// Acknowledgement checkbox label.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand this is a protected fund'**
+  String get fieldAcknowledgeWarning;
+
+  /// Confirmation checkbox label.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm this withdrawal is necessary'**
+  String get fieldConfirmWithdrawal;
+
+  /// Validation error for missing category.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category.'**
+  String get errorCategoryRequired;
+
+  /// Validation error for missing spender.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a spender.'**
+  String get errorSpenderRequired;
+
+  /// Validation error for missing beneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a beneficiary.'**
+  String get errorBeneficiaryRequired;
+
+  /// Validation error for missing scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a scope.'**
+  String get errorScopeRequired;
+
+  /// Error when account has insufficient funds.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient funds in the selected account.'**
+  String get errorInsufficientFunds;
+
+  /// Error when source and destination are the same.
+  ///
+  /// In en, this message translates to:
+  /// **'Source and destination must be different accounts.'**
+  String get errorSameAccount;
+
+  /// Error when accounts have different currencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts must use the same currency.'**
+  String get errorCurrencyMismatch;
+
+  /// Error when account is archived.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is archived and cannot receive new transactions.'**
+  String get errorAccountArchived;
+
+  /// Error when withdrawal reason is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'A non-empty reason is required for protected fund withdrawals.'**
+  String get errorWithdrawalReasonRequired;
+
+  /// Error when warning not acknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'You must acknowledge the protected fund warning.'**
+  String get errorWithdrawalAcknowledgmentRequired;
+
+  /// Error when withdrawal not confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You must confirm the withdrawal.'**
+  String get errorWithdrawalConfirmationRequired;
+
+  /// Title for spouse wallet summary section.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Wallet Summary'**
+  String get spouseWalletSummaryTitle;
+
+  /// Label for total funded amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Funded'**
+  String get spouseWalletFunded;
+
+  /// Label for total spent amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spent'**
+  String get spouseWalletSpent;
+
+  /// Label for total returned amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Returned'**
+  String get spouseWalletReturned;
+
+  /// Label for derived balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Derived Balance'**
+  String get spouseWalletDerivedBalance;
+
+  /// Action button to record income.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Income'**
+  String get actionRecordIncome;
+
+  /// Action button to record expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Expense'**
+  String get actionRecordExpense;
+
+  /// Action button to transfer money.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Money'**
+  String get actionTransfer;
+
+  /// Title for the transaction detail screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Detail'**
+  String get transactionDetailTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -266,4 +266,235 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorMoneyOverflow => 'المبلغ كبير جداً.';
+
+  @override
+  String get navTransactions => 'المعاملات';
+
+  @override
+  String get transactionsTitle => 'المعاملات';
+
+  @override
+  String get transactionsEmpty => 'لا توجد معاملات بعد.';
+
+  @override
+  String get transactionsFilterAll => 'الكل';
+
+  @override
+  String get transactionTypeIncome => 'دخل';
+
+  @override
+  String get transactionTypeExpense => 'مصروف';
+
+  @override
+  String get transactionTypeTransfer => 'تحويل';
+
+  @override
+  String get transactionTypeOpeningBalance => 'رصيد افتتاحي';
+
+  @override
+  String get transactionTypeAdjustment => 'تسوية';
+
+  @override
+  String get transactionTypeReversal => 'عكس عملية';
+
+  @override
+  String get transactionReversed => 'معكوسة';
+
+  @override
+  String get createTransactionTitle => 'معاملة جديدة';
+
+  @override
+  String get createIncomeTitle => 'سجّل دخلاً';
+
+  @override
+  String get createExpenseTitle => 'سجّل مصروفاً';
+
+  @override
+  String get createTransferTitle => 'حوّل أموالاً';
+
+  @override
+  String get incomeFormTitle => 'تفاصيل الدخل';
+
+  @override
+  String get expenseFormTitle => 'تفاصيل المصروف';
+
+  @override
+  String get transferFormTitle => 'تفاصيل التحويل';
+
+  @override
+  String get reviewTitle => 'مراجعة وتأكيد';
+
+  @override
+  String get fieldDestinationAccount => 'الحساب المستقبل';
+
+  @override
+  String get fieldSourceAccount => 'حساب المصدر';
+
+  @override
+  String get fieldPaymentAccount => 'حساب الدفع';
+
+  @override
+  String get fieldAmount => 'المبلغ';
+
+  @override
+  String get fieldCategory => 'الفئة';
+
+  @override
+  String get fieldSpender => 'المنفق';
+
+  @override
+  String get fieldBeneficiary => 'المستفيد';
+
+  @override
+  String get fieldScope => 'النطاق';
+
+  @override
+  String get fieldEffectiveDate => 'التاريخ';
+
+  @override
+  String get fieldNote => 'ملاحظة (اختياري)';
+
+  @override
+  String get fieldRecurring => 'متكرر';
+
+  @override
+  String get recurringOneTime => 'مرة واحدة';
+
+  @override
+  String get recurringYes => 'متكرر (الجدولة غير مفعّلة بعد)';
+
+  @override
+  String get scopePersonal => 'شخصي';
+
+  @override
+  String get scopeSpouse => 'زوج/ة';
+
+  @override
+  String get scopeHousehold => 'المنزل';
+
+  @override
+  String get scopeChild => 'طفل';
+
+  @override
+  String get catGroceries => 'بقالة';
+
+  @override
+  String get catHousing => 'سكن';
+
+  @override
+  String get catUtilities => 'خدمات منزلية';
+
+  @override
+  String get catTransportation => 'مواصلات';
+
+  @override
+  String get catHealth => 'صحة';
+
+  @override
+  String get catEducation => 'تعليم';
+
+  @override
+  String get catChildExpenses => 'مصاريف الأطفال';
+
+  @override
+  String get catPersonalSpending => 'إنفاق شخصي';
+
+  @override
+  String get catSpouseSpending => 'إنفاق الزوج/ة';
+
+  @override
+  String get catGiftsAndDonations => 'هدايا وتبرعات';
+
+  @override
+  String get catOtherExpense => 'مصروف آخر';
+
+  @override
+  String get catSalary => 'راتب';
+
+  @override
+  String get catBusinessIncome => 'دخل أعمال';
+
+  @override
+  String get catGiftReceived => 'هدية مستلمة';
+
+  @override
+  String get catInterestIncome => 'دخل فوائد';
+
+  @override
+  String get catOtherIncome => 'دخل آخر';
+
+  @override
+  String get protectedWithdrawalWarning =>
+      'تحذير: هذا صندوق محمي. السحب يتطلب مسوّغاً.';
+
+  @override
+  String get fieldWithdrawalReason => 'سبب السحب';
+
+  @override
+  String get fieldAcknowledgeWarning => 'أفهم أن هذا صندوق محمي';
+
+  @override
+  String get fieldConfirmWithdrawal => 'أؤكد أن هذا السحب ضروري';
+
+  @override
+  String get errorCategoryRequired => 'يرجى اختيار الفئة.';
+
+  @override
+  String get errorSpenderRequired => 'يرجى اختيار المنفق.';
+
+  @override
+  String get errorBeneficiaryRequired => 'يرجى اختيار المستفيد.';
+
+  @override
+  String get errorScopeRequired => 'يرجى اختيار النطاق.';
+
+  @override
+  String get errorInsufficientFunds => 'رصيد الحساب غير كافٍ.';
+
+  @override
+  String get errorSameAccount => 'يجب أن يكون الحساب المصدر والمستقبل مختلفين.';
+
+  @override
+  String get errorCurrencyMismatch => 'يجب أن يستخدم الحسابان نفس العملة.';
+
+  @override
+  String get errorAccountArchived => 'هذا الحساب مؤرشف ولا يقبل معاملات جديدة.';
+
+  @override
+  String get errorWithdrawalReasonRequired =>
+      'يُشترط ذكر سبب غير فارغ لسحب الصندوق المحمي.';
+
+  @override
+  String get errorWithdrawalAcknowledgmentRequired =>
+      'يجب تأكيد الإشعار الخاص بالصندوق المحمي.';
+
+  @override
+  String get errorWithdrawalConfirmationRequired => 'يجب تأكيد عملية السحب.';
+
+  @override
+  String get spouseWalletSummaryTitle => 'ملخص محفظة الزوج/ة';
+
+  @override
+  String get spouseWalletFunded => 'إجمالي المُحوَّل';
+
+  @override
+  String get spouseWalletSpent => 'إجمالي المُنفَق';
+
+  @override
+  String get spouseWalletReturned => 'إجمالي المُعاد';
+
+  @override
+  String get spouseWalletDerivedBalance => 'الرصيد المحتسب';
+
+  @override
+  String get actionRecordIncome => 'سجّل دخلاً';
+
+  @override
+  String get actionRecordExpense => 'سجّل مصروفاً';
+
+  @override
+  String get actionTransfer => 'حوّل أموالاً';
+
+  @override
+  String get transactionDetailTitle => 'تفاصيل المعاملة';
 }

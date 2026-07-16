@@ -155,3 +155,23 @@ enum OperationType {
         this == OperationType.openingBalance;
   }
 }
+
+/// Whether a transaction is intended to recur or is a one-time event.
+///
+/// Scheduling is deferred to a future phase.
+/// [recurring] means the user flagged this as a recurring transaction
+/// but no automatic generation occurs yet.
+enum RecurringStatus {
+  oneTime('one_time'),
+  recurring('recurring');
+
+  const RecurringStatus(this.code);
+
+  final String code;
+
+  static RecurringStatus fromCode(String c) => values.firstWhere(
+    (v) => v.code == c,
+    orElse: () =>
+        throw ArgumentError.value(c, 'code', 'Unknown RecurringStatus'),
+  );
+}

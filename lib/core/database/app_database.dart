@@ -7,6 +7,7 @@ import 'package:family_money_manager/core/database/tables/financial_accounts_tab
 import 'package:family_money_manager/core/database/tables/household_members_table.dart';
 import 'package:family_money_manager/core/database/tables/households_table.dart';
 import 'package:family_money_manager/core/database/tables/ledger_entries_table.dart';
+import 'package:family_money_manager/core/database/tables/operation_contexts_table.dart';
 import 'package:family_money_manager/core/database/tables/operations_table.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -41,6 +42,8 @@ part 'app_database.g.dart';
 ///                   household cardinality triggers (one primary_user, one spouse);
 ///                   immutable account type/currency trigger;
 ///                   scoped account idempotency index.
+///   5 — Phase 3B: operation_contexts table (append-only rich metadata);
+///                 FK + immutability triggers for operation_contexts.
 @DriftDatabase(
   tables: [
     Households,
@@ -49,6 +52,7 @@ part 'app_database.g.dart';
     LedgerEntries,
     Operations,
     ChildWithdrawalAudits,
+    OperationContexts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -64,7 +68,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +80,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyForeignKeyEnforcementTriggers();
       await _applyHouseholdConstraintTriggers();
       await _applyAccountMetadataImmutabilityTrigger();
+      await _applyOperationContextTriggers();
       await _applyIndexes();
     },
     onUpgrade: (Migrator m, int from, int to) async {
@@ -102,6 +107,11 @@ class AppDatabase extends _$AppDatabase {
         await _applyHouseholdConstraintTriggers();
         await _applyAccountMetadataImmutabilityTrigger();
         await _applyAccountIdempotencyIndex();
+      }
+      if (from <= 4) {
+        // v4 → v5: operation_contexts table for rich transaction metadata.
+        await m.createTable(operationContexts);
+        await _applyOperationContextTriggers();
       }
     },
     beforeOpen: (details) async {
@@ -397,6 +407,40 @@ class AppDatabase extends _$AppDatabase {
       'WHEN OLD.type != NEW.type OR OLD.currency_code != NEW.currency_code '
       'BEGIN '
       "  SELECT RAISE(ABORT, 'Account type and currency are immutable after creation'); "
+      'END',
+    );
+  }
+
+  // ── Operation-context triggers (Phase 3B) ─────────────────────────────────
+  //
+  // 1. FK enforcement: operation_id must reference an existing operations row.
+  // 2. Append-only: no update or delete permitted once written.
+
+  Future<void> _applyOperationContextTriggers() async {
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS fk_operation_context_operation_id '
+      'BEFORE INSERT ON operation_contexts '
+      'WHEN NOT EXISTS ( '
+      '  SELECT 1 FROM operations WHERE id = NEW.operation_id '
+      ') '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'operation_contexts.operation_id must reference an existing operations.id'); "
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS no_update_operation_contexts '
+      'BEFORE UPDATE ON operation_contexts '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Operation contexts are immutable and cannot be updated'); "
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS no_delete_operation_contexts '
+      'BEFORE DELETE ON operation_contexts '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Operation contexts cannot be deleted'); "
       'END',
     );
   }

@@ -86,6 +86,7 @@ void main() {
         'immutability:$field',
       AppPersistenceFailure() => 'persistence',
       AppUnexpectedFailure() => 'unexpected',
+      AppInsufficientFunds() => 'insufficient_funds',
     };
 
     test('AppOk matches correctly', () {

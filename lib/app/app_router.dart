@@ -5,20 +5,35 @@ import 'package:family_money_manager/features/accounts/presentation/accounts_scr
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
 import 'package:family_money_manager/features/settings/settings_screen.dart';
 import 'package:family_money_manager/features/shell/app_shell.dart';
+import 'package:family_money_manager/features/transactions/presentation/create_transaction_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/expense_form_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/expense_review_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/income_form_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/income_review_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/transaction_detail_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/transactions_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/transfer_form_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/transfer_review_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
 ///
-/// Phase 3A routes:
+/// Phase 3B routes:
 ///   /accounts              — AccountsScreen (tab 0)
 ///   /accounts/new          — AccountCreationScreen (push)
 ///   /accounts/:accountId   — AccountDetailScreen (push)
-///   /members               — HouseholdMembersScreen (tab 1)
-///   /settings              — SettingsScreen (tab 2)
-///
-/// The old smoke/foundation routes remain accessible via typed route objects
-/// for backwards compatibility with existing widget tests.
+///   /transactions          — TransactionsScreen (tab 1)
+///   /transactions/new      — CreateTransactionScreen (push)
+///   /transactions/new/income          — IncomeFormScreen
+///   /transactions/new/income/review   — IncomeReviewScreen
+///   /transactions/new/expense         — ExpenseFormScreen
+///   /transactions/new/expense/review  — ExpenseReviewScreen
+///   /transactions/new/transfer        — TransferFormScreen
+///   /transactions/new/transfer/review — TransferReviewScreen
+///   /transactions/:operationId        — TransactionDetailScreen
+///   /members               — HouseholdMembersScreen (tab 2)
+///   /settings              — SettingsScreen (tab 3)
 abstract final class AppRouter {
   static GoRouter create() {
     return GoRouter(
@@ -26,7 +41,7 @@ abstract final class AppRouter {
       debugLogDiagnostics: false,
       errorBuilder: (context, state) => AppErrorScreen(error: state.error),
       routes: [
-        // ── Phase 3A shell with bottom navigation ─────────────────────────
+        // ── Phase 3B shell with bottom navigation ─────────────────────────
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
               AppShell(navigationShell: navigationShell),
@@ -53,7 +68,71 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 1: Family members
+            // Tab 1: Transactions
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/transactions',
+                  builder: (context, state) => const TransactionsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: ':operationId',
+                      builder: (context, state) => TransactionDetailScreen(
+                        operationId: state.pathParameters['operationId']!,
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) => CreateTransactionScreen(
+                        preselectedAccountId: state.extra as String?,
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: 'income',
+                          builder: (context, state) => IncomeFormScreen(
+                            preselectedAccountId: state.extra as String?,
+                          ),
+                          routes: [
+                            GoRoute(
+                              path: 'review',
+                              builder: (context, state) =>
+                                  const IncomeReviewScreen(),
+                            ),
+                          ],
+                        ),
+                        GoRoute(
+                          path: 'expense',
+                          builder: (context, state) => ExpenseFormScreen(
+                            preselectedAccountId: state.extra as String?,
+                          ),
+                          routes: [
+                            GoRoute(
+                              path: 'review',
+                              builder: (context, state) =>
+                                  const ExpenseReviewScreen(),
+                            ),
+                          ],
+                        ),
+                        GoRoute(
+                          path: 'transfer',
+                          builder: (context, state) => TransferFormScreen(
+                            preselectedAccountId: state.extra as String?,
+                          ),
+                          routes: [
+                            GoRoute(
+                              path: 'review',
+                              builder: (context, state) =>
+                                  const TransferReviewScreen(),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            // Tab 2: Family members
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -62,7 +141,7 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 2: Settings
+            // Tab 3: Settings
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -82,9 +161,6 @@ abstract final class AppRouter {
 }
 
 /// Minimal error screen shown when no route matches.
-///
-/// Exposed as a public class so it can be widget-tested directly without
-/// requiring a live router instance.
 class AppErrorScreen extends StatelessWidget {
   const AppErrorScreen({this.error, super.key});
   final Exception? error;

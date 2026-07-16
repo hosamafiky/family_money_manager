@@ -42,3 +42,9 @@ final class AppPersistenceFailure<T> extends AppResult<T> {
 final class AppUnexpectedFailure<T> extends AppResult<T> {
   const AppUnexpectedFailure();
 }
+
+/// The requested operation cannot be completed because a source account
+/// has insufficient funds (INV-005).
+final class AppInsufficientFunds<T> extends AppResult<T> {
+  const AppInsufficientFunds();
+}

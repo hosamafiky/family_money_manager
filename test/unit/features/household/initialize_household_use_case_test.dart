@@ -62,27 +62,44 @@ void main() {
     });
 
     test(
-      'second call with same ID → AppOk with existing household (idempotent)',
+      'second call with same name → AppOk with existing household (idempotent)',
       () async {
         final r1 = await useCase.execute(
-          householdName: 'First Name',
+          householdName: 'Same Name',
           primaryMemberName: 'First Person',
           currencyCode: 'EGP',
         );
         expect(r1, isA<AppOk<HouseholdIdentity>>());
 
         final r2 = await useCase.execute(
-          householdName: 'Second Name',
+          householdName: 'Same Name',
           primaryMemberName: 'Second Person',
           currencyCode: 'USD',
         );
         expect(r2, isA<AppOk<HouseholdIdentity>>());
 
-        // Returns the ORIGINAL household, not the new name.
         final original = (r1 as AppOk<HouseholdIdentity>).value;
         final returned = (r2 as AppOk<HouseholdIdentity>).value;
         expect(returned.id, original.id);
         expect(returned.displayName, original.displayName);
+      },
+    );
+
+    test(
+      'second call with different name → AppDuplicateConflict (Phase 3B)',
+      () async {
+        await useCase.execute(
+          householdName: 'Original Name',
+          primaryMemberName: 'Owner',
+          currencyCode: 'EGP',
+        );
+
+        final r2 = await useCase.execute(
+          householdName: 'Different Name',
+          primaryMemberName: 'Owner',
+          currencyCode: 'EGP',
+        );
+        expect(r2, isA<AppDuplicateConflict<HouseholdIdentity>>());
       },
     );
   });

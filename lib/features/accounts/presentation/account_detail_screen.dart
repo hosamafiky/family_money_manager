@@ -154,7 +154,43 @@ class AccountDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Actions
+              // Transaction actions (only for active accounts)
+              if (!account.isArchived) ...[
+                FilledButton.icon(
+                  onPressed: () => context.push(
+                    '/transactions/new/income',
+                    extra: accountId,
+                  ),
+                  icon: const Icon(Icons.arrow_downward),
+                  label: Text(l10n.actionRecordIncome),
+                ),
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => context.push(
+                    '/transactions/new/expense',
+                    extra: accountId,
+                  ),
+                  icon: const Icon(Icons.arrow_upward),
+                  label: Text(l10n.actionRecordExpense),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => context.push(
+                    '/transactions/new/transfer',
+                    extra: accountId,
+                  ),
+                  icon: const Icon(Icons.swap_horiz),
+                  label: Text(l10n.actionTransfer),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              // Archive action
               if (!account.isArchived)
                 OutlinedButton.icon(
                   onPressed: () => _confirmArchive(context, ref, l10n),
