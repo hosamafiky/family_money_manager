@@ -506,4 +506,112 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionDetailTitle => 'Transaction Detail';
+
+  @override
+  String get navDashboard => 'Dashboard';
+
+  @override
+  String get dashboardTitle => 'Dashboard';
+
+  @override
+  String get dashboardSpendableBalances => 'Spendable Balances';
+
+  @override
+  String get dashboardProtectedBalances => 'Protected Balances';
+
+  @override
+  String get dashboardNoSpendable => 'No spendable accounts yet.';
+
+  @override
+  String get dashboardNoProtected => 'No protected accounts.';
+
+  @override
+  String get dashboardPeriodIncome => 'Income';
+
+  @override
+  String get dashboardPeriodExpenses => 'Expenses';
+
+  @override
+  String get dashboardPeriodNet => 'Net';
+
+  @override
+  String get dashboardPeriodNoActivity =>
+      'No income or expense activity in this period.';
+
+  @override
+  String get dashboardScopePersonal => 'Personal Spending';
+
+  @override
+  String get dashboardScopeSpouse => 'Spouse Spending';
+
+  @override
+  String get dashboardScopeHousehold => 'Household Spending';
+
+  @override
+  String get dashboardScopeChild => 'Child Spending';
+
+  @override
+  String get dashboardScopeNoActivity =>
+      'No expense scope data for this period.';
+
+  @override
+  String get dashboardSpouseWallet => 'Spouse Wallet';
+
+  @override
+  String get dashboardSpouseWalletFunded => 'Funded';
+
+  @override
+  String get dashboardSpouseWalletSpent => 'Spent';
+
+  @override
+  String get dashboardSpouseWalletReturned => 'Returned';
+
+  @override
+  String get dashboardSpouseWalletBalance => 'Current Balance';
+
+  @override
+  String get dashboardNoSpouseWallet => 'No spouse wallet found.';
+
+  @override
+  String get dashboardRecentActivity => 'Recent Activity';
+
+  @override
+  String get dashboardNoRecentActivity => 'No recent transactions.';
+
+  @override
+  String get dashboardViewAll => 'View all';
+
+  @override
+  String get dashboardPeriodCurrentMonth => 'This Month';
+
+  @override
+  String get dashboardPeriodPreviousMonth => 'Last Month';
+
+  @override
+  String get dashboardPeriodCurrentYear => 'This Year';
+
+  @override
+  String get dashboardPeriodCustom => 'Custom';
+
+  @override
+  String get dashboardNegativeBalanceWarning =>
+      'Negative balance — data integrity issue';
+
+  @override
+  String get dashboardChildProtected => 'Child (Protected)';
+
+  @override
+  String get dashboardRefresh => 'Refresh';
+
+  @override
+  String get dashboardLoading => 'Loading dashboard...';
+
+  @override
+  String get dashboardError => 'Unable to load financial summary.';
+
+  @override
+  String get dashboardRetry => 'Retry';
+
+  @override
+  String get dashboardPeriodLabel => 'Period';
 }

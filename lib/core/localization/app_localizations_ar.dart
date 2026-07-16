@@ -497,4 +497,112 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionDetailTitle => 'تفاصيل المعاملة';
+
+  @override
+  String get navDashboard => 'الرئيسية';
+
+  @override
+  String get dashboardTitle => 'الرئيسية';
+
+  @override
+  String get dashboardSpendableBalances => 'الأرصدة المتاحة';
+
+  @override
+  String get dashboardProtectedBalances => 'الأرصدة المحمية';
+
+  @override
+  String get dashboardNoSpendable => 'لا توجد حسابات متاحة للإنفاق.';
+
+  @override
+  String get dashboardNoProtected => 'لا توجد حسابات محمية.';
+
+  @override
+  String get dashboardPeriodIncome => 'الدخل';
+
+  @override
+  String get dashboardPeriodExpenses => 'المصروفات';
+
+  @override
+  String get dashboardPeriodNet => 'الصافي';
+
+  @override
+  String get dashboardPeriodNoActivity =>
+      'لا توجد حركة دخل أو مصروفات في هذه الفترة.';
+
+  @override
+  String get dashboardScopePersonal => 'الإنفاق الشخصي';
+
+  @override
+  String get dashboardScopeSpouse => 'إنفاق الزوج/ة';
+
+  @override
+  String get dashboardScopeHousehold => 'مصاريف المنزل';
+
+  @override
+  String get dashboardScopeChild => 'مصاريف الأطفال';
+
+  @override
+  String get dashboardScopeNoActivity =>
+      'لا توجد بيانات نطاق الإنفاق لهذه الفترة.';
+
+  @override
+  String get dashboardSpouseWallet => 'محفظة الزوج/ة';
+
+  @override
+  String get dashboardSpouseWalletFunded => 'موّل';
+
+  @override
+  String get dashboardSpouseWalletSpent => 'أُنفق';
+
+  @override
+  String get dashboardSpouseWalletReturned => 'أُعيد';
+
+  @override
+  String get dashboardSpouseWalletBalance => 'الرصيد الحالي';
+
+  @override
+  String get dashboardNoSpouseWallet => 'لا توجد محفظة للزوج/ة.';
+
+  @override
+  String get dashboardRecentActivity => 'آخر المعاملات';
+
+  @override
+  String get dashboardNoRecentActivity => 'لا توجد معاملات حديثة.';
+
+  @override
+  String get dashboardViewAll => 'عرض الكل';
+
+  @override
+  String get dashboardPeriodCurrentMonth => 'هذا الشهر';
+
+  @override
+  String get dashboardPeriodPreviousMonth => 'الشهر الماضي';
+
+  @override
+  String get dashboardPeriodCurrentYear => 'هذا العام';
+
+  @override
+  String get dashboardPeriodCustom => 'مخصص';
+
+  @override
+  String get dashboardNegativeBalanceWarning =>
+      'رصيد سالب — مشكلة في سلامة البيانات';
+
+  @override
+  String get dashboardChildProtected => 'الطفل (محمي)';
+
+  @override
+  String get dashboardRefresh => 'تحديث';
+
+  @override
+  String get dashboardLoading => 'جارٍ تحميل الرئيسية...';
+
+  @override
+  String get dashboardError => 'تعذّر تحميل الملخص المالي.';
+
+  @override
+  String get dashboardRetry => 'إعادة المحاولة';
+
+  @override
+  String get dashboardPeriodLabel => 'الفترة';
 }

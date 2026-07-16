@@ -1051,6 +1051,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transaction Detail'**
   String get transactionDetailTitle;
+
+  /// Bottom navigation label for dashboard tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get navDashboard;
+
+  /// Title for the dashboard screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboardTitle;
+
+  /// Section heading for spendable balances.
+  ///
+  /// In en, this message translates to:
+  /// **'Spendable Balances'**
+  String get dashboardSpendableBalances;
+
+  /// Section heading for protected balances.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected Balances'**
+  String get dashboardProtectedBalances;
+
+  /// Empty state for spendable balances.
+  ///
+  /// In en, this message translates to:
+  /// **'No spendable accounts yet.'**
+  String get dashboardNoSpendable;
+
+  /// Empty state for protected balances.
+  ///
+  /// In en, this message translates to:
+  /// **'No protected accounts.'**
+  String get dashboardNoProtected;
+
+  /// Label for income in period flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get dashboardPeriodIncome;
+
+  /// Label for expenses in period flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get dashboardPeriodExpenses;
+
+  /// Label for net amount in period flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get dashboardPeriodNet;
+
+  /// Empty state for period flow.
+  ///
+  /// In en, this message translates to:
+  /// **'No income or expense activity in this period.'**
+  String get dashboardPeriodNoActivity;
+
+  /// Expense scope label: personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Spending'**
+  String get dashboardScopePersonal;
+
+  /// Expense scope label: spouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Spending'**
+  String get dashboardScopeSpouse;
+
+  /// Expense scope label: household.
+  ///
+  /// In en, this message translates to:
+  /// **'Household Spending'**
+  String get dashboardScopeHousehold;
+
+  /// Expense scope label: child.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Spending'**
+  String get dashboardScopeChild;
+
+  /// Empty state for expense scopes.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense scope data for this period.'**
+  String get dashboardScopeNoActivity;
+
+  /// Section heading for spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Wallet'**
+  String get dashboardSpouseWallet;
+
+  /// Label for amount funded to spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Funded'**
+  String get dashboardSpouseWalletFunded;
+
+  /// Label for amount spent from spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get dashboardSpouseWalletSpent;
+
+  /// Label for amount returned from spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get dashboardSpouseWalletReturned;
+
+  /// Label for current spouse wallet balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Balance'**
+  String get dashboardSpouseWalletBalance;
+
+  /// Empty state for spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'No spouse wallet found.'**
+  String get dashboardNoSpouseWallet;
+
+  /// Section heading for recent activity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get dashboardRecentActivity;
+
+  /// Empty state for recent activity.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent transactions.'**
+  String get dashboardNoRecentActivity;
+
+  /// Link to view all transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get dashboardViewAll;
+
+  /// Period selector chip: current month.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get dashboardPeriodCurrentMonth;
+
+  /// Period selector chip: previous month.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month'**
+  String get dashboardPeriodPreviousMonth;
+
+  /// Period selector chip: current year.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get dashboardPeriodCurrentYear;
+
+  /// Period selector chip: custom range.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get dashboardPeriodCustom;
+
+  /// Warning for negative balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative balance — data integrity issue'**
+  String get dashboardNegativeBalanceWarning;
+
+  /// Label for protected child fund balance row.
+  ///
+  /// In en, this message translates to:
+  /// **'Child (Protected)'**
+  String get dashboardChildProtected;
+
+  /// Tooltip and semantic label for the refresh button.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get dashboardRefresh;
+
+  /// Loading state message for dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading dashboard...'**
+  String get dashboardLoading;
+
+  /// Error state message for dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load financial summary.'**
+  String get dashboardError;
+
+  /// Retry button label on dashboard error.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get dashboardRetry;
+
+  /// Label for the period selector section.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get dashboardPeriodLabel;
 }
 
 class _AppLocalizationsDelegate

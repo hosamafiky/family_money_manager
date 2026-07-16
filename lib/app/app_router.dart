@@ -2,6 +2,7 @@ import 'package:family_money_manager/core/navigation/routes.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_creation_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_detail_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/accounts_screen.dart';
+import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
 import 'package:family_money_manager/features/settings/settings_screen.dart';
 import 'package:family_money_manager/features/shell/app_shell.dart';
@@ -19,11 +20,12 @@ import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
 ///
-/// Phase 3B routes:
-///   /accounts              — AccountsScreen (tab 0)
+/// Phase 4A routes:
+///   /dashboard             — DashboardScreen (tab 0)
+///   /accounts              — AccountsScreen (tab 1)
 ///   /accounts/new          — AccountCreationScreen (push)
 ///   /accounts/:accountId   — AccountDetailScreen (push)
-///   /transactions          — TransactionsScreen (tab 1)
+///   /transactions          — TransactionsScreen (tab 2)
 ///   /transactions/new      — CreateTransactionScreen (push)
 ///   /transactions/new/income          — IncomeFormScreen
 ///   /transactions/new/income/review   — IncomeReviewScreen
@@ -32,21 +34,30 @@ import 'package:go_router/go_router.dart';
 ///   /transactions/new/transfer        — TransferFormScreen
 ///   /transactions/new/transfer/review — TransferReviewScreen
 ///   /transactions/:operationId        — TransactionDetailScreen
-///   /members               — HouseholdMembersScreen (tab 2)
-///   /settings              — SettingsScreen (tab 3)
+///   /members               — HouseholdMembersScreen (tab 3)
+///   /settings              — SettingsScreen (tab 4)
 abstract final class AppRouter {
   static GoRouter create() {
     return GoRouter(
-      initialLocation: '/accounts',
+      initialLocation: '/dashboard',
       debugLogDiagnostics: false,
       errorBuilder: (context, state) => AppErrorScreen(error: state.error),
       routes: [
-        // ── Phase 3B shell with bottom navigation ─────────────────────────
+        // ── Phase 4A shell with bottom navigation ─────────────────────────
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
               AppShell(navigationShell: navigationShell),
           branches: [
-            // Tab 0: Accounts
+            // Tab 0: Dashboard
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/dashboard',
+                  builder: (context, state) => const DashboardScreen(),
+                ),
+              ],
+            ),
+            // Tab 1: Accounts
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -68,7 +79,7 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 1: Transactions
+            // Tab 2: Transactions
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -132,7 +143,7 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 2: Family members
+            // Tab 3: Family members
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -141,7 +152,7 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 3: Settings
+            // Tab 4: Settings
             StatefulShellBranch(
               routes: [
                 GoRoute(

@@ -2,8 +2,8 @@ import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Main navigation shell with a [BottomNavigationBar] for four tabs:
-/// Accounts (0), Transactions (1), Family Members (2), and Settings (3).
+/// Main navigation shell with a [BottomNavigationBar] for five tabs:
+/// Dashboard (0), Accounts (1), Transactions (2), Family (3), Settings (4).
 class AppShell extends StatefulWidget {
   const AppShell({required this.navigationShell, super.key});
 
@@ -31,6 +31,11 @@ class _AppShellState extends State<AppShell> {
         onTap: _onTap,
         type: BottomNavigationBarType.fixed,
         items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.navDashboard,
+          ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.account_balance_wallet_outlined),
             activeIcon: const Icon(Icons.account_balance_wallet),
