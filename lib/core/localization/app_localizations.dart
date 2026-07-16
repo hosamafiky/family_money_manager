@@ -212,13 +212,18 @@ abstract class AppLocalizations {
   /// **'Probe: {probeId}'**
   String foundationDetailProbeLabel(String probeId);
 
-  // ── Phase 3A strings ─────────────────────────────────────────────────────
+  // ── Phase 3A ─────────────────────────────────────────────────────────────
+
+  String get navAccounts;
+  String get navMembers;
+  String get navSettings;
 
   String get accountsTitle;
   String get accountsEmpty;
   String get accountsAddButton;
   String get accountsTotalSpendable;
   String get accountsTotalProtected;
+
   String get accountTypePersonalCash;
   String get accountTypeSpouseCash;
   String get accountTypeHouseholdCash;
@@ -226,18 +231,17 @@ abstract class AppLocalizations {
   String get accountTypeBankAccount;
   String get accountTypeMobileWallet;
   String get accountTypeChildFund;
+
   String get accountCreateTitle;
   String get accountName;
   String get accountOwner;
-  String get accountPurpose;
   String get accountCurrency;
   String get accountOpeningBalance;
-  String get accountOpeningDate;
   String get accountNotes;
-  String get accountIsSpendable;
-  String get accountIsProtected;
-  String get accountIncludeNetWorth;
-  String get accountIncludeZakat;
+  String get accountProtectedWarning;
+  String get accountChildFundConfirmTitle;
+  String get accountChildFundConfirmBody;
+
   String get accountDetailTitle;
   String get accountDetailBalance;
   String get accountDetailHistory;
@@ -245,9 +249,7 @@ abstract class AppLocalizations {
   String get accountArchive;
   String get accountArchiveConfirm;
   String get accountArchiveError;
-  String get accountProtectedWarning;
-  String get accountChildFundConfirmTitle;
-  String get accountChildFundConfirmBody;
+
   String get membersTitle;
   String get memberPrimaryUser;
   String get memberSpouse;
@@ -258,15 +260,19 @@ abstract class AppLocalizations {
   String get memberRename;
   String get memberArchive;
   String get memberSpouseLoginNote;
-  String get ownerPrimaryUser;
-  String get ownerSpouse;
-  String get ownerChild;
-  String get ownerHousehold;
-  String get purposeAvailable;
-  String get purposeSavings;
-  String get purposeEmergency;
-  String get purposeChildEducation;
-  String get purposeChildFuture;
+
+  String get settingsTitle;
+
+  String get save;
+  String get cancel;
+  String get confirm;
+  String get protectedLabel;
+  String get spendableLabel;
+  String get archivedLabel;
+  String get loadingLabel;
+  String get balanceLabel;
+
+  String get errorGeneric;
   String get errorAccountNameEmpty;
   String get errorOpeningBalanceNegative;
   String get errorAccountDuplicate;
@@ -280,22 +286,6 @@ abstract class AppLocalizations {
   String get errorMoneyInvalidFormat;
   String get errorMoneyExcessDecimals;
   String get errorMoneyOverflow;
-  String get save;
-  String get cancel;
-  String get confirm;
-  String get edit;
-  String get back;
-  String get protectedLabel;
-  String get spendableLabel;
-  String get archivedLabel;
-  String get loadingLabel;
-  String get errorGeneric;
-  String get navAccounts;
-  String get navMembers;
-  String get navSettings;
-  String get settingsTitle;
-  String get balanceLabel;
-  String get reviewTitle;
 }
 
 class _AppLocalizationsDelegate
