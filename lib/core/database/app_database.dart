@@ -37,6 +37,10 @@ part 'app_database.g.dart';
 ///                 CHECK-enforcement triggers for amount_minor_units > 0,
 ///                 warning_shown = 1, reason non-empty; scoped idempotency index.
 ///   3 — Phase 3A: household_members table for named household members.
+///   4 — Phase 3A.1: financial_accounts idempotency_key + idempotency_payload;
+///                   household cardinality triggers (one primary_user, one spouse);
+///                   immutable account type/currency trigger;
+///                   scoped account idempotency index.
 @DriftDatabase(
   tables: [
     Households,
@@ -60,7 +64,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -70,6 +74,8 @@ class AppDatabase extends _$AppDatabase {
       await _applyAppendOnlyTriggers();
       await _applyCheckEnforcementTriggers();
       await _applyForeignKeyEnforcementTriggers();
+      await _applyHouseholdConstraintTriggers();
+      await _applyAccountMetadataImmutabilityTrigger();
       await _applyIndexes();
     },
     onUpgrade: (Migrator m, int from, int to) async {
@@ -84,6 +90,18 @@ class AppDatabase extends _$AppDatabase {
       if (from <= 2) {
         // v2 → v3: create household_members table.
         await m.createTable(householdMembers);
+      }
+      if (from <= 3) {
+        // v3 → v4: account idempotency columns, household cardinality triggers,
+        // immutable type/currency trigger, scoped account idempotency index.
+        await m.addColumn(financialAccounts, financialAccounts.idempotencyKey);
+        await m.addColumn(
+          financialAccounts,
+          financialAccounts.idempotencyPayload,
+        );
+        await _applyHouseholdConstraintTriggers();
+        await _applyAccountMetadataImmutabilityTrigger();
+        await _applyAccountIdempotencyIndex();
       }
     },
     beforeOpen: (details) async {
@@ -302,6 +320,7 @@ class AppDatabase extends _$AppDatabase {
     ''');
 
     await _applyScopedIdempotencyIndex();
+    await _applyAccountIdempotencyIndex();
   }
 
   /// Scoped idempotency: (household_id, idempotency_key) must be unique
@@ -312,6 +331,82 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE UNIQUE INDEX IF NOT EXISTS idx_operations_idempotency_key
       ON operations(household_id, idempotency_key)
+      WHERE idempotency_key IS NOT NULL
+    ''');
+  }
+
+  // ── Household cardinality triggers (Phase 3A.1) ───────────────────────────
+  //
+  // Enforces V1 business rules at the database level:
+  // - At most one active primary_user per household.
+  // - At most one active spouse per household.
+  // - Every household_members row must reference an existing household.
+
+  Future<void> _applyHouseholdConstraintTriggers() async {
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS one_primary_user_per_household '
+      'BEFORE INSERT ON household_members '
+      "WHEN NEW.role = 'primary_user' AND NEW.is_archived = 0 "
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Only one active primary_user per household') "
+      '  WHERE EXISTS ( '
+      '    SELECT 1 FROM household_members '
+      '    WHERE household_id = NEW.household_id '
+      "      AND role = 'primary_user' "
+      '      AND is_archived = 0 '
+      '  ); '
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS one_spouse_per_household '
+      'BEFORE INSERT ON household_members '
+      "WHEN NEW.role = 'spouse' AND NEW.is_archived = 0 "
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Only one active spouse per household in V1') "
+      '  WHERE EXISTS ( '
+      '    SELECT 1 FROM household_members '
+      '    WHERE household_id = NEW.household_id '
+      "      AND role = 'spouse' "
+      '      AND is_archived = 0 '
+      '  ); '
+      'END',
+    );
+
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS no_cross_household_member '
+      'BEFORE INSERT ON household_members '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'household_members.household_id must match household.id') "
+      '  WHERE NOT EXISTS ( '
+      '    SELECT 1 FROM households WHERE id = NEW.household_id '
+      '  ); '
+      'END',
+    );
+  }
+
+  // ── Immutable account type and currency trigger (Phase 3A.1) ─────────────
+  //
+  // [type] and [currency_code] must never change after insertion.
+  // This enforces the structural immutability rule at the DB engine level.
+
+  Future<void> _applyAccountMetadataImmutabilityTrigger() async {
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS immutable_account_type_currency '
+      'BEFORE UPDATE ON financial_accounts '
+      'WHEN OLD.type != NEW.type OR OLD.currency_code != NEW.currency_code '
+      'BEGIN '
+      "  SELECT RAISE(ABORT, 'Account type and currency are immutable after creation'); "
+      'END',
+    );
+  }
+
+  // ── Account idempotency index (Phase 3A.1) ────────────────────────────────
+
+  Future<void> _applyAccountIdempotencyIndex() async {
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_financial_accounts_idempotency
+      ON financial_accounts(household_id, idempotency_key)
       WHERE idempotency_key IS NOT NULL
     ''');
   }

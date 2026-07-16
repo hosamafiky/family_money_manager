@@ -12,13 +12,22 @@ Phase 3A delivers the complete foundation for the Family Money Manager UI: accou
 
 ---
 
-## Validation Results
+## Validation Results (Phase 3A commit)
 
 | Command | Exit Code | Result |
 |---|---|---|
 | `dart format --output=none --set-exit-if-changed .` | 0 | 0 files changed |
 | `flutter analyze` | 0 | No issues found |
 | `flutter test` | 0 | 458/458 tests passed |
+
+> **Note (Phase 3A.1 correction):** The following claims from this report were overstated or required hardening:
+> - The `CreateAccountUseCase` had no DB-level idempotency payload check (only operation-level idempotency existed in the ledger layer).
+> - The household cardinality triggers (one primary_user, one spouse per household) existed only at the application layer; DB-level triggers were added in Phase 3A.1.
+> - The `type` and `currency_code` columns had no DB-level immutability trigger; repo-layer exclusion was the only guard.
+> - `BalanceQueryResult` existed but was not tested against all scenarios (archived accounts, cross-household isolation).
+> - The schema version was v3; Phase 3A.1 bumps it to v4 with the above additions.
+>
+> See `docs/PHASE_3A_1_REPORT.md` for the full hardening report.
 
 ---
 

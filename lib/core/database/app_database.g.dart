@@ -1468,6 +1468,28 @@ class $FinancialAccountsTable extends FinancialAccounts
     requiredDuringInsert: false,
     defaultValue: const Constant('local'),
   );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _idempotencyPayloadMeta =
+      const VerificationMeta('idempotencyPayload');
+  @override
+  late final GeneratedColumn<String> idempotencyPayload =
+      GeneratedColumn<String>(
+        'idempotency_payload',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1490,6 +1512,8 @@ class $FinancialAccountsTable extends FinancialAccounts
     updatedAt,
     createdBy,
     syncStatus,
+    idempotencyKey,
+    idempotencyPayload,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1660,6 +1684,24 @@ class $FinancialAccountsTable extends FinancialAccounts
         syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
       );
     }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('idempotency_payload')) {
+      context.handle(
+        _idempotencyPayloadMeta,
+        idempotencyPayload.isAcceptableOrUnknown(
+          data['idempotency_payload']!,
+          _idempotencyPayloadMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1749,6 +1791,14 @@ class $FinancialAccountsTable extends FinancialAccounts
         DriftSqlType.string,
         data['${effectivePrefix}sync_status'],
       )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      ),
+      idempotencyPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_payload'],
+      ),
     );
   }
 
@@ -1792,6 +1842,15 @@ class DbFinancialAccount extends DataClass
 
   /// SyncStatus code.
   final String syncStatus;
+
+  /// Caller-supplied idempotency key scoped to (household_id, idempotency_key).
+  /// Nullable: accounts created without a key have no idempotency protection.
+  final String? idempotencyKey;
+
+  /// Stable serialised fingerprint of the creation payload.
+  /// Stored alongside [idempotencyKey] so that same-key-different-payload
+  /// conflicts can be detected without re-hashing on every lookup.
+  final String? idempotencyPayload;
   const DbFinancialAccount({
     required this.id,
     required this.householdId,
@@ -1813,6 +1872,8 @@ class DbFinancialAccount extends DataClass
     required this.updatedAt,
     required this.createdBy,
     required this.syncStatus,
+    this.idempotencyKey,
+    this.idempotencyPayload,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1843,6 +1904,12 @@ class DbFinancialAccount extends DataClass
     map['updated_at'] = Variable<String>(updatedAt);
     map['created_by'] = Variable<String>(createdBy);
     map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || idempotencyKey != null) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey);
+    }
+    if (!nullToAbsent || idempotencyPayload != null) {
+      map['idempotency_payload'] = Variable<String>(idempotencyPayload);
+    }
     return map;
   }
 
@@ -1874,6 +1941,12 @@ class DbFinancialAccount extends DataClass
       updatedAt: Value(updatedAt),
       createdBy: Value(createdBy),
       syncStatus: Value(syncStatus),
+      idempotencyKey: idempotencyKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idempotencyKey),
+      idempotencyPayload: idempotencyPayload == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idempotencyPayload),
     );
   }
 
@@ -1903,6 +1976,10 @@ class DbFinancialAccount extends DataClass
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
       createdBy: serializer.fromJson<String>(json['createdBy']),
       syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      idempotencyKey: serializer.fromJson<String?>(json['idempotencyKey']),
+      idempotencyPayload: serializer.fromJson<String?>(
+        json['idempotencyPayload'],
+      ),
     );
   }
   @override
@@ -1929,6 +2006,8 @@ class DbFinancialAccount extends DataClass
       'updatedAt': serializer.toJson<String>(updatedAt),
       'createdBy': serializer.toJson<String>(createdBy),
       'syncStatus': serializer.toJson<String>(syncStatus),
+      'idempotencyKey': serializer.toJson<String?>(idempotencyKey),
+      'idempotencyPayload': serializer.toJson<String?>(idempotencyPayload),
     };
   }
 
@@ -1953,6 +2032,8 @@ class DbFinancialAccount extends DataClass
     String? updatedAt,
     String? createdBy,
     String? syncStatus,
+    Value<String?> idempotencyKey = const Value.absent(),
+    Value<String?> idempotencyPayload = const Value.absent(),
   }) => DbFinancialAccount(
     id: id ?? this.id,
     householdId: householdId ?? this.householdId,
@@ -1974,6 +2055,12 @@ class DbFinancialAccount extends DataClass
     updatedAt: updatedAt ?? this.updatedAt,
     createdBy: createdBy ?? this.createdBy,
     syncStatus: syncStatus ?? this.syncStatus,
+    idempotencyKey: idempotencyKey.present
+        ? idempotencyKey.value
+        : this.idempotencyKey,
+    idempotencyPayload: idempotencyPayload.present
+        ? idempotencyPayload.value
+        : this.idempotencyPayload,
   );
   DbFinancialAccount copyWithCompanion(FinancialAccountsCompanion data) {
     return DbFinancialAccount(
@@ -2019,6 +2106,12 @@ class DbFinancialAccount extends DataClass
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
           : this.syncStatus,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      idempotencyPayload: data.idempotencyPayload.present
+          ? data.idempotencyPayload.value
+          : this.idempotencyPayload,
     );
   }
 
@@ -2044,13 +2137,15 @@ class DbFinancialAccount extends DataClass
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('createdBy: $createdBy, ')
-          ..write('syncStatus: $syncStatus')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     householdId,
     name,
@@ -2071,7 +2166,9 @@ class DbFinancialAccount extends DataClass
     updatedAt,
     createdBy,
     syncStatus,
-  );
+    idempotencyKey,
+    idempotencyPayload,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2095,7 +2192,9 @@ class DbFinancialAccount extends DataClass
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.createdBy == this.createdBy &&
-          other.syncStatus == this.syncStatus);
+          other.syncStatus == this.syncStatus &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.idempotencyPayload == this.idempotencyPayload);
 }
 
 class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
@@ -2119,6 +2218,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
   final Value<String> updatedAt;
   final Value<String> createdBy;
   final Value<String> syncStatus;
+  final Value<String?> idempotencyKey;
+  final Value<String?> idempotencyPayload;
   final Value<int> rowid;
   const FinancialAccountsCompanion({
     this.id = const Value.absent(),
@@ -2141,6 +2242,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
     this.updatedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.syncStatus = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.idempotencyPayload = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FinancialAccountsCompanion.insert({
@@ -2164,6 +2267,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
     required String updatedAt,
     required String createdBy,
     this.syncStatus = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.idempotencyPayload = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        householdId = Value(householdId),
@@ -2194,6 +2299,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
     Expression<String>? updatedAt,
     Expression<String>? createdBy,
     Expression<String>? syncStatus,
+    Expression<String>? idempotencyKey,
+    Expression<String>? idempotencyPayload,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2217,6 +2324,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (createdBy != null) 'created_by': createdBy,
       if (syncStatus != null) 'sync_status': syncStatus,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (idempotencyPayload != null) 'idempotency_payload': idempotencyPayload,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2242,6 +2351,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
     Value<String>? updatedAt,
     Value<String>? createdBy,
     Value<String>? syncStatus,
+    Value<String?>? idempotencyKey,
+    Value<String?>? idempotencyPayload,
     Value<int>? rowid,
   }) {
     return FinancialAccountsCompanion(
@@ -2265,6 +2376,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
       updatedAt: updatedAt ?? this.updatedAt,
       createdBy: createdBy ?? this.createdBy,
       syncStatus: syncStatus ?? this.syncStatus,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      idempotencyPayload: idempotencyPayload ?? this.idempotencyPayload,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2332,6 +2445,12 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
     if (syncStatus.present) {
       map['sync_status'] = Variable<String>(syncStatus.value);
     }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (idempotencyPayload.present) {
+      map['idempotency_payload'] = Variable<String>(idempotencyPayload.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2361,6 +2480,8 @@ class FinancialAccountsCompanion extends UpdateCompanion<DbFinancialAccount> {
           ..write('updatedAt: $updatedAt, ')
           ..write('createdBy: $createdBy, ')
           ..write('syncStatus: $syncStatus, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6890,6 +7011,8 @@ typedef $$FinancialAccountsTableCreateCompanionBuilder =
       required String updatedAt,
       required String createdBy,
       Value<String> syncStatus,
+      Value<String?> idempotencyKey,
+      Value<String?> idempotencyPayload,
       Value<int> rowid,
     });
 typedef $$FinancialAccountsTableUpdateCompanionBuilder =
@@ -6914,6 +7037,8 @@ typedef $$FinancialAccountsTableUpdateCompanionBuilder =
       Value<String> updatedAt,
       Value<String> createdBy,
       Value<String> syncStatus,
+      Value<String?> idempotencyKey,
+      Value<String?> idempotencyPayload,
       Value<int> rowid,
     });
 
@@ -7130,6 +7255,16 @@ class $$FinancialAccountsTableFilterComposer
 
   ColumnFilters<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7362,6 +7497,16 @@ class $$FinancialAccountsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$HouseholdsTableOrderingComposer get householdId {
     final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7469,6 +7614,16 @@ class $$FinancialAccountsTableAnnotationComposer
 
   GeneratedColumn<String> get syncStatus => $composableBuilder(
     column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
     builder: (column) => column,
   );
 
@@ -7656,6 +7811,8 @@ class $$FinancialAccountsTableTableManager
                 Value<String> updatedAt = const Value.absent(),
                 Value<String> createdBy = const Value.absent(),
                 Value<String> syncStatus = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> idempotencyPayload = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialAccountsCompanion(
                 id: id,
@@ -7678,6 +7835,8 @@ class $$FinancialAccountsTableTableManager
                 updatedAt: updatedAt,
                 createdBy: createdBy,
                 syncStatus: syncStatus,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7702,6 +7861,8 @@ class $$FinancialAccountsTableTableManager
                 required String updatedAt,
                 required String createdBy,
                 Value<String> syncStatus = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> idempotencyPayload = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FinancialAccountsCompanion.insert(
                 id: id,
@@ -7724,6 +7885,8 @@ class $$FinancialAccountsTableTableManager
                 updatedAt: updatedAt,
                 createdBy: createdBy,
                 syncStatus: syncStatus,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

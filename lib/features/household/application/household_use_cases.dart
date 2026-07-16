@@ -4,6 +4,67 @@ import 'package:family_money_manager/features/household/domain/household_identit
 import 'package:family_money_manager/features/household/domain/household_member.dart';
 import 'package:uuid/uuid.dart';
 
+/// Creates the household and primary member atomically on first launch.
+///
+/// Idempotent: a second call returns the existing household without error.
+/// Uses fixed IDs so that re-running the use case always refers to the same
+/// household row rather than creating duplicates.
+final class InitializeHouseholdUseCase {
+  const InitializeHouseholdUseCase({
+    required HouseholdRepository householdRepository,
+  }) : _repo = householdRepository;
+
+  final HouseholdRepository _repo;
+
+  static const String defaultHouseholdId = 'household-v1';
+  static const String defaultPrimaryMemberId = 'member-primary-v1';
+
+  Future<AppResult<HouseholdIdentity>> execute({
+    required String householdName,
+    required String primaryMemberName,
+    required String currencyCode,
+  }) async {
+    if (householdName.trim().isEmpty) {
+      return const AppValidationFailure(
+        field: 'householdName',
+        messageKey: 'error_member_name_empty',
+      );
+    }
+    if (primaryMemberName.trim().isEmpty) {
+      return const AppValidationFailure(
+        field: 'primaryMemberName',
+        messageKey: 'error_member_name_empty',
+      );
+    }
+
+    try {
+      // Idempotency: return existing household if already initialised.
+      final existing = await _repo.findHousehold(defaultHouseholdId);
+      if (existing != null) return AppOk(existing);
+
+      final household = await _repo.createHousehold(
+        id: defaultHouseholdId,
+        displayName: householdName.trim(),
+        currencyCode: currencyCode,
+        ownerUserId: defaultPrimaryMemberId,
+      );
+      await _repo.addMember(
+        id: defaultPrimaryMemberId,
+        householdId: defaultHouseholdId,
+        displayName: primaryMemberName.trim(),
+        role: MemberRole.primaryUser,
+      );
+      return AppOk(household);
+    } on DuplicateSpouseError {
+      return const AppDuplicateConflict(
+        messageKey: 'error_household_already_initialized',
+      );
+    } catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+}
+
 final class GetHouseholdUseCase {
   const GetHouseholdUseCase(this._repo);
   final HouseholdRepository _repo;

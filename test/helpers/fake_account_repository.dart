@@ -30,6 +30,10 @@ final class FakeAccountRepository implements AccountRepository {
       notes: params.notes,
     );
     _accounts.add(account);
+    if (params.idempotencyKey != null) {
+      _idempotencyKeys['${params.householdId}/${params.idempotencyKey}'] =
+          params.id;
+    }
     return account;
   }
 
@@ -40,6 +44,21 @@ final class FakeAccountRepository implements AccountRepository {
   }) async => _accounts
       .where((a) => a.id == id && a.householdId == householdId)
       .firstOrNull;
+
+  // Stores idempotency key → account id for idempotency testing.
+  final Map<String, String> _idempotencyKeys =
+      {}; // '$householdId/$key' → accountId
+
+  @override
+  Future<FinancialAccount?> findByIdempotencyKey({
+    required String householdId,
+    required String idempotencyKey,
+  }) async {
+    final mapKey = '$householdId/$idempotencyKey';
+    final accountId = _idempotencyKeys[mapKey];
+    if (accountId == null) return null;
+    return _accounts.where((a) => a.id == accountId).firstOrNull;
+  }
 
   @override
   Future<List<FinancialAccount>> findByHousehold({

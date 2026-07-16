@@ -175,6 +175,8 @@ final class CreateAccountParams {
     required this.createdBy,
     this.notes,
     this.metadata,
+    this.idempotencyKey,
+    this.idempotencyPayload,
   });
 
   final String id;
@@ -192,4 +194,13 @@ final class CreateAccountParams {
   final String createdBy;
   final String? notes;
   final Map<String, dynamic>? metadata;
+
+  /// Optional idempotency key scoped to (householdId, idempotencyKey).
+  /// When provided, a second call with the same key and matching payload
+  /// returns the existing account without creating a duplicate.
+  final String? idempotencyKey;
+
+  /// Stable serialised fingerprint of the creation payload.
+  /// Stored to detect same-key-different-payload conflicts.
+  final String? idempotencyPayload;
 }

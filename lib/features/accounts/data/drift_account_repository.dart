@@ -39,6 +39,8 @@ final class DriftAccountRepository implements AccountRepository {
       metadata: Value(
         params.metadata != null ? jsonEncode(params.metadata) : null,
       ),
+      idempotencyKey: Value(params.idempotencyKey),
+      idempotencyPayload: Value(params.idempotencyPayload),
     );
 
     try {
@@ -55,6 +57,21 @@ final class DriftAccountRepository implements AccountRepository {
         _db.financialAccounts,
       )..where((t) => t.id.equals(params.id))).getSingle(),
     );
+  }
+
+  @override
+  Future<FinancialAccount?> findByIdempotencyKey({
+    required String householdId,
+    required String idempotencyKey,
+  }) async {
+    final row =
+        await (_db.select(_db.financialAccounts)..where(
+              (t) =>
+                  t.householdId.equals(householdId) &
+                  t.idempotencyKey.equals(idempotencyKey),
+            ))
+            .getSingleOrNull();
+    return row == null ? null : _toAccount(row);
   }
 
   @override

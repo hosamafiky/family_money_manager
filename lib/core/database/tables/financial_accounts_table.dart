@@ -54,6 +54,15 @@ class FinancialAccounts extends Table {
   /// SyncStatus code.
   TextColumn get syncStatus => text().withDefault(const Constant('local'))();
 
+  /// Caller-supplied idempotency key scoped to (household_id, idempotency_key).
+  /// Nullable: accounts created without a key have no idempotency protection.
+  TextColumn get idempotencyKey => text().nullable()();
+
+  /// Stable serialised fingerprint of the creation payload.
+  /// Stored alongside [idempotencyKey] so that same-key-different-payload
+  /// conflicts can be detected without re-hashing on every lookup.
+  TextColumn get idempotencyPayload => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

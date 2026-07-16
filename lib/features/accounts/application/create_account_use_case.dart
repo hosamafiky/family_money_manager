@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Variable;
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
@@ -6,6 +7,24 @@ import 'package:family_money_manager/features/accounts/domain/financial_account.
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/operation.dart';
 import 'package:uuid/uuid.dart';
+
+/// Builds a stable, non-localized fingerprint string from creation params.
+///
+/// Used to detect same-key-different-payload conflicts for idempotent account
+/// creation.  All fields are stable codes (enum.code, booleans, integers).
+String _buildIdempotencyPayload(CreateAccountWorkflowParams p) {
+  final name = p.name.trim();
+  final type = p.type.code;
+  final ownerType = p.ownerType.code;
+  final fundPurpose = p.fundPurpose.code;
+  final currency = p.currencyCode;
+  final spendable = p.isSpendable;
+  final protected = p.isProtected;
+  final netWorth = p.includeInNetWorth;
+  final zakat = p.includeInZakat;
+  final openingBalance = p.openingBalanceMinorUnits ?? 0;
+  return '$name|$type|$ownerType|$fundPurpose|$currency|$spendable|$protected|$netWorth|$zakat|$openingBalance';
+}
 
 /// Parameters for the account-creation workflow.
 ///
@@ -91,8 +110,36 @@ final class CreateAccountUseCase {
       );
     }
 
+    // ── Idempotency check ───────────────────────────────────────────────────
+    // When a caller-supplied idempotency key is present, look for an existing
+    // account with the same (householdId, idempotencyKey) pair.
+    if (params.idempotencyKey != null) {
+      final existing = await _accountRepository.findByIdempotencyKey(
+        householdId: params.householdId,
+        idempotencyKey: params.idempotencyKey!,
+      );
+      if (existing != null) {
+        // Compare payload fingerprints to distinguish a safe retry from a
+        // conflicting call with the same key but different intent.
+        final currentPayload = _buildIdempotencyPayload(params);
+        final storedPayload = await _loadStoredPayload(
+          params.householdId,
+          params.idempotencyKey!,
+        );
+        if (storedPayload == currentPayload) {
+          return AppOk(existing);
+        }
+        return const AppDuplicateConflict(
+          messageKey: 'error_account_duplicate',
+        );
+      }
+    }
+
     final accountId = _uuid.v4();
     final idempotencyKey = params.idempotencyKey ?? accountId;
+    final idempotencyPayload = params.idempotencyKey != null
+        ? _buildIdempotencyPayload(params)
+        : null;
 
     try {
       late FinancialAccount account;
@@ -114,6 +161,8 @@ final class CreateAccountUseCase {
             displayOrder: 0,
             createdBy: params.createdBy,
             notes: params.notes,
+            idempotencyKey: params.idempotencyKey,
+            idempotencyPayload: idempotencyPayload,
           ),
         );
 
@@ -140,6 +189,11 @@ final class CreateAccountUseCase {
       return AppOk(account);
     } on DuplicateAccountIdError {
       return const AppDuplicateConflict(messageKey: 'error_account_duplicate');
+    } on ArchivedAccountError {
+      return const AppValidationFailure(
+        field: 'account',
+        messageKey: 'error_account_archived',
+      );
     } on ArgumentError catch (e) {
       return AppValidationFailure(
         field: e.name ?? 'unknown',
@@ -148,5 +202,22 @@ final class CreateAccountUseCase {
     } catch (_) {
       return const AppPersistenceFailure();
     }
+  }
+
+  /// Loads the stored idempotency payload for a given key, if any.
+  Future<String?> _loadStoredPayload(
+    String householdId,
+    String idempotencyKey,
+  ) async {
+    // Query the raw DB row to read the stored payload.
+    final rows = await _db
+        .customSelect(
+          'SELECT idempotency_payload FROM financial_accounts '
+          'WHERE household_id = ? AND idempotency_key = ?',
+          variables: [Variable(householdId), Variable(idempotencyKey)],
+        )
+        .get();
+    if (rows.isEmpty) return null;
+    return rows.first.read<String?>('idempotency_payload');
   }
 }

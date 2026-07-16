@@ -16,6 +16,14 @@ abstract interface class AccountRepository {
   /// Throws [DuplicateAccountIdError] when [params.id] already exists.
   Future<FinancialAccount> createAccount(CreateAccountParams params);
 
+  /// Finds an account by its idempotency key within [householdId].
+  ///
+  /// Returns null when no account with that key exists in this household.
+  Future<FinancialAccount?> findByIdempotencyKey({
+    required String householdId,
+    required String idempotencyKey,
+  });
+
   /// Returns the account with [id] within [householdId], or null when not found.
   Future<FinancialAccount?> findById({
     required String id,
@@ -120,4 +128,14 @@ final class ClassificationImmutabilityError extends Error {
       'ClassificationImmutabilityError: cannot change "$field" on account '
       '$accountId after ledger entries have been recorded. '
       'Use a reversal, new account, or dated-reclassification event instead.';
+}
+
+/// Thrown when attempting to record a financial operation on an archived account.
+///
+/// Archived accounts retain their ledger history but must not receive new entries.
+final class ArchivedAccountError extends Error {
+  ArchivedAccountError(this.accountId);
+  final String accountId;
+  @override
+  String toString() => 'ArchivedAccountError: account $accountId is archived';
 }

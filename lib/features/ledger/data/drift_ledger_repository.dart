@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
+import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
@@ -780,6 +781,7 @@ final class DriftLedgerRepository implements LedgerRepository {
         'Account $accountId not found in household $householdId',
       );
     }
+    if (row.isArchived) throw ArchivedAccountError(accountId);
     return _rowToAccount(row);
   }
 
