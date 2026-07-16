@@ -83,7 +83,7 @@ Widget _buildApp(IncomeContext? ctx) {
         return n;
       }),
       accountsProvider.overrideWith(
-        (ref, _) async => AppOk<List<FinancialAccount>>([_fakeAccount]),
+        (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
       ),
     ],
     child: _SeedAndRoute(ctx: ctx, router: router),
