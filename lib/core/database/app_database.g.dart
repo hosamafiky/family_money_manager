@@ -6435,6 +6435,1201 @@ class OperationContextsCompanion extends UpdateCompanion<DbOperationContext> {
   }
 }
 
+class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, DbBudget> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES households (id)',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _limitMinorUnitsMeta = const VerificationMeta(
+    'limitMinorUnits',
+  );
+  @override
+  late final GeneratedColumn<int> limitMinorUnits = GeneratedColumn<int>(
+    'limit_minor_units',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodTypeMeta = const VerificationMeta(
+    'periodType',
+  );
+  @override
+  late final GeneratedColumn<String> periodType = GeneratedColumn<String>(
+    'period_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fixedStartDateMeta = const VerificationMeta(
+    'fixedStartDate',
+  );
+  @override
+  late final GeneratedColumn<String> fixedStartDate = GeneratedColumn<String>(
+    'fixed_start_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fixedEndDateMeta = const VerificationMeta(
+    'fixedEndDate',
+  );
+  @override
+  late final GeneratedColumn<String> fixedEndDate = GeneratedColumn<String>(
+    'fixed_end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _filterCategoryCodeMeta =
+      const VerificationMeta('filterCategoryCode');
+  @override
+  late final GeneratedColumn<String> filterCategoryCode =
+      GeneratedColumn<String>(
+        'filter_category_code',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _filterScopeCodeMeta = const VerificationMeta(
+    'filterScopeCode',
+  );
+  @override
+  late final GeneratedColumn<String> filterScopeCode = GeneratedColumn<String>(
+    'filter_scope_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _filterSpenderMemberIdMeta =
+      const VerificationMeta('filterSpenderMemberId');
+  @override
+  late final GeneratedColumn<String> filterSpenderMemberId =
+      GeneratedColumn<String>(
+        'filter_spender_member_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _filterBeneficiaryMemberIdMeta =
+      const VerificationMeta('filterBeneficiaryMemberId');
+  @override
+  late final GeneratedColumn<String> filterBeneficiaryMemberId =
+      GeneratedColumn<String>(
+        'filter_beneficiary_member_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _filterPaymentAccountIdMeta =
+      const VerificationMeta('filterPaymentAccountId');
+  @override
+  late final GeneratedColumn<String> filterPaymentAccountId =
+      GeneratedColumn<String>(
+        'filter_payment_account_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
+  @override
+  late final GeneratedColumn<int> isArchived = GeneratedColumn<int>(
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _idempotencyPayloadMeta =
+      const VerificationMeta('idempotencyPayload');
+  @override
+  late final GeneratedColumn<String> idempotencyPayload =
+      GeneratedColumn<String>(
+        'idempotency_payload',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    householdId,
+    name,
+    currencyCode,
+    limitMinorUnits,
+    periodType,
+    fixedStartDate,
+    fixedEndDate,
+    filterCategoryCode,
+    filterScopeCode,
+    filterSpenderMemberId,
+    filterBeneficiaryMemberId,
+    filterPaymentAccountId,
+    isArchived,
+    idempotencyKey,
+    idempotencyPayload,
+    createdAt,
+    updatedAt,
+    schemaVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budgets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbBudget> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyCodeMeta);
+    }
+    if (data.containsKey('limit_minor_units')) {
+      context.handle(
+        _limitMinorUnitsMeta,
+        limitMinorUnits.isAcceptableOrUnknown(
+          data['limit_minor_units']!,
+          _limitMinorUnitsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_limitMinorUnitsMeta);
+    }
+    if (data.containsKey('period_type')) {
+      context.handle(
+        _periodTypeMeta,
+        periodType.isAcceptableOrUnknown(data['period_type']!, _periodTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodTypeMeta);
+    }
+    if (data.containsKey('fixed_start_date')) {
+      context.handle(
+        _fixedStartDateMeta,
+        fixedStartDate.isAcceptableOrUnknown(
+          data['fixed_start_date']!,
+          _fixedStartDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fixed_end_date')) {
+      context.handle(
+        _fixedEndDateMeta,
+        fixedEndDate.isAcceptableOrUnknown(
+          data['fixed_end_date']!,
+          _fixedEndDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('filter_category_code')) {
+      context.handle(
+        _filterCategoryCodeMeta,
+        filterCategoryCode.isAcceptableOrUnknown(
+          data['filter_category_code']!,
+          _filterCategoryCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('filter_scope_code')) {
+      context.handle(
+        _filterScopeCodeMeta,
+        filterScopeCode.isAcceptableOrUnknown(
+          data['filter_scope_code']!,
+          _filterScopeCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('filter_spender_member_id')) {
+      context.handle(
+        _filterSpenderMemberIdMeta,
+        filterSpenderMemberId.isAcceptableOrUnknown(
+          data['filter_spender_member_id']!,
+          _filterSpenderMemberIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('filter_beneficiary_member_id')) {
+      context.handle(
+        _filterBeneficiaryMemberIdMeta,
+        filterBeneficiaryMemberId.isAcceptableOrUnknown(
+          data['filter_beneficiary_member_id']!,
+          _filterBeneficiaryMemberIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('filter_payment_account_id')) {
+      context.handle(
+        _filterPaymentAccountIdMeta,
+        filterPaymentAccountId.isAcceptableOrUnknown(
+          data['filter_payment_account_id']!,
+          _filterPaymentAccountIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyKeyMeta);
+    }
+    if (data.containsKey('idempotency_payload')) {
+      context.handle(
+        _idempotencyPayloadMeta,
+        idempotencyPayload.isAcceptableOrUnknown(
+          data['idempotency_payload']!,
+          _idempotencyPayloadMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyPayloadMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbBudget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbBudget(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      limitMinorUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}limit_minor_units'],
+      )!,
+      periodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_type'],
+      )!,
+      fixedStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fixed_start_date'],
+      ),
+      fixedEndDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fixed_end_date'],
+      ),
+      filterCategoryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filter_category_code'],
+      ),
+      filterScopeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filter_scope_code'],
+      ),
+      filterSpenderMemberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filter_spender_member_id'],
+      ),
+      filterBeneficiaryMemberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filter_beneficiary_member_id'],
+      ),
+      filterPaymentAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}filter_payment_account_id'],
+      ),
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      )!,
+      idempotencyPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_payload'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+    );
+  }
+
+  @override
+  $BudgetsTable createAlias(String alias) {
+    return $BudgetsTable(attachedDatabase, alias);
+  }
+}
+
+class DbBudget extends DataClass implements Insertable<DbBudget> {
+  /// Stable client-generated UUID. Primary key.
+  final String id;
+
+  /// FK to households.id.
+  final String householdId;
+
+  /// User-visible budget name.
+  final String name;
+
+  /// ISO 4217 currency code. Immutable after creation.
+  final String currencyCode;
+
+  /// Spending limit in currency minor units.
+  final int limitMinorUnits;
+
+  /// 'monthly' or 'fixed'. Immutable after creation.
+  final String periodType;
+
+  /// ISO date yyyy-MM-dd inclusive start (only for periodType = 'fixed').
+  final String? fixedStartDate;
+
+  /// ISO date yyyy-MM-dd exclusive end (only for periodType = 'fixed').
+  final String? fixedEndDate;
+
+  /// Optional category code filter.
+  final String? filterCategoryCode;
+
+  /// Optional expense scope code filter.
+  final String? filterScopeCode;
+
+  /// Optional spender member UUID filter.
+  final String? filterSpenderMemberId;
+
+  /// Optional beneficiary member UUID filter.
+  final String? filterBeneficiaryMemberId;
+
+  /// Optional payment account ID filter.
+  final String? filterPaymentAccountId;
+
+  /// 0 = active, 1 = archived.
+  final int isArchived;
+
+  /// Stable fingerprint of creation payload for idempotency conflict detection.
+  final String idempotencyKey;
+
+  /// JSON-like serialized creation payload (for same-key-different-payload check).
+  final String idempotencyPayload;
+
+  /// UTC ISO 8601 creation timestamp.
+  final String createdAt;
+
+  /// UTC ISO 8601 last-updated timestamp.
+  final String updatedAt;
+
+  /// Schema version for this row (always 1 in Phase 5A).
+  final int schemaVersion;
+  const DbBudget({
+    required this.id,
+    required this.householdId,
+    required this.name,
+    required this.currencyCode,
+    required this.limitMinorUnits,
+    required this.periodType,
+    this.fixedStartDate,
+    this.fixedEndDate,
+    this.filterCategoryCode,
+    this.filterScopeCode,
+    this.filterSpenderMemberId,
+    this.filterBeneficiaryMemberId,
+    this.filterPaymentAccountId,
+    required this.isArchived,
+    required this.idempotencyKey,
+    required this.idempotencyPayload,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.schemaVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['name'] = Variable<String>(name);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['limit_minor_units'] = Variable<int>(limitMinorUnits);
+    map['period_type'] = Variable<String>(periodType);
+    if (!nullToAbsent || fixedStartDate != null) {
+      map['fixed_start_date'] = Variable<String>(fixedStartDate);
+    }
+    if (!nullToAbsent || fixedEndDate != null) {
+      map['fixed_end_date'] = Variable<String>(fixedEndDate);
+    }
+    if (!nullToAbsent || filterCategoryCode != null) {
+      map['filter_category_code'] = Variable<String>(filterCategoryCode);
+    }
+    if (!nullToAbsent || filterScopeCode != null) {
+      map['filter_scope_code'] = Variable<String>(filterScopeCode);
+    }
+    if (!nullToAbsent || filterSpenderMemberId != null) {
+      map['filter_spender_member_id'] = Variable<String>(filterSpenderMemberId);
+    }
+    if (!nullToAbsent || filterBeneficiaryMemberId != null) {
+      map['filter_beneficiary_member_id'] = Variable<String>(
+        filterBeneficiaryMemberId,
+      );
+    }
+    if (!nullToAbsent || filterPaymentAccountId != null) {
+      map['filter_payment_account_id'] = Variable<String>(
+        filterPaymentAccountId,
+      );
+    }
+    map['is_archived'] = Variable<int>(isArchived);
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
+    map['idempotency_payload'] = Variable<String>(idempotencyPayload);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    return map;
+  }
+
+  BudgetsCompanion toCompanion(bool nullToAbsent) {
+    return BudgetsCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      name: Value(name),
+      currencyCode: Value(currencyCode),
+      limitMinorUnits: Value(limitMinorUnits),
+      periodType: Value(periodType),
+      fixedStartDate: fixedStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fixedStartDate),
+      fixedEndDate: fixedEndDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fixedEndDate),
+      filterCategoryCode: filterCategoryCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filterCategoryCode),
+      filterScopeCode: filterScopeCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filterScopeCode),
+      filterSpenderMemberId: filterSpenderMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filterSpenderMemberId),
+      filterBeneficiaryMemberId:
+          filterBeneficiaryMemberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filterBeneficiaryMemberId),
+      filterPaymentAccountId: filterPaymentAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filterPaymentAccountId),
+      isArchived: Value(isArchived),
+      idempotencyKey: Value(idempotencyKey),
+      idempotencyPayload: Value(idempotencyPayload),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      schemaVersion: Value(schemaVersion),
+    );
+  }
+
+  factory DbBudget.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbBudget(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      name: serializer.fromJson<String>(json['name']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      limitMinorUnits: serializer.fromJson<int>(json['limitMinorUnits']),
+      periodType: serializer.fromJson<String>(json['periodType']),
+      fixedStartDate: serializer.fromJson<String?>(json['fixedStartDate']),
+      fixedEndDate: serializer.fromJson<String?>(json['fixedEndDate']),
+      filterCategoryCode: serializer.fromJson<String?>(
+        json['filterCategoryCode'],
+      ),
+      filterScopeCode: serializer.fromJson<String?>(json['filterScopeCode']),
+      filterSpenderMemberId: serializer.fromJson<String?>(
+        json['filterSpenderMemberId'],
+      ),
+      filterBeneficiaryMemberId: serializer.fromJson<String?>(
+        json['filterBeneficiaryMemberId'],
+      ),
+      filterPaymentAccountId: serializer.fromJson<String?>(
+        json['filterPaymentAccountId'],
+      ),
+      isArchived: serializer.fromJson<int>(json['isArchived']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
+      idempotencyPayload: serializer.fromJson<String>(
+        json['idempotencyPayload'],
+      ),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'name': serializer.toJson<String>(name),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'limitMinorUnits': serializer.toJson<int>(limitMinorUnits),
+      'periodType': serializer.toJson<String>(periodType),
+      'fixedStartDate': serializer.toJson<String?>(fixedStartDate),
+      'fixedEndDate': serializer.toJson<String?>(fixedEndDate),
+      'filterCategoryCode': serializer.toJson<String?>(filterCategoryCode),
+      'filterScopeCode': serializer.toJson<String?>(filterScopeCode),
+      'filterSpenderMemberId': serializer.toJson<String?>(
+        filterSpenderMemberId,
+      ),
+      'filterBeneficiaryMemberId': serializer.toJson<String?>(
+        filterBeneficiaryMemberId,
+      ),
+      'filterPaymentAccountId': serializer.toJson<String?>(
+        filterPaymentAccountId,
+      ),
+      'isArchived': serializer.toJson<int>(isArchived),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
+      'idempotencyPayload': serializer.toJson<String>(idempotencyPayload),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+    };
+  }
+
+  DbBudget copyWith({
+    String? id,
+    String? householdId,
+    String? name,
+    String? currencyCode,
+    int? limitMinorUnits,
+    String? periodType,
+    Value<String?> fixedStartDate = const Value.absent(),
+    Value<String?> fixedEndDate = const Value.absent(),
+    Value<String?> filterCategoryCode = const Value.absent(),
+    Value<String?> filterScopeCode = const Value.absent(),
+    Value<String?> filterSpenderMemberId = const Value.absent(),
+    Value<String?> filterBeneficiaryMemberId = const Value.absent(),
+    Value<String?> filterPaymentAccountId = const Value.absent(),
+    int? isArchived,
+    String? idempotencyKey,
+    String? idempotencyPayload,
+    String? createdAt,
+    String? updatedAt,
+    int? schemaVersion,
+  }) => DbBudget(
+    id: id ?? this.id,
+    householdId: householdId ?? this.householdId,
+    name: name ?? this.name,
+    currencyCode: currencyCode ?? this.currencyCode,
+    limitMinorUnits: limitMinorUnits ?? this.limitMinorUnits,
+    periodType: periodType ?? this.periodType,
+    fixedStartDate: fixedStartDate.present
+        ? fixedStartDate.value
+        : this.fixedStartDate,
+    fixedEndDate: fixedEndDate.present ? fixedEndDate.value : this.fixedEndDate,
+    filterCategoryCode: filterCategoryCode.present
+        ? filterCategoryCode.value
+        : this.filterCategoryCode,
+    filterScopeCode: filterScopeCode.present
+        ? filterScopeCode.value
+        : this.filterScopeCode,
+    filterSpenderMemberId: filterSpenderMemberId.present
+        ? filterSpenderMemberId.value
+        : this.filterSpenderMemberId,
+    filterBeneficiaryMemberId: filterBeneficiaryMemberId.present
+        ? filterBeneficiaryMemberId.value
+        : this.filterBeneficiaryMemberId,
+    filterPaymentAccountId: filterPaymentAccountId.present
+        ? filterPaymentAccountId.value
+        : this.filterPaymentAccountId,
+    isArchived: isArchived ?? this.isArchived,
+    idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+    idempotencyPayload: idempotencyPayload ?? this.idempotencyPayload,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+  );
+  DbBudget copyWithCompanion(BudgetsCompanion data) {
+    return DbBudget(
+      id: data.id.present ? data.id.value : this.id,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      name: data.name.present ? data.name.value : this.name,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      limitMinorUnits: data.limitMinorUnits.present
+          ? data.limitMinorUnits.value
+          : this.limitMinorUnits,
+      periodType: data.periodType.present
+          ? data.periodType.value
+          : this.periodType,
+      fixedStartDate: data.fixedStartDate.present
+          ? data.fixedStartDate.value
+          : this.fixedStartDate,
+      fixedEndDate: data.fixedEndDate.present
+          ? data.fixedEndDate.value
+          : this.fixedEndDate,
+      filterCategoryCode: data.filterCategoryCode.present
+          ? data.filterCategoryCode.value
+          : this.filterCategoryCode,
+      filterScopeCode: data.filterScopeCode.present
+          ? data.filterScopeCode.value
+          : this.filterScopeCode,
+      filterSpenderMemberId: data.filterSpenderMemberId.present
+          ? data.filterSpenderMemberId.value
+          : this.filterSpenderMemberId,
+      filterBeneficiaryMemberId: data.filterBeneficiaryMemberId.present
+          ? data.filterBeneficiaryMemberId.value
+          : this.filterBeneficiaryMemberId,
+      filterPaymentAccountId: data.filterPaymentAccountId.present
+          ? data.filterPaymentAccountId.value
+          : this.filterPaymentAccountId,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      idempotencyPayload: data.idempotencyPayload.present
+          ? data.idempotencyPayload.value
+          : this.idempotencyPayload,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbBudget(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('limitMinorUnits: $limitMinorUnits, ')
+          ..write('periodType: $periodType, ')
+          ..write('fixedStartDate: $fixedStartDate, ')
+          ..write('fixedEndDate: $fixedEndDate, ')
+          ..write('filterCategoryCode: $filterCategoryCode, ')
+          ..write('filterScopeCode: $filterScopeCode, ')
+          ..write('filterSpenderMemberId: $filterSpenderMemberId, ')
+          ..write('filterBeneficiaryMemberId: $filterBeneficiaryMemberId, ')
+          ..write('filterPaymentAccountId: $filterPaymentAccountId, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('schemaVersion: $schemaVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    householdId,
+    name,
+    currencyCode,
+    limitMinorUnits,
+    periodType,
+    fixedStartDate,
+    fixedEndDate,
+    filterCategoryCode,
+    filterScopeCode,
+    filterSpenderMemberId,
+    filterBeneficiaryMemberId,
+    filterPaymentAccountId,
+    isArchived,
+    idempotencyKey,
+    idempotencyPayload,
+    createdAt,
+    updatedAt,
+    schemaVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbBudget &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.name == this.name &&
+          other.currencyCode == this.currencyCode &&
+          other.limitMinorUnits == this.limitMinorUnits &&
+          other.periodType == this.periodType &&
+          other.fixedStartDate == this.fixedStartDate &&
+          other.fixedEndDate == this.fixedEndDate &&
+          other.filterCategoryCode == this.filterCategoryCode &&
+          other.filterScopeCode == this.filterScopeCode &&
+          other.filterSpenderMemberId == this.filterSpenderMemberId &&
+          other.filterBeneficiaryMemberId == this.filterBeneficiaryMemberId &&
+          other.filterPaymentAccountId == this.filterPaymentAccountId &&
+          other.isArchived == this.isArchived &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.idempotencyPayload == this.idempotencyPayload &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.schemaVersion == this.schemaVersion);
+}
+
+class BudgetsCompanion extends UpdateCompanion<DbBudget> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> name;
+  final Value<String> currencyCode;
+  final Value<int> limitMinorUnits;
+  final Value<String> periodType;
+  final Value<String?> fixedStartDate;
+  final Value<String?> fixedEndDate;
+  final Value<String?> filterCategoryCode;
+  final Value<String?> filterScopeCode;
+  final Value<String?> filterSpenderMemberId;
+  final Value<String?> filterBeneficiaryMemberId;
+  final Value<String?> filterPaymentAccountId;
+  final Value<int> isArchived;
+  final Value<String> idempotencyKey;
+  final Value<String> idempotencyPayload;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> schemaVersion;
+  final Value<int> rowid;
+  const BudgetsCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.limitMinorUnits = const Value.absent(),
+    this.periodType = const Value.absent(),
+    this.fixedStartDate = const Value.absent(),
+    this.fixedEndDate = const Value.absent(),
+    this.filterCategoryCode = const Value.absent(),
+    this.filterScopeCode = const Value.absent(),
+    this.filterSpenderMemberId = const Value.absent(),
+    this.filterBeneficiaryMemberId = const Value.absent(),
+    this.filterPaymentAccountId = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.idempotencyPayload = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BudgetsCompanion.insert({
+    required String id,
+    required String householdId,
+    required String name,
+    required String currencyCode,
+    required int limitMinorUnits,
+    required String periodType,
+    this.fixedStartDate = const Value.absent(),
+    this.fixedEndDate = const Value.absent(),
+    this.filterCategoryCode = const Value.absent(),
+    this.filterScopeCode = const Value.absent(),
+    this.filterSpenderMemberId = const Value.absent(),
+    this.filterBeneficiaryMemberId = const Value.absent(),
+    this.filterPaymentAccountId = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    required String idempotencyKey,
+    required String idempotencyPayload,
+    required String createdAt,
+    required String updatedAt,
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       householdId = Value(householdId),
+       name = Value(name),
+       currencyCode = Value(currencyCode),
+       limitMinorUnits = Value(limitMinorUnits),
+       periodType = Value(periodType),
+       idempotencyKey = Value(idempotencyKey),
+       idempotencyPayload = Value(idempotencyPayload),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<DbBudget> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? name,
+    Expression<String>? currencyCode,
+    Expression<int>? limitMinorUnits,
+    Expression<String>? periodType,
+    Expression<String>? fixedStartDate,
+    Expression<String>? fixedEndDate,
+    Expression<String>? filterCategoryCode,
+    Expression<String>? filterScopeCode,
+    Expression<String>? filterSpenderMemberId,
+    Expression<String>? filterBeneficiaryMemberId,
+    Expression<String>? filterPaymentAccountId,
+    Expression<int>? isArchived,
+    Expression<String>? idempotencyKey,
+    Expression<String>? idempotencyPayload,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? schemaVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (name != null) 'name': name,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (limitMinorUnits != null) 'limit_minor_units': limitMinorUnits,
+      if (periodType != null) 'period_type': periodType,
+      if (fixedStartDate != null) 'fixed_start_date': fixedStartDate,
+      if (fixedEndDate != null) 'fixed_end_date': fixedEndDate,
+      if (filterCategoryCode != null)
+        'filter_category_code': filterCategoryCode,
+      if (filterScopeCode != null) 'filter_scope_code': filterScopeCode,
+      if (filterSpenderMemberId != null)
+        'filter_spender_member_id': filterSpenderMemberId,
+      if (filterBeneficiaryMemberId != null)
+        'filter_beneficiary_member_id': filterBeneficiaryMemberId,
+      if (filterPaymentAccountId != null)
+        'filter_payment_account_id': filterPaymentAccountId,
+      if (isArchived != null) 'is_archived': isArchived,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (idempotencyPayload != null) 'idempotency_payload': idempotencyPayload,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BudgetsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? householdId,
+    Value<String>? name,
+    Value<String>? currencyCode,
+    Value<int>? limitMinorUnits,
+    Value<String>? periodType,
+    Value<String?>? fixedStartDate,
+    Value<String?>? fixedEndDate,
+    Value<String?>? filterCategoryCode,
+    Value<String?>? filterScopeCode,
+    Value<String?>? filterSpenderMemberId,
+    Value<String?>? filterBeneficiaryMemberId,
+    Value<String?>? filterPaymentAccountId,
+    Value<int>? isArchived,
+    Value<String>? idempotencyKey,
+    Value<String>? idempotencyPayload,
+    Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<int>? schemaVersion,
+    Value<int>? rowid,
+  }) {
+    return BudgetsCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      name: name ?? this.name,
+      currencyCode: currencyCode ?? this.currencyCode,
+      limitMinorUnits: limitMinorUnits ?? this.limitMinorUnits,
+      periodType: periodType ?? this.periodType,
+      fixedStartDate: fixedStartDate ?? this.fixedStartDate,
+      fixedEndDate: fixedEndDate ?? this.fixedEndDate,
+      filterCategoryCode: filterCategoryCode ?? this.filterCategoryCode,
+      filterScopeCode: filterScopeCode ?? this.filterScopeCode,
+      filterSpenderMemberId:
+          filterSpenderMemberId ?? this.filterSpenderMemberId,
+      filterBeneficiaryMemberId:
+          filterBeneficiaryMemberId ?? this.filterBeneficiaryMemberId,
+      filterPaymentAccountId:
+          filterPaymentAccountId ?? this.filterPaymentAccountId,
+      isArchived: isArchived ?? this.isArchived,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      idempotencyPayload: idempotencyPayload ?? this.idempotencyPayload,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (limitMinorUnits.present) {
+      map['limit_minor_units'] = Variable<int>(limitMinorUnits.value);
+    }
+    if (periodType.present) {
+      map['period_type'] = Variable<String>(periodType.value);
+    }
+    if (fixedStartDate.present) {
+      map['fixed_start_date'] = Variable<String>(fixedStartDate.value);
+    }
+    if (fixedEndDate.present) {
+      map['fixed_end_date'] = Variable<String>(fixedEndDate.value);
+    }
+    if (filterCategoryCode.present) {
+      map['filter_category_code'] = Variable<String>(filterCategoryCode.value);
+    }
+    if (filterScopeCode.present) {
+      map['filter_scope_code'] = Variable<String>(filterScopeCode.value);
+    }
+    if (filterSpenderMemberId.present) {
+      map['filter_spender_member_id'] = Variable<String>(
+        filterSpenderMemberId.value,
+      );
+    }
+    if (filterBeneficiaryMemberId.present) {
+      map['filter_beneficiary_member_id'] = Variable<String>(
+        filterBeneficiaryMemberId.value,
+      );
+    }
+    if (filterPaymentAccountId.present) {
+      map['filter_payment_account_id'] = Variable<String>(
+        filterPaymentAccountId.value,
+      );
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<int>(isArchived.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (idempotencyPayload.present) {
+      map['idempotency_payload'] = Variable<String>(idempotencyPayload.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('limitMinorUnits: $limitMinorUnits, ')
+          ..write('periodType: $periodType, ')
+          ..write('fixedStartDate: $fixedStartDate, ')
+          ..write('fixedEndDate: $fixedEndDate, ')
+          ..write('filterCategoryCode: $filterCategoryCode, ')
+          ..write('filterScopeCode: $filterScopeCode, ')
+          ..write('filterSpenderMemberId: $filterSpenderMemberId, ')
+          ..write('filterBeneficiaryMemberId: $filterBeneficiaryMemberId, ')
+          ..write('filterPaymentAccountId: $filterPaymentAccountId, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6450,6 +7645,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ChildWithdrawalAuditsTable(this);
   late final $OperationContextsTable operationContexts =
       $OperationContextsTable(this);
+  late final $BudgetsTable budgets = $BudgetsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6462,6 +7658,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     operations,
     childWithdrawalAudits,
     operationContexts,
+    budgets,
   ];
 }
 
@@ -6597,6 +7794,25 @@ final class $$HouseholdsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _childWithdrawalAuditsRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$BudgetsTable, List<DbBudget>> _budgetsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.budgets,
+    aliasName: 'households__id__budgets__household_id',
+  );
+
+  $$BudgetsTableProcessedTableManager get budgetsRefs {
+    final manager = $$BudgetsTableTableManager(
+      $_db,
+      $_db.budgets,
+    ).filter((f) => f.householdId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_budgetsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -6790,6 +8006,31 @@ class $$HouseholdsTableFilterComposer
                     $removeJoinBuilderFromRootComposer,
               ),
         );
+    return f(composer);
+  }
+
+  Expression<bool> budgetsRefs(
+    Expression<bool> Function($$BudgetsTableFilterComposer f) f,
+  ) {
+    final $$BudgetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.householdId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableFilterComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -7041,6 +8282,31 @@ class $$HouseholdsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> budgetsRefs<T extends Object>(
+    Expression<T> Function($$BudgetsTableAnnotationComposer a) f,
+  ) {
+    final $$BudgetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.householdId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$HouseholdsTableTableManager
@@ -7062,6 +8328,7 @@ class $$HouseholdsTableTableManager
             bool ledgerEntriesRefs,
             bool operationsRefs,
             bool childWithdrawalAuditsRefs,
+            bool budgetsRefs,
           })
         > {
   $$HouseholdsTableTableManager(_$AppDatabase db, $HouseholdsTable table)
@@ -7146,6 +8413,7 @@ class $$HouseholdsTableTableManager
                 ledgerEntriesRefs = false,
                 operationsRefs = false,
                 childWithdrawalAuditsRefs = false,
+                budgetsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -7155,6 +8423,7 @@ class $$HouseholdsTableTableManager
                     if (ledgerEntriesRefs) db.ledgerEntries,
                     if (operationsRefs) db.operations,
                     if (childWithdrawalAuditsRefs) db.childWithdrawalAudits,
+                    if (budgetsRefs) db.budgets,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -7264,6 +8533,27 @@ class $$HouseholdsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (budgetsRefs)
+                        await $_getPrefetchedData<
+                          DbHousehold,
+                          $HouseholdsTable,
+                          DbBudget
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HouseholdsTableReferences
+                              ._budgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HouseholdsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).budgetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.householdId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -7290,6 +8580,7 @@ typedef $$HouseholdsTableProcessedTableManager =
         bool ledgerEntriesRefs,
         bool operationsRefs,
         bool childWithdrawalAuditsRefs,
+        bool budgetsRefs,
       })
     >;
 typedef $$HouseholdMembersTableCreateCompanionBuilder =
@@ -11432,6 +12723,617 @@ typedef $$OperationContextsTableProcessedTableManager =
       DbOperationContext,
       PrefetchHooks Function()
     >;
+typedef $$BudgetsTableCreateCompanionBuilder =
+    BudgetsCompanion Function({
+      required String id,
+      required String householdId,
+      required String name,
+      required String currencyCode,
+      required int limitMinorUnits,
+      required String periodType,
+      Value<String?> fixedStartDate,
+      Value<String?> fixedEndDate,
+      Value<String?> filterCategoryCode,
+      Value<String?> filterScopeCode,
+      Value<String?> filterSpenderMemberId,
+      Value<String?> filterBeneficiaryMemberId,
+      Value<String?> filterPaymentAccountId,
+      Value<int> isArchived,
+      required String idempotencyKey,
+      required String idempotencyPayload,
+      required String createdAt,
+      required String updatedAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+typedef $$BudgetsTableUpdateCompanionBuilder =
+    BudgetsCompanion Function({
+      Value<String> id,
+      Value<String> householdId,
+      Value<String> name,
+      Value<String> currencyCode,
+      Value<int> limitMinorUnits,
+      Value<String> periodType,
+      Value<String?> fixedStartDate,
+      Value<String?> fixedEndDate,
+      Value<String?> filterCategoryCode,
+      Value<String?> filterScopeCode,
+      Value<String?> filterSpenderMemberId,
+      Value<String?> filterBeneficiaryMemberId,
+      Value<String?> filterPaymentAccountId,
+      Value<int> isArchived,
+      Value<String> idempotencyKey,
+      Value<String> idempotencyPayload,
+      Value<String> createdAt,
+      Value<String> updatedAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+
+final class $$BudgetsTableReferences
+    extends BaseReferences<_$AppDatabase, $BudgetsTable, DbBudget> {
+  $$BudgetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $HouseholdsTable _householdIdTable(_$AppDatabase db) =>
+      db.households.createAlias('budgets__household_id__households__id');
+
+  $$HouseholdsTableProcessedTableManager get householdId {
+    final $_column = $_itemColumn<String>('household_id')!;
+
+    final manager = $$HouseholdsTableTableManager(
+      $_db,
+      $_db.households,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_householdIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BudgetsTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get limitMinorUnits => $composableBuilder(
+    column: $table.limitMinorUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fixedStartDate => $composableBuilder(
+    column: $table.fixedStartDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fixedEndDate => $composableBuilder(
+    column: $table.fixedEndDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filterCategoryCode => $composableBuilder(
+    column: $table.filterCategoryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filterScopeCode => $composableBuilder(
+    column: $table.filterScopeCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filterSpenderMemberId => $composableBuilder(
+    column: $table.filterSpenderMemberId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filterBeneficiaryMemberId => $composableBuilder(
+    column: $table.filterBeneficiaryMemberId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filterPaymentAccountId => $composableBuilder(
+    column: $table.filterPaymentAccountId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$HouseholdsTableFilterComposer get householdId {
+    final $$HouseholdsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableFilterComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get limitMinorUnits => $composableBuilder(
+    column: $table.limitMinorUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fixedStartDate => $composableBuilder(
+    column: $table.fixedStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fixedEndDate => $composableBuilder(
+    column: $table.fixedEndDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filterCategoryCode => $composableBuilder(
+    column: $table.filterCategoryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filterScopeCode => $composableBuilder(
+    column: $table.filterScopeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filterSpenderMemberId => $composableBuilder(
+    column: $table.filterSpenderMemberId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filterBeneficiaryMemberId => $composableBuilder(
+    column: $table.filterBeneficiaryMemberId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filterPaymentAccountId => $composableBuilder(
+    column: $table.filterPaymentAccountId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HouseholdsTableOrderingComposer get householdId {
+    final $$HouseholdsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableOrderingComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get limitMinorUnits => $composableBuilder(
+    column: $table.limitMinorUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fixedStartDate => $composableBuilder(
+    column: $table.fixedStartDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fixedEndDate => $composableBuilder(
+    column: $table.fixedEndDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filterCategoryCode => $composableBuilder(
+    column: $table.filterCategoryCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filterScopeCode => $composableBuilder(
+    column: $table.filterScopeCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filterSpenderMemberId => $composableBuilder(
+    column: $table.filterSpenderMemberId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filterBeneficiaryMemberId => $composableBuilder(
+    column: $table.filterBeneficiaryMemberId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get filterPaymentAccountId => $composableBuilder(
+    column: $table.filterPaymentAccountId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  $$HouseholdsTableAnnotationComposer get householdId {
+    final $$HouseholdsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.householdId,
+      referencedTable: $db.households,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HouseholdsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.households,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetsTable,
+          DbBudget,
+          $$BudgetsTableFilterComposer,
+          $$BudgetsTableOrderingComposer,
+          $$BudgetsTableAnnotationComposer,
+          $$BudgetsTableCreateCompanionBuilder,
+          $$BudgetsTableUpdateCompanionBuilder,
+          (DbBudget, $$BudgetsTableReferences),
+          DbBudget,
+          PrefetchHooks Function({bool householdId})
+        > {
+  $$BudgetsTableTableManager(_$AppDatabase db, $BudgetsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<int> limitMinorUnits = const Value.absent(),
+                Value<String> periodType = const Value.absent(),
+                Value<String?> fixedStartDate = const Value.absent(),
+                Value<String?> fixedEndDate = const Value.absent(),
+                Value<String?> filterCategoryCode = const Value.absent(),
+                Value<String?> filterScopeCode = const Value.absent(),
+                Value<String?> filterSpenderMemberId = const Value.absent(),
+                Value<String?> filterBeneficiaryMemberId = const Value.absent(),
+                Value<String?> filterPaymentAccountId = const Value.absent(),
+                Value<int> isArchived = const Value.absent(),
+                Value<String> idempotencyKey = const Value.absent(),
+                Value<String> idempotencyPayload = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion(
+                id: id,
+                householdId: householdId,
+                name: name,
+                currencyCode: currencyCode,
+                limitMinorUnits: limitMinorUnits,
+                periodType: periodType,
+                fixedStartDate: fixedStartDate,
+                fixedEndDate: fixedEndDate,
+                filterCategoryCode: filterCategoryCode,
+                filterScopeCode: filterScopeCode,
+                filterSpenderMemberId: filterSpenderMemberId,
+                filterBeneficiaryMemberId: filterBeneficiaryMemberId,
+                filterPaymentAccountId: filterPaymentAccountId,
+                isArchived: isArchived,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String householdId,
+                required String name,
+                required String currencyCode,
+                required int limitMinorUnits,
+                required String periodType,
+                Value<String?> fixedStartDate = const Value.absent(),
+                Value<String?> fixedEndDate = const Value.absent(),
+                Value<String?> filterCategoryCode = const Value.absent(),
+                Value<String?> filterScopeCode = const Value.absent(),
+                Value<String?> filterSpenderMemberId = const Value.absent(),
+                Value<String?> filterBeneficiaryMemberId = const Value.absent(),
+                Value<String?> filterPaymentAccountId = const Value.absent(),
+                Value<int> isArchived = const Value.absent(),
+                required String idempotencyKey,
+                required String idempotencyPayload,
+                required String createdAt,
+                required String updatedAt,
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion.insert(
+                id: id,
+                householdId: householdId,
+                name: name,
+                currencyCode: currencyCode,
+                limitMinorUnits: limitMinorUnits,
+                periodType: periodType,
+                fixedStartDate: fixedStartDate,
+                fixedEndDate: fixedEndDate,
+                filterCategoryCode: filterCategoryCode,
+                filterScopeCode: filterScopeCode,
+                filterSpenderMemberId: filterSpenderMemberId,
+                filterBeneficiaryMemberId: filterBeneficiaryMemberId,
+                filterPaymentAccountId: filterPaymentAccountId,
+                isArchived: isArchived,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BudgetsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({householdId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (householdId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.householdId,
+                                referencedTable: $$BudgetsTableReferences
+                                    ._householdIdTable(db),
+                                referencedColumn: $$BudgetsTableReferences
+                                    ._householdIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BudgetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetsTable,
+      DbBudget,
+      $$BudgetsTableFilterComposer,
+      $$BudgetsTableOrderingComposer,
+      $$BudgetsTableAnnotationComposer,
+      $$BudgetsTableCreateCompanionBuilder,
+      $$BudgetsTableUpdateCompanionBuilder,
+      (DbBudget, $$BudgetsTableReferences),
+      DbBudget,
+      PrefetchHooks Function({bool householdId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11450,4 +13352,6 @@ class $AppDatabaseManager {
       $$ChildWithdrawalAuditsTableTableManager(_db, _db.childWithdrawalAudits);
   $$OperationContextsTableTableManager get operationContexts =>
       $$OperationContextsTableTableManager(_db, _db.operationContexts);
+  $$BudgetsTableTableManager get budgets =>
+      $$BudgetsTableTableManager(_db, _db.budgets);
 }

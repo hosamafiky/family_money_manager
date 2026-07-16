@@ -743,4 +743,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingGenericError => 'An error occurred. Please try again.';
+
+  @override
+  String get budgetsTitle => 'Budgets';
+
+  @override
+  String get budgetNew => 'New Budget';
+
+  @override
+  String get budgetName => 'Budget name';
+
+  @override
+  String get budgetCurrency => 'Currency';
+
+  @override
+  String get budgetLimit => 'Monthly limit';
+
+  @override
+  String get budgetLimitFixed => 'Budget limit';
+
+  @override
+  String get budgetPeriodMonthly => 'Monthly (recurring)';
+
+  @override
+  String get budgetPeriodFixed => 'Fixed period';
+
+  @override
+  String get budgetStartDate => 'Start date';
+
+  @override
+  String get budgetEndDate => 'End date';
+
+  @override
+  String get budgetCategoryFilter => 'Category (optional)';
+
+  @override
+  String get budgetScopeFilter => 'Scope (optional)';
+
+  @override
+  String get budgetSpenderFilter => 'Spender (optional)';
+
+  @override
+  String get budgetBeneficiaryFilter => 'Beneficiary (optional)';
+
+  @override
+  String get budgetAccountFilter => 'Payment account (optional)';
+
+  @override
+  String get budgetOverlapNote =>
+      'Budgets may overlap — each is monitored independently';
+
+  @override
+  String get budgetStatusNoSpending => 'No spending';
+
+  @override
+  String get budgetStatusOnTrack => 'On track';
+
+  @override
+  String get budgetStatusNearLimit => 'Near limit';
+
+  @override
+  String get budgetStatusLimitReached => 'Limit reached';
+
+  @override
+  String get budgetStatusOverBudget => 'Over budget';
+
+  @override
+  String get budgetConsumed => 'Spent';
+
+  @override
+  String get budgetRemaining => 'Remaining';
+
+  @override
+  String budgetPercent(int percent) {
+    return '$percent% used';
+  }
+
+  @override
+  String get budgetReversalNote =>
+      'Fully reversed expenses count as zero toward this budget';
+
+  @override
+  String get budgetEmpty => 'No budgets yet. Create one to start planning.';
+
+  @override
+  String get budgetArchived => 'Archived';
+
+  @override
+  String get budgetArchive => 'Archive budget';
+
+  @override
+  String get budgetRestore => 'Restore budget';
+
+  @override
+  String get budgetPreviousPeriods => 'Previous periods';
+
+  @override
+  String get budgetNoMatching => 'No matching expenses in this period';
+
+  @override
+  String get errorBudgetNameEmpty => 'Budget name is required';
+
+  @override
+  String get errorBudgetLimitZero => 'Budget limit must be greater than zero';
+
+  @override
+  String get errorBudgetEndBeforeStart => 'End date must be after start date';
+
+  @override
+  String get errorBudgetCurrencyRequired => 'Currency is required';
 }

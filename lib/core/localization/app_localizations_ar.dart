@@ -734,4 +734,114 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboardingGenericError => 'حدث خطأ. يرجى المحاولة مجدداً.';
+
+  @override
+  String get budgetsTitle => 'الميزانيات';
+
+  @override
+  String get budgetNew => 'ميزانية جديدة';
+
+  @override
+  String get budgetName => 'اسم الميزانية';
+
+  @override
+  String get budgetCurrency => 'العملة';
+
+  @override
+  String get budgetLimit => 'الحد الشهري';
+
+  @override
+  String get budgetLimitFixed => 'حد الميزانية';
+
+  @override
+  String get budgetPeriodMonthly => 'شهرية (متكررة)';
+
+  @override
+  String get budgetPeriodFixed => 'فترة محددة';
+
+  @override
+  String get budgetStartDate => 'تاريخ البدء';
+
+  @override
+  String get budgetEndDate => 'تاريخ الانتهاء';
+
+  @override
+  String get budgetCategoryFilter => 'الفئة (اختياري)';
+
+  @override
+  String get budgetScopeFilter => 'النطاق (اختياري)';
+
+  @override
+  String get budgetSpenderFilter => 'المُنفق (اختياري)';
+
+  @override
+  String get budgetBeneficiaryFilter => 'المستفيد (اختياري)';
+
+  @override
+  String get budgetAccountFilter => 'حساب الدفع (اختياري)';
+
+  @override
+  String get budgetOverlapNote =>
+      'يمكن أن تتداخل الميزانيات — كل ميزانية مستقلة';
+
+  @override
+  String get budgetStatusNoSpending => 'لا إنفاق';
+
+  @override
+  String get budgetStatusOnTrack => 'في المسار الصحيح';
+
+  @override
+  String get budgetStatusNearLimit => 'قرب الحد';
+
+  @override
+  String get budgetStatusLimitReached => 'تم الوصول للحد';
+
+  @override
+  String get budgetStatusOverBudget => 'تجاوز الميزانية';
+
+  @override
+  String get budgetConsumed => 'المُنفق';
+
+  @override
+  String get budgetRemaining => 'المتبقي';
+
+  @override
+  String budgetPercent(int percent) {
+    return '$percent٪ مُستخدم';
+  }
+
+  @override
+  String get budgetReversalNote => 'المبالغ المُعادة تُحتسب كصفر في الاستهلاك';
+
+  @override
+  String get budgetEmpty =>
+      'لا توجد ميزانيات بعد. أنشئ ميزانية للبدء في التخطيط.';
+
+  @override
+  String get budgetArchived => 'مؤرشف';
+
+  @override
+  String get budgetArchive => 'أرشفة الميزانية';
+
+  @override
+  String get budgetRestore => 'استعادة الميزانية';
+
+  @override
+  String get budgetPreviousPeriods => 'الفترات السابقة';
+
+  @override
+  String get budgetNoMatching => 'لا توجد نفقات مطابقة في هذه الفترة';
+
+  @override
+  String get errorBudgetNameEmpty => 'اسم الميزانية مطلوب';
+
+  @override
+  String get errorBudgetLimitZero => 'يجب أن يكون حد الميزانية أكبر من صفر';
+
+  @override
+  String get errorBudgetEndBeforeStart =>
+      'يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء';
+
+  @override
+  String get errorBudgetCurrencyRequired => 'العملة مطلوبة';
 }

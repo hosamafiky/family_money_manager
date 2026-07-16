@@ -1513,6 +1513,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred. Please try again.'**
   String get onboardingGenericError;
+
+  /// Title for the budgets section.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgetsTitle;
+
+  /// Button/title for creating a new budget.
+  ///
+  /// In en, this message translates to:
+  /// **'New Budget'**
+  String get budgetNew;
+
+  /// Label for the budget name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget name'**
+  String get budgetName;
+
+  /// Label for the budget currency field.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get budgetCurrency;
+
+  /// Label for the budget limit field (monthly budget).
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly limit'**
+  String get budgetLimit;
+
+  /// Label for the budget limit field (fixed budget).
+  ///
+  /// In en, this message translates to:
+  /// **'Budget limit'**
+  String get budgetLimitFixed;
+
+  /// Period type: monthly recurring budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly (recurring)'**
+  String get budgetPeriodMonthly;
+
+  /// Period type: fixed date range budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed period'**
+  String get budgetPeriodFixed;
+
+  /// Label for the budget start date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get budgetStartDate;
+
+  /// Label for the budget end date field.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get budgetEndDate;
+
+  /// Label for optional category filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Category (optional)'**
+  String get budgetCategoryFilter;
+
+  /// Label for optional expense scope filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope (optional)'**
+  String get budgetScopeFilter;
+
+  /// Label for optional spender member filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Spender (optional)'**
+  String get budgetSpenderFilter;
+
+  /// Label for optional beneficiary member filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary (optional)'**
+  String get budgetBeneficiaryFilter;
+
+  /// Label for optional payment account filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment account (optional)'**
+  String get budgetAccountFilter;
+
+  /// Explanation that budgets can overlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets may overlap — each is monitored independently'**
+  String get budgetOverlapNote;
+
+  /// Budget status: no spending yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending'**
+  String get budgetStatusNoSpending;
+
+  /// Budget status: on track.
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get budgetStatusOnTrack;
+
+  /// Budget status: near the limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Near limit'**
+  String get budgetStatusNearLimit;
+
+  /// Budget status: limit reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit reached'**
+  String get budgetStatusLimitReached;
+
+  /// Budget status: over budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get budgetStatusOverBudget;
+
+  /// Label for consumed/spent amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetConsumed;
+
+  /// Label for remaining amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get budgetRemaining;
+
+  /// Percentage of budget used.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String budgetPercent(int percent);
+
+  /// Note explaining reversal semantics for budgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully reversed expenses count as zero toward this budget'**
+  String get budgetReversalNote;
+
+  /// Empty state message for budgets list.
+  ///
+  /// In en, this message translates to:
+  /// **'No budgets yet. Create one to start planning.'**
+  String get budgetEmpty;
+
+  /// Label indicating a budget is archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get budgetArchived;
+
+  /// Button to archive a budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive budget'**
+  String get budgetArchive;
+
+  /// Button to restore an archived budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore budget'**
+  String get budgetRestore;
+
+  /// Section title for previous month history.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous periods'**
+  String get budgetPreviousPeriods;
+
+  /// Empty state for drill-down when no matching expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching expenses in this period'**
+  String get budgetNoMatching;
+
+  /// Validation error: budget name is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget name is required'**
+  String get errorBudgetNameEmpty;
+
+  /// Validation error: budget limit is zero.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget limit must be greater than zero'**
+  String get errorBudgetLimitZero;
+
+  /// Validation error: end date is before start date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date must be after start date'**
+  String get errorBudgetEndBeforeStart;
+
+  /// Validation error: currency not selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency is required'**
+  String get errorBudgetCurrencyRequired;
 }
 
 class _AppLocalizationsDelegate

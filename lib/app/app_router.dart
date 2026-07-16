@@ -3,6 +3,9 @@ import 'package:family_money_manager/core/navigation/routes.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_creation_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_detail_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/accounts_screen.dart';
+import 'package:family_money_manager/features/budgets/presentation/budget_creation_screen.dart';
+import 'package:family_money_manager/features/budgets/presentation/budget_detail_screen.dart';
+import 'package:family_money_manager/features/budgets/presentation/budgets_list_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/household/data/drift_household_repository.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
@@ -58,6 +61,9 @@ import 'package:go_router/go_router.dart';
 ///   /reports/spouse-wallet    — SpouseWalletReportScreen
 ///   /reports/protected-funds  — ProtectedFundsReportScreen
 ///   /reports/transactions     — ReportTransactionListScreen (drill-down)
+///   /budgets               — BudgetsListScreen (Phase 5A)
+///   /budgets/new           — BudgetCreationScreen
+///   /budgets/:budgetId     — BudgetDetailScreen
 abstract final class AppRouter {
   static GoRouter create(WidgetRef ref) {
     return GoRouter(
@@ -238,6 +244,24 @@ abstract final class AppRouter {
             GoRoute(
               path: 'transactions',
               builder: (context, state) => const ReportTransactionListScreen(),
+            ),
+          ],
+        ),
+
+        // ── Phase 5A budget routes ─────────────────────────────────────────
+        GoRoute(
+          path: '/budgets',
+          builder: (context, state) => const BudgetsListScreen(),
+          routes: [
+            GoRoute(
+              path: 'new',
+              builder: (context, state) => const BudgetCreationScreen(),
+            ),
+            GoRoute(
+              path: ':budgetId',
+              builder: (context, state) => BudgetDetailScreen(
+                budgetId: state.pathParameters['budgetId']!,
+              ),
             ),
           ],
         ),

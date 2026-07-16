@@ -1,4 +1,22 @@
 /// Drift-backed implementation of [ReportQueryRepository].
+///
+/// ── DETERMINISTIC ORDERING POLICY ────────────────────────────────────────────
+///
+/// All queries that return ordered rows (e.g. [drillDown]) use
+/// `ORDER BY o.effective_date DESC, o.id ASC` to guarantee a stable,
+/// deterministic result set across identical DB states. The compound sort key
+/// ensures:
+///   1. Most-recent transactions appear first (user expectation).
+///   2. Same-date operations are ordered by their immutable string ID, which
+///      is client-generated UUID v4. This tie-break is deterministic because
+///      UUIDs do not change after insertion.
+///
+/// ── SAFE RECORD LIMIT ─────────────────────────────────────────────────────────
+///
+/// [drillDown] enforces a hard `LIMIT` (default 100, max 500) to prevent
+/// unbounded memory allocation when a period contains thousands of rows.
+/// Callers that need full export should paginate using the `offset` parameter
+/// (not yet exposed; deferred to a future phase).
 library;
 
 import 'package:drift/drift.dart';

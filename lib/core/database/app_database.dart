@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:family_money_manager/core/database/tables/budgets_table.dart';
 import 'package:family_money_manager/core/database/tables/child_withdrawal_audits_table.dart';
 import 'package:family_money_manager/core/database/tables/financial_accounts_table.dart';
 import 'package:family_money_manager/core/database/tables/household_members_table.dart';
@@ -49,6 +50,7 @@ part 'app_database.g.dart';
 ///                   lock for owner_type, fund_purpose, is_protected, is_spendable,
 ///                   include_in_net_worth, include_in_zakat, type, currency_code);
 ///                   restrict_child_fund_unprotect trigger (always).
+///   7 — Phase 5A: budgets table for budget plans; idempotency index on budgets.
 @DriftDatabase(
   tables: [
     Households,
@@ -58,6 +60,7 @@ part 'app_database.g.dart';
     Operations,
     ChildWithdrawalAudits,
     OperationContexts,
+    Budgets,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -73,7 +76,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +92,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyChildFundProtectionTrigger();
       await _applyOperationContextTriggers();
       await _applyIndexes();
+      await _applyBudgetIdempotencyIndex();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -124,6 +128,11 @@ class AppDatabase extends _$AppDatabase {
         // v5 → v6: stronger account-classification immutability triggers.
         await _applyAccountClassificationImmutabilityTrigger();
         await _applyChildFundProtectionTrigger();
+      }
+      if (from <= 6) {
+        // v6 → v7: budgets table for Phase 5A budget planning.
+        await m.createTable(budgets);
+        await _applyBudgetIdempotencyIndex();
       }
     },
     beforeOpen: (details) async {
@@ -523,6 +532,15 @@ class AppDatabase extends _$AppDatabase {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_financial_accounts_idempotency
       ON financial_accounts(household_id, idempotency_key)
       WHERE idempotency_key IS NOT NULL
+    ''');
+  }
+
+  // ── Budget idempotency index (Phase 5A) ───────────────────────────────────
+
+  Future<void> _applyBudgetIdempotencyIndex() async {
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_budgets_idempotency
+      ON budgets(household_id, idempotency_key)
     ''');
   }
 }

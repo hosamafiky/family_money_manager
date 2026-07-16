@@ -94,7 +94,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(
@@ -115,7 +116,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(
@@ -141,7 +143,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
             incomeFormProvider.overrideWith(IncomeFormNotifier.new),
           ],
@@ -238,7 +241,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(
