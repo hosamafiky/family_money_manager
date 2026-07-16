@@ -21,6 +21,7 @@ import 'package:family_money_manager/features/accounts/data/drift_account_reposi
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/balance/data/drift_balance_repository.dart';
 import 'package:family_money_manager/features/ledger/data/drift_ledger_repository.dart';
+import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/operation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -245,5 +246,60 @@ void main() {
       );
       expect(activeAccounts.any((a) => a.id == accId), isFalse);
     });
+
+    // REVERSAL EXCEPTION: Reversals are permitted on archived accounts
+    // (append-only correction principle). A reversal does NOT call
+    // _requireAccount; it calls _loadAccount which skips the archived check.
+    test(
+      'reversal of income on archived account is permitted (append-only correction)',
+      () async {
+        await insertHousehold('hh-arch-9');
+        final accId = await createAccount('hh-arch-9');
+
+        // Fund the account.
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-arch-9-inc',
+            householdId: 'hh-arch-9',
+            destinationAccountId: accId,
+            amountMinorUnits: 5000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
+
+        // Archive the account (no balance check needed — archived directly via SQL).
+        await db.customStatement(
+          "UPDATE financial_accounts SET is_archived = 1, "
+          "archived_at = '2024-01-15T00:00:00Z', "
+          "updated_at = '2024-01-15T00:00:00Z' "
+          "WHERE id = '$accId'",
+        );
+
+        // A reversal that DEBITS the archived account should still succeed.
+        // This uses _loadAccount (not _requireAccount) so the archived flag
+        // does not block the write.
+        final result = await ledgerRepo.reverseOperation(
+          const ReverseOperationParams(
+            reversalOperationId: 'op-arch-9-rev',
+            originalOperationId: 'op-arch-9-inc',
+            householdId: 'hh-arch-9',
+            effectiveDate: '2024-01-16',
+            createdBy: 'user-1',
+            reason: 'Correction on archived account',
+          ),
+        );
+
+        expect(result, IdempotentOperationResult.created);
+
+        // Balance should be 0 after reversal.
+        final balance = await balanceRepo.currentBalanceMinorUnits(
+          accountId: accId,
+          householdId: 'hh-arch-9',
+        );
+        expect(balance, 0);
+      },
+    );
   });
 }
