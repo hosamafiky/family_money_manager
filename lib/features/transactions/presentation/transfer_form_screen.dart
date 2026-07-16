@@ -1,5 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/child_withdrawal_context.dart';
@@ -77,11 +79,33 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
             return Center(child: Text(l10n.errorGeneric));
           }
           final accounts = result.value.where((a) => !a.isArchived).toList();
+
+          // Clear invalid preselected IDs (archived accounts).
+          if (_sourceAccountId != null &&
+              accounts.every((a) => a.id != _sourceAccountId)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _sourceAccountId = null);
+            });
+          }
+          if (_destinationAccountId != null &&
+              accounts.every((a) => a.id != _destinationAccountId)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _destinationAccountId = null);
+            });
+          }
+
           final sourceAccount = accounts
               .where((a) => a.id == _sourceAccountId)
               .firstOrNull;
+          final destAccount = accounts
+              .where((a) => a.id == _destinationAccountId)
+              .firstOrNull;
           final isProtectedSource =
               sourceAccount?.requiresWithdrawalAudit ?? false;
+          final hasCurrencyMismatch =
+              sourceAccount != null &&
+              destAccount != null &&
+              sourceAccount.currencyCode != destAccount.currencyCode;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -121,6 +145,17 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     l10n.errorSameAccount,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              if (hasCurrencyMismatch)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    l10n.errorCurrencyMismatch,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                       fontSize: 12,
@@ -308,9 +343,20 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
       hasErrors = true;
     }
 
+    // Block cross-currency transfers at the form level.
+    if (_sourceAccountId != null && _destinationAccountId != null) {
+      final src = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
+      final dst = accounts
+          .where((a) => a.id == _destinationAccountId)
+          .firstOrNull;
+      if (src != null && dst != null && src.currencyCode != dst.currencyCode) {
+        setState(() => _destError = l10n.errorCurrencyMismatch);
+        hasErrors = true;
+      }
+    }
+
     final rawAmount = _amountController.text.trim();
-    final parsedAmount = double.tryParse(rawAmount);
-    if (parsedAmount == null || parsedAmount <= 0) {
+    if (rawAmount.isEmpty) {
       setState(() => _amountError = l10n.errorMoneyInvalidFormat);
       hasErrors = true;
     }
@@ -335,7 +381,13 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     if (hasErrors) return;
 
     final sourceAccount = accounts.firstWhere((a) => a.id == _sourceAccountId);
-    final minorUnits = (parsedAmount! * 100).round();
+    final currency = Currency.fromCode(sourceAccount.currencyCode);
+    final parseResult = MoneyInputFormatter.parse(rawAmount, currency);
+    if (parseResult is! MoneyParseOk || parseResult.value.minorUnits <= 0) {
+      setState(() => _amountError = l10n.errorMoneyInvalidFormat);
+      return;
+    }
+    final minorUnits = parseResult.value.minorUnits;
     final idemKey = ref.read(transferFormKeyProvider);
 
     ChildWithdrawalContext? withdrawalAudit;

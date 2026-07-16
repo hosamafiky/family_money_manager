@@ -313,7 +313,7 @@ void main() {
       await spend(wallet, 'op-sw-6-spend', 2000, '2025-01-10');
       // Reverse the expense
       await ledgerRepo.reverseOperation(
-        ReverseOperationParams(
+        const ReverseOperationParams(
           reversalOperationId: 'op-sw-6-rev',
           originalOperationId: 'op-sw-6-spend',
           householdId: _hh,

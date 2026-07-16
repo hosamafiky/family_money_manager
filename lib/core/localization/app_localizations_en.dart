@@ -728,4 +728,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportViewReports => 'View Reports';
+
+  @override
+  String get onboardingSubtitle => 'Welcome! Enter your name to get started.';
+
+  @override
+  String get onboardingNameLabel => 'Your name';
+
+  @override
+  String get onboardingNameHint => 'e.g. Ahmed';
+
+  @override
+  String get onboardingStartButton => 'Start';
+
+  @override
+  String get onboardingGenericError => 'An error occurred. Please try again.';
 }

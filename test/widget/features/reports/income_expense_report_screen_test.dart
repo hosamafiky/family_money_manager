@@ -92,8 +92,8 @@ Widget _buildScreen({
 void main() {
   group('IncomeExpenseReportScreen', () {
     testWidgets('1. Shows gross income amount', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 10000,
           grossExpenseMinorUnits: 3000,
@@ -108,8 +108,8 @@ void main() {
     });
 
     testWidgets('2. Shows gross expense amount', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 10000,
           grossExpenseMinorUnits: 5000,
@@ -122,8 +122,8 @@ void main() {
     });
 
     testWidgets('3. Shows reversal effect when present', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 10000,
           grossExpenseMinorUnits: 5000,
@@ -138,8 +138,8 @@ void main() {
     });
 
     testWidgets('4. Transfer note displayed', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 5000,
           grossExpenseMinorUnits: 0,
@@ -152,8 +152,8 @@ void main() {
     });
 
     testWidgets('5. Currency note displayed', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 5000,
           grossExpenseMinorUnits: 0,
@@ -166,13 +166,13 @@ void main() {
     });
 
     testWidgets('6. No mixed-currency total shown', (tester) async {
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 5000,
           grossExpenseMinorUnits: 0,
         ),
-        const CurrencyFlowSummary(
+        CurrencyFlowSummary(
           currencyCode: 'USD',
           grossIncomeMinorUnits: 2000,
           grossExpenseMinorUnits: 0,
@@ -212,8 +212,8 @@ void main() {
 
     testWidgets('10. Refresh button triggers reload', (tester) async {
       var callCount = 0;
-      final result = AppOk([
-        const CurrencyFlowSummary(
+      const result = AppOk([
+        CurrencyFlowSummary(
           currencyCode: 'EGP',
           grossIncomeMinorUnits: 5000,
           grossExpenseMinorUnits: 0,

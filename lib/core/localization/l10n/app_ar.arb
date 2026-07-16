@@ -233,5 +233,16 @@
   "reportPeriodClosingBalance": "الرصيد الختامي للفترة",
   "reportAuditDrillDown": "عرض التدقيق",
   "reportTransactionCount": "{count} معاملات",
-  "reportViewReports": "عرض التقارير"
+  "reportViewReports": "عرض التقارير",
+
+  "onboardingSubtitle": "مرحباً! أدخل اسمك لبدء الإعداد.",
+  "@onboardingSubtitle": { "description": "Onboarding screen subtitle." },
+  "onboardingNameLabel": "اسمك",
+  "@onboardingNameLabel": { "description": "Label for the name field on the onboarding screen." },
+  "onboardingNameHint": "مثال: أحمد",
+  "@onboardingNameHint": { "description": "Hint text for the name field on the onboarding screen." },
+  "onboardingStartButton": "ابدأ",
+  "@onboardingStartButton": { "description": "Submit button on the onboarding screen." },
+  "onboardingGenericError": "حدث خطأ. يرجى المحاولة مجدداً.",
+  "@onboardingGenericError": { "description": "Generic error message on the onboarding screen." }
 }

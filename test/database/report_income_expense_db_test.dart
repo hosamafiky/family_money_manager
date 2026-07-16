@@ -249,7 +249,7 @@ void main() {
       await income(_hh, acc, 'op-ie-6-seed', 20000, '2025-01-01');
       await expense(_hh, acc, 'op-exp-6', 6000, '2025-01-10');
       await ledgerRepo.reverseOperation(
-        ReverseOperationParams(
+        const ReverseOperationParams(
           reversalOperationId: 'op-rev-6',
           originalOperationId: 'op-exp-6',
           householdId: _hh,
@@ -271,7 +271,7 @@ void main() {
       await income(_hh, acc, 'op-ie-7-seed', 20000, '2025-01-01');
       await expense(_hh, acc, 'op-exp-7', 7000, '2025-01-10');
       await ledgerRepo.reverseOperation(
-        ReverseOperationParams(
+        const ReverseOperationParams(
           reversalOperationId: 'op-rev-7',
           originalOperationId: 'op-exp-7',
           householdId: _hh,
@@ -419,7 +419,7 @@ void main() {
       );
 
       // Request with currency filter for EGP only
-      final filter = ReportFilter(currencyCodes: ['EGP']);
+      const filter = ReportFilter(currencyCodes: ['EGP']);
       final flows = await reportRepo.incomeExpenseFlow(
         req(_hh, '2025-01-01', '2025-02-01', filter: filter),
       );

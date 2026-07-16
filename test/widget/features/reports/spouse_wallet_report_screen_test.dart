@@ -76,7 +76,7 @@ Widget _buildScreen({
       reportRequestProvider.overrideWith(_FixedRequestNotifier.new),
       spouseWalletReportProvider.overrideWith((ref, req) async {
         if (throwError) throw Exception('Fake error');
-        return result ?? AppOk([_sampleWallet]);
+        return result ?? const AppOk([_sampleWallet]);
       }),
     ],
     child: MaterialApp(

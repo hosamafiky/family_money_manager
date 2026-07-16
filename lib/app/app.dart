@@ -5,6 +5,7 @@ import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Root widget of the application.
 ///
@@ -19,7 +20,13 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-  late final _router = AppRouter.create();
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = AppRouter.create(ref);
+  }
 
   @override
   Widget build(BuildContext context) {

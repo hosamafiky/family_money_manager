@@ -249,7 +249,7 @@ void main() {
       await income(_hh, acc, 'op-af-7-seed', 20000, '2025-01-01');
       await expense(_hh, acc, 'op-exp-af-7', 4000, '2025-01-10');
       await ledgerRepo.reverseOperation(
-        ReverseOperationParams(
+        const ReverseOperationParams(
           reversalOperationId: 'op-rev-af-7',
           originalOperationId: 'op-exp-af-7',
           householdId: _hh,

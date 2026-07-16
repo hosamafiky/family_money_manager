@@ -1,5 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_category.dart';
@@ -31,6 +33,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   final _noteController = TextEditingController();
 
   String? _selectedAccountId;
+  // Track the full account so we can read its currency at submission time.
+  FinancialAccount? _selectedAccount;
   TransactionCategory? _selectedCategory;
   DateTime _effectiveDate = DateTime.now();
   String? _amountError;
@@ -70,6 +74,53 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
             return Center(child: Text(l10n.errorGeneric));
           }
           final accounts = result.value.where((a) => !a.isArchived).toList();
+
+          // Sync tracked account; clear preselected ID if account is now archived.
+          if (_selectedAccountId != null) {
+            final found = accounts
+                .where((a) => a.id == _selectedAccountId)
+                .firstOrNull;
+            if (found == null) {
+              // Archived or missing — schedule reset to avoid setState-in-build.
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _selectedAccountId = null;
+                    _selectedAccount = null;
+                  });
+                }
+              });
+            } else {
+              _selectedAccount ??= found;
+            }
+          }
+
+          if (accounts.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.account_balance_wallet_outlined, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.accountsEmpty,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/accounts/new'),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.accountsAddButton),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           return Form(
             key: _formKey,
             child: ListView(
@@ -130,6 +181,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           onChanged: (v) {
             setState(() {
               _selectedAccountId = v;
+              _selectedAccount = accounts.where((a) => a.id == v).firstOrNull;
               _accountError = null;
             });
           },
@@ -209,15 +261,21 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           : null;
     });
 
+    if (_selectedAccountId == null || _selectedCategory == null) return;
+
     final rawAmount = _amountController.text.trim();
-    final parsedAmount = double.tryParse(rawAmount);
-    if (parsedAmount == null || parsedAmount <= 0) {
+    final currencyCode = _selectedAccount?.currencyCode ?? 'EGP';
+    final currency = Currency.fromCode(currencyCode);
+    final parseResult = MoneyInputFormatter.parse(rawAmount, currency);
+    if (parseResult is! MoneyParseOk) {
       setState(() => _amountError = l10n.errorMoneyInvalidFormat);
       return;
     }
-    if (_selectedAccountId == null || _selectedCategory == null) return;
-
-    final minorUnits = (parsedAmount * 100).round();
+    if (parseResult.value.minorUnits <= 0) {
+      setState(() => _amountError = l10n.errorMoneyInvalidFormat);
+      return;
+    }
+    final minorUnits = parseResult.value.minorUnits;
     final idemKey = ref.read(incomeFormProvider).idempotencyKey;
 
     final ctx = IncomeContext(
@@ -226,7 +284,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       householdId: _householdId,
       destinationAccountId: _selectedAccountId!,
       amountMinorUnits: minorUnits,
-      currencyCode: 'EGP',
+      currencyCode: currencyCode,
       category: _selectedCategory!,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,

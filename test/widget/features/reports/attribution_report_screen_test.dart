@@ -84,9 +84,9 @@ Widget _buildScreen({
   );
 }
 
-SpendingAttributionReport _sampleReport() => SpendingAttributionReport(
+SpendingAttributionReport _sampleReport() => const SpendingAttributionReport(
   bySpender: [
-    const MemberSpendingBreakdown(
+    MemberSpendingBreakdown(
       memberId: 'member-1',
       memberDisplayName: 'Alice',
       currencyCode: 'EGP',
@@ -94,9 +94,9 @@ SpendingAttributionReport _sampleReport() => SpendingAttributionReport(
       transactionCount: 3,
     ),
   ],
-  byBeneficiary: const [],
+  byBeneficiary: [],
   byScope: [
-    const ExpenseScopeBreakdown(
+    ExpenseScopeBreakdown(
       scope: ExpenseScope.personal,
       currencyCode: 'EGP',
       totalMinorUnits: 3000,

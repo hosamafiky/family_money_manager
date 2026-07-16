@@ -719,4 +719,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportViewReports => 'عرض التقارير';
+
+  @override
+  String get onboardingSubtitle => 'مرحباً! أدخل اسمك لبدء الإعداد.';
+
+  @override
+  String get onboardingNameLabel => 'اسمك';
+
+  @override
+  String get onboardingNameHint => 'مثال: أحمد';
+
+  @override
+  String get onboardingStartButton => 'ابدأ';
+
+  @override
+  String get onboardingGenericError => 'حدث خطأ. يرجى المحاولة مجدداً.';
 }

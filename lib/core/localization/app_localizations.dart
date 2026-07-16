@@ -1483,6 +1483,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Reports'**
   String get reportViewReports;
+
+  /// Onboarding screen subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome! Enter your name to get started.'**
+  String get onboardingSubtitle;
+
+  /// Label for the name field on the onboarding screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get onboardingNameLabel;
+
+  /// Hint text for the name field on the onboarding screen.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Ahmed'**
+  String get onboardingNameHint;
+
+  /// Submit button on the onboarding screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get onboardingStartButton;
+
+  /// Generic error message on the onboarding screen.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get onboardingGenericError;
 }
 
 class _AppLocalizationsDelegate

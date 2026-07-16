@@ -1,5 +1,11 @@
 import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
+import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
+import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
+import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_context.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
 import 'package:family_money_manager/features/transactions/presentation/providers/transaction_providers.dart';
@@ -18,12 +24,28 @@ class TransferReviewScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final ctx = ref.watch(stagedTransferContextProvider);
     final submitting = ref.watch(submittingProvider);
+    final accountsAsync = ref.watch(accountsProvider(_householdId));
 
     if (ctx == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) context.pop();
+        if (context.mounted && context.canPop()) context.pop();
       });
       return const SizedBox.shrink();
+    }
+
+    final accounts = accountsAsync.maybeWhen(
+      data: (r) =>
+          r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
+      orElse: () => <FinancialAccount>[],
+    );
+
+    String accountName(String id) =>
+        accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
+
+    String formatAmount(int minor, String code) {
+      final currency = Currency.fromCode(code);
+      final money = Money(minorUnits: minor, currency: currency);
+      return '${MoneyInputFormatter.format(money)} $code';
     }
 
     return Scaffold(
@@ -31,9 +53,15 @@ class TransferReviewScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _Row(l10n.fieldSourceAccount, ctx.sourceAccountId),
-          _Row(l10n.fieldDestinationAccount, ctx.destinationAccountId),
-          _Row(l10n.fieldAmount, ctx.amountMinorUnits.toString()),
+          _Row(l10n.fieldSourceAccount, accountName(ctx.sourceAccountId)),
+          _Row(
+            l10n.fieldDestinationAccount,
+            accountName(ctx.destinationAccountId),
+          ),
+          _Row(
+            l10n.fieldAmount,
+            formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+          ),
           _Row(l10n.fieldEffectiveDate, ctx.effectiveDate),
           if (ctx.note != null) _Row(l10n.fieldNote, ctx.note!),
           if (ctx.childWithdrawalAudit != null)
@@ -76,6 +104,9 @@ class TransferReviewScreen extends ConsumerWidget {
           ref.invalidate(
             transactionListProvider((_householdId, const TransactionFilter())),
           );
+          ref.invalidate(accountsProvider(_householdId));
+          ref.invalidate(accountBalanceProvider);
+          ref.invalidate(dashboardSummaryProvider(_householdId));
           context.go('/transactions');
         case AppInsufficientFunds():
           _snack(context, l10n.errorInsufficientFunds);

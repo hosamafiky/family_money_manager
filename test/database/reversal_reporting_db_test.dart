@@ -125,11 +125,11 @@ void main() {
   }
 
   // Helper: build a period for a month
-  DashboardPeriod jan = DashboardPeriod.custom(
+  final DashboardPeriod jan = DashboardPeriod.custom(
     startDate: '2025-01-01',
     endDate: '2025-02-01',
   );
-  DashboardPeriod feb = DashboardPeriod.custom(
+  final DashboardPeriod feb = DashboardPeriod.custom(
     startDate: '2025-02-01',
     endDate: '2025-03-01',
   );

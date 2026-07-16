@@ -508,5 +508,16 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "reportViewReports": "View Reports",
-  "@reportViewReports": { "description": "Dashboard button to open reports." }
+  "@reportViewReports": { "description": "Dashboard button to open reports." },
+
+  "onboardingSubtitle": "Welcome! Enter your name to get started.",
+  "@onboardingSubtitle": { "description": "Onboarding screen subtitle." },
+  "onboardingNameLabel": "Your name",
+  "@onboardingNameLabel": { "description": "Label for the name field on the onboarding screen." },
+  "onboardingNameHint": "e.g. Ahmed",
+  "@onboardingNameHint": { "description": "Hint text for the name field on the onboarding screen." },
+  "onboardingStartButton": "Start",
+  "@onboardingStartButton": { "description": "Submit button on the onboarding screen." },
+  "onboardingGenericError": "An error occurred. Please try again.",
+  "@onboardingGenericError": { "description": "Generic error message on the onboarding screen." }
 }

@@ -39,7 +39,7 @@ class SpendingAttributionReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, __) => ReportErrorState(
+              error: (_, _) => ReportErrorState(
                 onRetry: () =>
                     ref.invalidate(spendingAttributionReportProvider(req)),
               ),

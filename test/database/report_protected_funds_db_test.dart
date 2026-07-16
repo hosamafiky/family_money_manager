@@ -210,7 +210,7 @@ void main() {
       await fund(acc, 'op-pf-4-fund', 20000, '2025-01-01');
       await withdraw(acc, 'op-pf-4-wd', 5000, '2025-01-10');
       await ledgerRepo.reverseOperation(
-        ReverseOperationParams(
+        const ReverseOperationParams(
           reversalOperationId: 'op-pf-4-rev',
           originalOperationId: 'op-pf-4-wd',
           householdId: _hh,

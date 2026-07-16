@@ -1,6 +1,8 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/household/domain/household_member.dart';
@@ -35,6 +37,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   final _reasonController = TextEditingController();
 
   String? _paymentAccountId;
+  FinancialAccount? _paymentAccount;
   TransactionCategory? _category;
   String? _spenderMemberId;
   String? _beneficiaryMemberId;
@@ -102,9 +105,83 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 .where((m) => m.isActive)
                 .toList();
 
-            final selectedAccount = accounts
-                .where((a) => a.id == _paymentAccountId)
-                .firstOrNull;
+            // Sync tracked account; clear preselected ID if account is now archived.
+            if (_paymentAccountId != null) {
+              final found = accounts
+                  .where((a) => a.id == _paymentAccountId)
+                  .firstOrNull;
+              if (found == null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      _paymentAccountId = null;
+                      _paymentAccount = null;
+                    });
+                  }
+                });
+              } else {
+                _paymentAccount ??= found;
+              }
+            }
+
+            if (accounts.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.accountsEmpty,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/accounts/new'),
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.accountsAddButton),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final selectedAccount =
+                _paymentAccount ??
+                accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
+
+            if (members.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.group_outlined, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.membersTitle,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/members'),
+                        icon: const Icon(Icons.person_add_outlined),
+                        label: Text(l10n.memberAddChild),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
             final isProtected =
                 selectedAccount?.requiresWithdrawalAudit ?? false;
 
@@ -198,6 +275,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           .toList(),
       onChanged: (v) => setState(() {
         _paymentAccountId = v;
+        _paymentAccount = accounts.where((a) => a.id == v).firstOrNull;
         _accountError = null;
         _warningAcknowledged = false;
         _confirmed = false;
@@ -420,8 +498,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     }
 
     final rawAmount = _amountController.text.trim();
-    final parsedAmount = double.tryParse(rawAmount);
-    if (parsedAmount == null || parsedAmount <= 0) {
+    if (rawAmount.isEmpty) {
       setState(() => _amountError = l10n.errorMoneyInvalidFormat);
       hasErrors = true;
     }
@@ -445,7 +522,19 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
     if (hasErrors) return;
 
-    final minorUnits = (parsedAmount! * 100).round();
+    final rawAmountStr = _amountController.text.trim();
+    final currencyCode = _paymentAccount?.currencyCode ?? 'EGP';
+    final currency = Currency.fromCode(currencyCode);
+    final parseResult = MoneyInputFormatter.parse(rawAmountStr, currency);
+    if (parseResult is! MoneyParseOk) {
+      setState(() => _amountError = l10n.errorMoneyInvalidFormat);
+      return;
+    }
+    if (parseResult.value.minorUnits <= 0) {
+      setState(() => _amountError = l10n.errorMoneyInvalidFormat);
+      return;
+    }
+    final minorUnits = parseResult.value.minorUnits;
     final idemKey = ref.read(expenseFormKeyProvider);
 
     ChildWithdrawalContext? withdrawalAudit;
@@ -465,7 +554,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       householdId: _householdId,
       paymentAccountId: _paymentAccountId!,
       amountMinorUnits: minorUnits,
-      currencyCode: 'EGP',
+      currencyCode: currencyCode,
       category: _category!,
       spenderMemberId: _spenderMemberId!,
       beneficiaryMemberId: _beneficiaryMemberId!,

@@ -1,9 +1,12 @@
+import 'package:family_money_manager/core/database/database_providers.dart';
 import 'package:family_money_manager/core/navigation/routes.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_creation_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_detail_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/accounts_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:family_money_manager/features/household/data/drift_household_repository.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
+import 'package:family_money_manager/features/onboarding/onboarding_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/account_flow_report_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/category_report_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/home_savings_report_screen.dart';
@@ -25,6 +28,7 @@ import 'package:family_money_manager/features/transactions/presentation/transact
 import 'package:family_money_manager/features/transactions/presentation/transfer_form_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/transfer_review_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
@@ -55,12 +59,27 @@ import 'package:go_router/go_router.dart';
 ///   /reports/protected-funds  — ProtectedFundsReportScreen
 ///   /reports/transactions     — ReportTransactionListScreen (drill-down)
 abstract final class AppRouter {
-  static GoRouter create() {
+  static GoRouter create(WidgetRef ref) {
     return GoRouter(
       initialLocation: '/dashboard',
       debugLogDiagnostics: false,
       errorBuilder: (context, state) => AppErrorScreen(error: state.error),
+      redirect: (context, state) async {
+        // On every navigation attempt, check whether the household is
+        // initialized. If not, redirect to /onboarding (unless already there).
+        if (state.matchedLocation == '/onboarding') return null;
+        final db = ref.read(appDatabaseProvider);
+        final repo = DriftHouseholdRepository(db);
+        final household = await repo.findHousehold('household-v1');
+        if (household == null) return '/onboarding';
+        return null;
+      },
       routes: [
+        // ── Onboarding ────────────────────────────────────────────────────
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
         // ── Phase 4A shell with bottom navigation ─────────────────────────
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
@@ -104,12 +123,6 @@ abstract final class AppRouter {
                   path: '/transactions',
                   builder: (context, state) => const TransactionsScreen(),
                   routes: [
-                    GoRoute(
-                      path: ':operationId',
-                      builder: (context, state) => TransactionDetailScreen(
-                        operationId: state.pathParameters['operationId']!,
-                      ),
-                    ),
                     GoRoute(
                       path: 'new',
                       builder: (context, state) => CreateTransactionScreen(
@@ -156,6 +169,12 @@ abstract final class AppRouter {
                           ],
                         ),
                       ],
+                    ),
+                    GoRoute(
+                      path: ':operationId',
+                      builder: (context, state) => TransactionDetailScreen(
+                        operationId: state.pathParameters['operationId']!,
+                      ),
                     ),
                   ],
                 ),
