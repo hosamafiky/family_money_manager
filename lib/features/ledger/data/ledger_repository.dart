@@ -1,3 +1,4 @@
+import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
 import 'package:family_money_manager/features/ledger/domain/ledger_entry.dart';
 import 'package:family_money_manager/features/ledger/domain/operation.dart';
@@ -165,9 +166,13 @@ final class CurrencyMismatchTransferError extends Error {
       'Cross-currency transfers are prohibited in V1.';
 }
 
-final class ArchivedAccountTransferError extends Error {
-  ArchivedAccountTransferError(this.accountId, this.role);
-  final String accountId;
+/// Subclass of [ArchivedAccountError] that also carries a [role] label
+/// ('source' or 'destination') identifying which leg of a transfer was archived.
+///
+/// Extends [ArchivedAccountError] so that a single `on ArchivedAccountError`
+/// catch in use cases covers both error types without needing two branches.
+final class ArchivedAccountTransferError extends ArchivedAccountError {
+  ArchivedAccountTransferError(super.accountId, this.role);
   final String role;
   @override
   String toString() =>

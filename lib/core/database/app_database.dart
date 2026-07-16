@@ -44,6 +44,11 @@ part 'app_database.g.dart';
 ///                   scoped account idempotency index.
 ///   5 — Phase 3B: operation_contexts table (append-only rich metadata);
 ///                 FK + immutability triggers for operation_contexts.
+///   6 — Phase 3B.1: stronger account-classification immutability;
+///                   restrict_account_classification_update trigger (post-history
+///                   lock for owner_type, fund_purpose, is_protected, is_spendable,
+///                   include_in_net_worth, include_in_zakat, type, currency_code);
+///                   restrict_child_fund_unprotect trigger (always).
 @DriftDatabase(
   tables: [
     Households,
@@ -68,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +85,8 @@ class AppDatabase extends _$AppDatabase {
       await _applyForeignKeyEnforcementTriggers();
       await _applyHouseholdConstraintTriggers();
       await _applyAccountMetadataImmutabilityTrigger();
+      await _applyAccountClassificationImmutabilityTrigger();
+      await _applyChildFundProtectionTrigger();
       await _applyOperationContextTriggers();
       await _applyIndexes();
     },
@@ -112,6 +119,11 @@ class AppDatabase extends _$AppDatabase {
         // v4 → v5: operation_contexts table for rich transaction metadata.
         await m.createTable(operationContexts);
         await _applyOperationContextTriggers();
+      }
+      if (from <= 5) {
+        // v5 → v6: stronger account-classification immutability triggers.
+        await _applyAccountClassificationImmutabilityTrigger();
+        await _applyChildFundProtectionTrigger();
       }
     },
     beforeOpen: (details) async {
@@ -409,6 +421,65 @@ class AppDatabase extends _$AppDatabase {
       "  SELECT RAISE(ABORT, 'Account type and currency are immutable after creation'); "
       'END',
     );
+  }
+
+  // ── Post-history classification immutability trigger (Phase 3B.1) ────────
+  //
+  // Once an account has any ledger entries, the following classification fields
+  // become immutable: type, currency_code, owner_type, fund_purpose,
+  // is_protected, is_spendable, include_in_net_worth, include_in_zakat.
+  //
+  // Defense-in-depth: type and currency_code are ALSO blocked by the always-on
+  // [_applyAccountMetadataImmutabilityTrigger]. This trigger adds the
+  // post-history lock for the remaining fields as a DB-engine guarantee.
+
+  Future<void> _applyAccountClassificationImmutabilityTrigger() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS restrict_account_classification_update
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN (
+        (SELECT COUNT(*) FROM ledger_entries WHERE account_id = OLD.id) > 0
+      )
+      BEGIN
+        SELECT CASE
+          WHEN NEW.type != OLD.type THEN
+            RAISE(ABORT, 'Account type is immutable once financial history exists')
+          WHEN NEW.currency_code != OLD.currency_code THEN
+            RAISE(ABORT, 'Account currency is immutable once financial history exists')
+          WHEN NEW.owner_type != OLD.owner_type THEN
+            RAISE(ABORT, 'Account owner_type is immutable once financial history exists')
+          WHEN NEW.fund_purpose != OLD.fund_purpose THEN
+            RAISE(ABORT, 'Account fund_purpose is immutable once financial history exists')
+          WHEN NEW.is_protected != OLD.is_protected THEN
+            RAISE(ABORT, 'Account is_protected is immutable once financial history exists')
+          WHEN NEW.is_spendable != OLD.is_spendable THEN
+            RAISE(ABORT, 'Account is_spendable is immutable once financial history exists')
+          WHEN NEW.include_in_net_worth != OLD.include_in_net_worth THEN
+            RAISE(ABORT, 'Account include_in_net_worth is immutable once financial history exists')
+          WHEN NEW.include_in_zakat != OLD.include_in_zakat THEN
+            RAISE(ABORT, 'Account include_in_zakat is immutable once financial history exists')
+        END;
+      END
+    ''');
+  }
+
+  // ── Child-protected-fund protection trigger (Phase 3B.1) ─────────────────
+  //
+  // A childProtectedFund account must ALWAYS have is_protected = true.
+  // This rule applies even BEFORE any financial history exists.
+  // Attempting to clear the flag raises an abort regardless of history.
+
+  Future<void> _applyChildFundProtectionTrigger() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS restrict_child_fund_unprotect
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN NEW.type = 'childProtectedFund' AND NEW.is_protected = 0
+      BEGIN
+        SELECT RAISE(ABORT, 'Child protected fund cannot have is_protected disabled');
+      END
+    ''');
   }
 
   // ── Operation-context triggers (Phase 3B) ─────────────────────────────────

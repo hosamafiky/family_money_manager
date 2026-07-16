@@ -6,12 +6,26 @@ import 'package:meta/meta.dart';
 /// An account is a named location that holds money. Its balance is NEVER
 /// stored here — it is derived from the ledger on every read (FINANCIAL_MODEL §3).
 ///
-/// IMMUTABILITY RULES (FINANCIAL_MODEL §21):
-/// - [type] is immutable after creation. The repository MUST NOT expose
-///   any method that changes this field.
-/// - [currencyCode] is immutable after the account has any financial use.
-///   Prefer prohibiting changes after creation to prevent silent reclassification.
-/// - All other fields ([name], [ownerType], [fundPurpose], flags) may be updated.
+/// IMMUTABILITY RULES (FINANCIAL_MODEL §21 / Phase 3B.1):
+///
+/// | Field               | Enforcement                                      |
+/// |---------------------|--------------------------------------------------|
+/// | id                  | Always immutable (PK)                            |
+/// | householdId         | Always immutable (FK)                            |
+/// | type                | Always immutable — DB trigger + repo             |
+/// | currencyCode        | Always immutable — DB trigger + repo             |
+/// | ownerType           | Immutable after financial history — DB trigger   |
+/// | fundPurpose         | Immutable after financial history — DB trigger   |
+/// | isProtected         | Immutable after history; childProtectedFund      |
+/// |                     | cannot disable even before history — DB trigger  |
+/// | isSpendable         | Immutable after financial history — DB trigger   |
+/// | includeInNetWorth   | Immutable after history — DB trigger + repo      |
+/// | includeInZakat      | Immutable after history — DB trigger + repo      |
+/// | name                | Always editable — no restriction                 |
+/// | isArchived          | Only via archive workflow — not in generic update|
+///
+/// "Financial history" = at least one row in `ledger_entries` referencing
+/// this account.
 ///
 /// Archiving: sets [isArchived] to true. Does NOT delete ledger history.
 /// Archived accounts are excluded from active balance totals but their

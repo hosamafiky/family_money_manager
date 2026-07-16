@@ -133,7 +133,9 @@ final class ClassificationImmutabilityError extends Error {
 /// Thrown when attempting to record a financial operation on an archived account.
 ///
 /// Archived accounts retain their ledger history but must not receive new entries.
-final class ArchivedAccountError extends Error {
+/// Not sealed as `final` so that [ArchivedAccountTransferError] (ledger layer)
+/// can extend it, allowing a single `on ArchivedAccountError` catch in use cases.
+class ArchivedAccountError extends Error {
   ArchivedAccountError(this.accountId);
   final String accountId;
   @override

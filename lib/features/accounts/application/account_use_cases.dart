@@ -73,6 +73,20 @@ final class ArchiveAccountUseCase {
 }
 
 /// Updates safe metadata fields (name, notes) of an account.
+///
+/// ## Accepted inputs
+/// Only [name] and [notes] are accepted. Classification fields (type,
+/// currencyCode, ownerType, fundPurpose, isSpendable, isProtected,
+/// includeInNetWorth, includeInZakat) and archive state are NOT accepted
+/// here; they are locked by the repository and database-trigger layers.
+///
+/// ## V1 Display-Name Policy
+/// Transaction lists, ledger entries, and audit records reference accounts
+/// by their stable `account_id`. The displayed name is always resolved at
+/// query time from the current `financial_accounts.name`. No historical name
+/// snapshot is stored. This means if an account is renamed, all historical
+/// displays show the new name. This is explicitly documented and acceptable
+/// for V1. Audit correctness depends on stable IDs, not names.
 final class UpdateAccountMetadataUseCase {
   const UpdateAccountMetadataUseCase(this._repo);
   final AccountRepository _repo;
@@ -102,7 +116,16 @@ final class UpdateAccountMetadataUseCase {
       return const AppNotFound();
     } on ClassificationImmutabilityError catch (e) {
       return AppClassificationImmutabilityViolation(field: e.field);
-    } catch (_) {
+    } catch (e) {
+      // DB-trigger RAISE(ABORT, ...) surfaces as a SqliteException whose
+      // message contains 'immutable'. Map it to AppClassificationImmutabilityViolation
+      // for defense-in-depth (repo-layer check should normally fire first).
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('immutable') || msg.contains('classification')) {
+        return const AppClassificationImmutabilityViolation(
+          field: 'classification',
+        );
+      }
       return const AppPersistenceFailure();
     }
   }
