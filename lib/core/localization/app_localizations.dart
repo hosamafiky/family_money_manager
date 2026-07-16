@@ -1261,6 +1261,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Period'**
   String get dashboardPeriodLabel;
+
+  /// Title for the reports landing screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reportsTitle;
+
+  /// Title for income/expense report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Income & Expenses'**
+  String get reportIncomeExpenseTitle;
+
+  /// Title for spending attribution report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Attribution'**
+  String get reportAttributionTitle;
+
+  /// Title for category report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get reportCategoriesTitle;
+
+  /// Title for account flow report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Flows'**
+  String get reportAccountsTitle;
+
+  /// Title for home savings report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Savings'**
+  String get reportHomeSavingsTitle;
+
+  /// Title for spouse wallet report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Wallet'**
+  String get reportSpouseWalletTitle;
+
+  /// Title for protected funds report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected Funds'**
+  String get reportProtectedFundsTitle;
+
+  /// Label for gross income amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Income'**
+  String get reportGrossIncome;
+
+  /// Label for gross expense amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Expenses'**
+  String get reportGrossExpense;
+
+  /// Label for net income amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Income'**
+  String get reportNetIncome;
+
+  /// Label for net expense amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Expenses'**
+  String get reportNetExpense;
+
+  /// Label for reversal effect amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal Effect'**
+  String get reportReversalEffect;
+
+  /// Label for net cash flow amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Cash Flow'**
+  String get reportNetCashFlow;
+
+  /// Section heading for spending by spender.
+  ///
+  /// In en, this message translates to:
+  /// **'By Spender'**
+  String get reportSpenderSection;
+
+  /// Section heading for spending by beneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'By Beneficiary'**
+  String get reportBeneficiarySection;
+
+  /// Section heading for spending by scope.
+  ///
+  /// In en, this message translates to:
+  /// **'By Scope'**
+  String get reportScopeSection;
+
+  /// Label for opening balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Balance'**
+  String get reportOpeningBalance;
+
+  /// Label for closing balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing Balance'**
+  String get reportClosingBalance;
+
+  /// Label for current balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Balance'**
+  String get reportCurrentBalance;
+
+  /// Label for funded amount in wallet report.
+  ///
+  /// In en, this message translates to:
+  /// **'Funded'**
+  String get reportFunded;
+
+  /// Label for spent amount in wallet report.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get reportSpent;
+
+  /// Label for returned amount in wallet report.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get reportReturned;
+
+  /// Label for withdrawals section.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawals'**
+  String get reportWithdrawals;
+
+  /// Label for withdrawal reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reportWithdrawalReason;
+
+  /// Label for beneficiary in protected fund.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary'**
+  String get reportBeneficiary;
+
+  /// Link to drill-down transaction list.
+  ///
+  /// In en, this message translates to:
+  /// **'View Transactions'**
+  String get reportDrillDown;
+
+  /// Empty-state message for reports.
+  ///
+  /// In en, this message translates to:
+  /// **'No data for this period.'**
+  String get reportEmpty;
+
+  /// Error message for report load failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load report.'**
+  String get reportError;
+
+  /// Refresh button label in reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get reportRefresh;
+
+  /// Note that totals are per currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals shown per currency'**
+  String get reportCurrencySeparate;
+
+  /// Note about transfer exclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers are not included in income or expense totals.'**
+  String get reportTransferNote;
+
+  /// Note about reversal effect display.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal effects are shown separately.'**
+  String get reportReversalNote;
+
+  /// Label for period closing balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Period Closing Balance'**
+  String get reportPeriodClosingBalance;
+
+  /// Link to audit detail.
+  ///
+  /// In en, this message translates to:
+  /// **'View Audit'**
+  String get reportAuditDrillDown;
+
+  /// Count of transactions in a category.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions'**
+  String reportTransactionCount(int count);
+
+  /// Dashboard button to open reports.
+  ///
+  /// In en, this message translates to:
+  /// **'View Reports'**
+  String get reportViewReports;
 }
 
 class _AppLocalizationsDelegate

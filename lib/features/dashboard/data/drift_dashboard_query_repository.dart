@@ -106,29 +106,51 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   }
 
   // ── periodFlow ─────────────────────────────────────────────────────────────
+  //
+  // PERIOD-ACTIVITY MODEL (Phase 4B):
+  // All income/expense operations in the period are included regardless of
+  // is_reversed. Reversal operations (type='reversal') in the period are
+  // queried separately and linked back to the original operation type.
 
   @override
   Future<List<PeriodFlowSummary>> periodFlow({
     required String householdId,
     required DashboardPeriod period,
   }) async {
-    const sql = '''
+    // Query 1: gross income and expense (no is_reversed filter).
+    const grossSql = '''
       SELECT
         currency_code,
         type,
-        is_reversed,
         SUM(total_amount_minor_units) AS subtotal
       FROM operations
       WHERE household_id = ?
         AND effective_date >= ?
         AND effective_date < ?
         AND type IN ('income', 'expense')
-      GROUP BY currency_code, type, is_reversed
+      GROUP BY currency_code, type
     ''';
 
-    final rows = await _db
+    // Query 2: reversal operations in the period, joined to the original
+    // operation to determine whether they cancel income or expense.
+    const reversalSql = '''
+      SELECT
+        rev.currency_code,
+        orig.type AS original_type,
+        SUM(rev.total_amount_minor_units) AS reversal_amount
+      FROM operations rev
+      JOIN operations orig ON orig.reversed_by = rev.id
+      WHERE rev.household_id = ?
+        AND rev.type = 'reversal'
+        AND rev.effective_date >= ?
+        AND rev.effective_date < ?
+        AND orig.type IN ('income', 'expense')
+      GROUP BY rev.currency_code, orig.type
+    ''';
+
+    final grossRows = await _db
         .customSelect(
-          sql,
+          grossSql,
           variables: [
             Variable.withString(householdId),
             Variable.withString(period.startDate),
@@ -137,22 +159,40 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
         )
         .get();
 
-    // Aggregate in Dart: accumulate per currency
+    final reversalRows = await _db
+        .customSelect(
+          reversalSql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(period.startDate),
+            Variable.withString(period.endDate),
+          ],
+        )
+        .get();
+
     final map = <String, _FlowAccumulator>{};
-    for (final row in rows) {
+
+    for (final row in grossRows) {
       final currency = row.read<String>('currency_code');
       final type = row.read<String>('type');
-      final isReversed = row.read<int>('is_reversed') == 1;
       final subtotal = row.read<int>('subtotal');
-
       final acc = map.putIfAbsent(currency, _FlowAccumulator.new);
       if (type == OperationType.income.code) {
-        acc.income += subtotal;
+        acc.grossIncome += subtotal;
       } else if (type == OperationType.expense.code) {
-        acc.expenseGross += subtotal;
-        if (!isReversed) {
-          acc.expenseNet += subtotal;
-        }
+        acc.grossExpense += subtotal;
+      }
+    }
+
+    for (final row in reversalRows) {
+      final currency = row.read<String>('currency_code');
+      final originalType = row.read<String>('original_type');
+      final reversalAmount = row.read<int>('reversal_amount');
+      final acc = map.putIfAbsent(currency, _FlowAccumulator.new);
+      if (originalType == OperationType.income.code) {
+        acc.incomeReversal += reversalAmount;
+      } else if (originalType == OperationType.expense.code) {
+        acc.expenseReversal += reversalAmount;
       }
     }
 
@@ -160,9 +200,10 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
         .map(
           (e) => PeriodFlowSummary(
             currencyCode: e.key,
-            incomeMinorUnits: e.value.income,
-            expenseMinorUnits: e.value.expenseGross,
-            netExpenseMinorUnits: e.value.expenseNet,
+            grossIncomeMinorUnits: e.value.grossIncome,
+            grossExpenseMinorUnits: e.value.grossExpense,
+            incomeReversalMinorUnits: e.value.incomeReversal,
+            expenseReversalMinorUnits: e.value.expenseReversal,
           ),
         )
         .toList();
@@ -415,7 +456,8 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
 
 /// Mutable accumulator used to aggregate period flow in [periodFlow].
 class _FlowAccumulator {
-  int income = 0;
-  int expenseGross = 0;
-  int expenseNet = 0;
+  int grossIncome = 0;
+  int grossExpense = 0;
+  int incomeReversal = 0;
+  int expenseReversal = 0;
 }

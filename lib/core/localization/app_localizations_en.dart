@@ -614,4 +614,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardPeriodLabel => 'Period';
+
+  @override
+  String get reportsTitle => 'Reports';
+
+  @override
+  String get reportIncomeExpenseTitle => 'Income & Expenses';
+
+  @override
+  String get reportAttributionTitle => 'Spending Attribution';
+
+  @override
+  String get reportCategoriesTitle => 'Categories';
+
+  @override
+  String get reportAccountsTitle => 'Account Flows';
+
+  @override
+  String get reportHomeSavingsTitle => 'Home Savings';
+
+  @override
+  String get reportSpouseWalletTitle => 'Spouse Wallet';
+
+  @override
+  String get reportProtectedFundsTitle => 'Protected Funds';
+
+  @override
+  String get reportGrossIncome => 'Gross Income';
+
+  @override
+  String get reportGrossExpense => 'Gross Expenses';
+
+  @override
+  String get reportNetIncome => 'Net Income';
+
+  @override
+  String get reportNetExpense => 'Net Expenses';
+
+  @override
+  String get reportReversalEffect => 'Reversal Effect';
+
+  @override
+  String get reportNetCashFlow => 'Net Cash Flow';
+
+  @override
+  String get reportSpenderSection => 'By Spender';
+
+  @override
+  String get reportBeneficiarySection => 'By Beneficiary';
+
+  @override
+  String get reportScopeSection => 'By Scope';
+
+  @override
+  String get reportOpeningBalance => 'Opening Balance';
+
+  @override
+  String get reportClosingBalance => 'Closing Balance';
+
+  @override
+  String get reportCurrentBalance => 'Current Balance';
+
+  @override
+  String get reportFunded => 'Funded';
+
+  @override
+  String get reportSpent => 'Spent';
+
+  @override
+  String get reportReturned => 'Returned';
+
+  @override
+  String get reportWithdrawals => 'Withdrawals';
+
+  @override
+  String get reportWithdrawalReason => 'Reason';
+
+  @override
+  String get reportBeneficiary => 'Beneficiary';
+
+  @override
+  String get reportDrillDown => 'View Transactions';
+
+  @override
+  String get reportEmpty => 'No data for this period.';
+
+  @override
+  String get reportError => 'Unable to load report.';
+
+  @override
+  String get reportRefresh => 'Refresh';
+
+  @override
+  String get reportCurrencySeparate => 'Totals shown per currency';
+
+  @override
+  String get reportTransferNote =>
+      'Transfers are not included in income or expense totals.';
+
+  @override
+  String get reportReversalNote => 'Reversal effects are shown separately.';
+
+  @override
+  String get reportPeriodClosingBalance => 'Period Closing Balance';
+
+  @override
+  String get reportAuditDrillDown => 'View Audit';
+
+  @override
+  String reportTransactionCount(int count) {
+    return '$count transactions';
+  }
+
+  @override
+  String get reportViewReports => 'View Reports';
 }

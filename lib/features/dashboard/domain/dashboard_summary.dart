@@ -49,7 +49,7 @@ final class DashboardSummary {
       protectedBalances.any((b) => b.totalMinorUnits != 0);
 
   bool get hasPeriodActivity => periodFlow.any(
-    (f) => f.incomeMinorUnits != 0 || f.expenseMinorUnits != 0,
+    (f) => f.grossIncomeMinorUnits != 0 || f.grossExpenseMinorUnits != 0,
   );
 }
 
@@ -71,29 +71,65 @@ final class CurrencyAmountSummary {
 }
 
 /// Income and expense totals for one currency in a period.
+///
+/// PERIOD-ACTIVITY MODEL (Phase 4B correction):
+/// Every operation (including subsequently reversed ones) appears in the period
+/// where its effectiveDate falls. Reversal operations (type='reversal') appear
+/// in their own effectiveDate period and are reported as reversal effects.
+/// No operation is silently excluded from gross period totals.
 @immutable
 final class PeriodFlowSummary {
   const PeriodFlowSummary({
     required this.currencyCode,
-    required this.incomeMinorUnits,
-    required this.expenseMinorUnits,
-    required this.netExpenseMinorUnits,
+    required this.grossIncomeMinorUnits,
+    required this.grossExpenseMinorUnits,
+    this.incomeReversalMinorUnits = 0,
+    this.expenseReversalMinorUnits = 0,
   });
 
   final String currencyCode;
 
-  /// Sum of income operation amounts in the period.
-  final int incomeMinorUnits;
+  /// Gross sum of all income operation amounts in the period (no exclusions).
+  final int grossIncomeMinorUnits;
 
-  /// Gross sum of expense operation amounts (including reversed operations).
-  final int expenseMinorUnits;
+  /// Gross sum of all expense operation amounts in the period (no exclusions).
+  final int grossExpenseMinorUnits;
 
-  /// Net expense: sum of non-reversed expense operations only.
+  /// Sum of reversal operation amounts that cancel income in this period.
+  /// These are type='reversal' operations whose effectiveDate is in this period
+  /// and whose original operation was an income operation.
+  final int incomeReversalMinorUnits;
+
+  /// Sum of reversal operation amounts that cancel expense in this period.
+  /// These are type='reversal' operations whose effectiveDate is in this period
+  /// and whose original operation was an expense operation.
+  final int expenseReversalMinorUnits;
+
+  // ── Backward-compat aliases ─────────────────────────────────────────────
+
+  /// Alias for [grossIncomeMinorUnits]. Kept for backward compatibility.
+  int get incomeMinorUnits => grossIncomeMinorUnits;
+
+  /// Alias for [grossExpenseMinorUnits]. Kept for backward compatibility.
+  int get expenseMinorUnits => grossExpenseMinorUnits;
+
+  // ── Derived ─────────────────────────────────────────────────────────────
+
+  /// Net income: gross income minus income reversals in this period.
+  int get netIncomeMinorUnits =>
+      grossIncomeMinorUnits - incomeReversalMinorUnits;
+
+  /// Net expense: gross expense minus expense reversals in this period.
   ///
-  /// REVERSAL POLICY: An operation with is_reversed=true is included in
-  /// [expenseMinorUnits] (gross) but excluded from [netExpenseMinorUnits].
-  /// The reversal operation itself (type='reversal') is excluded from both.
-  final int netExpenseMinorUnits;
+  /// For a same-period reversal: netExpense = gross - reversal = 0.
+  /// For a cross-period reversal (original in T, reversal in T+1):
+  ///   Period T: netExpense = gross (reversal not in this period)
+  ///   Period T+1: reversal shows as expenseReversalMinorUnits
+  int get netExpenseMinorUnits =>
+      grossExpenseMinorUnits - expenseReversalMinorUnits;
+
+  /// Net cash flow: net income minus net expense.
+  int get netCashFlowMinorUnits => netIncomeMinorUnits - netExpenseMinorUnits;
 }
 
 /// Expense totals for one scope and one currency in a period.

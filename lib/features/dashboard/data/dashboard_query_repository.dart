@@ -23,10 +23,11 @@ abstract interface class DashboardQueryRepository {
 
   /// Period income and expense totals by currency.
   ///
-  /// Excludes: transfers, opening balances, adjustments, reversals.
-  /// REVERSAL POLICY: is_reversed=true → excluded from netExpenseMinorUnits
-  /// but included in expenseMinorUnits (gross). Reversal operations (type=reversal)
-  /// are excluded from both income and expense totals.
+  /// Excludes: transfers, opening balances, adjustments.
+  /// PERIOD-ACTIVITY MODEL: All income/expense operations appear in their
+  /// effectiveDate period (no is_reversed exclusion from gross totals).
+  /// Reversal operations (type='reversal') appear separately as reversal effects
+  /// in the period where the reversal's effectiveDate falls.
   Future<List<PeriodFlowSummary>> periodFlow({
     required String householdId,
     required DashboardPeriod period,

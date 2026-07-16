@@ -117,6 +117,20 @@ final class DashboardPeriod {
   bool contains(String effectiveDate) =>
       effectiveDate.compareTo(startDate) >= 0 &&
       effectiveDate.compareTo(endDate) < 0;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DashboardPeriod &&
+          other.startDate == startDate &&
+          other.endDate == endDate &&
+          other.label == label;
+
+  @override
+  int get hashCode => Object.hash(startDate, endDate, label);
+
+  @override
+  String toString() => 'DashboardPeriod($startDate–$endDate, ${label.name})';
 }
 
 /// Named labels for dashboard time periods.

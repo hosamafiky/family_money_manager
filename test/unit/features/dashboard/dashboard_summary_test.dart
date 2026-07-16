@@ -82,9 +82,8 @@ void main() {
         flow: [
           const PeriodFlowSummary(
             currencyCode: 'EGP',
-            incomeMinorUnits: 0,
-            expenseMinorUnits: 0,
-            netExpenseMinorUnits: 0,
+            grossIncomeMinorUnits: 0,
+            grossExpenseMinorUnits: 0,
           ),
         ],
       );
@@ -92,9 +91,8 @@ void main() {
         flow: [
           const PeriodFlowSummary(
             currencyCode: 'EGP',
-            incomeMinorUnits: 1000,
-            expenseMinorUnits: 0,
-            netExpenseMinorUnits: 0,
+            grossIncomeMinorUnits: 1000,
+            grossExpenseMinorUnits: 0,
           ),
         ],
       );

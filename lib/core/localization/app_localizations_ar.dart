@@ -605,4 +605,118 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dashboardPeriodLabel => 'الفترة';
+
+  @override
+  String get reportsTitle => 'التقارير';
+
+  @override
+  String get reportIncomeExpenseTitle => 'الدخل والمصروفات';
+
+  @override
+  String get reportAttributionTitle => 'نسب الإنفاق';
+
+  @override
+  String get reportCategoriesTitle => 'الفئات';
+
+  @override
+  String get reportAccountsTitle => 'تدفقات الحسابات';
+
+  @override
+  String get reportHomeSavingsTitle => 'مدخرات المنزل';
+
+  @override
+  String get reportSpouseWalletTitle => 'محفظة الزوج/ة';
+
+  @override
+  String get reportProtectedFundsTitle => 'الأموال المحمية';
+
+  @override
+  String get reportGrossIncome => 'الدخل الإجمالي';
+
+  @override
+  String get reportGrossExpense => 'المصروفات الإجمالية';
+
+  @override
+  String get reportNetIncome => 'صافي الدخل';
+
+  @override
+  String get reportNetExpense => 'صافي المصروفات';
+
+  @override
+  String get reportReversalEffect => 'أثر العكس';
+
+  @override
+  String get reportNetCashFlow => 'صافي التدفق النقدي';
+
+  @override
+  String get reportSpenderSection => 'حسب المنفق';
+
+  @override
+  String get reportBeneficiarySection => 'حسب المستفيد';
+
+  @override
+  String get reportScopeSection => 'حسب النطاق';
+
+  @override
+  String get reportOpeningBalance => 'الرصيد الافتتاحي';
+
+  @override
+  String get reportClosingBalance => 'الرصيد الختامي';
+
+  @override
+  String get reportCurrentBalance => 'الرصيد الحالي';
+
+  @override
+  String get reportFunded => 'موّل';
+
+  @override
+  String get reportSpent => 'أُنفق';
+
+  @override
+  String get reportReturned => 'أُعيد';
+
+  @override
+  String get reportWithdrawals => 'السحوبات';
+
+  @override
+  String get reportWithdrawalReason => 'السبب';
+
+  @override
+  String get reportBeneficiary => 'المستفيد';
+
+  @override
+  String get reportDrillDown => 'عرض المعاملات';
+
+  @override
+  String get reportEmpty => 'لا توجد بيانات لهذه الفترة.';
+
+  @override
+  String get reportError => 'تعذّر تحميل التقرير.';
+
+  @override
+  String get reportRefresh => 'تحديث';
+
+  @override
+  String get reportCurrencySeparate => 'الإجماليات مفصّلة بالعملة';
+
+  @override
+  String get reportTransferNote =>
+      'التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.';
+
+  @override
+  String get reportReversalNote => 'آثار العكس معروضة بشكل منفصل.';
+
+  @override
+  String get reportPeriodClosingBalance => 'الرصيد الختامي للفترة';
+
+  @override
+  String get reportAuditDrillDown => 'عرض التدقيق';
+
+  @override
+  String reportTransactionCount(int count) {
+    return '$count معاملات';
+  }
+
+  @override
+  String get reportViewReports => 'عرض التقارير';
 }

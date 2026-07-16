@@ -33,6 +33,15 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(l10n.dashboardTitle),
         actions: [
           Semantics(
+            label: l10n.reportsTitle,
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.bar_chart),
+              tooltip: l10n.reportsTitle,
+              onPressed: () => context.push('/reports'),
+            ),
+          ),
+          Semantics(
             label: l10n.dashboardRefresh,
             child: IconButton(
               icon: const Icon(Icons.refresh),
@@ -385,18 +394,30 @@ class _FlowRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final net = flow.incomeMinorUnits - flow.netExpenseMinorUnits;
+    final net = flow.netIncomeMinorUnits - flow.netExpenseMinorUnits;
+    final hasExpenseReversal = flow.expenseReversalMinorUnits != 0;
+    final hasIncomeReversal = flow.incomeReversalMinorUnits != 0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Column(
         children: [
           _LabelledAmount(
             label: l10n.dashboardPeriodIncome,
-            minorUnits: flow.incomeMinorUnits,
+            minorUnits: flow.grossIncomeMinorUnits,
             currencyCode: flow.currencyCode,
             color: Colors.green,
             icon: Icons.arrow_downward,
           ),
+          if (hasIncomeReversal) ...[
+            _LabelledAmount(
+              label: l10n.reportReversalEffect,
+              minorUnits: -flow.incomeReversalMinorUnits,
+              currencyCode: flow.currencyCode,
+              color: Colors.orange,
+              icon: Icons.undo,
+            ),
+          ],
           _LabelledAmount(
             label: l10n.dashboardPeriodExpenses,
             minorUnits: flow.netExpenseMinorUnits,
@@ -404,6 +425,15 @@ class _FlowRow extends StatelessWidget {
             color: Colors.red,
             icon: Icons.arrow_upward,
           ),
+          if (hasExpenseReversal) ...[
+            _LabelledAmount(
+              label: l10n.reportReversalEffect,
+              minorUnits: -flow.expenseReversalMinorUnits,
+              currencyCode: flow.currencyCode,
+              color: Colors.orange,
+              icon: Icons.undo,
+            ),
+          ],
           _LabelledAmount(
             label: l10n.dashboardPeriodNet,
             minorUnits: net,

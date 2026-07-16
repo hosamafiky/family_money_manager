@@ -4,6 +4,15 @@ import 'package:family_money_manager/features/accounts/presentation/account_deta
 import 'package:family_money_manager/features/accounts/presentation/accounts_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/account_flow_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/category_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/home_savings_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/income_expense_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/protected_funds_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/report_transaction_list_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/reports_landing_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/spending_attribution_report_screen.dart';
+import 'package:family_money_manager/features/reports/presentation/spouse_wallet_report_screen.dart';
 import 'package:family_money_manager/features/settings/settings_screen.dart';
 import 'package:family_money_manager/features/shell/app_shell.dart';
 import 'package:family_money_manager/features/transactions/presentation/create_transaction_screen.dart';
@@ -20,7 +29,7 @@ import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
 ///
-/// Phase 4A routes:
+/// Phase 4A/4B routes:
 ///   /dashboard             — DashboardScreen (tab 0)
 ///   /accounts              — AccountsScreen (tab 1)
 ///   /accounts/new          — AccountCreationScreen (push)
@@ -36,6 +45,15 @@ import 'package:go_router/go_router.dart';
 ///   /transactions/:operationId        — TransactionDetailScreen
 ///   /members               — HouseholdMembersScreen (tab 3)
 ///   /settings              — SettingsScreen (tab 4)
+///   /reports               — ReportsLandingScreen (push from dashboard)
+///   /reports/income-expense   — IncomeExpenseReportScreen
+///   /reports/attribution      — SpendingAttributionReportScreen
+///   /reports/categories       — CategoryReportScreen
+///   /reports/accounts         — AccountFlowReportScreen
+///   /reports/home-savings     — HomeSavingsReportScreen
+///   /reports/spouse-wallet    — SpouseWalletReportScreen
+///   /reports/protected-funds  — ProtectedFundsReportScreen
+///   /reports/transactions     — ReportTransactionListScreen (drill-down)
 abstract final class AppRouter {
   static GoRouter create() {
     return GoRouter(
@@ -160,6 +178,47 @@ abstract final class AppRouter {
                   builder: (context, state) => const SettingsScreen(),
                 ),
               ],
+            ),
+          ],
+        ),
+
+        // ── Phase 4B report routes (pushed from dashboard, not in shell tab) ─
+        GoRoute(
+          path: '/reports',
+          builder: (context, state) => const ReportsLandingScreen(),
+          routes: [
+            GoRoute(
+              path: 'income-expense',
+              builder: (context, state) => const IncomeExpenseReportScreen(),
+            ),
+            GoRoute(
+              path: 'attribution',
+              builder: (context, state) =>
+                  const SpendingAttributionReportScreen(),
+            ),
+            GoRoute(
+              path: 'categories',
+              builder: (context, state) => const CategoryReportScreen(),
+            ),
+            GoRoute(
+              path: 'accounts',
+              builder: (context, state) => const AccountFlowReportScreen(),
+            ),
+            GoRoute(
+              path: 'home-savings',
+              builder: (context, state) => const HomeSavingsReportScreen(),
+            ),
+            GoRoute(
+              path: 'spouse-wallet',
+              builder: (context, state) => const SpouseWalletReportScreen(),
+            ),
+            GoRoute(
+              path: 'protected-funds',
+              builder: (context, state) => const ProtectedFundsReportScreen(),
+            ),
+            GoRoute(
+              path: 'transactions',
+              builder: (context, state) => const ReportTransactionListScreen(),
             ),
           ],
         ),

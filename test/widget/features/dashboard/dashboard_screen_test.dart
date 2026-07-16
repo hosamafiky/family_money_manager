@@ -266,9 +266,8 @@ void main() {
         flow: const [
           PeriodFlowSummary(
             currencyCode: 'EGP',
-            incomeMinorUnits: 500000,
-            expenseMinorUnits: 200000,
-            netExpenseMinorUnits: 200000,
+            grossIncomeMinorUnits: 500000,
+            grossExpenseMinorUnits: 200000,
           ),
         ],
       );
