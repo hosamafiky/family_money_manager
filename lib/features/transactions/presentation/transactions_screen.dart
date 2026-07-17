@@ -25,6 +25,7 @@ class TransactionsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transactionsTitle)),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_transactions',
         onPressed: () => context.push('/transactions/new'),
         child: const Icon(Icons.add),
       ),

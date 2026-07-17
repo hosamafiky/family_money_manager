@@ -40,6 +40,7 @@ class _BudgetsListScreenState extends ConsumerState<BudgetsListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_budgets',
         onPressed: () => context.push('/budgets/new'),
         icon: const Icon(Icons.add),
         label: Text(l10n.budgetNew),
