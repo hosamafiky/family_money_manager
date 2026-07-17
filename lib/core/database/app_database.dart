@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:family_money_manager/core/database/tables/budgets_table.dart';
 import 'package:family_money_manager/core/database/tables/child_withdrawal_audits_table.dart';
 import 'package:family_money_manager/core/database/tables/financial_accounts_table.dart';
+import 'package:family_money_manager/core/database/tables/goals_table.dart';
 import 'package:family_money_manager/core/database/tables/household_members_table.dart';
 import 'package:family_money_manager/core/database/tables/households_table.dart';
 import 'package:family_money_manager/core/database/tables/ledger_entries_table.dart';
@@ -51,6 +52,8 @@ part 'app_database.g.dart';
 ///                   include_in_net_worth, include_in_zakat, type, currency_code);
 ///                   restrict_child_fund_unprotect trigger (always).
 ///   7 — Phase 5A: budgets table for budget plans; idempotency index on budgets.
+///   8 — Phase 5B: goals, goal_revisions, goal_movements tables for savings
+///                 goals backed by dedicated goalReserve ledger accounts.
 @DriftDatabase(
   tables: [
     Households,
@@ -61,6 +64,9 @@ part 'app_database.g.dart';
     ChildWithdrawalAudits,
     OperationContexts,
     Budgets,
+    GoalsTable,
+    GoalRevisionsTable,
+    GoalMovementsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -76,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -93,6 +99,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyOperationContextTriggers();
       await _applyIndexes();
       await _applyBudgetIdempotencyIndex();
+      await _applyGoalIndexes();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -111,10 +118,7 @@ class AppDatabase extends _$AppDatabase {
         // v3 → v4: account idempotency columns, household cardinality triggers,
         // immutable type/currency trigger, scoped account idempotency index.
         await m.addColumn(financialAccounts, financialAccounts.idempotencyKey);
-        await m.addColumn(
-          financialAccounts,
-          financialAccounts.idempotencyPayload,
-        );
+        await m.addColumn(financialAccounts, financialAccounts.idempotencyPayload);
         await _applyHouseholdConstraintTriggers();
         await _applyAccountMetadataImmutabilityTrigger();
         await _applyAccountIdempotencyIndex();
@@ -133,6 +137,13 @@ class AppDatabase extends _$AppDatabase {
         // v6 → v7: budgets table for Phase 5A budget planning.
         await m.createTable(budgets);
         await _applyBudgetIdempotencyIndex();
+      }
+      if (from <= 7) {
+        // v7 → v8: goals, goal_revisions, goal_movements tables for Phase 5B.
+        await m.createTable(goalsTable);
+        await m.createTable(goalRevisionsTable);
+        await m.createTable(goalMovementsTable);
+        await _applyGoalIndexes();
       }
     },
     beforeOpen: (details) async {
@@ -541,6 +552,37 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE UNIQUE INDEX IF NOT EXISTS idx_budgets_idempotency
       ON budgets(household_id, idempotency_key)
+    ''');
+  }
+
+  // ── Goal indexes (Phase 5B) ────────────────────────────────────────────────
+
+  Future<void> _applyGoalIndexes() async {
+    // One reserve account per goal, and each reserve account belongs to at
+    // most one goal.
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goals_reserve_account
+      ON goals(reserve_account_id)
+    ''');
+    // Scoped idempotency for goals.
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goals_idempotency
+      ON goals(household_id, idempotency_key)
+    ''');
+    // Performance index for revision queries.
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_goal_revisions_goal
+      ON goal_revisions(goal_id)
+    ''');
+    // Performance index for movement queries.
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_goal_movements_goal
+      ON goal_movements(goal_id)
+    ''');
+    // Enables fast lookup of all movements for a given transfer operation.
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS idx_goal_movements_operation
+      ON goal_movements(transfer_operation_id)
     ''');
   }
 }

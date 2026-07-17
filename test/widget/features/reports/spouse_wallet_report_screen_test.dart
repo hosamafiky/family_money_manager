@@ -41,10 +41,7 @@ class _FixedRequestNotifier extends ReportRequestNotifier {
   @override
   FinancialReportRequest build() => FinancialReportRequest(
     householdId: 'household-v1',
-    period: DashboardPeriod.custom(
-      startDate: '2025-01-01',
-      endDate: '2025-02-01',
-    ),
+    period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
   );
 }
 
@@ -70,9 +67,7 @@ Widget _buildScreen({
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(
-        () => _FixedThemeModeNotifier(ThemeMode.light),
-      ),
+      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
       reportRequestProvider.overrideWith(_FixedRequestNotifier.new),
       spouseWalletReportProvider.overrideWith((ref, req) async {
         if (throwError) throw Exception('Fake error');
@@ -90,9 +85,7 @@ Widget _buildScreen({
 
 void main() {
   group('SpouseWalletReportScreen', () {
-    testWidgets('1. Shows funded, spent, returned, balance labels', (
-      tester,
-    ) async {
+    testWidgets('1. Shows funded, spent, returned, balance labels', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
@@ -102,9 +95,7 @@ void main() {
       expect(find.text('Period Closing Balance'), findsOneWidget);
     });
 
-    testWidgets('2. Period closing and current balance labeled distinctly', (
-      tester,
-    ) async {
+    testWidgets('2. Period closing and current balance labeled distinctly', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 

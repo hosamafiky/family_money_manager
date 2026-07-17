@@ -40,10 +40,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _householdId = 'household-v1';
 
-final _defaultPeriod = DashboardPeriod.custom(
-  startDate: '2025-03-01',
-  endDate: '2025-04-01',
-);
+final _defaultPeriod = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
 
 DashboardSummary _emptySummary() => DashboardSummary(
   householdId: _householdId,
@@ -120,9 +117,7 @@ Widget _buildScreen({
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(
-        () => _FixedThemeModeNotifier(ThemeMode.light),
-      ),
+      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
       dashboardPeriodProvider.overrideWith(() => _FixedPeriodNotifier()),
       dashboardSummaryProvider.overrideWith((ref, householdId) async {
         if (loading) return Completer<AppResult<DashboardSummary>>().future;
@@ -168,17 +163,13 @@ void main() {
       );
     });
 
-    testWidgets('3. Shows empty state for household with no accounts', (
-      tester,
-    ) async {
+    testWidgets('3. Shows empty state for household with no accounts', (tester) async {
       await tester.pumpWidget(_buildScreen(result: AppOk(_emptySummary())));
       await tester.pumpAndSettle();
       expect(find.byType(DashboardScreen), findsOneWidget);
     });
 
-    testWidgets('4. Shows one card per currency for spendable balances', (
-      tester,
-    ) async {
+    testWidgets('4. Shows one card per currency for spendable balances', (tester) async {
       final summary = _summaryWithData(
         spendable: const [
           CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 150000),
@@ -193,12 +184,8 @@ void main() {
 
     testWidgets('5. Protected balances shown separately', (tester) async {
       final summary = _summaryWithData(
-        spendable: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000),
-        ],
-        protected: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 50000),
-        ],
+        spendable: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000)],
+        protected: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 50000)],
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
@@ -225,24 +212,13 @@ void main() {
 
     testWidgets('6. No "net worth" text anywhere on screen', (tester) async {
       final summary = _summaryWithData(
-        spendable: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000),
-        ],
+        spendable: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000)],
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
-      expect(
-        find.textContaining('net worth', findRichText: true),
-        findsNothing,
-      );
-      expect(
-        find.textContaining('Net Worth', findRichText: true),
-        findsNothing,
-      );
-      expect(
-        find.textContaining('صافي الثروة', findRichText: true),
-        findsNothing,
-      );
+      expect(find.textContaining('net worth', findRichText: true), findsNothing);
+      expect(find.textContaining('Net Worth', findRichText: true), findsNothing);
+      expect(find.textContaining('صافي الثروة', findRichText: true), findsNothing);
     });
 
     testWidgets('7. No mixed-currency total shown', (tester) async {
@@ -259,9 +235,7 @@ void main() {
       expect(find.text('USD'), findsWidgets);
     });
 
-    testWidgets('8. Income and expense shown for period with data', (
-      tester,
-    ) async {
+    testWidgets('8. Income and expense shown for period with data', (tester) async {
       final summary = _summaryWithData(
         flow: const [
           PeriodFlowSummary(
@@ -277,8 +251,7 @@ void main() {
         find.byWidgetPredicate(
           (w) =>
               w is Text &&
-              (w.data?.contains('الدخل') == true ||
-                  w.data?.contains('Income') == true),
+              (w.data?.contains('الدخل') == true || w.data?.contains('Income') == true),
         ),
         findsWidgets,
       );
@@ -303,14 +276,8 @@ void main() {
       expect(find.byType(DashboardScreen), findsOneWidget);
     });
 
-    testWidgets('10. Reversed operation shown with معكوسة label', (
-      tester,
-    ) async {
-      final tx = _makeTxSummary(
-        id: 'op-r1',
-        type: OperationType.expense,
-        isReversed: true,
-      );
+    testWidgets('10. Reversed operation shown with معكوسة label', (tester) async {
+      final tx = _makeTxSummary(id: 'op-r1', type: OperationType.expense, isReversed: true);
       final summary = _summaryWithData(recent: [tx]);
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
@@ -320,8 +287,7 @@ void main() {
         find.byWidgetPredicate(
           (w) =>
               w is Text &&
-              (w.data?.contains('معكوسة') == true ||
-                  w.data?.contains('Reversed') == true),
+              (w.data?.contains('معكوسة') == true || w.data?.contains('Reversed') == true),
           skipOffstage: false,
         ),
         findsWidgets,
@@ -330,39 +296,25 @@ void main() {
 
     testWidgets('11. Arabic RTL layout correct', (tester) async {
       await tester.pumpWidget(
-        _buildScreen(
-          result: AppOk(_emptySummary()),
-          locale: const Locale('ar'),
-        ),
+        _buildScreen(result: AppOk(_emptySummary()), locale: const Locale('ar')),
       );
       await tester.pumpAndSettle();
-      final dir = Directionality.of(
-        tester.element(find.byType(DashboardScreen)),
-      );
+      final dir = Directionality.of(tester.element(find.byType(DashboardScreen)));
       expect(dir, TextDirection.rtl);
     });
 
     testWidgets('12. English LTR layout correct', (tester) async {
       await tester.pumpWidget(
-        _buildScreen(
-          result: AppOk(_emptySummary()),
-          locale: const Locale('en'),
-        ),
+        _buildScreen(result: AppOk(_emptySummary()), locale: const Locale('en')),
       );
       await tester.pumpAndSettle();
-      final dir = Directionality.of(
-        tester.element(find.byType(DashboardScreen)),
-      );
+      final dir = Directionality.of(tester.element(find.byType(DashboardScreen)));
       expect(dir, TextDirection.ltr);
     });
 
-    testWidgets('13. Semantics labels present on monetary sections', (
-      tester,
-    ) async {
+    testWidgets('13. Semantics labels present on monetary sections', (tester) async {
       final summary = _summaryWithData(
-        spendable: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000),
-        ],
+        spendable: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000)],
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
@@ -393,13 +345,9 @@ void main() {
       expect(find.byType(RefreshIndicator), findsOneWidget);
     });
 
-    testWidgets('16. Child fund shown with protected indicator', (
-      tester,
-    ) async {
+    testWidgets('16. Child fund shown with protected indicator', (tester) async {
       final summary = _summaryWithData(
-        protected: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 30000),
-        ],
+        protected: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 30000)],
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
@@ -417,9 +365,7 @@ void main() {
 
     testWidgets('17. Negative balance shown with warning icon', (tester) async {
       final summary = _summaryWithData(
-        spendable: const [
-          CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: -100),
-        ],
+        spendable: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: -100)],
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
@@ -429,18 +375,10 @@ void main() {
 
     testWidgets('18. Large text does not overflow cards', (tester) async {
       final summary = _summaryWithData(
-        spendable: const [
-          CurrencyAmountSummary(
-            currencyCode: 'EGP',
-            totalMinorUnits: 999999999,
-          ),
-        ],
+        spendable: const [CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 999999999)],
       );
       await tester.pumpWidget(
-        _buildScreen(
-          result: AppOk(summary),
-          textScaler: const TextScaler.linear(2.0),
-        ),
+        _buildScreen(result: AppOk(summary), textScaler: const TextScaler.linear(2.0)),
       );
       await tester.pumpAndSettle();
       // No overflow exceptions; screen renders successfully

@@ -18,9 +18,7 @@ class TransactionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     const filter = TransactionFilter();
-    final transactionsAsync = ref.watch(
-      transactionListProvider((_householdId, filter)),
-    );
+    final transactionsAsync = ref.watch(transactionListProvider((_householdId, filter)));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transactionsTitle)),
@@ -39,15 +37,12 @@ class TransactionsScreen extends ConsumerWidget {
                   ? Center(child: Text(l10n.transactionsEmpty))
                   : RefreshIndicator(
                       onRefresh: () async {
-                        ref.invalidate(
-                          transactionListProvider((_householdId, filter)),
-                        );
+                        ref.invalidate(transactionListProvider((_householdId, filter)));
                       },
                       child: ListView.separated(
                         itemCount: value.length,
                         separatorBuilder: (_, _) => const Divider(height: 1),
-                        itemBuilder: (context, i) =>
-                            _TransactionTile(summary: value[i]),
+                        itemBuilder: (context, i) => _TransactionTile(summary: value[i]),
                       ),
                     ),
             _ => Center(child: Text(l10n.errorGeneric)),
@@ -68,9 +63,7 @@ class _TransactionTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final op = summary.operation;
     final typeLabel = _typeLabel(l10n, op.type);
-    final isCredit =
-        op.type == OperationType.income ||
-        op.type == OperationType.openingBalance;
+    final isCredit = op.type == OperationType.income || op.type == OperationType.openingBalance;
     final amountColor = isCredit ? Colors.green : null;
 
     return ListTile(
@@ -91,9 +84,7 @@ class _TransactionTile extends StatelessWidget {
               ),
               child: Text(
                 l10n.transactionReversed,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.grey),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey),
               ),
             ),
         ],

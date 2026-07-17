@@ -107,9 +107,7 @@ void main() {
     test('opening balance is included', () {
       final result = LedgerCalculator.balance(
         accountId: accountId,
-        entries: [
-          _credit('e1', accountId, 5000, type: LedgerEntryType.openingBalance),
-        ],
+        entries: [_credit('e1', accountId, 5000, type: LedgerEntryType.openingBalance)],
         currency: Currency.egp,
       );
       expect(result.minorUnits, 5000);
@@ -121,13 +119,7 @@ void main() {
       final entries = [
         _credit('e1', accountId, 1000),
         _debit('e2', accountId, 500),
-        _credit(
-          'e3',
-          accountId,
-          500,
-          isReversal: true,
-          type: LedgerEntryType.reversalCredit,
-        ),
+        _credit('e3', accountId, 500, isReversal: true, type: LedgerEntryType.reversalCredit),
       ];
       final result = LedgerCalculator.balance(
         accountId: accountId,
@@ -278,20 +270,8 @@ void main() {
       final entries = [
         _credit('e1', srcId, 2000, date: '2024-01-01'),
         _credit('e2', dstId, 500, date: '2024-01-01'),
-        _debit(
-          't1-out',
-          srcId,
-          800,
-          date: '2024-02-01',
-          type: LedgerEntryType.transferOut,
-        ),
-        _credit(
-          't1-in',
-          dstId,
-          800,
-          date: '2024-02-01',
-          type: LedgerEntryType.transferIn,
-        ),
+        _debit('t1-out', srcId, 800, date: '2024-02-01', type: LedgerEntryType.transferOut),
+        _credit('t1-in', dstId, 800, date: '2024-02-01', type: LedgerEntryType.transferIn),
       ];
 
       final srcBalance = LedgerCalculator.balance(
@@ -316,18 +296,8 @@ void main() {
   group('Opening balance invariant', () {
     test('opening balance type is distinguishable from income', () {
       const accountId = 'acc-1';
-      final openingEntry = _credit(
-        'ob1',
-        accountId,
-        5000,
-        type: LedgerEntryType.openingBalance,
-      );
-      final incomeEntry = _credit(
-        'inc1',
-        accountId,
-        1000,
-        type: LedgerEntryType.income,
-      );
+      final openingEntry = _credit('ob1', accountId, 5000, type: LedgerEntryType.openingBalance);
+      final incomeEntry = _credit('inc1', accountId, 1000, type: LedgerEntryType.income);
 
       expect(openingEntry.entryType, LedgerEntryType.openingBalance);
       expect(incomeEntry.entryType, LedgerEntryType.income);
@@ -349,12 +319,7 @@ void main() {
         accountId: accountId,
         entries: [
           _credit('e1', accountId, 1000),
-          _credit(
-            'adj',
-            accountId,
-            100,
-            type: LedgerEntryType.adjustmentCredit,
-          ),
+          _credit('adj', accountId, 100, type: LedgerEntryType.adjustmentCredit),
         ],
         currency: Currency.egp,
       );

@@ -60,11 +60,7 @@ enum Currency {
     for (final c in Currency.values) {
       if (c.code == normalised) return c;
     }
-    throw ArgumentError.value(
-      code,
-      'code',
-      'Unsupported or malformed currency code',
-    );
+    throw ArgumentError.value(code, 'code', 'Unsupported or malformed currency code');
   }
 
   /// Returns true when [code] represents a known supported currency.

@@ -90,18 +90,12 @@ void main() {
 
   group('RedactedLogger — log injection prevention', () {
     test('newline characters in operationType are replaced', () {
-      logger.logOperation(
-        operationType: 'transfer\ninjection',
-        operationId: 'id-1',
-      );
+      logger.logOperation(operationType: 'transfer\ninjection', operationId: 'id-1');
       expect(sink.lastMessage, isNot(contains('\n')));
     });
 
     test('newline characters in operationId are replaced', () {
-      logger.logOperation(
-        operationType: 'expense',
-        operationId: 'id\r\ninjection',
-      );
+      logger.logOperation(operationType: 'expense', operationId: 'id\r\ninjection');
       expect(sink.lastMessage, isNot(contains('\r\n')));
     });
   });
@@ -174,22 +168,16 @@ void main() {
       expect(sink.lastMessage, isNot(contains('Exception')));
     });
 
-    test(
-      'backup and AI bodies cannot be passed — no body parameter exists',
-      () {
-        // The logger has no payload, body, or Map parameter.
-        // Backup content and AI response bodies cannot enter this class.
-        // This test documents the design constraint by confirming the only
-        // accepted inputs are opaque string codes and message strings.
-        logger.logOperation(
-          operationType: 'backup_complete',
-          operationId: 'bk-001',
-        );
-        expect(sink.records, hasLength(1));
-        // The message contains only the operation type and ID — no body.
-        expect(sink.lastMessage, isNot(contains('{')));
-        expect(sink.lastMessage, isNot(contains('payload')));
-      },
-    );
+    test('backup and AI bodies cannot be passed — no body parameter exists', () {
+      // The logger has no payload, body, or Map parameter.
+      // Backup content and AI response bodies cannot enter this class.
+      // This test documents the design constraint by confirming the only
+      // accepted inputs are opaque string codes and message strings.
+      logger.logOperation(operationType: 'backup_complete', operationId: 'bk-001');
+      expect(sink.records, hasLength(1));
+      // The message contains only the operation type and ID — no body.
+      expect(sink.lastMessage, isNot(contains('{')));
+      expect(sink.lastMessage, isNot(contains('payload')));
+    });
   });
 }

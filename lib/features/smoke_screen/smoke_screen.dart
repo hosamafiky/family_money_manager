@@ -35,10 +35,7 @@ class SmokeScreen extends ConsumerWidget {
             children: [
               _SectionCard(
                 title: l10n.foundationTitle,
-                child: Text(
-                  l10n.foundationSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                child: Text(l10n.foundationSubtitle, style: Theme.of(context).textTheme.bodyLarge),
               ),
               const SizedBox(height: AppTheme.space16),
               _SectionCard(
@@ -102,9 +99,7 @@ class SmokeScreen extends ConsumerWidget {
               _SectionCard(
                 title: l10n.foundationDirectionLabel,
                 child: Text(
-                  isRtl
-                      ? l10n.foundationDirectionRtl
-                      : l10n.foundationDirectionLtr,
+                  isRtl ? l10n.foundationDirectionRtl : l10n.foundationDirectionLtr,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -133,9 +128,9 @@ class _SectionCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: AppTheme.space8),
             child,
@@ -161,9 +156,9 @@ class _NoteCard extends StatelessWidget {
       ),
       child: Text(
         message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSecondaryContainer,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSecondaryContainer),
       ),
     );
   }

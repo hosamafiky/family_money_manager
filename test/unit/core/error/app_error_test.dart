@@ -44,10 +44,7 @@ void main() {
       test('returns the string provided by localizedMessage', () {
         const error = UnknownError();
 
-        final result = resolveErrorMessage(
-          error,
-          localizedMessage: (key) => 'translated:$key',
-        );
+        final result = resolveErrorMessage(error, localizedMessage: (key) => 'translated:$key');
 
         expect(result, 'translated:errorUnknown');
       });

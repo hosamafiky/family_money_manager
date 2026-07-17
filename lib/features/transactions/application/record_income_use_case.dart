@@ -28,10 +28,7 @@ final class RecordIncomeUseCase {
       );
     }
     if (!ctx.category.isIncome) {
-      return const AppValidationFailure(
-        field: 'category',
-        messageKey: 'errorCategoryRequired',
-      );
+      return const AppValidationFailure(field: 'category', messageKey: 'errorCategoryRequired');
     }
     if (ctx.householdId.isEmpty) {
       return const AppValidationFailure(
@@ -46,10 +43,7 @@ final class RecordIncomeUseCase {
       );
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(
-        field: 'effectiveDate',
-        messageKey: 'error_date_invalid',
-      );
+      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
     }
 
     // ── Account existence + household scoping ─────────────────────────────
@@ -67,10 +61,7 @@ final class RecordIncomeUseCase {
       );
     }
     if (account.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
 
     // ── Map and call ledger ───────────────────────────────────────────────

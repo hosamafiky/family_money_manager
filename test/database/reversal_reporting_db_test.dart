@@ -70,12 +70,7 @@ void main() {
     return id;
   }
 
-  Future<void> recordExpense(
-    String accId,
-    String opId,
-    int amount,
-    String date,
-  ) async {
+  Future<void> recordExpense(String accId, String opId, int amount, String date) async {
     await ledgerRepo.recordExpense(
       RecordExpenseParams(
         operationId: opId,
@@ -89,12 +84,7 @@ void main() {
     );
   }
 
-  Future<void> recordIncome(
-    String accId,
-    String opId,
-    int amount,
-    String date,
-  ) async {
+  Future<void> recordIncome(String accId, String opId, int amount, String date) async {
     await ledgerRepo.recordIncome(
       RecordIncomeParams(
         operationId: opId,
@@ -108,11 +98,7 @@ void main() {
     );
   }
 
-  Future<void> reverseOp(
-    String originalOpId,
-    String reversalOpId,
-    String date,
-  ) async {
+  Future<void> reverseOp(String originalOpId, String reversalOpId, String date) async {
     await ledgerRepo.reverseOperation(
       ReverseOperationParams(
         reversalOperationId: reversalOpId,
@@ -135,35 +121,20 @@ void main() {
   );
 
   group('Reversal reporting — period-activity model', () {
-    test(
-      '1. Expense Jan + reversal Jan → gross Jan expense = original; net = 0',
-      () async {
-        final acc = await createAccount();
-        // Seed opening balance so account isn't overdrawn
-        await recordIncome(acc, 'op-income-1', 10000, '2025-01-01');
-        await recordExpense(acc, 'op-exp-jan', 5000, '2025-01-15');
-        await reverseOp('op-exp-jan', 'op-rev-jan', '2025-01-20');
+    test('1. Expense Jan + reversal Jan → gross Jan expense = original; net = 0', () async {
+      final acc = await createAccount();
+      // Seed opening balance so account isn't overdrawn
+      await recordIncome(acc, 'op-income-1', 10000, '2025-01-01');
+      await recordExpense(acc, 'op-exp-jan', 5000, '2025-01-15');
+      await reverseOp('op-exp-jan', 'op-rev-jan', '2025-01-20');
 
-        final flows = await dashRepo.periodFlow(householdId: _hh, period: jan);
-        expect(flows.length, 1);
-        final flow = flows.first;
-        expect(
-          flow.grossExpenseMinorUnits,
-          5000,
-          reason: 'Gross expense includes reversed op',
-        );
-        expect(
-          flow.expenseReversalMinorUnits,
-          5000,
-          reason: 'Reversal in same period cancels gross',
-        );
-        expect(
-          flow.netExpenseMinorUnits,
-          0,
-          reason: 'Net = gross - reversal = 0',
-        );
-      },
-    );
+      final flows = await dashRepo.periodFlow(householdId: _hh, period: jan);
+      expect(flows.length, 1);
+      final flow = flows.first;
+      expect(flow.grossExpenseMinorUnits, 5000, reason: 'Gross expense includes reversed op');
+      expect(flow.expenseReversalMinorUnits, 5000, reason: 'Reversal in same period cancels gross');
+      expect(flow.netExpenseMinorUnits, 0, reason: 'Net = gross - reversal = 0');
+    });
 
     test(
       '2. Expense Jan + reversal Feb → gross Jan = amount; Jan net = gross; Feb shows reversal',
@@ -173,30 +144,20 @@ void main() {
         await recordExpense(acc, 'op-exp-jan-2', 5000, '2025-01-10');
         await reverseOp('op-exp-jan-2', 'op-rev-feb-2', '2025-02-05');
 
-        final janFlows = await dashRepo.periodFlow(
-          householdId: _hh,
-          period: jan,
-        );
+        final janFlows = await dashRepo.periodFlow(householdId: _hh, period: jan);
         expect(
           janFlows.first.grossExpenseMinorUnits,
           5000,
           reason: 'Jan gross expense includes the original op',
         );
-        expect(
-          janFlows.first.expenseReversalMinorUnits,
-          0,
-          reason: 'Reversal is in Feb, not Jan',
-        );
+        expect(janFlows.first.expenseReversalMinorUnits, 0, reason: 'Reversal is in Feb, not Jan');
         expect(
           janFlows.first.netExpenseMinorUnits,
           5000,
           reason: 'Net Jan = gross (no reversal in Jan)',
         );
 
-        final febFlows = await dashRepo.periodFlow(
-          householdId: _hh,
-          period: feb,
-        );
+        final febFlows = await dashRepo.periodFlow(householdId: _hh, period: feb);
         // Feb has a reversal operation; net expense should reflect that
         expect(
           febFlows.first.expenseReversalMinorUnits,
@@ -217,11 +178,7 @@ void main() {
         8000,
         reason: 'Jan gross income includes original op',
       );
-      expect(
-        janFlows.first.incomeReversalMinorUnits,
-        0,
-        reason: 'Reversal is in Feb',
-      );
+      expect(janFlows.first.incomeReversalMinorUnits, 0, reason: 'Reversal is in Feb');
       expect(janFlows.first.netIncomeMinorUnits, 8000);
 
       final febFlows = await dashRepo.periodFlow(householdId: _hh, period: feb);
@@ -240,9 +197,7 @@ void main() {
 
       // Verify both exist in operations table
       final ops = await db
-          .customSelect(
-            "SELECT id, type FROM operations WHERE household_id = '$_hh' ORDER BY id",
-          )
+          .customSelect("SELECT id, type FROM operations WHERE household_id = '$_hh' ORDER BY id")
           .get();
       final ids = ops.map((r) => r.read<String>('id')).toList();
       expect(ids, contains('op-exp-4'));
@@ -250,9 +205,7 @@ void main() {
 
       // is_reversed should be true on original
       final original = await db
-          .customSelect(
-            "SELECT is_reversed FROM operations WHERE id = 'op-exp-4'",
-          )
+          .customSelect("SELECT is_reversed FROM operations WHERE id = 'op-exp-4'")
           .getSingle();
       expect(original.read<bool>('is_reversed'), isTrue);
     });
@@ -273,9 +226,7 @@ void main() {
 
       final febFlows = await dashRepo.periodFlow(householdId: _hh, period: feb);
       // Feb should have no reversal from this op
-      final febRev = febFlows.isEmpty
-          ? 0
-          : febFlows.first.expenseReversalMinorUnits;
+      final febRev = febFlows.isEmpty ? 0 : febFlows.first.expenseReversalMinorUnits;
       expect(febRev, 0, reason: 'Reversal effective Jan, not Feb');
     });
 
@@ -294,10 +245,7 @@ void main() {
         flows2.first.grossIncomeMinorUnits,
         reason: 'Identical queries return identical totals',
       );
-      expect(
-        flows1.first.grossExpenseMinorUnits,
-        flows2.first.grossExpenseMinorUnits,
-      );
+      expect(flows1.first.grossExpenseMinorUnits, flows2.first.grossExpenseMinorUnits);
       expect(flows1.first.grossIncomeMinorUnits, 15000);
       expect(flows1.first.grossExpenseMinorUnits, 5000);
     });
@@ -334,10 +282,7 @@ void main() {
       await recordIncome(acc, 'op-inc-8', 5000, '2025-01-01');
       await recordExpense(acc, 'op-exp-8', 2000, '2025-01-15');
 
-      final janBefore = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: jan,
-      );
+      final janBefore = await dashRepo.periodFlow(householdId: _hh, period: jan);
 
       // Add Feb operations
       await recordIncome(acc, 'op-inc-8b', 3000, '2025-02-01');

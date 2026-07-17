@@ -43,10 +43,7 @@ FinancialAccount _makeAccount({
 );
 
 /// Builds a widget test environment with overridden Riverpod providers.
-Widget _buildScreen({
-  required List<FinancialAccount> accounts,
-  bool simulateError = false,
-}) {
+Widget _buildScreen({required List<FinancialAccount> accounts, bool simulateError = false}) {
   final fakeAccountRepo = FakeAccountRepository();
   final fakeBalanceRepo = FakeBalanceRepository();
 
@@ -57,18 +54,12 @@ Widget _buildScreen({
   return ProviderScope(
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
-      appLocaleProvider.overrideWith(
-        () => _FixedLocaleNotifier(const Locale('ar')),
-      ),
-      appThemeModeProvider.overrideWith(
-        () => _FixedThemeModeNotifier(ThemeMode.light),
-      ),
+      appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('ar'))),
+      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
       // Override repositories with typed interface providers.
       accountRepositoryProvider.overrideWithValue(fakeAccountRepo),
       balanceRepositoryProvider.overrideWithValue(fakeBalanceRepo),
-      listAccountsUseCaseProvider.overrideWithValue(
-        ListAccountsUseCase(fakeAccountRepo),
-      ),
+      listAccountsUseCaseProvider.overrideWithValue(ListAccountsUseCase(fakeAccountRepo)),
       accountsProvider(_householdId).overrideWith(
         (_) async => simulateError
             ? const AppPersistenceFailure<List<FinancialAccount>>()
@@ -91,24 +82,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(
-              () => _FixedLocaleNotifier(const Locale('ar')),
-            ),
-            appThemeModeProvider.overrideWith(
-              () => _FixedThemeModeNotifier(ThemeMode.light),
-            ),
-            accountRepositoryProvider.overrideWithValue(
-              FakeAccountRepository(),
-            ),
-            balanceRepositoryProvider.overrideWithValue(
-              FakeBalanceRepository(),
-            ),
+            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('ar'))),
+            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            accountRepositoryProvider.overrideWithValue(FakeAccountRepository()),
+            balanceRepositoryProvider.overrideWithValue(FakeBalanceRepository()),
             listAccountsUseCaseProvider.overrideWithValue(
               ListAccountsUseCase(FakeAccountRepository()),
             ),
-            accountsProvider(_householdId).overrideWith(
-              (_) => Completer<AppResult<List<FinancialAccount>>>().future,
-            ),
+            accountsProvider(
+              _householdId,
+            ).overrideWith((_) => Completer<AppResult<List<FinancialAccount>>>().future),
           ],
           child: const MaterialApp(
             locale: Locale('ar'),

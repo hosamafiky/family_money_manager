@@ -53,9 +53,7 @@ class _BudgetsListScreenState extends ConsumerState<BudgetsListScreen> {
             return Center(child: Text(l10n.budgetEmpty));
           }
           final allPlans = result.value;
-          final plans = _showArchived
-              ? allPlans
-              : allPlans.where((p) => !p.isArchived).toList();
+          final plans = _showArchived ? allPlans : allPlans.where((p) => !p.isArchived).toList();
 
           if (plans.isEmpty) {
             return Center(
@@ -64,11 +62,7 @@ class _BudgetsListScreenState extends ConsumerState<BudgetsListScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.account_balance_wallet_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
+                    const Icon(Icons.account_balance_wallet_outlined, size: 64, color: Colors.grey),
                     const SizedBox(height: 16),
                     Text(
                       l10n.budgetEmpty,
@@ -126,25 +120,19 @@ class _BudgetCard extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       plan.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                   if (plan.isArchived)
                     Chip(
-                      label: Text(
-                        l10n.budgetArchived,
-                        style: const TextStyle(fontSize: 11),
-                      ),
+                      label: Text(l10n.budgetArchived, style: const TextStyle(fontSize: 11)),
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   const SizedBox(width: 4),
-                  Text(
-                    plan.currencyCode,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                  Text(plan.currencyCode, style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
               const SizedBox(height: 8),
@@ -185,10 +173,7 @@ class _ProgressSection extends StatelessWidget {
     );
     final pct = progress.percentageUsed;
     final fraction = progress.limitMinorUnits > 0
-        ? (progress.consumedMinorUnits / progress.limitMinorUnits).clamp(
-            0.0,
-            1.0,
-          )
+        ? (progress.consumedMinorUnits / progress.limitMinorUnits).clamp(0.0, 1.0)
         : 0.0;
 
     return Column(
@@ -197,15 +182,9 @@ class _ProgressSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$consumed / $limit',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text('$consumed / $limit', style: Theme.of(context).textTheme.bodyMedium),
             if (pct != null)
-              Text(
-                l10n.budgetPercent(pct),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(l10n.budgetPercent(pct), style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
         const SizedBox(height: 6),
@@ -229,26 +208,11 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, icon) = switch (state) {
-      BudgetUsageState.noSpending => (
-        l10n.budgetStatusNoSpending,
-        Icons.circle_outlined,
-      ),
-      BudgetUsageState.onTrack => (
-        l10n.budgetStatusOnTrack,
-        Icons.check_circle_outline,
-      ),
-      BudgetUsageState.nearLimit => (
-        l10n.budgetStatusNearLimit,
-        Icons.warning_amber_outlined,
-      ),
-      BudgetUsageState.limitReached => (
-        l10n.budgetStatusLimitReached,
-        Icons.block_outlined,
-      ),
-      BudgetUsageState.overBudget => (
-        l10n.budgetStatusOverBudget,
-        Icons.error_outline,
-      ),
+      BudgetUsageState.noSpending => (l10n.budgetStatusNoSpending, Icons.circle_outlined),
+      BudgetUsageState.onTrack => (l10n.budgetStatusOnTrack, Icons.check_circle_outline),
+      BudgetUsageState.nearLimit => (l10n.budgetStatusNearLimit, Icons.warning_amber_outlined),
+      BudgetUsageState.limitReached => (l10n.budgetStatusLimitReached, Icons.block_outlined),
+      BudgetUsageState.overBudget => (l10n.budgetStatusOverBudget, Icons.error_outline),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -27,8 +27,7 @@ class SpendingAttributionReportScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: l10n.reportRefresh,
-            onPressed: () =>
-                ref.invalidate(spendingAttributionReportProvider(req)),
+            onPressed: () => ref.invalidate(spendingAttributionReportProvider(req)),
           ),
         ],
       ),
@@ -40,14 +39,12 @@ class SpendingAttributionReportScreen extends ConsumerWidget {
             child: reportAsync.when(
               loading: () => const ReportLoading(),
               error: (_, _) => ReportErrorState(
-                onRetry: () =>
-                    ref.invalidate(spendingAttributionReportProvider(req)),
+                onRetry: () => ref.invalidate(spendingAttributionReportProvider(req)),
               ),
               data: (result) {
                 if (result is! AppOk<SpendingAttributionReport>) {
                   return ReportErrorState(
-                    onRetry: () =>
-                        ref.invalidate(spendingAttributionReportProvider(req)),
+                    onRetry: () => ref.invalidate(spendingAttributionReportProvider(req)),
                   );
                 }
                 final report = result.value;
@@ -130,9 +127,7 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16, bottom: 4),
       child: Text(
         title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }

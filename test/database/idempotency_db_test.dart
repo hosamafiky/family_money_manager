@@ -92,160 +92,143 @@ void main() {
   // ── Sequential duplicate income ───────────────────────────────────────────
 
   group('Sequential duplicate income', () {
-    test(
-      'same operation_id returns alreadyExists and does not add extra records',
-      () async {
-        await setupHousehold('hh-1');
-        final acc = await createAccount('hh-1');
+    test('same operation_id returns alreadyExists and does not add extra records', () async {
+      await setupHousehold('hh-1');
+      final acc = await createAccount('hh-1');
 
-        final r1 = await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-inc-1',
-            householdId: 'hh-1',
-            destinationAccountId: acc,
-          ),
-        );
-        expect(r1, IdempotentOperationResult.created);
+      final r1 = await ledgerRepo.recordIncome(
+        incomeParams(operationId: 'op-inc-1', householdId: 'hh-1', destinationAccountId: acc),
+      );
+      expect(r1, IdempotentOperationResult.created);
 
-        final r2 = await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-inc-1',
-            householdId: 'hh-1',
-            destinationAccountId: acc,
-          ),
-        );
-        expect(r2, IdempotentOperationResult.alreadyExists);
+      final r2 = await ledgerRepo.recordIncome(
+        incomeParams(operationId: 'op-inc-1', householdId: 'hh-1', destinationAccountId: acc),
+      );
+      expect(r2, IdempotentOperationResult.alreadyExists);
 
-        // Balance must reflect exactly one income, not two.
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
-          householdId: 'hh-1',
-        );
-        expect(balance, 10000);
+      // Balance must reflect exactly one income, not two.
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-1',
+      );
+      expect(balance, 10000);
 
-        // Only one operation row.
-        final ops = await ledgerRepo.operationsInRange(
-          householdId: 'hh-1',
-          fromDate: '2024-01-01',
-          toDate: '2024-12-31',
-        );
-        expect(ops.length, 1);
-      },
-    );
+      // Only one operation row.
+      final ops = await ledgerRepo.operationsInRange(
+        householdId: 'hh-1',
+        fromDate: '2024-01-01',
+        toDate: '2024-12-31',
+      );
+      expect(ops.length, 1);
+    });
   });
 
   // ── Sequential duplicate expense ──────────────────────────────────────────
 
   group('Sequential duplicate expense', () {
-    test(
-      'same operation_id returns alreadyExists and does not reduce balance twice',
-      () async {
-        await setupHousehold('hh-2');
-        final acc = await createAccount('hh-2');
+    test('same operation_id returns alreadyExists and does not reduce balance twice', () async {
+      await setupHousehold('hh-2');
+      final acc = await createAccount('hh-2');
 
-        await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-seed',
-            householdId: 'hh-2',
-            destinationAccountId: acc,
-            amount: 20000,
-          ),
-        );
-
-        final r1 = await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: 'op-exp-1',
-            householdId: 'hh-2',
-            sourceAccountId: acc,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r1, IdempotentOperationResult.created);
-
-        final r2 = await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: 'op-exp-1',
-            householdId: 'hh-2',
-            sourceAccountId: acc,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r2, IdempotentOperationResult.alreadyExists);
-
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
+      await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-seed',
           householdId: 'hh-2',
-        );
-        expect(balance, 15000); // 20000 - 5000, not -10000
-      },
-    );
+          destinationAccountId: acc,
+          amount: 20000,
+        ),
+      );
+
+      final r1 = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: 'op-exp-1',
+          householdId: 'hh-2',
+          sourceAccountId: acc,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r1, IdempotentOperationResult.created);
+
+      final r2 = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: 'op-exp-1',
+          householdId: 'hh-2',
+          sourceAccountId: acc,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r2, IdempotentOperationResult.alreadyExists);
+
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-2',
+      );
+      expect(balance, 15000); // 20000 - 5000, not -10000
+    });
   });
 
   // ── Sequential duplicate transfer ─────────────────────────────────────────
 
   group('Sequential duplicate transfer', () {
-    test(
-      'same operation_id returns alreadyExists and moves money only once',
-      () async {
-        await setupHousehold('hh-3');
-        final src = await createAccount('hh-3', suffix: 'src');
-        final dst = await createAccount('hh-3', suffix: 'dst');
+    test('same operation_id returns alreadyExists and moves money only once', () async {
+      await setupHousehold('hh-3');
+      final src = await createAccount('hh-3', suffix: 'src');
+      final dst = await createAccount('hh-3', suffix: 'dst');
 
-        await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-seed3',
-            householdId: 'hh-3',
-            destinationAccountId: src,
-            amount: 10000,
-          ),
-        );
-
-        final r1 = await ledgerRepo.executeTransfer(
-          ExecuteTransferParams(
-            operationId: 'op-tf-1',
-            householdId: 'hh-3',
-            sourceAccountId: src,
-            destinationAccountId: dst,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r1, IdempotentOperationResult.created);
-
-        final r2 = await ledgerRepo.executeTransfer(
-          ExecuteTransferParams(
-            operationId: 'op-tf-1',
-            householdId: 'hh-3',
-            sourceAccountId: src,
-            destinationAccountId: dst,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r2, IdempotentOperationResult.alreadyExists);
-
-        final srcBalance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: src,
+      await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-seed3',
           householdId: 'hh-3',
-        );
-        final dstBalance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: dst,
+          destinationAccountId: src,
+          amount: 10000,
+        ),
+      );
+
+      final r1 = await ledgerRepo.executeTransfer(
+        ExecuteTransferParams(
+          operationId: 'op-tf-1',
           householdId: 'hh-3',
-        );
-        expect(srcBalance, 7000); // 10000 - 3000
-        expect(dstBalance, 3000);
-      },
-    );
+          sourceAccountId: src,
+          destinationAccountId: dst,
+          amountMinorUnits: 3000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r1, IdempotentOperationResult.created);
+
+      final r2 = await ledgerRepo.executeTransfer(
+        ExecuteTransferParams(
+          operationId: 'op-tf-1',
+          householdId: 'hh-3',
+          sourceAccountId: src,
+          destinationAccountId: dst,
+          amountMinorUnits: 3000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r2, IdempotentOperationResult.alreadyExists);
+
+      final srcBalance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: src,
+        householdId: 'hh-3',
+      );
+      final dstBalance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: dst,
+        householdId: 'hh-3',
+      );
+      expect(srcBalance, 7000); // 10000 - 3000
+      expect(dstBalance, 3000);
+    });
   });
 
   // ── Same key in different profiles ────────────────────────────────────────
@@ -326,50 +309,23 @@ void main() {
   // ── Rollback followed by retry ────────────────────────────────────────────
 
   group('Rollback then retry', () {
-    test(
-      'operation can be recorded after a failed attempt with the same params',
-      () async {
-        await setupHousehold('hh-6');
-        final acc = await createAccount('hh-6');
+    test('operation can be recorded after a failed attempt with the same params', () async {
+      await setupHousehold('hh-6');
+      final acc = await createAccount('hh-6');
 
-        // Seed insufficient funds scenario.
-        await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-seed6',
-            householdId: 'hh-6',
-            destinationAccountId: acc,
-            amount: 100,
-          ),
-        );
+      // Seed insufficient funds scenario.
+      await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-seed6',
+          householdId: 'hh-6',
+          destinationAccountId: acc,
+          amount: 100,
+        ),
+      );
 
-        // First attempt fails (insufficient funds).
-        await expectLater(
-          ledgerRepo.recordExpense(
-            RecordExpenseParams(
-              operationId: 'op-exp-retry',
-              householdId: 'hh-6',
-              sourceAccountId: acc,
-              amountMinorUnits: 500,
-              currencyCode: 'EGP',
-              effectiveDate: '2024-01-02',
-              createdBy: 'user-1',
-            ),
-          ),
-          throwsA(isA<InsufficientFundsError>()),
-        );
-
-        // Add more funds.
-        await ledgerRepo.recordIncome(
-          incomeParams(
-            operationId: 'op-more',
-            householdId: 'hh-6',
-            destinationAccountId: acc,
-            amount: 1000,
-          ),
-        );
-
-        // Retry with the same operation_id → should succeed now.
-        final r = await ledgerRepo.recordExpense(
+      // First attempt fails (insufficient funds).
+      await expectLater(
+        ledgerRepo.recordExpense(
           RecordExpenseParams(
             operationId: 'op-exp-retry',
             householdId: 'hh-6',
@@ -379,79 +335,95 @@ void main() {
             effectiveDate: '2024-01-02',
             createdBy: 'user-1',
           ),
-        );
-        expect(r, IdempotentOperationResult.created);
+        ),
+        throwsA(isA<InsufficientFundsError>()),
+      );
 
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
+      // Add more funds.
+      await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-more',
           householdId: 'hh-6',
-        );
-        expect(balance, 600); // 100 + 1000 - 500
-      },
-    );
+          destinationAccountId: acc,
+          amount: 1000,
+        ),
+      );
+
+      // Retry with the same operation_id → should succeed now.
+      final r = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: 'op-exp-retry',
+          householdId: 'hh-6',
+          sourceAccountId: acc,
+          amountMinorUnits: 500,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r, IdempotentOperationResult.created);
+
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-6',
+      );
+      expect(balance, 600); // 100 + 1000 - 500
+    });
   });
 
   // ── Scoped idempotency index: DB-level enforcement ────────────────────────
 
   group('DB-level scoped idempotency uniqueness', () {
-    test(
-      'UNIQUE(household_id, idempotency_key) prevents duplicate at DB level',
-      () async {
-        await setupHousehold('hh-7');
+    test('UNIQUE(household_id, idempotency_key) prevents duplicate at DB level', () async {
+      await setupHousehold('hh-7');
 
-        // Insert two operations with the same scoped key at raw SQL level.
-        await db.customStatement(
+      // Insert two operations with the same scoped key at raw SQL level.
+      await db.customStatement(
+        "INSERT INTO operations "
+        "(id, household_id, type, effective_date, recorded_at, "
+        " total_amount_minor_units, currency_code, created_by, created_at, "
+        " updated_at, idempotency_key) "
+        "VALUES ('op-idx-1', 'hh-7', 'income', '2024-01-01', '2024-01-01', "
+        "        100, 'EGP', 'user-1', '2024-01-01', '2024-01-01', 'key-A')",
+      );
+
+      expect(
+        () => db.customStatement(
           "INSERT INTO operations "
           "(id, household_id, type, effective_date, recorded_at, "
           " total_amount_minor_units, currency_code, created_by, created_at, "
           " updated_at, idempotency_key) "
-          "VALUES ('op-idx-1', 'hh-7', 'income', '2024-01-01', '2024-01-01', "
-          "        100, 'EGP', 'user-1', '2024-01-01', '2024-01-01', 'key-A')",
-        );
+          "VALUES ('op-idx-2', 'hh-7', 'income', '2024-01-01', '2024-01-01', "
+          "        200, 'EGP', 'user-1', '2024-01-01', '2024-01-01', 'key-A')",
+        ),
+        throwsA(anything), // UNIQUE constraint violation
+      );
+    });
 
-        expect(
-          () => db.customStatement(
-            "INSERT INTO operations "
-            "(id, household_id, type, effective_date, recorded_at, "
-            " total_amount_minor_units, currency_code, created_by, created_at, "
-            " updated_at, idempotency_key) "
-            "VALUES ('op-idx-2', 'hh-7', 'income', '2024-01-01', '2024-01-01', "
-            "        200, 'EGP', 'user-1', '2024-01-01', '2024-01-01', 'key-A')",
-          ),
-          throwsA(anything), // UNIQUE constraint violation
-        );
-      },
-    );
+    test('NULL idempotency_key is not subject to uniqueness (allowed multiple)', () async {
+      await setupHousehold('hh-8');
 
-    test(
-      'NULL idempotency_key is not subject to uniqueness (allowed multiple)',
-      () async {
-        await setupHousehold('hh-8');
+      await db.customStatement(
+        "INSERT INTO operations "
+        "(id, household_id, type, effective_date, recorded_at, "
+        " total_amount_minor_units, currency_code, created_by, created_at, updated_at) "
+        "VALUES ('op-null-1', 'hh-8', 'income', '2024-01-01', '2024-01-01', "
+        "        100, 'EGP', 'user-1', '2024-01-01', '2024-01-01')",
+      );
 
-        await db.customStatement(
-          "INSERT INTO operations "
-          "(id, household_id, type, effective_date, recorded_at, "
-          " total_amount_minor_units, currency_code, created_by, created_at, updated_at) "
-          "VALUES ('op-null-1', 'hh-8', 'income', '2024-01-01', '2024-01-01', "
-          "        100, 'EGP', 'user-1', '2024-01-01', '2024-01-01')",
-        );
+      // Second with NULL idempotency_key should not violate constraint.
+      await db.customStatement(
+        "INSERT INTO operations "
+        "(id, household_id, type, effective_date, recorded_at, "
+        " total_amount_minor_units, currency_code, created_by, created_at, updated_at) "
+        "VALUES ('op-null-2', 'hh-8', 'income', '2024-01-01', '2024-01-01', "
+        "        200, 'EGP', 'user-1', '2024-01-01', '2024-01-01')",
+      );
 
-        // Second with NULL idempotency_key should not violate constraint.
-        await db.customStatement(
-          "INSERT INTO operations "
-          "(id, household_id, type, effective_date, recorded_at, "
-          " total_amount_minor_units, currency_code, created_by, created_at, updated_at) "
-          "VALUES ('op-null-2', 'hh-8', 'income', '2024-01-01', '2024-01-01', "
-          "        200, 'EGP', 'user-1', '2024-01-01', '2024-01-01')",
-        );
-
-        final ops = await db
-            .customSelect(
-              "SELECT id FROM operations WHERE household_id = 'hh-8'",
-            )
-            .get();
-        expect(ops.length, 2);
-      },
-    );
+      final ops = await db
+          .customSelect("SELECT id FROM operations WHERE household_id = 'hh-8'")
+          .get();
+      expect(ops.length, 2);
+    });
   });
 }

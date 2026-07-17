@@ -9,9 +9,6 @@ void main() {
   config.validate();
 
   runApp(
-    ProviderScope(
-      overrides: [appConfigProvider.overrideWithValue(config)],
-      child: const App(),
-    ),
+    ProviderScope(overrides: [appConfigProvider.overrideWithValue(config)], child: const App()),
   );
 }

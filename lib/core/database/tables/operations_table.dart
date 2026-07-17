@@ -60,12 +60,10 @@ class Operations extends Table {
   TextColumn get beneficiaryRole => text().nullable()();
 
   @ReferenceName('sourceOperations')
-  TextColumn get sourceAccountId =>
-      text().nullable().references(FinancialAccounts, #id)();
+  TextColumn get sourceAccountId => text().nullable().references(FinancialAccounts, #id)();
 
   @ReferenceName('destinationOperations')
-  TextColumn get destinationAccountId =>
-      text().nullable().references(FinancialAccounts, #id)();
+  TextColumn get destinationAccountId => text().nullable().references(FinancialAccounts, #id)();
 
   /// Face amount in minor units (always positive).
   IntColumn get totalAmountMinorUnits => integer()();

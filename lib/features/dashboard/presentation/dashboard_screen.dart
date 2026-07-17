@@ -33,6 +33,15 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(l10n.dashboardTitle),
         actions: [
           Semantics(
+            label: l10n.goalsTitle,
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.flag_outlined),
+              tooltip: l10n.goalsTitle,
+              onPressed: () => context.push('/goals'),
+            ),
+          ),
+          Semantics(
             label: l10n.budgetsTitle,
             button: true,
             child: IconButton(
@@ -55,21 +64,18 @@ class DashboardScreen extends ConsumerWidget {
             child: IconButton(
               icon: const Icon(Icons.refresh),
               tooltip: l10n.dashboardRefresh,
-              onPressed: () =>
-                  ref.invalidate(dashboardSummaryProvider(_householdId)),
+              onPressed: () => ref.invalidate(dashboardSummaryProvider(_householdId)),
             ),
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async =>
-            ref.invalidate(dashboardSummaryProvider(_householdId)),
+        onRefresh: () async => ref.invalidate(dashboardSummaryProvider(_householdId)),
         child: summaryAsync.when(
           loading: () => _DashboardLoading(l10n: l10n),
           error: (_, _) => _DashboardError(
             l10n: l10n,
-            onRetry: () =>
-                ref.invalidate(dashboardSummaryProvider(_householdId)),
+            onRetry: () => ref.invalidate(dashboardSummaryProvider(_householdId)),
           ),
           data: (result) {
             if (result is AppOk<DashboardSummary>) {
@@ -77,8 +83,7 @@ class DashboardScreen extends ConsumerWidget {
             }
             return _DashboardError(
               l10n: l10n,
-              onRetry: () =>
-                  ref.invalidate(dashboardSummaryProvider(_householdId)),
+              onRetry: () => ref.invalidate(dashboardSummaryProvider(_householdId)),
             );
           },
         ),
@@ -153,15 +158,9 @@ class _DashboardContent extends StatelessWidget {
       children: [
         _PeriodSelector(l10n: l10n),
         const SizedBox(height: 16),
-        _SpendableBalancesSection(
-          balances: summary.spendableBalances,
-          l10n: l10n,
-        ),
+        _SpendableBalancesSection(balances: summary.spendableBalances, l10n: l10n),
         const SizedBox(height: 12),
-        _ProtectedBalancesSection(
-          balances: summary.protectedBalances,
-          l10n: l10n,
-        ),
+        _ProtectedBalancesSection(balances: summary.protectedBalances, l10n: l10n),
         const SizedBox(height: 12),
         _PeriodFlowSection(flows: summary.periodFlow, l10n: l10n),
         const SizedBox(height: 12),
@@ -198,10 +197,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.dashboardPeriodLabel,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text(l10n.dashboardPeriodLabel, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -209,8 +205,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
               children: [
                 _PeriodChip(
                   label: l10n.dashboardPeriodCurrentMonth,
-                  selected:
-                      currentPeriod.label == DashboardPeriodLabel.currentMonth,
+                  selected: currentPeriod.label == DashboardPeriodLabel.currentMonth,
                   onSelected: (_) => ref
                       .read(dashboardPeriodProvider.notifier)
                       .setPeriod(DashboardPeriod.currentMonth(clock)),
@@ -218,8 +213,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
                 const SizedBox(width: 8),
                 _PeriodChip(
                   label: l10n.dashboardPeriodPreviousMonth,
-                  selected:
-                      currentPeriod.label == DashboardPeriodLabel.previousMonth,
+                  selected: currentPeriod.label == DashboardPeriodLabel.previousMonth,
                   onSelected: (_) => ref
                       .read(dashboardPeriodProvider.notifier)
                       .setPeriod(DashboardPeriod.previousMonth(clock)),
@@ -227,8 +221,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
                 const SizedBox(width: 8),
                 _PeriodChip(
                   label: l10n.dashboardPeriodCurrentYear,
-                  selected:
-                      currentPeriod.label == DashboardPeriodLabel.currentYear,
+                  selected: currentPeriod.label == DashboardPeriodLabel.currentYear,
                   onSelected: (_) => ref
                       .read(dashboardPeriodProvider.notifier)
                       .setPeriod(DashboardPeriod.currentYear(clock)),
@@ -253,10 +246,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(now.year + 1),
-      initialDateRange: DateTimeRange(
-        start: DateTime(now.year, now.month, 1),
-        end: now,
-      ),
+      initialDateRange: DateTimeRange(start: DateTime(now.year, now.month, 1), end: now),
     );
     if (range == null) return;
 
@@ -266,9 +256,7 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
 
     ref
         .read(dashboardPeriodProvider.notifier)
-        .setPeriod(
-          DashboardPeriod.custom(startDate: startDate, endDate: endDate),
-        );
+        .setPeriod(DashboardPeriod.custom(startDate: startDate, endDate: endDate));
   }
 
   static String _fmtDate(DateTime d) =>
@@ -278,22 +266,14 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
 }
 
 class _PeriodChip extends StatelessWidget {
-  const _PeriodChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
+  const _PeriodChip({required this.label, required this.selected, required this.onSelected});
   final String label;
   final bool selected;
   final void Function(bool) onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: onSelected,
-    );
+    return FilterChip(label: Text(label), selected: selected, onSelected: onSelected);
   }
 }
 
@@ -318,8 +298,7 @@ class _SpendableBalancesSection extends StatelessWidget {
                     .map(
                       (b) => _BalanceRow(
                         balance: b,
-                        negativeWarningLabel:
-                            l10n.dashboardNegativeBalanceWarning,
+                        negativeWarningLabel: l10n.dashboardNegativeBalanceWarning,
                       ),
                     )
                     .toList(),
@@ -359,10 +338,7 @@ class _ProtectedBalancesSection extends StatelessWidget {
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ),
-                        _AmountText(
-                          minorUnits: b.totalMinorUnits,
-                          currencyCode: b.currencyCode,
-                        ),
+                        _AmountText(minorUnits: b.totalMinorUnits, currencyCode: b.currencyCode),
                       ],
                     ),
                   );
@@ -388,9 +364,7 @@ class _PeriodFlowSection extends StatelessWidget {
       child: flows.isEmpty
           ? _EmptyState(message: l10n.dashboardPeriodNoActivity)
           : Column(
-              children: flows
-                  .map((f) => _FlowRow(flow: f, l10n: l10n))
-                  .toList(),
+              children: flows.map((f) => _FlowRow(flow: f, l10n: l10n)).toList(),
             ),
     );
   }
@@ -518,9 +492,7 @@ class _SpouseWalletsSection extends StatelessWidget {
       child: wallets.isEmpty
           ? _EmptyState(message: l10n.dashboardNoSpouseWallet)
           : Column(
-              children: wallets
-                  .map((w) => _WalletSubSection(wallet: w, l10n: l10n))
-                  .toList(),
+              children: wallets.map((w) => _WalletSubSection(wallet: w, l10n: l10n)).toList(),
             ),
     );
   }
@@ -591,9 +563,7 @@ class _RecentActivitySection extends StatelessWidget {
       child: activities.isEmpty
           ? _EmptyState(message: l10n.dashboardNoRecentActivity)
           : Column(
-              children: activities
-                  .map((a) => _ActivityRow(activity: a, l10n: l10n))
-                  .toList(),
+              children: activities.map((a) => _ActivityRow(activity: a, l10n: l10n)).toList(),
             ),
     );
   }
@@ -614,12 +584,7 @@ class _ActivityRow extends StatelessWidget {
       leading: _OperationTypeIcon(typeCode: op.type.code),
       title: Row(
         children: [
-          Flexible(
-            child: Text(
-              op.description ?? op.type.code,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+          Flexible(child: Text(op.description ?? op.type.code, overflow: TextOverflow.ellipsis)),
           if (op.isReversed) ...[
             const SizedBox(width: 4),
             Container(
@@ -639,10 +604,7 @@ class _ActivityRow extends StatelessWidget {
         ],
       ),
       subtitle: Text(op.effectiveDate),
-      trailing: _AmountText(
-        minorUnits: op.totalAmountMinorUnits,
-        currencyCode: op.currencyCode,
-      ),
+      trailing: _AmountText(minorUnits: op.totalAmountMinorUnits, currencyCode: op.currencyCode),
     );
   }
 }
@@ -683,12 +645,7 @@ class _OperationTypeIcon extends StatelessWidget {
 // ── Shared sub-widgets ────────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.icon,
-    required this.child,
-    this.trailing,
-  });
+  const _SectionCard({required this.title, required this.icon, required this.child, this.trailing});
   final String title;
   final IconData icon;
   final Widget child;
@@ -707,12 +664,7 @@ class _SectionCard extends StatelessWidget {
               children: [
                 Icon(icon, size: 18),
                 const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
+                Expanded(child: Text(title, style: Theme.of(context).textTheme.titleMedium)),
                 ?trailing,
               ],
             ),
@@ -739,10 +691,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _BalanceRow extends StatelessWidget {
-  const _BalanceRow({
-    required this.balance,
-    required this.negativeWarningLabel,
-  });
+  const _BalanceRow({required this.balance, required this.negativeWarningLabel});
   final CurrencyAmountSummary balance;
   final String negativeWarningLabel;
 
@@ -755,32 +704,20 @@ class _BalanceRow extends StatelessWidget {
           if (balance.isNegative) ...[
             Semantics(
               label: negativeWarningLabel,
-              child: const Icon(
-                Icons.warning_amber_outlined,
-                size: 16,
-                color: Colors.red,
-              ),
+              child: const Icon(Icons.warning_amber_outlined, size: 16, color: Colors.red),
             ),
             const SizedBox(width: 4),
             Flexible(
               child: Text(
                 negativeWarningLabel,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.red),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.red),
               ),
             ),
           ] else ...[
-            Text(
-              balance.currencyCode,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text(balance.currencyCode, style: Theme.of(context).textTheme.bodySmall),
           ],
           const Spacer(),
-          _AmountText(
-            minorUnits: balance.totalMinorUnits,
-            currencyCode: balance.currencyCode,
-          ),
+          _AmountText(minorUnits: balance.totalMinorUnits, currencyCode: balance.currencyCode),
         ],
       ),
     );
@@ -812,16 +749,10 @@ class _LabelledAmount extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: color),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: color),
             ),
           ),
-          _AmountText(
-            minorUnits: minorUnits,
-            currencyCode: currencyCode,
-            color: color,
-          ),
+          _AmountText(minorUnits: minorUnits, currencyCode: currencyCode, color: color),
         ],
       ),
     );
@@ -833,11 +764,7 @@ class _LabelledAmount extends StatelessWidget {
 /// Uses [Currency.fromCode] to determine decimal precision.
 /// Falls back to 2 decimal places for unknown currency codes.
 class _AmountText extends StatelessWidget {
-  const _AmountText({
-    required this.minorUnits,
-    required this.currencyCode,
-    this.color,
-  });
+  const _AmountText({required this.minorUnits, required this.currencyCode, this.color});
   final int minorUnits;
   final String currencyCode;
   final Color? color;
@@ -849,10 +776,9 @@ class _AmountText extends StatelessWidget {
       label: '$text $currencyCode',
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: color),
       ),
     );
   }

@@ -121,180 +121,147 @@ void main() {
       expect(ids, isNot(contains('op-hist-dec')));
     });
 
-    test(
-      'account filter — operationsForAccount restricts to that account',
-      () async {
-        final acc1 = await createAccount(suffix: 'af1');
-        final acc2 = await createAccount(suffix: 'af2');
+    test('account filter — operationsForAccount restricts to that account', () async {
+      final acc1 = await createAccount(suffix: 'af1');
+      final acc2 = await createAccount(suffix: 'af2');
 
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-af1-inc',
-            householdId: 'hh-hist',
-            destinationAccountId: acc1,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-af2-inc',
-            householdId: 'hh-hist',
-            destinationAccountId: acc2,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-
-        final resultsForAcc1 = await queryRepo.operationsForAccount(
-          accountId: acc1,
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-af1-inc',
           householdId: 'hh-hist',
-        );
-        final ids = resultsForAcc1.map((t) => t.operation.id).toSet();
-        expect(ids, contains('op-hist-af1-inc'));
-        expect(ids, isNot(contains('op-hist-af2-inc')));
-      },
-    );
-
-    test(
-      'operation type filter — income/expense/transfer are distinct',
-      () async {
-        final acc = await createAccount(suffix: 'ot1');
-        final acc2 = await createAccount(suffix: 'ot2');
-
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-ot-inc',
-            householdId: 'hh-hist',
-            destinationAccountId: acc,
-            amountMinorUnits: 10000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: 'op-hist-ot-exp',
-            householdId: 'hh-hist',
-            sourceAccountId: acc,
-            amountMinorUnits: 2000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.executeTransfer(
-          ExecuteTransferParams(
-            operationId: 'op-hist-ot-tf',
-            householdId: 'hh-hist',
-            sourceAccountId: acc,
-            destinationAccountId: acc2,
-            amountMinorUnits: 1000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-03',
-            createdBy: 'user-1',
-          ),
-        );
-
-        // Filter by income.
-        final incomeOps = await queryRepo.recentOperations(
+          destinationAccountId: acc1,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-af2-inc',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.income,
-            pageSize: 100,
-          ),
-        );
-        expect(
-          incomeOps.every((t) => t.operation.type == OperationType.income),
-          isTrue,
-        );
-        expect(
-          incomeOps.any((t) => t.operation.id == 'op-hist-ot-inc'),
-          isTrue,
-        );
+          destinationAccountId: acc2,
+          amountMinorUnits: 3000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
 
-        // Filter by expense.
-        final expenseOps = await queryRepo.recentOperations(
+      final resultsForAcc1 = await queryRepo.operationsForAccount(
+        accountId: acc1,
+        householdId: 'hh-hist',
+      );
+      final ids = resultsForAcc1.map((t) => t.operation.id).toSet();
+      expect(ids, contains('op-hist-af1-inc'));
+      expect(ids, isNot(contains('op-hist-af2-inc')));
+    });
+
+    test('operation type filter — income/expense/transfer are distinct', () async {
+      final acc = await createAccount(suffix: 'ot1');
+      final acc2 = await createAccount(suffix: 'ot2');
+
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-ot-inc',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.expense,
-            pageSize: 100,
-          ),
-        );
-        expect(
-          expenseOps.every((t) => t.operation.type == OperationType.expense),
-          isTrue,
-        );
-
-        // Filter by transfer.
-        final transferOps = await queryRepo.recentOperations(
+          destinationAccountId: acc,
+          amountMinorUnits: 10000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: 'op-hist-ot-exp',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.transfer,
-            pageSize: 100,
-          ),
-        );
-        expect(
-          transferOps.every((t) => t.operation.type == OperationType.transfer),
-          isTrue,
-        );
-      },
-    );
-
-    test(
-      'transfers excluded from income/expense totals — type filter is separate',
-      () async {
-        final src = await createAccount(suffix: 'te1-src');
-        final dst = await createAccount(suffix: 'te1-dst');
-
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-te-inc',
-            householdId: 'hh-hist',
-            destinationAccountId: src,
-            amountMinorUnits: 8000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.executeTransfer(
-          ExecuteTransferParams(
-            operationId: 'op-hist-te-tf',
-            householdId: 'hh-hist',
-            sourceAccountId: src,
-            destinationAccountId: dst,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-
-        // Income filter should not include transfer.
-        final incomeOnly = await queryRepo.recentOperations(
+          sourceAccountId: acc,
+          amountMinorUnits: 2000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.executeTransfer(
+        ExecuteTransferParams(
+          operationId: 'op-hist-ot-tf',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.income,
-            pageSize: 100,
-          ),
-        );
-        final incomeIds = incomeOnly.map((t) => t.operation.id).toSet();
-        expect(incomeIds, isNot(contains('op-hist-te-tf')));
+          sourceAccountId: acc,
+          destinationAccountId: acc2,
+          amountMinorUnits: 1000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-03',
+          createdBy: 'user-1',
+        ),
+      );
 
-        // Total income amount should be 8000, not 8000+3000.
-        final totalIncome = incomeOnly.fold<int>(
-          0,
-          (sum, t) => sum + t.operation.totalAmountMinorUnits,
-        );
-        expect(totalIncome, 8000);
-      },
-    );
+      // Filter by income.
+      final incomeOps = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.income, pageSize: 100),
+      );
+      expect(incomeOps.every((t) => t.operation.type == OperationType.income), isTrue);
+      expect(incomeOps.any((t) => t.operation.id == 'op-hist-ot-inc'), isTrue);
+
+      // Filter by expense.
+      final expenseOps = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.expense, pageSize: 100),
+      );
+      expect(expenseOps.every((t) => t.operation.type == OperationType.expense), isTrue);
+
+      // Filter by transfer.
+      final transferOps = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.transfer, pageSize: 100),
+      );
+      expect(transferOps.every((t) => t.operation.type == OperationType.transfer), isTrue);
+    });
+
+    test('transfers excluded from income/expense totals — type filter is separate', () async {
+      final src = await createAccount(suffix: 'te1-src');
+      final dst = await createAccount(suffix: 'te1-dst');
+
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-te-inc',
+          householdId: 'hh-hist',
+          destinationAccountId: src,
+          amountMinorUnits: 8000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.executeTransfer(
+        ExecuteTransferParams(
+          operationId: 'op-hist-te-tf',
+          householdId: 'hh-hist',
+          sourceAccountId: src,
+          destinationAccountId: dst,
+          amountMinorUnits: 3000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+
+      // Income filter should not include transfer.
+      final incomeOnly = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.income, pageSize: 100),
+      );
+      final incomeIds = incomeOnly.map((t) => t.operation.id).toSet();
+      expect(incomeIds, isNot(contains('op-hist-te-tf')));
+
+      // Total income amount should be 8000, not 8000+3000.
+      final totalIncome = incomeOnly.fold<int>(
+        0,
+        (sum, t) => sum + t.operation.totalAmountMinorUnits,
+      );
+      expect(totalIncome, 8000);
+    });
 
     test('reversed indicator visible on reversed operations', () async {
       final acc = await createAccount(suffix: 'rv1');
@@ -389,125 +356,107 @@ void main() {
       expect(ids, contains('op-hist-orb-rev'));
     });
 
-    test(
-      'opening balance distinct from income (type = openingBalance)',
-      () async {
-        final acc = await createAccount(suffix: 'ob1');
+    test('opening balance distinct from income (type = openingBalance)', () async {
+      final acc = await createAccount(suffix: 'ob1');
 
-        await ledgerRepo.recordOpeningBalance(
-          RecordOpeningBalanceParams(
-            operationId: 'op-hist-ob',
-            householdId: 'hh-hist',
-            accountId: acc,
-            amountMinorUnits: 15000,
-            currencyCode: 'EGP',
-            effectiveDate: '2023-12-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-ob-inc',
-            householdId: 'hh-hist',
-            destinationAccountId: acc,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-
-        // Filter by income only — opening balance should NOT appear.
-        final incomeOnly = await queryRepo.recentOperations(
+      await ledgerRepo.recordOpeningBalance(
+        RecordOpeningBalanceParams(
+          operationId: 'op-hist-ob',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.income,
-            pageSize: 100,
-          ),
-        );
-        final ids = incomeOnly.map((t) => t.operation.id).toSet();
-        expect(ids, isNot(contains('op-hist-ob')));
-        expect(ids, contains('op-hist-ob-inc'));
-
-        // Filter by openingBalance only.
-        final obOnly = await queryRepo.recentOperations(
+          accountId: acc,
+          amountMinorUnits: 15000,
+          currencyCode: 'EGP',
+          effectiveDate: '2023-12-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-ob-inc',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.openingBalance,
-            pageSize: 100,
-          ),
-        );
-        expect(obOnly.any((t) => t.operation.id == 'op-hist-ob'), isTrue);
-      },
-    );
+          destinationAccountId: acc,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-    test(
-      'deterministic ordering — results are DESC by date, then recorded_at, then id',
-      () async {
-        final acc = await createAccount(suffix: 'ord1');
+      // Filter by income only — opening balance should NOT appear.
+      final incomeOnly = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.income, pageSize: 100),
+      );
+      final ids = incomeOnly.map((t) => t.operation.id).toSet();
+      expect(ids, isNot(contains('op-hist-ob')));
+      expect(ids, contains('op-hist-ob-inc'));
 
-        // Insert operations with different dates.
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-ord-1',
-            householdId: 'hh-hist',
-            destinationAccountId: acc,
-            amountMinorUnits: 100,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-ord-2',
-            householdId: 'hh-hist',
-            destinationAccountId: acc,
-            amountMinorUnits: 200,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-06-01',
-            createdBy: 'user-1',
-          ),
-        );
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-hist-ord-3',
-            householdId: 'hh-hist',
-            destinationAccountId: acc,
-            amountMinorUnits: 300,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-03-01',
-            createdBy: 'user-1',
-          ),
-        );
+      // Filter by openingBalance only.
+      final obOnly = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.openingBalance, pageSize: 100),
+      );
+      expect(obOnly.any((t) => t.operation.id == 'op-hist-ob'), isTrue);
+    });
 
-        final results = await queryRepo.recentOperations(
+    test('deterministic ordering — results are DESC by date, then recorded_at, then id', () async {
+      final acc = await createAccount(suffix: 'ord1');
+
+      // Insert operations with different dates.
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-ord-1',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.income,
-            pageSize: 100,
-          ),
-        );
-
-        final ids = results.map((t) => t.operation.id).toList();
-        // Newest date first (2024-06, 2024-03, 2024-01).
-        final juneIdx = ids.indexOf('op-hist-ord-2');
-        final marchIdx = ids.indexOf('op-hist-ord-3');
-        final janIdx = ids.indexOf('op-hist-ord-1');
-        expect(juneIdx < marchIdx, isTrue);
-        expect(marchIdx < janIdx, isTrue);
-
-        // Running the same query twice must return the same order.
-        final results2 = await queryRepo.recentOperations(
+          destinationAccountId: acc,
+          amountMinorUnits: 100,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-ord-2',
           householdId: 'hh-hist',
-          filter: const TransactionFilter(
-            operationType: OperationType.income,
-            pageSize: 100,
-          ),
-        );
-        final ids2 = results2.map((t) => t.operation.id).toList();
-        expect(ids, equals(ids2));
-      },
-    );
+          destinationAccountId: acc,
+          amountMinorUnits: 200,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-06-01',
+          createdBy: 'user-1',
+        ),
+      );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-hist-ord-3',
+          householdId: 'hh-hist',
+          destinationAccountId: acc,
+          amountMinorUnits: 300,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-03-01',
+          createdBy: 'user-1',
+        ),
+      );
+
+      final results = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.income, pageSize: 100),
+      );
+
+      final ids = results.map((t) => t.operation.id).toList();
+      // Newest date first (2024-06, 2024-03, 2024-01).
+      final juneIdx = ids.indexOf('op-hist-ord-2');
+      final marchIdx = ids.indexOf('op-hist-ord-3');
+      final janIdx = ids.indexOf('op-hist-ord-1');
+      expect(juneIdx < marchIdx, isTrue);
+      expect(marchIdx < janIdx, isTrue);
+
+      // Running the same query twice must return the same order.
+      final results2 = await queryRepo.recentOperations(
+        householdId: 'hh-hist',
+        filter: const TransactionFilter(operationType: OperationType.income, pageSize: 100),
+      );
+      final ids2 = results2.map((t) => t.operation.id).toList();
+      expect(ids, equals(ids2));
+    });
   });
 }

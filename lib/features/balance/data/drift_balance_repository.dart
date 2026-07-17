@@ -63,16 +63,11 @@ final class DriftBalanceRepository implements BalanceRepository {
       entries: entries,
       currency: currency,
     );
-    return BalanceFound(
-      minorUnits: balance.minorUnits,
-      currencyCode: account.currencyCode,
-    );
+    return BalanceFound(minorUnits: balance.minorUnits, currencyCode: account.currencyCode);
   }
 
   @override
-  Future<List<AccountBalance>> netWorthBalances({
-    required String householdId,
-  }) async {
+  Future<List<AccountBalance>> netWorthBalances({required String householdId}) async {
     final accounts =
         await (_db.select(_db.financialAccounts)..where(
               (t) =>
@@ -98,17 +93,10 @@ final class DriftBalanceRepository implements BalanceRepository {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  Future<List<LedgerEntryRecord>> _loadEntries(
-    String accountId,
-    String householdId,
-  ) async {
-    final rows =
-        await (_db.select(_db.ledgerEntries)..where(
-              (t) =>
-                  t.accountId.equals(accountId) &
-                  t.householdId.equals(householdId),
-            ))
-            .get();
+  Future<List<LedgerEntryRecord>> _loadEntries(String accountId, String householdId) async {
+    final rows = await (_db.select(
+      _db.ledgerEntries,
+    )..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId))).get();
 
     return rows
         .map(
@@ -127,13 +115,9 @@ final class DriftBalanceRepository implements BalanceRepository {
         .toList();
   }
 
-  Future<DbFinancialAccount?> _getAccount(
-    String accountId,
-    String householdId,
-  ) async {
-    return (_db.select(_db.financialAccounts)..where(
-          (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
-        ))
-        .getSingleOrNull();
+  Future<DbFinancialAccount?> _getAccount(String accountId, String householdId) async {
+    return (_db.select(
+      _db.financialAccounts,
+    )..where((t) => t.id.equals(accountId) & t.householdId.equals(householdId))).getSingleOrNull();
   }
 }

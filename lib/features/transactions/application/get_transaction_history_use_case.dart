@@ -14,10 +14,7 @@ final class GetTransactionHistoryUseCase {
     TransactionFilter filter = const TransactionFilter(),
   }) async {
     try {
-      final summaries = await _repo.recentOperations(
-        householdId: householdId,
-        filter: filter,
-      );
+      final summaries = await _repo.recentOperations(householdId: householdId, filter: filter);
       return AppOk(summaries);
     } catch (_) {
       return const AppPersistenceFailure();

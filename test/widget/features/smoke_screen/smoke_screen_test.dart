@@ -74,23 +74,16 @@ void main() {
     });
 
     testWidgets('shows LTR direction label for English', (tester) async {
-      await tester.pumpWidget(
-        buildSmokeScreen(locale: const Locale('en', 'US')),
-      );
+      await tester.pumpWidget(buildSmokeScreen(locale: const Locale('en', 'US')));
       await tester.pumpAndSettle();
       expect(find.text('LTR'), findsOneWidget);
     });
 
-    testWidgets('does not contain financial amounts or balances', (
-      tester,
-    ) async {
+    testWidgets('does not contain financial amounts or balances', (tester) async {
       await tester.pumpWidget(buildSmokeScreen());
       await tester.pumpAndSettle();
 
-      final allText = tester
-          .widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? '')
-          .join(' ');
+      final allText = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data ?? '').join(' ');
 
       expect(allText, isNot(contains('EGP')));
       expect(allText, isNot(matches(RegExp(r'\d{3,}'))));
@@ -113,9 +106,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('language toggle buttons have non-empty semantics labels', (
-      tester,
-    ) async {
+    testWidgets('language toggle buttons have non-empty semantics labels', (tester) async {
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(buildSmokeScreen());
       await tester.pumpAndSettle();
@@ -130,9 +121,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('theme toggle buttons have non-empty semantics labels', (
-      tester,
-    ) async {
+    testWidgets('theme toggle buttons have non-empty semantics labels', (tester) async {
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(buildSmokeScreen());
       await tester.pumpAndSettle();
@@ -149,41 +138,31 @@ void main() {
 
   group('SmokeScreen — Arabic RTL', () {
     testWidgets('renders without error in Arabic', (tester) async {
-      await tester.pumpWidget(
-        buildSmokeScreen(locale: const Locale('ar', 'EG')),
-      );
+      await tester.pumpWidget(buildSmokeScreen(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('shows Arabic app title', (tester) async {
-      await tester.pumpWidget(
-        buildSmokeScreen(locale: const Locale('ar', 'EG')),
-      );
+      await tester.pumpWidget(buildSmokeScreen(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
       expect(find.text('مدير مالية الأسرة'), findsOneWidget);
     });
 
     testWidgets('shows RTL direction label for Arabic', (tester) async {
-      await tester.pumpWidget(
-        buildSmokeScreen(locale: const Locale('ar', 'EG')),
-      );
+      await tester.pumpWidget(buildSmokeScreen(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
       expect(find.text('يمين إلى يسار'), findsOneWidget);
     });
   });
 
   group('SmokeScreen — touch targets', () {
-    testWidgets('language toggle buttons meet 48-pt minimum touch target', (
-      tester,
-    ) async {
+    testWidgets('language toggle buttons meet 48-pt minimum touch target', (tester) async {
       await tester.pumpWidget(buildSmokeScreen());
       await tester.pumpAndSettle();
 
       // Find all OutlinedButtons (language + theme toggles).
-      final buttons = tester.widgetList<OutlinedButton>(
-        find.byType(OutlinedButton),
-      );
+      final buttons = tester.widgetList<OutlinedButton>(find.byType(OutlinedButton));
       expect(buttons, isNotEmpty);
 
       for (final button in buttons) {
@@ -192,8 +171,7 @@ void main() {
         expect(
           renderBox.size.height,
           greaterThanOrEqualTo(48.0),
-          reason:
-              'Button height ${renderBox.size.height} is below 48pt minimum',
+          reason: 'Button height ${renderBox.size.height} is below 48pt minimum',
         );
       }
     });

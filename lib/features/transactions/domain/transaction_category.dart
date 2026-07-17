@@ -48,8 +48,7 @@ enum TransactionCategory {
       values.where((c) => c.isExpense).toList();
 
   /// All income categories in display order.
-  static List<TransactionCategory> get incomeCategories =>
-      values.where((c) => c.isIncome).toList();
+  static List<TransactionCategory> get incomeCategories => values.where((c) => c.isIncome).toList();
 }
 
 enum CategoryType { expense, income }

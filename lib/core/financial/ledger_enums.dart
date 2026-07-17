@@ -28,9 +28,8 @@ enum LedgerDirection {
     throw ArgumentError.value(code, 'code', 'Unknown LedgerDirection');
   }
 
-  LedgerDirection get opposite => this == LedgerDirection.credit
-      ? LedgerDirection.debit
-      : LedgerDirection.credit;
+  LedgerDirection get opposite =>
+      this == LedgerDirection.credit ? LedgerDirection.debit : LedgerDirection.credit;
 }
 
 /// The specific type of a single ledger entry.
@@ -171,7 +170,6 @@ enum RecurringStatus {
 
   static RecurringStatus fromCode(String c) => values.firstWhere(
     (v) => v.code == c,
-    orElse: () =>
-        throw ArgumentError.value(c, 'code', 'Unknown RecurringStatus'),
+    orElse: () => throw ArgumentError.value(c, 'code', 'Unknown RecurringStatus'),
   );
 }

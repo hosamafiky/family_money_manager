@@ -65,9 +65,7 @@ void main() {
           final amount = rng.nextInt(10000) + 1;
           final isCredit = rng.nextBool();
           final dir = isCredit ? LedgerDirection.credit : LedgerDirection.debit;
-          final type = isCredit
-              ? LedgerEntryType.income
-              : LedgerEntryType.expense;
+          final type = isCredit ? LedgerEntryType.income : LedgerEntryType.expense;
           entries.add(
             _makeEntry(
               id: 'e-$trial-$i',
@@ -142,11 +140,7 @@ void main() {
         );
         final total = LedgerCalculator.totalBalance([srcBalance, dstBalance]);
 
-        expect(
-          total.minorUnits,
-          srcStart + dstStart,
-          reason: 'Trial $trial: neutrality violated',
-        );
+        expect(total.minorUnits, srcStart + dstStart, reason: 'Trial $trial: neutrality violated');
         expect(srcBalance.minorUnits, srcStart - transferAmount);
         expect(dstBalance.minorUnits, dstStart + transferAmount);
       }
@@ -215,9 +209,7 @@ void main() {
             _makeEntry(
               id: 'e-det-$trial-$i',
               accountId: accountId,
-              direction: isCredit
-                  ? LedgerDirection.credit
-                  : LedgerDirection.debit,
+              direction: isCredit ? LedgerDirection.credit : LedgerDirection.debit,
               amount: amount,
               date: _dateForDay(rng.nextInt(365)),
             ),
@@ -264,53 +256,41 @@ void main() {
   });
 
   group('Duplicate operation idempotency (domain property)', () {
-    test(
-      'applying same income twice produces double balance (not idempotent at domain layer)',
-      () {
-        // The domain-layer LedgerCalculator itself is a pure summation function.
-        // Idempotency is enforced by the database UNIQUE constraint on operation IDs.
-        // Here we verify that duplicates in the entry list would increase the balance,
-        // confirming that the constraint IS needed.
-        const accountId = 'dup-test';
-        final e = _makeEntry(
-          id: 'income-1',
-          accountId: accountId,
-          direction: LedgerDirection.credit,
-          amount: 1000,
-        );
-        final result = LedgerCalculator.balance(
-          accountId: accountId,
-          entries: [e, e], // same entry twice
-          currency: Currency.egp,
-        );
-        // Without idempotency enforcement, the balance would be doubled
-        expect(result.minorUnits, 2000);
-        // This proves why the UNIQUE constraint in the DB is essential (INV-008)
-      },
-    );
+    test('applying same income twice produces double balance (not idempotent at domain layer)', () {
+      // The domain-layer LedgerCalculator itself is a pure summation function.
+      // Idempotency is enforced by the database UNIQUE constraint on operation IDs.
+      // Here we verify that duplicates in the entry list would increase the balance,
+      // confirming that the constraint IS needed.
+      const accountId = 'dup-test';
+      final e = _makeEntry(
+        id: 'income-1',
+        accountId: accountId,
+        direction: LedgerDirection.credit,
+        amount: 1000,
+      );
+      final result = LedgerCalculator.balance(
+        accountId: accountId,
+        entries: [e, e], // same entry twice
+        currency: Currency.egp,
+      );
+      // Without idempotency enforcement, the balance would be doubled
+      expect(result.minorUnits, 2000);
+      // This proves why the UNIQUE constraint in the DB is essential (INV-008)
+    });
   });
 
   group('Money arithmetic properties', () {
     test('addition is commutative', () {
       for (var i = 0; i < 50; i++) {
-        final a = Money(
-          minorUnits: rng.nextInt(100000),
-          currency: Currency.egp,
-        );
-        final b = Money(
-          minorUnits: rng.nextInt(100000),
-          currency: Currency.egp,
-        );
+        final a = Money(minorUnits: rng.nextInt(100000), currency: Currency.egp);
+        final b = Money(minorUnits: rng.nextInt(100000), currency: Currency.egp);
         expect((a + b).minorUnits, (b + a).minorUnits);
       }
     });
 
     test('x + zero = x', () {
       for (var i = 0; i < 50; i++) {
-        final a = Money(
-          minorUnits: rng.nextInt(100000),
-          currency: Currency.egp,
-        );
+        final a = Money(minorUnits: rng.nextInt(100000), currency: Currency.egp);
         const zero = Money.zero(Currency.egp);
         expect((a + zero).minorUnits, a.minorUnits);
       }
@@ -339,11 +319,7 @@ void main() {
         final m = Money(minorUnits: amount, currency: Currency.egp);
         final allocated = m.allocate(parts);
         final sum = allocated.fold(0, (acc, p) => acc + p.minorUnits);
-        expect(
-          sum,
-          amount,
-          reason: 'Allocation of $amount into $parts parts lost money',
-        );
+        expect(sum, amount, reason: 'Allocation of $amount into $parts parts lost money');
       }
     });
   });

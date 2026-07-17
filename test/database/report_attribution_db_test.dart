@@ -126,26 +126,16 @@ void main() {
     );
   }
 
-  FinancialReportRequest janReq({String householdId = _hh}) =>
-      FinancialReportRequest(
-        householdId: householdId,
-        period: DashboardPeriod.custom(
-          startDate: '2025-01-01',
-          endDate: '2025-02-01',
-        ),
-      );
+  FinancialReportRequest janReq({String householdId = _hh}) => FinancialReportRequest(
+    householdId: householdId,
+    period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
+  );
 
   group('report_attribution_db', () {
     test('1. Expense by spender', () async {
       final acc = await createAccount('acc-attr-1');
       await seedIncome(acc, 'op-inc-attr-1', 20000);
-      await expenseWithContext(
-        acc,
-        'op-exp-attr-1',
-        5000,
-        '2025-01-10',
-        spenderId: 'member-1',
-      );
+      await expenseWithContext(acc, 'op-exp-attr-1', 5000, '2025-01-10', spenderId: 'member-1');
 
       final result = await reportRepo.expenseBySpender(janReq());
       expect(result.isNotEmpty, isTrue);
@@ -160,13 +150,7 @@ void main() {
     test('2. Expense by beneficiary', () async {
       final acc = await createAccount('acc-attr-2');
       await seedIncome(acc, 'op-inc-attr-2', 20000);
-      await expenseWithContext(
-        acc,
-        'op-exp-attr-2',
-        3000,
-        '2025-01-15',
-        beneficiaryId: 'member-2',
-      );
+      await expenseWithContext(acc, 'op-exp-attr-2', 3000, '2025-01-15', beneficiaryId: 'member-2');
 
       final result = await reportRepo.expenseByBeneficiary(janReq());
       expect(result.isNotEmpty, isTrue);
@@ -212,36 +196,14 @@ void main() {
     test('4. Multiple spenders grouped correctly', () async {
       final acc = await createAccount('acc-attr-4');
       await seedIncome(acc, 'op-inc-attr-4', 30000);
-      await expenseWithContext(
-        acc,
-        'op-exp-attr-4a',
-        2000,
-        '2025-01-10',
-        spenderId: 'member-1',
-      );
-      await expenseWithContext(
-        acc,
-        'op-exp-attr-4b',
-        3000,
-        '2025-01-11',
-        spenderId: 'member-1',
-      );
-      await expenseWithContext(
-        acc,
-        'op-exp-attr-4c',
-        7000,
-        '2025-01-12',
-        spenderId: 'member-2',
-      );
+      await expenseWithContext(acc, 'op-exp-attr-4a', 2000, '2025-01-10', spenderId: 'member-1');
+      await expenseWithContext(acc, 'op-exp-attr-4b', 3000, '2025-01-11', spenderId: 'member-1');
+      await expenseWithContext(acc, 'op-exp-attr-4c', 7000, '2025-01-12', spenderId: 'member-2');
 
       final result = await reportRepo.expenseBySpender(janReq());
       final alice = result.firstWhere((r) => r.memberId == 'member-1');
       final bob = result.firstWhere((r) => r.memberId == 'member-2');
-      expect(
-        alice.totalMinorUnits,
-        5000,
-        reason: '2000 + 3000 = 5000 for Alice',
-      );
+      expect(alice.totalMinorUnits, 5000, reason: '2000 + 3000 = 5000 for Alice');
       expect(bob.totalMinorUnits, 7000);
     });
 
@@ -285,11 +247,7 @@ void main() {
       );
 
       final result = await reportRepo.expenseBySpender(janReq());
-      expect(
-        result.isEmpty,
-        isTrue,
-        reason: 'Expenses without spender context are excluded',
-      );
+      expect(result.isEmpty, isTrue, reason: 'Expenses without spender context are excluded');
     });
 
     test('7. Cross-household isolation', () async {
@@ -313,13 +271,7 @@ void main() {
           createdBy: 'test',
         ),
       );
-      await expenseWithContext(
-        acc1,
-        'op-exp-hh1',
-        4000,
-        '2025-01-10',
-        spenderId: 'member-1',
-      );
+      await expenseWithContext(acc1, 'op-exp-hh1', 4000, '2025-01-10', spenderId: 'member-1');
       await expenseWithContext(
         acc2,
         'op-exp-hh2',
@@ -425,11 +377,7 @@ void main() {
         (r) => r.memberId == 'member-1',
         orElse: () => throw Exception('member-1 not found'),
       );
-      expect(
-        alice.totalMinorUnits,
-        3000,
-        reason: 'Only in-period expense (3000) counted',
-      );
+      expect(alice.totalMinorUnits, 3000, reason: 'Only in-period expense (3000) counted');
     });
 
     test('10. Beneficiary with display name from household_members', () async {
@@ -448,11 +396,7 @@ void main() {
         (r) => r.memberId == 'member-2',
         orElse: () => throw Exception('member-2 not found'),
       );
-      expect(
-        bob.memberDisplayName,
-        'Bob',
-        reason: 'Display name fetched from household_members',
-      );
+      expect(bob.memberDisplayName, 'Bob', reason: 'Display name fetched from household_members');
       expect(bob.totalMinorUnits, 4500);
     });
   });

@@ -38,14 +38,12 @@ class IncomeExpenseReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(incomeExpenseReportProvider(req)),
-              ),
+              error: (_, _) =>
+                  ReportErrorState(onRetry: () => ref.invalidate(incomeExpenseReportProvider(req))),
               data: (result) {
                 if (result is! AppOk<List<CurrencyFlowSummary>>) {
                   return ReportErrorState(
-                    onRetry: () =>
-                        ref.invalidate(incomeExpenseReportProvider(req)),
+                    onRetry: () => ref.invalidate(incomeExpenseReportProvider(req)),
                   );
                 }
                 final flows = result.value;
@@ -157,9 +155,7 @@ class _FlowCard extends StatelessWidget {
               label: l10n.reportNetCashFlow,
               minorUnits: flow.netCashFlowMinorUnits,
               currencyCode: flow.currencyCode,
-              color: flow.netCashFlowMinorUnits >= 0
-                  ? Colors.green
-                  : Colors.red,
+              color: flow.netCashFlowMinorUnits >= 0 ? Colors.green : Colors.red,
               bold: true,
             ),
             if (hasReversals) ...[

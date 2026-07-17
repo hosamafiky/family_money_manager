@@ -16,8 +16,7 @@ class BudgetCreationScreen extends ConsumerStatefulWidget {
   const BudgetCreationScreen({super.key});
 
   @override
-  ConsumerState<BudgetCreationScreen> createState() =>
-      _BudgetCreationScreenState();
+  ConsumerState<BudgetCreationScreen> createState() => _BudgetCreationScreenState();
 }
 
 class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
@@ -67,9 +66,9 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 
     if (_periodType == BudgetPeriodType.fixed) {
       if (_startDate == null || _endDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select start and end dates.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Please select start and end dates.')));
         return;
       }
       if (!_endDate!.isAfter(_startDate!)) {
@@ -118,19 +117,15 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
         ref.invalidate(budgetsProvider(_householdId));
         context.go('/budgets/${value.id}');
       case AppValidationFailure(:final messageKey):
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(messageKey)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(messageKey)));
       case AppDuplicateConflict():
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A budget with this configuration already exists.'),
-          ),
+          const SnackBar(content: Text('A budget with this configuration already exists.')),
         );
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create budget.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to create budget.')));
     }
   }
 
@@ -161,9 +156,7 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
                 border: const OutlineInputBorder(),
               ),
               textInputAction: TextInputAction.next,
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? l10n.errorBudgetNameEmpty
-                  : null,
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.errorBudgetNameEmpty : null,
             ),
             const SizedBox(height: 16),
 
@@ -175,16 +168,12 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
                 border: const OutlineInputBorder(),
               ),
               items: Currency.values
-                  .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
-                  )
+                  .map((c) => DropdownMenuItem(value: c.code, child: Text(c.code)))
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _selectedCurrency = v);
               },
-              validator: (v) => (v == null || v.isEmpty)
-                  ? l10n.errorBudgetCurrencyRequired
-                  : null,
+              validator: (v) => (v == null || v.isEmpty) ? l10n.errorBudgetCurrencyRequired : null,
             ),
             const SizedBox(height: 16),
 
@@ -197,12 +186,8 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
                     : l10n.budgetLimitFixed,
                 border: const OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-              ],
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
               validator: (v) {
                 if (v == null || v.isEmpty) return l10n.errorBudgetLimitZero;
                 final parsed = double.tryParse(v.replaceAll(',', ''));
@@ -220,18 +205,12 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
               segments: [
                 ButtonSegment(
                   value: BudgetPeriodType.monthly,
-                  label: Text(
-                    l10n.budgetPeriodMonthly,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  label: Text(l10n.budgetPeriodMonthly, style: const TextStyle(fontSize: 12)),
                   icon: const Icon(Icons.repeat, size: 16),
                 ),
                 ButtonSegment(
                   value: BudgetPeriodType.fixed,
-                  label: Text(
-                    l10n.budgetPeriodFixed,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                  label: Text(l10n.budgetPeriodFixed, style: const TextStyle(fontSize: 12)),
                   icon: const Icon(Icons.date_range, size: 16),
                 ),
               ],
@@ -297,11 +276,7 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 }
 
 class _DatePickerTile extends StatelessWidget {
-  const _DatePickerTile({
-    required this.label,
-    required this.date,
-    required this.onTap,
-  });
+  const _DatePickerTile({required this.label, required this.date, required this.onTap});
 
   final String label;
   final DateTime? date;

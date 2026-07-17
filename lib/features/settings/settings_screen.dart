@@ -70,10 +70,7 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.foundationThemeLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text(l10n.foundationThemeLabel, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Row(
                     children: [

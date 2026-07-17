@@ -23,8 +23,7 @@ import 'package:family_money_manager/core/logging/log_sink.dart';
 /// [RedactedLogger] and write directly to [print] or a crash reporter
 /// receive no protection. See SECURITY_THREAT_MODEL.md T-07.
 final class RedactedLogger {
-  RedactedLogger(this._tag, {LogSink? sink})
-    : _sink = sink ?? const DebugPrintSink();
+  RedactedLogger(this._tag, {LogSink? sink}) : _sink = sink ?? const DebugPrintSink();
 
   final String _tag;
   final LogSink _sink;
@@ -35,14 +34,8 @@ final class RedactedLogger {
   ///
   /// Only [operationType] and [operationId] are accepted. Amounts, account
   /// names, balances, and user data are explicitly excluded from this API.
-  void logOperation({
-    required String operationType,
-    required String operationId,
-  }) {
-    _emit(
-      LogLevel.info,
-      'op=${_sanitize(operationType)} id=${_sanitize(operationId)}',
-    );
+  void logOperation({required String operationType, required String operationId}) {
+    _emit(LogLevel.info, 'op=${_sanitize(operationType)} id=${_sanitize(operationId)}');
   }
 
   /// Logs a navigation event (route name only, no financial context).
@@ -74,8 +67,7 @@ final class RedactedLogger {
   }
 
   /// Removes characters that could form log-injection payloads.
-  static String _sanitize(String input) =>
-      input.replaceAll(RegExp(r'[\n\r\t]'), ' ').trim();
+  static String _sanitize(String input) => input.replaceAll(RegExp(r'[\n\r\t]'), ' ').trim();
 
   /// Replaces known sensitive patterns with placeholder text.
   ///

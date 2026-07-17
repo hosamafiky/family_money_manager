@@ -39,8 +39,7 @@ enum FinancialAccountType {
 
   /// Returns true when any debit on this account type requires a
   /// [ChildWithdrawalAudit] record. See INV-006 and FINANCIAL_MODEL.md §9.
-  bool get requiresProtectedWithdrawalAudit =>
-      this == FinancialAccountType.childProtectedFund;
+  bool get requiresProtectedWithdrawalAudit => this == FinancialAccountType.childProtectedFund;
 }
 
 /// Who owns the financial account.
@@ -72,6 +71,11 @@ enum FundPurpose {
   investment,
   certificate,
   gold,
+
+  /// Reserved for a savings goal. Accounts with this purpose are
+  /// non-spendable and non-protected; their balance is derived from the
+  /// ledger exactly like every other account.
+  goalReserve,
   custom;
 
   String get code => name;

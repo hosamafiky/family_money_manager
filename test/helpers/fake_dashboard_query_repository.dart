@@ -30,17 +30,13 @@ final class FakeDashboardQueryRepository implements DashboardQueryRepository {
   final bool _throwOnCall;
 
   @override
-  Future<List<CurrencyAmountSummary>> spendableBalances({
-    required String householdId,
-  }) async {
+  Future<List<CurrencyAmountSummary>> spendableBalances({required String householdId}) async {
     if (_throwOnCall) throw Exception('Fake error');
     return _spendable;
   }
 
   @override
-  Future<List<CurrencyAmountSummary>> protectedBalances({
-    required String householdId,
-  }) async {
+  Future<List<CurrencyAmountSummary>> protectedBalances({required String householdId}) async {
     if (_throwOnCall) throw Exception('Fake error');
     return _protected;
   }

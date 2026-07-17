@@ -19,8 +19,7 @@ class ReportPeriodSelector extends ConsumerStatefulWidget {
   const ReportPeriodSelector({super.key});
 
   @override
-  ConsumerState<ReportPeriodSelector> createState() =>
-      _ReportPeriodSelectorState();
+  ConsumerState<ReportPeriodSelector> createState() => _ReportPeriodSelectorState();
 }
 
 class _ReportPeriodSelectorState extends ConsumerState<ReportPeriodSelector> {
@@ -39,25 +38,19 @@ class _ReportPeriodSelectorState extends ConsumerState<ReportPeriodSelector> {
             _Chip(
               label: l10n.dashboardPeriodCurrentMonth,
               selected: current.label == DashboardPeriodLabel.currentMonth,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.currentMonth(ref.read(clockProvider)),
-              ),
+              onSelected: (_) => _setPeriod(DashboardPeriod.currentMonth(ref.read(clockProvider))),
             ),
             const SizedBox(width: 8),
             _Chip(
               label: l10n.dashboardPeriodPreviousMonth,
               selected: current.label == DashboardPeriodLabel.previousMonth,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.previousMonth(ref.read(clockProvider)),
-              ),
+              onSelected: (_) => _setPeriod(DashboardPeriod.previousMonth(ref.read(clockProvider))),
             ),
             const SizedBox(width: 8),
             _Chip(
               label: l10n.dashboardPeriodCurrentYear,
               selected: current.label == DashboardPeriodLabel.currentYear,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.currentYear(ref.read(clockProvider)),
-              ),
+              onSelected: (_) => _setPeriod(DashboardPeriod.currentYear(ref.read(clockProvider))),
             ),
             const SizedBox(width: 8),
             _Chip(
@@ -90,10 +83,7 @@ class _ReportPeriodSelectorState extends ConsumerState<ReportPeriodSelector> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(now.year + 1),
-      initialDateRange: DateTimeRange(
-        start: DateTime(now.year, now.month, 1),
-        end: now,
-      ),
+      initialDateRange: DateTimeRange(start: DateTime(now.year, now.month, 1), end: now),
     );
     if (range == null) return;
 
@@ -109,11 +99,7 @@ class _ReportPeriodSelectorState extends ConsumerState<ReportPeriodSelector> {
 }
 
 class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
+  const _Chip({required this.label, required this.selected, required this.onSelected});
 
   final String label;
   final bool selected;
@@ -121,11 +107,7 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: onSelected,
-    );
+    return FilterChip(label: Text(label), selected: selected, onSelected: onSelected);
   }
 }
 
@@ -156,10 +138,7 @@ class ReportErrorState extends StatelessWidget {
           const SizedBox(height: 12),
           Text(l10n.reportError),
           const SizedBox(height: 12),
-          FilledButton.tonal(
-            onPressed: onRetry,
-            child: Text(l10n.reportRefresh),
-          ),
+          FilledButton.tonal(onPressed: onRetry, child: Text(l10n.reportRefresh)),
         ],
       ),
     );
@@ -269,10 +248,7 @@ class ReportAmountRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-          ],
+          if (icon != null) ...[Icon(icon, size: 14, color: color), const SizedBox(width: 4)],
           Expanded(
             child: Text(
               label,
@@ -307,9 +283,7 @@ class CurrencyHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Text(
         currencyCode,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -334,9 +308,7 @@ class ReportInfoNote extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
           ),
         ],

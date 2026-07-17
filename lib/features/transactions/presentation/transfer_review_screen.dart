@@ -34,13 +34,11 @@ class TransferReviewScreen extends ConsumerWidget {
     }
 
     final accounts = accountsAsync.maybeWhen(
-      data: (r) =>
-          r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
+      data: (r) => r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
       orElse: () => <FinancialAccount>[],
     );
 
-    String accountName(String id) =>
-        accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
+    String accountName(String id) => accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
 
     String formatAmount(int minor, String code) {
       final currency = Currency.fromCode(code);
@@ -54,23 +52,15 @@ class TransferReviewScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _Row(l10n.fieldSourceAccount, accountName(ctx.sourceAccountId)),
-          _Row(
-            l10n.fieldDestinationAccount,
-            accountName(ctx.destinationAccountId),
-          ),
-          _Row(
-            l10n.fieldAmount,
-            formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
-          ),
+          _Row(l10n.fieldDestinationAccount, accountName(ctx.destinationAccountId)),
+          _Row(l10n.fieldAmount, formatAmount(ctx.amountMinorUnits, ctx.currencyCode)),
           _Row(l10n.fieldEffectiveDate, ctx.effectiveDate),
           if (ctx.note != null) _Row(l10n.fieldNote, ctx.note!),
           if (ctx.childWithdrawalAudit != null)
             _Row(l10n.fieldWithdrawalReason, ctx.childWithdrawalAudit!.reason),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: submitting
-                ? null
-                : () => _submit(context, ref, l10n, ctx),
+            onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
             child: submitting
                 ? const SizedBox(
                     height: 20,
@@ -101,9 +91,7 @@ class TransferReviewScreen extends ConsumerWidget {
         case AppOk():
           ref.read(transferFormKeyProvider.notifier).regenerateKey();
           ref.read(stagedTransferContextProvider.notifier).set(null);
-          ref.invalidate(
-            transactionListProvider((_householdId, const TransactionFilter())),
-          );
+          ref.invalidate(transactionListProvider((_householdId, const TransactionFilter())));
           ref.invalidate(accountsProvider(_householdId));
           ref.invalidate(accountBalanceProvider);
           ref.invalidate(dashboardSummaryProvider(_householdId));
@@ -134,10 +122,8 @@ class TransferReviewScreen extends ConsumerWidget {
     'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
     'errorSameAccount' => l10n.errorSameAccount,
     'errorWithdrawalReasonRequired' => l10n.errorWithdrawalReasonRequired,
-    'errorWithdrawalAcknowledgmentRequired' =>
-      l10n.errorWithdrawalAcknowledgmentRequired,
-    'errorWithdrawalConfirmationRequired' =>
-      l10n.errorWithdrawalConfirmationRequired,
+    'errorWithdrawalAcknowledgmentRequired' => l10n.errorWithdrawalAcknowledgmentRequired,
+    'errorWithdrawalConfirmationRequired' => l10n.errorWithdrawalConfirmationRequired,
     _ => l10n.errorGeneric,
   };
 }
@@ -158,17 +144,15 @@ class _Row extends StatelessWidget {
             width: 150,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ],

@@ -28,8 +28,7 @@ class AccountCreationScreen extends ConsumerStatefulWidget {
   const AccountCreationScreen({super.key});
 
   @override
-  ConsumerState<AccountCreationScreen> createState() =>
-      _AccountCreationScreenState();
+  ConsumerState<AccountCreationScreen> createState() => _AccountCreationScreenState();
 }
 
 class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
@@ -72,21 +71,19 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
     });
   }
 
-  static AccountOwnerType _defaultOwner(FinancialAccountType type) =>
-      switch (type) {
-        FinancialAccountType.spouseCashWallet => AccountOwnerType.spouse,
-        FinancialAccountType.householdCash ||
-        FinancialAccountType.homeSavingsCash => AccountOwnerType.household,
-        FinancialAccountType.childProtectedFund => AccountOwnerType.child,
-        _ => AccountOwnerType.user,
-      };
+  static AccountOwnerType _defaultOwner(FinancialAccountType type) => switch (type) {
+    FinancialAccountType.spouseCashWallet => AccountOwnerType.spouse,
+    FinancialAccountType.householdCash ||
+    FinancialAccountType.homeSavingsCash => AccountOwnerType.household,
+    FinancialAccountType.childProtectedFund => AccountOwnerType.child,
+    _ => AccountOwnerType.user,
+  };
 
-  static FundPurpose _defaultPurpose(FinancialAccountType type) =>
-      switch (type) {
-        FinancialAccountType.homeSavingsCash => FundPurpose.longTermSavings,
-        FinancialAccountType.childProtectedFund => FundPurpose.childProtected,
-        _ => FundPurpose.available,
-      };
+  static FundPurpose _defaultPurpose(FinancialAccountType type) => switch (type) {
+    FinancialAccountType.homeSavingsCash => FundPurpose.longTermSavings,
+    FinancialAccountType.childProtectedFund => FundPurpose.childProtected,
+    _ => FundPurpose.available,
+  };
 
   static bool _isProtectedType(FinancialAccountType type) =>
       type == FinancialAccountType.childProtectedFund;
@@ -175,14 +172,8 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
         title: Text(l10n.accountChildFundConfirmTitle),
         content: Text(l10n.accountChildFundConfirmBody),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.confirm),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.confirm)),
         ],
       ),
     );
@@ -220,12 +211,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
                 border: const OutlineInputBorder(),
               ),
               items: _supportedTypes
-                  .map(
-                    (t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(_typeLabel(t, l10n)),
-                    ),
-                  )
+                  .map((t) => DropdownMenuItem(value: t, child: Text(_typeLabel(t, l10n))))
                   .toList(),
               onChanged: (t) {
                 if (t != null) _onTypeChanged(t);
@@ -257,9 +243,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
                 border: const OutlineInputBorder(),
               ),
               items: Currency.values
-                  .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
-                  )
+                  .map((c) => DropdownMenuItem(value: c.code, child: Text(c.code)))
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _currencyCode = v);
@@ -274,9 +258,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
                 border: const OutlineInputBorder(),
                 suffixText: _currencyCode,
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -293,9 +275,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             if (_isProtectedType(_type)) ...[
               const SizedBox(height: 12),
               Card(
-                color: Theme.of(
-                  context,
-                ).colorScheme.errorContainer.withAlpha(80),
+                color: Theme.of(context).colorScheme.errorContainer.withAlpha(80),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(l10n.accountProtectedWarning),
@@ -304,10 +284,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             ],
             if (_errorMessage != null) ...[
               const SizedBox(height: 12),
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
+              Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ],
             const SizedBox(height: 24),
             FilledButton(
@@ -326,15 +303,14 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
     );
   }
 
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
-      switch (type) {
-        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-        _ => type.code,
-      };
+  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) => switch (type) {
+    FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
+    FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
+    FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
+    FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
+    FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
+    FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
+    FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
+    _ => type.code,
+  };
 }

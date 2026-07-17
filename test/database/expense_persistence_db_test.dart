@@ -111,59 +111,56 @@ void main() {
   );
 
   group('Expense persistence', () {
-    test(
-      '1: valid expense → debit entry, operation, context created',
-      () async {
-        final acc = await createAccount(suffix: 't1');
-        await fund(acc, 20000);
+    test('1: valid expense → debit entry, operation, context created', () async {
+      final acc = await createAccount(suffix: 't1');
+      await fund(acc, 20000);
 
-        final result = await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: 'op-exp-t1',
-            householdId: 'hh-exp',
-            sourceAccountId: acc,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(result, IdempotentOperationResult.created);
-
-        // Operation row.
-        final opRows = await db
-            .customSelect("SELECT type FROM operations WHERE id = 'op-exp-t1'")
-            .get();
-        expect(opRows.length, 1);
-        expect(opRows.first.read<String>('type'), 'expense');
-
-        // Debit entry.
-        final entryRows = await db
-            .customSelect(
-              "SELECT direction, amount_minor_units FROM ledger_entries "
-              "WHERE operation_id = 'op-exp-t1'",
-            )
-            .get();
-        expect(entryRows.length, 1);
-        expect(entryRows.first.read<String>('direction'), 'debit');
-        expect(entryRows.first.read<int>('amount_minor_units'), 5000);
-
-        // Context row.
-        final ctxRows = await db
-            .customSelect(
-              "SELECT operation_id FROM operation_contexts "
-              "WHERE operation_id = 'op-exp-t1'",
-            )
-            .get();
-        expect(ctxRows.length, 1);
-
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
+      final result = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: 'op-exp-t1',
           householdId: 'hh-exp',
-        );
-        expect(balance, 15000);
-      },
-    );
+          sourceAccountId: acc,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(result, IdempotentOperationResult.created);
+
+      // Operation row.
+      final opRows = await db
+          .customSelect("SELECT type FROM operations WHERE id = 'op-exp-t1'")
+          .get();
+      expect(opRows.length, 1);
+      expect(opRows.first.read<String>('type'), 'expense');
+
+      // Debit entry.
+      final entryRows = await db
+          .customSelect(
+            "SELECT direction, amount_minor_units FROM ledger_entries "
+            "WHERE operation_id = 'op-exp-t1'",
+          )
+          .get();
+      expect(entryRows.length, 1);
+      expect(entryRows.first.read<String>('direction'), 'debit');
+      expect(entryRows.first.read<int>('amount_minor_units'), 5000);
+
+      // Context row.
+      final ctxRows = await db
+          .customSelect(
+            "SELECT operation_id FROM operation_contexts "
+            "WHERE operation_id = 'op-exp-t1'",
+          )
+          .get();
+      expect(ctxRows.length, 1);
+
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-exp',
+      );
+      expect(balance, 15000);
+    });
 
     test('2: amount 0 rejected at domain params level', () {
       expect(
@@ -183,9 +180,7 @@ void main() {
     test('3: archived account rejected with ArchivedAccountError', () async {
       final acc = await createAccount(suffix: 't3');
       await fund(acc, 10000);
-      await db.customStatement(
-        "UPDATE financial_accounts SET is_archived = 1 WHERE id = '$acc'",
-      );
+      await db.customStatement("UPDATE financial_accounts SET is_archived = 1 WHERE id = '$acc'");
 
       await expectLater(
         ledgerRepo.recordExpense(
@@ -203,38 +198,32 @@ void main() {
       );
     });
 
-    test(
-      '4: insufficient funds rejected with InsufficientFundsError',
-      () async {
-        final acc = await createAccount(suffix: 't4');
-        await fund(acc, 1000);
+    test('4: insufficient funds rejected with InsufficientFundsError', () async {
+      final acc = await createAccount(suffix: 't4');
+      await fund(acc, 1000);
 
-        await expectLater(
-          ledgerRepo.recordExpense(
-            RecordExpenseParams(
-              operationId: 'op-exp-t4',
-              householdId: 'hh-exp',
-              sourceAccountId: acc,
-              amountMinorUnits: 5000, // more than the 1000 balance
-              currencyCode: 'EGP',
-              effectiveDate: '2024-01-02',
-              createdBy: 'user-1',
-            ),
+      await expectLater(
+        ledgerRepo.recordExpense(
+          RecordExpenseParams(
+            operationId: 'op-exp-t4',
+            householdId: 'hh-exp',
+            sourceAccountId: acc,
+            amountMinorUnits: 5000, // more than the 1000 balance
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-02',
+            createdBy: 'user-1',
           ),
-          throwsA(isA<InsufficientFundsError>()),
-        );
-      },
-    );
+        ),
+        throwsA(isA<InsufficientFundsError>()),
+      );
+    });
 
     test('5: cross-household account rejected', () async {
       await db.customStatement(
         "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
         "VALUES ('hh-exp-other', 'Other', 'user-1', '2024-01-01', '2024-01-01')",
       );
-      final acc = await createAccount(
-        suffix: 't5',
-        householdId: 'hh-exp-other',
-      );
+      final acc = await createAccount(suffix: 't5', householdId: 'hh-exp-other');
 
       // Try to fund from hh-exp (wrong household).
       await expectLater(
@@ -278,38 +267,32 @@ void main() {
           .get();
       expect(ctxRows.length, 1);
       expect(ctxRows.first.read<bool>('is_recurring'), isTrue);
-      expect(
-        ctxRows.first.read<String?>('recurring_note'),
-        'recurring_marker_not_scheduled',
-      );
+      expect(ctxRows.first.read<String?>('recurring_note'), 'recurring_marker_not_scheduled');
     });
 
-    test(
-      '7: protected account requires audit (MissingProtectedWithdrawalAuditError)',
-      () async {
-        final acc = await createAccount(
-          suffix: 't7',
-          ownerType: AccountOwnerType.child,
-          type: FinancialAccountType.childProtectedFund,
-        );
-        await fund(acc, 20000);
+    test('7: protected account requires audit (MissingProtectedWithdrawalAuditError)', () async {
+      final acc = await createAccount(
+        suffix: 't7',
+        ownerType: AccountOwnerType.child,
+        type: FinancialAccountType.childProtectedFund,
+      );
+      await fund(acc, 20000);
 
-        await expectLater(
-          ledgerRepo.recordExpense(
-            RecordExpenseParams(
-              operationId: 'op-exp-t7',
-              householdId: 'hh-exp',
-              sourceAccountId: acc,
-              amountMinorUnits: 3000,
-              currencyCode: 'EGP',
-              effectiveDate: '2024-01-02',
-              createdBy: 'user-1',
-            ),
+      await expectLater(
+        ledgerRepo.recordExpense(
+          RecordExpenseParams(
+            operationId: 'op-exp-t7',
+            householdId: 'hh-exp',
+            sourceAccountId: acc,
+            amountMinorUnits: 3000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-02',
+            createdBy: 'user-1',
           ),
-          throwsA(isA<MissingProtectedWithdrawalAuditError>()),
-        );
-      },
-    );
+        ),
+        throwsA(isA<MissingProtectedWithdrawalAuditError>()),
+      );
+    });
 
     test('8: protected audit written atomically with operation', () async {
       final acc = await createAccount(
@@ -334,15 +317,11 @@ void main() {
       );
 
       // Both the operation and its audit must exist.
-      final opRows = await db
-          .customSelect("SELECT id FROM operations WHERE id = '$opId'")
-          .get();
+      final opRows = await db.customSelect("SELECT id FROM operations WHERE id = '$opId'").get();
       expect(opRows.length, 1);
 
       final auditRows = await db
-          .customSelect(
-            "SELECT id FROM child_withdrawal_audits WHERE operation_id = '$opId'",
-          )
+          .customSelect("SELECT id FROM child_withdrawal_audits WHERE operation_id = '$opId'")
           .get();
       expect(auditRows.length, 1);
     });
@@ -389,46 +368,43 @@ void main() {
       expect(balance, 0);
     });
 
-    test(
-      '10: idempotent retry — same operation ID → alreadyExists, no duplicate debit',
-      () async {
-        final acc = await createAccount(suffix: 't10');
-        await fund(acc, 10000);
+    test('10: idempotent retry — same operation ID → alreadyExists, no duplicate debit', () async {
+      final acc = await createAccount(suffix: 't10');
+      await fund(acc, 10000);
 
-        const opId = 'op-exp-t10';
-        final r1 = await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: opId,
-            householdId: 'hh-exp',
-            sourceAccountId: acc,
-            amountMinorUnits: 2000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r1, IdempotentOperationResult.created);
-
-        final r2 = await ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: opId,
-            householdId: 'hh-exp',
-            sourceAccountId: acc,
-            amountMinorUnits: 2000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r2, IdempotentOperationResult.alreadyExists);
-
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
+      const opId = 'op-exp-t10';
+      final r1 = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: opId,
           householdId: 'hh-exp',
-        );
-        expect(balance, 8000); // 10000 - 2000 (only once)
-      },
-    );
+          sourceAccountId: acc,
+          amountMinorUnits: 2000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r1, IdempotentOperationResult.created);
+
+      final r2 = await ledgerRepo.recordExpense(
+        RecordExpenseParams(
+          operationId: opId,
+          householdId: 'hh-exp',
+          sourceAccountId: acc,
+          amountMinorUnits: 2000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-02',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r2, IdempotentOperationResult.alreadyExists);
+
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-exp',
+      );
+      expect(balance, 8000); // 10000 - 2000 (only once)
+    });
 
     test(
       '11: conflicting retry — same idempotency key, different operation ID → conflict',

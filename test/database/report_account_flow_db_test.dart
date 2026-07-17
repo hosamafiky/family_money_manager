@@ -118,11 +118,7 @@ void main() {
     );
   }
 
-  FinancialReportRequest req(
-    String start,
-    String end, {
-    String householdId = _hh,
-  }) {
+  FinancialReportRequest req(String start, String end, {String householdId = _hh}) {
     return FinancialReportRequest(
       householdId: householdId,
       period: DashboardPeriod.custom(startDate: start, endDate: end),
@@ -135,9 +131,7 @@ void main() {
       // Pre-period income
       await income(_hh, acc, 'op-pre-1', 8000, '2024-12-15');
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
       expect(
         flow.openingBalanceMinorUnits,
@@ -150,9 +144,7 @@ void main() {
       final acc = await createAccount('acc-af-2');
       await income(_hh, acc, 'op-af-2', 5000, '2025-01-10');
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
       expect(flow.incomeMinorUnits, 5000);
     });
@@ -162,9 +154,7 @@ void main() {
       await income(_hh, acc, 'op-af-3-seed', 10000, '2025-01-01');
       await expense(_hh, acc, 'op-af-3', 3000, '2025-01-15');
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
       expect(flow.expenseMinorUnits, 3000);
     });
@@ -186,9 +176,7 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final dstFlow = result.firstWhere((r) => r.accountId == dst);
       expect(dstFlow.transfersInMinorUnits, 4000);
     });
@@ -210,9 +198,7 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final srcFlow = result.firstWhere((r) => r.accountId == src);
       expect(srcFlow.transfersOutMinorUnits, 2500);
     });
@@ -233,15 +219,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
-      expect(
-        flow.adjustmentsMinorUnits,
-        500,
-        reason: 'Credit adjustment = positive',
-      );
+      expect(flow.adjustmentsMinorUnits, 500, reason: 'Credit adjustment = positive');
     });
 
     test('7. Reversal effect handled', () async {
@@ -258,9 +238,7 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
       expect(
         flow.reversalEffectMinorUnits,
@@ -277,9 +255,7 @@ void main() {
       await income(_hh, acc, 'op-af-8-inc', 3000, '2025-01-10');
       await expense(_hh, acc, 'op-af-8-exp', 1000, '2025-01-15');
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final flow = result.firstWhere((r) => r.accountId == acc);
 
       expect(
@@ -310,9 +286,7 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       final egp = result.firstWhere((r) => r.accountId == accEgp);
       final usd = result.firstWhere((r) => r.accountId == accUsd);
       expect(egp.currencyCode, 'EGP');
@@ -337,9 +311,7 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.accountFlows(
-        req('2025-01-01', '2025-02-01'),
-      );
+      final result = await reportRepo.accountFlows(req('2025-01-01', '2025-02-01'));
       expect(
         result.any((r) => r.accountId == acc2),
         isFalse,

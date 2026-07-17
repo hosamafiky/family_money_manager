@@ -4,11 +4,7 @@ import 'package:go_router/go_router.dart';
 
 /// Type-selector screen. Lets the user choose between income, expense, transfer.
 class CreateTransactionScreen extends StatelessWidget {
-  const CreateTransactionScreen({
-    this.preselectedAccountId,
-    this.preselectedType,
-    super.key,
-  });
+  const CreateTransactionScreen({this.preselectedAccountId, this.preselectedType, super.key});
 
   /// If navigated from an account detail screen, pre-select the account.
   final String? preselectedAccountId;
@@ -30,10 +26,7 @@ class CreateTransactionScreen extends StatelessWidget {
             color: Colors.green,
             title: l10n.createIncomeTitle,
             subtitle: l10n.transactionTypeIncome,
-            onTap: () => context.push(
-              '/transactions/new/income',
-              extra: preselectedAccountId,
-            ),
+            onTap: () => context.push('/transactions/new/income', extra: preselectedAccountId),
           ),
           const SizedBox(height: 12),
           _TypeCard(
@@ -41,10 +34,7 @@ class CreateTransactionScreen extends StatelessWidget {
             color: Colors.red,
             title: l10n.createExpenseTitle,
             subtitle: l10n.transactionTypeExpense,
-            onTap: () => context.push(
-              '/transactions/new/expense',
-              extra: preselectedAccountId,
-            ),
+            onTap: () => context.push('/transactions/new/expense', extra: preselectedAccountId),
           ),
           const SizedBox(height: 12),
           _TypeCard(
@@ -52,10 +42,7 @@ class CreateTransactionScreen extends StatelessWidget {
             color: Colors.blue,
             title: l10n.createTransferTitle,
             subtitle: l10n.transactionTypeTransfer,
-            onTap: () => context.push(
-              '/transactions/new/transfer',
-              extra: preselectedAccountId,
-            ),
+            onTap: () => context.push('/transactions/new/transfer', extra: preselectedAccountId),
           ),
         ],
       ),

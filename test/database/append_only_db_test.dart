@@ -54,11 +54,7 @@ void main() {
     );
   }
 
-  Future<void> insertLedgerEntry(
-    String id,
-    String operationId,
-    String accountId,
-  ) async {
+  Future<void> insertLedgerEntry(String id, String operationId, String accountId) async {
     await db.customStatement(
       'INSERT INTO ledger_entries '
       '(id, operation_id, household_id, account_id, direction, amount_minor_units, '
@@ -68,11 +64,7 @@ void main() {
     );
   }
 
-  Future<void> insertChildAudit(
-    String id,
-    String operationId,
-    String accountId,
-  ) async {
+  Future<void> insertChildAudit(String id, String operationId, String accountId) async {
     await db.customStatement(
       'INSERT INTO child_withdrawal_audits '
       '(id, operation_id, household_id, account_id, amount_minor_units, reason, '
@@ -106,9 +98,7 @@ void main() {
       await insertLedgerEntry('entry-1', 'op-1', 'acc-1');
 
       expect(
-        () => db.customStatement(
-          "DELETE FROM ledger_entries WHERE id = 'entry-1'",
-        ),
+        () => db.customStatement("DELETE FROM ledger_entries WHERE id = 'entry-1'"),
         throwsA(isA<SqliteException>()),
       );
     });
@@ -139,22 +129,17 @@ void main() {
       );
     });
 
-    test(
-      'DELETE from child_withdrawal_audits raises SqliteException',
-      () async {
-        await insertHousehold();
-        await insertAccount('acc-p');
-        await insertOperation('op-cfw2');
-        await insertChildAudit('audit-2', 'op-cfw2', 'acc-p');
+    test('DELETE from child_withdrawal_audits raises SqliteException', () async {
+      await insertHousehold();
+      await insertAccount('acc-p');
+      await insertOperation('op-cfw2');
+      await insertChildAudit('audit-2', 'op-cfw2', 'acc-p');
 
-        expect(
-          () => db.customStatement(
-            "DELETE FROM child_withdrawal_audits WHERE id = 'audit-2'",
-          ),
-          throwsA(isA<SqliteException>()),
-        );
-      },
-    );
+      expect(
+        () => db.customStatement("DELETE FROM child_withdrawal_audits WHERE id = 'audit-2'"),
+        throwsA(isA<SqliteException>()),
+      );
+    });
   });
 
   // ── Operations: restricted update ────────────────────────────────────────
@@ -165,9 +150,7 @@ void main() {
       await insertOperation('op-r1');
 
       expect(
-        () => db.customStatement(
-          "UPDATE operations SET type = 'expense' WHERE id = 'op-r1'",
-        ),
+        () => db.customStatement("UPDATE operations SET type = 'expense' WHERE id = 'op-r1'"),
         throwsA(isA<SqliteException>()),
       );
     });
@@ -177,9 +160,7 @@ void main() {
       await insertOperation('op-r2');
 
       expect(
-        () => db.customStatement(
-          "UPDATE operations SET household_id = 'other' WHERE id = 'op-r2'",
-        ),
+        () => db.customStatement("UPDATE operations SET household_id = 'other' WHERE id = 'op-r2'"),
         throwsA(isA<SqliteException>()),
       );
     });
@@ -320,83 +301,74 @@ void main() {
   // ── FK trigger: ledger_entries.operation_id ───────────────────────────────
 
   group('FK trigger – ledger_entries.operation_id must reference operations', () {
-    test(
-      'inserting entry with non-existent operation_id raises SqliteException',
-      () async {
-        await insertHousehold();
-        await insertAccount('acc-fk');
+    test('inserting entry with non-existent operation_id raises SqliteException', () async {
+      await insertHousehold();
+      await insertAccount('acc-fk');
 
-        expect(
-          () => db.customStatement(
-            'INSERT INTO ledger_entries '
-            '(id, operation_id, household_id, account_id, direction, amount_minor_units, '
-            ' currency_code, entry_type, effective_date, recorded_at, created_by) '
-            "VALUES ('e-fk', 'GHOST_OP', 'hh-1', 'acc-fk', 'credit', 100, "
-            "        'EGP', 'income', '2024-01-01', '2024-01-01', 'user-1')",
-          ),
-          throwsA(isA<SqliteException>()),
-        );
-      },
-    );
+      expect(
+        () => db.customStatement(
+          'INSERT INTO ledger_entries '
+          '(id, operation_id, household_id, account_id, direction, amount_minor_units, '
+          ' currency_code, entry_type, effective_date, recorded_at, created_by) '
+          "VALUES ('e-fk', 'GHOST_OP', 'hh-1', 'acc-fk', 'credit', 100, "
+          "        'EGP', 'income', '2024-01-01', '2024-01-01', 'user-1')",
+        ),
+        throwsA(isA<SqliteException>()),
+      );
+    });
 
-    test(
-      'inserting entry with operation in different household raises SqliteException',
-      () async {
-        await insertHousehold();
-        await db.customStatement(
-          'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
-          "VALUES ('hh-2', 'Other', 'user-1', '2024-01-01', '2024-01-01')",
-        );
-        await insertOperation('op-hh1'); // belongs to hh-1
-        await db.customStatement(
-          "INSERT INTO financial_accounts "
-          "(id, household_id, name, type, owner_type, fund_purpose, currency_code, "
-          " created_at, updated_at, created_by) "
-          "VALUES ('acc-hh2', 'hh-2', 'Acc', 'wallet', 'user', 'general', 'EGP', "
-          "        '2024-01-01', '2024-01-01', 'user-1')",
-        );
+    test('inserting entry with operation in different household raises SqliteException', () async {
+      await insertHousehold();
+      await db.customStatement(
+        'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
+        "VALUES ('hh-2', 'Other', 'user-1', '2024-01-01', '2024-01-01')",
+      );
+      await insertOperation('op-hh1'); // belongs to hh-1
+      await db.customStatement(
+        "INSERT INTO financial_accounts "
+        "(id, household_id, name, type, owner_type, fund_purpose, currency_code, "
+        " created_at, updated_at, created_by) "
+        "VALUES ('acc-hh2', 'hh-2', 'Acc', 'wallet', 'user', 'general', 'EGP', "
+        "        '2024-01-01', '2024-01-01', 'user-1')",
+      );
 
-        // Entry claims to belong to hh-2 but operation is in hh-1
-        expect(
-          () => db.customStatement(
-            'INSERT INTO ledger_entries '
-            '(id, operation_id, household_id, account_id, direction, amount_minor_units, '
-            ' currency_code, entry_type, effective_date, recorded_at, created_by) '
-            "VALUES ('e-cross', 'op-hh1', 'hh-2', 'acc-hh2', 'credit', 100, "
-            "        'EGP', 'income', '2024-01-01', '2024-01-01', 'user-1')",
-          ),
-          throwsA(isA<SqliteException>()),
-        );
-      },
-    );
+      // Entry claims to belong to hh-2 but operation is in hh-1
+      expect(
+        () => db.customStatement(
+          'INSERT INTO ledger_entries '
+          '(id, operation_id, household_id, account_id, direction, amount_minor_units, '
+          ' currency_code, entry_type, effective_date, recorded_at, created_by) '
+          "VALUES ('e-cross', 'op-hh1', 'hh-2', 'acc-hh2', 'credit', 100, "
+          "        'EGP', 'income', '2024-01-01', '2024-01-01', 'user-1')",
+        ),
+        throwsA(isA<SqliteException>()),
+      );
+    });
   });
 
   // ── FK trigger: child_withdrawal_audits.operation_id ─────────────────────
 
   group('FK trigger – child_withdrawal_audits cross-profile rejection', () {
-    test(
-      'audit in different household than operation raises SqliteException',
-      () async {
-        await insertHousehold();
-        await db.customStatement(
-          'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
-          "VALUES ('hh-3', 'Third', 'user-1', '2024-01-01', '2024-01-01')",
-        );
-        await insertOperation('op-cross');
-        await insertAccount('acc-cross');
+    test('audit in different household than operation raises SqliteException', () async {
+      await insertHousehold();
+      await db.customStatement(
+        'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
+        "VALUES ('hh-3', 'Third', 'user-1', '2024-01-01', '2024-01-01')",
+      );
+      await insertOperation('op-cross');
+      await insertAccount('acc-cross');
 
-        expect(
-          () => db.customStatement(
-            'INSERT INTO child_withdrawal_audits '
-            '(id, operation_id, household_id, account_id, amount_minor_units, reason, '
-            ' beneficiary, confirmed_at, confirmed_by, created_at) '
-            "VALUES ('aud-cross', 'op-cross', 'hh-3', 'acc-cross', 100, 'reason', "
-            "        'child', '2024-01-01', 'user-1', '2024-01-01')",
-          ),
-          throwsA(isA<SqliteException>()),
-        );
-      },
-    );
+      expect(
+        () => db.customStatement(
+          'INSERT INTO child_withdrawal_audits '
+          '(id, operation_id, household_id, account_id, amount_minor_units, reason, '
+          ' beneficiary, confirmed_at, confirmed_by, created_at) '
+          "VALUES ('aud-cross', 'op-cross', 'hh-3', 'acc-cross', 100, 'reason', "
+          "        'child', '2024-01-01', 'user-1', '2024-01-01')",
+        ),
+        throwsA(isA<SqliteException>()),
+      );
+    });
   });
 
   // ── UNIQUE: one audit per operation ──────────────────────────────────────

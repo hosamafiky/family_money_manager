@@ -11,10 +11,7 @@ sealed class Result<T> {
   bool get isOk => this is Ok<T>;
   bool get isErr => this is Err<T>;
 
-  R when<R>({
-    required R Function(T value) ok,
-    required R Function(AppError error) err,
-  }) {
+  R when<R>({required R Function(T value) ok, required R Function(AppError error) err}) {
     return switch (this) {
       Ok(:final value) => ok(value),
       Err(:final error) => err(error),

@@ -32,10 +32,7 @@ final class ExecuteTransferUseCase {
       );
     }
     if (ctx.sourceAccountId.isEmpty || ctx.destinationAccountId.isEmpty) {
-      return const AppValidationFailure(
-        field: 'account',
-        messageKey: 'error_account_required',
-      );
+      return const AppValidationFailure(field: 'account', messageKey: 'error_account_required');
     }
     if (ctx.sourceAccountId == ctx.destinationAccountId) {
       return const AppValidationFailure(
@@ -44,17 +41,11 @@ final class ExecuteTransferUseCase {
       );
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(
-        field: 'effectiveDate',
-        messageKey: 'error_date_invalid',
-      );
+      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
     }
 
     // ── Account validation ────────────────────────────────────────────────
-    final source = await _accounts.findById(
-      id: ctx.sourceAccountId,
-      householdId: ctx.householdId,
-    );
+    final source = await _accounts.findById(id: ctx.sourceAccountId, householdId: ctx.householdId);
     if (source == null) return const AppNotFound();
     if (source.isArchived) {
       return const AppValidationFailure(
@@ -75,16 +66,10 @@ final class ExecuteTransferUseCase {
       );
     }
     if (source.currencyCode != destination.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
     if (source.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
 
     // ── Protected-fund audit validation ───────────────────────────────────
@@ -145,10 +130,7 @@ final class ExecuteTransferUseCase {
         description: ctx.note,
       );
 
-      final ledgerResult = await _ledger.executeTransfer(
-        params,
-        auditParams: auditParams,
-      );
+      final ledgerResult = await _ledger.executeTransfer(params, auditParams: auditParams);
 
       return switch (ledgerResult) {
         IdempotentOperationResult.created => AppOk(ctx.operationId),
@@ -165,10 +147,7 @@ final class ExecuteTransferUseCase {
         messageKey: 'errorSameAccount',
       );
     } on CurrencyMismatchTransferError {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     } on ArchivedAccountError {
       return const AppValidationFailure(
         field: 'sourceAccountId',

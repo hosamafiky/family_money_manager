@@ -57,23 +57,16 @@ void main() {
     });
 
     testWidgets('shows localized title in Arabic', (tester) async {
-      await tester.pumpWidget(
-        buildDetailScreen(locale: const Locale('ar', 'EG')),
-      );
+      await tester.pumpWidget(buildDetailScreen(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
       expect(find.text('تفاصيل البنية'), findsOneWidget);
     });
 
-    testWidgets('does not display financial amounts or currency', (
-      tester,
-    ) async {
+    testWidgets('does not display financial amounts or currency', (tester) async {
       await tester.pumpWidget(buildDetailScreen(probeId: 'safe-probe'));
       await tester.pumpAndSettle();
 
-      final allText = tester
-          .widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? '')
-          .join(' ');
+      final allText = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data ?? '').join(' ');
       expect(allText, isNot(contains('EGP')));
       expect(allText, isNot(matches(RegExp(r'\d{4,}'))));
     });

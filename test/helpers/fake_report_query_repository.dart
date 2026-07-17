@@ -18,11 +18,7 @@ final class FakeReportQueryRepository implements ReportQueryRepository {
   }) : _incomeExpenseFlows = incomeExpenseFlows ?? const [],
        _attribution =
            attribution ??
-           const SpendingAttributionReport(
-             bySpender: [],
-             byBeneficiary: [],
-             byScope: [],
-           ),
+           const SpendingAttributionReport(bySpender: [], byBeneficiary: [], byScope: []),
        _expenseByCategory = expenseByCategory ?? const [],
        _incomeByCategory = incomeByCategory ?? const [],
        _accountFlows = accountFlows ?? const [],
@@ -48,81 +44,61 @@ final class FakeReportQueryRepository implements ReportQueryRepository {
   }
 
   @override
-  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(FinancialReportRequest req) async {
     _maybeThrow();
     return _incomeExpenseFlows;
   }
 
   @override
-  Future<List<ExpenseScopeBreakdown>> expenseByScope(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<ExpenseScopeBreakdown>> expenseByScope(FinancialReportRequest req) async {
     _maybeThrow();
     return _attribution.byScope;
   }
 
   @override
-  Future<List<MemberSpendingBreakdown>> expenseBySpender(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<MemberSpendingBreakdown>> expenseBySpender(FinancialReportRequest req) async {
     _maybeThrow();
     return _attribution.bySpender;
   }
 
   @override
-  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(FinancialReportRequest req) async {
     _maybeThrow();
     return _attribution.byBeneficiary;
   }
 
   @override
-  Future<List<CategoryBreakdown>> expenseByCategory(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<CategoryBreakdown>> expenseByCategory(FinancialReportRequest req) async {
     _maybeThrow();
     return _expenseByCategory;
   }
 
   @override
-  Future<List<CategoryBreakdown>> incomeByCategory(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<CategoryBreakdown>> incomeByCategory(FinancialReportRequest req) async {
     _maybeThrow();
     return _incomeByCategory;
   }
 
   @override
-  Future<List<AccountFlowBreakdown>> accountFlows(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<AccountFlowBreakdown>> accountFlows(FinancialReportRequest req) async {
     _maybeThrow();
     return _accountFlows;
   }
 
   @override
-  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(FinancialReportRequest req) async {
     _maybeThrow();
     return _homeSavingsFlows;
   }
 
   @override
-  Future<List<SpouseWalletReport>> spouseWalletReports(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<SpouseWalletReport>> spouseWalletReports(FinancialReportRequest req) async {
     _maybeThrow();
     return _spouseWalletReports;
   }
 
   @override
-  Future<List<ProtectedFundsSummary>> protectedFundsReports(
-    FinancialReportRequest req,
-  ) async {
+  Future<List<ProtectedFundsSummary>> protectedFundsReports(FinancialReportRequest req) async {
     _maybeThrow();
     return _protectedFundsReports;
   }

@@ -38,9 +38,8 @@ class CategoryReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(categoryReportProvider(req)),
-              ),
+              error: (_, _) =>
+                  ReportErrorState(onRetry: () => ref.invalidate(categoryReportProvider(req))),
               data: (result) {
                 if (result is! AppOk<CategoryReport>) {
                   return ReportErrorState(
@@ -48,8 +47,7 @@ class CategoryReportScreen extends ConsumerWidget {
                   );
                 }
                 final report = result.value;
-                if (report.expenseByCategory.isEmpty &&
-                    report.incomeByCategory.isEmpty) {
+                if (report.expenseByCategory.isEmpty && report.incomeByCategory.isEmpty) {
                   return const ReportEmptyState();
                 }
                 return _CategoryContent(report: report, l10n: l10n);
@@ -76,13 +74,11 @@ class _CategoryContent extends StatelessWidget {
         ReportInfoNote(text: l10n.reportCurrencySeparate),
         if (report.expenseByCategory.isNotEmpty) ...[
           _SectionHeader(title: l10n.reportGrossExpense),
-          for (final item in report.expenseByCategory)
-            _CategoryRow(item: item, l10n: l10n),
+          for (final item in report.expenseByCategory) _CategoryRow(item: item, l10n: l10n),
         ],
         if (report.incomeByCategory.isNotEmpty) ...[
           _SectionHeader(title: l10n.reportGrossIncome),
-          for (final item in report.incomeByCategory)
-            _CategoryRow(item: item, l10n: l10n),
+          for (final item in report.incomeByCategory) _CategoryRow(item: item, l10n: l10n),
         ],
         const SizedBox(height: 24),
       ],
@@ -100,9 +96,7 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16, bottom: 4),
       child: Text(
         title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }

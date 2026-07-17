@@ -8,20 +8,12 @@ final class GetIncomeExpenseReportUseCase {
 
   final ReportQueryRepository _repository;
 
-  Future<AppResult<List<CurrencyFlowSummary>>> execute(
-    FinancialReportRequest req,
-  ) async {
+  Future<AppResult<List<CurrencyFlowSummary>>> execute(FinancialReportRequest req) async {
     if (req.householdId.isEmpty) {
-      return const AppValidationFailure(
-        field: 'householdId',
-        messageKey: 'errorValidationGeneric',
-      );
+      return const AppValidationFailure(field: 'householdId', messageKey: 'errorValidationGeneric');
     }
     if (req.period.startDate.compareTo(req.period.endDate) >= 0) {
-      return const AppValidationFailure(
-        field: 'period',
-        messageKey: 'errorValidationGeneric',
-      );
+      return const AppValidationFailure(field: 'period', messageKey: 'errorValidationGeneric');
     }
     try {
       final data = await _repository.incomeExpenseFlow(req);

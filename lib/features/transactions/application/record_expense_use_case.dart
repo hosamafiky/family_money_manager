@@ -38,10 +38,7 @@ final class RecordExpenseUseCase {
       );
     }
     if (!ctx.category.isExpense) {
-      return const AppValidationFailure(
-        field: 'category',
-        messageKey: 'errorCategoryRequired',
-      );
+      return const AppValidationFailure(field: 'category', messageKey: 'errorCategoryRequired');
     }
     if (ctx.householdId.isEmpty) {
       return const AppValidationFailure(
@@ -56,10 +53,7 @@ final class RecordExpenseUseCase {
       );
     }
     if (ctx.spenderMemberId.isEmpty) {
-      return const AppValidationFailure(
-        field: 'spender',
-        messageKey: 'errorSpenderRequired',
-      );
+      return const AppValidationFailure(field: 'spender', messageKey: 'errorSpenderRequired');
     }
     if (ctx.beneficiaryMemberId.isEmpty) {
       return const AppValidationFailure(
@@ -68,10 +62,7 @@ final class RecordExpenseUseCase {
       );
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(
-        field: 'effectiveDate',
-        messageKey: 'error_date_invalid',
-      );
+      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
     }
 
     // ── Account validation ────────────────────────────────────────────────
@@ -87,17 +78,12 @@ final class RecordExpenseUseCase {
       );
     }
     if (account.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
 
     // ── Scope/beneficiary consistency ─────────────────────────────────────
     final members = await _household.listMembers(ctx.householdId);
-    final beneficiary = members
-        .where((m) => m.id == ctx.beneficiaryMemberId)
-        .firstOrNull;
+    final beneficiary = members.where((m) => m.id == ctx.beneficiaryMemberId).firstOrNull;
     if (beneficiary == null) return const AppNotFound();
 
     final scopeValidation = _validateScope(ctx.scope, beneficiary.role);
@@ -149,10 +135,7 @@ final class RecordExpenseUseCase {
         isRecurring: ctx.isRecurring,
       );
 
-      final ledgerResult = await _ledger.recordExpense(
-        params,
-        auditParams: auditParams,
-      );
+      final ledgerResult = await _ledger.recordExpense(params, auditParams: auditParams);
 
       return switch (ledgerResult) {
         IdempotentOperationResult.created => AppOk(ctx.operationId),
@@ -173,10 +156,7 @@ final class RecordExpenseUseCase {
     }
   }
 
-  AppResult<String>? _validateScope(
-    ExpenseScope scope,
-    MemberRole beneficiaryRole,
-  ) {
+  AppResult<String>? _validateScope(ExpenseScope scope, MemberRole beneficiaryRole) {
     switch (scope) {
       case ExpenseScope.child:
         if (beneficiaryRole != MemberRole.child) {

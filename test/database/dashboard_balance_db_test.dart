@@ -190,11 +190,7 @@ void main() {
         isProtected: true,
         type: 'childProtectedFund',
       );
-      await recordIncome(
-        accountId: 'acc-sp-3',
-        amount: 5000,
-        date: '2025-03-01',
-      );
+      await recordIncome(accountId: 'acc-sp-3', amount: 5000, date: '2025-03-01');
 
       final balances = await dashRepo.spendableBalances(householdId: _hh);
       expect(balances.isEmpty, isTrue);
@@ -210,18 +206,8 @@ void main() {
     test('5. Multiple currencies remain separate', () async {
       await createAccount(id: 'acc-egp', currency: 'EGP');
       await createAccount(id: 'acc-usd', currency: 'USD');
-      await recordIncome(
-        accountId: 'acc-egp',
-        amount: 10000,
-        date: '2025-03-01',
-        currency: 'EGP',
-      );
-      await recordIncome(
-        accountId: 'acc-usd',
-        amount: 500,
-        date: '2025-03-01',
-        currency: 'USD',
-      );
+      await recordIncome(accountId: 'acc-egp', amount: 10000, date: '2025-03-01', currency: 'EGP');
+      await recordIncome(accountId: 'acc-usd', amount: 500, date: '2025-03-01', currency: 'USD');
 
       final balances = await dashRepo.spendableBalances(householdId: _hh);
       expect(balances.length, 2);
@@ -231,32 +217,26 @@ void main() {
       expect(usd.totalMinorUnits, 500);
     });
 
-    test(
-      '6. Account with no ledger entries contributes 0 (no row returned)',
-      () async {
-        await createAccount(id: 'acc-sp-6');
-        // No transactions — no ledger entries — no row in aggregation
-        final balances = await dashRepo.spendableBalances(householdId: _hh);
-        // An account with no entries returns no row (SUM over empty set = NULL)
-        expect(balances.isEmpty, isTrue);
-      },
-    );
+    test('6. Account with no ledger entries contributes 0 (no row returned)', () async {
+      await createAccount(id: 'acc-sp-6');
+      // No transactions — no ledger entries — no row in aggregation
+      final balances = await dashRepo.spendableBalances(householdId: _hh);
+      // An account with no entries returns no row (SUM over empty set = NULL)
+      expect(balances.isEmpty, isTrue);
+    });
 
-    test(
-      '7. Profile isolation — other household accounts not included',
-      () async {
-        await createAccount(id: 'acc-sp-7-hh2', householdId: _hh2);
-        await recordIncome(
-          accountId: 'acc-sp-7-hh2',
-          amount: 99999,
-          date: '2025-03-01',
-          householdId: _hh2,
-        );
+    test('7. Profile isolation — other household accounts not included', () async {
+      await createAccount(id: 'acc-sp-7-hh2', householdId: _hh2);
+      await recordIncome(
+        accountId: 'acc-sp-7-hh2',
+        amount: 99999,
+        date: '2025-03-01',
+        householdId: _hh2,
+      );
 
-        final balances = await dashRepo.spendableBalances(householdId: _hh);
-        expect(balances.isEmpty, isTrue);
-      },
-    );
+      final balances = await dashRepo.spendableBalances(householdId: _hh);
+      expect(balances.isEmpty, isTrue);
+    });
 
     test('8. Negative balance surfaces as isNegative flag', () async {
       // Create account and expense more than funded (using opening balance trick)
@@ -272,11 +252,7 @@ void main() {
           createdBy: 'test',
         ),
       );
-      await recordExpense(
-        accountId: 'acc-sp-8',
-        amount: 1000,
-        date: '2025-02-01',
-      );
+      await recordExpense(accountId: 'acc-sp-8', amount: 1000, date: '2025-02-01');
       // Insert an extra debit directly to force negative balance for test
       await db.customStatement(
         "INSERT INTO operations (id, household_id, type, effective_date, recorded_at, "
@@ -388,17 +364,10 @@ void main() {
       await createAccount(id: 'acc-flow');
     });
 
-    final period = DashboardPeriod.custom(
-      startDate: '2025-03-01',
-      endDate: '2025-04-01',
-    );
+    final period = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
 
     test('12. Ordinary income included', () async {
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 50000,
-        date: '2025-03-15',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 50000, date: '2025-03-15');
 
       final flows = await dashRepo.periodFlow(householdId: _hh, period: period);
       expect(flows.length, 1);
@@ -407,11 +376,7 @@ void main() {
 
     test('13. Transfer excluded from income totals', () async {
       await createAccount(id: 'acc-flow-dest');
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 100000,
-        date: '2025-02-01',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 100000, date: '2025-02-01');
       await executeTransfer(
         sourceId: 'acc-flow',
         destId: 'acc-flow-dest',
@@ -444,11 +409,7 @@ void main() {
     });
 
     test('15. Adjustment excluded', () async {
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 100000,
-        date: '2025-01-01',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 100000, date: '2025-01-01');
       await ledgerRepo.recordAdjustment(
         RecordAdjustmentParams(
           operationId: 'adj-15',
@@ -467,54 +428,30 @@ void main() {
       expect(incomeTotal, 0);
     });
 
-    test(
-      '16. Fully reversed expense: gross includes it, net excludes it',
-      () async {
-        await recordIncome(
-          accountId: 'acc-flow',
-          amount: 50000,
-          date: '2025-01-01',
-        );
-        await recordExpense(
-          accountId: 'acc-flow',
-          amount: 20000,
-          date: '2025-03-10',
-          opId: 'exp-16',
-        );
-        await ledgerRepo.reverseOperation(
-          const ReverseOperationParams(
-            reversalOperationId: 'rev-16',
-            originalOperationId: 'exp-16',
-            householdId: _hh,
-            effectiveDate: '2025-03-11',
-            createdBy: 'test',
-          ),
-        );
-
-        final flows = await dashRepo.periodFlow(
+    test('16. Fully reversed expense: gross includes it, net excludes it', () async {
+      await recordIncome(accountId: 'acc-flow', amount: 50000, date: '2025-01-01');
+      await recordExpense(accountId: 'acc-flow', amount: 20000, date: '2025-03-10', opId: 'exp-16');
+      await ledgerRepo.reverseOperation(
+        const ReverseOperationParams(
+          reversalOperationId: 'rev-16',
+          originalOperationId: 'exp-16',
           householdId: _hh,
-          period: period,
-        );
-        final egp = flows.firstWhere((f) => f.currencyCode == 'EGP');
-        // Gross expense includes the reversed operation
-        expect(egp.expenseMinorUnits, 20000);
-        // Net expense excludes the reversed operation
-        expect(egp.netExpenseMinorUnits, 0);
-      },
-    );
+          effectiveDate: '2025-03-11',
+          createdBy: 'test',
+        ),
+      );
+
+      final flows = await dashRepo.periodFlow(householdId: _hh, period: period);
+      final egp = flows.firstWhere((f) => f.currencyCode == 'EGP');
+      // Gross expense includes the reversed operation
+      expect(egp.expenseMinorUnits, 20000);
+      // Net expense excludes the reversed operation
+      expect(egp.netExpenseMinorUnits, 0);
+    });
 
     test('17. Reversal operation itself not counted as income', () async {
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 50000,
-        date: '2025-01-01',
-      );
-      await recordExpense(
-        accountId: 'acc-flow',
-        amount: 5000,
-        date: '2025-02-10',
-        opId: 'exp-17',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 50000, date: '2025-01-01');
+      await recordExpense(accountId: 'acc-flow', amount: 5000, date: '2025-02-10', opId: 'exp-17');
       await ledgerRepo.reverseOperation(
         const ReverseOperationParams(
           reversalOperationId: 'rev-17',
@@ -531,11 +468,7 @@ void main() {
     });
 
     test('18. Backdated income appears in correct period', () async {
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 20000,
-        date: '2025-02-28',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 20000, date: '2025-02-28');
       await recordIncome(
         accountId: 'acc-flow',
         amount: 30000,
@@ -543,23 +476,11 @@ void main() {
         opId: 'inc-march',
       );
 
-      final marchPeriod = DashboardPeriod.custom(
-        startDate: '2025-03-01',
-        endDate: '2025-04-01',
-      );
-      final febPeriod = DashboardPeriod.custom(
-        startDate: '2025-02-01',
-        endDate: '2025-03-01',
-      );
+      final marchPeriod = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
+      final febPeriod = DashboardPeriod.custom(startDate: '2025-02-01', endDate: '2025-03-01');
 
-      final marchFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: marchPeriod,
-      );
-      final febFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: febPeriod,
-      );
+      final marchFlows = await dashRepo.periodFlow(householdId: _hh, period: marchPeriod);
+      final febFlows = await dashRepo.periodFlow(householdId: _hh, period: febPeriod);
 
       expect(marchFlows.first.incomeMinorUnits, 30000);
       expect(febFlows.first.incomeMinorUnits, 20000);
@@ -567,12 +488,7 @@ void main() {
 
     test('19. Currency grouping correct', () async {
       await createAccount(id: 'acc-usd-flow', currency: 'USD');
-      await recordIncome(
-        accountId: 'acc-flow',
-        amount: 10000,
-        date: '2025-03-10',
-        currency: 'EGP',
-      );
+      await recordIncome(accountId: 'acc-flow', amount: 10000, date: '2025-03-10', currency: 'EGP');
       await recordIncome(
         accountId: 'acc-usd-flow',
         amount: 200,
@@ -592,10 +508,7 @@ void main() {
   // ── Expense scopes ────────────────────────────────────────────────────────────
 
   group('expense scopes', () {
-    final period = DashboardPeriod.custom(
-      startDate: '2025-03-01',
-      endDate: '2025-04-01',
-    );
+    final period = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
 
     setUp(() async {
       await createAccount(id: 'acc-scope');
@@ -621,10 +534,7 @@ void main() {
         opId: 'exp-scope-20',
       );
 
-      final scopes = await dashRepo.expensesByScope(
-        householdId: _hh,
-        period: period,
-      );
+      final scopes = await dashRepo.expensesByScope(householdId: _hh, period: period);
       final personal = scopes.where((s) => s.scope == ExpenseScope.personal);
       expect(personal.isNotEmpty, isTrue);
       expect(personal.first.totalMinorUnits, 1000);
@@ -639,10 +549,7 @@ void main() {
         opId: 'exp-scope-21',
       );
 
-      final scopes = await dashRepo.expensesByScope(
-        householdId: _hh,
-        period: period,
-      );
+      final scopes = await dashRepo.expensesByScope(householdId: _hh, period: period);
       final child = scopes.where((s) => s.scope == ExpenseScope.child);
       expect(child.isNotEmpty, isTrue);
       expect(child.first.totalMinorUnits, 2000);
@@ -657,10 +564,7 @@ void main() {
         opId: 'exp-scope-22',
       );
 
-      final scopes = await dashRepo.expensesByScope(
-        householdId: _hh,
-        period: period,
-      );
+      final scopes = await dashRepo.expensesByScope(householdId: _hh, period: period);
       final spouse = scopes.where((s) => s.scope == ExpenseScope.spouse);
       expect(spouse.isNotEmpty, isTrue);
       expect(spouse.first.totalMinorUnits, 3000);
@@ -675,10 +579,7 @@ void main() {
         opId: 'exp-scope-23',
       );
 
-      final scopes = await dashRepo.expensesByScope(
-        householdId: _hh,
-        period: period,
-      );
+      final scopes = await dashRepo.expensesByScope(householdId: _hh, period: period);
       final household = scopes.where((s) => s.scope == ExpenseScope.household);
       expect(household.isNotEmpty, isTrue);
       expect(household.first.totalMinorUnits, 4000);
@@ -702,10 +603,7 @@ void main() {
         ),
       );
 
-      final scopes = await dashRepo.expensesByScope(
-        householdId: _hh,
-        period: period,
-      );
+      final scopes = await dashRepo.expensesByScope(householdId: _hh, period: period);
       // is_reversed = 1 → excluded from scope totals
       final personal = scopes.where((s) => s.scope == ExpenseScope.personal);
       expect(personal.isEmpty, isTrue);
@@ -715,10 +613,7 @@ void main() {
   // ── Spouse wallet ─────────────────────────────────────────────────────────────
 
   group('spouse wallet', () {
-    final period = DashboardPeriod.custom(
-      startDate: '2025-03-01',
-      endDate: '2025-04-01',
-    );
+    final period = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
 
     Future<String> createSourceAndWallet() async {
       await createAccount(id: 'acc-src');
@@ -746,10 +641,7 @@ void main() {
         date: '2025-03-10',
       );
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       expect(summaries.length, 1);
       expect(summaries.first.periodFundedMinorUnits, 10000);
     });
@@ -769,10 +661,7 @@ void main() {
         opId: 'exp-wallet-26',
       );
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       expect(summaries.first.periodSpentMinorUnits, 15000);
     });
 
@@ -791,10 +680,7 @@ void main() {
         date: '2025-03-15',
       );
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       expect(summaries.first.periodReturnedMinorUnits, 5000);
     });
 
@@ -807,17 +693,9 @@ void main() {
         date: '2025-01-01',
         opId: 'tr-28a',
       );
-      await recordExpense(
-        accountId: walletId,
-        amount: 5000,
-        date: '2025-02-01',
-        opId: 'exp-28',
-      );
+      await recordExpense(accountId: walletId, amount: 5000, date: '2025-02-01', opId: 'exp-28');
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       expect(summaries.first.currentBalanceMinorUnits, 25000);
     });
 
@@ -840,10 +718,7 @@ void main() {
         opId: 'tr-29-mar',
       );
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       // Only March funding counted in period
       expect(summaries.first.periodFundedMinorUnits, 10000);
     });
@@ -864,10 +739,7 @@ void main() {
       await createAccount(id: 'wallet-30a', type: 'spouseCashWallet');
       await createAccount(id: 'wallet-30b', type: 'spouseCashWallet');
 
-      final summaries = await dashRepo.spouseWalletSummaries(
-        householdId: _hh,
-        period: period,
-      );
+      final summaries = await dashRepo.spouseWalletSummaries(householdId: _hh, period: period);
       expect(summaries.length, 2);
       final ids = summaries.map((s) => s.accountId).toSet();
       expect(ids.contains('wallet-30a'), isTrue);
@@ -907,10 +779,7 @@ void main() {
         opId: 'inc-new',
       );
 
-      final activities = await dashRepo.recentActivity(
-        householdId: _hh,
-        limit: 5,
-      );
+      final activities = await dashRepo.recentActivity(householdId: _hh, limit: 5);
       // Most recent first
       expect(activities.first.operation.id, 'inc-new');
     });
@@ -932,10 +801,7 @@ void main() {
         ),
       );
 
-      final activities = await dashRepo.recentActivity(
-        householdId: _hh,
-        limit: 20,
-      );
+      final activities = await dashRepo.recentActivity(householdId: _hh, limit: 20);
       final ids = activities.map((a) => a.operation.id).toList();
       expect(ids.contains('rev-32'), isTrue);
     });
@@ -962,10 +828,7 @@ void main() {
         opId: 'tr-33',
       );
 
-      final activities = await dashRepo.recentActivity(
-        householdId: _hh,
-        limit: 20,
-      );
+      final activities = await dashRepo.recentActivity(householdId: _hh, limit: 20);
       final types = activities.map((a) => a.operation.type.code).toSet();
       expect(types.contains('income'), isTrue);
       expect(types.contains('expense'), isTrue);

@@ -73,68 +73,63 @@ void main() {
       ),
     );
     if (isArchived) {
-      await db.customStatement(
-        "UPDATE financial_accounts SET is_archived = 1 WHERE id = '$id'",
-      );
+      await db.customStatement("UPDATE financial_accounts SET is_archived = 1 WHERE id = '$id'");
     }
     return id;
   }
 
   group('Income persistence', () {
-    test(
-      '1: valid income → operation row, credit entry, context row created',
-      () async {
-        final acc = await createAccount(suffix: 't1');
+    test('1: valid income → operation row, credit entry, context row created', () async {
+      final acc = await createAccount(suffix: 't1');
 
-        final result = await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-inc-t1',
-            householdId: 'hh-inc',
-            destinationAccountId: acc,
-            amountMinorUnits: 8000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(result, IdempotentOperationResult.created);
-
-        // Operation row.
-        final opRows = await db
-            .customSelect("SELECT type FROM operations WHERE id = 'op-inc-t1'")
-            .get();
-        expect(opRows.length, 1);
-        expect(opRows.first.read<String>('type'), 'income');
-
-        // Credit entry.
-        final entryRows = await db
-            .customSelect(
-              "SELECT direction, amount_minor_units FROM ledger_entries "
-              "WHERE operation_id = 'op-inc-t1'",
-            )
-            .get();
-        expect(entryRows.length, 1);
-        expect(entryRows.first.read<String>('direction'), 'credit');
-        expect(entryRows.first.read<int>('amount_minor_units'), 8000);
-
-        // Context row.
-        final ctxRows = await db
-            .customSelect(
-              "SELECT household_id FROM operation_contexts "
-              "WHERE operation_id = 'op-inc-t1'",
-            )
-            .get();
-        expect(ctxRows.length, 1);
-        expect(ctxRows.first.read<String>('household_id'), 'hh-inc');
-
-        // Balance.
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: acc,
+      final result = await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-inc-t1',
           householdId: 'hh-inc',
-        );
-        expect(balance, 8000);
-      },
-    );
+          destinationAccountId: acc,
+          amountMinorUnits: 8000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(result, IdempotentOperationResult.created);
+
+      // Operation row.
+      final opRows = await db
+          .customSelect("SELECT type FROM operations WHERE id = 'op-inc-t1'")
+          .get();
+      expect(opRows.length, 1);
+      expect(opRows.first.read<String>('type'), 'income');
+
+      // Credit entry.
+      final entryRows = await db
+          .customSelect(
+            "SELECT direction, amount_minor_units FROM ledger_entries "
+            "WHERE operation_id = 'op-inc-t1'",
+          )
+          .get();
+      expect(entryRows.length, 1);
+      expect(entryRows.first.read<String>('direction'), 'credit');
+      expect(entryRows.first.read<int>('amount_minor_units'), 8000);
+
+      // Context row.
+      final ctxRows = await db
+          .customSelect(
+            "SELECT household_id FROM operation_contexts "
+            "WHERE operation_id = 'op-inc-t1'",
+          )
+          .get();
+      expect(ctxRows.length, 1);
+      expect(ctxRows.first.read<String>('household_id'), 'hh-inc');
+
+      // Balance.
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: acc,
+        householdId: 'hh-inc',
+      );
+      expect(balance, 8000);
+    });
 
     test('2: amount 0 rejected at domain params level', () {
       expect(
@@ -166,27 +161,24 @@ void main() {
       );
     });
 
-    test(
-      '4: archived destination rejected with ArchivedAccountError',
-      () async {
-        final acc = await createAccount(suffix: 't4', isArchived: true);
+    test('4: archived destination rejected with ArchivedAccountError', () async {
+      final acc = await createAccount(suffix: 't4', isArchived: true);
 
-        await expectLater(
-          ledgerRepo.recordIncome(
-            RecordIncomeParams(
-              operationId: 'op-inc-t4',
-              householdId: 'hh-inc',
-              destinationAccountId: acc,
-              amountMinorUnits: 1000,
-              currencyCode: 'EGP',
-              effectiveDate: '2024-01-01',
-              createdBy: 'user-1',
-            ),
+      await expectLater(
+        ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-inc-t4',
+            householdId: 'hh-inc',
+            destinationAccountId: acc,
+            amountMinorUnits: 1000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
           ),
-          throwsA(isA<ArchivedAccountError>()),
-        );
-      },
-    );
+        ),
+        throwsA(isA<ArchivedAccountError>()),
+      );
+    });
 
     test('5: account in wrong household rejected with ArgumentError', () async {
       // Create account in a different household.
@@ -246,9 +238,7 @@ void main() {
 
         // No duplicate rows.
         final opCount = await db
-            .customSelect(
-              "SELECT COUNT(*) AS cnt FROM operations WHERE id = '$opId'",
-            )
+            .customSelect("SELECT COUNT(*) AS cnt FROM operations WHERE id = '$opId'")
             .get();
         expect(opCount.first.read<int>('cnt'), 1);
 
@@ -260,78 +250,72 @@ void main() {
       },
     );
 
-    test(
-      '7: same idempotency key + different operation ID → conflict',
-      () async {
-        final acc = await createAccount(suffix: 't7');
-        const idemKey = 'idem-key-t7';
+    test('7: same idempotency key + different operation ID → conflict', () async {
+      final acc = await createAccount(suffix: 't7');
+      const idemKey = 'idem-key-t7';
 
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-inc-t7a',
-            idempotencyKey: idemKey,
-            householdId: 'hh-inc',
-            destinationAccountId: acc,
-            amountMinorUnits: 2000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-inc-t7a',
+          idempotencyKey: idemKey,
+          householdId: 'hh-inc',
+          destinationAccountId: acc,
+          amountMinorUnits: 2000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        final r2 = await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-inc-t7b', // DIFFERENT operation ID
-            idempotencyKey: idemKey, // SAME idempotency key
-            householdId: 'hh-inc',
-            destinationAccountId: acc,
-            amountMinorUnits: 2000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-        expect(r2, IdempotentOperationResult.conflict);
-      },
-    );
+      final r2 = await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-inc-t7b', // DIFFERENT operation ID
+          idempotencyKey: idemKey, // SAME idempotency key
+          householdId: 'hh-inc',
+          destinationAccountId: acc,
+          amountMinorUnits: 2000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+      expect(r2, IdempotentOperationResult.conflict);
+    });
 
-    test(
-      '8: income excluded from transfer totals (count operations by type)',
-      () async {
-        final acc = await createAccount(suffix: 't8');
+    test('8: income excluded from transfer totals (count operations by type)', () async {
+      final acc = await createAccount(suffix: 't8');
 
-        // Record income.
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-inc-t8-inc',
-            householdId: 'hh-inc',
-            destinationAccountId: acc,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
+      // Record income.
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-inc-t8-inc',
+          householdId: 'hh-inc',
+          destinationAccountId: acc,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        // Count operations of type 'transfer' — should be 0.
-        final transferCount = await db
-            .customSelect(
-              "SELECT COUNT(*) AS cnt FROM operations "
-              "WHERE household_id = 'hh-inc' AND type = 'transfer'",
-            )
-            .get();
-        expect(transferCount.first.read<int>('cnt'), 0);
+      // Count operations of type 'transfer' — should be 0.
+      final transferCount = await db
+          .customSelect(
+            "SELECT COUNT(*) AS cnt FROM operations "
+            "WHERE household_id = 'hh-inc' AND type = 'transfer'",
+          )
+          .get();
+      expect(transferCount.first.read<int>('cnt'), 0);
 
-        // Count operations of type 'income' — should be 1.
-        final incomeCount = await db
-            .customSelect(
-              "SELECT COUNT(*) AS cnt FROM operations "
-              "WHERE household_id = 'hh-inc' AND type = 'income'",
-            )
-            .get();
-        expect(incomeCount.first.read<int>('cnt'), 1);
-      },
-    );
+      // Count operations of type 'income' — should be 1.
+      final incomeCount = await db
+          .customSelect(
+            "SELECT COUNT(*) AS cnt FROM operations "
+            "WHERE household_id = 'hh-inc' AND type = 'income'",
+          )
+          .get();
+      expect(incomeCount.first.read<int>('cnt'), 1);
+    });
 
     test('9: opening-balance analytics unaffected by income', () async {
       final acc = await createAccount(suffix: 't9');
@@ -379,31 +363,28 @@ void main() {
       expect(balance, 12000);
     });
 
-    test(
-      '10: income operation_contexts row is append-only (immutability check)',
-      () async {
-        final acc = await createAccount(suffix: 't10');
+    test('10: income operation_contexts row is append-only (immutability check)', () async {
+      final acc = await createAccount(suffix: 't10');
 
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-inc-t10',
-            householdId: 'hh-inc',
-            destinationAccountId: acc,
-            amountMinorUnits: 1500,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-inc-t10',
+          householdId: 'hh-inc',
+          destinationAccountId: acc,
+          amountMinorUnits: 1500,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        await expectLater(
-          db.customStatement(
-            "UPDATE operation_contexts SET note = 'tampered' "
-            "WHERE operation_id = 'op-inc-t10'",
-          ),
-          throwsA(anything),
-        );
-      },
-    );
+      await expectLater(
+        db.customStatement(
+          "UPDATE operation_contexts SET note = 'tampered' "
+          "WHERE operation_id = 'op-inc-t10'",
+        ),
+        throwsA(anything),
+      );
+    });
   });
 }

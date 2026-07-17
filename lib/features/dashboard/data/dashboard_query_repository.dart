@@ -10,16 +10,12 @@ abstract interface class DashboardQueryRepository {
   /// Spendable (non-protected, non-archived) account balances by currency.
   ///
   /// Excludes: archived accounts, protected accounts.
-  Future<List<CurrencyAmountSummary>> spendableBalances({
-    required String householdId,
-  });
+  Future<List<CurrencyAmountSummary>> spendableBalances({required String householdId});
 
   /// Protected account balances by currency.
   ///
   /// Excludes: archived protected accounts.
-  Future<List<CurrencyAmountSummary>> protectedBalances({
-    required String householdId,
-  });
+  Future<List<CurrencyAmountSummary>> protectedBalances({required String householdId});
 
   /// Period income and expense totals by currency.
   ///
@@ -52,8 +48,5 @@ abstract interface class DashboardQueryRepository {
   /// Recent activity, ordered deterministically, limited to [limit] items.
   ///
   /// Ordering: effective_date DESC, recorded_at DESC, id DESC.
-  Future<List<TransactionSummary>> recentActivity({
-    required String householdId,
-    int limit = 20,
-  });
+  Future<List<TransactionSummary>> recentActivity({required String householdId, int limit = 20});
 }

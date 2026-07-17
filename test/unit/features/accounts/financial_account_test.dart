@@ -57,14 +57,11 @@ void main() {
       expect(modified.type, FinancialAccountType.bankAccount);
     });
 
-    test(
-      'currencyCode is excluded from copyWith (immutable after creation)',
-      () {
-        final acc = _account(currencyCode: 'USD');
-        final modified = acc.copyWith(name: 'New Name');
-        expect(modified.currencyCode, 'USD');
-      },
-    );
+    test('currencyCode is excluded from copyWith (immutable after creation)', () {
+      final acc = _account(currencyCode: 'USD');
+      final modified = acc.copyWith(name: 'New Name');
+      expect(modified.currencyCode, 'USD');
+    });
 
     test('copyWith preserves id and householdId', () {
       final acc = _account(id: 'acc-42', householdId: 'hh-99');
@@ -116,36 +113,19 @@ void main() {
       expect(acc.requiresWithdrawalAudit, isTrue);
     });
 
-    test(
-      'isProtected flag triggers requiresWithdrawalAudit even for other types',
-      () {
-        final acc = _account(
-          type: FinancialAccountType.personalCashWallet,
-          isProtected: true,
-        );
-        expect(acc.requiresWithdrawalAudit, isTrue);
-      },
-    );
+    test('isProtected flag triggers requiresWithdrawalAudit even for other types', () {
+      final acc = _account(type: FinancialAccountType.personalCashWallet, isProtected: true);
+      expect(acc.requiresWithdrawalAudit, isTrue);
+    });
 
     test('normal account does not require withdrawal audit', () {
-      final acc = _account(
-        type: FinancialAccountType.personalCashWallet,
-        isProtected: false,
-      );
+      final acc = _account(type: FinancialAccountType.personalCashWallet, isProtected: false);
       expect(acc.requiresWithdrawalAudit, isFalse);
     });
 
     test('isChildProtectedFund is true only for childProtectedFund type', () {
-      expect(
-        _account(
-          type: FinancialAccountType.childProtectedFund,
-        ).isChildProtectedFund,
-        isTrue,
-      );
-      expect(
-        _account(type: FinancialAccountType.bankAccount).isChildProtectedFund,
-        isFalse,
-      );
+      expect(_account(type: FinancialAccountType.childProtectedFund).isChildProtectedFund, isTrue);
+      expect(_account(type: FinancialAccountType.bankAccount).isChildProtectedFund, isFalse);
     });
   });
 
@@ -172,10 +152,7 @@ void main() {
     });
 
     test('fromCode throws for unknown code', () {
-      expect(
-        () => FinancialAccountType.fromCode('unknownType'),
-        throwsArgumentError,
-      );
+      expect(() => FinancialAccountType.fromCode('unknownType'), throwsArgumentError);
     });
 
     test('only childProtectedFund requiresProtectedWithdrawalAudit', () {

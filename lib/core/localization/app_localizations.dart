@@ -62,8 +62,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -93,10 +91,7 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('ar'),
-    Locale('en'),
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('en')];
 
   /// The main application title shown in the header and title bar.
   ///
@@ -1723,10 +1718,357 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Currency is required'**
   String get errorBudgetCurrencyRequired;
+
+  /// Title for the savings goals screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get goalsTitle;
+
+  /// Button/title to create a new savings goal.
+  ///
+  /// In en, this message translates to:
+  /// **'New Goal'**
+  String get goalNew;
+
+  /// Label for the goal name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name'**
+  String get goalName;
+
+  /// Label for the goal purpose field.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get goalPurpose;
+
+  /// Label for the goal currency field.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get goalCurrency;
+
+  /// Label for the goal target amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount'**
+  String get goalTarget;
+
+  /// Label for the optional target date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date (optional)'**
+  String get goalTargetDate;
+
+  /// Label for the optional beneficiary member field.
+  ///
+  /// In en, this message translates to:
+  /// **'Beneficiary (optional)'**
+  String get goalBeneficiary;
+
+  /// Section label for optional initial funding.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial funding (optional)'**
+  String get goalInitialFunding;
+
+  /// Label for the initial funding source account.
+  ///
+  /// In en, this message translates to:
+  /// **'Source account'**
+  String get goalInitialFundingSource;
+
+  /// Label for the initial funding amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial amount'**
+  String get goalInitialFundingAmount;
+
+  /// Goal status: active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get goalStatusActive;
+
+  /// Goal status: target reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached'**
+  String get goalStatusTargetReached;
+
+  /// Goal status: completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get goalStatusCompleted;
+
+  /// Goal status: archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get goalStatusArchived;
+
+  /// Progress state: no funds yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get goalProgressNotStarted;
+
+  /// Progress state: partially funded.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get goalProgressInProgress;
+
+  /// Progress state: at or above target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target reached'**
+  String get goalProgressTargetReached;
+
+  /// Progress state: balance exceeds target.
+  ///
+  /// In en, this message translates to:
+  /// **'Overfunded'**
+  String get goalProgressOverfunded;
+
+  /// Label for the goal reserve balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get goalReserveBalance;
+
+  /// Label for remaining amount to target.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get goalRemaining;
+
+  /// Label prefix when goal is overfunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Overfunded by'**
+  String get goalOverfunded;
+
+  /// Progress percentage label.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% funded'**
+  String goalPercent(int percent);
+
+  /// Button to fund a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Add funds'**
+  String get goalFundAction;
+
+  /// Button to release funds from a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Release funds'**
+  String get goalReleaseAction;
+
+  /// Button to mark a goal as complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as complete'**
+  String get goalCompleteAction;
+
+  /// Button to archive a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get goalArchiveAction;
+
+  /// Button to restore an archived goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get goalRestoreAction;
+
+  /// Label for the release reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Release reason'**
+  String get goalReleaseReason;
+
+  /// Movement type: funding.
+  ///
+  /// In en, this message translates to:
+  /// **'Funding'**
+  String get goalMovementFunding;
+
+  /// Movement type: release.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get goalMovementRelease;
+
+  /// Section title for goal revision history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get goalRevisions;
+
+  /// Clarification note shown in goal detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal funds are NOT child-protected money'**
+  String get goalChildFundNote;
+
+  /// Note shown on fund-goal confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an internal transfer — not an expense'**
+  String get goalTransferNote;
+
+  /// Note shown on release-goal confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an internal transfer — not income'**
+  String get goalReleaseTransferNote;
+
+  /// Empty state message for goals list.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet. Create one to start saving.'**
+  String get goalEmpty;
+
+  /// Goal purpose: emergency fund.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency fund'**
+  String get purposeEmergencyFund;
+
+  /// Goal purpose: home purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Home purchase'**
+  String get purposeHomePurchase;
+
+  /// Goal purpose: education.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get purposeEducation;
+
+  /// Goal purpose: travel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get purposeTravel;
+
+  /// Goal purpose: major purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Major purchase'**
+  String get purposeMajorPurchase;
+
+  /// Goal purpose: family event.
+  ///
+  /// In en, this message translates to:
+  /// **'Family event'**
+  String get purposeFamilyEvent;
+
+  /// Goal purpose: other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get purposeOther;
+
+  /// Validation error: goal name is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name is required'**
+  String get errorGoalNameEmpty;
+
+  /// Validation error: goal target is zero.
+  ///
+  /// In en, this message translates to:
+  /// **'Target amount must be greater than zero'**
+  String get errorGoalTargetZero;
+
+  /// Validation error: currency not selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency is required'**
+  String get errorGoalCurrencyRequired;
+
+  /// Validation error: release reason is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Release reason is required'**
+  String get errorGoalReleaseReasonEmpty;
+
+  /// Error when reserve has insufficient funds for release.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient balance in goal reserve'**
+  String get errorGoalInsufficientReserve;
+
+  /// Error when trying to archive a goal with non-zero reserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot archive a goal with remaining funds. Release all funds first.'**
+  String get errorGoalArchiveNonzeroBalance;
+
+  /// Error when source account is a protected child fund.
+  ///
+  /// In en, this message translates to:
+  /// **'Funding from a protected child account is not allowed'**
+  String get errorGoalSourceIsProtected;
+
+  /// Error when source account is a goalReserve account.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot fund a goal from another goal reserve'**
+  String get errorGoalSourceIsReserve;
+
+  /// Title for the fund-goal screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Funds to Goal'**
+  String get goalFundTitle;
+
+  /// Title for the release-goal screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Goal Funds'**
+  String get goalReleaseTitle;
+
+  /// Label for source account in fund-goal screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Source account'**
+  String get goalSourceAccount;
+
+  /// Label for destination account in release-goal screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination account'**
+  String get goalDestinationAccount;
+
+  /// Label for amount field in goal fund/release screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get goalAmount;
+
+  /// Label for projected balance section.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected balance'**
+  String get goalProjectedBalance;
+
+  /// Dashboard section showing goal-reserved amounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reserves'**
+  String get goalReservedBalances;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1735,8 +2077,7 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

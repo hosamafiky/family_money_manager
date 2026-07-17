@@ -36,13 +36,11 @@ class IncomeReviewScreen extends ConsumerWidget {
     }
 
     final accounts = accountsAsync.maybeWhen(
-      data: (r) =>
-          r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
+      data: (r) => r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
       orElse: () => <FinancialAccount>[],
     );
 
-    String accountName(String id) =>
-        accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
+    String accountName(String id) => accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
 
     String formatAmount(int minor, String code) {
       final currency = Currency.fromCode(code);
@@ -63,18 +61,12 @@ class IncomeReviewScreen extends ConsumerWidget {
             label: l10n.fieldAmount,
             value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
           ),
-          _ReviewRow(
-            label: l10n.fieldCategory,
-            value: categoryLabel(l10n, ctx.category),
-          ),
+          _ReviewRow(label: l10n.fieldCategory, value: categoryLabel(l10n, ctx.category)),
           _ReviewRow(label: l10n.fieldEffectiveDate, value: ctx.effectiveDate),
-          if (ctx.note != null)
-            _ReviewRow(label: l10n.fieldNote, value: ctx.note!),
+          if (ctx.note != null) _ReviewRow(label: l10n.fieldNote, value: ctx.note!),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: submitting
-                ? null
-                : () => _submit(context, ref, l10n, ctx),
+            onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
             child: submitting
                 ? const SizedBox(
                     height: 20,
@@ -105,9 +97,7 @@ class IncomeReviewScreen extends ConsumerWidget {
         case AppOk():
           ref.read(incomeFormProvider.notifier).regenerateKey();
           ref.read(stagedIncomeContextProvider.notifier).set(null);
-          ref.invalidate(
-            transactionListProvider((_householdId, const TransactionFilter())),
-          );
+          ref.invalidate(transactionListProvider((_householdId, const TransactionFilter())));
           ref.invalidate(accountsProvider(_householdId));
           ref.invalidate(accountBalanceProvider);
           ref.invalidate(dashboardSummaryProvider(_householdId));
@@ -129,9 +119,7 @@ class IncomeReviewScreen extends ConsumerWidget {
   }
 
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _resolveMessage(AppLocalizations l10n, String key) {
@@ -160,17 +148,15 @@ class _ReviewRow extends StatelessWidget {
             width: 150,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ],

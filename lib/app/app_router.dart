@@ -7,6 +7,11 @@ import 'package:family_money_manager/features/budgets/presentation/budget_creati
 import 'package:family_money_manager/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:family_money_manager/features/budgets/presentation/budgets_list_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:family_money_manager/features/goals/presentation/fund_goal_screen.dart';
+import 'package:family_money_manager/features/goals/presentation/goal_creation_screen.dart';
+import 'package:family_money_manager/features/goals/presentation/goal_detail_screen.dart';
+import 'package:family_money_manager/features/goals/presentation/goals_list_screen.dart';
+import 'package:family_money_manager/features/goals/presentation/release_goal_screen.dart';
 import 'package:family_money_manager/features/household/data/drift_household_repository.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
 import 'package:family_money_manager/features/onboarding/onboarding_screen.dart';
@@ -82,22 +87,15 @@ abstract final class AppRouter {
       },
       routes: [
         // ── Onboarding ────────────────────────────────────────────────────
-        GoRoute(
-          path: '/onboarding',
-          builder: (context, state) => const OnboardingScreen(),
-        ),
+        GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
         // ── Phase 4A shell with bottom navigation ─────────────────────────
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) =>
-              AppShell(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
           branches: [
             // Tab 0: Dashboard
             StatefulShellBranch(
               routes: [
-                GoRoute(
-                  path: '/dashboard',
-                  builder: (context, state) => const DashboardScreen(),
-                ),
+                GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen()),
               ],
             ),
             // Tab 1: Accounts
@@ -109,14 +107,12 @@ abstract final class AppRouter {
                   routes: [
                     GoRoute(
                       path: 'new',
-                      builder: (context, state) =>
-                          const AccountCreationScreen(),
+                      builder: (context, state) => const AccountCreationScreen(),
                     ),
                     GoRoute(
                       path: ':accountId',
-                      builder: (context, state) => AccountDetailScreen(
-                        accountId: state.pathParameters['accountId']!,
-                      ),
+                      builder: (context, state) =>
+                          AccountDetailScreen(accountId: state.pathParameters['accountId']!),
                     ),
                   ],
                 ),
@@ -131,46 +127,39 @@ abstract final class AppRouter {
                   routes: [
                     GoRoute(
                       path: 'new',
-                      builder: (context, state) => CreateTransactionScreen(
-                        preselectedAccountId: state.extra as String?,
-                      ),
+                      builder: (context, state) =>
+                          CreateTransactionScreen(preselectedAccountId: state.extra as String?),
                       routes: [
                         GoRoute(
                           path: 'income',
-                          builder: (context, state) => IncomeFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
+                          builder: (context, state) =>
+                              IncomeFormScreen(preselectedAccountId: state.extra as String?),
                           routes: [
                             GoRoute(
                               path: 'review',
-                              builder: (context, state) =>
-                                  const IncomeReviewScreen(),
+                              builder: (context, state) => const IncomeReviewScreen(),
                             ),
                           ],
                         ),
                         GoRoute(
                           path: 'expense',
-                          builder: (context, state) => ExpenseFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
+                          builder: (context, state) =>
+                              ExpenseFormScreen(preselectedAccountId: state.extra as String?),
                           routes: [
                             GoRoute(
                               path: 'review',
-                              builder: (context, state) =>
-                                  const ExpenseReviewScreen(),
+                              builder: (context, state) => const ExpenseReviewScreen(),
                             ),
                           ],
                         ),
                         GoRoute(
                           path: 'transfer',
-                          builder: (context, state) => TransferFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
+                          builder: (context, state) =>
+                              TransferFormScreen(preselectedAccountId: state.extra as String?),
                           routes: [
                             GoRoute(
                               path: 'review',
-                              builder: (context, state) =>
-                                  const TransferReviewScreen(),
+                              builder: (context, state) => const TransferReviewScreen(),
                             ),
                           ],
                         ),
@@ -198,10 +187,7 @@ abstract final class AppRouter {
             // Tab 4: Settings
             StatefulShellBranch(
               routes: [
-                GoRoute(
-                  path: '/settings',
-                  builder: (context, state) => const SettingsScreen(),
-                ),
+                GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
               ],
             ),
           ],
@@ -218,17 +204,10 @@ abstract final class AppRouter {
             ),
             GoRoute(
               path: 'attribution',
-              builder: (context, state) =>
-                  const SpendingAttributionReportScreen(),
+              builder: (context, state) => const SpendingAttributionReportScreen(),
             ),
-            GoRoute(
-              path: 'categories',
-              builder: (context, state) => const CategoryReportScreen(),
-            ),
-            GoRoute(
-              path: 'accounts',
-              builder: (context, state) => const AccountFlowReportScreen(),
-            ),
+            GoRoute(path: 'categories', builder: (context, state) => const CategoryReportScreen()),
+            GoRoute(path: 'accounts', builder: (context, state) => const AccountFlowReportScreen()),
             GoRoute(
               path: 'home-savings',
               builder: (context, state) => const HomeSavingsReportScreen(),
@@ -253,15 +232,37 @@ abstract final class AppRouter {
           path: '/budgets',
           builder: (context, state) => const BudgetsListScreen(),
           routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const BudgetCreationScreen(),
-            ),
+            GoRoute(path: 'new', builder: (context, state) => const BudgetCreationScreen()),
             GoRoute(
               path: ':budgetId',
-              builder: (context, state) => BudgetDetailScreen(
-                budgetId: state.pathParameters['budgetId']!,
-              ),
+              builder: (context, state) =>
+                  BudgetDetailScreen(budgetId: state.pathParameters['budgetId']!),
+            ),
+          ],
+        ),
+
+        // ── Phase 5B goal routes ────────────────────────────────────────────
+        GoRoute(
+          path: '/goals',
+          builder: (context, state) => const GoalsListScreen(),
+          routes: [
+            GoRoute(path: 'new', builder: (context, state) => const GoalCreationScreen()),
+            GoRoute(
+              path: ':goalId',
+              builder: (context, state) =>
+                  GoalDetailScreen(goalId: state.pathParameters['goalId']!),
+              routes: [
+                GoRoute(
+                  path: 'fund',
+                  builder: (context, state) =>
+                      FundGoalScreen(goalId: state.pathParameters['goalId']!),
+                ),
+                GoRoute(
+                  path: 'release',
+                  builder: (context, state) =>
+                      ReleaseGoalScreen(goalId: state.pathParameters['goalId']!),
+                ),
+              ],
             ),
           ],
         ),

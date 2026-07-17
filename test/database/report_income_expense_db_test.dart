@@ -142,9 +142,7 @@ void main() {
       final acc = await createAccount(id: 'acc-ie-1', householdId: _hh);
       await income(_hh, acc, 'op-ie-1', 5000, '2025-01-10');
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(flows.length, 1);
       expect(flows.first.grossIncomeMinorUnits, 5000);
     });
@@ -166,19 +164,9 @@ void main() {
         ),
       );
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
-      expect(
-        flows.first.grossIncomeMinorUnits,
-        10000,
-        reason: 'Transfer not in income total',
-      );
-      expect(
-        flows.first.grossExpenseMinorUnits,
-        0,
-        reason: 'Transfer not in expense total',
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
+      expect(flows.first.grossIncomeMinorUnits, 10000, reason: 'Transfer not in income total');
+      expect(flows.first.grossExpenseMinorUnits, 0, reason: 'Transfer not in expense total');
     });
 
     test('3. Expense included in gross expense', () async {
@@ -186,9 +174,7 @@ void main() {
       await income(_hh, acc, 'op-ie-3-seed', 10000, '2025-01-01');
       await expense(_hh, acc, 'op-ie-3', 4000, '2025-01-15');
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(flows.first.grossExpenseMinorUnits, 4000);
     });
 
@@ -206,9 +192,7 @@ void main() {
         ),
       );
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       // Opening balance should not appear in income/expense totals
       expect(flows.isEmpty || flows.first.grossIncomeMinorUnits == 0, isTrue);
     });
@@ -229,19 +213,9 @@ void main() {
         ),
       );
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
-      expect(
-        flows.first.grossIncomeMinorUnits,
-        10000,
-        reason: 'Adjustment not in income total',
-      );
-      expect(
-        flows.first.grossExpenseMinorUnits,
-        0,
-        reason: 'Adjustment not in expense total',
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
+      expect(flows.first.grossIncomeMinorUnits, 10000, reason: 'Adjustment not in income total');
+      expect(flows.first.grossExpenseMinorUnits, 0, reason: 'Adjustment not in expense total');
     });
 
     test('6. Reversal effect computed correctly (same period)', () async {
@@ -258,9 +232,7 @@ void main() {
         ),
       );
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(flows.first.grossExpenseMinorUnits, 6000);
       expect(flows.first.expenseReversalMinorUnits, 6000);
       expect(flows.first.netExpenseMinorUnits, 0);
@@ -280,19 +252,11 @@ void main() {
         ),
       );
 
-      final janFlows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final janFlows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(janFlows.first.grossExpenseMinorUnits, 7000);
-      expect(
-        janFlows.first.expenseReversalMinorUnits,
-        0,
-        reason: 'Reversal is in Feb, not Jan',
-      );
+      expect(janFlows.first.expenseReversalMinorUnits, 0, reason: 'Reversal is in Feb, not Jan');
 
-      final febFlows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-02-01', '2025-03-01'),
-      );
+      final febFlows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-02-01', '2025-03-01'));
       expect(
         febFlows.first.expenseReversalMinorUnits,
         7000,
@@ -301,37 +265,13 @@ void main() {
     });
 
     test('8. Two currencies reported separately', () async {
-      final accEgp = await createAccount(
-        id: 'acc-ie-8a',
-        householdId: _hh,
-        currency: 'EGP',
-      );
-      final accUsd = await createAccount(
-        id: 'acc-ie-8b',
-        householdId: _hh,
-        currency: 'USD',
-      );
+      final accEgp = await createAccount(id: 'acc-ie-8a', householdId: _hh, currency: 'EGP');
+      final accUsd = await createAccount(id: 'acc-ie-8b', householdId: _hh, currency: 'USD');
 
-      await income(
-        _hh,
-        accEgp,
-        'op-ie-8a',
-        3000,
-        '2025-01-05',
-        currency: 'EGP',
-      );
-      await income(
-        _hh,
-        accUsd,
-        'op-ie-8b',
-        1500,
-        '2025-01-05',
-        currency: 'USD',
-      );
+      await income(_hh, accEgp, 'op-ie-8a', 3000, '2025-01-05', currency: 'EGP');
+      await income(_hh, accUsd, 'op-ie-8b', 1500, '2025-01-05', currency: 'USD');
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(flows.length, 2);
       final egp = flows.firstWhere((f) => f.currencyCode == 'EGP');
       final usd = flows.firstWhere((f) => f.currencyCode == 'USD');
@@ -345,9 +285,7 @@ void main() {
       await income(_hh, acc, 'op-ie-9b', 2000, '2025-01-31');
       await income(_hh, acc, 'op-ie-9c', 3000, '2025-02-01'); // exclusive end
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
       expect(
         flows.first.grossIncomeMinorUnits,
         3000,
@@ -360,17 +298,10 @@ void main() {
       // Record in Jan even though it was "entered" later (simulated by date)
       await income(_hh, acc, 'op-ie-10', 4000, '2025-01-05');
 
-      final janFlows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
-      final febFlows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-02-01', '2025-03-01'),
-      );
+      final janFlows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
+      final febFlows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-02-01', '2025-03-01'));
       expect(janFlows.first.grossIncomeMinorUnits, 4000);
-      expect(
-        febFlows.isEmpty || febFlows.first.grossIncomeMinorUnits == 0,
-        isTrue,
-      );
+      expect(febFlows.isEmpty || febFlows.first.grossIncomeMinorUnits == 0, isTrue);
     });
 
     test('11. Household isolation', () async {
@@ -380,43 +311,15 @@ void main() {
       final acc2 = await createAccount(id: 'acc-ie-11b', householdId: _hh2);
       await income(_hh2, acc2, 'op-ie-11b', 9000, '2025-01-10');
 
-      final flows = await reportRepo.incomeExpenseFlow(
-        req(_hh, '2025-01-01', '2025-02-01'),
-      );
-      expect(
-        flows.first.grossIncomeMinorUnits,
-        5000,
-        reason: 'Only hh1 income, not hh2',
-      );
+      final flows = await reportRepo.incomeExpenseFlow(req(_hh, '2025-01-01', '2025-02-01'));
+      expect(flows.first.grossIncomeMinorUnits, 5000, reason: 'Only hh1 income, not hh2');
     });
 
     test('12. Filter by currency code', () async {
-      final accEgp = await createAccount(
-        id: 'acc-ie-12a',
-        householdId: _hh,
-        currency: 'EGP',
-      );
-      final accUsd = await createAccount(
-        id: 'acc-ie-12b',
-        householdId: _hh,
-        currency: 'USD',
-      );
-      await income(
-        _hh,
-        accEgp,
-        'op-ie-12a',
-        4000,
-        '2025-01-05',
-        currency: 'EGP',
-      );
-      await income(
-        _hh,
-        accUsd,
-        'op-ie-12b',
-        2000,
-        '2025-01-05',
-        currency: 'USD',
-      );
+      final accEgp = await createAccount(id: 'acc-ie-12a', householdId: _hh, currency: 'EGP');
+      final accUsd = await createAccount(id: 'acc-ie-12b', householdId: _hh, currency: 'USD');
+      await income(_hh, accEgp, 'op-ie-12a', 4000, '2025-01-05', currency: 'EGP');
+      await income(_hh, accUsd, 'op-ie-12b', 2000, '2025-01-05', currency: 'USD');
 
       // Request with currency filter for EGP only
       const filter = ReportFilter(currencyCodes: ['EGP']);

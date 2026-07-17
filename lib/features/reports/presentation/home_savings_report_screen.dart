@@ -36,14 +36,12 @@ class HomeSavingsReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(homeSavingsReportProvider(req)),
-              ),
+              error: (_, _) =>
+                  ReportErrorState(onRetry: () => ref.invalidate(homeSavingsReportProvider(req))),
               data: (result) {
                 if (result is! AppOk<List<HomeSavingsFlowSummary>>) {
                   return ReportErrorState(
-                    onRetry: () =>
-                        ref.invalidate(homeSavingsReportProvider(req)),
+                    onRetry: () => ref.invalidate(homeSavingsReportProvider(req)),
                   );
                 }
                 final accounts = result.value;
@@ -96,10 +94,7 @@ class _HomeSavingsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              account.accountName,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text(account.accountName, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             ReportAmountRow(
               label: l10n.reportOpeningBalance,
@@ -132,8 +127,7 @@ class _HomeSavingsCard extends StatelessWidget {
               ),
             if (account.spouseWalletReturnMinorUnits != 0)
               ReportAmountRow(
-                label:
-                    '${l10n.reportSpouseWalletTitle} (${l10n.reportReturned})',
+                label: '${l10n.reportSpouseWalletTitle} (${l10n.reportReturned})',
                 minorUnits: account.spouseWalletReturnMinorUnits,
                 currencyCode: account.currencyCode,
                 color: Colors.blue,

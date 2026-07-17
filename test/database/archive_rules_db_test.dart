@@ -52,10 +52,7 @@ void main() {
     "VALUES ('$id', 'HH $id', 'user-1', '2024-01-01', '2024-01-01')",
   );
 
-  Future<String> createAccount(
-    String householdId, {
-    String suffix = '1',
-  }) async {
+  Future<String> createAccount(String householdId, {String suffix = '1'}) async {
     final id = 'acc-arch-$householdId-$suffix';
     await accountRepo.createAccount(
       CreateAccountParams(
@@ -82,40 +79,31 @@ void main() {
       await insertHousehold('hh-arch-1');
       final accId = await createAccount('hh-arch-1');
 
-      final result = await archiveUseCase.execute(
-        accountId: accId,
-        householdId: 'hh-arch-1',
-      );
+      final result = await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-1');
 
       expect(result, isA<AppOk<dynamic>>());
     });
 
-    test(
-      'archive account with non-zero balance → AppValidationFailure',
-      () async {
-        await insertHousehold('hh-arch-2');
-        final accId = await createAccount('hh-arch-2');
+    test('archive account with non-zero balance → AppValidationFailure', () async {
+      await insertHousehold('hh-arch-2');
+      final accId = await createAccount('hh-arch-2');
 
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-arch-2',
-            householdId: 'hh-arch-2',
-            destinationAccountId: accId,
-            amountMinorUnits: 1000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-
-        final result = await archiveUseCase.execute(
-          accountId: accId,
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-arch-2',
           householdId: 'hh-arch-2',
-        );
+          destinationAccountId: accId,
+          amountMinorUnits: 1000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        expect(result, isA<AppValidationFailure<dynamic>>());
-      },
-    );
+      final result = await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-2');
+
+      expect(result, isA<AppValidationFailure<dynamic>>());
+    });
 
     test('archive already-archived account → AppDuplicateConflict', () async {
       await insertHousehold('hh-arch-3');
@@ -125,10 +113,7 @@ void main() {
       await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-3');
 
       // Second archive.
-      final result = await archiveUseCase.execute(
-        accountId: accId,
-        householdId: 'hh-arch-3',
-      );
+      final result = await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-3');
 
       expect(result, isA<AppDuplicateConflict<dynamic>>());
     });
@@ -172,9 +157,7 @@ void main() {
       );
 
       // Zero balance account by reversing, then archive.
-      await db.customStatement(
-        "UPDATE financial_accounts SET is_archived = 1 WHERE id = '$accId'",
-      );
+      await db.customStatement("UPDATE financial_accounts SET is_archived = 1 WHERE id = '$accId'");
 
       await expectLater(
         ledgerRepo.recordExpense(
@@ -207,9 +190,7 @@ void main() {
           createdBy: 'user-1',
         ),
       );
-      await db.customStatement(
-        "UPDATE financial_accounts SET is_archived = 1 WHERE id = '$accId'",
-      );
+      await db.customStatement("UPDATE financial_accounts SET is_archived = 1 WHERE id = '$accId'");
 
       final balance = await balanceRepo.currentBalanceMinorUnits(
         accountId: accId,
@@ -218,88 +199,77 @@ void main() {
       expect(balance, 2500);
     });
 
-    test(
-      'archived account appears in findByHousehold(includeArchived: true)',
-      () async {
-        await insertHousehold('hh-arch-7');
-        final accId = await createAccount('hh-arch-7');
-        await archiveUseCase.execute(
-          accountId: accId,
-          householdId: 'hh-arch-7',
-        );
+    test('archived account appears in findByHousehold(includeArchived: true)', () async {
+      await insertHousehold('hh-arch-7');
+      final accId = await createAccount('hh-arch-7');
+      await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-7');
 
-        final allAccounts = await accountRepo.findByHousehold(
-          householdId: 'hh-arch-7',
-          includeArchived: true,
-        );
-        expect(allAccounts.any((a) => a.id == accId), isTrue);
-      },
-    );
+      final allAccounts = await accountRepo.findByHousehold(
+        householdId: 'hh-arch-7',
+        includeArchived: true,
+      );
+      expect(allAccounts.any((a) => a.id == accId), isTrue);
+    });
 
     test('archived account hidden in findByHousehold() default', () async {
       await insertHousehold('hh-arch-8');
       final accId = await createAccount('hh-arch-8');
       await archiveUseCase.execute(accountId: accId, householdId: 'hh-arch-8');
 
-      final activeAccounts = await accountRepo.findByHousehold(
-        householdId: 'hh-arch-8',
-      );
+      final activeAccounts = await accountRepo.findByHousehold(householdId: 'hh-arch-8');
       expect(activeAccounts.any((a) => a.id == accId), isFalse);
     });
 
     // REVERSAL EXCEPTION: Reversals are permitted on archived accounts
     // (append-only correction principle). A reversal does NOT call
     // _requireAccount; it calls _loadAccount which skips the archived check.
-    test(
-      'reversal of income on archived account is permitted (append-only correction)',
-      () async {
-        await insertHousehold('hh-arch-9');
-        final accId = await createAccount('hh-arch-9');
+    test('reversal of income on archived account is permitted (append-only correction)', () async {
+      await insertHousehold('hh-arch-9');
+      final accId = await createAccount('hh-arch-9');
 
-        // Fund the account.
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-arch-9-inc',
-            householdId: 'hh-arch-9',
-            destinationAccountId: accId,
-            amountMinorUnits: 5000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
-
-        // Archive the account (no balance check needed — archived directly via SQL).
-        await db.customStatement(
-          "UPDATE financial_accounts SET is_archived = 1, "
-          "archived_at = '2024-01-15T00:00:00Z', "
-          "updated_at = '2024-01-15T00:00:00Z' "
-          "WHERE id = '$accId'",
-        );
-
-        // A reversal that DEBITS the archived account should still succeed.
-        // This uses _loadAccount (not _requireAccount) so the archived flag
-        // does not block the write.
-        final result = await ledgerRepo.reverseOperation(
-          const ReverseOperationParams(
-            reversalOperationId: 'op-arch-9-rev',
-            originalOperationId: 'op-arch-9-inc',
-            householdId: 'hh-arch-9',
-            effectiveDate: '2024-01-16',
-            createdBy: 'user-1',
-            reason: 'Correction on archived account',
-          ),
-        );
-
-        expect(result, IdempotentOperationResult.created);
-
-        // Balance should be 0 after reversal.
-        final balance = await balanceRepo.currentBalanceMinorUnits(
-          accountId: accId,
+      // Fund the account.
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-arch-9-inc',
           householdId: 'hh-arch-9',
-        );
-        expect(balance, 0);
-      },
-    );
+          destinationAccountId: accId,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
+
+      // Archive the account (no balance check needed — archived directly via SQL).
+      await db.customStatement(
+        "UPDATE financial_accounts SET is_archived = 1, "
+        "archived_at = '2024-01-15T00:00:00Z', "
+        "updated_at = '2024-01-15T00:00:00Z' "
+        "WHERE id = '$accId'",
+      );
+
+      // A reversal that DEBITS the archived account should still succeed.
+      // This uses _loadAccount (not _requireAccount) so the archived flag
+      // does not block the write.
+      final result = await ledgerRepo.reverseOperation(
+        const ReverseOperationParams(
+          reversalOperationId: 'op-arch-9-rev',
+          originalOperationId: 'op-arch-9-inc',
+          householdId: 'hh-arch-9',
+          effectiveDate: '2024-01-16',
+          createdBy: 'user-1',
+          reason: 'Correction on archived account',
+        ),
+      );
+
+      expect(result, IdempotentOperationResult.created);
+
+      // Balance should be 0 after reversal.
+      final balance = await balanceRepo.currentBalanceMinorUnits(
+        accountId: accId,
+        householdId: 'hh-arch-9',
+      );
+      expect(balance, 0);
+    });
   });
 }

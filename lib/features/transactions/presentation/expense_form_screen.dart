@@ -98,18 +98,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             if (memberResult is! AppOk<List<HouseholdMember>>) {
               return Center(child: Text(l10n.errorGeneric));
             }
-            final accounts = accountResult.value
-                .where((a) => !a.isArchived)
-                .toList();
-            final members = memberResult.value
-                .where((m) => m.isActive)
-                .toList();
+            final accounts = accountResult.value.where((a) => !a.isArchived).toList();
+            final members = memberResult.value.where((m) => m.isActive).toList();
 
             // Sync tracked account; clear preselected ID if account is now archived.
             if (_paymentAccountId != null) {
-              final found = accounts
-                  .where((a) => a.id == _paymentAccountId)
-                  .firstOrNull;
+              final found = accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
               if (found == null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
@@ -131,10 +125,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.account_balance_wallet_outlined,
-                        size: 48,
-                      ),
+                      const Icon(Icons.account_balance_wallet_outlined, size: 48),
                       const SizedBox(height: 16),
                       Text(
                         l10n.accountsEmpty,
@@ -154,8 +145,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             }
 
             final selectedAccount =
-                _paymentAccount ??
-                accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
+                _paymentAccount ?? accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
 
             if (members.isEmpty) {
               return Center(
@@ -182,8 +172,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               );
             }
-            final isProtected =
-                selectedAccount?.requiresWithdrawalAudit ?? false;
+            final isProtected = selectedAccount?.requiresWithdrawalAudit ?? false;
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -240,13 +229,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
-                  onPressed: () => _goToReview(
-                    context,
-                    l10n,
-                    accounts,
-                    members,
-                    isProtected,
-                  ),
+                  onPressed: () => _goToReview(context, l10n, accounts, members, isProtected),
                   child: Text(l10n.reviewTitle),
                 ),
               ],
@@ -270,9 +253,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         border: const OutlineInputBorder(),
         errorText: _accountError,
       ),
-      items: accounts
-          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-          .toList(),
+      items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
       onChanged: (v) => setState(() {
         _paymentAccountId = v;
         _paymentAccount = accounts.where((a) => a.id == v).firstOrNull;
@@ -307,10 +288,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         errorText: _categoryError,
       ),
       items: TransactionCategory.expenseCategories
-          .map(
-            (c) =>
-                DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
-          )
+          .map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))))
           .toList(),
       onChanged: (v) => setState(() {
         _category = v;
@@ -336,9 +314,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         border: const OutlineInputBorder(),
         errorText: error,
       ),
-      items: members
-          .map((m) => DropdownMenuItem(value: m.id, child: Text(m.displayName)))
-          .toList(),
+      items: members.map((m) => DropdownMenuItem(value: m.id, child: Text(m.displayName))).toList(),
       onChanged: onChanged,
     );
   }
@@ -353,10 +329,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return DropdownButtonFormField<ExpenseScope>(
       // ignore: deprecated_member_use
       value: _scope,
-      decoration: InputDecoration(
-        labelText: l10n.fieldScope,
-        border: const OutlineInputBorder(),
-      ),
+      decoration: InputDecoration(labelText: l10n.fieldScope, border: const OutlineInputBorder()),
       items: scopeOptions.entries
           .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
           .toList(),
@@ -369,10 +342,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(l10n.fieldRecurring),
-        Switch(
-          value: _isRecurring,
-          onChanged: (v) => setState(() => _isRecurring = v),
-        ),
+        Switch(value: _isRecurring, onChanged: (v) => setState(() => _isRecurring = v)),
       ],
     );
   }
@@ -395,10 +365,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(_formatDate(_effectiveDate)),
-            const Icon(Icons.calendar_today, size: 18),
-          ],
+          children: [Text(_formatDate(_effectiveDate)), const Icon(Icons.calendar_today, size: 18)],
         ),
       ),
     );
@@ -439,10 +406,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           subtitle: _ackError != null
               ? Text(
                   _ackError!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
                 )
               : null,
           onChanged: (v) => setState(() {
@@ -456,10 +420,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
           subtitle: _confirmError != null
               ? Text(
                   _confirmError!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
                 )
               : null,
           onChanged: (v) => setState(() {
@@ -513,9 +474,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         hasErrors = true;
       }
       if (!_confirmed) {
-        setState(
-          () => _confirmError = l10n.errorWithdrawalConfirmationRequired,
-        );
+        setState(() => _confirmError = l10n.errorWithdrawalConfirmationRequired);
         hasErrors = true;
       }
     }
@@ -562,9 +521,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       isRecurring: _isRecurring,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty
-          ? null
-          : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
       childWithdrawalAudit: withdrawalAudit,
     );
 

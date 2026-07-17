@@ -27,9 +27,7 @@ class LocaleNotifier extends Notifier<Locale> {
   void setLocale(Locale locale) => state = locale;
 }
 
-final appLocaleProvider = NotifierProvider<LocaleNotifier, Locale>(
-  LocaleNotifier.new,
-);
+final appLocaleProvider = NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
 
 // ─── Theme mode ────────────────────────────────────────────────────────────
 
@@ -44,6 +42,4 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   void setThemeMode(ThemeMode mode) => state = mode;
 }
 
-final appThemeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
-  ThemeModeNotifier.new,
-);
+final appThemeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);

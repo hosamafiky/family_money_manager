@@ -82,9 +82,7 @@ abstract final class LedgerCalculator {
     required Currency currency,
     required String asOfDate,
   }) {
-    final filtered = entries
-        .where((e) => e.effectiveDate.compareTo(asOfDate) <= 0)
-        .toList();
+    final filtered = entries.where((e) => e.effectiveDate.compareTo(asOfDate) <= 0).toList();
     return _sum(accountId: accountId, entries: filtered, currency: currency);
   }
 

@@ -70,12 +70,7 @@ void main() {
     return id;
   }
 
-  Future<void> seedIncome(
-    String accId,
-    String opId,
-    int amount, {
-    String currency = 'EGP',
-  }) async {
+  Future<void> seedIncome(String accId, String opId, int amount, {String currency = 'EGP'}) async {
     await ledgerRepo.recordIncome(
       RecordIncomeParams(
         operationId: opId,
@@ -148,13 +143,7 @@ void main() {
     test('1. Expense by category', () async {
       final acc = await createAccount('acc-cat-1');
       await seedIncome(acc, 'op-seed-cat-1', 20000);
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-1',
-        3000,
-        '2025-01-10',
-        'food',
-      );
+      await expenseWithCategory(acc, 'op-exp-cat-1', 3000, '2025-01-10', 'food');
 
       final result = await reportRepo.expenseByCategory(req());
       expect(result.isNotEmpty, isTrue);
@@ -168,13 +157,7 @@ void main() {
 
     test('2. Income by category', () async {
       final acc = await createAccount('acc-cat-2');
-      await incomeWithCategory(
-        acc,
-        'op-inc-cat-2',
-        8000,
-        '2025-01-05',
-        'salary',
-      );
+      await incomeWithCategory(acc, 'op-inc-cat-2', 8000, '2025-01-05', 'salary');
 
       final result = await reportRepo.incomeByCategory(req());
       expect(result.isNotEmpty, isTrue);
@@ -188,33 +171,15 @@ void main() {
 
     test('3. Income and expense not combined', () async {
       final acc = await createAccount('acc-cat-3');
-      await incomeWithCategory(
-        acc,
-        'op-inc-cat-3',
-        5000,
-        '2025-01-05',
-        'salary',
-      );
+      await incomeWithCategory(acc, 'op-inc-cat-3', 5000, '2025-01-05', 'salary');
       await seedIncome(acc, 'op-seed-cat-3', 20000);
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-3',
-        2000,
-        '2025-01-10',
-        'food',
-      );
+      await expenseWithCategory(acc, 'op-exp-cat-3', 2000, '2025-01-10', 'food');
 
       final expenseResult = await reportRepo.expenseByCategory(req());
       final incomeResult = await reportRepo.incomeByCategory(req());
 
-      expect(
-        expenseResult.every((r) => r.categoryType == CategoryType.expense),
-        isTrue,
-      );
-      expect(
-        incomeResult.every((r) => r.categoryType == CategoryType.income),
-        isTrue,
-      );
+      expect(expenseResult.every((r) => r.categoryType == CategoryType.expense), isTrue);
+      expect(incomeResult.every((r) => r.categoryType == CategoryType.income), isTrue);
       expect(
         expenseResult.any((r) => r.categoryCode == 'salary'),
         isFalse,
@@ -225,47 +190,19 @@ void main() {
     test('4. Stable category code used (not localized label)', () async {
       final acc = await createAccount('acc-cat-4');
       await seedIncome(acc, 'op-seed-cat-4', 20000);
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-4',
-        1500,
-        '2025-01-10',
-        'transport',
-      );
+      await expenseWithCategory(acc, 'op-exp-cat-4', 1500, '2025-01-10', 'transport');
 
       final result = await reportRepo.expenseByCategory(req());
       final transport = result.firstWhere((r) => r.categoryCode == 'transport');
-      expect(
-        transport.categoryCode,
-        'transport',
-        reason: 'Raw code returned, not localized label',
-      );
+      expect(transport.categoryCode, 'transport', reason: 'Raw code returned, not localized label');
     });
 
     test('5. Transaction count accurate', () async {
       final acc = await createAccount('acc-cat-5');
       await seedIncome(acc, 'op-seed-cat-5', 30000);
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-5a',
-        1000,
-        '2025-01-05',
-        'food',
-      );
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-5b',
-        2000,
-        '2025-01-10',
-        'food',
-      );
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-5c',
-        3000,
-        '2025-01-15',
-        'food',
-      );
+      await expenseWithCategory(acc, 'op-exp-cat-5a', 1000, '2025-01-05', 'food');
+      await expenseWithCategory(acc, 'op-exp-cat-5b', 2000, '2025-01-10', 'food');
+      await expenseWithCategory(acc, 'op-exp-cat-5c', 3000, '2025-01-15', 'food');
 
       final result = await reportRepo.expenseByCategory(req());
       final food = result.firstWhere((r) => r.categoryCode == 'food');
@@ -315,35 +252,13 @@ void main() {
     test('7. Period boundary for categories', () async {
       final acc = await createAccount('acc-cat-7');
       await seedIncome(acc, 'op-seed-cat-7', 30000);
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-7a',
-        2000,
-        '2024-12-31',
-        'food',
-      ); // before
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-7b',
-        3000,
-        '2025-01-15',
-        'food',
-      ); // in
-      await expenseWithCategory(
-        acc,
-        'op-exp-cat-7c',
-        4000,
-        '2025-02-01',
-        'food',
-      ); // exclusive end
+      await expenseWithCategory(acc, 'op-exp-cat-7a', 2000, '2024-12-31', 'food'); // before
+      await expenseWithCategory(acc, 'op-exp-cat-7b', 3000, '2025-01-15', 'food'); // in
+      await expenseWithCategory(acc, 'op-exp-cat-7c', 4000, '2025-02-01', 'food'); // exclusive end
 
       final result = await reportRepo.expenseByCategory(req());
       final food = result.firstWhere((r) => r.categoryCode == 'food');
-      expect(
-        food.totalMinorUnits,
-        3000,
-        reason: 'Only in-period expense counted',
-      );
+      expect(food.totalMinorUnits, 3000, reason: 'Only in-period expense counted');
     });
 
     test('8. No category code = not in breakdown', () async {
@@ -363,11 +278,7 @@ void main() {
       );
 
       final result = await reportRepo.expenseByCategory(req());
-      expect(
-        result.isEmpty,
-        isTrue,
-        reason: 'Expense without category excluded from breakdown',
-      );
+      expect(result.isEmpty, isTrue, reason: 'Expense without category excluded from breakdown');
     });
   });
 }

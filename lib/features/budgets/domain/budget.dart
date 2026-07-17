@@ -26,10 +26,7 @@ final class MonthlyBudgetPeriod extends BudgetPeriodDefinition {
 }
 
 final class FixedBudgetPeriod extends BudgetPeriodDefinition {
-  const FixedBudgetPeriod({
-    required this.startDateInclusive,
-    required this.endDateExclusive,
-  });
+  const FixedBudgetPeriod({required this.startDateInclusive, required this.endDateExclusive});
 
   /// ISO 8601 date string yyyy-MM-dd (inclusive start).
   final String startDateInclusive;
@@ -69,9 +66,7 @@ final class BudgetFilter {
     Object? paymentAccountId = _absent,
   }) {
     return BudgetFilter(
-      categoryCode: categoryCode == _absent
-          ? this.categoryCode
-          : categoryCode as String?,
+      categoryCode: categoryCode == _absent ? this.categoryCode : categoryCode as String?,
       scopeCode: scopeCode == _absent ? this.scopeCode : scopeCode as String?,
       spenderMemberId: spenderMemberId == _absent
           ? this.spenderMemberId
@@ -96,13 +91,8 @@ final class BudgetFilter {
           other.paymentAccountId == paymentAccountId;
 
   @override
-  int get hashCode => Object.hash(
-    categoryCode,
-    scopeCode,
-    spenderMemberId,
-    beneficiaryMemberId,
-    paymentAccountId,
-  );
+  int get hashCode =>
+      Object.hash(categoryCode, scopeCode, spenderMemberId, beneficiaryMemberId, paymentAccountId);
 }
 
 // Sentinel for distinguishing null from absent in copyWith.
@@ -189,9 +179,8 @@ final class BudgetProgress {
 
   /// Percentage used, as integer 0–(possibly >100). Never uses floating-point money.
   /// Returns null when limitMinorUnits == 0.
-  int? get percentageUsed => limitMinorUnits == 0
-      ? null
-      : (consumedMinorUnits * 100) ~/ limitMinorUnits;
+  int? get percentageUsed =>
+      limitMinorUnits == 0 ? null : (consumedMinorUnits * 100) ~/ limitMinorUnits;
 }
 
 /// Computes [BudgetUsageState] from consumed and limit amounts.

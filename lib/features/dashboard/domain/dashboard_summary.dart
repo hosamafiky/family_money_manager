@@ -42,24 +42,18 @@ final class DashboardSummary {
   /// Timestamp when this snapshot was generated (clock.now at query time).
   final DateTime generatedAt;
 
-  bool get hasSpendableBalance =>
-      spendableBalances.any((b) => b.totalMinorUnits != 0);
+  bool get hasSpendableBalance => spendableBalances.any((b) => b.totalMinorUnits != 0);
 
-  bool get hasProtectedBalance =>
-      protectedBalances.any((b) => b.totalMinorUnits != 0);
+  bool get hasProtectedBalance => protectedBalances.any((b) => b.totalMinorUnits != 0);
 
-  bool get hasPeriodActivity => periodFlow.any(
-    (f) => f.grossIncomeMinorUnits != 0 || f.grossExpenseMinorUnits != 0,
-  );
+  bool get hasPeriodActivity =>
+      periodFlow.any((f) => f.grossIncomeMinorUnits != 0 || f.grossExpenseMinorUnits != 0);
 }
 
 /// Total ledger-derived balance for one currency.
 @immutable
 final class CurrencyAmountSummary {
-  const CurrencyAmountSummary({
-    required this.currencyCode,
-    required this.totalMinorUnits,
-  });
+  const CurrencyAmountSummary({required this.currencyCode, required this.totalMinorUnits});
 
   final String currencyCode;
 
@@ -116,8 +110,7 @@ final class PeriodFlowSummary {
   // ── Derived ─────────────────────────────────────────────────────────────
 
   /// Net income: gross income minus income reversals in this period.
-  int get netIncomeMinorUnits =>
-      grossIncomeMinorUnits - incomeReversalMinorUnits;
+  int get netIncomeMinorUnits => grossIncomeMinorUnits - incomeReversalMinorUnits;
 
   /// Net expense: gross expense minus expense reversals in this period.
   ///
@@ -125,8 +118,7 @@ final class PeriodFlowSummary {
   /// For a cross-period reversal (original in T, reversal in T+1):
   ///   Period T: netExpense = gross (reversal not in this period)
   ///   Period T+1: reversal shows as expenseReversalMinorUnits
-  int get netExpenseMinorUnits =>
-      grossExpenseMinorUnits - expenseReversalMinorUnits;
+  int get netExpenseMinorUnits => grossExpenseMinorUnits - expenseReversalMinorUnits;
 
   /// Net cash flow: net income minus net expense.
   int get netCashFlowMinorUnits => netIncomeMinorUnits - netExpenseMinorUnits;

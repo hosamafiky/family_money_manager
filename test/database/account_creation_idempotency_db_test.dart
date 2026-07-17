@@ -42,9 +42,7 @@ void main() {
 
   Future<int> countAccounts(String householdId) async {
     final rows = await db
-        .customSelect(
-          "SELECT id FROM financial_accounts WHERE household_id = '$householdId'",
-        )
+        .customSelect("SELECT id FROM financial_accounts WHERE household_id = '$householdId'")
         .get();
     return rows.length;
   }
@@ -102,19 +100,11 @@ void main() {
       await insertHousehold('hh-aidem-3');
 
       await useCase.execute(
-        baseParams(
-          householdId: 'hh-aidem-3',
-          name: 'Original Name',
-          idempotencyKey: 'key-c',
-        ),
+        baseParams(householdId: 'hh-aidem-3', name: 'Original Name', idempotencyKey: 'key-c'),
       );
 
       final r2 = await useCase.execute(
-        baseParams(
-          householdId: 'hh-aidem-3',
-          name: 'Different Name',
-          idempotencyKey: 'key-c',
-        ),
+        baseParams(householdId: 'hh-aidem-3', name: 'Different Name', idempotencyKey: 'key-c'),
       );
 
       expect(r2, isA<AppDuplicateConflict<dynamic>>());
@@ -124,42 +114,31 @@ void main() {
       await insertHousehold('hh-aidem-4');
 
       await useCase.execute(
-        baseParams(
-          householdId: 'hh-aidem-4',
-          currency: 'EGP',
-          idempotencyKey: 'key-d',
-        ),
+        baseParams(householdId: 'hh-aidem-4', currency: 'EGP', idempotencyKey: 'key-d'),
       );
 
       final r2 = await useCase.execute(
-        baseParams(
-          householdId: 'hh-aidem-4',
-          currency: 'USD',
-          idempotencyKey: 'key-d',
-        ),
+        baseParams(householdId: 'hh-aidem-4', currency: 'USD', idempotencyKey: 'key-d'),
       );
 
       expect(r2, isA<AppDuplicateConflict<dynamic>>());
     });
 
-    test(
-      'same key, different household → creates new account (key is scoped)',
-      () async {
-        await insertHousehold('hh-aidem-5a');
-        await insertHousehold('hh-aidem-5b');
+    test('same key, different household → creates new account (key is scoped)', () async {
+      await insertHousehold('hh-aidem-5a');
+      await insertHousehold('hh-aidem-5b');
 
-        final rA = await useCase.execute(
-          baseParams(householdId: 'hh-aidem-5a', idempotencyKey: 'shared-key'),
-        );
-        expect(rA, isA<AppOk<dynamic>>());
+      final rA = await useCase.execute(
+        baseParams(householdId: 'hh-aidem-5a', idempotencyKey: 'shared-key'),
+      );
+      expect(rA, isA<AppOk<dynamic>>());
 
-        final rB = await useCase.execute(
-          baseParams(householdId: 'hh-aidem-5b', idempotencyKey: 'shared-key'),
-        );
-        expect(rB, isA<AppOk<dynamic>>());
-        expect((rA as AppOk).value.id, isNot((rB as AppOk).value.id));
-      },
-    );
+      final rB = await useCase.execute(
+        baseParams(householdId: 'hh-aidem-5b', idempotencyKey: 'shared-key'),
+      );
+      expect(rB, isA<AppOk<dynamic>>());
+      expect((rA as AppOk).value.id, isNot((rB as AppOk).value.id));
+    });
 
     test('no key provided → each call creates a new account', () async {
       await insertHousehold('hh-aidem-6');

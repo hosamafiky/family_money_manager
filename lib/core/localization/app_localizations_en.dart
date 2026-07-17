@@ -56,8 +56,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAuth => 'Your session is invalid. Please sign in again.';
 
   @override
-  String get errorStorage =>
-      'A local storage error occurred. Please try again.';
+  String get errorStorage => 'A local storage error occurred. Please try again.';
 
   @override
   String get errorUnknown => 'An unexpected error occurred. Please try again.';
@@ -160,12 +159,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountArchive => 'Archive Account';
 
   @override
-  String get accountArchiveConfirm =>
-      'Are you sure you want to archive this account?';
+  String get accountArchiveConfirm => 'Are you sure you want to archive this account?';
 
   @override
-  String get accountArchiveError =>
-      'Cannot archive account with non-zero balance.';
+  String get accountArchiveError => 'Cannot archive account with non-zero balance.';
 
   @override
   String get membersTitle => 'Family Members';
@@ -195,8 +192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memberArchive => 'Archive Member';
 
   @override
-  String get memberSpouseLoginNote =>
-      'Note: Separate spouse login is not available in V1.';
+  String get memberSpouseLoginNote => 'Note: Separate spouse login is not available in V1.';
 
   @override
   String get settingsTitle => 'Settings';
@@ -232,15 +228,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAccountNameEmpty => 'Account name is required.';
 
   @override
-  String get errorOpeningBalanceNegative =>
-      'Opening balance cannot be negative.';
+  String get errorOpeningBalanceNegative => 'Opening balance cannot be negative.';
 
   @override
   String get errorAccountDuplicate => 'An account with this ID already exists.';
 
   @override
-  String get errorArchiveNonzeroBalance =>
-      'Cannot archive account with non-zero balance.';
+  String get errorArchiveNonzeroBalance => 'Cannot archive account with non-zero balance.';
 
   @override
   String get errorAccountAlreadyArchived => 'Account is already archived.';
@@ -249,12 +243,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorMemberNameEmpty => 'Member name is required.';
 
   @override
-  String get errorSpouseDuplicate =>
-      'A spouse is already registered for this household.';
+  String get errorSpouseDuplicate => 'A spouse is already registered for this household.';
 
   @override
-  String get errorCannotArchivePrimaryUser =>
-      'Cannot archive the primary user.';
+  String get errorCannotArchivePrimaryUser => 'Cannot archive the primary user.';
 
   @override
   String get errorMemberAlreadyArchived => 'Member is already archived.';
@@ -266,8 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorMoneyInvalidFormat => 'Invalid amount format.';
 
   @override
-  String get errorMoneyExcessDecimals =>
-      'Too many decimal places for this currency.';
+  String get errorMoneyExcessDecimals => 'Too many decimal places for this currency.';
 
   @override
   String get errorMoneyOverflow => 'Amount is too large.';
@@ -454,12 +445,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorScopeRequired => 'Please select a scope.';
 
   @override
-  String get errorInsufficientFunds =>
-      'Insufficient funds in the selected account.';
+  String get errorInsufficientFunds => 'Insufficient funds in the selected account.';
 
   @override
-  String get errorSameAccount =>
-      'Source and destination must be different accounts.';
+  String get errorSameAccount => 'Source and destination must be different accounts.';
 
   @override
   String get errorCurrencyMismatch => 'Accounts must use the same currency.';
@@ -477,8 +466,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You must acknowledge the protected fund warning.';
 
   @override
-  String get errorWithdrawalConfirmationRequired =>
-      'You must confirm the withdrawal.';
+  String get errorWithdrawalConfirmationRequired => 'You must confirm the withdrawal.';
 
   @override
   String get spouseWalletSummaryTitle => 'Spouse Wallet Summary';
@@ -535,8 +523,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardPeriodNet => 'Net';
 
   @override
-  String get dashboardPeriodNoActivity =>
-      'No income or expense activity in this period.';
+  String get dashboardPeriodNoActivity => 'No income or expense activity in this period.';
 
   @override
   String get dashboardScopePersonal => 'Personal Spending';
@@ -551,8 +538,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardScopeChild => 'Child Spending';
 
   @override
-  String get dashboardScopeNoActivity =>
-      'No expense scope data for this period.';
+  String get dashboardScopeNoActivity => 'No expense scope data for this period.';
 
   @override
   String get dashboardSpouseWallet => 'Spouse Wallet';
@@ -594,8 +580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardPeriodCustom => 'Custom';
 
   @override
-  String get dashboardNegativeBalanceWarning =>
-      'Negative balance — data integrity issue';
+  String get dashboardNegativeBalanceWarning => 'Negative balance — data integrity issue';
 
   @override
   String get dashboardChildProtected => 'Child (Protected)';
@@ -709,8 +694,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportCurrencySeparate => 'Totals shown per currency';
 
   @override
-  String get reportTransferNote =>
-      'Transfers are not included in income or expense totals.';
+  String get reportTransferNote => 'Transfers are not included in income or expense totals.';
 
   @override
   String get reportReversalNote => 'Reversal effects are shown separately.';
@@ -790,8 +774,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetAccountFilter => 'Payment account (optional)';
 
   @override
-  String get budgetOverlapNote =>
-      'Budgets may overlap — each is monitored independently';
+  String get budgetOverlapNote => 'Budgets may overlap — each is monitored independently';
 
   @override
   String get budgetStatusNoSpending => 'No spending';
@@ -820,8 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get budgetReversalNote =>
-      'Fully reversed expenses count as zero toward this budget';
+  String get budgetReversalNote => 'Fully reversed expenses count as zero toward this budget';
 
   @override
   String get budgetEmpty => 'No budgets yet. Create one to start planning.';
@@ -852,4 +834,181 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorBudgetCurrencyRequired => 'Currency is required';
+
+  @override
+  String get goalsTitle => 'Goals';
+
+  @override
+  String get goalNew => 'New Goal';
+
+  @override
+  String get goalName => 'Goal name';
+
+  @override
+  String get goalPurpose => 'Purpose';
+
+  @override
+  String get goalCurrency => 'Currency';
+
+  @override
+  String get goalTarget => 'Target amount';
+
+  @override
+  String get goalTargetDate => 'Target date (optional)';
+
+  @override
+  String get goalBeneficiary => 'Beneficiary (optional)';
+
+  @override
+  String get goalInitialFunding => 'Initial funding (optional)';
+
+  @override
+  String get goalInitialFundingSource => 'Source account';
+
+  @override
+  String get goalInitialFundingAmount => 'Initial amount';
+
+  @override
+  String get goalStatusActive => 'Active';
+
+  @override
+  String get goalStatusTargetReached => 'Target reached';
+
+  @override
+  String get goalStatusCompleted => 'Completed';
+
+  @override
+  String get goalStatusArchived => 'Archived';
+
+  @override
+  String get goalProgressNotStarted => 'Not started';
+
+  @override
+  String get goalProgressInProgress => 'In progress';
+
+  @override
+  String get goalProgressTargetReached => 'Target reached';
+
+  @override
+  String get goalProgressOverfunded => 'Overfunded';
+
+  @override
+  String get goalReserveBalance => 'Reserved';
+
+  @override
+  String get goalRemaining => 'Remaining';
+
+  @override
+  String get goalOverfunded => 'Overfunded by';
+
+  @override
+  String goalPercent(int percent) {
+    return '$percent% funded';
+  }
+
+  @override
+  String get goalFundAction => 'Add funds';
+
+  @override
+  String get goalReleaseAction => 'Release funds';
+
+  @override
+  String get goalCompleteAction => 'Mark as complete';
+
+  @override
+  String get goalArchiveAction => 'Archive';
+
+  @override
+  String get goalRestoreAction => 'Restore';
+
+  @override
+  String get goalReleaseReason => 'Release reason';
+
+  @override
+  String get goalMovementFunding => 'Funding';
+
+  @override
+  String get goalMovementRelease => 'Release';
+
+  @override
+  String get goalRevisions => 'History';
+
+  @override
+  String get goalChildFundNote => 'Goal funds are NOT child-protected money';
+
+  @override
+  String get goalTransferNote => 'This is an internal transfer — not an expense';
+
+  @override
+  String get goalReleaseTransferNote => 'This is an internal transfer — not income';
+
+  @override
+  String get goalEmpty => 'No goals yet. Create one to start saving.';
+
+  @override
+  String get purposeEmergencyFund => 'Emergency fund';
+
+  @override
+  String get purposeHomePurchase => 'Home purchase';
+
+  @override
+  String get purposeEducation => 'Education';
+
+  @override
+  String get purposeTravel => 'Travel';
+
+  @override
+  String get purposeMajorPurchase => 'Major purchase';
+
+  @override
+  String get purposeFamilyEvent => 'Family event';
+
+  @override
+  String get purposeOther => 'Other';
+
+  @override
+  String get errorGoalNameEmpty => 'Goal name is required';
+
+  @override
+  String get errorGoalTargetZero => 'Target amount must be greater than zero';
+
+  @override
+  String get errorGoalCurrencyRequired => 'Currency is required';
+
+  @override
+  String get errorGoalReleaseReasonEmpty => 'Release reason is required';
+
+  @override
+  String get errorGoalInsufficientReserve => 'Insufficient balance in goal reserve';
+
+  @override
+  String get errorGoalArchiveNonzeroBalance =>
+      'Cannot archive a goal with remaining funds. Release all funds first.';
+
+  @override
+  String get errorGoalSourceIsProtected => 'Funding from a protected child account is not allowed';
+
+  @override
+  String get errorGoalSourceIsReserve => 'Cannot fund a goal from another goal reserve';
+
+  @override
+  String get goalFundTitle => 'Add Funds to Goal';
+
+  @override
+  String get goalReleaseTitle => 'Release Goal Funds';
+
+  @override
+  String get goalSourceAccount => 'Source account';
+
+  @override
+  String get goalDestinationAccount => 'Destination account';
+
+  @override
+  String get goalAmount => 'Amount';
+
+  @override
+  String get goalProjectedBalance => 'Projected balance';
+
+  @override
+  String get goalReservedBalances => 'Goal reserves';
 }

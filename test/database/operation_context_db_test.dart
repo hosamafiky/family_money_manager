@@ -43,10 +43,7 @@ void main() {
     "VALUES ('$id', 'HH $id', 'user-1', '2024-01-01', '2024-01-01')",
   );
 
-  Future<String> createAccount(
-    String householdId, {
-    String suffix = '1',
-  }) async {
+  Future<String> createAccount(String householdId, {String suffix = '1'}) async {
     final id = 'acc-ctx-$householdId-$suffix';
     await accountRepo.createAccount(
       CreateAccountParams(
@@ -227,99 +224,88 @@ void main() {
       );
 
       await expectLater(
-        db.customStatement(
-          "DELETE FROM operation_contexts WHERE operation_id = 'op-ctx-5'",
-        ),
+        db.customStatement("DELETE FROM operation_contexts WHERE operation_id = 'op-ctx-5'"),
         throwsA(anything),
       );
     });
   });
 
   group('operation_contexts FK enforcement', () {
-    test(
-      '6: Cannot insert context for non-existent operation (FK trigger)',
-      () async {
-        await insertHousehold('hh-ctx-6');
+    test('6: Cannot insert context for non-existent operation (FK trigger)', () async {
+      await insertHousehold('hh-ctx-6');
 
-        // Insert a context row without a matching operations row.
-        await expectLater(
-          db.customStatement(
-            "INSERT INTO operation_contexts "
-            "(operation_id, household_id, created_at) "
-            "VALUES ('op-ghost', 'hh-ctx-6', '2024-01-01T00:00:00Z')",
-          ),
-          throwsA(anything),
-        );
-      },
-    );
+      // Insert a context row without a matching operations row.
+      await expectLater(
+        db.customStatement(
+          "INSERT INTO operation_contexts "
+          "(operation_id, household_id, created_at) "
+          "VALUES ('op-ghost', 'hh-ctx-6', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+      );
+    });
 
-    test(
-      '7: Cannot insert context with mismatched household_id '
-      '(context has wrong household but operation in different household)',
-      () async {
-        // Create two households.
-        await insertHousehold('hh-ctx-7a');
-        await insertHousehold('hh-ctx-7b');
-        final acc = await createAccount('hh-ctx-7a');
+    test('7: Cannot insert context with mismatched household_id '
+        '(context has wrong household but operation in different household)', () async {
+      // Create two households.
+      await insertHousehold('hh-ctx-7a');
+      await insertHousehold('hh-ctx-7b');
+      final acc = await createAccount('hh-ctx-7a');
 
-        // Write a valid income in household A to create an operation row.
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-ctx-7',
-            householdId: 'hh-ctx-7a',
-            destinationAccountId: acc,
-            amountMinorUnits: 1000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
+      // Write a valid income in household A to create an operation row.
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-ctx-7',
+          householdId: 'hh-ctx-7a',
+          destinationAccountId: acc,
+          amountMinorUnits: 1000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        // Try to insert a context referencing the REAL operation but with the
-        // WRONG household (hh-ctx-7b). The FK trigger on operation_contexts
-        // checks that operation_id exists in operations; since 'op-ctx-7' does
-        // exist in operations, the FK trigger passes. However, the context
-        // already exists (inserted atomically above), so the INSERT will fail
-        // with a UNIQUE PRIMARY KEY constraint error.
-        await expectLater(
-          db.customStatement(
-            "INSERT INTO operation_contexts "
-            "(operation_id, household_id, created_at) "
-            "VALUES ('op-ctx-7', 'hh-ctx-7b', '2024-01-01T00:00:00Z')",
-          ),
-          throwsA(anything),
-        );
-      },
-    );
+      // Try to insert a context referencing the REAL operation but with the
+      // WRONG household (hh-ctx-7b). The FK trigger on operation_contexts
+      // checks that operation_id exists in operations; since 'op-ctx-7' does
+      // exist in operations, the FK trigger passes. However, the context
+      // already exists (inserted atomically above), so the INSERT will fail
+      // with a UNIQUE PRIMARY KEY constraint error.
+      await expectLater(
+        db.customStatement(
+          "INSERT INTO operation_contexts "
+          "(operation_id, household_id, created_at) "
+          "VALUES ('op-ctx-7', 'hh-ctx-7b', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+      );
+    });
 
-    test(
-      '8: Two contexts for same operation_id are rejected (UNIQUE PK)',
-      () async {
-        await insertHousehold('hh-ctx-8');
-        final acc = await createAccount('hh-ctx-8');
+    test('8: Two contexts for same operation_id are rejected (UNIQUE PK)', () async {
+      await insertHousehold('hh-ctx-8');
+      final acc = await createAccount('hh-ctx-8');
 
-        await ledgerRepo.recordIncome(
-          RecordIncomeParams(
-            operationId: 'op-ctx-8',
-            householdId: 'hh-ctx-8',
-            destinationAccountId: acc,
-            amountMinorUnits: 1000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        );
+      await ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-ctx-8',
+          householdId: 'hh-ctx-8',
+          destinationAccountId: acc,
+          amountMinorUnits: 1000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
-        // Attempt to insert a second context row for the same operation_id.
-        await expectLater(
-          db.customStatement(
-            "INSERT INTO operation_contexts "
-            "(operation_id, household_id, created_at) "
-            "VALUES ('op-ctx-8', 'hh-ctx-8', '2024-01-02T00:00:00Z')",
-          ),
-          throwsA(anything),
-        );
-      },
-    );
+      // Attempt to insert a second context row for the same operation_id.
+      await expectLater(
+        db.customStatement(
+          "INSERT INTO operation_contexts "
+          "(operation_id, household_id, created_at) "
+          "VALUES ('op-ctx-8', 'hh-ctx-8', '2024-01-02T00:00:00Z')",
+        ),
+        throwsA(anything),
+      );
+    });
   });
 }

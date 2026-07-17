@@ -27,11 +27,7 @@ final class ChildWithdrawalContext {
     required bool confirmed,
   }) {
     if (reason.trim().isEmpty) {
-      throw ArgumentError.value(
-        reason,
-        'reason',
-        'Withdrawal reason must not be empty',
-      );
+      throw ArgumentError.value(reason, 'reason', 'Withdrawal reason must not be empty');
     }
     if (!warningAcknowledged) {
       throw ArgumentError.value(

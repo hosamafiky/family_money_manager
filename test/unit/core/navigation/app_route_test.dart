@@ -12,14 +12,7 @@ void main() {
     });
 
     test('location does not contain financial route segments', () {
-      const prohibited = [
-        'accounts',
-        'ledger',
-        'dashboard',
-        'transaction',
-        'wallet',
-        'balance',
-      ];
+      const prohibited = ['accounts', 'ledger', 'dashboard', 'transaction', 'wallet', 'balance'];
       final location = const SmokeRouteData().location;
       for (final segment in prohibited) {
         expect(location, isNot(contains(segment)));
@@ -29,16 +22,11 @@ void main() {
 
   group('FoundationDetailRouteData — typed parameter route', () {
     test('location encodes probeId in URL', () {
-      expect(
-        const FoundationDetailRouteData(probeId: 'abc123').location,
-        '/detail/abc123',
-      );
+      expect(const FoundationDetailRouteData(probeId: 'abc123').location, '/detail/abc123');
     });
 
     test('location URI-encodes probeId containing special characters', () {
-      final loc = const FoundationDetailRouteData(
-        probeId: 'hello world',
-      ).location;
+      final loc = const FoundationDetailRouteData(probeId: 'hello world').location;
       expect(loc, '/detail/hello%20world');
       expect(loc, isNot(contains(' ')));
     });
@@ -60,14 +48,11 @@ void main() {
       );
     });
 
-    test(
-      'probeId does not accept financial-domain terms without compile error',
-      () {
-        // This test documents that probeId is an opaque string — it carries
-        // no financial semantics. The compile-time type is String.
-        const route = FoundationDetailRouteData(probeId: 'probe-001');
-        expect(route.probeId, 'probe-001');
-      },
-    );
+    test('probeId does not accept financial-domain terms without compile error', () {
+      // This test documents that probeId is an opaque string — it carries
+      // no financial semantics. The compile-time type is String.
+      const route = FoundationDetailRouteData(probeId: 'probe-001');
+      expect(route.probeId, 'probe-001');
+    });
   });
 }

@@ -13,24 +13,16 @@ abstract interface class ReportQueryRepository {
   /// Follows the period-activity model: all income/expense operations in the
   /// period are included regardless of is_reversed. Reversal operations in the
   /// period are reported as separate reversal effects.
-  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(
-    FinancialReportRequest req,
-  );
+  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(FinancialReportRequest req);
 
   /// Expense totals grouped by expense scope and currency.
-  Future<List<ExpenseScopeBreakdown>> expenseByScope(
-    FinancialReportRequest req,
-  );
+  Future<List<ExpenseScopeBreakdown>> expenseByScope(FinancialReportRequest req);
 
   /// Expense totals grouped by spender member and currency.
-  Future<List<MemberSpendingBreakdown>> expenseBySpender(
-    FinancialReportRequest req,
-  );
+  Future<List<MemberSpendingBreakdown>> expenseBySpender(FinancialReportRequest req);
 
   /// Expense totals grouped by beneficiary member and currency.
-  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(
-    FinancialReportRequest req,
-  );
+  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(FinancialReportRequest req);
 
   /// Expense totals grouped by category code and currency.
   Future<List<CategoryBreakdown>> expenseByCategory(FinancialReportRequest req);
@@ -43,25 +35,16 @@ abstract interface class ReportQueryRepository {
   Future<List<AccountFlowBreakdown>> accountFlows(FinancialReportRequest req);
 
   /// Home savings account flow reports (homeSavingsCash account type).
-  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(
-    FinancialReportRequest req,
-  );
+  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(FinancialReportRequest req);
 
   /// Spouse wallet reports (spouseCashWallet account type).
-  Future<List<SpouseWalletReport>> spouseWalletReports(
-    FinancialReportRequest req,
-  );
+  Future<List<SpouseWalletReport>> spouseWalletReports(FinancialReportRequest req);
 
   /// Protected fund reports (is_protected = 1 accounts) with withdrawal audits.
-  Future<List<ProtectedFundsSummary>> protectedFundsReports(
-    FinancialReportRequest req,
-  );
+  Future<List<ProtectedFundsSummary>> protectedFundsReports(FinancialReportRequest req);
 
   /// Drill-down: individual transaction rows matching the request filter.
   ///
   /// Returns at most [limit] rows, ordered by effective_date DESC, id DESC.
-  Future<List<ReportTransactionRow>> drillDown(
-    FinancialReportRequest req, {
-    int limit = 100,
-  });
+  Future<List<ReportTransactionRow>> drillDown(FinancialReportRequest req, {int limit = 100});
 }

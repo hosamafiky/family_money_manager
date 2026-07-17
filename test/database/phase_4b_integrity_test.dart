@@ -137,12 +137,7 @@ void main() {
     );
   }
 
-  Future<void> reversal(
-    String hhId,
-    String originalOpId,
-    String reversalOpId,
-    String date,
-  ) async {
+  Future<void> reversal(String hhId, String originalOpId, String reversalOpId, String date) async {
     await ledgerRepo.reverseOperation(
       ReverseOperationParams(
         reversalOperationId: reversalOpId,
@@ -162,66 +157,56 @@ void main() {
 
   // ── Tests: Dashboard == Report consistency ────────────────────────────────
 
-  test(
-    '1. Dashboard gross income == report gross income for same period',
-    () async {
-      final acc = await createAccount(id: 'acc-gate-1', householdId: _hh);
-      await income(_hh, acc, 'op-inc-1', 5000, '2024-03-10');
-      await income(_hh, acc, 'op-inc-2', 3000, '2024-03-20');
+  test('1. Dashboard gross income == report gross income for same period', () async {
+    final acc = await createAccount(id: 'acc-gate-1', householdId: _hh);
+    await income(_hh, acc, 'op-inc-1', 5000, '2024-03-10');
+    await income(_hh, acc, 'op-inc-2', 3000, '2024-03-20');
 
-      final dashFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      );
-      final reportResult = await reportRepo.incomeExpenseFlow(
-        mkReq('2024-03-01', '2024-04-01'),
-      );
+    final dashFlows = await dashRepo.periodFlow(
+      householdId: _hh,
+      period: mkPeriod('2024-03-01', '2024-04-01'),
+    );
+    final reportResult = await reportRepo.incomeExpenseFlow(mkReq('2024-03-01', '2024-04-01'));
 
-      final dashIncome = dashFlows
-          .where((f) => f.currencyCode == 'EGP')
-          .map((f) => f.grossIncomeMinorUnits)
-          .fold(0, (a, b) => a + b);
-      final reportIncome = reportResult
-          .where((r) => r.currencyCode == 'EGP')
-          .map((r) => r.grossIncomeMinorUnits)
-          .fold(0, (a, b) => a + b);
+    final dashIncome = dashFlows
+        .where((f) => f.currencyCode == 'EGP')
+        .map((f) => f.grossIncomeMinorUnits)
+        .fold(0, (a, b) => a + b);
+    final reportIncome = reportResult
+        .where((r) => r.currencyCode == 'EGP')
+        .map((r) => r.grossIncomeMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-      expect(dashIncome, equals(8000));
-      expect(reportIncome, equals(8000));
-      expect(dashIncome, equals(reportIncome));
-    },
-  );
+    expect(dashIncome, equals(8000));
+    expect(reportIncome, equals(8000));
+    expect(dashIncome, equals(reportIncome));
+  });
 
-  test(
-    '2. Dashboard gross expense == report gross expense for same period',
-    () async {
-      final acc = await createAccount(id: 'acc-gate-2', householdId: _hh);
-      await income(_hh, acc, 'op-inc-gate-2', 10000, '2024-03-01');
-      await expense(_hh, acc, 'op-exp-1', 2000, '2024-03-10');
-      await expense(_hh, acc, 'op-exp-2', 1500, '2024-03-25');
+  test('2. Dashboard gross expense == report gross expense for same period', () async {
+    final acc = await createAccount(id: 'acc-gate-2', householdId: _hh);
+    await income(_hh, acc, 'op-inc-gate-2', 10000, '2024-03-01');
+    await expense(_hh, acc, 'op-exp-1', 2000, '2024-03-10');
+    await expense(_hh, acc, 'op-exp-2', 1500, '2024-03-25');
 
-      final dashFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      );
-      final reportResult = await reportRepo.incomeExpenseFlow(
-        mkReq('2024-03-01', '2024-04-01'),
-      );
+    final dashFlows = await dashRepo.periodFlow(
+      householdId: _hh,
+      period: mkPeriod('2024-03-01', '2024-04-01'),
+    );
+    final reportResult = await reportRepo.incomeExpenseFlow(mkReq('2024-03-01', '2024-04-01'));
 
-      final dashExpense = dashFlows
-          .where((f) => f.currencyCode == 'EGP')
-          .map((f) => f.grossExpenseMinorUnits)
-          .fold(0, (a, b) => a + b);
-      final reportExpense = reportResult
-          .where((r) => r.currencyCode == 'EGP')
-          .map((r) => r.grossExpenseMinorUnits)
-          .fold(0, (a, b) => a + b);
+    final dashExpense = dashFlows
+        .where((f) => f.currencyCode == 'EGP')
+        .map((f) => f.grossExpenseMinorUnits)
+        .fold(0, (a, b) => a + b);
+    final reportExpense = reportResult
+        .where((r) => r.currencyCode == 'EGP')
+        .map((r) => r.grossExpenseMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-      expect(dashExpense, equals(3500));
-      expect(reportExpense, equals(3500));
-      expect(dashExpense, equals(reportExpense));
-    },
-  );
+    expect(dashExpense, equals(3500));
+    expect(reportExpense, equals(3500));
+    expect(dashExpense, equals(reportExpense));
+  });
 
   test('3. Reversal effect appears in dashboard with correct sign', () async {
     final acc = await createAccount(id: 'acc-gate-3', householdId: _hh);
@@ -246,9 +231,7 @@ void main() {
     await expense(_hh, acc, 'op-exp-r2', 3000, '2024-03-15');
     await reversal(_hh, 'op-exp-r2', 'rev-exp-r2', '2024-03-16');
 
-    final reportResult = await reportRepo.incomeExpenseFlow(
-      mkReq('2024-03-01', '2024-04-01'),
-    );
+    final reportResult = await reportRepo.incomeExpenseFlow(mkReq('2024-03-01', '2024-04-01'));
 
     final egp = reportResult.firstWhere((r) => r.currencyCode == 'EGP');
     expect(egp.grossExpenseMinorUnits, equals(3000));
@@ -266,9 +249,7 @@ void main() {
       householdId: _hh,
       period: mkPeriod('2024-03-01', '2024-04-01'),
     );
-    final reportResult = await reportRepo.incomeExpenseFlow(
-      mkReq('2024-03-01', '2024-04-01'),
-    );
+    final reportResult = await reportRepo.incomeExpenseFlow(mkReq('2024-03-01', '2024-04-01'));
 
     final dashNetExp = dashFlows
         .where((f) => f.currencyCode == 'EGP')
@@ -283,88 +264,73 @@ void main() {
     expect(dashNetExp, equals(0));
   });
 
-  test(
-    '6. Cross-period reversal: original period gross unaffected in dashboard',
-    () async {
-      final acc = await createAccount(id: 'acc-gate-6', householdId: _hh);
-      await income(_hh, acc, 'op-inc-gate-6', 10000, '2024-03-01');
-      await expense(_hh, acc, 'op-exp-cp1', 5000, '2024-03-10');
-      await reversal(_hh, 'op-exp-cp1', 'rev-cp1', '2024-04-02');
+  test('6. Cross-period reversal: original period gross unaffected in dashboard', () async {
+    final acc = await createAccount(id: 'acc-gate-6', householdId: _hh);
+    await income(_hh, acc, 'op-inc-gate-6', 10000, '2024-03-01');
+    await expense(_hh, acc, 'op-exp-cp1', 5000, '2024-03-10');
+    await reversal(_hh, 'op-exp-cp1', 'rev-cp1', '2024-04-02');
 
-      final marFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      );
-      final marEgp = marFlows.firstWhere((f) => f.currencyCode == 'EGP');
-      expect(marEgp.grossExpenseMinorUnits, equals(5000));
-      expect(marEgp.expenseReversalMinorUnits, equals(0));
-      expect(marEgp.netExpenseMinorUnits, equals(5000));
+    final marFlows = await dashRepo.periodFlow(
+      householdId: _hh,
+      period: mkPeriod('2024-03-01', '2024-04-01'),
+    );
+    final marEgp = marFlows.firstWhere((f) => f.currencyCode == 'EGP');
+    expect(marEgp.grossExpenseMinorUnits, equals(5000));
+    expect(marEgp.expenseReversalMinorUnits, equals(0));
+    expect(marEgp.netExpenseMinorUnits, equals(5000));
 
-      final aprFlows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: mkPeriod('2024-04-01', '2024-05-01'),
-      );
-      final aprEgp = aprFlows.firstWhere((f) => f.currencyCode == 'EGP');
-      expect(aprEgp.expenseReversalMinorUnits, equals(5000));
-    },
-  );
+    final aprFlows = await dashRepo.periodFlow(
+      householdId: _hh,
+      period: mkPeriod('2024-04-01', '2024-05-01'),
+    );
+    final aprEgp = aprFlows.firstWhere((f) => f.currencyCode == 'EGP');
+    expect(aprEgp.expenseReversalMinorUnits, equals(5000));
+  });
 
-  test(
-    '7. Cross-period reversal: original period gross unaffected in report',
-    () async {
-      final acc = await createAccount(id: 'acc-gate-7', householdId: _hh);
-      await income(_hh, acc, 'op-inc-gate-7', 10000, '2024-03-01');
-      await expense(_hh, acc, 'op-exp-cp2', 4000, '2024-03-20');
-      await reversal(_hh, 'op-exp-cp2', 'rev-cp2', '2024-04-05');
+  test('7. Cross-period reversal: original period gross unaffected in report', () async {
+    final acc = await createAccount(id: 'acc-gate-7', householdId: _hh);
+    await income(_hh, acc, 'op-inc-gate-7', 10000, '2024-03-01');
+    await expense(_hh, acc, 'op-exp-cp2', 4000, '2024-03-20');
+    await reversal(_hh, 'op-exp-cp2', 'rev-cp2', '2024-04-05');
 
-      final marReport = await reportRepo.incomeExpenseFlow(
-        mkReq('2024-03-01', '2024-04-01'),
-      );
-      final marEgp = marReport.firstWhere((r) => r.currencyCode == 'EGP');
-      expect(marEgp.grossExpenseMinorUnits, equals(4000));
-      expect(marEgp.expenseReversalMinorUnits, equals(0));
-    },
-  );
+    final marReport = await reportRepo.incomeExpenseFlow(mkReq('2024-03-01', '2024-04-01'));
+    final marEgp = marReport.firstWhere((r) => r.currencyCode == 'EGP');
+    expect(marEgp.grossExpenseMinorUnits, equals(4000));
+    expect(marEgp.expenseReversalMinorUnits, equals(0));
+  });
 
-  test(
-    '8. Household isolation: each household only sees its own data',
-    () async {
-      final acc1 = await createAccount(id: 'acc-iso-1', householdId: _hh);
-      final acc2 = await createAccount(id: 'acc-iso-2', householdId: _hh2);
-      await income(_hh, acc1, 'op-iso-inc-1', 5000, '2024-03-10');
-      await income(_hh2, acc2, 'op-iso-inc-2', 8000, '2024-03-10');
+  test('8. Household isolation: each household only sees its own data', () async {
+    final acc1 = await createAccount(id: 'acc-iso-1', householdId: _hh);
+    final acc2 = await createAccount(id: 'acc-iso-2', householdId: _hh2);
+    await income(_hh, acc1, 'op-iso-inc-1', 5000, '2024-03-10');
+    await income(_hh2, acc2, 'op-iso-inc-2', 8000, '2024-03-10');
 
-      final hh1Flows = await dashRepo.periodFlow(
-        householdId: _hh,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      );
-      final hh1Inc = hh1Flows
-          .where((f) => f.currencyCode == 'EGP')
-          .map((f) => f.grossIncomeMinorUnits)
-          .fold(0, (a, b) => a + b);
-      expect(hh1Inc, equals(5000));
+    final hh1Flows = await dashRepo.periodFlow(
+      householdId: _hh,
+      period: mkPeriod('2024-03-01', '2024-04-01'),
+    );
+    final hh1Inc = hh1Flows
+        .where((f) => f.currencyCode == 'EGP')
+        .map((f) => f.grossIncomeMinorUnits)
+        .fold(0, (a, b) => a + b);
+    expect(hh1Inc, equals(5000));
 
-      final hh2Flows = await dashRepo.periodFlow(
-        householdId: _hh2,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      );
-      final hh2Inc = hh2Flows
-          .where((f) => f.currencyCode == 'EGP')
-          .map((f) => f.grossIncomeMinorUnits)
-          .fold(0, (a, b) => a + b);
-      expect(hh2Inc, equals(8000));
-    },
-  );
+    final hh2Flows = await dashRepo.periodFlow(
+      householdId: _hh2,
+      period: mkPeriod('2024-03-01', '2024-04-01'),
+    );
+    final hh2Inc = hh2Flows
+        .where((f) => f.currencyCode == 'EGP')
+        .map((f) => f.grossIncomeMinorUnits)
+        .fold(0, (a, b) => a + b);
+    expect(hh2Inc, equals(8000));
+  });
 
   // ── Tests: Spouse-wallet regression ────────────────────────────────────────
 
   test('9-14. Spouse-wallet: all metrics correct', () async {
     await createAccount(id: 'hs-sw', householdId: _hh, type: 'homeSavingsCash');
-    await createAccount(
-      id: 'sw-sw',
-      householdId: _hh,
-      type: 'spouseCashWallet',
-    );
+    await createAccount(id: 'sw-sw', householdId: _hh, type: 'spouseCashWallet');
 
     // Put income into home savings first
     await income(_hh, 'hs-sw', 'op-hs-sw-inc', 10000, '2024-03-01');
@@ -401,10 +367,7 @@ void main() {
     );
 
     final swReport = await reportRepo.spouseWalletReports(
-      FinancialReportRequest(
-        householdId: _hh,
-        period: mkPeriod('2024-03-01', '2024-04-01'),
-      ),
+      FinancialReportRequest(householdId: _hh, period: mkPeriod('2024-03-01', '2024-04-01')),
     );
 
     expect(swReport.length, equals(1));
@@ -429,64 +392,47 @@ void main() {
     expect(sw.currentBalanceMinorUnits, equals(500));
   });
 
-  test(
-    '15. Spouse-wallet regression: reversed expense NOT double-counted',
-    () async {
-      await createAccount(
-        id: 'hs-sw2',
+  test('15. Spouse-wallet regression: reversed expense NOT double-counted', () async {
+    await createAccount(id: 'hs-sw2', householdId: _hh, type: 'homeSavingsCash');
+    await createAccount(id: 'sw-sw2', householdId: _hh, type: 'spouseCashWallet');
+
+    // Put income into home savings first
+    await income(_hh, 'hs-sw2', 'op-hs-sw2-inc', 10000, '2024-03-01');
+
+    // Fund 3000
+    await ledgerRepo.executeTransfer(
+      ExecuteTransferParams(
+        operationId: 'transfer-fund-sw2',
         householdId: _hh,
-        type: 'homeSavingsCash',
-      );
-      await createAccount(
-        id: 'sw-sw2',
-        householdId: _hh,
-        type: 'spouseCashWallet',
-      );
+        sourceAccountId: 'hs-sw2',
+        destinationAccountId: 'sw-sw2',
+        amountMinorUnits: 3000,
+        currencyCode: 'EGP',
+        effectiveDate: '2024-03-01',
+        createdBy: 'test',
+      ),
+    );
 
-      // Put income into home savings first
-      await income(_hh, 'hs-sw2', 'op-hs-sw2-inc', 10000, '2024-03-01');
+    // Spend 1000, then reverse it
+    await expense(_hh, 'sw-sw2', 'exp-sw2-1', 1000, '2024-03-05');
+    await reversal(_hh, 'exp-sw2-1', 'rev-sw2-1', '2024-03-06');
 
-      // Fund 3000
-      await ledgerRepo.executeTransfer(
-        ExecuteTransferParams(
-          operationId: 'transfer-fund-sw2',
-          householdId: _hh,
-          sourceAccountId: 'hs-sw2',
-          destinationAccountId: 'sw-sw2',
-          amountMinorUnits: 3000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-03-01',
-          createdBy: 'test',
-        ),
-      );
+    final swReport = await reportRepo.spouseWalletReports(
+      FinancialReportRequest(householdId: _hh, period: mkPeriod('2024-03-01', '2024-04-01')),
+    );
 
-      // Spend 1000, then reverse it
-      await expense(_hh, 'sw-sw2', 'exp-sw2-1', 1000, '2024-03-05');
-      await reversal(_hh, 'exp-sw2-1', 'rev-sw2-1', '2024-03-06');
+    final sw = swReport.first;
 
-      final swReport = await reportRepo.spouseWalletReports(
-        FinancialReportRequest(
-          householdId: _hh,
-          period: mkPeriod('2024-03-01', '2024-04-01'),
-        ),
-      );
-
-      final sw = swReport.first;
-
-      // funded = 3000
-      expect(sw.periodFundedMinorUnits, equals(3000));
-      // gross spent = 1000 (is_reversal = 0 filter correctly captures this)
-      expect(sw.periodSpentMinorUnits, equals(1000));
-      // The reversal restores funds; reversal_effect should be non-zero (positive = credit)
-      expect(sw.periodReversalEffectMinorUnits, isNonZero);
-      // The spent aggregation (is_reversal = 0) and reversal aggregation (is_reversal = 1)
-      // are separate — no double-counting possible.
-      expect(
-        sw.periodSpentMinorUnits + sw.periodReversalEffectMinorUnits,
-        isNonNegative,
-      );
-    },
-  );
+    // funded = 3000
+    expect(sw.periodFundedMinorUnits, equals(3000));
+    // gross spent = 1000 (is_reversal = 0 filter correctly captures this)
+    expect(sw.periodSpentMinorUnits, equals(1000));
+    // The reversal restores funds; reversal_effect should be non-zero (positive = credit)
+    expect(sw.periodReversalEffectMinorUnits, isNonZero);
+    // The spent aggregation (is_reversal = 0) and reversal aggregation (is_reversal = 1)
+    // are separate — no double-counting possible.
+    expect(sw.periodSpentMinorUnits + sw.periodReversalEffectMinorUnits, isNonNegative);
+  });
 
   // ── Tests: Report-to-drill-down reconciliation ──────────────────────────────
 
@@ -494,42 +440,20 @@ void main() {
     final acc = await createAccount(id: 'acc-drill-1', householdId: _hh);
     await income(_hh, acc, 'op-drill-inc-1', 4000, '2024-04-05');
     await income(_hh, acc, 'op-drill-inc-2', 2000, '2024-04-10');
-    await expense(
-      _hh,
-      acc,
-      'op-drill-exp-1',
-      1000,
-      '2024-04-12',
-      categoryCode: 'groceries',
-    );
-    await expense(
-      _hh,
-      acc,
-      'op-drill-exp-2',
-      500,
-      '2024-04-20',
-      categoryCode: 'utilities',
-    );
+    await expense(_hh, acc, 'op-drill-exp-1', 1000, '2024-04-12', categoryCode: 'groceries');
+    await expense(_hh, acc, 'op-drill-exp-2', 500, '2024-04-20', categoryCode: 'utilities');
 
-    final flowReport = await reportRepo.incomeExpenseFlow(
-      mkReq('2024-04-01', '2024-05-01'),
-    );
-    final drillRows = await reportRepo.drillDown(
-      mkReq('2024-04-01', '2024-05-01'),
-    );
+    final flowReport = await reportRepo.incomeExpenseFlow(mkReq('2024-04-01', '2024-05-01'));
+    final drillRows = await reportRepo.drillDown(mkReq('2024-04-01', '2024-05-01'));
 
     final egpFlow = flowReport.firstWhere((r) => r.currencyCode == 'EGP');
 
     final drillIncomeTotal = drillRows
-        .where(
-          (r) => r.operationType.code == 'income' && r.currencyCode == 'EGP',
-        )
+        .where((r) => r.operationType.code == 'income' && r.currencyCode == 'EGP')
         .map((r) => r.amountMinorUnits)
         .fold(0, (a, b) => a + b);
     final drillExpenseTotal = drillRows
-        .where(
-          (r) => r.operationType.code == 'expense' && r.currencyCode == 'EGP',
-        )
+        .where((r) => r.operationType.code == 'expense' && r.currencyCode == 'EGP')
         .map((r) => r.amountMinorUnits)
         .fold(0, (a, b) => a + b);
 
@@ -537,93 +461,42 @@ void main() {
     expect(drillExpenseTotal, equals(egpFlow.grossExpenseMinorUnits));
   });
 
-  test(
-    '17. Spending attribution totals match expense drill-down totals',
-    () async {
-      final acc = await createAccount(id: 'acc-attr-1', householdId: _hh);
-      await income(_hh, acc, 'op-attr-inc-1', 10000, '2024-05-01');
-      await expense(
-        _hh,
-        acc,
-        'op-attr-exp-1',
-        3000,
-        '2024-05-10',
-        categoryCode: 'groceries',
-      );
-      await expense(
-        _hh,
-        acc,
-        'op-attr-exp-2',
-        2000,
-        '2024-05-15',
-        categoryCode: 'utilities',
-      );
+  test('17. Spending attribution totals match expense drill-down totals', () async {
+    final acc = await createAccount(id: 'acc-attr-1', householdId: _hh);
+    await income(_hh, acc, 'op-attr-inc-1', 10000, '2024-05-01');
+    await expense(_hh, acc, 'op-attr-exp-1', 3000, '2024-05-10', categoryCode: 'groceries');
+    await expense(_hh, acc, 'op-attr-exp-2', 2000, '2024-05-15', categoryCode: 'utilities');
 
-      final catBreakdown = await reportRepo.expenseByCategory(
-        mkReq('2024-05-01', '2024-06-01'),
-      );
-      final drillRows = await reportRepo.drillDown(
-        mkReq('2024-05-01', '2024-06-01'),
-      );
+    final catBreakdown = await reportRepo.expenseByCategory(mkReq('2024-05-01', '2024-06-01'));
+    final drillRows = await reportRepo.drillDown(mkReq('2024-05-01', '2024-06-01'));
 
-      final catTotal = catBreakdown
-          .where((r) => r.currencyCode == 'EGP')
-          .map((r) => r.totalMinorUnits)
-          .fold(0, (a, b) => a + b);
+    final catTotal = catBreakdown
+        .where((r) => r.currencyCode == 'EGP')
+        .map((r) => r.totalMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-      final drillExpTotal = drillRows
-          .where(
-            (r) => r.operationType.code == 'expense' && r.currencyCode == 'EGP',
-          )
-          .map((r) => r.amountMinorUnits)
-          .fold(0, (a, b) => a + b);
+    final drillExpTotal = drillRows
+        .where((r) => r.operationType.code == 'expense' && r.currencyCode == 'EGP')
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-      expect(catTotal, equals(drillExpTotal));
-      expect(catTotal, equals(5000));
-    },
-  );
+    expect(catTotal, equals(drillExpTotal));
+    expect(catTotal, equals(5000));
+  });
 
   test('18. Category totals == sum of drill-down rows per category', () async {
     final acc = await createAccount(id: 'acc-cat-1', householdId: _hh);
     await income(_hh, acc, 'op-cat-inc-1', 10000, '2024-06-01');
-    await expense(
-      _hh,
-      acc,
-      'op-cat-exp-1',
-      1500,
-      '2024-06-05',
-      categoryCode: 'groceries',
-    );
-    await expense(
-      _hh,
-      acc,
-      'op-cat-exp-2',
-      800,
-      '2024-06-10',
-      categoryCode: 'groceries',
-    );
-    await expense(
-      _hh,
-      acc,
-      'op-cat-exp-3',
-      2000,
-      '2024-06-15',
-      categoryCode: 'utilities',
-    );
+    await expense(_hh, acc, 'op-cat-exp-1', 1500, '2024-06-05', categoryCode: 'groceries');
+    await expense(_hh, acc, 'op-cat-exp-2', 800, '2024-06-10', categoryCode: 'groceries');
+    await expense(_hh, acc, 'op-cat-exp-3', 2000, '2024-06-15', categoryCode: 'utilities');
 
-    final catBreakdown = await reportRepo.expenseByCategory(
-      mkReq('2024-06-01', '2024-07-01'),
-    );
-    final drillRows = await reportRepo.drillDown(
-      mkReq('2024-06-01', '2024-07-01'),
-    );
+    final catBreakdown = await reportRepo.expenseByCategory(mkReq('2024-06-01', '2024-07-01'));
+    final drillRows = await reportRepo.drillDown(mkReq('2024-06-01', '2024-07-01'));
 
     for (final cat in catBreakdown.where((c) => c.currencyCode == 'EGP')) {
       final drillTotal = drillRows
-          .where(
-            (r) =>
-                r.categoryCode == cat.categoryCode && r.currencyCode == 'EGP',
-          )
+          .where((r) => r.categoryCode == cat.categoryCode && r.currencyCode == 'EGP')
           .map((r) => r.amountMinorUnits)
           .fold(0, (a, b) => a + b);
       expect(
@@ -636,66 +509,35 @@ void main() {
 
   // ── Tests: Filter intersection semantics ────────────────────────────────────
 
-  test(
-    '19. Category filter (date + category) uses intersection semantics',
-    () async {
-      final acc = await createAccount(id: 'acc-filter-1', householdId: _hh);
-      await income(_hh, acc, 'op-filter-inc', 10000, '2024-07-01');
-      // Groceries in July — should be returned
-      await expense(
-        _hh,
-        acc,
-        'op-filter-exp-1',
-        1000,
-        '2024-07-10',
-        categoryCode: 'groceries',
-      );
-      // Utilities in July — should NOT be returned when filtering groceries
-      await expense(
-        _hh,
-        acc,
-        'op-filter-exp-2',
-        2000,
-        '2024-07-15',
-        categoryCode: 'utilities',
-      );
-      // Groceries in August — should NOT be returned for July period
-      await expense(
-        _hh,
-        acc,
-        'op-filter-exp-3',
-        500,
-        '2024-08-01',
-        categoryCode: 'groceries',
-      );
+  test('19. Category filter (date + category) uses intersection semantics', () async {
+    final acc = await createAccount(id: 'acc-filter-1', householdId: _hh);
+    await income(_hh, acc, 'op-filter-inc', 10000, '2024-07-01');
+    // Groceries in July — should be returned
+    await expense(_hh, acc, 'op-filter-exp-1', 1000, '2024-07-10', categoryCode: 'groceries');
+    // Utilities in July — should NOT be returned when filtering groceries
+    await expense(_hh, acc, 'op-filter-exp-2', 2000, '2024-07-15', categoryCode: 'utilities');
+    // Groceries in August — should NOT be returned for July period
+    await expense(_hh, acc, 'op-filter-exp-3', 500, '2024-08-01', categoryCode: 'groceries');
 
-      final catBreakdown = await reportRepo.expenseByCategory(
-        FinancialReportRequest(
-          householdId: _hh,
-          period: mkPeriod('2024-07-01', '2024-08-01'),
-        ),
-      );
+    final catBreakdown = await reportRepo.expenseByCategory(
+      FinancialReportRequest(householdId: _hh, period: mkPeriod('2024-07-01', '2024-08-01')),
+    );
 
-      final groceriesInJuly = catBreakdown
-          .where(
-            (r) => r.categoryCode == 'groceries' && r.currencyCode == 'EGP',
-          )
-          .map((r) => r.totalMinorUnits)
-          .fold(0, (a, b) => a + b);
+    final groceriesInJuly = catBreakdown
+        .where((r) => r.categoryCode == 'groceries' && r.currencyCode == 'EGP')
+        .map((r) => r.totalMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-      // Must be ONLY July groceries (1000); not August (500) or utilities (2000)
-      expect(groceriesInJuly, equals(1000));
+    // Must be ONLY July groceries (1000); not August (500) or utilities (2000)
+    expect(groceriesInJuly, equals(1000));
 
-      // Utilities also only July
-      final utilitiesInJuly = catBreakdown
-          .where(
-            (r) => r.categoryCode == 'utilities' && r.currencyCode == 'EGP',
-          )
-          .map((r) => r.totalMinorUnits)
-          .fold(0, (a, b) => a + b);
-      expect(utilitiesInJuly, equals(2000));
-    },
-  );
+    // Utilities also only July
+    final utilitiesInJuly = catBreakdown
+        .where((r) => r.categoryCode == 'utilities' && r.currencyCode == 'EGP')
+        .map((r) => r.totalMinorUnits)
+        .fold(0, (a, b) => a + b);
+    expect(utilitiesInJuly, equals(2000));
+  });
 
   test('20. Empty period returns zero totals (no null panic)', () async {
     await createAccount(id: 'acc-empty-1', householdId: _hh);
@@ -707,10 +549,7 @@ void main() {
     expect(dashFlows, isEmpty);
 
     final reportResult = await reportRepo.incomeExpenseFlow(
-      FinancialReportRequest(
-        householdId: _hh,
-        period: mkPeriod('2030-01-01', '2030-02-01'),
-      ),
+      FinancialReportRequest(householdId: _hh, period: mkPeriod('2030-01-01', '2030-02-01')),
     );
     expect(reportResult, isEmpty);
   });

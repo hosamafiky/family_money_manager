@@ -43,10 +43,7 @@ class _FixedRequestNotifier extends ReportRequestNotifier {
   @override
   FinancialReportRequest build() => FinancialReportRequest(
     householdId: 'household-v1',
-    period: DashboardPeriod.custom(
-      startDate: '2025-01-01',
-      endDate: '2025-02-01',
-    ),
+    period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
   );
 }
 
@@ -59,20 +56,12 @@ Widget _buildScreen({
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(
-        () => _FixedThemeModeNotifier(ThemeMode.light),
-      ),
+      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
       reportRequestProvider.overrideWith(_FixedRequestNotifier.new),
       spendingAttributionReportProvider.overrideWith((ref, req) async {
         if (throwError) throw Exception('Fake error');
         return result ??
-            const AppOk(
-              SpendingAttributionReport(
-                bySpender: [],
-                byBeneficiary: [],
-                byScope: [],
-              ),
-            );
+            const AppOk(SpendingAttributionReport(bySpender: [], byBeneficiary: [], byScope: []));
       }),
     ],
     child: MaterialApp(
@@ -124,10 +113,7 @@ void main() {
 
     testWidgets('3. RTL Arabic layout shown correctly', (tester) async {
       await tester.pumpWidget(
-        _buildScreen(
-          result: AppOk(_sampleReport()),
-          locale: const Locale('ar'),
-        ),
+        _buildScreen(result: AppOk(_sampleReport()), locale: const Locale('ar')),
       );
       await tester.pumpAndSettle();
 
@@ -139,11 +125,7 @@ void main() {
       await tester.pumpWidget(
         _buildScreen(
           result: const AppOk(
-            SpendingAttributionReport(
-              bySpender: [],
-              byBeneficiary: [],
-              byScope: [],
-            ),
+            SpendingAttributionReport(bySpender: [], byBeneficiary: [], byScope: []),
           ),
         ),
       );

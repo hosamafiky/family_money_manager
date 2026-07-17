@@ -10,9 +10,8 @@ import 'package:uuid/uuid.dart';
 /// Uses fixed IDs so that re-running the use case always refers to the same
 /// household row rather than creating duplicates.
 final class InitializeHouseholdUseCase {
-  const InitializeHouseholdUseCase({
-    required HouseholdRepository householdRepository,
-  }) : _repo = householdRepository;
+  const InitializeHouseholdUseCase({required HouseholdRepository householdRepository})
+    : _repo = householdRepository;
 
   final HouseholdRepository _repo;
 
@@ -46,9 +45,7 @@ final class InitializeHouseholdUseCase {
         if (existing.displayName == householdName.trim()) {
           return AppOk(existing);
         }
-        return const AppDuplicateConflict(
-          messageKey: 'error_household_already_initialized',
-        );
+        return const AppDuplicateConflict(messageKey: 'error_household_already_initialized');
       }
 
       final household = await _repo.createHousehold(
@@ -65,9 +62,7 @@ final class InitializeHouseholdUseCase {
       );
       return AppOk(household);
     } on DuplicateSpouseError {
-      return const AppDuplicateConflict(
-        messageKey: 'error_household_already_initialized',
-      );
+      return const AppDuplicateConflict(messageKey: 'error_household_already_initialized');
     } catch (_) {
       return const AppPersistenceFailure();
     }
@@ -127,9 +122,7 @@ final class AddMemberUseCase {
       );
       return AppOk(member);
     } on DuplicateSpouseError {
-      return const AppDuplicateConflict<HouseholdMember>(
-        messageKey: 'error_spouse_duplicate',
-      );
+      return const AppDuplicateConflict<HouseholdMember>(messageKey: 'error_spouse_duplicate');
     } catch (_) {
       return const AppPersistenceFailure();
     }
@@ -175,10 +168,7 @@ final class ArchiveMemberUseCase {
     required String householdId,
   }) async {
     try {
-      final member = await _repo.archiveMember(
-        memberId: memberId,
-        householdId: householdId,
-      );
+      final member = await _repo.archiveMember(memberId: memberId, householdId: householdId);
       return AppOk(member);
     } on CannotArchivePrimaryUserError {
       return const AppValidationFailure(
@@ -186,9 +176,7 @@ final class ArchiveMemberUseCase {
         messageKey: 'error_cannot_archive_primary_user',
       );
     } on MemberAlreadyArchivedError {
-      return const AppDuplicateConflict(
-        messageKey: 'error_member_already_archived',
-      );
+      return const AppDuplicateConflict(messageKey: 'error_member_already_archived');
     } on MemberNotFoundError {
       return const AppNotFound();
     } catch (_) {
