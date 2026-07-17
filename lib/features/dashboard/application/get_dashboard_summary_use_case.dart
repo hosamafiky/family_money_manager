@@ -40,7 +40,8 @@ final class GetDashboardSummaryUseCase {
           protectedBalances: (results[1] as List).cast<CurrencyAmountSummary>(),
           periodFlow: (results[2] as List).cast<PeriodFlowSummary>(),
           expensesByScope: (results[3] as List).cast<ExpenseScopeSummary>(),
-          spouseWallets: (results[4] as List).cast<SpouseWalletDashboardSummary>(),
+          spouseWallets: (results[4] as List)
+              .cast<SpouseWalletDashboardSummary>(),
           recentActivity: (results[5] as List).cast<TransactionSummary>(),
           generatedAt: _clock.now,
         ),

@@ -40,7 +40,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final name = _nameCtrl.text.trim();
     final db = ref.read(appDatabaseProvider);
-    final useCase = InitializeHouseholdUseCase(householdRepository: DriftHouseholdRepository(db));
+    final useCase = InitializeHouseholdUseCase(
+      householdRepository: DriftHouseholdRepository(db),
+    );
     final result = await useCase.execute(
       householdName: 'أسرتي',
       primaryMemberName: name,
@@ -115,7 +117,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const SizedBox(height: 12),
                   Text(
                     _error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

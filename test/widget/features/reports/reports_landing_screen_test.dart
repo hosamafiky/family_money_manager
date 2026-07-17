@@ -83,7 +83,9 @@ Widget _buildScreen({Locale locale = const Locale('ar')}) {
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
     ],
     child: MaterialApp.router(
       locale: locale,

@@ -1,4 +1,5 @@
 import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/goals/presentation/providers/goal_providers.dart';
@@ -44,7 +45,11 @@ class GoalsListScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.flag_outlined, size: 64, color: Colors.grey),
+                    const Icon(
+                      Icons.flag_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       l10n.goalEmpty,
@@ -95,12 +100,20 @@ class _GoalCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: Text(goal.name, style: Theme.of(context).textTheme.titleMedium)),
+                  Expanded(
+                    child: Text(
+                      goal.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
                   _StatusBadge(status: goal.status, l10n: l10n),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(_purposeLabel(goal.purpose, l10n), style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                _purposeLabel(goal.purpose, l10n),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 8),
               progressAsync.when(
                 loading: () => const LinearProgressIndicator(),
@@ -114,18 +127,24 @@ class _GoalCard extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LinearProgressIndicator(value: (pct / 100).clamp(0.0, 1.0), minHeight: 6),
+                      LinearProgressIndicator(
+                        value: (pct / 100).clamp(0.0, 1.0),
+                        minHeight: 6,
+                      ),
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${goal.currencyCode} ${_formatAmount(progress.reserveBalanceMinorUnits)}',
+                            '${goal.currencyCode} ${_formatAmount(progress.reserveBalanceMinorUnits, goal.currencyCode)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          Text(l10n.goalPercent(pct), style: Theme.of(context).textTheme.bodySmall),
                           Text(
-                            '${goal.currencyCode} ${_formatAmount(goal.targetMinorUnits)}',
+                            l10n.goalPercent(pct),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(
+                            '${goal.currencyCode} ${_formatAmount(goal.targetMinorUnits, goal.currencyCode)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -141,21 +160,41 @@ class _GoalCard extends ConsumerWidget {
     );
   }
 
-  String _formatAmount(int minorUnits) {
-    final whole = minorUnits ~/ 100;
-    final fraction = (minorUnits % 100).abs();
-    return '$whole.${fraction.toString().padLeft(2, '0')}';
+  String _formatAmount(int minorUnits, String currencyCode) {
+    int scale;
+    try {
+      scale = Currency.fromCode(currencyCode).minorUnitScale;
+    } catch (_) {
+      scale = 2;
+    }
+    if (scale == 0) return '$minorUnits';
+    final divisor = _pow10(scale);
+    final whole = minorUnits ~/ divisor;
+    final fraction = (minorUnits % divisor).abs().toString().padLeft(
+      scale,
+      '0',
+    );
+    return '$whole.$fraction';
   }
 
-  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) => switch (purpose) {
-    GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
-    GoalPurpose.homePurchase => l10n.purposeHomePurchase,
-    GoalPurpose.education => l10n.purposeEducation,
-    GoalPurpose.travel => l10n.purposeTravel,
-    GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
-    GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
-    GoalPurpose.other => l10n.purposeOther,
-  };
+  static int _pow10(int n) {
+    var r = 1;
+    for (var i = 0; i < n; i++) {
+      r *= 10;
+    }
+    return r;
+  }
+
+  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) =>
+      switch (purpose) {
+        GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
+        GoalPurpose.homePurchase => l10n.purposeHomePurchase,
+        GoalPurpose.education => l10n.purposeEducation,
+        GoalPurpose.travel => l10n.purposeTravel,
+        GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
+        GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
+        GoalPurpose.other => l10n.purposeOther,
+      };
 }
 
 class _StatusBadge extends StatelessWidget {
@@ -168,7 +207,10 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, icon) = switch (status) {
       GoalStatus.active => (l10n.goalStatusActive, Icons.radio_button_checked),
-      GoalStatus.targetReached => (l10n.goalStatusTargetReached, Icons.check_circle_outline),
+      GoalStatus.targetReached => (
+        l10n.goalStatusTargetReached,
+        Icons.check_circle_outline,
+      ),
       GoalStatus.completed => (l10n.goalStatusCompleted, Icons.check_circle),
       GoalStatus.archived => (l10n.goalStatusArchived, Icons.archive_outlined),
     };

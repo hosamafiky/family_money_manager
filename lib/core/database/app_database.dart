@@ -53,7 +53,8 @@ part 'app_database.g.dart';
 ///                   restrict_child_fund_unprotect trigger (always).
 ///   7 — Phase 5A: budgets table for budget plans; idempotency index on budgets.
 ///   8 — Phase 5B: goals, goal_revisions, goal_movements tables for savings
-///                 goals backed by dedicated goalReserve ledger accounts.
+///                 goals backed by dedicated goalReserve ledger accounts;
+///                 immutability triggers for goal_revisions and goal_movements.
 @DriftDatabase(
   tables: [
     Households,
@@ -99,6 +100,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyOperationContextTriggers();
       await _applyIndexes();
       await _applyBudgetIdempotencyIndex();
+      await _applyGoalImmutabilityTriggers();
       await _applyGoalIndexes();
     },
     onUpgrade: (Migrator m, int from, int to) async {
@@ -118,7 +120,10 @@ class AppDatabase extends _$AppDatabase {
         // v3 → v4: account idempotency columns, household cardinality triggers,
         // immutable type/currency trigger, scoped account idempotency index.
         await m.addColumn(financialAccounts, financialAccounts.idempotencyKey);
-        await m.addColumn(financialAccounts, financialAccounts.idempotencyPayload);
+        await m.addColumn(
+          financialAccounts,
+          financialAccounts.idempotencyPayload,
+        );
         await _applyHouseholdConstraintTriggers();
         await _applyAccountMetadataImmutabilityTrigger();
         await _applyAccountIdempotencyIndex();
@@ -143,6 +148,7 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(goalsTable);
         await m.createTable(goalRevisionsTable);
         await m.createTable(goalMovementsTable);
+        await _applyGoalImmutabilityTriggers();
         await _applyGoalIndexes();
       }
     },
@@ -552,6 +558,43 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE UNIQUE INDEX IF NOT EXISTS idx_budgets_idempotency
       ON budgets(household_id, idempotency_key)
+    ''');
+  }
+
+  // ── Goal immutability triggers (Phase 5B) ─────────────────────────────────
+  //
+  // goal_revisions and goal_movements are append-only records. No application
+  // code ever issues UPDATE or DELETE on these tables, but these triggers
+  // enforce the constraint at the database engine level as a safety net.
+
+  Future<void> _applyGoalImmutabilityTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_update_goal_revisions
+      BEFORE UPDATE ON goal_revisions
+      BEGIN
+        SELECT RAISE(ABORT, 'goal_revisions are immutable and cannot be updated');
+      END
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_delete_goal_revisions
+      BEFORE DELETE ON goal_revisions
+      BEGIN
+        SELECT RAISE(ABORT, 'goal_revisions cannot be deleted');
+      END
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_update_goal_movements
+      BEFORE UPDATE ON goal_movements
+      BEGIN
+        SELECT RAISE(ABORT, 'goal_movements are immutable and cannot be updated');
+      END
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_delete_goal_movements
+      BEFORE DELETE ON goal_movements
+      BEGIN
+        SELECT RAISE(ABORT, 'goal_movements cannot be deleted');
+      END
     ''');
   }
 

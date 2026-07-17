@@ -44,9 +44,9 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
   Future<void> _submit(SavingsGoal goal) async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedDestinationAccountId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a destination account.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a destination account.')),
+      );
       return;
     }
 
@@ -75,15 +75,17 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
       ref.invalidate(goalsProvider(_householdId));
       context.pop();
     } else if (result is AppInsufficientFunds) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.errorGoalInsufficientReserve)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGoalInsufficientReserve)),
+      );
     } else if (result is AppValidationFailure<SavingsGoal>) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.messageKey)));
-    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('An error occurred. Please try again.')));
+      ).showSnackBar(SnackBar(content: Text(result.messageKey)));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred. Please try again.')),
+      );
     }
   }
 
@@ -107,7 +109,9 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
           // Eligible destinations: same currency, not goalReserve, not archived.
           final destinations = accountsAsync.when(
             data: (ar) {
-              if (ar is! AppOk<List<FinancialAccount>>) return <FinancialAccount>[];
+              if (ar is! AppOk<List<FinancialAccount>>) {
+                return <FinancialAccount>[];
+              }
               return ar.value
                   .where(
                     (a) =>
@@ -138,9 +142,15 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
                     border: const OutlineInputBorder(),
                   ),
                   items: destinations
-                      .map((a) => DropdownMenuItem<String>(value: a.id, child: Text(a.name)))
+                      .map(
+                        (a) => DropdownMenuItem<String>(
+                          value: a.id,
+                          child: Text(a.name),
+                        ),
+                      )
                       .toList(),
-                  onChanged: (v) => setState(() => _selectedDestinationAccountId = v),
+                  onChanged: (v) =>
+                      setState(() => _selectedDestinationAccountId = v),
                   validator: (v) => v == null ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
@@ -153,8 +163,12 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
                     border: const OutlineInputBorder(),
                     prefixText: '${goal.currencyCode} ',
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                  ],
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Required';
                     final parsed = double.tryParse(v.replaceAll(',', ''));
@@ -172,8 +186,9 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
                     border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? l10n.errorGoalReleaseReasonEmpty : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? l10n.errorGoalReleaseReasonEmpty
+                      : null,
                 ),
                 const SizedBox(height: 16),
 

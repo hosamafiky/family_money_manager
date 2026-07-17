@@ -92,12 +92,18 @@ final class CreateAccountUseCase {
 
   static const _uuid = Uuid();
 
-  Future<AppResult<FinancialAccount>> execute(CreateAccountWorkflowParams params) async {
+  Future<AppResult<FinancialAccount>> execute(
+    CreateAccountWorkflowParams params,
+  ) async {
     // ── Input validation ────────────────────────────────────────────────────
     if (params.name.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'error_account_name_empty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'error_account_name_empty',
+      );
     }
-    if (params.openingBalanceMinorUnits != null && params.openingBalanceMinorUnits! < 0) {
+    if (params.openingBalanceMinorUnits != null &&
+        params.openingBalanceMinorUnits! < 0) {
       return const AppValidationFailure(
         field: 'openingBalance',
         messageKey: 'error_opening_balance_negative',
@@ -116,11 +122,16 @@ final class CreateAccountUseCase {
         // Compare payload fingerprints to distinguish a safe retry from a
         // conflicting call with the same key but different intent.
         final currentPayload = _buildIdempotencyPayload(params);
-        final storedPayload = await _loadStoredPayload(params.householdId, params.idempotencyKey!);
+        final storedPayload = await _loadStoredPayload(
+          params.householdId,
+          params.idempotencyKey!,
+        );
         if (storedPayload == currentPayload) {
           return AppOk(existing);
         }
-        return const AppDuplicateConflict(messageKey: 'error_account_duplicate');
+        return const AppDuplicateConflict(
+          messageKey: 'error_account_duplicate',
+        );
       }
     }
 
@@ -179,7 +190,10 @@ final class CreateAccountUseCase {
     } on DuplicateAccountIdError {
       return const AppDuplicateConflict(messageKey: 'error_account_duplicate');
     } on ArchivedAccountError {
-      return const AppValidationFailure(field: 'account', messageKey: 'error_account_archived');
+      return const AppValidationFailure(
+        field: 'account',
+        messageKey: 'error_account_archived',
+      );
     } on ArgumentError catch (e) {
       return AppValidationFailure(
         field: e.name ?? 'unknown',
@@ -191,7 +205,10 @@ final class CreateAccountUseCase {
   }
 
   /// Loads the stored idempotency payload for a given key, if any.
-  Future<String?> _loadStoredPayload(String householdId, String idempotencyKey) async {
+  Future<String?> _loadStoredPayload(
+    String householdId,
+    String idempotencyKey,
+  ) async {
     // Query the raw DB row to read the stored payload.
     final rows = await _db
         .customSelect(

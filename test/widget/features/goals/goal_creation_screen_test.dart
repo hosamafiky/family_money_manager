@@ -44,7 +44,9 @@ GoRouter _makeRouter() => GoRouter(
     GoRoute(
       path: '/goals',
       builder: (_, _) => const Scaffold(body: Text('Goals List')),
-      routes: [GoRoute(path: 'new', builder: (_, _) => const GoalCreationScreen())],
+      routes: [
+        GoRoute(path: 'new', builder: (_, _) => const GoalCreationScreen()),
+      ],
     ),
   ],
 );
@@ -54,8 +56,12 @@ Widget _buildApp({Locale locale = const Locale('en')}) {
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-      accountsProvider.overrideWith((ref, _) async => const AppOk(<FinancialAccount>[])),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
+      accountsProvider.overrideWith(
+        (ref, _) async => const AppOk(<FinancialAccount>[]),
+      ),
       createGoalUseCaseProvider.overrideWith(
         (ref) => throw UnimplementedError('not needed in widget tests'),
       ),
@@ -95,7 +101,9 @@ void main() {
       expect(find.text('Target amount'), findsOneWidget);
     });
 
-    testWidgets('5. Submit with empty name shows validation error', (tester) async {
+    testWidgets('5. Submit with empty name shows validation error', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp());
       await tester.pumpAndSettle();
 
@@ -110,11 +118,16 @@ void main() {
       expect(find.text('Goal name is required'), findsOneWidget);
     });
 
-    testWidgets('6. Submit with zero target shows validation error', (tester) async {
+    testWidgets('6. Submit with zero target shows validation error', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp());
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.widgetWithText(TextFormField, 'Goal name'), 'My Goal');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Goal name'),
+        'My Goal',
+      );
       // Dismiss keyboard so button is not obscured.
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
@@ -128,7 +141,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Target amount must be greater than zero', skipOffstage: false),
+        find.text(
+          'Target amount must be greater than zero',
+          skipOffstage: false,
+        ),
         findsAtLeastNWidgets(1),
       );
     });

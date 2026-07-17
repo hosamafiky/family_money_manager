@@ -54,7 +54,10 @@ void main() {
 
   tearDown(() async => db.close());
 
-  Future<String> createHomeSavings(String id, {String householdId = _hh}) async {
+  Future<String> createHomeSavings(
+    String id, {
+    String householdId = _hh,
+  }) async {
     await accountRepo.createAccount(
       CreateAccountParams(
         id: id,
@@ -177,7 +180,11 @@ void main() {
     );
   }
 
-  FinancialReportRequest req(String start, String end, {String householdId = _hh}) {
+  FinancialReportRequest req(
+    String start,
+    String end, {
+    String householdId = _hh,
+  }) {
     return FinancialReportRequest(
       householdId: householdId,
       period: DashboardPeriod.custom(startDate: start, endDate: end),
@@ -185,27 +192,33 @@ void main() {
   }
 
   group('report_spouse_wallet_db', () {
-    test('1. Standard scenario: funded=2000, spent=1300, returned=200, closing=500', () async {
-      final hs = await createHomeSavings('hs-sw-1');
-      final wallet = await createSpouseWallet('wallet-sw-1');
-      await seedHS(hs, 'op-sw-1-seed', 20000);
+    test(
+      '1. Standard scenario: funded=2000, spent=1300, returned=200, closing=500',
+      () async {
+        final hs = await createHomeSavings('hs-sw-1');
+        final wallet = await createSpouseWallet('wallet-sw-1');
+        await seedHS(hs, 'op-sw-1-seed', 20000);
 
-      await fund(hs, wallet, 'op-sw-1-fund', 2000, '2025-01-05');
-      await spend(wallet, 'op-sw-1-spend', 1300, '2025-01-10');
-      await returnFunds(wallet, hs, 'op-sw-1-return', 200, '2025-01-20');
+        await fund(hs, wallet, 'op-sw-1-fund', 2000, '2025-01-05');
+        await spend(wallet, 'op-sw-1-spend', 1300, '2025-01-10');
+        await returnFunds(wallet, hs, 'op-sw-1-return', 200, '2025-01-20');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
-      final walletReport = result.firstWhere((r) => r.accountId == wallet);
+        final result = await reportRepo.spouseWalletReports(
+          req('2025-01-01', '2025-02-01'),
+        );
+        final walletReport = result.firstWhere((r) => r.accountId == wallet);
 
-      expect(walletReport.periodFundedMinorUnits, 2000);
-      expect(walletReport.periodSpentMinorUnits, 1300);
-      expect(walletReport.periodReturnedMinorUnits, 200);
-      expect(
-        walletReport.periodClosingBalanceMinorUnits,
-        500,
-        reason: 'opening(0) + funded(2000) - spent(1300) - returned(200) = 500',
-      );
-    });
+        expect(walletReport.periodFundedMinorUnits, 2000);
+        expect(walletReport.periodSpentMinorUnits, 1300);
+        expect(walletReport.periodReturnedMinorUnits, 200);
+        expect(
+          walletReport.periodClosingBalanceMinorUnits,
+          500,
+          reason:
+              'opening(0) + funded(2000) - spent(1300) - returned(200) = 500',
+        );
+      },
+    );
 
     test('2. Opening balance computed from pre-period entries', () async {
       final hs = await createHomeSavings('hs-sw-2');
@@ -216,7 +229,9 @@ void main() {
       await fund(hs, wallet, 'op-sw-2-pre-fund', 3000, '2024-12-15');
       await spend(wallet, 'op-sw-2-pre-spend', 1000, '2024-12-20');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
       expect(
         walletReport.openingBalanceMinorUnits,
@@ -235,14 +250,20 @@ void main() {
       // Period funding
       await fund(hs, wallet, 'op-sw-3-in', 2000, '2025-01-10');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
       expect(
         walletReport.periodFundedMinorUnits,
         2000,
         reason: 'Only period funding counted in periodFunded',
       );
-      expect(walletReport.openingBalanceMinorUnits, 1000, reason: 'Pre-period 1000 = opening');
+      expect(
+        walletReport.openingBalanceMinorUnits,
+        1000,
+        reason: 'Pre-period 1000 = opening',
+      );
     });
 
     test('4. Current balance = all-time ledger balance', () async {
@@ -253,7 +274,9 @@ void main() {
       await fund(hs, wallet, 'op-sw-4-fund', 5000, '2025-01-05');
       await spend(wallet, 'op-sw-4-spend', 3000, '2025-01-10');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
       expect(
         walletReport.currentBalanceMinorUnits,
@@ -271,7 +294,9 @@ void main() {
       await fund(hs, wallet1, 'op-sw-5a-fund', 3000, '2025-01-05');
       await fund(hs, wallet2, 'op-sw-5b-fund', 7000, '2025-01-05');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       expect(result.length, 2);
       final r1 = result.firstWhere((r) => r.accountId == wallet1);
       final r2 = result.firstWhere((r) => r.accountId == wallet2);
@@ -297,7 +322,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
       // Reversal effect should appear as positive
       expect(
@@ -313,7 +340,9 @@ void main() {
       await seedHS(hs, 'op-sw-7-seed', 20000);
       await fund(hs, wallet, 'op-sw-7-fund', 4000, '2025-01-05');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
       // funded = 4000 (transfer in), not income
       expect(walletReport.periodFundedMinorUnits, 4000);
@@ -321,7 +350,10 @@ void main() {
       final flows = await reportRepo.incomeExpenseFlow(
         FinancialReportRequest(
           householdId: _hh,
-          period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
+          period: DashboardPeriod.custom(
+            startDate: '2025-01-01',
+            endDate: '2025-02-01',
+          ),
         ),
       );
       expect(
@@ -338,16 +370,29 @@ void main() {
       await fund(hs, wallet, 'op-sw-8-fund', 3000, '2025-01-05');
       await returnFunds(wallet, hs, 'op-sw-8-ret', 1000, '2025-01-15');
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final walletReport = result.firstWhere((r) => r.accountId == wallet);
-      expect(walletReport.periodSpentMinorUnits, 0, reason: 'Return is not expense');
-      expect(walletReport.periodReturnedMinorUnits, 1000, reason: 'Return tracked separately');
+      expect(
+        walletReport.periodSpentMinorUnits,
+        0,
+        reason: 'Return is not expense',
+      );
+      expect(
+        walletReport.periodReturnedMinorUnits,
+        1000,
+        reason: 'Return tracked separately',
+      );
     });
 
     test('9. Multiple currencies separate', () async {
       final hsEgp = await createHomeSavings('hs-sw-9a');
       final walletEgp = await createSpouseWallet('wallet-sw-9a');
-      final walletUsd = await createSpouseWallet('wallet-sw-9b', currency: 'USD');
+      final walletUsd = await createSpouseWallet(
+        'wallet-sw-9b',
+        currency: 'USD',
+      );
       await seedHS(hsEgp, 'op-sw-9-seed', 20000);
 
       await fund(hsEgp, walletEgp, 'op-sw-9-fund-egp', 3000, '2025-01-05');
@@ -365,7 +410,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final egp = result.where((r) => r.currencyCode == 'EGP').toList();
       final usd = result.where((r) => r.currencyCode == 'USD').toList();
       expect(egp.isNotEmpty, isTrue);
@@ -380,7 +427,10 @@ void main() {
 
       // HH2 wallet
       final hs2 = await createHomeSavings('hs-sw-10b');
-      final wallet2 = await createSpouseWallet('wallet-sw-10b', householdId: _hh2);
+      final wallet2 = await createSpouseWallet(
+        'wallet-sw-10b',
+        householdId: _hh2,
+      );
       await db.customStatement(
         "UPDATE financial_accounts SET household_id = '$_hh2' "
         "WHERE id = 'hs-sw-10b'",
@@ -397,7 +447,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.spouseWalletReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.spouseWalletReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       expect(
         result.any((r) => r.accountId == wallet2),
         isFalse,

@@ -45,7 +45,10 @@ void main() {
       test('excess decimals 1.234 → error', () {
         final result = MoneyInputFormatter.parse('1.234', Currency.egp);
         expect(result, isA<MoneyParseValidationError>());
-        expect((result as MoneyParseValidationError).messageKey, 'error_money_excess_decimals');
+        expect(
+          (result as MoneyParseValidationError).messageKey,
+          'error_money_excess_decimals',
+        );
       });
 
       test('single decimal digit 5.5 → 550', () {
@@ -65,7 +68,10 @@ void main() {
       test('any decimal → excess decimals error', () {
         final result = MoneyInputFormatter.parse('1000.5', Currency.jpy);
         expect(result, isA<MoneyParseValidationError>());
-        expect((result as MoneyParseValidationError).messageKey, 'error_money_excess_decimals');
+        expect(
+          (result as MoneyParseValidationError).messageKey,
+          'error_money_excess_decimals',
+        );
       });
 
       test('0 → 0', () {

@@ -52,35 +52,70 @@ abstract final class AppTheme {
       textTheme: _buildTextTheme(colorScheme),
       cardTheme: CardThemeData(
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMedium),
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(0, minTouchTarget),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusMedium),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(0, minTouchTarget),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusMedium),
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        contentPadding: const EdgeInsets.symmetric(horizontal: space16, vertical: space12),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(radiusMedium)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: space16,
+          vertical: space12,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusMedium),
+        ),
       ),
     );
   }
 
   static TextTheme _buildTextTheme(ColorScheme scheme) {
     return TextTheme(
-      displayLarge: TextStyle(fontSize: 57, fontWeight: FontWeight.w400, color: scheme.onSurface),
-      headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: scheme.onSurface),
-      titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: scheme.onSurface),
-      bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: scheme.onSurface),
-      bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: scheme.onSurface),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: scheme.onSurface),
+      displayLarge: TextStyle(
+        fontSize: 57,
+        fontWeight: FontWeight.w400,
+        color: scheme.onSurface,
+      ),
+      headlineMedium: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurface,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurface,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: scheme.onSurface,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: scheme.onSurface,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: scheme.onSurface,
+      ),
     );
   }
 }

@@ -100,7 +100,10 @@ void main() {
     });
 
     test('isActive is false when archived', () {
-      final member = validMember(isArchived: true, lifecycle: MemberLifecycle.archived);
+      final member = validMember(
+        isArchived: true,
+        lifecycle: MemberLifecycle.archived,
+      );
       expect(member.isActive, isFalse);
     });
 

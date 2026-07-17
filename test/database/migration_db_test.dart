@@ -18,7 +18,9 @@ void main() {
 
     test('all required tables exist', () async {
       final tables = await db
-          .customSelect("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
+          )
           .get();
       final tableNames = tables.map((r) => r.read<String>('name')).toList();
 
@@ -37,7 +39,9 @@ void main() {
 
     test('household cardinality triggers exist', () async {
       final triggers = await db
-          .customSelect("SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name")
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name",
+          )
           .get();
       final triggerNames = triggers.map((r) => r.read<String>('name')).toList();
 
@@ -71,12 +75,17 @@ void main() {
       expect(indexes.length, 1);
     });
 
-    test('financial_accounts has idempotency_key and idempotency_payload columns', () async {
-      final cols = await db.customSelect('PRAGMA table_info(financial_accounts)').get();
-      final colNames = cols.map((r) => r.read<String>('name')).toList();
-      expect(colNames, contains('idempotency_key'));
-      expect(colNames, contains('idempotency_payload'));
-    });
+    test(
+      'financial_accounts has idempotency_key and idempotency_payload columns',
+      () async {
+        final cols = await db
+            .customSelect('PRAGMA table_info(financial_accounts)')
+            .get();
+        final colNames = cols.map((r) => r.read<String>('name')).toList();
+        expect(colNames, contains('idempotency_key'));
+        expect(colNames, contains('idempotency_payload'));
+      },
+    );
 
     test('idempotency_key and idempotency_payload are nullable', () async {
       await db.customStatement(
@@ -93,7 +102,9 @@ void main() {
       );
 
       final rows = await db
-          .customSelect("SELECT idempotency_key FROM financial_accounts WHERE id='acc-mig-null'")
+          .customSelect(
+            "SELECT idempotency_key FROM financial_accounts WHERE id='acc-mig-null'",
+          )
           .get();
       expect(rows.first.read<String?>('idempotency_key'), isNull);
     });
@@ -104,32 +115,35 @@ void main() {
     setUp(() => db = AppDatabase.forTesting());
     tearDown(() async => db.close());
 
-    test('existing accounts survive v3→v4 migration (new cols default null)', () async {
-      // Simulate a row that already existed in v3 (no idempotency columns yet).
-      // Since AppDatabase.forTesting() creates at v4, we verify that rows
-      // inserted without the new columns default to null.
-      await db.customStatement(
-        'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
-        "VALUES ('hh-mig-2', 'HH', 'user-1', '2024-01-01', '2024-01-01')",
-      );
-      await db.customStatement(
-        'INSERT INTO financial_accounts '
-        '(id, household_id, name, type, owner_type, created_by, created_at, updated_at) '
-        "VALUES ('acc-mig-old', 'hh-mig-2', 'Old Account', 'bankAccount', "
-        "'user', 'user-1', '2024-01-01', '2024-01-01')",
-      );
+    test(
+      'existing accounts survive v3→v4 migration (new cols default null)',
+      () async {
+        // Simulate a row that already existed in v3 (no idempotency columns yet).
+        // Since AppDatabase.forTesting() creates at v4, we verify that rows
+        // inserted without the new columns default to null.
+        await db.customStatement(
+          'INSERT INTO households (id, name, owner_user_id, created_at, updated_at) '
+          "VALUES ('hh-mig-2', 'HH', 'user-1', '2024-01-01', '2024-01-01')",
+        );
+        await db.customStatement(
+          'INSERT INTO financial_accounts '
+          '(id, household_id, name, type, owner_type, created_by, created_at, updated_at) '
+          "VALUES ('acc-mig-old', 'hh-mig-2', 'Old Account', 'bankAccount', "
+          "'user', 'user-1', '2024-01-01', '2024-01-01')",
+        );
 
-      final rows = await db
-          .customSelect(
-            "SELECT id, idempotency_key, idempotency_payload "
-            "FROM financial_accounts WHERE id = 'acc-mig-old'",
-          )
-          .get();
+        final rows = await db
+            .customSelect(
+              "SELECT id, idempotency_key, idempotency_payload "
+              "FROM financial_accounts WHERE id = 'acc-mig-old'",
+            )
+            .get();
 
-      expect(rows.length, 1);
-      expect(rows.first.read<String?>('idempotency_key'), isNull);
-      expect(rows.first.read<String?>('idempotency_payload'), isNull);
-    });
+        expect(rows.length, 1);
+        expect(rows.first.read<String?>('idempotency_key'), isNull);
+        expect(rows.first.read<String?>('idempotency_payload'), isNull);
+      },
+    );
 
     test('null idempotency keys allow multiple accounts (partial index)', () async {
       await db.customStatement(
@@ -152,7 +166,9 @@ void main() {
       );
 
       final rows = await db
-          .customSelect("SELECT id FROM financial_accounts WHERE household_id = 'hh-mig-3'")
+          .customSelect(
+            "SELECT id FROM financial_accounts WHERE household_id = 'hh-mig-3'",
+          )
           .get();
       expect(rows.length, 2);
     });

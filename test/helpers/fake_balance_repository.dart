@@ -37,5 +37,7 @@ final class FakeBalanceRepository implements BalanceRepository {
   }) async => _balances[accountId] ?? 0;
 
   @override
-  Future<List<AccountBalance>> netWorthBalances({required String householdId}) async => [];
+  Future<List<AccountBalance>> netWorthBalances({
+    required String householdId,
+  }) async => [];
 }

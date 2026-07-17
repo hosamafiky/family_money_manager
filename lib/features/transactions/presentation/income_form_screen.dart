@@ -77,7 +77,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
           // Sync tracked account; clear preselected ID if account is now archived.
           if (_selectedAccountId != null) {
-            final found = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
+            final found = accounts
+                .where((a) => a.id == _selectedAccountId)
+                .firstOrNull;
             if (found == null) {
               // Archived or missing — schedule reset to avoid setState-in-build.
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -173,7 +175,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
             border: const OutlineInputBorder(),
             errorText: _accountError,
           ),
-          items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
+          items: accounts
+              .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+              .toList(),
           onChanged: (v) {
             setState(() {
               _selectedAccountId = v;
@@ -210,7 +214,10 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         errorText: _categoryError,
       ),
       items: TransactionCategory.incomeCategories
-          .map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))))
+          .map(
+            (c) =>
+                DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
+          )
           .toList(),
       onChanged: (v) => setState(() {
         _selectedCategory = v;
@@ -237,7 +244,10 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(_formatDate(_effectiveDate)), const Icon(Icons.calendar_today, size: 18)],
+          children: [
+            Text(_formatDate(_effectiveDate)),
+            const Icon(Icons.calendar_today, size: 18),
+          ],
         ),
       ),
     );
@@ -246,7 +256,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   void _goToReview(BuildContext context, AppLocalizations l10n) {
     setState(() {
       _accountError = _selectedAccountId == null ? l10n.errorGeneric : null;
-      _categoryError = _selectedCategory == null ? l10n.errorCategoryRequired : null;
+      _categoryError = _selectedCategory == null
+          ? l10n.errorCategoryRequired
+          : null;
     });
 
     if (_selectedAccountId == null || _selectedCategory == null) return;
@@ -276,7 +288,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       category: _selectedCategory!,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
     );
 
     ref.read(stagedIncomeContextProvider.notifier).set(ctx);

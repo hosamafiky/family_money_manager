@@ -25,15 +25,18 @@ class FinancialAccounts extends Table {
   TextColumn get ownerType => text()();
 
   /// FundPurpose code.
-  TextColumn get fundPurpose => text().withDefault(const Constant('available'))();
+  TextColumn get fundPurpose =>
+      text().withDefault(const Constant('available'))();
 
   /// ISO 4217 currency code.
   TextColumn get currencyCode => text().withDefault(const Constant('EGP'))();
 
   BoolColumn get isSpendable => boolean().withDefault(const Constant(true))();
   BoolColumn get isProtected => boolean().withDefault(const Constant(false))();
-  BoolColumn get includeInNetWorth => boolean().withDefault(const Constant(true))();
-  BoolColumn get includeInZakat => boolean().withDefault(const Constant(false))();
+  BoolColumn get includeInNetWorth =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get includeInZakat =>
+      boolean().withDefault(const Constant(false))();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   TextColumn get archivedAt => text().nullable()();
 

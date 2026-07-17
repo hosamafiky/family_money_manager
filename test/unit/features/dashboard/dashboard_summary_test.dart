@@ -14,7 +14,10 @@ import 'package:family_money_manager/features/dashboard/domain/dashboard_summary
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final period = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
+  final period = DashboardPeriod.custom(
+    startDate: '2025-03-01',
+    endDate: '2025-04-01',
+  );
 
   DashboardSummary buildSummary({
     List<CurrencyAmountSummary> spendable = const [],
@@ -37,24 +40,38 @@ void main() {
   group('DashboardSummary computed properties', () {
     test('1. hasSpendableBalance returns false when all zeros', () {
       final summary = buildSummary(
-        spendable: [const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 0)],
+        spendable: [
+          const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 0),
+        ],
       );
       expect(summary.hasSpendableBalance, isFalse);
     });
 
     test('2. hasSpendableBalance returns true when any non-zero', () {
       final summary = buildSummary(
-        spendable: [const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 5000)],
+        spendable: [
+          const CurrencyAmountSummary(
+            currencyCode: 'EGP',
+            totalMinorUnits: 5000,
+          ),
+        ],
       );
       expect(summary.hasSpendableBalance, isTrue);
     });
 
     test('3. hasProtectedBalance correct', () {
       final zeroSummary = buildSummary(
-        protected: [const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 0)],
+        protected: [
+          const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 0),
+        ],
       );
       final nonZeroSummary = buildSummary(
-        protected: [const CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100)],
+        protected: [
+          const CurrencyAmountSummary(
+            currencyCode: 'EGP',
+            totalMinorUnits: 100,
+          ),
+        ],
       );
       expect(zeroSummary.hasProtectedBalance, isFalse);
       expect(nonZeroSummary.hasProtectedBalance, isTrue);
@@ -84,9 +101,18 @@ void main() {
     });
 
     test('5. CurrencyAmountSummary.isNegative correct', () {
-      const positive = CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 1000);
-      const zero = CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 0);
-      const negative = CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: -500);
+      const positive = CurrencyAmountSummary(
+        currencyCode: 'EGP',
+        totalMinorUnits: 1000,
+      );
+      const zero = CurrencyAmountSummary(
+        currencyCode: 'EGP',
+        totalMinorUnits: 0,
+      );
+      const negative = CurrencyAmountSummary(
+        currencyCode: 'EGP',
+        totalMinorUnits: -500,
+      );
       expect(positive.isNegative, isFalse);
       expect(zero.isNegative, isFalse);
       expect(negative.isNegative, isTrue);

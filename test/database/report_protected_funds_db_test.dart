@@ -146,7 +146,11 @@ void main() {
     );
   }
 
-  FinancialReportRequest req(String start, String end, {String householdId = _hh}) {
+  FinancialReportRequest req(
+    String start,
+    String end, {
+    String householdId = _hh,
+  }) {
     return FinancialReportRequest(
       householdId: householdId,
       period: DashboardPeriod.custom(startDate: start, endDate: end),
@@ -158,7 +162,9 @@ void main() {
       final acc = await createProtectedAccount('pf-1');
       await fund(acc, 'op-pf-1-fund', 10000, '2025-01-05');
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final summary = result.firstWhere((r) => r.accountId == acc);
       expect(summary.fundingMinorUnits, 10000);
     });
@@ -166,9 +172,17 @@ void main() {
     test('2. Withdrawal counted with audit reason', () async {
       final acc = await createProtectedAccount('pf-2');
       await fund(acc, 'op-pf-2-fund', 15000, '2025-01-01');
-      await withdraw(acc, 'op-pf-2-wd', 3000, '2025-01-15', reason: 'Medical expenses');
+      await withdraw(
+        acc,
+        'op-pf-2-wd',
+        3000,
+        '2025-01-15',
+        reason: 'Medical expenses',
+      );
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final summary = result.firstWhere((r) => r.accountId == acc);
       expect(summary.withdrawalMinorUnits, 3000);
       expect(summary.withdrawalAudits.isNotEmpty, isTrue);
@@ -180,7 +194,9 @@ void main() {
       await fund(acc, 'op-pf-3-fund', 15000, '2025-01-01');
       await withdraw(acc, 'op-pf-3-wd', 2000, '2025-01-10');
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final summary = result.firstWhere((r) => r.accountId == acc);
       expect(
         summary.withdrawalAudits.first.beneficiaryMemberId.isNotEmpty,
@@ -203,9 +219,15 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final summary = result.firstWhere((r) => r.accountId == acc);
-      expect(summary.reversalEffectMinorUnits, 5000, reason: 'Reversal restores funds');
+      expect(
+        summary.reversalEffectMinorUnits,
+        5000,
+        reason: 'Reversal restores funds',
+      );
     });
 
     test('5. Closing balance reconciles', () async {
@@ -213,30 +235,37 @@ void main() {
       await fund(acc, 'op-pf-5-fund', 12000, '2025-01-05');
       await withdraw(acc, 'op-pf-5-wd', 3000, '2025-01-15');
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final summary = result.firstWhere((r) => r.accountId == acc);
       // closing = 12000 - 3000 = 9000
       expect(summary.closingBalanceMinorUnits, 9000);
     });
 
-    test('6. Current balance differs from period closing when post-period ops exist', () async {
-      final acc = await createProtectedAccount('pf-6');
-      await fund(acc, 'op-pf-6-fund-jan', 10000, '2025-01-05');
-      // Post-period withdrawal
-      await withdraw(acc, 'op-pf-6-wd-feb', 2000, '2025-02-10');
+    test(
+      '6. Current balance differs from period closing when post-period ops exist',
+      () async {
+        final acc = await createProtectedAccount('pf-6');
+        await fund(acc, 'op-pf-6-fund-jan', 10000, '2025-01-05');
+        // Post-period withdrawal
+        await withdraw(acc, 'op-pf-6-wd-feb', 2000, '2025-02-10');
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
-      final summary = result.firstWhere((r) => r.accountId == acc);
-      // Period closing = 10000 (no Feb activity in Jan period)
-      expect(summary.closingBalanceMinorUnits, 10000);
-      // Current = 10000 - 2000 = 8000
-      expect(summary.currentBalanceMinorUnits, 8000);
-      expect(
-        summary.closingBalanceMinorUnits != summary.currentBalanceMinorUnits,
-        isTrue,
-        reason: 'Period closing ≠ current when post-period ops exist',
-      );
-    });
+        final result = await reportRepo.protectedFundsReports(
+          req('2025-01-01', '2025-02-01'),
+        );
+        final summary = result.firstWhere((r) => r.accountId == acc);
+        // Period closing = 10000 (no Feb activity in Jan period)
+        expect(summary.closingBalanceMinorUnits, 10000);
+        // Current = 10000 - 2000 = 8000
+        expect(summary.currentBalanceMinorUnits, 8000);
+        expect(
+          summary.closingBalanceMinorUnits != summary.currentBalanceMinorUnits,
+          isTrue,
+          reason: 'Period closing ≠ current when post-period ops exist',
+        );
+      },
+    );
 
     test('7. Multiple protected accounts reported separately', () async {
       final acc1 = await createProtectedAccount('pf-7a');
@@ -244,7 +273,9 @@ void main() {
       await fund(acc1, 'op-pf-7a-fund', 5000, '2025-01-05');
       await fund(acc2, 'op-pf-7b-fund', 8000, '2025-01-05');
 
-      final result = await reportRepo.protectedFundsReports(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.protectedFundsReports(
+        req('2025-01-01', '2025-02-01'),
+      );
       final s1 = result.firstWhere((r) => r.accountId == acc1);
       final s2 = result.firstWhere((r) => r.accountId == acc2);
       expect(s1.fundingMinorUnits, 5000);

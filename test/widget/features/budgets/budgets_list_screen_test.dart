@@ -63,17 +63,18 @@ BudgetPlan _fakePlan({
   idempotencyPayload: 'p-$id',
 );
 
-BudgetProgress _fakeProgress(BudgetPlan plan, {int consumed = 0}) => BudgetProgress(
-  budget: plan,
-  periodStart: '2024-01-01',
-  periodEnd: '2024-02-01',
-  consumedMinorUnits: consumed,
-  limitMinorUnits: plan.limitMinorUnits,
-  currencyCode: plan.currencyCode,
-  matchingTransactionCount: 0,
-  usageState: BudgetUsageState.noSpending,
-  drillDown: const [],
-);
+BudgetProgress _fakeProgress(BudgetPlan plan, {int consumed = 0}) =>
+    BudgetProgress(
+      budget: plan,
+      periodStart: '2024-01-01',
+      periodEnd: '2024-02-01',
+      consumedMinorUnits: consumed,
+      limitMinorUnits: plan.limitMinorUnits,
+      currencyCode: plan.currencyCode,
+      matchingTransactionCount: 0,
+      usageState: BudgetUsageState.noSpending,
+      drillDown: const [],
+    );
 
 GoRouter _makeRouter({String initialLocation = '/budgets'}) => GoRouter(
   initialLocation: initialLocation,
@@ -88,8 +89,9 @@ GoRouter _makeRouter({String initialLocation = '/budgets'}) => GoRouter(
         ),
         GoRoute(
           path: ':budgetId',
-          builder: (context, state) =>
-              Scaffold(body: Text('Detail:${state.pathParameters['budgetId']}')),
+          builder: (context, state) => Scaffold(
+            body: Text('Detail:${state.pathParameters['budgetId']}'),
+          ),
         ),
       ],
     ),
@@ -105,8 +107,12 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             budgetsProvider.overrideWith(
               // Never-completing future keeps the provider in AsyncLoading.
               (ref, _) => Completer<AppResult<List<BudgetPlan>>>().future,
@@ -132,9 +138,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            budgetsProvider.overrideWith((ref, _) async => const AppOk(<BudgetPlan>[])),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            budgetsProvider.overrideWith(
+              (ref, _) async => const AppOk(<BudgetPlan>[]),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -156,9 +168,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            budgetsProvider.overrideWith((ref, _) => Future.error(Exception('DB error'))),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            budgetsProvider.overrideWith(
+              (ref, _) => Future.error(Exception('DB error')),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -181,10 +199,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             budgetsProvider.overrideWith((ref, _) async => AppOk([plan])),
-            budgetProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            budgetProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -208,8 +232,12 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             budgetsProvider.overrideWith((ref, _) async => AppOk([egp, usd])),
             budgetProgressProvider.overrideWith((ref, id) async {
               final plan = id == 'b1' ? egp : usd;
@@ -240,10 +268,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             budgetsProvider.overrideWith((ref, _) async => AppOk([plan])),
-            budgetProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            budgetProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -264,9 +298,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('ar'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            budgetsProvider.overrideWith((ref, _) async => const AppOk(<BudgetPlan>[])),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('ar')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            budgetsProvider.overrideWith(
+              (ref, _) async => const AppOk(<BudgetPlan>[]),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('ar'),
@@ -286,9 +326,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            budgetsProvider.overrideWith((ref, _) async => const AppOk(<BudgetPlan>[])),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            budgetsProvider.overrideWith(
+              (ref, _) async => const AppOk(<BudgetPlan>[]),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -311,10 +357,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             budgetsProvider.overrideWith((ref, _) async => AppOk([plan])),
-            budgetProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            budgetProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),
@@ -337,9 +389,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            budgetsProvider.overrideWith((ref, _) async => const AppOk(<BudgetPlan>[])),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            budgetsProvider.overrideWith(
+              (ref, _) async => const AppOk(<BudgetPlan>[]),
+            ),
           ],
           child: MaterialApp.router(
             locale: const Locale('en'),

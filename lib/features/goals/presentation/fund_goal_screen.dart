@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -43,9 +44,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
   Future<void> _submit(SavingsGoal goal) async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedSourceAccountId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a source account.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a source account.')));
       return;
     }
 
@@ -73,15 +72,11 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
       ref.invalidate(goalsProvider(_householdId));
       context.pop();
     } else if (result is AppInsufficientFunds) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.errorGoalInsufficientReserve)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGoalInsufficientReserve)));
     } else if (result is AppValidationFailure<SavingsGoal>) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.messageKey)));
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('An error occurred. Please try again.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('An error occurred. Please try again.')));
     }
   }
 
@@ -127,19 +122,14 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 Text(goal.name, style: Theme.of(context).textTheme.titleLarge),
-                Text('${l10n.goalTarget}: ${goal.currencyCode} ${_fmt(goal.targetMinorUnits)}'),
+                Text('${l10n.goalTarget}: ${goal.currencyCode} ${_fmt(goal.targetMinorUnits, goal.currencyCode)}'),
                 const SizedBox(height: 16),
 
                 // Source account selector
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSourceAccountId,
-                  decoration: InputDecoration(
-                    labelText: l10n.goalSourceAccount,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: sources
-                      .map((a) => DropdownMenuItem<String>(value: a.id, child: Text(a.name)))
-                      .toList(),
+                  decoration: InputDecoration(labelText: l10n.goalSourceAccount, border: const OutlineInputBorder()),
+                  items: sources.map((a) => DropdownMenuItem<String>(value: a.id, child: Text(a.name))).toList(),
                   onChanged: (v) => setState(() => _selectedSourceAccountId = v),
                   validator: (v) => v == null ? 'Required' : null,
                 ),
@@ -148,11 +138,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
                 // Amount field
                 TextFormField(
                   controller: _amountController,
-                  decoration: InputDecoration(
-                    labelText: l10n.goalAmount,
-                    border: const OutlineInputBorder(),
-                    prefixText: '${goal.currencyCode} ',
-                  ),
+                  decoration: InputDecoration(labelText: l10n.goalAmount, border: const OutlineInputBorder(), prefixText: '${goal.currencyCode} '),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
                   validator: (v) {
@@ -182,13 +168,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
 
                 ElevatedButton(
                   onPressed: _isSubmitting ? null : () => _submit(goal),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.goalFundAction),
+                  child: _isSubmitting ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.goalFundAction),
                 ),
               ],
             ),
@@ -198,9 +178,25 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
     );
   }
 
-  String _fmt(int minorUnits) {
-    final whole = minorUnits ~/ 100;
-    final fraction = (minorUnits % 100).abs();
-    return '$whole.${fraction.toString().padLeft(2, '0')}';
+  String _fmt(int minorUnits, String currencyCode) {
+    int scale;
+    try {
+      scale = Currency.fromCode(currencyCode).minorUnitScale;
+    } catch (_) {
+      scale = 2;
+    }
+    if (scale == 0) return '$minorUnits';
+    final divisor = _pow10(scale);
+    final whole = minorUnits ~/ divisor;
+    final fraction = (minorUnits % divisor).abs().toString().padLeft(scale, '0');
+    return '$whole.$fraction';
+  }
+
+  static int _pow10(int n) {
+    var r = 1;
+    for (var i = 0; i < n; i++) {
+      r *= 10;
+    }
+    return r;
   }
 }

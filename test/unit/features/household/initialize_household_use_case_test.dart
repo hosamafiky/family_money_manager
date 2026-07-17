@@ -18,29 +18,35 @@ void main() {
   });
 
   group('InitializeHouseholdUseCase', () {
-    test('empty household name → AppValidationFailure(field: householdName)', () async {
-      final result = await useCase.execute(
-        householdName: '  ',
-        primaryMemberName: 'Ahmed',
-        currencyCode: 'EGP',
-      );
+    test(
+      'empty household name → AppValidationFailure(field: householdName)',
+      () async {
+        final result = await useCase.execute(
+          householdName: '  ',
+          primaryMemberName: 'Ahmed',
+          currencyCode: 'EGP',
+        );
 
-      expect(result, isA<AppValidationFailure<HouseholdIdentity>>());
-      final failure = result as AppValidationFailure<HouseholdIdentity>;
-      expect(failure.field, 'householdName');
-    });
+        expect(result, isA<AppValidationFailure<HouseholdIdentity>>());
+        final failure = result as AppValidationFailure<HouseholdIdentity>;
+        expect(failure.field, 'householdName');
+      },
+    );
 
-    test('empty primary member name → AppValidationFailure(field: primaryMemberName)', () async {
-      final result = await useCase.execute(
-        householdName: 'My Family',
-        primaryMemberName: '',
-        currencyCode: 'EGP',
-      );
+    test(
+      'empty primary member name → AppValidationFailure(field: primaryMemberName)',
+      () async {
+        final result = await useCase.execute(
+          householdName: 'My Family',
+          primaryMemberName: '',
+          currencyCode: 'EGP',
+        );
 
-      expect(result, isA<AppValidationFailure<HouseholdIdentity>>());
-      final failure = result as AppValidationFailure<HouseholdIdentity>;
-      expect(failure.field, 'primaryMemberName');
-    });
+        expect(result, isA<AppValidationFailure<HouseholdIdentity>>());
+        final failure = result as AppValidationFailure<HouseholdIdentity>;
+        expect(failure.field, 'primaryMemberName');
+      },
+    );
 
     test('valid inputs → AppOk with household identity', () async {
       final result = await useCase.execute(
@@ -55,40 +61,46 @@ void main() {
       expect(ok.value.displayName, 'Al-Rashid Family');
     });
 
-    test('second call with same name → AppOk with existing household (idempotent)', () async {
-      final r1 = await useCase.execute(
-        householdName: 'Same Name',
-        primaryMemberName: 'First Person',
-        currencyCode: 'EGP',
-      );
-      expect(r1, isA<AppOk<HouseholdIdentity>>());
+    test(
+      'second call with same name → AppOk with existing household (idempotent)',
+      () async {
+        final r1 = await useCase.execute(
+          householdName: 'Same Name',
+          primaryMemberName: 'First Person',
+          currencyCode: 'EGP',
+        );
+        expect(r1, isA<AppOk<HouseholdIdentity>>());
 
-      final r2 = await useCase.execute(
-        householdName: 'Same Name',
-        primaryMemberName: 'Second Person',
-        currencyCode: 'USD',
-      );
-      expect(r2, isA<AppOk<HouseholdIdentity>>());
+        final r2 = await useCase.execute(
+          householdName: 'Same Name',
+          primaryMemberName: 'Second Person',
+          currencyCode: 'USD',
+        );
+        expect(r2, isA<AppOk<HouseholdIdentity>>());
 
-      final original = (r1 as AppOk<HouseholdIdentity>).value;
-      final returned = (r2 as AppOk<HouseholdIdentity>).value;
-      expect(returned.id, original.id);
-      expect(returned.displayName, original.displayName);
-    });
+        final original = (r1 as AppOk<HouseholdIdentity>).value;
+        final returned = (r2 as AppOk<HouseholdIdentity>).value;
+        expect(returned.id, original.id);
+        expect(returned.displayName, original.displayName);
+      },
+    );
 
-    test('second call with different name → AppDuplicateConflict (Phase 3B)', () async {
-      await useCase.execute(
-        householdName: 'Original Name',
-        primaryMemberName: 'Owner',
-        currencyCode: 'EGP',
-      );
+    test(
+      'second call with different name → AppDuplicateConflict (Phase 3B)',
+      () async {
+        await useCase.execute(
+          householdName: 'Original Name',
+          primaryMemberName: 'Owner',
+          currencyCode: 'EGP',
+        );
 
-      final r2 = await useCase.execute(
-        householdName: 'Different Name',
-        primaryMemberName: 'Owner',
-        currencyCode: 'EGP',
-      );
-      expect(r2, isA<AppDuplicateConflict<HouseholdIdentity>>());
-    });
+        final r2 = await useCase.execute(
+          householdName: 'Different Name',
+          primaryMemberName: 'Owner',
+          currencyCode: 'EGP',
+        );
+        expect(r2, isA<AppDuplicateConflict<HouseholdIdentity>>());
+      },
+    );
   });
 }

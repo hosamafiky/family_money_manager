@@ -44,7 +44,10 @@ void main() {
     );
   }
 
-  Future<String> createAccount(String householdId, {String suffix = '1'}) async {
+  Future<String> createAccount(
+    String householdId, {
+    String suffix = '1',
+  }) async {
     final id = 'acc-$householdId-$suffix';
     await accountRepo.createAccount(
       CreateAccountParams(
@@ -69,95 +72,104 @@ void main() {
   // ── Cross-household account reference via repository ──────────────────────
 
   group('Repository-level cross-household isolation', () {
-    test('recordIncome with account from different household throws ArgumentError', () async {
-      await insertHousehold('hhA');
-      await insertHousehold('hhB');
-      final accA = await createAccount('hhA');
+    test(
+      'recordIncome with account from different household throws ArgumentError',
+      () async {
+        await insertHousehold('hhA');
+        await insertHousehold('hhB');
+        final accA = await createAccount('hhA');
 
-      // Attempt to record income for hhB but target an account in hhA.
-      await expectLater(
-        ledgerRepo.recordIncome(
+        // Attempt to record income for hhB but target an account in hhA.
+        await expectLater(
+          ledgerRepo.recordIncome(
+            RecordIncomeParams(
+              operationId: 'op-iso-1',
+              householdId: 'hhB',
+              destinationAccountId: accA, // belongs to hhA, not hhB
+              amountMinorUnits: 1000,
+              currencyCode: 'EGP',
+              effectiveDate: '2024-01-01',
+              createdBy: 'user-1',
+            ),
+          ),
+          throwsArgumentError, // _requireAccount fails because account not in hhB
+        );
+      },
+    );
+
+    test(
+      'executeTransfer between accounts of different households throws',
+      () async {
+        await insertHousehold('hhC');
+        await insertHousehold('hhD');
+        final accC = await createAccount('hhC');
+        final accD = await createAccount('hhD');
+
+        await ledgerRepo.recordIncome(
           RecordIncomeParams(
-            operationId: 'op-iso-1',
-            householdId: 'hhB',
-            destinationAccountId: accA, // belongs to hhA, not hhB
-            amountMinorUnits: 1000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-01',
-            createdBy: 'user-1',
-          ),
-        ),
-        throwsArgumentError, // _requireAccount fails because account not in hhB
-      );
-    });
-
-    test('executeTransfer between accounts of different households throws', () async {
-      await insertHousehold('hhC');
-      await insertHousehold('hhD');
-      final accC = await createAccount('hhC');
-      final accD = await createAccount('hhD');
-
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-seed-c',
-          householdId: 'hhC',
-          destinationAccountId: accC,
-          amountMinorUnits: 10000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
-
-      // hhC doesn't know about accD → ArgumentError.
-      await expectLater(
-        ledgerRepo.executeTransfer(
-          ExecuteTransferParams(
-            operationId: 'op-cross-tf',
+            operationId: 'op-seed-c',
             householdId: 'hhC',
-            sourceAccountId: accC,
-            destinationAccountId: accD, // wrong household
-            amountMinorUnits: 1000,
+            destinationAccountId: accC,
+            amountMinorUnits: 10000,
             currencyCode: 'EGP',
             effectiveDate: '2024-01-01',
             createdBy: 'user-1',
           ),
-        ),
-        throwsArgumentError,
-      );
-    });
+        );
 
-    test('reverseOperation from different household returns OperationNotFoundError', () async {
-      await insertHousehold('hhE');
-      await insertHousehold('hhF');
-      final accE = await createAccount('hhE');
+        // hhC doesn't know about accD → ArgumentError.
+        await expectLater(
+          ledgerRepo.executeTransfer(
+            ExecuteTransferParams(
+              operationId: 'op-cross-tf',
+              householdId: 'hhC',
+              sourceAccountId: accC,
+              destinationAccountId: accD, // wrong household
+              amountMinorUnits: 1000,
+              currencyCode: 'EGP',
+              effectiveDate: '2024-01-01',
+              createdBy: 'user-1',
+            ),
+          ),
+          throwsArgumentError,
+        );
+      },
+    );
 
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-in-hhE',
-          householdId: 'hhE',
-          destinationAccountId: accE,
-          amountMinorUnits: 5000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
+    test(
+      'reverseOperation from different household returns OperationNotFoundError',
+      () async {
+        await insertHousehold('hhE');
+        await insertHousehold('hhF');
+        final accE = await createAccount('hhE');
 
-      // hhF tries to reverse an operation in hhE.
-      await expectLater(
-        ledgerRepo.reverseOperation(
-          const ReverseOperationParams(
-            reversalOperationId: 'op-rev-cross',
-            originalOperationId: 'op-in-hhE',
-            householdId: 'hhF', // wrong household
-            effectiveDate: '2024-01-02',
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-in-hhE',
+            householdId: 'hhE',
+            destinationAccountId: accE,
+            amountMinorUnits: 5000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
             createdBy: 'user-1',
           ),
-        ),
-        throwsA(isA<OperationNotFoundError>()),
-      );
-    });
+        );
+
+        // hhF tries to reverse an operation in hhE.
+        await expectLater(
+          ledgerRepo.reverseOperation(
+            const ReverseOperationParams(
+              reversalOperationId: 'op-rev-cross',
+              originalOperationId: 'op-in-hhE',
+              householdId: 'hhF', // wrong household
+              effectiveDate: '2024-01-02',
+              createdBy: 'user-1',
+            ),
+          ),
+          throwsA(isA<OperationNotFoundError>()),
+        );
+      },
+    );
   });
 
   // ── DB-level: ledger_entries must match operation's household ─────────────
@@ -202,48 +214,57 @@ void main() {
   // ── Balance query isolation ───────────────────────────────────────────────
 
   group('Balance query isolation', () {
-    test('currentBalanceMinorUnits is scoped to account within household', () async {
-      await insertHousehold('hhI');
-      await insertHousehold('hhJ');
-      final accI = await createAccount('hhI');
-      final accJ = await createAccount('hhJ');
+    test(
+      'currentBalanceMinorUnits is scoped to account within household',
+      () async {
+        await insertHousehold('hhI');
+        await insertHousehold('hhJ');
+        final accI = await createAccount('hhI');
+        final accJ = await createAccount('hhJ');
 
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-i',
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-i',
+            householdId: 'hhI',
+            destinationAccountId: accI,
+            amountMinorUnits: 50000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
+
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-j',
+            householdId: 'hhJ',
+            destinationAccountId: accJ,
+            amountMinorUnits: 99999,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
+
+        final balI = await balanceRepo.currentBalanceMinorUnits(
+          accountId: accI,
           householdId: 'hhI',
-          destinationAccountId: accI,
-          amountMinorUnits: 50000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
-
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-j',
+        );
+        final balJ = await balanceRepo.currentBalanceMinorUnits(
+          accountId: accJ,
           householdId: 'hhJ',
-          destinationAccountId: accJ,
-          amountMinorUnits: 99999,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
+        );
 
-      final balI = await balanceRepo.currentBalanceMinorUnits(accountId: accI, householdId: 'hhI');
-      final balJ = await balanceRepo.currentBalanceMinorUnits(accountId: accJ, householdId: 'hhJ');
+        expect(balI, 50000);
+        expect(balJ, 99999);
 
-      expect(balI, 50000);
-      expect(balJ, 99999);
-
-      // Cross-profile query: hhI asking for hhJ's account → 0 (not found).
-      final crossBal = await balanceRepo.currentBalanceMinorUnits(
-        accountId: accJ,
-        householdId: 'hhI', // wrong household
-      );
-      expect(crossBal, 0);
-    });
+        // Cross-profile query: hhI asking for hhJ's account → 0 (not found).
+        final crossBal = await balanceRepo.currentBalanceMinorUnits(
+          accountId: accJ,
+          householdId: 'hhI', // wrong household
+        );
+        expect(crossBal, 0);
+      },
+    );
   });
 }

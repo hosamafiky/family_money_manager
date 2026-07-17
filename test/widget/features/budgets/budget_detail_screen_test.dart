@@ -54,7 +54,10 @@ BudgetPlan _fakePlan({
   limitMinorUnits: 100000,
   periodDefinition: monthly
       ? const MonthlyBudgetPeriod()
-      : const FixedBudgetPeriod(startDateInclusive: '2024-01-01', endDateExclusive: '2024-06-01'),
+      : const FixedBudgetPeriod(
+          startDateInclusive: '2024-01-01',
+          endDateExclusive: '2024-06-01',
+        ),
   filter: const BudgetFilter(),
   isArchived: archived,
   createdAt: '2024-01-01T00:00:00Z',
@@ -75,14 +78,18 @@ BudgetProgress _fakeProgress(
   limitMinorUnits: plan.limitMinorUnits,
   currencyCode: plan.currencyCode,
   matchingTransactionCount: drillDown.length,
-  usageState: consumed == 0 ? BudgetUsageState.noSpending : BudgetUsageState.onTrack,
+  usageState: consumed == 0
+      ? BudgetUsageState.noSpending
+      : BudgetUsageState.onTrack,
   drillDown: drillDown,
 );
 
 Widget _buildDetailScreen({
   required String budgetId,
   required AppResult<BudgetProgress> progressResult,
-  AppResult<List<BudgetProgress>> historyResult = const AppOk(<BudgetProgress>[]),
+  AppResult<List<BudgetProgress>> historyResult = const AppOk(
+    <BudgetProgress>[],
+  ),
   Locale locale = const Locale('en'),
 }) {
   final router = GoRouter(
@@ -101,7 +108,8 @@ Widget _buildDetailScreen({
       ),
       GoRoute(
         path: '/transactions/:opId',
-        builder: (context, state) => Scaffold(body: Text('Tx:${state.pathParameters['opId']}')),
+        builder: (context, state) =>
+            Scaffold(body: Text('Tx:${state.pathParameters['opId']}')),
       ),
     ],
   );
@@ -110,7 +118,9 @@ Widget _buildDetailScreen({
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
       budgetProgressProvider.overrideWith((ref, _) async => progressResult),
       budgetHistoryProvider.overrideWith((ref, _) async => historyResult),
       budgetDetailProvider.overrideWith((ref, _) async {
@@ -137,18 +147,24 @@ void main() {
       final plan = _fakePlan(name: 'House Budget');
       final progress = _fakeProgress(plan);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       // Name appears in AppBar title and in the body summary card
       expect(find.text('House Budget'), findsWidgets);
     });
 
-    testWidgets('2. Consumed and limit shown (formatted amounts)', (tester) async {
+    testWidgets('2. Consumed and limit shown (formatted amounts)', (
+      tester,
+    ) async {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan, consumed: 40000);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       // formatMinorUnits(40000, 'EGP') → 'EGP 400.00'
@@ -161,7 +177,9 @@ void main() {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan, consumed: 40000);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Remaining'), findsOneWidget);
@@ -171,7 +189,9 @@ void main() {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan, consumed: 40000);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       // "On track" text visible alongside the icon
@@ -182,7 +202,9 @@ void main() {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan, consumed: 40000);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(LinearProgressIndicator), findsWidgets);
@@ -192,7 +214,9 @@ void main() {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Fully reversed expenses'), findsOneWidget);
@@ -211,7 +235,9 @@ void main() {
       );
       final progress = _fakeProgress(plan, consumed: 5000, drillDown: [tx]);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.textContaining('2024-01-15'), findsOneWidget);
@@ -221,13 +247,17 @@ void main() {
       final plan = _fakePlan();
       final progress = _fakeProgress(plan);
 
-      await tester.pumpWidget(_buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)));
+      await tester.pumpWidget(
+        _buildDetailScreen(budgetId: 'b1', progressResult: AppOk(progress)),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Archive budget'), findsOneWidget);
     });
 
-    testWidgets('9. Monthly budget shows previous periods section', (tester) async {
+    testWidgets('9. Monthly budget shows previous periods section', (
+      tester,
+    ) async {
       final plan = _fakePlan(monthly: true);
       final progress = _fakeProgress(plan);
       final historyEntry = BudgetProgress(

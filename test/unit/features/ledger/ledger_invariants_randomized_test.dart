@@ -90,11 +90,12 @@ void main() {
     reversalOfEntryId: reversalOfEntryId,
   );
 
-  int computeBalance(String accountId, List<LedgerEntryRecord> entries) => LedgerCalculator.balance(
-    accountId: accountId,
-    entries: entries.where((e) => e.accountId == accountId).toList(),
-    currency: Currency.egp,
-  ).minorUnits;
+  int computeBalance(String accountId, List<LedgerEntryRecord> entries) =>
+      LedgerCalculator.balance(
+        accountId: accountId,
+        entries: entries.where((e) => e.accountId == accountId).toList(),
+        currency: Currency.egp,
+      ).minorUnits;
 
   // ---------------------------------------------------------------------------
   // INV-R01: balance == sum of signed ledger entries
@@ -113,7 +114,9 @@ void main() {
         for (var i = 0; i < 10; i++) {
           final amount = innerRng.nextInt(10000) + 1;
           final isCredit = innerRng.nextBool();
-          final direction = isCredit ? LedgerDirection.credit : LedgerDirection.debit;
+          final direction = isCredit
+              ? LedgerDirection.credit
+              : LedgerDirection.debit;
           entries.add(
             makeRecord(
               id: 'e-$trial-$i',
@@ -126,7 +129,11 @@ void main() {
         }
 
         final balance = computeBalance(accountId, entries);
-        expect(balance, expectedBalance, reason: 'INV-R01 failed at trial $trial seed=$seed');
+        expect(
+          balance,
+          expectedBalance,
+          reason: 'INV-R01 failed at trial $trial seed=$seed',
+        );
       } catch (e) {
         fail('INV-R01 trial=$trial seed=$seed: $e');
       }
@@ -234,7 +241,11 @@ void main() {
         // that a clean list of entries is always idempotent.
         final clean = <LedgerEntryRecord>{...single}.toList();
         final balClean = computeBalance(accountId, clean);
-        expect(balClean, balSingle, reason: 'INV-R03 failed at trial=$trial seed=$seed');
+        expect(
+          balClean,
+          balSingle,
+          reason: 'INV-R03 failed at trial=$trial seed=$seed',
+        );
       } catch (e) {
         fail('INV-R03 trial=$trial seed=$seed: $e');
       }
@@ -315,7 +326,8 @@ void main() {
             amount: badAmount,
           ),
           throwsArgumentError,
-          reason: 'INV-R06 should reject amount=$badAmount at trial=$trial seed=$seed',
+          reason:
+              'INV-R06 should reject amount=$badAmount at trial=$trial seed=$seed',
         );
       } catch (e) {
         if (e is TestFailure) rethrow;
@@ -353,7 +365,11 @@ void main() {
 
         final balance1 = computeBalance(accountId, entries);
         final balance2 = computeBalance(accountId, List.from(entries));
-        expect(balance1, balance2, reason: 'INV-R07 non-deterministic at trial=$trial seed=$seed');
+        expect(
+          balance1,
+          balance2,
+          reason: 'INV-R07 non-deterministic at trial=$trial seed=$seed',
+        );
       } catch (e) {
         fail('INV-R07 trial=$trial seed=$seed: $e');
       }
@@ -371,7 +387,8 @@ void main() {
       try {
         final innerRng = Random(seed);
         // Random signed amount.
-        final amount = innerRng.nextInt(100000) * (innerRng.nextBool() ? 1 : -1);
+        final amount =
+            innerRng.nextInt(100000) * (innerRng.nextBool() ? 1 : -1);
         if (amount == 0) {
           continue; // skip zero (not a domain-valid ledger amount)
         }

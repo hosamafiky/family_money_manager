@@ -79,7 +79,12 @@ void main() {
 
     test('non-spendable, non-protected accounts excluded from both totals', () {
       final accounts = [
-        _makeAccount(id: 'a1', currencyCode: 'EGP', isSpendable: false, isProtected: false),
+        _makeAccount(
+          id: 'a1',
+          currencyCode: 'EGP',
+          isSpendable: false,
+          isProtected: false,
+        ),
       ];
       final totals = AccountTotalsService.compute(
         accounts: accounts,
@@ -94,7 +99,12 @@ void main() {
 
     test('protected account counted in protected total only', () {
       final accounts = [
-        _makeAccount(id: 'a1', currencyCode: 'EGP', isSpendable: false, isProtected: true),
+        _makeAccount(
+          id: 'a1',
+          currencyCode: 'EGP',
+          isSpendable: false,
+          isProtected: true,
+        ),
       ];
       final totals = AccountTotalsService.compute(
         accounts: accounts,
@@ -106,17 +116,20 @@ void main() {
       expect(egpTotal.spendableMinorUnits, 0);
     });
 
-    test('spendable (non-protected) account counted in spendable total only', () {
-      final accounts = [_makeAccount(id: 'a1', currencyCode: 'EGP')];
-      final totals = AccountTotalsService.compute(
-        accounts: accounts,
-        balancesByAccountId: {'a1': 2000},
-      );
+    test(
+      'spendable (non-protected) account counted in spendable total only',
+      () {
+        final accounts = [_makeAccount(id: 'a1', currencyCode: 'EGP')];
+        final totals = AccountTotalsService.compute(
+          accounts: accounts,
+          balancesByAccountId: {'a1': 2000},
+        );
 
-      final egpTotal = totals.first;
-      expect(egpTotal.spendableMinorUnits, 2000);
-      expect(egpTotal.protectedMinorUnits, 0);
-    });
+        final egpTotal = totals.first;
+        expect(egpTotal.spendableMinorUnits, 2000);
+        expect(egpTotal.protectedMinorUnits, 0);
+      },
+    );
 
     test('zero balance accounts included with zero amounts', () {
       final accounts = [_makeAccount(id: 'a1', currencyCode: 'EGP')];

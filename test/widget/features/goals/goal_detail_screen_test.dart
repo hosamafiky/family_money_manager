@@ -37,7 +37,10 @@ class _FixedThemeModeNotifier extends ThemeModeNotifier {
   ThemeMode build() => _mode;
 }
 
-GoalRevision _fakeRevision({String name = 'Emergency Fund', int target = 100000}) => GoalRevision(
+GoalRevision _fakeRevision({
+  String name = 'Emergency Fund',
+  int target = 100000,
+}) => GoalRevision(
   id: 'rev-1',
   goalId: 'g-1',
   householdId: 'household-v1',
@@ -77,7 +80,9 @@ GoalProgress _fakeProgress({
     goal: goal,
     reserveBalanceMinorUnits: balance,
     currencyCode: 'EGP',
-    progressState: balance == 0 ? GoalProgressState.notStarted : GoalProgressState.inProgress,
+    progressState: balance == 0
+        ? GoalProgressState.notStarted
+        : GoalProgressState.inProgress,
     movements: movements,
     revisions: revisions.isEmpty ? [goal.currentRevision] : revisions,
   );
@@ -92,7 +97,8 @@ GoRouter _makeRouter({String goalId = 'g-1'}) => GoRouter(
       routes: [
         GoRoute(
           path: ':goalId',
-          builder: (context, state) => GoalDetailScreen(goalId: state.pathParameters['goalId']!),
+          builder: (context, state) =>
+              GoalDetailScreen(goalId: state.pathParameters['goalId']!),
           routes: [
             GoRoute(
               path: 'fund',
@@ -114,17 +120,30 @@ GoRouter _makeRouter({String goalId = 'g-1'}) => GoRouter(
   ],
 );
 
-Widget _buildApp({required GoalProgress progress, Locale locale = const Locale('en')}) {
+Widget _buildApp({
+  required GoalProgress progress,
+  Locale locale = const Locale('en'),
+}) {
   return ProviderScope(
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
       goalProgressProvider.overrideWith((ref, goalId) async => AppOk(progress)),
-      goalDetailProvider.overrideWith((ref, goalId) async => AppOk(progress.goal)),
-      completeGoalUseCaseProvider.overrideWith((ref) => throw UnimplementedError()),
-      archiveGoalUseCaseProvider.overrideWith((ref) => throw UnimplementedError()),
-      restoreGoalUseCaseProvider.overrideWith((ref) => throw UnimplementedError()),
+      goalDetailProvider.overrideWith(
+        (ref, goalId) async => AppOk(progress.goal),
+      ),
+      completeGoalUseCaseProvider.overrideWith(
+        (ref) => throw UnimplementedError(),
+      ),
+      archiveGoalUseCaseProvider.overrideWith(
+        (ref) => throw UnimplementedError(),
+      ),
+      restoreGoalUseCaseProvider.overrideWith(
+        (ref) => throw UnimplementedError(),
+      ),
     ],
     child: MaterialApp.router(
       locale: locale,
@@ -143,9 +162,13 @@ void main() {
       expect(find.text('Emergency Fund'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('2. Reserve balance shown formatted (not raw minor units)', (tester) async {
+    testWidgets('2. Reserve balance shown formatted (not raw minor units)', (
+      tester,
+    ) async {
       // Balance is 25000 minor units = 250.00 EGP
-      await tester.pumpWidget(_buildApp(progress: _fakeProgress(balance: 25000)));
+      await tester.pumpWidget(
+        _buildApp(progress: _fakeProgress(balance: 25000)),
+      );
       await tester.pumpAndSettle();
 
       // Should show formatted amount like "250.00" not raw "25000"
@@ -154,12 +177,16 @@ void main() {
     });
 
     testWidgets('3. Progress bar present', (tester) async {
-      await tester.pumpWidget(_buildApp(progress: _fakeProgress(balance: 50000)));
+      await tester.pumpWidget(
+        _buildApp(progress: _fakeProgress(balance: 50000)),
+      );
       await tester.pumpAndSettle();
       expect(find.byType(LinearProgressIndicator), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('4. Status badge uses text + icon (not color alone)', (tester) async {
+    testWidgets('4. Status badge uses text + icon (not color alone)', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(progress: _fakeProgress()));
       await tester.pumpAndSettle();
       // Status badge text must be present.
@@ -171,7 +198,10 @@ void main() {
     testWidgets('5. Child-fund separation note shown', (tester) async {
       await tester.pumpWidget(_buildApp(progress: _fakeProgress()));
       await tester.pumpAndSettle();
-      expect(find.text('Goal funds are NOT child-protected money'), findsOneWidget);
+      expect(
+        find.text('Goal funds are NOT child-protected money'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('6. Fund button present for active goal', (tester) async {
@@ -189,15 +219,22 @@ void main() {
         movementType: GoalMovementType.funding,
         createdAt: '2024-01-01T00:00:00Z',
       );
-      await tester.pumpWidget(_buildApp(progress: _fakeProgress(movements: [movement])));
+      await tester.pumpWidget(
+        _buildApp(progress: _fakeProgress(movements: [movement])),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Funding'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('8. Arabic RTL layout correct', (tester) async {
-      await tester.pumpWidget(_buildApp(progress: _fakeProgress(), locale: const Locale('ar')));
+      await tester.pumpWidget(
+        _buildApp(progress: _fakeProgress(), locale: const Locale('ar')),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('أموال الأهداف ليست أموالاً محمية للأطفال'), findsOneWidget);
+      expect(
+        find.text('أموال الأهداف ليست أموالاً محمية للأطفال'),
+        findsOneWidget,
+      );
     });
   });
 }

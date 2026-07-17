@@ -90,26 +90,42 @@ void main() {
     // (not alphabetical ID order) determines the sequence. This is correct and
     // desired: the sequence is fully deterministic because 'recordedAt' is a
     // persisted field that never changes after write.
-    test('entries with same date maintain insertion-time order (recordedAt)', () async {
-      await insertHousehold();
-      final acc = await createAccount();
+    test(
+      'entries with same date maintain insertion-time order (recordedAt)',
+      () async {
+        await insertHousehold();
+        final acc = await createAccount();
 
-      await ledgerRepo.recordIncome(income(opId: 'op-first', accId: acc, date: '2024-06-01'));
-      await ledgerRepo.recordIncome(income(opId: 'op-second', accId: acc, date: '2024-06-01'));
-      await ledgerRepo.recordIncome(income(opId: 'op-third', accId: acc, date: '2024-06-01'));
+        await ledgerRepo.recordIncome(
+          income(opId: 'op-first', accId: acc, date: '2024-06-01'),
+        );
+        await ledgerRepo.recordIncome(
+          income(opId: 'op-second', accId: acc, date: '2024-06-01'),
+        );
+        await ledgerRepo.recordIncome(
+          income(opId: 'op-third', accId: acc, date: '2024-06-01'),
+        );
 
-      final entries = await ledgerRepo.entriesForAccount(accountId: acc, householdId: 'hh-1');
-      expect(entries.length, 3);
-      // All entries share the same effectiveDate.
-      expect(entries.every((e) => e.effectiveDate == '2024-06-01'), isTrue);
-    });
+        final entries = await ledgerRepo.entriesForAccount(
+          accountId: acc,
+          householdId: 'hh-1',
+        );
+        expect(entries.length, 3);
+        // All entries share the same effectiveDate.
+        expect(entries.every((e) => e.effectiveDate == '2024-06-01'), isTrue);
+      },
+    );
 
     test('repeated query returns identical sequence (deterministic)', () async {
       await insertHousehold();
       final acc = await createAccount(suffix: 'r');
 
-      await ledgerRepo.recordIncome(income(opId: 'op-r1', accId: acc, date: '2024-03-15'));
-      await ledgerRepo.recordIncome(income(opId: 'op-r2', accId: acc, date: '2024-03-15'));
+      await ledgerRepo.recordIncome(
+        income(opId: 'op-r1', accId: acc, date: '2024-03-15'),
+      );
+      await ledgerRepo.recordIncome(
+        income(opId: 'op-r2', accId: acc, date: '2024-03-15'),
+      );
 
       final seq1 = (await ledgerRepo.entriesForAccount(
         accountId: acc,
@@ -166,7 +182,10 @@ void main() {
         "        'EGP', 'income', '2024-06-01', '2024-06-01T10:00:00Z', 'user-1')",
       );
 
-      final entries = await ledgerRepo.entriesForAccount(accountId: accId, householdId: 'hh-1');
+      final entries = await ledgerRepo.entriesForAccount(
+        accountId: accId,
+        householdId: 'hh-1',
+      );
       // Same effectiveDate, same recordedAt → ordered by entry id ASC.
       expect(entries[0].id, 'op-id-aaa_credit');
       expect(entries[1].id, 'op-id-zzz_credit');
@@ -181,12 +200,19 @@ void main() {
       final acc = await createAccount(suffix: 'bd');
 
       // Record income for Jan 10 first.
-      await ledgerRepo.recordIncome(income(opId: 'op-jan10', accId: acc, date: '2024-01-10'));
+      await ledgerRepo.recordIncome(
+        income(opId: 'op-jan10', accId: acc, date: '2024-01-10'),
+      );
 
       // Record backdated income for Jan 01 (inserted later, but earlier date).
-      await ledgerRepo.recordIncome(income(opId: 'op-jan01', accId: acc, date: '2024-01-01'));
+      await ledgerRepo.recordIncome(
+        income(opId: 'op-jan01', accId: acc, date: '2024-01-01'),
+      );
 
-      final entries = await ledgerRepo.entriesForAccount(accountId: acc, householdId: 'hh-1');
+      final entries = await ledgerRepo.entriesForAccount(
+        accountId: acc,
+        householdId: 'hh-1',
+      );
 
       expect(entries.length, 2);
       // Jan 01 should come first because effectiveDate < Jan 10.
@@ -194,25 +220,38 @@ void main() {
       expect(entries[1].effectiveDate, '2024-01-10');
     });
 
-    test('historical balance at Jan 05 excludes backdated-but-later Jan 10 entry', () async {
-      await insertHousehold();
-      final acc = await createAccount(suffix: 'hb');
+    test(
+      'historical balance at Jan 05 excludes backdated-but-later Jan 10 entry',
+      () async {
+        await insertHousehold();
+        final acc = await createAccount(suffix: 'hb');
 
-      await ledgerRepo.recordIncome(
-        income(opId: 'op-hb-jan10', accId: acc, date: '2024-01-10', amount: 10000),
-      );
-      await ledgerRepo.recordIncome(
-        income(opId: 'op-hb-jan01', accId: acc, date: '2024-01-01', amount: 5000),
-      );
+        await ledgerRepo.recordIncome(
+          income(
+            opId: 'op-hb-jan10',
+            accId: acc,
+            date: '2024-01-10',
+            amount: 10000,
+          ),
+        );
+        await ledgerRepo.recordIncome(
+          income(
+            opId: 'op-hb-jan01',
+            accId: acc,
+            date: '2024-01-01',
+            amount: 5000,
+          ),
+        );
 
-      // Historical balance on Jan 05 should include only the Jan 01 entry.
-      final bal = await balanceRepo.historicalBalanceMinorUnits(
-        accountId: acc,
-        householdId: 'hh-1',
-        asOfDate: '2024-01-05',
-      );
-      expect(bal, 5000);
-    });
+        // Historical balance on Jan 05 should include only the Jan 01 entry.
+        final bal = await balanceRepo.historicalBalanceMinorUnits(
+          accountId: acc,
+          householdId: 'hh-1',
+          asOfDate: '2024-01-05',
+        );
+        expect(bal, 5000);
+      },
+    );
   });
 
   // ── Reversal ordering ─────────────────────────────────────────────────────
@@ -237,7 +276,10 @@ void main() {
         ),
       );
 
-      final entries = await ledgerRepo.entriesForAccount(accountId: acc, householdId: 'hh-1');
+      final entries = await ledgerRepo.entriesForAccount(
+        accountId: acc,
+        householdId: 'hh-1',
+      );
 
       // Reversal entry (Jan 15) should come before the original income (Jan 20).
       expect(entries.first.effectiveDate, '2024-01-15');
@@ -267,10 +309,18 @@ void main() {
       );
 
       await ledgerRepo.recordIncome(
-        income(opId: 'op-inc-bbb', accId: acc, date: '2024-01-01', amount: 5000),
+        income(
+          opId: 'op-inc-bbb',
+          accId: acc,
+          date: '2024-01-01',
+          amount: 5000,
+        ),
       );
 
-      final entries = await ledgerRepo.entriesForAccount(accountId: acc, householdId: 'hh-1');
+      final entries = await ledgerRepo.entriesForAccount(
+        accountId: acc,
+        householdId: 'hh-1',
+      );
 
       final ids = entries.map((e) => e.id).toList();
       // op-ob-aaa_credit < op-inc-bbb_credit alphabetically.

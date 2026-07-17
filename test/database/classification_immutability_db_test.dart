@@ -68,36 +68,40 @@ void main() {
     return id;
   }
 
-  Future<void> recordIncome(String householdId, String accountId) => ledgerRepo.recordIncome(
-    RecordIncomeParams(
-      operationId: 'op-seed-${accountId.replaceAll('-', '')}',
-      householdId: householdId,
-      destinationAccountId: accountId,
-      amountMinorUnits: 10000,
-      currencyCode: 'EGP',
-      effectiveDate: '2024-01-01',
-      createdBy: 'user-1',
-    ),
-  );
+  Future<void> recordIncome(String householdId, String accountId) =>
+      ledgerRepo.recordIncome(
+        RecordIncomeParams(
+          operationId: 'op-seed-${accountId.replaceAll('-', '')}',
+          householdId: householdId,
+          destinationAccountId: accountId,
+          amountMinorUnits: 10000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'user-1',
+        ),
+      );
 
   // ── Classification fields: blocked once entries exist ─────────────────────
 
   group('Classification immutability – after first ledger entry (INV-017)', () {
-    test('changing isProtected after entries throws ClassificationImmutabilityError', () async {
-      await insertHousehold('hh-ci-1');
-      final acc = await createAccount('hh-ci-1', isProtected: false);
-      await recordIncome('hh-ci-1', acc);
+    test(
+      'changing isProtected after entries throws ClassificationImmutabilityError',
+      () async {
+        await insertHousehold('hh-ci-1');
+        final acc = await createAccount('hh-ci-1', isProtected: false);
+        await recordIncome('hh-ci-1', acc);
 
-      await expectLater(
-        accountRepo.updateAccount(
-          id: acc,
-          householdId: 'hh-ci-1',
-          isProtected: true, // was false
-          updatedAt: '2024-06-01',
-        ),
-        throwsA(isA<ClassificationImmutabilityError>()),
-      );
-    });
+        await expectLater(
+          accountRepo.updateAccount(
+            id: acc,
+            householdId: 'hh-ci-1',
+            isProtected: true, // was false
+            updatedAt: '2024-06-01',
+          ),
+          throwsA(isA<ClassificationImmutabilityError>()),
+        );
+      },
+    );
 
     test(
       'changing includeInNetWorth after entries throws ClassificationImmutabilityError',
@@ -118,21 +122,24 @@ void main() {
       },
     );
 
-    test('changing includeInZakat after entries throws ClassificationImmutabilityError', () async {
-      await insertHousehold('hh-ci-3');
-      final acc = await createAccount('hh-ci-3', includeInZakat: false);
-      await recordIncome('hh-ci-3', acc);
+    test(
+      'changing includeInZakat after entries throws ClassificationImmutabilityError',
+      () async {
+        await insertHousehold('hh-ci-3');
+        final acc = await createAccount('hh-ci-3', includeInZakat: false);
+        await recordIncome('hh-ci-3', acc);
 
-      await expectLater(
-        accountRepo.updateAccount(
-          id: acc,
-          householdId: 'hh-ci-3',
-          includeInZakat: true,
-          updatedAt: '2024-06-01',
-        ),
-        throwsA(isA<ClassificationImmutabilityError>()),
-      );
-    });
+        await expectLater(
+          accountRepo.updateAccount(
+            id: acc,
+            householdId: 'hh-ci-3',
+            includeInZakat: true,
+            updatedAt: '2024-06-01',
+          ),
+          throwsA(isA<ClassificationImmutabilityError>()),
+        );
+      },
+    );
   });
 
   // ── Classification fields: allowed before first ledger entry ─────────────
@@ -203,7 +210,10 @@ void main() {
       );
 
       // The ledger entry must still exist.
-      final entries = await ledgerRepo.entriesForAccount(accountId: acc, householdId: 'hh-ci-7');
+      final entries = await ledgerRepo.entriesForAccount(
+        accountId: acc,
+        householdId: 'hh-ci-7',
+      );
       expect(entries, isNotEmpty);
     });
 

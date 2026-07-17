@@ -150,7 +150,9 @@ void main() {
       expect(find.text('acc-1'), findsNothing);
     });
 
-    testWidgets('4. amount formatted as decimal + currency code', (tester) async {
+    testWidgets('4. amount formatted as decimal + currency code', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildApp(_fakeCtx));
       await tester.pumpAndSettle();
       // 10000 minor units EGP → '100.00 EGP'

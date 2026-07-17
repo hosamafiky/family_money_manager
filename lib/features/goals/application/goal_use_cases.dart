@@ -29,7 +29,10 @@ bool _isSupportedCurrency(String code) {
 AppResult<T>? _validateFundingSource<T>(FinancialAccount? source) {
   if (source == null) return const AppNotFound();
   if (source.isArchived) {
-    return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorAccountArchived');
+    return const AppValidationFailure(
+      field: 'sourceAccountId',
+      messageKey: 'errorAccountArchived',
+    );
   }
   if (source.isProtected) {
     return const AppValidationFailure(
@@ -75,7 +78,10 @@ final class CreateGoalUseCase {
   }) async {
     // ── Validation ──────────────────────────────────────────────────────────
     if (goalName.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorGoalNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorGoalNameEmpty',
+      );
     }
     if (targetMinorUnits <= 0) {
       return const AppValidationFailure(
@@ -166,7 +172,10 @@ final class CreateGoalUseCase {
       }
 
       final transferOperationId = _uuid.v4();
-      final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+      final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
+        0,
+        10,
+      );
 
       try {
         await _ledger.executeTransfer(
@@ -235,11 +244,17 @@ final class FundGoalUseCase {
 
     // Load goal.
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
-    if (goal.status != GoalStatus.active && goal.status != GoalStatus.targetReached) {
-      return const AppValidationFailure(field: 'goalId', messageKey: 'errorGoalNotActive');
+    if (goal.status != GoalStatus.active &&
+        goal.status != GoalStatus.targetReached) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalNotActive',
+      );
     }
     if (sourceAccountId == goal.reserveAccountId) {
       return const AppValidationFailure(
@@ -249,16 +264,25 @@ final class FundGoalUseCase {
     }
 
     // Validate source account.
-    final source = await _accounts.findById(id: sourceAccountId, householdId: householdId);
+    final source = await _accounts.findById(
+      id: sourceAccountId,
+      householdId: householdId,
+    );
     final sourceError = _validateFundingSource<SavingsGoal>(source);
     if (sourceError != null) return sourceError;
     if (source!.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // Execute the transfer.
     final transferOperationId = _uuid.v4();
-    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
+      0,
+      10,
+    );
     final now = _nowUtc();
 
     try {
@@ -301,11 +325,16 @@ final class FundGoalUseCase {
     );
     if (balanceResult is AppOk<int>) {
       final balance = balanceResult.value;
-      if (balance >= goal.targetMinorUnits && goal.status == GoalStatus.active) {
-        await _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.targetReached);
+      if (balance >= goal.targetMinorUnits &&
+          goal.status == GoalStatus.active) {
+        await _goals.updateGoalStatus(
+          goalId: goalId,
+          status: GoalStatus.targetReached,
+        );
         // Return an updated goal reflecting new status.
         final updatedResult = await _goals.findGoalById(goalId);
-        if (updatedResult is AppOk<SavingsGoal?> && updatedResult.value != null) {
+        if (updatedResult is AppOk<SavingsGoal?> &&
+            updatedResult.value != null) {
           return AppOk(updatedResult.value!);
         }
       }
@@ -357,11 +386,16 @@ final class ReleaseGoalFundsUseCase {
 
     // Load goal.
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
     if (goal.status == GoalStatus.archived) {
-      return const AppValidationFailure(field: 'goalId', messageKey: 'errorGoalArchived');
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalArchived',
+      );
     }
     if (destinationAccountId == goal.reserveAccountId) {
       return const AppValidationFailure(
@@ -389,7 +423,10 @@ final class ReleaseGoalFundsUseCase {
       );
     }
     if (destination.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // Check reserve has sufficient balance.
@@ -404,7 +441,10 @@ final class ReleaseGoalFundsUseCase {
 
     // Execute the transfer.
     final transferOperationId = _uuid.v4();
-    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
+      0,
+      10,
+    );
     final now = _nowUtc();
 
     try {
@@ -458,7 +498,9 @@ final class GetGoalProgressUseCase {
 
   Future<AppResult<GoalProgress>> execute(String goalId) async {
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
@@ -520,7 +562,10 @@ final class UpdateGoalRevisionUseCase {
     String? newBeneficiaryMemberId,
   }) async {
     if (newName.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorGoalNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorGoalNameEmpty',
+      );
     }
     if (newTargetMinorUnits <= 0) {
       return const AppValidationFailure(
@@ -530,7 +575,9 @@ final class UpdateGoalRevisionUseCase {
     }
 
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
@@ -544,7 +591,9 @@ final class UpdateGoalRevisionUseCase {
       // Currency and household are immutable across revisions.
       currencyCode: goal.currencyCode,
       createdAt: _nowUtc(),
-      revisionReason: revisionReason.trim().isEmpty ? 'updated' : revisionReason.trim(),
+      revisionReason: revisionReason.trim().isEmpty
+          ? 'updated'
+          : revisionReason.trim(),
       targetDate: newTargetDate,
       beneficiaryMemberId: newBeneficiaryMemberId,
     );
@@ -562,7 +611,9 @@ final class CompleteGoalUseCase {
 
   Future<AppResult<void>> execute({required String goalId}) async {
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
@@ -581,9 +632,14 @@ final class ArchiveGoalUseCase {
 
   final GoalRepository _goals;
 
-  Future<AppResult<void>> execute({required String goalId, required String householdId}) async {
+  Future<AppResult<void>> execute({
+    required String goalId,
+    required String householdId,
+  }) async {
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
@@ -617,10 +673,16 @@ final class RestoreGoalUseCase {
 
   Future<AppResult<void>> execute({required String goalId}) async {
     final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) return const AppPersistenceFailure();
+    if (goalResult is! AppOk<SavingsGoal?>) {
+      return const AppPersistenceFailure();
+    }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
-    return _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.active, archivedAt: null);
+    return _goals.updateGoalStatus(
+      goalId: goalId,
+      status: GoalStatus.active,
+      archivedAt: null,
+    );
   }
 }

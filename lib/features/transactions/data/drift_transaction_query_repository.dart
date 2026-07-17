@@ -11,7 +11,8 @@ import 'package:family_money_manager/features/transactions/domain/transaction_su
 ///
 /// Uses raw `customSelect` queries for cross-table joins (operations ⟕ operation_contexts).
 /// All queries are read-only.
-final class DriftTransactionQueryRepository implements TransactionQueryRepository {
+final class DriftTransactionQueryRepository
+    implements TransactionQueryRepository {
   const DriftTransactionQueryRepository(this._db);
 
   final AppDatabase _db;
@@ -26,7 +27,13 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final whereClause = StringBuffer('o.household_id = ?');
     final args = <Object?>[householdId];
 
-    _applyFilterClauses(whereClause, args, filter, tablePrefix: 'o', contextPrefix: 'oc');
+    _applyFilterClauses(
+      whereClause,
+      args,
+      filter,
+      tablePrefix: 'o',
+      contextPrefix: 'oc',
+    );
 
     final sql =
         '''
@@ -49,7 +56,9 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       LIMIT ${filter.pageSize}
     ''';
 
-    final rows = await _db.customSelect(sql, variables: _toVariables(args)).get();
+    final rows = await _db
+        .customSelect(sql, variables: _toVariables(args))
+        .get();
     return rows.map(_rowToSummary).toList();
   }
 
@@ -66,7 +75,13 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     );
     final args = <Object?>[householdId, accountId, accountId];
 
-    _applyFilterClauses(whereClause, args, filter, tablePrefix: 'o', contextPrefix: 'oc');
+    _applyFilterClauses(
+      whereClause,
+      args,
+      filter,
+      tablePrefix: 'o',
+      contextPrefix: 'oc',
+    );
 
     final sql =
         '''
@@ -89,7 +104,9 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       LIMIT ${filter.pageSize}
     ''';
 
-    final rows = await _db.customSelect(sql, variables: _toVariables(args)).get();
+    final rows = await _db
+        .customSelect(sql, variables: _toVariables(args))
+        .get();
     return rows.map(_rowToSummary).toList();
   }
 
@@ -122,7 +139,10 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final rows = await _db
         .customSelect(
           sql,
-          variables: [Variable.withString(operationId), Variable.withString(householdId)],
+          variables: [
+            Variable.withString(operationId),
+            Variable.withString(householdId),
+          ],
         )
         .get();
 
@@ -142,7 +162,10 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final accountRows = await _db
         .customSelect(
           'SELECT currency_code FROM financial_accounts WHERE id = ? AND household_id = ? LIMIT 1',
-          variables: [Variable.withString(spouseAccountId), Variable.withString(householdId)],
+          variables: [
+            Variable.withString(spouseAccountId),
+            Variable.withString(householdId),
+          ],
         )
         .get();
     final currencyCode = accountRows.isEmpty
@@ -281,10 +304,15 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       categoryCode: row.readNullable<String>('category_code'),
       spenderMemberId: row.readNullable<String>('spender_member_id'),
       beneficiaryMemberId: row.readNullable<String>('beneficiary_member_id'),
-      scope: effectiveScopeStr != null ? ExpenseScope.fromCode(effectiveScopeStr) : null,
+      scope: effectiveScopeStr != null
+          ? ExpenseScope.fromCode(effectiveScopeStr)
+          : null,
       isRecurring:
-          (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 || row.read<bool>('is_recurring'),
-      note: row.readNullable<String>('ctx_note') ?? row.readNullable<String>('description'),
+          (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 ||
+          row.read<bool>('is_recurring'),
+      note:
+          row.readNullable<String>('ctx_note') ??
+          row.readNullable<String>('description'),
     );
   }
 }

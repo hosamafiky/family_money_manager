@@ -126,14 +126,20 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       expect(
         hsFlow.spouseWalletFundingMinorUnits,
         5000,
         reason: 'Transfer to spouseCashWallet = wallet funding',
       );
-      expect(hsFlow.transfersOutMinorUnits, 5000, reason: 'Also counted in total transfers out');
+      expect(
+        hsFlow.transfersOutMinorUnits,
+        5000,
+        reason: 'Also counted in total transfers out',
+      );
     });
 
     test('2. Spouse wallet return counted as transfer in', () async {
@@ -178,7 +184,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       expect(
         hsFlow.spouseWalletReturnMinorUnits,
@@ -213,7 +221,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       expect(hsFlow.directExpenseMinorUnits, 3000);
     });
@@ -232,7 +242,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       expect(hsFlow.directIncomeMinorUnits, 12000);
     });
@@ -263,7 +275,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       expect(hsFlow.adjustmentsMinorUnits, 300);
     });
@@ -293,11 +307,17 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
       // closing should be 10000 - 2000 = 8000
       expect(hsFlow.closingBalanceMinorUnits, 8000);
-      expect(hsFlow.currentBalanceMinorUnits, 8000, reason: 'No further ops, so current = closing');
+      expect(
+        hsFlow.currentBalanceMinorUnits,
+        8000,
+        reason: 'No further ops, so current = closing',
+      );
     });
 
     test('7. Period filter: pre-period income = opening', () async {
@@ -327,10 +347,20 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       final hsFlow = result.firstWhere((r) => r.accountId == hs);
-      expect(hsFlow.openingBalanceMinorUnits, 6000, reason: 'Pre-period income = opening');
-      expect(hsFlow.directIncomeMinorUnits, 4000, reason: 'Period income = direct income');
+      expect(
+        hsFlow.openingBalanceMinorUnits,
+        6000,
+        reason: 'Pre-period income = opening',
+      );
+      expect(
+        hsFlow.directIncomeMinorUnits,
+        4000,
+        reason: 'Period income = direct income',
+      );
     });
 
     test('8. Multiple home savings accounts reported separately', () async {
@@ -359,7 +389,9 @@ void main() {
         ),
       );
 
-      final result = await reportRepo.homeSavingsFlows(req('2025-01-01', '2025-02-01'));
+      final result = await reportRepo.homeSavingsFlows(
+        req('2025-01-01', '2025-02-01'),
+      );
       expect(result.length, 2);
       final f1 = result.firstWhere((r) => r.accountId == hs1);
       final f2 = result.firstWhere((r) => r.accountId == hs2);

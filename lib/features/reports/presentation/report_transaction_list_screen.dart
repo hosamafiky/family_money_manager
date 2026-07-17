@@ -40,12 +40,14 @@ class ReportTransactionListScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) =>
-                  ReportErrorState(onRetry: () => ref.invalidate(reportTransactionsProvider(req))),
+              error: (_, _) => ReportErrorState(
+                onRetry: () => ref.invalidate(reportTransactionsProvider(req)),
+              ),
               data: (result) {
                 if (result is! AppOk<List<ReportTransactionRow>>) {
                   return ReportErrorState(
-                    onRetry: () => ref.invalidate(reportTransactionsProvider(req)),
+                    onRetry: () =>
+                        ref.invalidate(reportTransactionsProvider(req)),
                   );
                 }
                 final rows = result.value;
@@ -120,11 +122,16 @@ class _TransactionRow extends StatelessWidget {
           children: [
             Text(row.effectiveDate),
             if (row.categoryCode != null)
-              Text(row.categoryCode!, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                row.categoryCode!,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             if (row.isReversed)
               Text(
                 l10n.reportReversalEffect,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.orange),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: Colors.orange),
               ),
           ],
         ),

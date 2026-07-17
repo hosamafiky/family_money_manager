@@ -139,7 +139,9 @@ void main() {
 
   group('Account repository – basic CRUD', () {
     test('creates and retrieves an account', () async {
-      final acc = await accountRepo.createAccount(_accountParams(id: 'acc-1', name: 'My Wallet'));
+      final acc = await accountRepo.createAccount(
+        _accountParams(id: 'acc-1', name: 'My Wallet'),
+      );
       expect(acc.id, 'acc-1');
       expect(acc.name, 'My Wallet');
       expect(acc.isArchived, isFalse);
@@ -154,7 +156,10 @@ void main() {
     });
 
     test('findById returns null for unknown id', () async {
-      final result = await accountRepo.findById(id: 'not-found', householdId: _householdId);
+      final result = await accountRepo.findById(
+        id: 'not-found',
+        householdId: _householdId,
+      );
       expect(result, isNull);
     });
 
@@ -168,7 +173,9 @@ void main() {
         updatedAt: DateTime.utc(2024, 6, 1).toIso8601String(),
       );
 
-      final active = await accountRepo.findByHousehold(householdId: _householdId);
+      final active = await accountRepo.findByHousehold(
+        householdId: _householdId,
+      );
       expect(active.any((a) => a.id == 'acc-arch'), isFalse);
       expect(active.any((a) => a.id == 'acc-active'), isTrue);
     });
@@ -252,10 +259,18 @@ void main() {
     test('records expense and balance reflects it', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-exp'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-1', destinationAccountId: 'acc-exp', amount: 20000),
+        _incomeParams(
+          operationId: 'op-fund-1',
+          destinationAccountId: 'acc-exp',
+          amount: 20000,
+        ),
       );
       await ledgerRepo.recordExpense(
-        _expenseParams(operationId: 'op-exp-1', sourceAccountId: 'acc-exp', amount: 5000),
+        _expenseParams(
+          operationId: 'op-exp-1',
+          sourceAccountId: 'acc-exp',
+          amount: 5000,
+        ),
       );
 
       final balance = await balanceRepo.currentBalanceMinorUnits(
@@ -268,7 +283,11 @@ void main() {
     test('duplicate expense operation returns alreadyExists', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-exp2'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-2', destinationAccountId: 'acc-exp2', amount: 10000),
+        _incomeParams(
+          operationId: 'op-fund-2',
+          destinationAccountId: 'acc-exp2',
+          amount: 10000,
+        ),
       );
       await ledgerRepo.recordExpense(
         _expenseParams(operationId: 'op-exp-dup', sourceAccountId: 'acc-exp2'),
@@ -287,7 +306,11 @@ void main() {
       await accountRepo.createAccount(_accountParams(id: 'src-acc'));
       await accountRepo.createAccount(_accountParams(id: 'dst-acc'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-src', destinationAccountId: 'src-acc', amount: 15000),
+        _incomeParams(
+          operationId: 'op-fund-src',
+          destinationAccountId: 'src-acc',
+          amount: 15000,
+        ),
       );
 
       final result = await ledgerRepo.executeTransfer(
@@ -315,43 +338,50 @@ void main() {
       expect(srcBal + dstBal, 15000);
     });
 
-    test('duplicate transfer returns alreadyExists and does not duplicate money', () async {
-      await accountRepo.createAccount(_accountParams(id: 'src-dup'));
-      await accountRepo.createAccount(_accountParams(id: 'dst-dup'));
-      await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-dup', destinationAccountId: 'src-dup', amount: 20000),
-      );
-      await ledgerRepo.executeTransfer(
-        _transferParams(
-          operationId: 'op-tx-dup',
-          sourceAccountId: 'src-dup',
-          destinationAccountId: 'dst-dup',
-          amount: 3000,
-        ),
-      );
-      final second = await ledgerRepo.executeTransfer(
-        _transferParams(
-          operationId: 'op-tx-dup',
-          sourceAccountId: 'src-dup',
-          destinationAccountId: 'dst-dup',
-          amount: 3000,
-        ),
-      );
-      expect(second, IdempotentOperationResult.alreadyExists);
+    test(
+      'duplicate transfer returns alreadyExists and does not duplicate money',
+      () async {
+        await accountRepo.createAccount(_accountParams(id: 'src-dup'));
+        await accountRepo.createAccount(_accountParams(id: 'dst-dup'));
+        await ledgerRepo.recordIncome(
+          _incomeParams(
+            operationId: 'op-fund-dup',
+            destinationAccountId: 'src-dup',
+            amount: 20000,
+          ),
+        );
+        await ledgerRepo.executeTransfer(
+          _transferParams(
+            operationId: 'op-tx-dup',
+            sourceAccountId: 'src-dup',
+            destinationAccountId: 'dst-dup',
+            amount: 3000,
+          ),
+        );
+        final second = await ledgerRepo.executeTransfer(
+          _transferParams(
+            operationId: 'op-tx-dup',
+            sourceAccountId: 'src-dup',
+            destinationAccountId: 'dst-dup',
+            amount: 3000,
+          ),
+        );
+        expect(second, IdempotentOperationResult.alreadyExists);
 
-      final srcBal = await balanceRepo.currentBalanceMinorUnits(
-        accountId: 'src-dup',
-        householdId: _householdId,
-      );
-      final dstBal = await balanceRepo.currentBalanceMinorUnits(
-        accountId: 'dst-dup',
-        householdId: _householdId,
-      );
+        final srcBal = await balanceRepo.currentBalanceMinorUnits(
+          accountId: 'src-dup',
+          householdId: _householdId,
+        );
+        final dstBal = await balanceRepo.currentBalanceMinorUnits(
+          accountId: 'dst-dup',
+          householdId: _householdId,
+        );
 
-      // Only one transfer happened
-      expect(srcBal, 17000);
-      expect(dstBal, 3000);
-    });
+        // Only one transfer happened
+        expect(srcBal, 17000);
+        expect(dstBal, 3000);
+      },
+    );
 
     test('transfer to same account is rejected', () async {
       await accountRepo.createAccount(_accountParams(id: 'same-acc'));
@@ -368,8 +398,12 @@ void main() {
     });
 
     test('transfer with mismatched currencies is rejected', () async {
-      await accountRepo.createAccount(_accountParams(id: 'egp-acc', currencyCode: 'EGP'));
-      await accountRepo.createAccount(_accountParams(id: 'usd-acc', currencyCode: 'USD'));
+      await accountRepo.createAccount(
+        _accountParams(id: 'egp-acc', currencyCode: 'EGP'),
+      );
+      await accountRepo.createAccount(
+        _accountParams(id: 'usd-acc', currencyCode: 'USD'),
+      );
       expect(
         () => ledgerRepo.executeTransfer(
           ExecuteTransferParams(
@@ -452,7 +486,11 @@ void main() {
     test('positive adjustment increases balance', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-adj'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-adj', destinationAccountId: 'acc-adj', amount: 5000),
+        _incomeParams(
+          operationId: 'op-fund-adj',
+          destinationAccountId: 'acc-adj',
+          amount: 5000,
+        ),
       );
       await ledgerRepo.recordAdjustment(
         RecordAdjustmentParams(
@@ -477,7 +515,11 @@ void main() {
     test('negative adjustment decreases balance', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-adj2'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-adj2', destinationAccountId: 'acc-adj2', amount: 5000),
+        _incomeParams(
+          operationId: 'op-fund-adj2',
+          destinationAccountId: 'acc-adj2',
+          amount: 5000,
+        ),
       );
       await ledgerRepo.recordAdjustment(
         RecordAdjustmentParams(
@@ -506,10 +548,18 @@ void main() {
     test('reversal restores balance to pre-operation state', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-rev'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-rev', destinationAccountId: 'acc-rev', amount: 20000),
+        _incomeParams(
+          operationId: 'op-fund-rev',
+          destinationAccountId: 'acc-rev',
+          amount: 20000,
+        ),
       );
       await ledgerRepo.recordExpense(
-        _expenseParams(operationId: 'op-exp-rev', sourceAccountId: 'acc-rev', amount: 5000),
+        _expenseParams(
+          operationId: 'op-exp-rev',
+          sourceAccountId: 'acc-rev',
+          amount: 5000,
+        ),
       );
 
       final balanceAfterExpense = await balanceRepo.currentBalanceMinorUnits(
@@ -536,44 +586,63 @@ void main() {
       expect(balanceAfterReversal, 20000);
     });
 
-    test('reversing an already-reversed operation throws DuplicateReversalError', () async {
-      await accountRepo.createAccount(_accountParams(id: 'acc-rev2'));
-      await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-rev2', destinationAccountId: 'acc-rev2', amount: 10000),
-      );
-      await ledgerRepo.recordExpense(
-        _expenseParams(operationId: 'op-exp-rev2', sourceAccountId: 'acc-rev2', amount: 3000),
-      );
-      await ledgerRepo.reverseOperation(
-        const ReverseOperationParams(
-          reversalOperationId: 'op-rev-2',
-          originalOperationId: 'op-exp-rev2',
-          householdId: _householdId,
-          effectiveDate: '2024-01-10',
-          createdBy: _userId,
-        ),
-      );
-      expect(
-        () => ledgerRepo.reverseOperation(
+    test(
+      'reversing an already-reversed operation throws DuplicateReversalError',
+      () async {
+        await accountRepo.createAccount(_accountParams(id: 'acc-rev2'));
+        await ledgerRepo.recordIncome(
+          _incomeParams(
+            operationId: 'op-fund-rev2',
+            destinationAccountId: 'acc-rev2',
+            amount: 10000,
+          ),
+        );
+        await ledgerRepo.recordExpense(
+          _expenseParams(
+            operationId: 'op-exp-rev2',
+            sourceAccountId: 'acc-rev2',
+            amount: 3000,
+          ),
+        );
+        await ledgerRepo.reverseOperation(
           const ReverseOperationParams(
-            reversalOperationId: 'op-rev-2b',
+            reversalOperationId: 'op-rev-2',
             originalOperationId: 'op-exp-rev2',
             householdId: _householdId,
-            effectiveDate: '2024-01-11',
+            effectiveDate: '2024-01-10',
             createdBy: _userId,
           ),
-        ),
-        throwsA(isA<DuplicateReversalError>()),
-      );
-    });
+        );
+        expect(
+          () => ledgerRepo.reverseOperation(
+            const ReverseOperationParams(
+              reversalOperationId: 'op-rev-2b',
+              originalOperationId: 'op-exp-rev2',
+              householdId: _householdId,
+              effectiveDate: '2024-01-11',
+              createdBy: _userId,
+            ),
+          ),
+          throwsA(isA<DuplicateReversalError>()),
+        );
+      },
+    );
 
     test('duplicate reversal operation ID returns alreadyExists', () async {
       await accountRepo.createAccount(_accountParams(id: 'acc-rev3'));
       await ledgerRepo.recordIncome(
-        _incomeParams(operationId: 'op-fund-rev3', destinationAccountId: 'acc-rev3', amount: 10000),
+        _incomeParams(
+          operationId: 'op-fund-rev3',
+          destinationAccountId: 'acc-rev3',
+          amount: 10000,
+        ),
       );
       await ledgerRepo.recordExpense(
-        _expenseParams(operationId: 'op-exp-rev3', sourceAccountId: 'acc-rev3', amount: 2000),
+        _expenseParams(
+          operationId: 'op-exp-rev3',
+          sourceAccountId: 'acc-rev3',
+          amount: 2000,
+        ),
       );
       await ledgerRepo.reverseOperation(
         const ReverseOperationParams(
@@ -593,7 +662,8 @@ void main() {
       //  which is tested in the "reversing an already-reversed operation" test above.)
       final result = await ledgerRepo.reverseOperation(
         const ReverseOperationParams(
-          reversalOperationId: 'op-rev-dup', // same reversal operation ID → idempotent
+          reversalOperationId:
+              'op-rev-dup', // same reversal operation ID → idempotent
           originalOperationId: 'op-exp-rev3',
           householdId: _householdId,
           effectiveDate: '2024-01-10',
@@ -630,7 +700,9 @@ void main() {
       );
 
       expect(
-        () => db.customStatement("DELETE FROM ledger_entries WHERE operation_id = 'op-del-1'"),
+        () => db.customStatement(
+          "DELETE FROM ledger_entries WHERE operation_id = 'op-del-1'",
+        ),
         throwsA(anything),
       );
     });
@@ -709,7 +781,10 @@ void main() {
 
         expect(
           () => ledgerRepo.recordExpense(
-            _expenseParams(operationId: 'op-child-exp', sourceAccountId: 'child-acc'),
+            _expenseParams(
+              operationId: 'op-child-exp',
+              sourceAccountId: 'child-acc',
+            ),
             // No audit params → should throw
           ),
           throwsA(isA<MissingProtectedWithdrawalAuditError>()),
@@ -735,7 +810,11 @@ void main() {
       );
 
       final result = await ledgerRepo.recordExpense(
-        _expenseParams(operationId: 'op-child-exp2', sourceAccountId: 'child-acc2', amount: 1000),
+        _expenseParams(
+          operationId: 'op-child-exp2',
+          sourceAccountId: 'child-acc2',
+          amount: 1000,
+        ),
         auditParams: ChildWithdrawalAuditParams(
           auditId: 'audit-1',
           operationId: 'op-child-exp2',

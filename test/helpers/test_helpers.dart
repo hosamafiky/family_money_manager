@@ -31,8 +31,11 @@ Widget buildTestApp({
   return ProviderScope(
     overrides: [
       appConfigProvider.overrideWithValue(config),
-      if (locale != null) appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(themeMode)),
+      if (locale != null)
+        appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(themeMode),
+      ),
       appDatabaseProvider.overrideWith((ref) {
         final db = AppDatabase.forTesting();
         ref.onDispose(db.close);
@@ -45,7 +48,10 @@ Widget buildTestApp({
         (ref, householdId) async => AppOk(
           DashboardSummary(
             householdId: householdId,
-            period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
+            period: DashboardPeriod.custom(
+              startDate: '2025-01-01',
+              endDate: '2025-02-01',
+            ),
             spendableBalances: const [],
             protectedBalances: const [],
             periodFlow: const [],

@@ -27,8 +27,12 @@ class AccountDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final accountAsync = ref.watch(accountDetailProvider((accountId, _householdId)));
-    final balanceAsync = ref.watch(accountBalanceProvider((accountId, _householdId)));
+    final accountAsync = ref.watch(
+      accountDetailProvider((accountId, _householdId)),
+    );
+    final balanceAsync = ref.watch(
+      accountBalanceProvider((accountId, _householdId)),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.accountDetailTitle)),
@@ -49,7 +53,10 @@ class AccountDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(account.name, style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                        account.name,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         account.type.code,
@@ -61,12 +68,21 @@ class AccountDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           if (account.isProtected)
-                            _Chip(label: l10n.protectedLabel, color: Colors.orange)
+                            _Chip(
+                              label: l10n.protectedLabel,
+                              color: Colors.orange,
+                            )
                           else if (account.isSpendable)
-                            _Chip(label: l10n.spendableLabel, color: Colors.green),
+                            _Chip(
+                              label: l10n.spendableLabel,
+                              color: Colors.green,
+                            ),
                           if (account.isArchived) ...[
                             const SizedBox(width: 8),
-                            _Chip(label: l10n.archivedLabel, color: Colors.grey),
+                            _Chip(
+                              label: l10n.archivedLabel,
+                              color: Colors.grey,
+                            ),
                           ],
                         ],
                       ),
@@ -91,7 +107,9 @@ class AccountDetailScreen extends ConsumerWidget {
                         loading: () => const CircularProgressIndicator(),
                         error: (_, _) => Text(l10n.errorGeneric),
                         data: (minorUnits) {
-                          final currency = Currency.fromCode(account.currencyCode);
+                          final currency = Currency.fromCode(
+                            account.currencyCode,
+                          );
                           final formatted = MoneyInputFormatter.format(
                             Money(minorUnits: minorUnits, currency: currency),
                           );
@@ -117,7 +135,10 @@ class AccountDetailScreen extends ConsumerWidget {
               ],
               const SizedBox(height: 16),
               // History section
-              Text(l10n.accountDetailHistory, style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                l10n.accountDetailHistory,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Card(
                 child: Padding(
@@ -136,23 +157,36 @@ class AccountDetailScreen extends ConsumerWidget {
               // Transaction actions (only for active accounts)
               if (!account.isArchived) ...[
                 FilledButton.icon(
-                  onPressed: () => context.push('/transactions/new/income', extra: accountId),
+                  onPressed: () => context.push(
+                    '/transactions/new/income',
+                    extra: accountId,
+                  ),
                   icon: const Icon(Icons.arrow_downward),
                   label: Text(l10n.actionRecordIncome),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.icon(
-                  onPressed: () => context.push('/transactions/new/expense', extra: accountId),
+                  onPressed: () => context.push(
+                    '/transactions/new/expense',
+                    extra: accountId,
+                  ),
                   icon: const Icon(Icons.arrow_upward),
                   label: Text(l10n.actionRecordExpense),
-                  style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.icon(
-                  onPressed: () => context.push('/transactions/new/transfer', extra: accountId),
+                  onPressed: () => context.push(
+                    '/transactions/new/transfer',
+                    extra: accountId,
+                  ),
                   icon: const Icon(Icons.swap_horiz),
                   label: Text(l10n.actionTransfer),
-                  style: FilledButton.styleFrom(backgroundColor: Colors.blue.shade700),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                  ),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -173,17 +207,26 @@ class AccountDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmArchive(BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
+  Future<void> _confirmArchive(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.accountArchive),
         content: Text(l10n.accountArchiveConfirm),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             child: Text(l10n.confirm),
           ),
         ],
@@ -192,7 +235,10 @@ class AccountDetailScreen extends ConsumerWidget {
     if (confirmed != true) return;
 
     final useCase = ref.read(archiveAccountUseCaseProvider);
-    final result = await useCase.execute(accountId: accountId, householdId: _householdId);
+    final result = await useCase.execute(
+      accountId: accountId,
+      householdId: _householdId,
+    );
 
     if (!context.mounted) return;
 
@@ -207,7 +253,9 @@ class AccountDetailScreen extends ConsumerWidget {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.accountArchiveError)));
       default:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 }
@@ -227,7 +275,10 @@ class _Chip extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: color.withAlpha(120)),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+      ),
     );
   }
 }

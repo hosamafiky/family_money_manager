@@ -25,10 +25,12 @@ enum MemberLifecycle {
 
   String get code => name;
 
-  static MemberLifecycle fromCode(String code) => MemberLifecycle.values.firstWhere(
-    (v) => v.code == code,
-    orElse: () => throw ArgumentError.value(code, 'code', 'Unknown MemberLifecycle'),
-  );
+  static MemberLifecycle fromCode(String code) =>
+      MemberLifecycle.values.firstWhere(
+        (v) => v.code == code,
+        orElse: () =>
+            throw ArgumentError.value(code, 'code', 'Unknown MemberLifecycle'),
+      );
 }
 
 @immutable
@@ -56,10 +58,18 @@ final class HouseholdMember {
   }) {
     if (id.isEmpty) throw ArgumentError.value(id, 'id', 'must not be empty');
     if (householdId.isEmpty) {
-      throw ArgumentError.value(householdId, 'householdId', 'must not be empty');
+      throw ArgumentError.value(
+        householdId,
+        'householdId',
+        'must not be empty',
+      );
     }
     if (displayName.trim().isEmpty) {
-      throw ArgumentError.value(displayName, 'displayName', 'must not be empty');
+      throw ArgumentError.value(
+        displayName,
+        'displayName',
+        'must not be empty',
+      );
     }
     return HouseholdMember._(
       id: id,

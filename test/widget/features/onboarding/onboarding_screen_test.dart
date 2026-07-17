@@ -93,7 +93,9 @@ void main() {
     testWidgets('8. RTL directionality for Arabic locale', (tester) async {
       await tester.pumpWidget(_wrap());
       await tester.pump();
-      final dir = tester.widget<Directionality>(find.byType(Directionality).first);
+      final dir = tester.widget<Directionality>(
+        find.byType(Directionality).first,
+      );
       expect(dir.textDirection, TextDirection.rtl);
     });
   });

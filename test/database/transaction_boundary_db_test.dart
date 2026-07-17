@@ -70,35 +70,40 @@ void main() {
     return id;
   }
 
-  Future<int> countOperations() async => (await db.select(db.operations).get()).length;
+  Future<int> countOperations() async =>
+      (await db.select(db.operations).get()).length;
 
-  Future<int> countEntries() async => (await db.select(db.ledgerEntries).get()).length;
+  Future<int> countEntries() async =>
+      (await db.select(db.ledgerEntries).get()).length;
 
   // ── Domain-validation failure → complete rollback ─────────────────────────
 
   group('Transaction rollback – invalid params rejected before commit', () {
-    test('zero-amount income is rejected; no partial records persist', () async {
-      await insertHousehold('hh-txn-1');
-      await createAccount('hh-txn-1');
+    test(
+      'zero-amount income is rejected; no partial records persist',
+      () async {
+        await insertHousehold('hh-txn-1');
+        await createAccount('hh-txn-1');
 
-      // Attempt income with 0 amount → ArgumentError thrown by factory.
-      expect(
-        () => RecordIncomeParams(
-          operationId: 'op-txn-1',
-          householdId: 'hh-txn-1',
-          destinationAccountId: 'acc-txn-hh-txn-1',
-          amountMinorUnits: 0, // invalid
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-        throwsArgumentError,
-      );
+        // Attempt income with 0 amount → ArgumentError thrown by factory.
+        expect(
+          () => RecordIncomeParams(
+            operationId: 'op-txn-1',
+            householdId: 'hh-txn-1',
+            destinationAccountId: 'acc-txn-hh-txn-1',
+            amountMinorUnits: 0, // invalid
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+          throwsArgumentError,
+        );
 
-      // Nothing was written to the DB because construction failed.
-      expect(await countOperations(), 0);
-      expect(await countEntries(), 0);
-    });
+        // Nothing was written to the DB because construction failed.
+        expect(await countOperations(), 0);
+        expect(await countEntries(), 0);
+      },
+    );
 
     test('account-not-found before transaction → no partial records', () async {
       await insertHousehold('hh-txn-2');
@@ -128,43 +133,46 @@ void main() {
   // ── Retry after failure succeeds ─────────────────────────────────────────
 
   group('Retry after failure', () {
-    test('income succeeds after a prior rejection with the same operation ID', () async {
-      await insertHousehold('hh-txn-3');
-      final acc = await createAccount('hh-txn-3');
+    test(
+      'income succeeds after a prior rejection with the same operation ID',
+      () async {
+        await insertHousehold('hh-txn-3');
+        final acc = await createAccount('hh-txn-3');
 
-      // First attempt: wrong account → fails.
-      await expectLater(
-        ledgerRepo.recordIncome(
+        // First attempt: wrong account → fails.
+        await expectLater(
+          ledgerRepo.recordIncome(
+            RecordIncomeParams(
+              operationId: 'op-txn-retry',
+              householdId: 'hh-txn-3',
+              destinationAccountId: 'acc-bad',
+              amountMinorUnits: 500,
+              currencyCode: 'EGP',
+              effectiveDate: '2024-01-01',
+              createdBy: 'user-1',
+            ),
+          ),
+          throwsArgumentError,
+        );
+        expect(await countOperations(), 0);
+
+        // Second attempt: correct account → succeeds.
+        final result = await ledgerRepo.recordIncome(
           RecordIncomeParams(
             operationId: 'op-txn-retry',
             householdId: 'hh-txn-3',
-            destinationAccountId: 'acc-bad',
+            destinationAccountId: acc,
             amountMinorUnits: 500,
             currencyCode: 'EGP',
             effectiveDate: '2024-01-01',
             createdBy: 'user-1',
           ),
-        ),
-        throwsArgumentError,
-      );
-      expect(await countOperations(), 0);
-
-      // Second attempt: correct account → succeeds.
-      final result = await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-txn-retry',
-          householdId: 'hh-txn-3',
-          destinationAccountId: acc,
-          amountMinorUnits: 500,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
-      expect(result, IdempotentOperationResult.created);
-      expect(await countOperations(), 1);
-      expect(await countEntries(), greaterThanOrEqualTo(1));
-    });
+        );
+        expect(result, IdempotentOperationResult.created);
+        expect(await countOperations(), 1);
+        expect(await countEntries(), greaterThanOrEqualTo(1));
+      },
+    );
   });
 
   // ── No orphan ledger entries ──────────────────────────────────────────────
@@ -174,9 +182,9 @@ void main() {
       // Verify at compile time: the class must not expose a public method for
       // inserting ledger entries independently of a parent operation.
       // This test documents the contract rather than exercising dynamic dispatch.
-      final hasPublicInsert = (ledgerRepo as dynamic).runtimeType.toString().contains(
-        'insertEntry',
-      );
+      final hasPublicInsert = (ledgerRepo as dynamic).runtimeType
+          .toString()
+          .contains('insertEntry');
       // We cannot instantiate private members, so we check the mirror-less
       // way: attempt reflection via the public interface only.
       // The interface LedgerRepository defines the public surface.
@@ -184,88 +192,94 @@ void main() {
       expect(hasPublicInsert, isFalse);
     });
 
-    test('raw DB insert without parent operation is rejected by FK trigger', () async {
-      await insertHousehold('hh-txn-4');
-      await createAccount('hh-txn-4');
+    test(
+      'raw DB insert without parent operation is rejected by FK trigger',
+      () async {
+        await insertHousehold('hh-txn-4');
+        await createAccount('hh-txn-4');
 
-      // Insert an entry that references a non-existent operation.
-      // The FK enforcement trigger should raise.
-      await expectLater(
-        db.customStatement(
-          'INSERT INTO ledger_entries '
-          '(id, operation_id, household_id, account_id, direction, '
-          ' amount_minor_units, currency_code, entry_type, effective_date, '
-          ' recorded_at, created_by) '
-          "VALUES ('e-orphan', 'op-nonexistent', 'hh-txn-4', "
-          "        'acc-txn-hh-txn-4', 'credit', 1000, 'EGP', 'income', "
-          "        '2024-01-01', '2024-01-01', 'user-1')",
-        ),
-        throwsA(anything), // SqliteException from FK trigger
-      );
+        // Insert an entry that references a non-existent operation.
+        // The FK enforcement trigger should raise.
+        await expectLater(
+          db.customStatement(
+            'INSERT INTO ledger_entries '
+            '(id, operation_id, household_id, account_id, direction, '
+            ' amount_minor_units, currency_code, entry_type, effective_date, '
+            ' recorded_at, created_by) '
+            "VALUES ('e-orphan', 'op-nonexistent', 'hh-txn-4', "
+            "        'acc-txn-hh-txn-4', 'credit', 1000, 'EGP', 'income', "
+            "        '2024-01-01', '2024-01-01', 'user-1')",
+          ),
+          throwsA(anything), // SqliteException from FK trigger
+        );
 
-      expect(await countEntries(), 0);
-    });
+        expect(await countEntries(), 0);
+      },
+    );
   });
 
   // ── Transfer atomicity ────────────────────────────────────────────────────
 
   group('Transfer atomicity', () {
-    test('successful transfer writes exactly one operation and two entries', () async {
-      await insertHousehold('hh-txn-5');
-      final src = await createAccount('hh-txn-5');
+    test(
+      'successful transfer writes exactly one operation and two entries',
+      () async {
+        await insertHousehold('hh-txn-5');
+        final src = await createAccount('hh-txn-5');
 
-      // Another account for the destination.
-      const dstId = 'acc-txn-dst-hh-txn-5';
-      await accountRepo.createAccount(
-        const CreateAccountParams(
-          id: dstId,
-          householdId: 'hh-txn-5',
-          name: 'Dst',
-          type: FinancialAccountType.bankAccount,
-          ownerType: AccountOwnerType.user,
-          fundPurpose: FundPurpose.available,
-          currencyCode: 'EGP',
-          isSpendable: true,
-          isProtected: false,
-          includeInNetWorth: true,
-          includeInZakat: false,
-          displayOrder: 1,
-          createdBy: 'user-1',
-        ),
-      );
+        // Another account for the destination.
+        const dstId = 'acc-txn-dst-hh-txn-5';
+        await accountRepo.createAccount(
+          const CreateAccountParams(
+            id: dstId,
+            householdId: 'hh-txn-5',
+            name: 'Dst',
+            type: FinancialAccountType.bankAccount,
+            ownerType: AccountOwnerType.user,
+            fundPurpose: FundPurpose.available,
+            currencyCode: 'EGP',
+            isSpendable: true,
+            isProtected: false,
+            includeInNetWorth: true,
+            includeInZakat: false,
+            displayOrder: 1,
+            createdBy: 'user-1',
+          ),
+        );
 
-      // Fund source first.
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-fund',
-          householdId: 'hh-txn-5',
-          destinationAccountId: src,
-          amountMinorUnits: 50000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
+        // Fund source first.
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-fund',
+            householdId: 'hh-txn-5',
+            destinationAccountId: src,
+            amountMinorUnits: 50000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
 
-      final opsBefore = await countOperations();
-      final entriesBefore = await countEntries();
+        final opsBefore = await countOperations();
+        final entriesBefore = await countEntries();
 
-      await ledgerRepo.executeTransfer(
-        ExecuteTransferParams(
-          operationId: 'op-xfer',
-          householdId: 'hh-txn-5',
-          sourceAccountId: src,
-          destinationAccountId: dstId,
-          amountMinorUnits: 10000,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-15',
-          createdBy: 'user-1',
-        ),
-      );
+        await ledgerRepo.executeTransfer(
+          ExecuteTransferParams(
+            operationId: 'op-xfer',
+            householdId: 'hh-txn-5',
+            sourceAccountId: src,
+            destinationAccountId: dstId,
+            amountMinorUnits: 10000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-15',
+            createdBy: 'user-1',
+          ),
+        );
 
-      // Transfer adds exactly 1 operation and 2 entries.
-      expect(await countOperations(), opsBefore + 1);
-      expect(await countEntries(), entriesBefore + 2);
-    });
+        // Transfer adds exactly 1 operation and 2 entries.
+        expect(await countOperations(), opsBefore + 1);
+        expect(await countEntries(), entriesBefore + 2);
+      },
+    );
   });
 }

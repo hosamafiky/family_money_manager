@@ -51,7 +51,8 @@ final class IncomeContext {
   final String? note;
 
   /// The resolved idempotency key: falls back to [operationId] when [idempotencyKey] is empty.
-  String get resolvedIdempotencyKey => idempotencyKey.isEmpty ? operationId : idempotencyKey;
+  String get resolvedIdempotencyKey =>
+      idempotencyKey.isEmpty ? operationId : idempotencyKey;
 }
 
 // ── ExpenseContext ────────────────────────────────────────────────────────────
@@ -111,7 +112,8 @@ final class ExpenseContext {
   /// Required when [paymentAccountId] is a protected fund account.
   final ChildWithdrawalContext? childWithdrawalAudit;
 
-  String get resolvedIdempotencyKey => idempotencyKey.isEmpty ? operationId : idempotencyKey;
+  String get resolvedIdempotencyKey =>
+      idempotencyKey.isEmpty ? operationId : idempotencyKey;
 }
 
 // ── TransferContext ───────────────────────────────────────────────────────────
@@ -147,5 +149,6 @@ final class TransferContext {
   /// Required when [sourceAccountId] is a protected fund account.
   final ChildWithdrawalContext? childWithdrawalAudit;
 
-  String get resolvedIdempotencyKey => idempotencyKey.isEmpty ? operationId : idempotencyKey;
+  String get resolvedIdempotencyKey =>
+      idempotencyKey.isEmpty ? operationId : idempotencyKey;
 }

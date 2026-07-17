@@ -37,7 +37,9 @@ final class DriftHouseholdRepository implements HouseholdRepository {
           ),
         );
     return _toIdentity(
-      await (_db.select(_db.households)..where((t) => t.id.equals(id))).getSingle(),
+      await (_db.select(
+        _db.households,
+      )..where((t) => t.id.equals(id))).getSingle(),
     );
   }
 
@@ -51,7 +53,9 @@ final class DriftHouseholdRepository implements HouseholdRepository {
       HouseholdsCompanion(name: Value(displayName), updatedAt: Value(now)),
     );
     return _toIdentity(
-      await (_db.select(_db.households)..where((t) => t.id.equals(id))).getSingle(),
+      await (_db.select(
+        _db.households,
+      )..where((t) => t.id.equals(id))).getSingle(),
     );
   }
 
@@ -88,7 +92,9 @@ final class DriftHouseholdRepository implements HouseholdRepository {
           ),
         );
     return _toMember(
-      await (_db.select(_db.householdMembers)..where((t) => t.id.equals(id))).getSingle(),
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(id))).getSingle(),
     );
   }
 
@@ -97,9 +103,11 @@ final class DriftHouseholdRepository implements HouseholdRepository {
     required String memberId,
     required String householdId,
   }) async {
-    final row = await (_db.select(
-      _db.householdMembers,
-    )..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId))).getSingleOrNull();
+    final row =
+        await (_db.select(_db.householdMembers)..where(
+              (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
     return row == null ? null : _toMember(row);
   }
 
@@ -119,14 +127,25 @@ final class DriftHouseholdRepository implements HouseholdRepository {
     required String householdId,
     required String displayName,
   }) async {
-    final existing = await findMember(memberId: memberId, householdId: householdId);
+    final existing = await findMember(
+      memberId: memberId,
+      householdId: householdId,
+    );
     if (existing == null) throw MemberNotFoundError(memberId);
     final now = DateTime.now().toUtc().toIso8601String();
-    await (_db.update(_db.householdMembers)
-          ..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId)))
-        .write(HouseholdMembersCompanion(displayName: Value(displayName), updatedAt: Value(now)));
+    await (_db.update(_db.householdMembers)..where(
+          (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+        ))
+        .write(
+          HouseholdMembersCompanion(
+            displayName: Value(displayName),
+            updatedAt: Value(now),
+          ),
+        );
     return _toMember(
-      await (_db.select(_db.householdMembers)..where((t) => t.id.equals(memberId))).getSingle(),
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(memberId))).getSingle(),
     );
   }
 
@@ -135,24 +154,30 @@ final class DriftHouseholdRepository implements HouseholdRepository {
     required String memberId,
     required String householdId,
   }) async {
-    final existing = await findMember(memberId: memberId, householdId: householdId);
+    final existing = await findMember(
+      memberId: memberId,
+      householdId: householdId,
+    );
     if (existing == null) throw MemberNotFoundError(memberId);
     if (existing.role == MemberRole.primaryUser) {
       throw CannotArchivePrimaryUserError();
     }
     if (existing.isArchived) throw MemberAlreadyArchivedError(memberId);
     final now = DateTime.now().toUtc().toIso8601String();
-    await (_db.update(
-      _db.householdMembers,
-    )..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId))).write(
-      HouseholdMembersCompanion(
-        isArchived: const Value(true),
-        lifecycle: Value(MemberLifecycle.archived.code),
-        updatedAt: Value(now),
-      ),
-    );
+    await (_db.update(_db.householdMembers)..where(
+          (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+        ))
+        .write(
+          HouseholdMembersCompanion(
+            isArchived: const Value(true),
+            lifecycle: Value(MemberLifecycle.archived.code),
+            updatedAt: Value(now),
+          ),
+        );
     return _toMember(
-      await (_db.select(_db.householdMembers)..where((t) => t.id.equals(memberId))).getSingle(),
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(memberId))).getSingle(),
     );
   }
 

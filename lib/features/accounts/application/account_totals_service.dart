@@ -58,7 +58,10 @@ abstract final class AccountTotalsService {
         );
       } else {
         // Non-spendable, non-protected: ensure currency key exists but no total.
-        byCurrency.putIfAbsent(account.currencyCode, () => (spendable: 0, protected_: 0));
+        byCurrency.putIfAbsent(
+          account.currencyCode,
+          () => (spendable: 0, protected_: 0),
+        );
       }
     }
 

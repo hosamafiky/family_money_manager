@@ -115,9 +115,15 @@ class _TotalsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.accountsTotalSpendable, style: Theme.of(context).textTheme.labelMedium),
+                  Text(
+                    l10n.accountsTotalSpendable,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text('$spendableCount', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$spendableCount',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
@@ -125,9 +131,15 @@ class _TotalsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.accountsTotalProtected, style: Theme.of(context).textTheme.labelMedium),
+                  Text(
+                    l10n.accountsTotalProtected,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text('$protectedCount', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$protectedCount',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
@@ -149,9 +161,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Text(
         label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
@@ -165,7 +177,9 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final balanceAsync = ref.watch(accountBalanceProvider((account.id, account.householdId)));
+    final balanceAsync = ref.watch(
+      accountBalanceProvider((account.id, account.householdId)),
+    );
     final typeLabel = _typeLabel(account.type, l10n);
 
     return Card(
@@ -207,16 +221,17 @@ class _AccountCard extends ConsumerWidget {
     );
   }
 
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) => switch (type) {
-    FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-    FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-    FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-    FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-    FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-    FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-    FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-    _ => type.code,
-  };
+  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
+      switch (type) {
+        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
+        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
+        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
+        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
+        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
+        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
+        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
+        _ => type.code,
+      };
 }
 
 class _Badge extends StatelessWidget {
@@ -234,7 +249,10 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color.withAlpha(100)),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+      ),
     );
   }
 }

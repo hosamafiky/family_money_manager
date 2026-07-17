@@ -39,7 +39,8 @@ enum FinancialAccountType {
 
   /// Returns true when any debit on this account type requires a
   /// [ChildWithdrawalAudit] record. See INV-006 and FINANCIAL_MODEL.md §9.
-  bool get requiresProtectedWithdrawalAudit => this == FinancialAccountType.childProtectedFund;
+  bool get requiresProtectedWithdrawalAudit =>
+      this == FinancialAccountType.childProtectedFund;
 }
 
 /// Who owns the financial account.

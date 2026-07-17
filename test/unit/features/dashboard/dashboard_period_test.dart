@@ -47,7 +47,10 @@ void main() {
     });
 
     test('4. contains() correctly includes/excludes boundary dates', () {
-      final period = DashboardPeriod.custom(startDate: '2025-03-01', endDate: '2025-04-01');
+      final period = DashboardPeriod.custom(
+        startDate: '2025-03-01',
+        endDate: '2025-04-01',
+      );
       expect(period.contains('2025-03-01'), isTrue);
       expect(period.contains('2025-03-31'), isTrue);
       expect(period.contains('2025-04-01'), isFalse);
@@ -55,7 +58,10 @@ void main() {
     });
 
     test('5. custom period respects provided dates', () {
-      final period = DashboardPeriod.custom(startDate: '2024-06-15', endDate: '2024-07-15');
+      final period = DashboardPeriod.custom(
+        startDate: '2024-06-15',
+        endDate: '2024-07-15',
+      );
       expect(period.startDate, '2024-06-15');
       expect(period.endDate, '2024-07-15');
       expect(period.label, DashboardPeriodLabel.custom);

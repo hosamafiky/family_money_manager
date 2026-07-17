@@ -63,19 +63,40 @@ void main() {
   group('Money – predicates', () {
     test('isZero', () {
       expect(const Money(minorUnits: 0, currency: Currency.egp).isZero, isTrue);
-      expect(const Money(minorUnits: 1, currency: Currency.egp).isZero, isFalse);
+      expect(
+        const Money(minorUnits: 1, currency: Currency.egp).isZero,
+        isFalse,
+      );
     });
 
     test('isPositive', () {
-      expect(const Money(minorUnits: 1, currency: Currency.egp).isPositive, isTrue);
-      expect(const Money(minorUnits: 0, currency: Currency.egp).isPositive, isFalse);
-      expect(const Money(minorUnits: -1, currency: Currency.egp).isPositive, isFalse);
+      expect(
+        const Money(minorUnits: 1, currency: Currency.egp).isPositive,
+        isTrue,
+      );
+      expect(
+        const Money(minorUnits: 0, currency: Currency.egp).isPositive,
+        isFalse,
+      );
+      expect(
+        const Money(minorUnits: -1, currency: Currency.egp).isPositive,
+        isFalse,
+      );
     });
 
     test('isNegative', () {
-      expect(const Money(minorUnits: -1, currency: Currency.egp).isNegative, isTrue);
-      expect(const Money(minorUnits: 0, currency: Currency.egp).isNegative, isFalse);
-      expect(const Money(minorUnits: 1, currency: Currency.egp).isNegative, isFalse);
+      expect(
+        const Money(minorUnits: -1, currency: Currency.egp).isNegative,
+        isTrue,
+      );
+      expect(
+        const Money(minorUnits: 0, currency: Currency.egp).isNegative,
+        isFalse,
+      );
+      expect(
+        const Money(minorUnits: 1, currency: Currency.egp).isNegative,
+        isFalse,
+      );
     });
   });
 
@@ -118,11 +139,20 @@ void main() {
     const egp = Money(minorUnits: 100, currency: Currency.egp);
     const usd = Money(minorUnits: 100, currency: Currency.usd);
 
-    test('addition', () => expect(() => egp + usd, throwsA(isA<CurrencyMismatchError>())));
-    test('subtraction', () => expect(() => egp - usd, throwsA(isA<CurrencyMismatchError>())));
+    test(
+      'addition',
+      () => expect(() => egp + usd, throwsA(isA<CurrencyMismatchError>())),
+    );
+    test(
+      'subtraction',
+      () => expect(() => egp - usd, throwsA(isA<CurrencyMismatchError>())),
+    );
     test(
       'compareTo',
-      () => expect(() => egp.compareTo(usd), throwsA(isA<CurrencyMismatchError>())),
+      () => expect(
+        () => egp.compareTo(usd),
+        throwsA(isA<CurrencyMismatchError>()),
+      ),
     );
   });
 
@@ -137,13 +167,19 @@ void main() {
     });
 
     test('subtraction overflow throws MoneyOverflowError', () {
-      const minMoney = Money(minorUnits: -9223372036854775808, currency: Currency.egp);
+      const minMoney = Money(
+        minorUnits: -9223372036854775808,
+        currency: Currency.egp,
+      );
       const one = Money(minorUnits: 1, currency: Currency.egp);
       expect(() => minMoney - one, throwsA(isA<MoneyOverflowError>()));
     });
 
     test('negation of minInt throws MoneyOverflowError', () {
-      const minMoney = Money(minorUnits: -9223372036854775808, currency: Currency.egp);
+      const minMoney = Money(
+        minorUnits: -9223372036854775808,
+        currency: Currency.egp,
+      );
       expect(() => -minMoney, throwsA(isA<MoneyOverflowError>()));
     });
 
@@ -239,7 +275,10 @@ void main() {
     });
 
     test('fromJson throws for unsupported currency', () {
-      expect(() => Money.fromJson({'minorUnits': 100, 'currencyCode': 'XXX'}), throwsArgumentError);
+      expect(
+        () => Money.fromJson({'minorUnits': 100, 'currencyCode': 'XXX'}),
+        throwsArgumentError,
+      );
     });
   });
 

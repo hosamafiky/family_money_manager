@@ -201,16 +201,23 @@ final class GoalProgress {
 
   /// How much more needs to be funded to reach the target. Zero when at or over target.
   int get remainingMinorUnits =>
-      (goal.targetMinorUnits - reserveBalanceMinorUnits).clamp(0, goal.targetMinorUnits);
+      (goal.targetMinorUnits - reserveBalanceMinorUnits).clamp(
+        0,
+        goal.targetMinorUnits,
+      );
 
   /// How much the reserve exceeds the target. Zero when at or under target.
   int get overfundedMinorUnits =>
-      (reserveBalanceMinorUnits - goal.targetMinorUnits).clamp(0, reserveBalanceMinorUnits);
+      (reserveBalanceMinorUnits - goal.targetMinorUnits).clamp(
+        0,
+        reserveBalanceMinorUnits,
+      );
 
   bool get isTargetReached => reserveBalanceMinorUnits >= goal.targetMinorUnits;
 
   /// Percentage funded as an integer (0–possibly >100).
   /// Returns null when target == 0.
-  int? get percentageFunded =>
-      goal.targetMinorUnits == 0 ? null : (reserveBalanceMinorUnits * 100) ~/ goal.targetMinorUnits;
+  int? get percentageFunded => goal.targetMinorUnits == 0
+      ? null
+      : (reserveBalanceMinorUnits * 100) ~/ goal.targetMinorUnits;
 }

@@ -41,7 +41,9 @@ class _MembersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final primaryUsers = members.where((m) => m.role == MemberRole.primaryUser).toList();
+    final primaryUsers = members
+        .where((m) => m.role == MemberRole.primaryUser)
+        .toList();
     final spouses = members.where((m) => m.role == MemberRole.spouse).toList();
     final children = members.where((m) => m.role == MemberRole.child).toList();
     final hasSpouse = spouses.isNotEmpty;
@@ -59,16 +61,17 @@ class _MembersList extends ConsumerWidget {
         if (!hasSpouse)
           _AddButton(
             label: l10n.memberAddSpouse,
-            onPressed: () => _showAddMemberDialog(context, ref, l10n, MemberRole.spouse),
+            onPressed: () =>
+                _showAddMemberDialog(context, ref, l10n, MemberRole.spouse),
           ),
         // V1 note about spouse login
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
             l10n.memberSpouseLoginNote,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.outline),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -77,7 +80,8 @@ class _MembersList extends ConsumerWidget {
         ...children.map((m) => _MemberTile(member: m)),
         _AddButton(
           label: l10n.memberAddChild,
-          onPressed: () => _showAddMemberDialog(context, ref, l10n, MemberRole.child),
+          onPressed: () =>
+              _showAddMemberDialog(context, ref, l10n, MemberRole.child),
         ),
       ],
     );
@@ -93,7 +97,11 @@ class _MembersList extends ConsumerWidget {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(role == MemberRole.spouse ? l10n.memberAddSpouse : l10n.memberAddChild),
+        title: Text(
+          role == MemberRole.spouse
+              ? l10n.memberAddSpouse
+              : l10n.memberAddChild,
+        ),
         content: TextField(
           controller: nameCtrl,
           decoration: InputDecoration(
@@ -105,8 +113,14 @@ class _MembersList extends ConsumerWidget {
           onSubmitted: (_) => Navigator.pop(ctx, nameCtrl.text),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(ctx, nameCtrl.text), child: Text(l10n.save)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, nameCtrl.text),
+            child: Text(l10n.save),
+          ),
         ],
       ),
     );
@@ -130,7 +144,9 @@ class _MembersList extends ConsumerWidget {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.errorSpouseDuplicate)));
       default:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 }
@@ -146,9 +162,9 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
@@ -172,8 +188,14 @@ class _MemberTile extends ConsumerWidget {
             ? PopupMenuButton<_MemberAction>(
                 onSelected: (action) => _onAction(context, ref, l10n, action),
                 itemBuilder: (ctx) => [
-                  PopupMenuItem(value: _MemberAction.rename, child: Text(l10n.memberRename)),
-                  PopupMenuItem(value: _MemberAction.archive, child: Text(l10n.memberArchive)),
+                  PopupMenuItem(
+                    value: _MemberAction.rename,
+                    child: Text(l10n.memberRename),
+                  ),
+                  PopupMenuItem(
+                    value: _MemberAction.archive,
+                    child: Text(l10n.memberArchive),
+                  ),
                 ],
               )
             : null,
@@ -195,7 +217,11 @@ class _MemberTile extends ConsumerWidget {
     }
   }
 
-  Future<void> _showRenameDialog(BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
+  Future<void> _showRenameDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
     final nameCtrl = TextEditingController(text: member.displayName);
     final result = await showDialog<String>(
       context: context,
@@ -210,8 +236,14 @@ class _MemberTile extends ConsumerWidget {
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(ctx, nameCtrl.text), child: Text(l10n.save)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, nameCtrl.text),
+            child: Text(l10n.save),
+          ),
         ],
       ),
     );
@@ -229,17 +261,26 @@ class _MemberTile extends ConsumerWidget {
     ref.invalidate(householdMembersProvider(_householdId));
   }
 
-  Future<void> _confirmArchive(BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
+  Future<void> _confirmArchive(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.memberArchive),
         content: Text(member.displayName),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             child: Text(l10n.confirm),
           ),
         ],
@@ -249,7 +290,10 @@ class _MemberTile extends ConsumerWidget {
     if (confirmed != true) return;
 
     final useCase = ref.read(archiveMemberUseCaseProvider);
-    final result = await useCase.execute(memberId: member.id, householdId: _householdId);
+    final result = await useCase.execute(
+      memberId: member.id,
+      householdId: _householdId,
+    );
 
     if (!context.mounted) return;
 
@@ -257,7 +301,9 @@ class _MemberTile extends ConsumerWidget {
       case AppOk():
         ref.invalidate(householdMembersProvider(_householdId));
       default:
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 }

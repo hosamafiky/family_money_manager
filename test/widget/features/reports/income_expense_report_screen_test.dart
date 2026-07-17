@@ -49,7 +49,10 @@ class _FixedRequestNotifier extends ReportRequestNotifier {
   @override
   FinancialReportRequest build() => FinancialReportRequest(
     householdId: 'household-v1',
-    period: DashboardPeriod.custom(startDate: '2025-01-01', endDate: '2025-02-01'),
+    period: DashboardPeriod.custom(
+      startDate: '2025-01-01',
+      endDate: '2025-02-01',
+    ),
   );
 }
 
@@ -63,7 +66,9 @@ Widget _buildScreen({
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
       reportRequestProvider.overrideWith(_FixedRequestNotifier.new),
       incomeExpenseReportProvider.overrideWith((ref, req) async {
         if (loading) {
@@ -218,8 +223,12 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             reportRequestProvider.overrideWith(_FixedRequestNotifier.new),
             incomeExpenseReportProvider.overrideWith((ref, req) async {
               callCount++;

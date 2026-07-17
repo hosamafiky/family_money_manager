@@ -19,7 +19,11 @@ final class HouseholdIdentity {
   }) {
     if (id.isEmpty) throw ArgumentError.value(id, 'id', 'must not be empty');
     if (displayName.trim().isEmpty) {
-      throw ArgumentError.value(displayName, 'displayName', 'must not be empty');
+      throw ArgumentError.value(
+        displayName,
+        'displayName',
+        'must not be empty',
+      );
     }
     return HouseholdIdentity._(
       id: id,

@@ -11,8 +11,9 @@ final class FakeLedgerRepository implements LedgerRepository {
   final List<RecordOpeningBalanceParams> recordedOpeningBalances = [];
 
   @override
-  Future<IdempotentOperationResult> recordIncome(RecordIncomeParams params) async =>
-      IdempotentOperationResult.created;
+  Future<IdempotentOperationResult> recordIncome(
+    RecordIncomeParams params,
+  ) async => IdempotentOperationResult.created;
 
   @override
   Future<IdempotentOperationResult> recordExpense(
@@ -27,7 +28,9 @@ final class FakeLedgerRepository implements LedgerRepository {
   }) async => IdempotentOperationResult.created;
 
   @override
-  Future<IdempotentOperationResult> recordOpeningBalance(RecordOpeningBalanceParams params) async {
+  Future<IdempotentOperationResult> recordOpeningBalance(
+    RecordOpeningBalanceParams params,
+  ) async {
     recordedOpeningBalances.add(params);
     return IdempotentOperationResult.created;
   }

@@ -39,16 +39,20 @@ class ExpenseReviewScreen extends ConsumerWidget {
     }
 
     final accounts = accountsAsync.maybeWhen(
-      data: (r) => r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
+      data: (r) =>
+          r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
       orElse: () => <FinancialAccount>[],
     );
     final members = membersAsync.maybeWhen(
-      data: (r) => r is AppOk<List<HouseholdMember>> ? r.value : <HouseholdMember>[],
+      data: (r) =>
+          r is AppOk<List<HouseholdMember>> ? r.value : <HouseholdMember>[],
       orElse: () => <HouseholdMember>[],
     );
 
-    String accountName(String id) => accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
-    String memberName(String id) => members.where((m) => m.id == id).firstOrNull?.displayName ?? id;
+    String accountName(String id) =>
+        accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
+    String memberName(String id) =>
+        members.where((m) => m.id == id).firstOrNull?.displayName ?? id;
 
     String formatAmount(int minor, String code) {
       final currency = Currency.fromCode(code);
@@ -70,19 +74,27 @@ class ExpenseReviewScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _Row(l10n.fieldPaymentAccount, accountName(ctx.paymentAccountId)),
-          _Row(l10n.fieldAmount, formatAmount(ctx.amountMinorUnits, ctx.currencyCode)),
+          _Row(
+            l10n.fieldAmount,
+            formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+          ),
           _Row(l10n.fieldCategory, categoryLabel(l10n, ctx.category)),
           _Row(l10n.fieldSpender, memberName(ctx.spenderMemberId)),
           _Row(l10n.fieldBeneficiary, memberName(ctx.beneficiaryMemberId)),
           _Row(l10n.fieldScope, scopeLabel(ctx.scope)),
-          _Row(l10n.fieldRecurring, ctx.isRecurring ? l10n.recurringYes : l10n.recurringOneTime),
+          _Row(
+            l10n.fieldRecurring,
+            ctx.isRecurring ? l10n.recurringYes : l10n.recurringOneTime,
+          ),
           _Row(l10n.fieldEffectiveDate, ctx.effectiveDate),
           if (ctx.note != null) _Row(l10n.fieldNote, ctx.note!),
           if (ctx.childWithdrawalAudit != null)
             _Row(l10n.fieldWithdrawalReason, ctx.childWithdrawalAudit!.reason),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
+            onPressed: submitting
+                ? null
+                : () => _submit(context, ref, l10n, ctx),
             child: submitting
                 ? const SizedBox(
                     height: 20,
@@ -113,7 +125,9 @@ class ExpenseReviewScreen extends ConsumerWidget {
         case AppOk():
           ref.read(expenseFormKeyProvider.notifier).regenerateKey();
           ref.read(stagedExpenseContextProvider.notifier).set(null);
-          ref.invalidate(transactionListProvider((_householdId, const TransactionFilter())));
+          ref.invalidate(
+            transactionListProvider((_householdId, const TransactionFilter())),
+          );
           ref.invalidate(accountsProvider(_householdId));
           ref.invalidate(accountBalanceProvider);
           ref.invalidate(dashboardSummaryProvider(_householdId));
@@ -143,8 +157,10 @@ class ExpenseReviewScreen extends ConsumerWidget {
     'errorAccountArchived' => l10n.errorAccountArchived,
     'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
     'errorWithdrawalReasonRequired' => l10n.errorWithdrawalReasonRequired,
-    'errorWithdrawalAcknowledgmentRequired' => l10n.errorWithdrawalAcknowledgmentRequired,
-    'errorWithdrawalConfirmationRequired' => l10n.errorWithdrawalConfirmationRequired,
+    'errorWithdrawalAcknowledgmentRequired' =>
+      l10n.errorWithdrawalAcknowledgmentRequired,
+    'errorWithdrawalConfirmationRequired' =>
+      l10n.errorWithdrawalConfirmationRequired,
     _ => l10n.errorGeneric,
   };
 }
@@ -165,15 +181,17 @@ class _Row extends StatelessWidget {
             width: 150,
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ],

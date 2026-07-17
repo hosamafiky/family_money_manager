@@ -9,7 +9,10 @@ abstract interface class HouseholdRepository {
     required String currencyCode,
     required String ownerUserId,
   });
-  Future<HouseholdIdentity> updateHouseholdName({required String id, required String displayName});
+  Future<HouseholdIdentity> updateHouseholdName({
+    required String id,
+    required String displayName,
+  });
 
   Future<HouseholdMember> addMember({
     required String id,
@@ -17,14 +20,20 @@ abstract interface class HouseholdRepository {
     required String displayName,
     required MemberRole role,
   });
-  Future<HouseholdMember?> findMember({required String memberId, required String householdId});
+  Future<HouseholdMember?> findMember({
+    required String memberId,
+    required String householdId,
+  });
   Future<List<HouseholdMember>> listMembers(String householdId);
   Future<HouseholdMember> renameMember({
     required String memberId,
     required String householdId,
     required String displayName,
   });
-  Future<HouseholdMember> archiveMember({required String memberId, required String householdId});
+  Future<HouseholdMember> archiveMember({
+    required String memberId,
+    required String householdId,
+  });
 }
 
 // ── Domain errors ──────────────────────────────────────────────────────────

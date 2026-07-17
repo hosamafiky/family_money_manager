@@ -76,7 +76,10 @@ final class CreateBudgetUseCase {
     String? idempotencyKey,
   }) async {
     if (name.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorBudgetNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorBudgetNameEmpty',
+      );
     }
     if (limitMinorUnits <= 0) {
       return const AppValidationFailure(
@@ -95,7 +98,10 @@ final class CreateBudgetUseCase {
     }
 
     if (periodDefinition is FixedBudgetPeriod) {
-      if (periodDefinition.startDateInclusive.compareTo(periodDefinition.endDateExclusive) >= 0) {
+      if (periodDefinition.startDateInclusive.compareTo(
+            periodDefinition.endDateExclusive,
+          ) >=
+          0) {
         return const AppValidationFailure(
           field: 'endDate',
           messageKey: 'errorBudgetEndBeforeStart',
@@ -157,7 +163,10 @@ final class UpdateBudgetUseCase {
 
     final newName = name?.trim() ?? existing.name;
     if (newName.isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorBudgetNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorBudgetNameEmpty',
+      );
     }
 
     final newLimit = limitMinorUnits ?? existing.limitMinorUnits;
@@ -194,7 +203,8 @@ final class ArchiveBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<void>> execute(String budgetId) => _repository.archiveBudget(budgetId);
+  Future<AppResult<void>> execute(String budgetId) =>
+      _repository.archiveBudget(budgetId);
 }
 
 // ── RestoreBudgetUseCase ───────────────────────────────────────────────────
@@ -204,7 +214,8 @@ final class RestoreBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<void>> execute(String budgetId) => _repository.restoreBudget(budgetId);
+  Future<AppResult<void>> execute(String budgetId) =>
+      _repository.restoreBudget(budgetId);
 }
 
 // ── GetBudgetUseCase ───────────────────────────────────────────────────────
@@ -214,7 +225,8 @@ final class GetBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<BudgetPlan?>> execute(String budgetId) => _repository.findBudgetById(budgetId);
+  Future<AppResult<BudgetPlan?>> execute(String budgetId) =>
+      _repository.findBudgetById(budgetId);
 }
 
 // ── ListBudgetsUseCase ─────────────────────────────────────────────────────
@@ -227,7 +239,10 @@ final class ListBudgetsUseCase {
   Future<AppResult<List<BudgetPlan>>> execute({
     required String householdId,
     bool includeArchived = false,
-  }) => _repository.listBudgets(householdId: householdId, includeArchived: includeArchived);
+  }) => _repository.listBudgets(
+    householdId: householdId,
+    includeArchived: includeArchived,
+  );
 }
 
 // ── GetBudgetProgressUseCase ───────────────────────────────────────────────
@@ -255,7 +270,10 @@ final class GetBudgetProgressUseCase {
         } else {
           periodRange = currentMonthRange();
         }
-      case FixedBudgetPeriod(:final startDateInclusive, :final endDateExclusive):
+      case FixedBudgetPeriod(
+        :final startDateInclusive,
+        :final endDateExclusive,
+      ):
         periodRange = (start: startDateInclusive, end: endDateExclusive);
     }
 
@@ -272,7 +290,9 @@ final class GetBudgetProgressUseCase {
     }
     final rows = txResult.value;
 
-    final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+    final consumed = rows
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
 
     final usageState = computeUsageState(
       consumedMinorUnits: consumed,
@@ -331,7 +351,9 @@ final class GetBudgetHistoryUseCase {
       if (txResult is! AppOk<List<BudgetTransactionRow>>) continue;
       final rows = txResult.value;
 
-      final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+      final consumed = rows
+          .map((r) => r.amountMinorUnits)
+          .fold(0, (a, b) => a + b);
 
       history.add(
         BudgetProgress(

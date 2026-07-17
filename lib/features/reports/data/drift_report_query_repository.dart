@@ -39,7 +39,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── incomeExpenseFlow ──────────────────────────────────────────────────────
 
   @override
-  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(FinancialReportRequest req) async {
+  Future<List<CurrencyFlowSummary>> incomeExpenseFlow(
+    FinancialReportRequest req,
+  ) async {
     const grossSql = '''
       SELECT o.currency_code, o.type, SUM(o.total_amount_minor_units) AS subtotal
       FROM operations o
@@ -70,7 +72,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
     ];
 
     final grossRows = await _db.customSelect(grossSql, variables: vars).get();
-    final reversalRows = await _db.customSelect(reversalSql, variables: vars).get();
+    final reversalRows = await _db
+        .customSelect(reversalSql, variables: vars)
+        .get();
 
     final map = <String, _FlowAcc>{};
     for (final row in grossRows) {
@@ -112,7 +116,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── expenseByScope ────────────────────────────────────────────────────────
 
   @override
-  Future<List<ExpenseScopeBreakdown>> expenseByScope(FinancialReportRequest req) async {
+  Future<List<ExpenseScopeBreakdown>> expenseByScope(
+    FinancialReportRequest req,
+  ) async {
     const sql = '''
       SELECT
         COALESCE(oc.expense_scope, o.scope) AS effective_scope,
@@ -163,7 +169,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── expenseBySpender ──────────────────────────────────────────────────────
 
   @override
-  Future<List<MemberSpendingBreakdown>> expenseBySpender(FinancialReportRequest req) async {
+  Future<List<MemberSpendingBreakdown>> expenseBySpender(
+    FinancialReportRequest req,
+  ) async {
     const sql = '''
       SELECT
         oc.spender_member_id,
@@ -201,7 +209,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── expenseByBeneficiary ──────────────────────────────────────────────────
 
   @override
-  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(FinancialReportRequest req) async {
+  Future<List<MemberSpendingBreakdown>> expenseByBeneficiary(
+    FinancialReportRequest req,
+  ) async {
     const sql = '''
       SELECT
         oc.beneficiary_member_id AS spender_member_id,
@@ -239,7 +249,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── expenseByCategory ─────────────────────────────────────────────────────
 
   @override
-  Future<List<CategoryBreakdown>> expenseByCategory(FinancialReportRequest req) async {
+  Future<List<CategoryBreakdown>> expenseByCategory(
+    FinancialReportRequest req,
+  ) async {
     const sql = '''
       SELECT
         COALESCE(oc.category_code, o.category_code) AS cat_code,
@@ -274,7 +286,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── incomeByCategory ──────────────────────────────────────────────────────
 
   @override
-  Future<List<CategoryBreakdown>> incomeByCategory(FinancialReportRequest req) async {
+  Future<List<CategoryBreakdown>> incomeByCategory(
+    FinancialReportRequest req,
+  ) async {
     const sql = '''
       SELECT
         COALESCE(oc.category_code, o.category_code) AS cat_code,
@@ -309,7 +323,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── accountFlows ──────────────────────────────────────────────────────────
 
   @override
-  Future<List<AccountFlowBreakdown>> accountFlows(FinancialReportRequest req) async {
+  Future<List<AccountFlowBreakdown>> accountFlows(
+    FinancialReportRequest req,
+  ) async {
     final accountRows = await _db
         .customSelect(
           'SELECT id, name, currency_code FROM financial_accounts '
@@ -450,7 +466,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── homeSavingsFlows ──────────────────────────────────────────────────────
 
   @override
-  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(FinancialReportRequest req) async {
+  Future<List<HomeSavingsFlowSummary>> homeSavingsFlows(
+    FinancialReportRequest req,
+  ) async {
     final accountRows = await _db
         .customSelect(
           "SELECT id, name, currency_code FROM financial_accounts "
@@ -549,16 +567,25 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
         Variable.withString(req.period.endDate),
       ];
 
-      final pr = (await _db.customSelect(periodSql, variables: periodVars).get()).firstOrNull;
+      final pr =
+          (await _db.customSelect(periodSql, variables: periodVars).get())
+              .firstOrNull;
       final sfr =
-          (await _db.customSelect(spouseFundingSql, variables: periodVars).get()).firstOrNull;
+          (await _db
+                  .customSelect(spouseFundingSql, variables: periodVars)
+                  .get())
+              .firstOrNull;
       final srr =
-          (await _db.customSelect(spouseReturnSql, variables: periodVars).get()).firstOrNull;
+          (await _db.customSelect(spouseReturnSql, variables: periodVars).get())
+              .firstOrNull;
 
       final balanceRows = await _db
           .customSelect(
             balanceSql,
-            variables: [Variable.withString(accountId), Variable.withString(req.householdId)],
+            variables: [
+              Variable.withString(accountId),
+              Variable.withString(req.householdId),
+            ],
           )
           .get();
 
@@ -589,17 +616,23 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
           accountId: accountId,
           accountName: accountName,
           currencyCode: currencyCode,
-          openingBalanceMinorUnits: openingRows.firstOrNull?.readNullable<int>('balance') ?? 0,
+          openingBalanceMinorUnits:
+              openingRows.firstOrNull?.readNullable<int>('balance') ?? 0,
           directIncomeMinorUnits: pr?.readNullable<int>('direct_income') ?? 0,
           directExpenseMinorUnits: pr?.readNullable<int>('direct_expense') ?? 0,
           transfersInMinorUnits: pr?.readNullable<int>('transfers_in') ?? 0,
           transfersOutMinorUnits: pr?.readNullable<int>('transfers_out') ?? 0,
-          spouseWalletFundingMinorUnits: sfr?.readNullable<int>('wallet_funded') ?? 0,
-          spouseWalletReturnMinorUnits: srr?.readNullable<int>('wallet_returned') ?? 0,
+          spouseWalletFundingMinorUnits:
+              sfr?.readNullable<int>('wallet_funded') ?? 0,
+          spouseWalletReturnMinorUnits:
+              srr?.readNullable<int>('wallet_returned') ?? 0,
           adjustmentsMinorUnits: pr?.readNullable<int>('adjustments') ?? 0,
-          reversalEffectMinorUnits: pr?.readNullable<int>('reversal_effect') ?? 0,
-          closingBalanceMinorUnits: closingRows.firstOrNull?.readNullable<int>('balance') ?? 0,
-          currentBalanceMinorUnits: balanceRows.firstOrNull?.readNullable<int>('balance') ?? 0,
+          reversalEffectMinorUnits:
+              pr?.readNullable<int>('reversal_effect') ?? 0,
+          closingBalanceMinorUnits:
+              closingRows.firstOrNull?.readNullable<int>('balance') ?? 0,
+          currentBalanceMinorUnits:
+              balanceRows.firstOrNull?.readNullable<int>('balance') ?? 0,
         ),
       );
     }
@@ -609,7 +642,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── spouseWalletReports ───────────────────────────────────────────────────
 
   @override
-  Future<List<SpouseWalletReport>> spouseWalletReports(FinancialReportRequest req) async {
+  Future<List<SpouseWalletReport>> spouseWalletReports(
+    FinancialReportRequest req,
+  ) async {
     final accountRows = await _db
         .customSelect(
           "SELECT id, name, currency_code FROM financial_accounts "
@@ -756,7 +791,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
   // ── protectedFundsReports ─────────────────────────────────────────────────
 
   @override
-  Future<List<ProtectedFundsSummary>> protectedFundsReports(FinancialReportRequest req) async {
+  Future<List<ProtectedFundsSummary>> protectedFundsReports(
+    FinancialReportRequest req,
+  ) async {
     final accountRows = await _db
         .customSelect(
           'SELECT id, name, currency_code, type FROM financial_accounts '
@@ -884,7 +921,10 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
       final auditRows = await _db
           .customSelect(
             auditSql,
-            variables: [Variable.withString(accountId), Variable.withString(req.householdId)],
+            variables: [
+              Variable.withString(accountId),
+              Variable.withString(req.householdId),
+            ],
           )
           .get();
 
@@ -913,12 +953,16 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
           accountName: accountName,
           accountType: accountType,
           currencyCode: currencyCode,
-          openingBalanceMinorUnits: openingRow?.readNullable<int>('balance') ?? 0,
+          openingBalanceMinorUnits:
+              openingRow?.readNullable<int>('balance') ?? 0,
           fundingMinorUnits: pr?.readNullable<int>('funding') ?? 0,
           withdrawalMinorUnits: pr?.readNullable<int>('withdrawal') ?? 0,
-          reversalEffectMinorUnits: pr?.readNullable<int>('reversal_effect') ?? 0,
-          closingBalanceMinorUnits: closingRow?.readNullable<int>('balance') ?? 0,
-          currentBalanceMinorUnits: currentRow?.readNullable<int>('balance') ?? 0,
+          reversalEffectMinorUnits:
+              pr?.readNullable<int>('reversal_effect') ?? 0,
+          closingBalanceMinorUnits:
+              closingRow?.readNullable<int>('balance') ?? 0,
+          currentBalanceMinorUnits:
+              currentRow?.readNullable<int>('balance') ?? 0,
           withdrawalAudits: audits,
         ),
       );
@@ -999,7 +1043,9 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
           accountName: row.readNullable<String>('account_name') ?? '',
           categoryCode: row.readNullable<String>('cat_code'),
           spenderMemberId: row.readNullable<String>('spender_member_id'),
-          beneficiaryMemberId: row.readNullable<String>('beneficiary_member_id'),
+          beneficiaryMemberId: row.readNullable<String>(
+            'beneficiary_member_id',
+          ),
           scope: scope,
           isReversed: row.read<int>('is_reversed') == 1,
           isProtectedWithdrawal: row.read<int>('is_protected') == 1,
@@ -1024,7 +1070,10 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
     }).toList();
   }
 
-  List<CategoryBreakdown> _mapCategoryBreakdown(List<QueryRow> rows, CategoryType defaultType) {
+  List<CategoryBreakdown> _mapCategoryBreakdown(
+    List<QueryRow> rows,
+    CategoryType defaultType,
+  ) {
     return rows.map((row) {
       final catCode = row.readNullable<String>('cat_code') ?? '';
       CategoryType type = defaultType;

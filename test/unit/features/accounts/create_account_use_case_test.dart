@@ -21,24 +21,29 @@ void main() {
 
   tearDown(() async => db.close());
 
-  CreateAccountWorkflowParams baseParams({String name = 'My Wallet', int? openingBalance}) =>
-      CreateAccountWorkflowParams(
-        householdId: 'hh1',
-        name: name,
-        type: FinancialAccountType.personalCashWallet,
-        ownerType: AccountOwnerType.user,
-        fundPurpose: FundPurpose.available,
-        currencyCode: 'EGP',
-        isSpendable: true,
-        isProtected: false,
-        includeInNetWorth: true,
-        includeInZakat: true,
-        createdBy: 'user1',
-        openingBalanceMinorUnits: openingBalance,
-      );
+  CreateAccountWorkflowParams baseParams({
+    String name = 'My Wallet',
+    int? openingBalance,
+  }) => CreateAccountWorkflowParams(
+    householdId: 'hh1',
+    name: name,
+    type: FinancialAccountType.personalCashWallet,
+    ownerType: AccountOwnerType.user,
+    fundPurpose: FundPurpose.available,
+    currencyCode: 'EGP',
+    isSpendable: true,
+    isProtected: false,
+    includeInNetWorth: true,
+    includeInZakat: true,
+    createdBy: 'user1',
+    openingBalanceMinorUnits: openingBalance,
+  );
 
-  CreateAccountUseCase buildUseCase() =>
-      CreateAccountUseCase(accountRepository: accountRepo, ledgerRepository: ledgerRepo, db: db);
+  CreateAccountUseCase buildUseCase() => CreateAccountUseCase(
+    accountRepository: accountRepo,
+    ledgerRepository: ledgerRepo,
+    db: db,
+  );
 
   group('CreateAccountUseCase validation', () {
     test('empty name returns AppValidationFailure', () async {
@@ -57,7 +62,9 @@ void main() {
     });
 
     test('negative opening balance returns AppValidationFailure', () async {
-      final result = await buildUseCase().execute(baseParams(openingBalance: -100));
+      final result = await buildUseCase().execute(
+        baseParams(openingBalance: -100),
+      );
       expect(result, isA<AppValidationFailure<FinancialAccount>>());
       final failure = result as AppValidationFailure<FinancialAccount>;
       expect(failure.field, 'openingBalance');
@@ -65,7 +72,9 @@ void main() {
     });
 
     test('zero opening balance is allowed (no ledger entry created)', () async {
-      final result = await buildUseCase().execute(baseParams(openingBalance: 0));
+      final result = await buildUseCase().execute(
+        baseParams(openingBalance: 0),
+      );
       expect(result, isA<AppOk<FinancialAccount>>());
       expect(ledgerRepo.recordedOpeningBalances, isEmpty);
     });
@@ -76,14 +85,18 @@ void main() {
     });
 
     test('name is trimmed before creation', () async {
-      final result = await buildUseCase().execute(baseParams(name: '  My Wallet  '));
+      final result = await buildUseCase().execute(
+        baseParams(name: '  My Wallet  '),
+      );
       expect(result, isA<AppOk<FinancialAccount>>());
       final account = (result as AppOk<FinancialAccount>).value;
       expect(account.name, 'My Wallet');
     });
 
     test('positive opening balance records opening balance entry', () async {
-      final result = await buildUseCase().execute(baseParams(openingBalance: 500));
+      final result = await buildUseCase().execute(
+        baseParams(openingBalance: 500),
+      );
       expect(result, isA<AppOk<FinancialAccount>>());
       expect(ledgerRepo.recordedOpeningBalances, hasLength(1));
       expect(ledgerRepo.recordedOpeningBalances.first.amountMinorUnits, 500);

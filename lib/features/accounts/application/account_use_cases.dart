@@ -34,7 +34,10 @@ final class ArchiveAccountUseCase {
     required String householdId,
   }) async {
     try {
-      final account = await _accountRepo.findById(id: accountId, householdId: householdId);
+      final account = await _accountRepo.findById(
+        id: accountId,
+        householdId: householdId,
+      );
       if (account == null) return const AppNotFound();
 
       // A non-zero balance blocks archiving.
@@ -60,7 +63,9 @@ final class ArchiveAccountUseCase {
     } on AccountNotFoundError {
       return const AppNotFound();
     } on AccountAlreadyArchivedError {
-      return const AppDuplicateConflict(messageKey: 'error_account_already_archived');
+      return const AppDuplicateConflict(
+        messageKey: 'error_account_already_archived',
+      );
     } catch (_) {
       return const AppPersistenceFailure();
     }
@@ -93,7 +98,10 @@ final class UpdateAccountMetadataUseCase {
     String? notes,
   }) async {
     if (name != null && name.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'error_account_name_empty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'error_account_name_empty',
+      );
     }
     try {
       final updated = await _repo.updateAccount(
@@ -114,7 +122,9 @@ final class UpdateAccountMetadataUseCase {
       // for defense-in-depth (repo-layer check should normally fire first).
       final msg = e.toString().toLowerCase();
       if (msg.contains('immutable') || msg.contains('classification')) {
-        return const AppClassificationImmutabilityViolation(field: 'classification');
+        return const AppClassificationImmutabilityViolation(
+          field: 'classification',
+        );
       }
       return const AppPersistenceFailure();
     }

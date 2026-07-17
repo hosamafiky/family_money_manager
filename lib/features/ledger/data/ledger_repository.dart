@@ -63,7 +63,9 @@ abstract interface class LedgerRepository {
   ///
   /// Throws [DuplicateOpeningBalanceError] if the account already has an
   /// opening balance entry (FINANCIAL_MODEL §5.1).
-  Future<IdempotentOperationResult> recordOpeningBalance(RecordOpeningBalanceParams params);
+  Future<IdempotentOperationResult> recordOpeningBalance(
+    RecordOpeningBalanceParams params,
+  );
 
   /// Records a balance adjustment (credit or debit).
   ///
@@ -107,7 +109,10 @@ abstract interface class LedgerRepository {
   });
 
   /// Returns the [Operation] with [operationId], or null when not found.
-  Future<Operation?> findOperation({required String operationId, required String householdId});
+  Future<Operation?> findOperation({
+    required String operationId,
+    required String householdId,
+  });
 
   /// Returns all operations for [householdId] between [fromDate] and [toDate]
   /// inclusive ("YYYY-MM-DD" format), ordered by effective date ascending.
@@ -148,7 +153,10 @@ final class SameAccountTransferError extends Error {
 }
 
 final class CurrencyMismatchTransferError extends Error {
-  CurrencyMismatchTransferError({required this.sourceCode, required this.destinationCode});
+  CurrencyMismatchTransferError({
+    required this.sourceCode,
+    required this.destinationCode,
+  });
   final String sourceCode;
   final String destinationCode;
   @override
@@ -167,7 +175,8 @@ final class ArchivedAccountTransferError extends ArchivedAccountError {
   ArchivedAccountTransferError(super.accountId, this.role);
   final String role;
   @override
-  String toString() => 'ArchivedAccountTransferError: $role account $accountId is archived';
+  String toString() =>
+      'ArchivedAccountTransferError: $role account $accountId is archived';
 }
 
 final class DuplicateOpeningBalanceError extends Error {
@@ -184,7 +193,8 @@ final class OperationNotFoundError extends Error {
   OperationNotFoundError(this.operationId);
   final String operationId;
   @override
-  String toString() => 'OperationNotFoundError: operation $operationId not found';
+  String toString() =>
+      'OperationNotFoundError: operation $operationId not found';
 }
 
 final class DuplicateReversalError extends Error {

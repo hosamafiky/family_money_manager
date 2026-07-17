@@ -184,7 +184,10 @@ void main() {
     expect(goal.reserveAccountId, isNotEmpty);
     expect(goal.householdId, _hh);
     // Reserve account must exist in financial_accounts.
-    final acc = await accountRepo.findById(id: goal.reserveAccountId, householdId: _hh);
+    final acc = await accountRepo.findById(
+      id: goal.reserveAccountId,
+      householdId: _hh,
+    );
     expect(acc, isNotNull);
   });
 
@@ -219,21 +222,30 @@ void main() {
   test('5. Reserve account created with correct type (goalReserve)', () async {
     final result = await createGoal();
     final goal = (result as AppOk<SavingsGoal>).value;
-    final acc = await accountRepo.findById(id: goal.reserveAccountId, householdId: _hh);
+    final acc = await accountRepo.findById(
+      id: goal.reserveAccountId,
+      householdId: _hh,
+    );
     expect(acc!.type, FinancialAccountType.goalReserve);
   });
 
   test('6. Reserve account is non-spendable', () async {
     final result = await createGoal();
     final goal = (result as AppOk<SavingsGoal>).value;
-    final acc = await accountRepo.findById(id: goal.reserveAccountId, householdId: _hh);
+    final acc = await accountRepo.findById(
+      id: goal.reserveAccountId,
+      householdId: _hh,
+    );
     expect(acc!.isSpendable, isFalse);
   });
 
   test('7. Reserve account is non-protected', () async {
     final result = await createGoal();
     final goal = (result as AppOk<SavingsGoal>).value;
-    final acc = await accountRepo.findById(id: goal.reserveAccountId, householdId: _hh);
+    final acc = await accountRepo.findById(
+      id: goal.reserveAccountId,
+      householdId: _hh,
+    );
     expect(acc!.isProtected, isFalse);
   });
 
@@ -265,7 +277,10 @@ void main() {
     final fakeRevision = fakeDuplicateGoal.currentRevision;
 
     // The unique index on goals.reserve_account_id should prevent this.
-    final fakeAccount = await accountRepo.findById(id: goal.reserveAccountId, householdId: _hh);
+    final fakeAccount = await accountRepo.findById(
+      id: goal.reserveAccountId,
+      householdId: _hh,
+    );
     // We can't re-insert the same account — trying a direct repo call
     // but providing same reserveAccountId in a new goal should fail via unique constraint.
     // We use a minimal direct DB insert to test the DB-level constraint:
@@ -281,13 +296,19 @@ void main() {
       // Expected: unique index on reserve_account_id
       expect(e, isA<Exception>());
     }
-    expect(fakeRevision.id, isNotEmpty); // use fakeRevision to suppress unused variable warning
+    expect(
+      fakeRevision.id,
+      isNotEmpty,
+    ); // use fakeRevision to suppress unused variable warning
   });
 
   test('9. One goal per reserve — goal id itself is the PK', () async {
     // Each goal gets a unique UUID from the use case, so no collision by design.
     final r1 = await createGoal(goalName: 'Goal A');
-    final r2 = await createGoal(goalName: 'Goal B', idempotencyKey: 'ik-goal-b');
+    final r2 = await createGoal(
+      goalName: 'Goal B',
+      idempotencyKey: 'ik-goal-b',
+    );
     final id1 = (r1 as AppOk<SavingsGoal>).value.id;
     final id2 = (r2 as AppOk<SavingsGoal>).value.id;
     expect(id1, isNot(id2));
@@ -339,7 +360,10 @@ void main() {
     );
 
     // Source balance should now be 50000 - 20000 = 30000.
-    final balResult = await goalRepo.getReserveBalance(reserveAccountId: srcId, householdId: _hh);
+    final balResult = await goalRepo.getReserveBalance(
+      reserveAccountId: srcId,
+      householdId: _hh,
+    );
     expect(balResult, isA<AppOk<int>>());
     expect((balResult as AppOk<int>).value, 30000);
   });
@@ -390,39 +414,42 @@ void main() {
     expect(movements.first.movementType, GoalMovementType.funding);
   });
 
-  test('14. Fund goal: budget consumption NOT incremented (transfer != expense)', () async {
-    const srcId = 'src-acc-budget';
-    await createAccount(id: srcId, householdId: _hh);
-    await creditAccount(srcId, _hh, 50000);
+  test(
+    '14. Fund goal: budget consumption NOT incremented (transfer != expense)',
+    () async {
+      const srcId = 'src-acc-budget';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
 
-    // Count operations before.
-    final beforeRows = await db
-        .customSelect(
-          "SELECT COUNT(*) as cnt FROM operations WHERE type = 'expense' AND household_id = '$_hh'",
-        )
-        .get();
-    final beforeCount = beforeRows.first.read<int>('cnt');
+      // Count operations before.
+      final beforeRows = await db
+          .customSelect(
+            "SELECT COUNT(*) as cnt FROM operations WHERE type = 'expense' AND household_id = '$_hh'",
+          )
+          .get();
+      final beforeCount = beforeRows.first.read<int>('cnt');
 
-    final goalResult = await createGoal(idempotencyKey: 'ik-goal-budget');
-    final goal = (goalResult as AppOk<SavingsGoal>).value;
+      final goalResult = await createGoal(idempotencyKey: 'ik-goal-budget');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    await fundGoalUc.execute(
-      goalId: goal.id,
-      sourceAccountId: srcId,
-      amountMinorUnits: 10000,
-      householdId: _hh,
-      idempotencyKey: 'ik-fund-budget',
-    );
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-budget',
+      );
 
-    final afterRows = await db
-        .customSelect(
-          "SELECT COUNT(*) as cnt FROM operations WHERE type = 'expense' AND household_id = '$_hh'",
-        )
-        .get();
-    final afterCount = afterRows.first.read<int>('cnt');
+      final afterRows = await db
+          .customSelect(
+            "SELECT COUNT(*) as cnt FROM operations WHERE type = 'expense' AND household_id = '$_hh'",
+          )
+          .get();
+      final afterCount = afterRows.first.read<int>('cnt');
 
-    expect(afterCount, beforeCount); // No expense operations created
-  });
+      expect(afterCount, beforeCount); // No expense operations created
+    },
+  );
 
   test('15. Fund goal: not classified as income', () async {
     const srcId = 'src-acc-income';
@@ -456,31 +483,34 @@ void main() {
     expect(afterCount, beforeCount);
   });
 
-  test('16. Fund goal: not classified as expense (operation type is transfer)', () async {
-    const srcId = 'src-acc-expense';
-    await createAccount(id: srcId, householdId: _hh);
-    await creditAccount(srcId, _hh, 50000);
+  test(
+    '16. Fund goal: not classified as expense (operation type is transfer)',
+    () async {
+      const srcId = 'src-acc-expense';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
 
-    final goalResult = await createGoal(idempotencyKey: 'ik-goal-expense');
-    final goal = (goalResult as AppOk<SavingsGoal>).value;
+      final goalResult = await createGoal(idempotencyKey: 'ik-goal-expense');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    await fundGoalUc.execute(
-      goalId: goal.id,
-      sourceAccountId: srcId,
-      amountMinorUnits: 10000,
-      householdId: _hh,
-      idempotencyKey: 'ik-fund-expense',
-    );
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-expense',
+      );
 
-    // The operation type must be 'transfer', not 'expense'.
-    final opsRows = await db
-        .customSelect(
-          "SELECT type FROM operations WHERE household_id = '$_hh' AND type != 'income' ORDER BY created_at DESC LIMIT 1",
-        )
-        .get();
-    expect(opsRows, isNotEmpty);
-    expect(opsRows.first.read<String>('type'), 'transfer');
-  });
+      // The operation type must be 'transfer', not 'expense'.
+      final opsRows = await db
+          .customSelect(
+            "SELECT type FROM operations WHERE household_id = '$_hh' AND type != 'income' ORDER BY created_at DESC LIMIT 1",
+          )
+          .get();
+      expect(opsRows, isNotEmpty);
+      expect(opsRows.first.read<String>('type'), 'transfer');
+    },
+  );
 
   test('17. Insufficient source balance → AppInsufficientFunds', () async {
     const srcId = 'src-acc-insuf';
@@ -522,13 +552,22 @@ void main() {
       idempotencyKey: 'ik-fund-prot',
     );
     expect(result, isA<AppValidationFailure<SavingsGoal>>());
-    expect((result as AppValidationFailure<SavingsGoal>).messageKey, 'errorGoalSourceIsProtected');
+    expect(
+      (result as AppValidationFailure<SavingsGoal>).messageKey,
+      'errorGoalSourceIsProtected',
+    );
   });
 
   test('19. Fund goal from another goalReserve → rejected', () async {
     // Create two goals; try to fund one from the other's reserve.
-    final r1 = await createGoal(goalName: 'Goal A', idempotencyKey: 'ik-goal-a');
-    final r2 = await createGoal(goalName: 'Goal B', idempotencyKey: 'ik-goal-b');
+    final r1 = await createGoal(
+      goalName: 'Goal A',
+      idempotencyKey: 'ik-goal-a',
+    );
+    final r2 = await createGoal(
+      goalName: 'Goal B',
+      idempotencyKey: 'ik-goal-b',
+    );
     final goal1 = (r1 as AppOk<SavingsGoal>).value;
     final goal2 = (r2 as AppOk<SavingsGoal>).value;
 
@@ -544,7 +583,10 @@ void main() {
       idempotencyKey: 'ik-fund-reserve-to-reserve',
     );
     expect(result, isA<AppValidationFailure<SavingsGoal>>());
-    expect((result as AppValidationFailure<SavingsGoal>).messageKey, 'errorGoalSourceIsReserve');
+    expect(
+      (result as AppValidationFailure<SavingsGoal>).messageKey,
+      'errorGoalSourceIsReserve',
+    );
   });
 
   test('20. Release goal: transfer recorded correctly', () async {
@@ -632,7 +674,10 @@ void main() {
       idempotencyKey: 'ik-release-dst',
     );
 
-    final dstBal = await goalRepo.getReserveBalance(reserveAccountId: dstId, householdId: _hh);
+    final dstBal = await goalRepo.getReserveBalance(
+      reserveAccountId: dstId,
+      householdId: _hh,
+    );
     expect((dstBal as AppOk<int>).value, 15000);
   });
 
@@ -761,7 +806,10 @@ void main() {
       idempotencyKey: 'ik-release-reason',
     );
     expect(result, isA<AppValidationFailure<SavingsGoal>>());
-    expect((result as AppValidationFailure<SavingsGoal>).messageKey, 'errorGoalReleaseReasonEmpty');
+    expect(
+      (result as AppValidationFailure<SavingsGoal>).messageKey,
+      'errorGoalReleaseReasonEmpty',
+    );
   });
 
   test('27. Insufficient reserve balance → AppInsufficientFunds', () async {
@@ -788,8 +836,14 @@ void main() {
     await createAccount(id: srcId, householdId: _hh);
     await creditAccount(srcId, _hh, 50000);
 
-    final r1 = await createGoal(goalName: 'Goal A', idempotencyKey: 'ik-goal-relres-a');
-    final r2 = await createGoal(goalName: 'Goal B', idempotencyKey: 'ik-goal-relres-b');
+    final r1 = await createGoal(
+      goalName: 'Goal A',
+      idempotencyKey: 'ik-goal-relres-a',
+    );
+    final r2 = await createGoal(
+      goalName: 'Goal B',
+      idempotencyKey: 'ik-goal-relres-b',
+    );
     final goal1 = (r1 as AppOk<SavingsGoal>).value;
     final goal2 = (r2 as AppOk<SavingsGoal>).value;
 
@@ -826,21 +880,33 @@ void main() {
     );
     final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    final result = await archiveGoalUc.execute(goalId: goal.id, householdId: _hh);
+    final result = await archiveGoalUc.execute(
+      goalId: goal.id,
+      householdId: _hh,
+    );
     expect(result, isA<AppValidationFailure<void>>());
-    expect((result as AppValidationFailure<void>).messageKey, 'errorGoalArchiveNonzeroBalance');
+    expect(
+      (result as AppValidationFailure<void>).messageKey,
+      'errorGoalArchiveNonzeroBalance',
+    );
   });
 
   test('30. Archive with zero balance → succeeds', () async {
     final goalResult = await createGoal(idempotencyKey: 'ik-goal-arch0');
     final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    final result = await archiveGoalUc.execute(goalId: goal.id, householdId: _hh);
+    final result = await archiveGoalUc.execute(
+      goalId: goal.id,
+      householdId: _hh,
+    );
     expect(result, isA<AppOk<void>>());
 
     // Verify status is now archived.
     final refreshed = await goalRepo.findGoalById(goal.id);
-    expect((refreshed as AppOk<SavingsGoal?>).value!.status, GoalStatus.archived);
+    expect(
+      (refreshed as AppOk<SavingsGoal?>).value!.status,
+      GoalStatus.archived,
+    );
   });
 
   test('31. Restore archived goal → active', () async {
@@ -855,61 +921,70 @@ void main() {
     expect((refreshed as AppOk<SavingsGoal?>).value!.status, GoalStatus.active);
   });
 
-  test('32. Goal revisions are append-only (no UPDATE on existing rows)', () async {
-    final goalResult = await createGoal(idempotencyKey: 'ik-goal-rev');
-    final goal = (goalResult as AppOk<SavingsGoal>).value;
+  test(
+    '32. Goal revisions are append-only (no UPDATE on existing rows)',
+    () async {
+      final goalResult = await createGoal(idempotencyKey: 'ik-goal-rev');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    await updateRevisionUc.execute(
-      goalId: goal.id,
-      householdId: _hh,
-      newName: 'Updated Name',
-      newTargetMinorUnits: 200000,
-      newPurpose: GoalPurpose.travel,
-      revisionReason: 'target revised',
-    );
+      await updateRevisionUc.execute(
+        goalId: goal.id,
+        householdId: _hh,
+        newName: 'Updated Name',
+        newTargetMinorUnits: 200000,
+        newPurpose: GoalPurpose.travel,
+        revisionReason: 'target revised',
+      );
 
-    final revResult = await goalRepo.getRevisions(goal.id);
-    final revisions = (revResult as AppOk<List<GoalRevision>>).value;
-    // Original revision + new revision = 2 rows
-    expect(revisions.length, 2);
-    // Most recent revision has the new name.
-    expect(revisions.last.name, 'Updated Name');
-    // Original revision is still there (append-only).
-    expect(revisions.first.name, 'Test Goal');
-  });
+      final revResult = await goalRepo.getRevisions(goal.id);
+      final revisions = (revResult as AppOk<List<GoalRevision>>).value;
+      // Original revision + new revision = 2 rows
+      expect(revisions.length, 2);
+      // Most recent revision has the new name.
+      expect(revisions.last.name, 'Updated Name');
+      // Original revision is still there (append-only).
+      expect(revisions.first.name, 'Test Goal');
+    },
+  );
 
-  test('33. Goal movements are append-only (no UPDATE on existing rows)', () async {
-    const srcId = 'src-acc-movapp';
-    const dstId = 'dst-acc-movapp';
-    await createAccount(id: srcId, householdId: _hh);
-    await createAccount(id: dstId, householdId: _hh);
-    await creditAccount(srcId, _hh, 100000);
+  test(
+    '33. Goal movements are append-only (no UPDATE on existing rows)',
+    () async {
+      const srcId = 'src-acc-movapp';
+      const dstId = 'dst-acc-movapp';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 100000);
 
-    final goalResult = await createGoal(idempotencyKey: 'ik-goal-movapp');
-    final goal = (goalResult as AppOk<SavingsGoal>).value;
+      final goalResult = await createGoal(idempotencyKey: 'ik-goal-movapp');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
 
-    // Fund twice.
-    await fundGoalUc.execute(
-      goalId: goal.id,
-      sourceAccountId: srcId,
-      amountMinorUnits: 20000,
-      householdId: _hh,
-      idempotencyKey: 'ik-fund-movapp-1',
-    );
-    await fundGoalUc.execute(
-      goalId: goal.id,
-      sourceAccountId: srcId,
-      amountMinorUnits: 10000,
-      householdId: _hh,
-      idempotencyKey: 'ik-fund-movapp-2',
-    );
+      // Fund twice.
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-movapp-1',
+      );
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-movapp-2',
+      );
 
-    final movResult = await goalRepo.getMovements(goal.id);
-    final movements = (movResult as AppOk<List<GoalMovement>>).value;
-    expect(movements.length, 2);
-    // Both are funding movements.
-    expect(movements.every((m) => m.movementType == GoalMovementType.funding), isTrue);
-  });
+      final movResult = await goalRepo.getMovements(goal.id);
+      final movements = (movResult as AppOk<List<GoalMovement>>).value;
+      expect(movements.length, 2);
+      // Both are funding movements.
+      expect(
+        movements.every((m) => m.movementType == GoalMovementType.funding),
+        isTrue,
+      );
+    },
+  );
 
   test('34. Metadata-only update does NOT write to operations table', () async {
     final goalResult = await createGoal(idempotencyKey: 'ik-goal-meta');
@@ -917,7 +992,9 @@ void main() {
 
     final beforeCount =
         (await db
-                .customSelect("SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'")
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'",
+                )
                 .get())
             .first
             .read<int>('cnt');
@@ -934,7 +1011,9 @@ void main() {
 
     final afterCount =
         (await db
-                .customSelect("SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'")
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'",
+                )
                 .get())
             .first
             .read<int>('cnt');
@@ -942,19 +1021,30 @@ void main() {
     expect(afterCount, beforeCount); // No ledger operations created
   });
 
-  test('35. Migration v7→v8: goals tables created and budget data preserved', () async {
-    // In forTesting() the schema is always created fresh at the current
-    // schemaVersion (8), so all goal tables exist by definition.
-    // This test verifies the three tables are present and functional.
-    final goalRows = await db.customSelect('SELECT COUNT(*) as cnt FROM goals').get();
-    final revRows = await db.customSelect('SELECT COUNT(*) as cnt FROM goal_revisions').get();
-    final movRows = await db.customSelect('SELECT COUNT(*) as cnt FROM goal_movements').get();
-    expect(goalRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
-    expect(revRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
-    expect(movRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
+  test(
+    '35. Migration v7→v8: goals tables created and budget data preserved',
+    () async {
+      // In forTesting() the schema is always created fresh at the current
+      // schemaVersion (8), so all goal tables exist by definition.
+      // This test verifies the three tables are present and functional.
+      final goalRows = await db
+          .customSelect('SELECT COUNT(*) as cnt FROM goals')
+          .get();
+      final revRows = await db
+          .customSelect('SELECT COUNT(*) as cnt FROM goal_revisions')
+          .get();
+      final movRows = await db
+          .customSelect('SELECT COUNT(*) as cnt FROM goal_movements')
+          .get();
+      expect(goalRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
+      expect(revRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
+      expect(movRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
 
-    // Verify existing tables from prior phases still exist (budget table from v7).
-    final budgetRows = await db.customSelect('SELECT COUNT(*) as cnt FROM budgets').get();
-    expect(budgetRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
-  });
+      // Verify existing tables from prior phases still exist (budget table from v7).
+      final budgetRows = await db
+          .customSelect('SELECT COUNT(*) as cnt FROM budgets')
+          .get();
+      expect(budgetRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
+    },
+  );
 }

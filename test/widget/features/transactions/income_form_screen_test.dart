@@ -94,7 +94,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(
@@ -115,7 +116,8 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(
@@ -133,13 +135,16 @@ void main() {
       expect(find.text('محفظتي'), findsWidgets);
     });
 
-    testWidgets('4. stays on form when review tapped with no amount', (tester) async {
+    testWidgets('4. stays on form when review tapped with no amount', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
             incomeFormProvider.overrideWith(IncomeFormNotifier.new),
           ],
@@ -185,7 +190,9 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) => Future<AppResult<List<FinancialAccount>>>.error(Exception('DB error')),
+              (ref, _) => Future<AppResult<List<FinancialAccount>>>.error(
+                Exception('DB error'),
+              ),
             ),
           ],
           child: const MaterialApp(
@@ -200,13 +207,16 @@ void main() {
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     });
 
-    testWidgets('7. archived accounts excluded — empty state shown', (tester) async {
+    testWidgets('7. archived accounts excluded — empty state shown', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_archivedAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_archivedAccount]),
             ),
           ],
           child: const MaterialApp(
@@ -223,13 +233,16 @@ void main() {
       expect(find.text('حساب مؤرشف'), findsNothing);
     });
 
-    testWidgets('8. amount text field visible when accounts exist', (tester) async {
+    testWidgets('8. amount text field visible when accounts exist', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             appDatabaseProvider.overrideWith(_db),
             accountsProvider.overrideWith(
-              (ref, _) async => const AppOk<List<FinancialAccount>>([_fakeAccount]),
+              (ref, _) async =>
+                  const AppOk<List<FinancialAccount>>([_fakeAccount]),
             ),
           ],
           child: const MaterialApp(

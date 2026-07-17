@@ -81,7 +81,8 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
           final accounts = result.value.where((a) => !a.isArchived).toList();
 
           // Clear invalid preselected IDs (archived accounts).
-          if (_sourceAccountId != null && accounts.every((a) => a.id != _sourceAccountId)) {
+          if (_sourceAccountId != null &&
+              accounts.every((a) => a.id != _sourceAccountId)) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) setState(() => _sourceAccountId = null);
             });
@@ -93,9 +94,14 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
             });
           }
 
-          final sourceAccount = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
-          final destAccount = accounts.where((a) => a.id == _destinationAccountId).firstOrNull;
-          final isProtectedSource = sourceAccount?.requiresWithdrawalAudit ?? false;
+          final sourceAccount = accounts
+              .where((a) => a.id == _sourceAccountId)
+              .firstOrNull;
+          final destAccount = accounts
+              .where((a) => a.id == _destinationAccountId)
+              .firstOrNull;
+          final isProtectedSource =
+              sourceAccount?.requiresWithdrawalAudit ?? false;
           final hasCurrencyMismatch =
               sourceAccount != null &&
               destAccount != null &&
@@ -139,7 +145,10 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     l10n.errorSameAccount,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               if (hasCurrencyMismatch)
@@ -147,14 +156,21 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     l10n.errorCurrencyMismatch,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                ],
                 decoration: InputDecoration(
                   labelText: l10n.fieldAmount,
                   border: const OutlineInputBorder(),
@@ -202,7 +218,8 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
               ],
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => _goToReview(context, l10n, accounts, isProtectedSource),
+                onPressed: () =>
+                    _goToReview(context, l10n, accounts, isProtectedSource),
                 child: Text(l10n.reviewTitle),
               ),
             ],
@@ -229,7 +246,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
         border: const OutlineInputBorder(),
         errorText: error,
       ),
-      items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
+      items: accounts
+          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+          .toList(),
       onChanged: onChanged,
     );
   }
@@ -269,7 +288,10 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
           subtitle: _ackError != null
               ? Text(
                   _ackError!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
                 )
               : null,
           onChanged: (v) => setState(() {
@@ -283,7 +305,10 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
           subtitle: _confirmError != null
               ? Text(
                   _confirmError!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
                 )
               : null,
           onChanged: (v) => setState(() {
@@ -321,7 +346,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     // Block cross-currency transfers at the form level.
     if (_sourceAccountId != null && _destinationAccountId != null) {
       final src = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
-      final dst = accounts.where((a) => a.id == _destinationAccountId).firstOrNull;
+      final dst = accounts
+          .where((a) => a.id == _destinationAccountId)
+          .firstOrNull;
       if (src != null && dst != null && src.currencyCode != dst.currencyCode) {
         setState(() => _destError = l10n.errorCurrencyMismatch);
         hasErrors = true;
@@ -344,7 +371,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
         hasErrors = true;
       }
       if (!_confirmed) {
-        setState(() => _confirmError = l10n.errorWithdrawalConfirmationRequired);
+        setState(
+          () => _confirmError = l10n.errorWithdrawalConfirmationRequired,
+        );
         hasErrors = true;
       }
     }
@@ -382,7 +411,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
       currencyCode: sourceAccount.currencyCode,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       childWithdrawalAudit: withdrawalAudit,
     );
 

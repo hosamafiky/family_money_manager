@@ -31,17 +31,23 @@ final class FakeAccountRepository implements AccountRepository {
     );
     _accounts.add(account);
     if (params.idempotencyKey != null) {
-      _idempotencyKeys['${params.householdId}/${params.idempotencyKey}'] = params.id;
+      _idempotencyKeys['${params.householdId}/${params.idempotencyKey}'] =
+          params.id;
     }
     return account;
   }
 
   @override
-  Future<FinancialAccount?> findById({required String id, required String householdId}) async =>
-      _accounts.where((a) => a.id == id && a.householdId == householdId).firstOrNull;
+  Future<FinancialAccount?> findById({
+    required String id,
+    required String householdId,
+  }) async => _accounts
+      .where((a) => a.id == id && a.householdId == householdId)
+      .firstOrNull;
 
   // Stores idempotency key → account id for idempotency testing.
-  final Map<String, String> _idempotencyKeys = {}; // '$householdId/$key' → accountId
+  final Map<String, String> _idempotencyKeys =
+      {}; // '$householdId/$key' → accountId
 
   @override
   Future<FinancialAccount?> findByIdempotencyKey({
@@ -59,12 +65,17 @@ final class FakeAccountRepository implements AccountRepository {
     required String householdId,
     bool includeArchived = false,
   }) async => _accounts
-      .where((a) => a.householdId == householdId && (includeArchived || !a.isArchived))
+      .where(
+        (a) =>
+            a.householdId == householdId && (includeArchived || !a.isArchived),
+      )
       .toList();
 
   @override
-  Future<bool> hasOpeningBalance({required String accountId, required String householdId}) async =>
-      false;
+  Future<bool> hasOpeningBalance({
+    required String accountId,
+    required String householdId,
+  }) async => false;
 
   @override
   Future<FinancialAccount> archiveAccount({
@@ -73,7 +84,9 @@ final class FakeAccountRepository implements AccountRepository {
     required DateTime archivedAt,
     required String updatedAt,
   }) async {
-    final idx = _accounts.indexWhere((a) => a.id == id && a.householdId == householdId);
+    final idx = _accounts.indexWhere(
+      (a) => a.id == id && a.householdId == householdId,
+    );
     if (idx < 0) throw AccountNotFoundError(id);
     if (_accounts[idx].isArchived) throw AccountAlreadyArchivedError(id);
     final archived = _accounts[idx].copyWith(isArchived: true);
@@ -95,7 +108,9 @@ final class FakeAccountRepository implements AccountRepository {
     Map<String, dynamic>? metadata,
     required String updatedAt,
   }) async {
-    final idx = _accounts.indexWhere((a) => a.id == id && a.householdId == householdId);
+    final idx = _accounts.indexWhere(
+      (a) => a.id == id && a.householdId == householdId,
+    );
     if (idx < 0) throw AccountNotFoundError(id);
     final updated = _accounts[idx].copyWith(
       name: name,

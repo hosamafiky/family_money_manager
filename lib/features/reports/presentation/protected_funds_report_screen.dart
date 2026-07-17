@@ -37,12 +37,14 @@ class ProtectedFundsReportScreen extends ConsumerWidget {
             child: reportAsync.when(
               loading: () => const ReportLoading(),
               error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(protectedFundsReportProvider(req)),
+                onRetry: () =>
+                    ref.invalidate(protectedFundsReportProvider(req)),
               ),
               data: (result) {
                 if (result is! AppOk<List<ProtectedFundsSummary>>) {
                   return ReportErrorState(
-                    onRetry: () => ref.invalidate(protectedFundsReportProvider(req)),
+                    onRetry: () =>
+                        ref.invalidate(protectedFundsReportProvider(req)),
                   );
                 }
                 final funds = result.value;
@@ -69,7 +71,10 @@ class _ProtectedFundsContent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         ReportInfoNote(text: l10n.reportCurrencySeparate),
-        for (final fund in funds) ...[_FundCard(fund: fund, l10n: l10n), const SizedBox(height: 8)],
+        for (final fund in funds) ...[
+          _FundCard(fund: fund, l10n: l10n),
+          const SizedBox(height: 8),
+        ],
         const SizedBox(height: 24),
       ],
     );
@@ -91,7 +96,10 @@ class _FundCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(fund.accountName, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              fund.accountName,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ReportAmountRow(
               label: l10n.reportOpeningBalance,
@@ -137,8 +145,13 @@ class _FundCard extends StatelessWidget {
             ),
             if (fund.withdrawalAudits.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(l10n.reportWithdrawals, style: Theme.of(context).textTheme.labelMedium),
-              ...fund.withdrawalAudits.map((audit) => _AuditRow(audit: audit, l10n: l10n)),
+              Text(
+                l10n.reportWithdrawals,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              ...fund.withdrawalAudits.map(
+                (audit) => _AuditRow(audit: audit, l10n: l10n),
+              ),
             ],
           ],
         ),

@@ -155,61 +155,71 @@ void main() {
           effectiveDate: '2024-01-02',
           createdBy: 'user-1',
         ),
-        auditParams: audit(operationId: opId, householdId: 'hh-p2', accountId: acc),
+        auditParams: audit(
+          operationId: opId,
+          householdId: 'hh-p2',
+          accountId: acc,
+        ),
       );
       expect(result, IdempotentOperationResult.created);
     });
 
-    test('audit with mismatched operationId throws AuditOperationMismatchError', () async {
-      await insertHousehold('hh-p3');
-      final acc = await seedProtectedAccount('hh-p3', 'prot3');
+    test(
+      'audit with mismatched operationId throws AuditOperationMismatchError',
+      () async {
+        await insertHousehold('hh-p3');
+        final acc = await seedProtectedAccount('hh-p3', 'prot3');
 
-      await expectLater(
-        ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: 'op-exp-prot3',
-            householdId: 'hh-p3',
-            sourceAccountId: acc,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
+        await expectLater(
+          ledgerRepo.recordExpense(
+            RecordExpenseParams(
+              operationId: 'op-exp-prot3',
+              householdId: 'hh-p3',
+              sourceAccountId: acc,
+              amountMinorUnits: 3000,
+              currencyCode: 'EGP',
+              effectiveDate: '2024-01-02',
+              createdBy: 'user-1',
+            ),
+            auditParams: audit(
+              operationId: 'WRONG_OP_ID', // mismatch
+              householdId: 'hh-p3',
+              accountId: acc,
+            ),
           ),
-          auditParams: audit(
-            operationId: 'WRONG_OP_ID', // mismatch
-            householdId: 'hh-p3',
-            accountId: acc,
-          ),
-        ),
-        throwsA(isA<AuditOperationMismatchError>()),
-      );
-    });
+          throwsA(isA<AuditOperationMismatchError>()),
+        );
+      },
+    );
 
-    test('audit with mismatched accountId throws AuditAccountMismatchError', () async {
-      await insertHousehold('hh-p4');
-      final acc = await seedProtectedAccount('hh-p4', 'prot4');
+    test(
+      'audit with mismatched accountId throws AuditAccountMismatchError',
+      () async {
+        await insertHousehold('hh-p4');
+        final acc = await seedProtectedAccount('hh-p4', 'prot4');
 
-      const opId = 'op-exp-prot4';
-      await expectLater(
-        ledgerRepo.recordExpense(
-          RecordExpenseParams(
-            operationId: opId,
-            householdId: 'hh-p4',
-            sourceAccountId: acc,
-            amountMinorUnits: 3000,
-            currencyCode: 'EGP',
-            effectiveDate: '2024-01-02',
-            createdBy: 'user-1',
+        const opId = 'op-exp-prot4';
+        await expectLater(
+          ledgerRepo.recordExpense(
+            RecordExpenseParams(
+              operationId: opId,
+              householdId: 'hh-p4',
+              sourceAccountId: acc,
+              amountMinorUnits: 3000,
+              currencyCode: 'EGP',
+              effectiveDate: '2024-01-02',
+              createdBy: 'user-1',
+            ),
+            auditParams: audit(
+              operationId: opId,
+              householdId: 'hh-p4',
+              accountId: 'WRONG_ACC', // mismatch
+            ),
           ),
-          auditParams: audit(
-            operationId: opId,
-            householdId: 'hh-p4',
-            accountId: 'WRONG_ACC', // mismatch
-          ),
-        ),
-        throwsA(isA<AuditAccountMismatchError>()),
-      );
-    });
+          throwsA(isA<AuditAccountMismatchError>()),
+        );
+      },
+    );
   });
 
   // ── Transfer from protected account ──────────────────────────────────────
@@ -254,7 +264,12 @@ void main() {
           effectiveDate: '2024-01-02',
           createdBy: 'user-1',
         ),
-        auditParams: audit(operationId: opId, householdId: 'hh-tf2', accountId: src, amount: 5000),
+        auditParams: audit(
+          operationId: opId,
+          householdId: 'hh-tf2',
+          accountId: src,
+          amount: 5000,
+        ),
       );
       expect(result, IdempotentOperationResult.created);
     });

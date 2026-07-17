@@ -49,8 +49,9 @@ Widget _buildCreationScreen({Locale locale = const Locale('en')}) {
           GoRoute(path: 'new', builder: (_, _) => const BudgetCreationScreen()),
           GoRoute(
             path: ':budgetId',
-            builder: (context, state) =>
-                Scaffold(body: Text('Detail:${state.pathParameters['budgetId']}')),
+            builder: (context, state) => Scaffold(
+              body: Text('Detail:${state.pathParameters['budgetId']}'),
+            ),
           ),
         ],
       ),
@@ -61,7 +62,9 @@ Widget _buildCreationScreen({Locale locale = const Locale('en')}) {
     overrides: [
       appConfigProvider.overrideWithValue(AppConfig.development),
       appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(locale)),
-      appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+      appThemeModeProvider.overrideWith(
+        () => _FixedThemeModeNotifier(ThemeMode.light),
+      ),
     ],
     child: MaterialApp.router(
       locale: locale,
@@ -101,7 +104,10 @@ void main() {
       await tester.pumpWidget(_buildCreationScreen());
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(TextFormField, 'Monthly limit'), findsOneWidget);
+      expect(
+        find.widgetWithText(TextFormField, 'Monthly limit'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('4. Monthly period option selectable', (tester) async {
@@ -112,7 +118,9 @@ void main() {
       expect(find.text('Monthly (recurring)'), findsOneWidget);
     });
 
-    testWidgets('5. Fixed period shows date pickers after selection', (tester) async {
+    testWidgets('5. Fixed period shows date pickers after selection', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildCreationScreen());
       await tester.pumpAndSettle();
 
@@ -131,12 +139,17 @@ void main() {
       expect(find.textContaining('Budgets may overlap'), findsOneWidget);
     });
 
-    testWidgets('7. Submit with empty name shows validation error', (tester) async {
+    testWidgets('7. Submit with empty name shows validation error', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildCreationScreen());
       await tester.pumpAndSettle();
 
       // Enter a valid limit so only the name fails validation
-      await tester.enterText(find.widgetWithText(TextFormField, 'Monthly limit'), '100');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Monthly limit'),
+        '100',
+      );
       await tester.pump();
 
       // FilledButton is the submit button (AppBar title shares text "New Budget")
@@ -148,12 +161,20 @@ void main() {
       expect(find.text('Budget name is required'), findsOneWidget);
     });
 
-    testWidgets('8. Submit with zero limit shows validation error', (tester) async {
+    testWidgets('8. Submit with zero limit shows validation error', (
+      tester,
+    ) async {
       await tester.pumpWidget(_buildCreationScreen());
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.widgetWithText(TextFormField, 'Budget name'), 'My Budget');
-      await tester.enterText(find.widgetWithText(TextFormField, 'Monthly limit'), '0');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Budget name'),
+        'My Budget',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Monthly limit'),
+        '0',
+      );
       await tester.pump();
 
       final submitButton = find.byType(FilledButton);
@@ -161,26 +182,39 @@ void main() {
       await tester.tap(submitButton);
       await tester.pump();
 
-      expect(find.text('Budget limit must be greater than zero'), findsOneWidget);
+      expect(
+        find.text('Budget limit must be greater than zero'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('9. Fixed period changes limit label from Monthly limit to Budget limit', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildCreationScreen());
-      await tester.pumpAndSettle();
+    testWidgets(
+      '9. Fixed period changes limit label from Monthly limit to Budget limit',
+      (tester) async {
+        await tester.pumpWidget(_buildCreationScreen());
+        await tester.pumpAndSettle();
 
-      // In monthly mode: label is "Monthly limit"
-      expect(find.widgetWithText(TextFormField, 'Monthly limit'), findsOneWidget);
+        // In monthly mode: label is "Monthly limit"
+        expect(
+          find.widgetWithText(TextFormField, 'Monthly limit'),
+          findsOneWidget,
+        );
 
-      // Switch to fixed period
-      await tester.tap(find.text('Fixed period'));
-      await tester.pumpAndSettle();
+        // Switch to fixed period
+        await tester.tap(find.text('Fixed period'));
+        await tester.pumpAndSettle();
 
-      // Label changes to "Budget limit" and monthly label is gone
-      expect(find.widgetWithText(TextFormField, 'Budget limit'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Monthly limit'), findsNothing);
-    });
+        // Label changes to "Budget limit" and monthly label is gone
+        expect(
+          find.widgetWithText(TextFormField, 'Budget limit'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(TextFormField, 'Monthly limit'),
+          findsNothing,
+        );
+      },
+    );
 
     testWidgets('10. Arabic RTL layout', (tester) async {
       await tester.pumpWidget(_buildCreationScreen(locale: const Locale('ar')));

@@ -49,7 +49,9 @@ final class DriftGoalRepository implements GoalRepository {
           final found = await _findById(existingId);
           if (found != null) return AppOk(found);
         }
-        return const AppDuplicateConflict(messageKey: 'errorGoalIdempotencyConflict');
+        return const AppDuplicateConflict(
+          messageKey: 'errorGoalIdempotencyConflict',
+        );
       }
 
       final payload = _buildIdempotencyPayload(goal, initialRevision);
@@ -172,7 +174,9 @@ final class DriftGoalRepository implements GoalRepository {
     String? archivedAt,
   }) async {
     try {
-      await (_db.update(_db.goalsTable)..where((t) => t.id.equals(goalId))).write(
+      await (_db.update(
+        _db.goalsTable,
+      )..where((t) => t.id.equals(goalId))).write(
         GoalsTableCompanion(
           status: Value(status.name),
           completedAt: Value(completedAt),
@@ -285,7 +289,10 @@ final class DriftGoalRepository implements GoalRepository {
           .customSelect(
             'SELECT direction, amount_minor_units FROM ledger_entries '
             'WHERE account_id = ? AND household_id = ?',
-            variables: [Variable.withString(reserveAccountId), Variable.withString(householdId)],
+            variables: [
+              Variable.withString(reserveAccountId),
+              Variable.withString(householdId),
+            ],
           )
           .get();
 
@@ -310,7 +317,10 @@ final class DriftGoalRepository implements GoalRepository {
   /// Loads a [SavingsGoal] with its current (latest) revision.
   Future<SavingsGoal?> _findById(String goalId) async {
     final goalRows = await _db
-        .customSelect('SELECT * FROM goals WHERE id = ?', variables: [Variable.withString(goalId)])
+        .customSelect(
+          'SELECT * FROM goals WHERE id = ?',
+          variables: [Variable.withString(goalId)],
+        )
         .get();
     if (goalRows.isEmpty) return null;
     final g = goalRows.first;

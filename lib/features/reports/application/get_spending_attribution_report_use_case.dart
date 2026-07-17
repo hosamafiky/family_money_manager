@@ -20,12 +20,20 @@ final class GetSpendingAttributionReportUseCase {
 
   final ReportQueryRepository _repository;
 
-  Future<AppResult<SpendingAttributionReport>> execute(FinancialReportRequest req) async {
+  Future<AppResult<SpendingAttributionReport>> execute(
+    FinancialReportRequest req,
+  ) async {
     if (req.householdId.isEmpty) {
-      return const AppValidationFailure(field: 'householdId', messageKey: 'errorValidationGeneric');
+      return const AppValidationFailure(
+        field: 'householdId',
+        messageKey: 'errorValidationGeneric',
+      );
     }
     if (req.period.startDate.compareTo(req.period.endDate) >= 0) {
-      return const AppValidationFailure(field: 'period', messageKey: 'errorValidationGeneric');
+      return const AppValidationFailure(
+        field: 'period',
+        messageKey: 'errorValidationGeneric',
+      );
     }
     try {
       final bySpender = await _repository.expenseBySpender(req);

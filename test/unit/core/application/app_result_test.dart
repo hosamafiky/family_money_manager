@@ -19,7 +19,10 @@ void main() {
 
   group('AppValidationFailure', () {
     test('exposes field and messageKey', () {
-      const result = AppValidationFailure<int>(field: 'name', messageKey: 'error_name_empty');
+      const result = AppValidationFailure<int>(
+        field: 'name',
+        messageKey: 'error_name_empty',
+      );
       expect(result.field, 'name');
       expect(result.messageKey, 'error_name_empty');
     });
@@ -27,7 +30,9 @@ void main() {
 
   group('AppDuplicateConflict', () {
     test('exposes messageKey', () {
-      const result = AppDuplicateConflict<String>(messageKey: 'error_duplicate');
+      const result = AppDuplicateConflict<String>(
+        messageKey: 'error_duplicate',
+      );
       expect(result.messageKey, 'error_duplicate');
     });
   });
@@ -48,7 +53,9 @@ void main() {
 
   group('AppClassificationImmutabilityViolation', () {
     test('exposes field', () {
-      const result = AppClassificationImmutabilityViolation<int>(field: 'isProtected');
+      const result = AppClassificationImmutabilityViolation<int>(
+        field: 'isProtected',
+      );
       expect(result.field, 'isProtected');
     });
   });
@@ -70,11 +77,13 @@ void main() {
   group('Pattern matching on AppResult variants', () {
     String describe(AppResult<int> r) => switch (r) {
       AppOk(:final value) => 'ok:$value',
-      AppValidationFailure(:final field, :final messageKey) => 'validation:$field:$messageKey',
+      AppValidationFailure(:final field, :final messageKey) =>
+        'validation:$field:$messageKey',
       AppDuplicateConflict(:final messageKey) => 'duplicate:$messageKey',
       AppNotFound() => 'not_found',
       AppIsolationViolation() => 'isolation',
-      AppClassificationImmutabilityViolation(:final field) => 'immutability:$field',
+      AppClassificationImmutabilityViolation(:final field) =>
+        'immutability:$field',
       AppPersistenceFailure() => 'persistence',
       AppUnexpectedFailure() => 'unexpected',
       AppInsufficientFunds() => 'insufficient_funds',
@@ -85,11 +94,17 @@ void main() {
     });
 
     test('AppValidationFailure matches correctly', () {
-      expect(describe(const AppValidationFailure(field: 'f', messageKey: 'k')), 'validation:f:k');
+      expect(
+        describe(const AppValidationFailure(field: 'f', messageKey: 'k')),
+        'validation:f:k',
+      );
     });
 
     test('AppDuplicateConflict matches correctly', () {
-      expect(describe(const AppDuplicateConflict(messageKey: 'dup')), 'duplicate:dup');
+      expect(
+        describe(const AppDuplicateConflict(messageKey: 'dup')),
+        'duplicate:dup',
+      );
     });
 
     test('AppNotFound matches correctly', () {
@@ -101,7 +116,10 @@ void main() {
     });
 
     test('AppClassificationImmutabilityViolation matches correctly', () {
-      expect(describe(const AppClassificationImmutabilityViolation(field: 'x')), 'immutability:x');
+      expect(
+        describe(const AppClassificationImmutabilityViolation(field: 'x')),
+        'immutability:x',
+      );
     });
 
     test('AppPersistenceFailure matches correctly', () {

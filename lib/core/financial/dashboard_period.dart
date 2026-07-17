@@ -45,7 +45,11 @@ final class SystemClock implements Clock {
 /// - Dates are 'YYYY-MM-DD' strings for direct SQL comparison
 @immutable
 final class DashboardPeriod {
-  const DashboardPeriod({required this.startDate, required this.endDate, required this.label});
+  const DashboardPeriod({
+    required this.startDate,
+    required this.endDate,
+    required this.label,
+  });
 
   /// 'YYYY-MM-DD' inclusive start boundary.
   final String startDate;
@@ -91,7 +95,10 @@ final class DashboardPeriod {
   }
 
   /// Custom date range (inclusive start, exclusive end).
-  factory DashboardPeriod.custom({required String startDate, required String endDate}) {
+  factory DashboardPeriod.custom({
+    required String startDate,
+    required String endDate,
+  }) {
     return DashboardPeriod(
       startDate: startDate,
       endDate: endDate,
@@ -108,7 +115,8 @@ final class DashboardPeriod {
   ///
   /// Uses lexicographic string comparison (YYYY-MM-DD format).
   bool contains(String effectiveDate) =>
-      effectiveDate.compareTo(startDate) >= 0 && effectiveDate.compareTo(endDate) < 0;
+      effectiveDate.compareTo(startDate) >= 0 &&
+      effectiveDate.compareTo(endDate) < 0;
 
   @override
   bool operator ==(Object other) =>

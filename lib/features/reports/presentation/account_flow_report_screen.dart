@@ -36,12 +36,14 @@ class AccountFlowReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) =>
-                  ReportErrorState(onRetry: () => ref.invalidate(accountFlowReportProvider(req))),
+              error: (_, _) => ReportErrorState(
+                onRetry: () => ref.invalidate(accountFlowReportProvider(req)),
+              ),
               data: (result) {
                 if (result is! AppOk<List<AccountFlowBreakdown>>) {
                   return ReportErrorState(
-                    onRetry: () => ref.invalidate(accountFlowReportProvider(req)),
+                    onRetry: () =>
+                        ref.invalidate(accountFlowReportProvider(req)),
                   );
                 }
                 final accounts = result.value;
@@ -93,7 +95,10 @@ class _AccountCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(account.accountName, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              account.accountName,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ReportAmountRow(
               label: l10n.reportOpeningBalance,

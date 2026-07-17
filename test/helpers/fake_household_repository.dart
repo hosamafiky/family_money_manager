@@ -63,7 +63,10 @@ final class FakeHouseholdRepository implements HouseholdRepository {
     if (role == MemberRole.spouse) {
       final existing = _members
           .where(
-            (m) => m.householdId == householdId && m.role == MemberRole.spouse && !m.isArchived,
+            (m) =>
+                m.householdId == householdId &&
+                m.role == MemberRole.spouse &&
+                !m.isArchived,
           )
           .firstOrNull;
       if (existing != null) throw DuplicateSpouseError();
@@ -87,7 +90,9 @@ final class FakeHouseholdRepository implements HouseholdRepository {
   Future<HouseholdMember?> findMember({
     required String memberId,
     required String householdId,
-  }) async => _members.where((m) => m.id == memberId && m.householdId == householdId).firstOrNull;
+  }) async => _members
+      .where((m) => m.id == memberId && m.householdId == householdId)
+      .firstOrNull;
 
   @override
   Future<List<HouseholdMember>> listMembers(String householdId) async =>
@@ -99,7 +104,9 @@ final class FakeHouseholdRepository implements HouseholdRepository {
     required String householdId,
     required String displayName,
   }) async {
-    final idx = _members.indexWhere((m) => m.id == memberId && m.householdId == householdId);
+    final idx = _members.indexWhere(
+      (m) => m.id == memberId && m.householdId == householdId,
+    );
     if (idx < 0) throw MemberNotFoundError(memberId);
     final now = DateTime.now().toUtc().toIso8601String();
     final updated = HouseholdMember(
@@ -121,7 +128,9 @@ final class FakeHouseholdRepository implements HouseholdRepository {
     required String memberId,
     required String householdId,
   }) async {
-    final idx = _members.indexWhere((m) => m.id == memberId && m.householdId == householdId);
+    final idx = _members.indexWhere(
+      (m) => m.id == memberId && m.householdId == householdId,
+    );
     if (idx < 0) throw MemberNotFoundError(memberId);
     if (_members[idx].role == MemberRole.primaryUser) {
       throw CannotArchivePrimaryUserError();

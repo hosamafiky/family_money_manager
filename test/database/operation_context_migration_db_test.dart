@@ -31,7 +31,9 @@ void main() {
 
     test('1: all required tables exist including operation_contexts', () async {
       final rows = await db
-          .customSelect("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
+          )
           .get();
       final tableNames = rows.map((r) => r.read<String>('name')).toList();
 
@@ -50,7 +52,9 @@ void main() {
     });
 
     test('2: operation_contexts has expected columns', () async {
-      final cols = await db.customSelect('PRAGMA table_info(operation_contexts)').get();
+      final cols = await db
+          .customSelect('PRAGMA table_info(operation_contexts)')
+          .get();
       final colNames = cols.map((r) => r.read<String>('name')).toSet();
 
       expect(
@@ -71,12 +75,17 @@ void main() {
 
       // operation_id is PK (notnull = 1 and pk = 1 in PRAGMA table_info).
       final pkCols = cols.where((r) => r.read<int>('pk') == 1);
-      expect(pkCols.map((r) => r.read<String>('name')), contains('operation_id'));
+      expect(
+        pkCols.map((r) => r.read<String>('name')),
+        contains('operation_id'),
+      );
     });
 
     test('3: operation_contexts FK and immutability triggers exist', () async {
       final rows = await db
-          .customSelect("SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name")
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name",
+          )
           .get();
       final triggerNames = rows.map((r) => r.read<String>('name')).toSet();
 
@@ -90,74 +99,81 @@ void main() {
       );
     });
 
-    test('4: existing data preserved — households, accounts, operations, entries', () async {
-      // Seed data using raw SQL to simulate pre-existing data.
-      await db.customStatement(
-        "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
-        "VALUES ('hh-mig5-1', 'Migrate HH', 'user-1', '2024-01-01', '2024-01-01')",
-      );
+    test(
+      '4: existing data preserved — households, accounts, operations, entries',
+      () async {
+        // Seed data using raw SQL to simulate pre-existing data.
+        await db.customStatement(
+          "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+          "VALUES ('hh-mig5-1', 'Migrate HH', 'user-1', '2024-01-01', '2024-01-01')",
+        );
 
-      final accountRepo = DriftAccountRepository(db);
-      await accountRepo.createAccount(
-        const CreateAccountParams(
-          id: 'acc-mig5-1',
-          householdId: 'hh-mig5-1',
-          name: 'Migrated Account',
-          type: FinancialAccountType.personalCashWallet,
-          ownerType: AccountOwnerType.user,
-          fundPurpose: FundPurpose.available,
-          currencyCode: 'EGP',
-          isSpendable: true,
-          isProtected: false,
-          includeInNetWorth: true,
-          includeInZakat: false,
-          displayOrder: 0,
-          createdBy: 'user-1',
-        ),
-      );
+        final accountRepo = DriftAccountRepository(db);
+        await accountRepo.createAccount(
+          const CreateAccountParams(
+            id: 'acc-mig5-1',
+            householdId: 'hh-mig5-1',
+            name: 'Migrated Account',
+            type: FinancialAccountType.personalCashWallet,
+            ownerType: AccountOwnerType.user,
+            fundPurpose: FundPurpose.available,
+            currencyCode: 'EGP',
+            isSpendable: true,
+            isProtected: false,
+            includeInNetWorth: true,
+            includeInZakat: false,
+            displayOrder: 0,
+            createdBy: 'user-1',
+          ),
+        );
 
-      final ledgerRepo = DriftLedgerRepository(db);
-      await ledgerRepo.recordIncome(
-        RecordIncomeParams(
-          operationId: 'op-mig5-1',
-          householdId: 'hh-mig5-1',
-          destinationAccountId: 'acc-mig5-1',
-          amountMinorUnits: 7500,
-          currencyCode: 'EGP',
-          effectiveDate: '2024-01-01',
-          createdBy: 'user-1',
-        ),
-      );
+        final ledgerRepo = DriftLedgerRepository(db);
+        await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-mig5-1',
+            householdId: 'hh-mig5-1',
+            destinationAccountId: 'acc-mig5-1',
+            amountMinorUnits: 7500,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
 
-      // Verify all rows survived.
-      final hhRows = await db
-          .customSelect("SELECT id FROM households WHERE id = 'hh-mig5-1'")
-          .get();
-      expect(hhRows.length, 1);
+        // Verify all rows survived.
+        final hhRows = await db
+            .customSelect("SELECT id FROM households WHERE id = 'hh-mig5-1'")
+            .get();
+        expect(hhRows.length, 1);
 
-      final accRows = await db
-          .customSelect("SELECT id FROM financial_accounts WHERE id = 'acc-mig5-1'")
-          .get();
-      expect(accRows.length, 1);
+        final accRows = await db
+            .customSelect(
+              "SELECT id FROM financial_accounts WHERE id = 'acc-mig5-1'",
+            )
+            .get();
+        expect(accRows.length, 1);
 
-      final opRows = await db
-          .customSelect("SELECT id FROM operations WHERE id = 'op-mig5-1'")
-          .get();
-      expect(opRows.length, 1);
+        final opRows = await db
+            .customSelect("SELECT id FROM operations WHERE id = 'op-mig5-1'")
+            .get();
+        expect(opRows.length, 1);
 
-      final entryRows = await db
-          .customSelect("SELECT id FROM ledger_entries WHERE operation_id = 'op-mig5-1'")
-          .get();
-      expect(entryRows.length, 1);
+        final entryRows = await db
+            .customSelect(
+              "SELECT id FROM ledger_entries WHERE operation_id = 'op-mig5-1'",
+            )
+            .get();
+        expect(entryRows.length, 1);
 
-      // operation_contexts row must also exist.
-      final ctxRows = await db
-          .customSelect(
-            "SELECT operation_id FROM operation_contexts WHERE operation_id = 'op-mig5-1'",
-          )
-          .get();
-      expect(ctxRows.length, 1);
-    });
+        // operation_contexts row must also exist.
+        final ctxRows = await db
+            .customSelect(
+              "SELECT operation_id FROM operation_contexts WHERE operation_id = 'op-mig5-1'",
+            )
+            .get();
+        expect(ctxRows.length, 1);
+      },
+    );
 
     test('5: operation_contexts UPDATE trigger fires on v5 db', () async {
       await db.customStatement(
@@ -204,20 +220,23 @@ void main() {
       );
     });
 
-    test('6: operation_contexts FK trigger fires — cannot insert orphan context', () async {
-      await db.customStatement(
-        "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
-        "VALUES ('hh-mig5-3', 'HH', 'user-1', '2024-01-01', '2024-01-01')",
-      );
+    test(
+      '6: operation_contexts FK trigger fires — cannot insert orphan context',
+      () async {
+        await db.customStatement(
+          "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+          "VALUES ('hh-mig5-3', 'HH', 'user-1', '2024-01-01', '2024-01-01')",
+        );
 
-      await expectLater(
-        db.customStatement(
-          "INSERT INTO operation_contexts "
-          "(operation_id, household_id, created_at) "
-          "VALUES ('op-does-not-exist', 'hh-mig5-3', '2024-01-01T00:00:00Z')",
-        ),
-        throwsA(anything),
-      );
-    });
+        await expectLater(
+          db.customStatement(
+            "INSERT INTO operation_contexts "
+            "(operation_id, household_id, created_at) "
+            "VALUES ('op-does-not-exist', 'hh-mig5-3', '2024-01-01T00:00:00Z')",
+          ),
+          throwsA(anything),
+        );
+      },
+    );
   });
 }

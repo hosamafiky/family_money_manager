@@ -26,39 +26,60 @@ final reportQueryRepositoryProvider = Provider<ReportQueryRepository>((ref) {
 
 // ── Use cases ─────────────────────────────────────────────────────────────────
 
-final getIncomeExpenseReportUseCaseProvider = Provider<GetIncomeExpenseReportUseCase>((ref) {
-  return GetIncomeExpenseReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getIncomeExpenseReportUseCaseProvider =
+    Provider<GetIncomeExpenseReportUseCase>((ref) {
+      return GetIncomeExpenseReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
-final getSpendingAttributionReportUseCaseProvider = Provider<GetSpendingAttributionReportUseCase>((
+final getSpendingAttributionReportUseCaseProvider =
+    Provider<GetSpendingAttributionReportUseCase>((ref) {
+      return GetSpendingAttributionReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
+
+final getCategoryReportUseCaseProvider = Provider<GetCategoryReportUseCase>((
   ref,
 ) {
-  return GetSpendingAttributionReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
-
-final getCategoryReportUseCaseProvider = Provider<GetCategoryReportUseCase>((ref) {
   return GetCategoryReportUseCase(ref.watch(reportQueryRepositoryProvider));
 });
 
-final getAccountFlowReportUseCaseProvider = Provider<GetAccountFlowReportUseCase>((ref) {
-  return GetAccountFlowReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getAccountFlowReportUseCaseProvider =
+    Provider<GetAccountFlowReportUseCase>((ref) {
+      return GetAccountFlowReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
-final getHomeSavingsReportUseCaseProvider = Provider<GetHomeSavingsReportUseCase>((ref) {
-  return GetHomeSavingsReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getHomeSavingsReportUseCaseProvider =
+    Provider<GetHomeSavingsReportUseCase>((ref) {
+      return GetHomeSavingsReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
-final getSpouseWalletReportUseCaseProvider = Provider<GetSpouseWalletReportUseCase>((ref) {
-  return GetSpouseWalletReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getSpouseWalletReportUseCaseProvider =
+    Provider<GetSpouseWalletReportUseCase>((ref) {
+      return GetSpouseWalletReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
-final getProtectedFundsReportUseCaseProvider = Provider<GetProtectedFundsReportUseCase>((ref) {
-  return GetProtectedFundsReportUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getProtectedFundsReportUseCaseProvider =
+    Provider<GetProtectedFundsReportUseCase>((ref) {
+      return GetProtectedFundsReportUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
-final getReportTransactionsUseCaseProvider = Provider<GetReportTransactionsUseCase>((ref) {
-  return GetReportTransactionsUseCase(ref.watch(reportQueryRepositoryProvider));
-});
+final getReportTransactionsUseCaseProvider =
+    Provider<GetReportTransactionsUseCase>((ref) {
+      return GetReportTransactionsUseCase(
+        ref.watch(reportQueryRepositoryProvider),
+      );
+    });
 
 // ── Selected report request ───────────────────────────────────────────────────
 
@@ -80,56 +101,81 @@ class ReportRequestNotifier extends Notifier<FinancialReportRequest> {
 /// The currently selected report request (period + filters).
 ///
 /// Defaults to the current month with no filters.
-final reportRequestProvider = NotifierProvider<ReportRequestNotifier, FinancialReportRequest>(
-  ReportRequestNotifier.new,
-);
+final reportRequestProvider =
+    NotifierProvider<ReportRequestNotifier, FinancialReportRequest>(
+      ReportRequestNotifier.new,
+    );
 
 // ── Report data providers ─────────────────────────────────────────────────────
 
 final incomeExpenseReportProvider = FutureProvider.autoDispose
-    .family<AppResult<List<CurrencyFlowSummary>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<CurrencyFlowSummary>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getIncomeExpenseReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final spendingAttributionReportProvider = FutureProvider.autoDispose
-    .family<AppResult<SpendingAttributionReport>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<SpendingAttributionReport>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getSpendingAttributionReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final categoryReportProvider = FutureProvider.autoDispose
-    .family<AppResult<CategoryReport>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<CategoryReport>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getCategoryReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final accountFlowReportProvider = FutureProvider.autoDispose
-    .family<AppResult<List<AccountFlowBreakdown>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<AccountFlowBreakdown>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getAccountFlowReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final homeSavingsReportProvider = FutureProvider.autoDispose
-    .family<AppResult<List<HomeSavingsFlowSummary>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<HomeSavingsFlowSummary>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getHomeSavingsReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final spouseWalletReportProvider = FutureProvider.autoDispose
-    .family<AppResult<List<SpouseWalletReport>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<SpouseWalletReport>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getSpouseWalletReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final protectedFundsReportProvider = FutureProvider.autoDispose
-    .family<AppResult<List<ProtectedFundsSummary>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<ProtectedFundsSummary>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getProtectedFundsReportUseCaseProvider);
       return useCase.execute(req);
     });
 
 final reportTransactionsProvider = FutureProvider.autoDispose
-    .family<AppResult<List<ReportTransactionRow>>, FinancialReportRequest>((ref, req) async {
+    .family<AppResult<List<ReportTransactionRow>>, FinancialReportRequest>((
+      ref,
+      req,
+    ) async {
       final useCase = ref.watch(getReportTransactionsUseCaseProvider);
       return useCase.execute(req);
     });

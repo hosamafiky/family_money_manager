@@ -45,7 +45,10 @@ GoalRevision _fakeRevision({
   revisionReason: 'initial',
 );
 
-SavingsGoal _fakeGoal({GoalStatus status = GoalStatus.active, int targetMinorUnits = 100000}) {
+SavingsGoal _fakeGoal({
+  GoalStatus status = GoalStatus.active,
+  int targetMinorUnits = 100000,
+}) {
   final rev = _fakeRevision(targetMinorUnits: targetMinorUnits);
   return SavingsGoal(
     id: 'g-1',
@@ -226,7 +229,10 @@ void main() {
     test('18. GoalProgressState is not derived from GoalStatus', () {
       // A completed goal can still have non-100% progress if you manually
       // completed it before reaching target.
-      final completedGoal = _fakeGoal(status: GoalStatus.completed, targetMinorUnits: 100000);
+      final completedGoal = _fakeGoal(
+        status: GoalStatus.completed,
+        targetMinorUnits: 100000,
+      );
       // We construct progress independently from status.
       final progress = GoalProgress(
         goal: completedGoal,
@@ -246,12 +252,21 @@ void main() {
       // Domain rule: goalReserve accounts have isProtected = false.
       // This test verifies the rule by checking the account_enums setup.
       // goalReserve type does NOT requiresProtectedWithdrawalAudit.
-      expect(FinancialAccountType.goalReserve.requiresProtectedWithdrawalAudit, isFalse);
+      expect(
+        FinancialAccountType.goalReserve.requiresProtectedWithdrawalAudit,
+        isFalse,
+      );
     });
 
-    test('20. FinancialAccountType.goalReserve and FundPurpose.goalReserve exist', () {
-      expect(FinancialAccountType.values, contains(FinancialAccountType.goalReserve));
-      expect(FundPurpose.values, contains(FundPurpose.goalReserve));
-    });
+    test(
+      '20. FinancialAccountType.goalReserve and FundPurpose.goalReserve exist',
+      () {
+        expect(
+          FinancialAccountType.values,
+          contains(FinancialAccountType.goalReserve),
+        );
+        expect(FundPurpose.values, contains(FundPurpose.goalReserve));
+      },
+    );
   });
 }

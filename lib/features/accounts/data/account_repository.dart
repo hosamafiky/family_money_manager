@@ -25,7 +25,10 @@ abstract interface class AccountRepository {
   });
 
   /// Returns the account with [id] within [householdId], or null when not found.
-  Future<FinancialAccount?> findById({required String id, required String householdId});
+  Future<FinancialAccount?> findById({
+    required String id,
+    required String householdId,
+  });
 
   /// Returns all accounts for [householdId].
   ///
@@ -39,7 +42,10 @@ abstract interface class AccountRepository {
   /// Checks whether an opening balance has already been recorded for [accountId].
   ///
   /// Used to enforce the single-opening-balance rule (FINANCIAL_MODEL §5.1).
-  Future<bool> hasOpeningBalance({required String accountId, required String householdId});
+  Future<bool> hasOpeningBalance({
+    required String accountId,
+    required String householdId,
+  });
 
   /// Marks the account as archived.
   ///
@@ -90,7 +96,8 @@ final class DuplicateAccountIdError extends Error {
   DuplicateAccountIdError(this.accountId);
   final String accountId;
   @override
-  String toString() => 'DuplicateAccountIdError: account $accountId already exists';
+  String toString() =>
+      'DuplicateAccountIdError: account $accountId already exists';
 }
 
 final class AccountNotFoundError extends Error {
@@ -104,7 +111,8 @@ final class AccountAlreadyArchivedError extends Error {
   AccountAlreadyArchivedError(this.accountId);
   final String accountId;
   @override
-  String toString() => 'AccountAlreadyArchivedError: account $accountId is already archived';
+  String toString() =>
+      'AccountAlreadyArchivedError: account $accountId is already archived';
 }
 
 /// Thrown when attempting to mutate a classification field (isProtected,

@@ -77,7 +77,9 @@ GoalProgress _fakeProgress(SavingsGoal goal, {int balance = 0}) => GoalProgress(
   goal: goal,
   reserveBalanceMinorUnits: balance,
   currencyCode: goal.currencyCode,
-  progressState: balance == 0 ? GoalProgressState.notStarted : GoalProgressState.inProgress,
+  progressState: balance == 0
+      ? GoalProgressState.notStarted
+      : GoalProgressState.inProgress,
   movements: const [],
   revisions: [goal.currentRevision],
 );
@@ -119,8 +121,12 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith(
               (ref, _) => Completer<AppResult<List<SavingsGoal>>>().future,
             ),
@@ -140,10 +146,18 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            goalsProvider.overrideWith((ref, _) async => const AppOk(<SavingsGoal>[])),
-            goalProgressProvider.overrideWith((ref, _) async => Future.error('not needed')),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            goalsProvider.overrideWith(
+              (ref, _) async => const AppOk(<SavingsGoal>[]),
+            ),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => Future.error('not needed'),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),
@@ -159,9 +173,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            goalsProvider.overrideWith((ref, _) => Future.error(Exception('DB error'))),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            goalsProvider.overrideWith(
+              (ref, _) => Future.error(Exception('DB error')),
+            ),
             goalProgressProvider.overrideWith(
               (ref, _) => Future.error(Exception('progress error')),
             ),
@@ -173,7 +193,9 @@ void main() {
       expect(find.textContaining('DB error'), findsOneWidget);
     });
 
-    testWidgets('4. Goal card shows name, currency, target amount', (tester) async {
+    testWidgets('4. Goal card shows name, currency, target amount', (
+      tester,
+    ) async {
       final goal = _fakeGoal(name: 'Car Fund', currency: 'EGP', target: 200000);
       final progress = _fakeProgress(goal, balance: 50000);
 
@@ -181,10 +203,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith((ref, _) async => AppOk([goal])),
-            goalProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),
@@ -205,9 +233,15 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            goalsProvider.overrideWith((ref, _) async => AppOk([goalEgp, goalUsd])),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            goalsProvider.overrideWith(
+              (ref, _) async => AppOk([goalEgp, goalUsd]),
+            ),
             goalProgressProvider.overrideWith((ref, goalId) async {
               if (goalId == 'g-egp') return AppOk(progressEgp);
               return AppOk(progressUsd);
@@ -223,7 +257,9 @@ void main() {
       expect(find.textContaining('Total'), findsNothing);
     });
 
-    testWidgets('6. Status badge uses text + icon (not color alone)', (tester) async {
+    testWidgets('6. Status badge uses text + icon (not color alone)', (
+      tester,
+    ) async {
       final goal = _fakeGoal(status: GoalStatus.active);
       final progress = _fakeProgress(goal);
 
@@ -231,10 +267,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith((ref, _) async => AppOk([goal])),
-            goalProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),
@@ -253,10 +295,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('ar'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('ar')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith((ref, _) async => AppOk([goal])),
-            goalProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('ar')),
         ),
@@ -274,10 +322,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith((ref, _) async => AppOk([goal])),
-            goalProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),
@@ -292,17 +346,27 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
-            goalsProvider.overrideWith((ref, _) async => const AppOk(<SavingsGoal>[])),
-            goalProgressProvider.overrideWith((ref, _) async => Future.error('not used')),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
+            goalsProvider.overrideWith(
+              (ref, _) async => const AppOk(<SavingsGoal>[]),
+            ),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => Future.error('not used'),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),
       );
       await tester.pumpAndSettle();
 
-      final fab = tester.widget<FloatingActionButton>(find.byType(FloatingActionButton));
+      final fab = tester.widget<FloatingActionButton>(
+        find.byType(FloatingActionButton),
+      );
       expect(fab.heroTag, 'fab_goals');
     });
 
@@ -314,10 +378,16 @@ void main() {
         ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(() => _FixedLocaleNotifier(const Locale('en'))),
-            appThemeModeProvider.overrideWith(() => _FixedThemeModeNotifier(ThemeMode.light)),
+            appLocaleProvider.overrideWith(
+              () => _FixedLocaleNotifier(const Locale('en')),
+            ),
+            appThemeModeProvider.overrideWith(
+              () => _FixedThemeModeNotifier(ThemeMode.light),
+            ),
             goalsProvider.overrideWith((ref, _) async => AppOk([goal])),
-            goalProgressProvider.overrideWith((ref, _) async => AppOk(progress)),
+            goalProgressProvider.overrideWith(
+              (ref, _) async => AppOk(progress),
+            ),
           ],
           child: _appShell(_makeRouter(), const Locale('en')),
         ),

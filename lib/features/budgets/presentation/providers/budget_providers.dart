@@ -34,45 +34,50 @@ final listBudgetsUseCaseProvider = Provider<ListBudgetsUseCase>((ref) {
   return ListBudgetsUseCase(ref.watch(budgetRepositoryProvider));
 });
 
-final getBudgetProgressUseCaseProvider = Provider<GetBudgetProgressUseCase>((ref) {
+final getBudgetProgressUseCaseProvider = Provider<GetBudgetProgressUseCase>((
+  ref,
+) {
   return GetBudgetProgressUseCase(ref.watch(budgetRepositoryProvider));
 });
 
-final getBudgetHistoryUseCaseProvider = Provider<GetBudgetHistoryUseCase>((ref) {
+final getBudgetHistoryUseCaseProvider = Provider<GetBudgetHistoryUseCase>((
+  ref,
+) {
   return GetBudgetHistoryUseCase(ref.watch(budgetRepositoryProvider));
 });
 
 // ── Data providers ────────────────────────────────────────────────────────
 
 /// List budgets (active only by default) for a household.
-final budgetsProvider = FutureProvider.family<AppResult<List<BudgetPlan>>, String>((
-  ref,
-  householdId,
-) {
-  final useCase = ref.watch(listBudgetsUseCaseProvider);
-  return useCase.execute(householdId: householdId);
-});
+final budgetsProvider =
+    FutureProvider.family<AppResult<List<BudgetPlan>>, String>((
+      ref,
+      householdId,
+    ) {
+      final useCase = ref.watch(listBudgetsUseCaseProvider);
+      return useCase.execute(householdId: householdId);
+    });
 
 /// Budget progress for a single budget (current period).
-final budgetProgressProvider = FutureProvider.family<AppResult<BudgetProgress>, String>((
-  ref,
-  budgetId,
-) {
-  final useCase = ref.watch(getBudgetProgressUseCaseProvider);
-  return useCase.execute(budgetId: budgetId);
-});
+final budgetProgressProvider =
+    FutureProvider.family<AppResult<BudgetProgress>, String>((ref, budgetId) {
+      final useCase = ref.watch(getBudgetProgressUseCaseProvider);
+      return useCase.execute(budgetId: budgetId);
+    });
 
 /// Budget history for monthly budgets (last 6 months by default).
-final budgetHistoryProvider = FutureProvider.family<AppResult<List<BudgetProgress>>, String>((
-  ref,
-  budgetId,
-) {
-  final useCase = ref.watch(getBudgetHistoryUseCaseProvider);
-  return useCase.execute(budgetId: budgetId, numberOfMonths: 6);
-});
+final budgetHistoryProvider =
+    FutureProvider.family<AppResult<List<BudgetProgress>>, String>((
+      ref,
+      budgetId,
+    ) {
+      final useCase = ref.watch(getBudgetHistoryUseCaseProvider);
+      return useCase.execute(budgetId: budgetId, numberOfMonths: 6);
+    });
 
 /// Single budget detail (plan only, no progress calculation).
-final budgetDetailProvider = FutureProvider.family<AppResult<BudgetPlan?>, String>((ref, budgetId) {
-  final repo = ref.watch(budgetRepositoryProvider);
-  return repo.findBudgetById(budgetId);
-});
+final budgetDetailProvider =
+    FutureProvider.family<AppResult<BudgetPlan?>, String>((ref, budgetId) {
+      final repo = ref.watch(budgetRepositoryProvider);
+      return repo.findBudgetById(budgetId);
+    });

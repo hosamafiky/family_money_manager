@@ -69,13 +69,16 @@ final class CurrencyFlowSummary {
   /// Reversal operations in the period that cancel expense.
   final int expenseReversalMinorUnits;
 
-  int get netIncomeMinorUnits => grossIncomeMinorUnits - incomeReversalMinorUnits;
+  int get netIncomeMinorUnits =>
+      grossIncomeMinorUnits - incomeReversalMinorUnits;
 
-  int get netExpenseMinorUnits => grossExpenseMinorUnits - expenseReversalMinorUnits;
+  int get netExpenseMinorUnits =>
+      grossExpenseMinorUnits - expenseReversalMinorUnits;
 
   int get netCashFlowMinorUnits => netIncomeMinorUnits - netExpenseMinorUnits;
 
-  bool get hasReversalEffect => incomeReversalMinorUnits != 0 || expenseReversalMinorUnits != 0;
+  bool get hasReversalEffect =>
+      incomeReversalMinorUnits != 0 || expenseReversalMinorUnits != 0;
 }
 
 // ── Expense breakdowns ────────────────────────────────────────────────────────

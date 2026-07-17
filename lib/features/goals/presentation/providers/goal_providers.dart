@@ -31,7 +31,9 @@ final fundGoalUseCaseProvider = Provider<FundGoalUseCase>((ref) {
   );
 });
 
-final releaseGoalFundsUseCaseProvider = Provider<ReleaseGoalFundsUseCase>((ref) {
+final releaseGoalFundsUseCaseProvider = Provider<ReleaseGoalFundsUseCase>((
+  ref,
+) {
   return ReleaseGoalFundsUseCase(
     goalRepository: ref.watch(goalRepositoryProvider),
     accountRepository: ref.watch(accountRepositoryProvider),
@@ -43,7 +45,9 @@ final getGoalProgressUseCaseProvider = Provider<GetGoalProgressUseCase>((ref) {
   return GetGoalProgressUseCase(ref.watch(goalRepositoryProvider));
 });
 
-final updateGoalRevisionUseCaseProvider = Provider<UpdateGoalRevisionUseCase>((ref) {
+final updateGoalRevisionUseCaseProvider = Provider<UpdateGoalRevisionUseCase>((
+  ref,
+) {
   return UpdateGoalRevisionUseCase(ref.watch(goalRepositoryProvider));
 });
 
@@ -62,22 +66,25 @@ final restoreGoalUseCaseProvider = Provider<RestoreGoalUseCase>((ref) {
 // ── Data providers ────────────────────────────────────────────────────────
 
 /// Lists goals (active by default) for a household.
-final goalsProvider = FutureProvider.family<AppResult<List<SavingsGoal>>, String>((
-  ref,
-  householdId,
-) {
-  final repo = ref.watch(goalRepositoryProvider);
-  return repo.listGoals(householdId: householdId);
-});
+final goalsProvider =
+    FutureProvider.family<AppResult<List<SavingsGoal>>, String>((
+      ref,
+      householdId,
+    ) {
+      final repo = ref.watch(goalRepositoryProvider);
+      return repo.listGoals(householdId: householdId);
+    });
 
 /// Full progress snapshot for a single goal.
-final goalProgressProvider = FutureProvider.family<AppResult<GoalProgress>, String>((ref, goalId) {
-  final useCase = ref.watch(getGoalProgressUseCaseProvider);
-  return useCase.execute(goalId);
-});
+final goalProgressProvider =
+    FutureProvider.family<AppResult<GoalProgress>, String>((ref, goalId) {
+      final useCase = ref.watch(getGoalProgressUseCaseProvider);
+      return useCase.execute(goalId);
+    });
 
 /// Single goal detail (raw entity, without derived progress).
-final goalDetailProvider = FutureProvider.family<AppResult<SavingsGoal?>, String>((ref, goalId) {
-  final repo = ref.watch(goalRepositoryProvider);
-  return repo.findGoalById(goalId);
-});
+final goalDetailProvider =
+    FutureProvider.family<AppResult<SavingsGoal?>, String>((ref, goalId) {
+      final repo = ref.watch(goalRepositoryProvider);
+      return repo.findGoalById(goalId);
+    });

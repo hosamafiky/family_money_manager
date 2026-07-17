@@ -82,7 +82,11 @@ final class LedgerEntry {
       );
     }
     if (accountId.isEmpty) {
-      throw ArgumentError.value(accountId, 'accountId', 'LedgerEntry accountId must not be empty');
+      throw ArgumentError.value(
+        accountId,
+        'accountId',
+        'LedgerEntry accountId must not be empty',
+      );
     }
     return LedgerEntry._(
       id: id,

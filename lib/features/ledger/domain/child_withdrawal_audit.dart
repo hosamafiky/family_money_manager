@@ -68,10 +68,18 @@ final class ChildWithdrawalAudit {
       );
     }
     if (reason.isEmpty) {
-      throw ArgumentError.value(reason, 'reason', 'ChildWithdrawalAudit reason must not be empty');
+      throw ArgumentError.value(
+        reason,
+        'reason',
+        'ChildWithdrawalAudit reason must not be empty',
+      );
     }
     if (id.isEmpty) {
-      throw ArgumentError.value(id, 'id', 'ChildWithdrawalAudit id must not be empty');
+      throw ArgumentError.value(
+        id,
+        'id',
+        'ChildWithdrawalAudit id must not be empty',
+      );
     }
     if (operationId.isEmpty) {
       throw ArgumentError.value(
@@ -128,7 +136,8 @@ final class ChildWithdrawalAudit {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'ChildWithdrawalAudit(operationId: $operationId, accountId: $accountId)';
+  String toString() =>
+      'ChildWithdrawalAudit(operationId: $operationId, accountId: $accountId)';
 }
 
 /// Parameters required to record a protected-fund withdrawal.
@@ -190,10 +199,18 @@ final class ChildWithdrawalAuditParams {
       );
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
+      throw ArgumentError.value(
+        operationId,
+        'operationId',
+        'operationId must not be empty',
+      );
     }
     if (accountId.isEmpty) {
-      throw ArgumentError.value(accountId, 'accountId', 'accountId must not be empty');
+      throw ArgumentError.value(
+        accountId,
+        'accountId',
+        'accountId must not be empty',
+      );
     }
     return ChildWithdrawalAuditParams._(
       auditId: auditId,
@@ -240,7 +257,10 @@ final class MissingProtectedWithdrawalAuditError extends Error {
 
 /// Thrown when an audit record references a different operation than expected.
 final class AuditOperationMismatchError extends Error {
-  AuditOperationMismatchError({required this.auditOperationId, required this.expectedOperationId});
+  AuditOperationMismatchError({
+    required this.auditOperationId,
+    required this.expectedOperationId,
+  });
   final String auditOperationId;
   final String expectedOperationId;
   @override
@@ -254,7 +274,10 @@ final class AuditOperationMismatchError extends Error {
 /// Thrown when an audit record references a different account than the
 /// protected account being debited.
 final class AuditAccountMismatchError extends Error {
-  AuditAccountMismatchError({required this.auditAccountId, required this.expectedAccountId});
+  AuditAccountMismatchError({
+    required this.auditAccountId,
+    required this.expectedAccountId,
+  });
   final String auditAccountId;
   final String expectedAccountId;
   @override

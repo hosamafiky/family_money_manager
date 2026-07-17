@@ -17,7 +17,10 @@ abstract interface class BalanceRepository {
   /// Returns 0 for unknown or cross-household accounts (legacy behaviour).
   /// Prefer [balanceForAccount] for typed results that distinguish zero-balance
   /// from account-not-found.
-  Future<int> currentBalanceMinorUnits({required String accountId, required String householdId});
+  Future<int> currentBalanceMinorUnits({
+    required String accountId,
+    required String householdId,
+  });
 
   /// Returns a typed balance result for [accountId] within [householdId].
   ///

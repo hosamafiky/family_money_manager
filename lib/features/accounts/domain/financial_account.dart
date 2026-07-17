@@ -107,10 +107,12 @@ final class FinancialAccount {
 
   /// True when any debit from this account MUST be accompanied by a
   /// [ChildWithdrawalAuditParams] record (INV-006).
-  bool get requiresWithdrawalAudit => type.requiresProtectedWithdrawalAudit || isProtected;
+  bool get requiresWithdrawalAudit =>
+      type.requiresProtectedWithdrawalAudit || isProtected;
 
   /// True when this account is a child-protected fund (always audited).
-  bool get isChildProtectedFund => type == FinancialAccountType.childProtectedFund;
+  bool get isChildProtectedFund =>
+      type == FinancialAccountType.childProtectedFund;
 
   // ── copyWith ─────────────────────────────────────────────────────────────────
 
@@ -157,7 +159,9 @@ final class FinancialAccount {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FinancialAccount && other.id == id && other.householdId == householdId;
+      other is FinancialAccount &&
+          other.id == id &&
+          other.householdId == householdId;
 
   @override
   int get hashCode => Object.hash(id, householdId);

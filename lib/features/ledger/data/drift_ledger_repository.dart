@@ -57,7 +57,9 @@ final class DriftLedgerRepository implements LedgerRepository {
   // ── Income ────────────────────────────────────────────────────────────────
 
   @override
-  Future<IdempotentOperationResult> recordIncome(RecordIncomeParams params) async {
+  Future<IdempotentOperationResult> recordIncome(
+    RecordIncomeParams params,
+  ) async {
     // Validate account belongs to household before starting the transaction.
     await _requireAccount(params.destinationAccountId, params.householdId);
 
@@ -143,7 +145,10 @@ final class DriftLedgerRepository implements LedgerRepository {
     RecordExpenseParams params, {
     ChildWithdrawalAuditParams? auditParams,
   }) async {
-    final account = await _requireAccount(params.sourceAccountId, params.householdId);
+    final account = await _requireAccount(
+      params.sourceAccountId,
+      params.householdId,
+    );
     _checkProtectedWithdrawal(
       account: account,
       auditParams: auditParams,
@@ -252,8 +257,14 @@ final class DriftLedgerRepository implements LedgerRepository {
       throw SameAccountTransferError(params.sourceAccountId);
     }
 
-    final source = await _requireAccount(params.sourceAccountId, params.householdId);
-    final destination = await _requireAccount(params.destinationAccountId, params.householdId);
+    final source = await _requireAccount(
+      params.sourceAccountId,
+      params.householdId,
+    );
+    final destination = await _requireAccount(
+      params.destinationAccountId,
+      params.householdId,
+    );
 
     if (source.currencyCode != destination.currencyCode) {
       throw CurrencyMismatchTransferError(
@@ -265,7 +276,10 @@ final class DriftLedgerRepository implements LedgerRepository {
       throw ArchivedAccountTransferError(params.sourceAccountId, 'source');
     }
     if (destination.isArchived) {
-      throw ArchivedAccountTransferError(params.destinationAccountId, 'destination');
+      throw ArchivedAccountTransferError(
+        params.destinationAccountId,
+        'destination',
+      );
     }
     _checkProtectedWithdrawal(
       account: source,
@@ -371,7 +385,9 @@ final class DriftLedgerRepository implements LedgerRepository {
   // ── Opening balance ───────────────────────────────────────────────────────
 
   @override
-  Future<IdempotentOperationResult> recordOpeningBalance(RecordOpeningBalanceParams params) async {
+  Future<IdempotentOperationResult> recordOpeningBalance(
+    RecordOpeningBalanceParams params,
+  ) async {
     await _requireAccount(params.accountId, params.householdId);
 
     // Idempotency check: if this exact operation ID already exists → safe retry.
@@ -381,7 +397,10 @@ final class DriftLedgerRepository implements LedgerRepository {
     );
     if (existing != null) return IdempotentOperationResult.alreadyExists;
 
-    final alreadyHas = await _hasOpeningBalance(params.accountId, params.householdId);
+    final alreadyHas = await _hasOpeningBalance(
+      params.accountId,
+      params.householdId,
+    );
     if (alreadyHas) throw DuplicateOpeningBalanceError(params.accountId);
 
     final now = DateTime.now().toUtc().toIso8601String();
@@ -498,8 +517,12 @@ final class DriftLedgerRepository implements LedgerRepository {
           createdAt: now,
           updatedAt: now,
           description: Value(params.reason),
-          sourceAccountId: params.isCredit ? const Value.absent() : Value(params.accountId),
-          destinationAccountId: params.isCredit ? Value(params.accountId) : const Value.absent(),
+          sourceAccountId: params.isCredit
+              ? const Value.absent()
+              : Value(params.accountId),
+          destinationAccountId: params.isCredit
+              ? Value(params.accountId)
+              : const Value.absent(),
           idempotencyKey: Value(params.resolvedIdempotencyKey),
         ),
       );
@@ -510,7 +533,9 @@ final class DriftLedgerRepository implements LedgerRepository {
           operationId: params.operationId,
           householdId: params.householdId,
           accountId: params.accountId,
-          direction: params.isCredit ? LedgerDirection.credit.code : LedgerDirection.debit.code,
+          direction: params.isCredit
+              ? LedgerDirection.credit.code
+              : LedgerDirection.debit.code,
           amountMinorUnits: absAmount,
           currencyCode: Value(params.currencyCode),
           entryType: params.isCredit
@@ -641,7 +666,8 @@ final class DriftLedgerRepository implements LedgerRepository {
           createdAt: now,
           updatedAt: now,
           description: Value(
-            params.reason ?? 'Reversal of operation ${params.originalOperationId}',
+            params.reason ??
+                'Reversal of operation ${params.originalOperationId}',
           ),
           sourceAccountId: Value(original.destinationAccountId),
           destinationAccountId: Value(original.sourceAccountId),
@@ -681,7 +707,8 @@ final class DriftLedgerRepository implements LedgerRepository {
       // The `restrict_operations_update` DB trigger enforces this restriction.
       await (_db.update(_db.operations)..where(
             (t) =>
-                t.id.equals(params.originalOperationId) & t.householdId.equals(params.householdId),
+                t.id.equals(params.originalOperationId) &
+                t.householdId.equals(params.householdId),
           ))
           .write(
             OperationsCompanion(
@@ -699,7 +726,10 @@ final class DriftLedgerRepository implements LedgerRepository {
         OperationContextsCompanion.insert(
           operationId: params.reversalOperationId,
           householdId: params.householdId,
-          note: Value(params.reason ?? 'Reversal of operation ${params.originalOperationId}'),
+          note: Value(
+            params.reason ??
+                'Reversal of operation ${params.originalOperationId}',
+          ),
           createdAt: now,
         ),
       );
@@ -719,7 +749,11 @@ final class DriftLedgerRepository implements LedgerRepository {
   }) async {
     final rows =
         await (_db.select(_db.ledgerEntries)
-              ..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId))
+              ..where(
+                (t) =>
+                    t.accountId.equals(accountId) &
+                    t.householdId.equals(householdId),
+              )
               ..orderBy([
                 (t) => OrderingTerm.asc(t.effectiveDate),
                 (t) => OrderingTerm.asc(t.recordedAt),
@@ -735,8 +769,10 @@ final class DriftLedgerRepository implements LedgerRepository {
     required String householdId,
   }) async {
     final row =
-        await (_db.select(_db.operations)
-              ..where((t) => t.id.equals(operationId) & t.householdId.equals(householdId)))
+        await (_db.select(_db.operations)..where(
+              (t) =>
+                  t.id.equals(operationId) & t.householdId.equals(householdId),
+            ))
             .getSingleOrNull();
     return row == null ? null : _toOperation(row);
   }
@@ -783,8 +819,10 @@ final class DriftLedgerRepository implements LedgerRepository {
   }) async {
     // Check 1: exact operation ID already exists → safe retry.
     final existingById =
-        await (_db.select(_db.operations)
-              ..where((t) => t.id.equals(operationId) & t.householdId.equals(householdId)))
+        await (_db.select(_db.operations)..where(
+              (t) =>
+                  t.id.equals(operationId) & t.householdId.equals(householdId),
+            ))
             .getSingleOrNull();
     if (existingById != null) return IdempotentOperationResult.alreadyExists;
 
@@ -792,7 +830,9 @@ final class DriftLedgerRepository implements LedgerRepository {
     if (idempotencyKey != operationId) {
       final existingByKey =
           await (_db.select(_db.operations)..where(
-                (t) => t.idempotencyKey.equals(idempotencyKey) & t.householdId.equals(householdId),
+                (t) =>
+                    t.idempotencyKey.equals(idempotencyKey) &
+                    t.householdId.equals(householdId),
               ))
               .getSingleOrNull();
       if (existingByKey != null) {
@@ -803,12 +843,19 @@ final class DriftLedgerRepository implements LedgerRepository {
     return null; // proceed with insert
   }
 
-  Future<FinancialAccount> _requireAccount(String accountId, String householdId) async {
-    final row = await (_db.select(
-      _db.financialAccounts,
-    )..where((t) => t.id.equals(accountId) & t.householdId.equals(householdId))).getSingleOrNull();
+  Future<FinancialAccount> _requireAccount(
+    String accountId,
+    String householdId,
+  ) async {
+    final row =
+        await (_db.select(_db.financialAccounts)..where(
+              (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
     if (row == null) {
-      throw ArgumentError('Account $accountId not found in household $householdId');
+      throw ArgumentError(
+        'Account $accountId not found in household $householdId',
+      );
     }
     if (row.isArchived) throw ArchivedAccountError(accountId);
     return _rowToAccount(row);
@@ -818,12 +865,19 @@ final class DriftLedgerRepository implements LedgerRepository {
   ///
   /// Used for reversal operations only — reversals may correct entries on
   /// archived accounts (append-only correction principle).
-  Future<FinancialAccount> _loadAccount(String accountId, String householdId) async {
-    final row = await (_db.select(
-      _db.financialAccounts,
-    )..where((t) => t.id.equals(accountId) & t.householdId.equals(householdId))).getSingleOrNull();
+  Future<FinancialAccount> _loadAccount(
+    String accountId,
+    String householdId,
+  ) async {
+    final row =
+        await (_db.select(_db.financialAccounts)..where(
+              (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
     if (row == null) {
-      throw ArgumentError('Account $accountId not found in household $householdId');
+      throw ArgumentError(
+        'Account $accountId not found in household $householdId',
+      );
     }
     return _rowToAccount(row);
   }
@@ -840,10 +894,18 @@ final class DriftLedgerRepository implements LedgerRepository {
     return rows.isNotEmpty;
   }
 
-  Future<void> _checkSufficientBalance(String accountId, String householdId, int amount) async {
-    final entries = await (_db.select(
-      _db.ledgerEntries,
-    )..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId))).get();
+  Future<void> _checkSufficientBalance(
+    String accountId,
+    String householdId,
+    int amount,
+  ) async {
+    final entries =
+        await (_db.select(_db.ledgerEntries)..where(
+              (t) =>
+                  t.accountId.equals(accountId) &
+                  t.householdId.equals(householdId),
+            ))
+            .get();
 
     var balance = 0;
     for (final e in entries) {
@@ -912,7 +974,10 @@ final class DriftLedgerRepository implements LedgerRepository {
     await _db.into(_db.operationContexts).insert(companion);
   }
 
-  Future<void> _insertAudit(ChildWithdrawalAuditParams params, String now) async {
+  Future<void> _insertAudit(
+    ChildWithdrawalAuditParams params,
+    String now,
+  ) async {
     await _db
         .into(_db.childWithdrawalAudits)
         .insert(
@@ -961,7 +1026,9 @@ final class DriftLedgerRepository implements LedgerRepository {
     description: row.description,
     categoryCode: row.categoryCode,
     scope: row.scope != null ? ExpenseScope.fromCode(row.scope!) : null,
-    spenderRole: row.spenderRole != null ? HouseholdMemberRole.fromCode(row.spenderRole!) : null,
+    spenderRole: row.spenderRole != null
+        ? HouseholdMemberRole.fromCode(row.spenderRole!)
+        : null,
     beneficiaryRole: row.beneficiaryRole != null
         ? HouseholdMemberRole.fromCode(row.beneficiaryRole!)
         : null,
@@ -995,7 +1062,9 @@ final class DriftLedgerRepository implements LedgerRepository {
     includeInNetWorth: row.includeInNetWorth,
     includeInZakat: row.includeInZakat,
     isArchived: row.isArchived,
-    archivedAt: row.archivedAt != null ? DateTime.tryParse(row.archivedAt!)?.toUtc() : null,
+    archivedAt: row.archivedAt != null
+        ? DateTime.tryParse(row.archivedAt!)?.toUtc()
+        : null,
     displayOrder: row.displayOrder,
     notes: row.notes,
     createdAt: row.createdAt,

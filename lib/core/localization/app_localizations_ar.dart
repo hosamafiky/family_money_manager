@@ -45,10 +45,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get foundationDirectionRtl => 'يمين إلى يسار';
 
   @override
-  String get foundationNote => 'لا توجد ميزات مالية حتى الآن. المرحلة الثانية ستُضيف سجل الحسابات.';
+  String get foundationNote =>
+      'لا توجد ميزات مالية حتى الآن. المرحلة الثانية ستُضيف سجل الحسابات.';
 
   @override
-  String get errorNetwork => 'حدث خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مجدداً.';
+  String get errorNetwork =>
+      'حدث خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مجدداً.';
 
   @override
   String get errorAuth => 'جلستك منتهية الصلاحية. يرجى تسجيل الدخول مجدداً.';
@@ -190,7 +192,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get memberArchive => 'أرشفة العضو';
 
   @override
-  String get memberSpouseLoginNote => 'ملاحظة: تسجيل دخول منفصل للزوج/ة غير متاح في الإصدار الأول.';
+  String get memberSpouseLoginNote =>
+      'ملاحظة: تسجيل دخول منفصل للزوج/ة غير متاح في الإصدار الأول.';
 
   @override
   String get settingsTitle => 'الإعدادات';
@@ -226,7 +229,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorAccountNameEmpty => 'اسم الحساب مطلوب.';
 
   @override
-  String get errorOpeningBalanceNegative => 'الرصيد الافتتاحي لا يمكن أن يكون سالباً.';
+  String get errorOpeningBalanceNegative =>
+      'الرصيد الافتتاحي لا يمكن أن يكون سالباً.';
 
   @override
   String get errorAccountDuplicate => 'حساب بهذا المعرف موجود مسبقاً.';
@@ -250,13 +254,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorMemberAlreadyArchived => 'العضو مؤرشف مسبقاً.';
 
   @override
-  String get errorValidationGeneric => 'بيانات غير صالحة. يرجى التحقق من المدخلات.';
+  String get errorValidationGeneric =>
+      'بيانات غير صالحة. يرجى التحقق من المدخلات.';
 
   @override
   String get errorMoneyInvalidFormat => 'صيغة المبلغ غير صحيحة.';
 
   @override
-  String get errorMoneyExcessDecimals => 'عدد الخانات العشرية يتجاوز دقة العملة.';
+  String get errorMoneyExcessDecimals =>
+      'عدد الخانات العشرية يتجاوز دقة العملة.';
 
   @override
   String get errorMoneyOverflow => 'المبلغ كبير جداً.';
@@ -418,7 +424,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get catOtherIncome => 'دخل آخر';
 
   @override
-  String get protectedWithdrawalWarning => 'تحذير: هذا صندوق محمي. السحب يتطلب مسوّغاً.';
+  String get protectedWithdrawalWarning =>
+      'تحذير: هذا صندوق محمي. السحب يتطلب مسوّغاً.';
 
   @override
   String get fieldWithdrawalReason => 'سبب السحب';
@@ -454,10 +461,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorAccountArchived => 'هذا الحساب مؤرشف ولا يقبل معاملات جديدة.';
 
   @override
-  String get errorWithdrawalReasonRequired => 'يُشترط ذكر سبب غير فارغ لسحب الصندوق المحمي.';
+  String get errorWithdrawalReasonRequired =>
+      'يُشترط ذكر سبب غير فارغ لسحب الصندوق المحمي.';
 
   @override
-  String get errorWithdrawalAcknowledgmentRequired => 'يجب تأكيد الإشعار الخاص بالصندوق المحمي.';
+  String get errorWithdrawalAcknowledgmentRequired =>
+      'يجب تأكيد الإشعار الخاص بالصندوق المحمي.';
 
   @override
   String get errorWithdrawalConfirmationRequired => 'يجب تأكيد عملية السحب.';
@@ -517,7 +526,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboardPeriodNet => 'الصافي';
 
   @override
-  String get dashboardPeriodNoActivity => 'لا توجد حركة دخل أو مصروفات في هذه الفترة.';
+  String get dashboardPeriodNoActivity =>
+      'لا توجد حركة دخل أو مصروفات في هذه الفترة.';
 
   @override
   String get dashboardScopePersonal => 'الإنفاق الشخصي';
@@ -532,7 +542,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboardScopeChild => 'مصاريف الأطفال';
 
   @override
-  String get dashboardScopeNoActivity => 'لا توجد بيانات نطاق الإنفاق لهذه الفترة.';
+  String get dashboardScopeNoActivity =>
+      'لا توجد بيانات نطاق الإنفاق لهذه الفترة.';
 
   @override
   String get dashboardSpouseWallet => 'محفظة الزوج/ة';
@@ -574,7 +585,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboardPeriodCustom => 'مخصص';
 
   @override
-  String get dashboardNegativeBalanceWarning => 'رصيد سالب — مشكلة في سلامة البيانات';
+  String get dashboardNegativeBalanceWarning =>
+      'رصيد سالب — مشكلة في سلامة البيانات';
 
   @override
   String get dashboardChildProtected => 'الطفل (محمي)';
@@ -688,7 +700,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportCurrencySeparate => 'الإجماليات مفصّلة بالعملة';
 
   @override
-  String get reportTransferNote => 'التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.';
+  String get reportTransferNote =>
+      'التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.';
 
   @override
   String get reportReversalNote => 'آثار العكس معروضة بشكل منفصل.';
@@ -768,7 +781,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get budgetAccountFilter => 'حساب الدفع (اختياري)';
 
   @override
-  String get budgetOverlapNote => 'يمكن أن تتداخل الميزانيات — كل ميزانية مستقلة';
+  String get budgetOverlapNote =>
+      'يمكن أن تتداخل الميزانيات — كل ميزانية مستقلة';
 
   @override
   String get budgetStatusNoSpending => 'لا إنفاق';
@@ -800,7 +814,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get budgetReversalNote => 'المبالغ المُعادة تُحتسب كصفر في الاستهلاك';
 
   @override
-  String get budgetEmpty => 'لا توجد ميزانيات بعد. أنشئ ميزانية للبدء في التخطيط.';
+  String get budgetEmpty =>
+      'لا توجد ميزانيات بعد. أنشئ ميزانية للبدء في التخطيط.';
 
   @override
   String get budgetArchived => 'مؤرشف';
@@ -824,7 +839,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorBudgetLimitZero => 'يجب أن يكون حد الميزانية أكبر من صفر';
 
   @override
-  String get errorBudgetEndBeforeStart => 'يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء';
+  String get errorBudgetEndBeforeStart =>
+      'يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء';
 
   @override
   String get errorBudgetCurrencyRequired => 'العملة مطلوبة';
@@ -980,7 +996,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يمكن أرشفة هدف يحتوي على أموال. حرِّر جميع الأموال أولاً.';
 
   @override
-  String get errorGoalSourceIsProtected => 'لا يُسمح بالتمويل من حساب أطفال محمي';
+  String get errorGoalSourceIsProtected =>
+      'لا يُسمح بالتمويل من حساب أطفال محمي';
 
   @override
   String get errorGoalSourceIsReserve => 'لا يمكن تمويل هدف من احتياطي هدف آخر';

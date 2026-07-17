@@ -12,12 +12,16 @@ RouteBase get $smokeRouteData => GoRouteData.$route(
   path: '/',
   factory: $SmokeRouteData._fromState,
   routes: [
-    GoRouteData.$route(path: 'detail/:probeId', factory: $FoundationDetailRouteData._fromState),
+    GoRouteData.$route(
+      path: 'detail/:probeId',
+      factory: $FoundationDetailRouteData._fromState,
+    ),
   ],
 );
 
 mixin $SmokeRouteData on GoRouteData {
-  static SmokeRouteData _fromState(GoRouterState state) => const SmokeRouteData();
+  static SmokeRouteData _fromState(GoRouterState state) =>
+      const SmokeRouteData();
 
   @override
   String get location => GoRouteData.$location('/');
@@ -29,7 +33,8 @@ mixin $SmokeRouteData on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);
@@ -42,7 +47,8 @@ mixin $FoundationDetailRouteData on GoRouteData {
   FoundationDetailRouteData get _self => this as FoundationDetailRouteData;
 
   @override
-  String get location => GoRouteData.$location('/detail/${Uri.encodeComponent(_self.probeId)}');
+  String get location =>
+      GoRouteData.$location('/detail/${Uri.encodeComponent(_self.probeId)}');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -51,7 +57,8 @@ mixin $FoundationDetailRouteData on GoRouteData {
   Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
 
   @override
   void replace(BuildContext context) => context.replace(location);

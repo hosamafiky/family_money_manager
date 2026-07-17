@@ -36,12 +36,14 @@ class SpouseWalletReportScreen extends ConsumerWidget {
           Expanded(
             child: reportAsync.when(
               loading: () => const ReportLoading(),
-              error: (_, _) =>
-                  ReportErrorState(onRetry: () => ref.invalidate(spouseWalletReportProvider(req))),
+              error: (_, _) => ReportErrorState(
+                onRetry: () => ref.invalidate(spouseWalletReportProvider(req)),
+              ),
               data: (result) {
                 if (result is! AppOk<List<SpouseWalletReport>>) {
                   return ReportErrorState(
-                    onRetry: () => ref.invalidate(spouseWalletReportProvider(req)),
+                    onRetry: () =>
+                        ref.invalidate(spouseWalletReportProvider(req)),
                   );
                 }
                 final wallets = result.value;
@@ -96,7 +98,10 @@ class _WalletCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(wallet.accountName, style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                wallet.accountName,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               ReportAmountRow(
                 label: l10n.reportOpeningBalance,
@@ -148,7 +153,8 @@ class _WalletCard extends StatelessWidget {
                 currencyCode: wallet.currencyCode,
                 bold: true,
               ),
-              if (wallet.periodClosingBalanceMinorUnits != wallet.currentBalanceMinorUnits)
+              if (wallet.periodClosingBalanceMinorUnits !=
+                  wallet.currentBalanceMinorUnits)
                 ReportInfoNote(text: l10n.reportReversalNote),
             ],
           ),

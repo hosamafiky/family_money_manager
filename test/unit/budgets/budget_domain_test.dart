@@ -59,7 +59,10 @@ BudgetProgress _progress({
   required int limit,
   List<BudgetTransactionRow> rows = const [],
 }) {
-  final state = computeUsageState(consumedMinorUnits: consumed, limitMinorUnits: limit);
+  final state = computeUsageState(
+    consumedMinorUnits: consumed,
+    limitMinorUnits: limit,
+  );
   return BudgetProgress(
     budget: _plan(limit: limit),
     periodStart: '2024-03-01',
@@ -73,7 +76,11 @@ BudgetProgress _progress({
   );
 }
 
-BudgetTransactionRow _row({String id = 'op-1', int amount = 1000, bool isReversed = false}) {
+BudgetTransactionRow _row({
+  String id = 'op-1',
+  int amount = 1000,
+  bool isReversed = false,
+}) {
   return BudgetTransactionRow(
     operationId: id,
     effectiveDate: '2024-03-10',
@@ -206,7 +213,9 @@ void main() {
     // This test verifies that when the drillDown list has no reversed rows,
     // the consumed amount reflects only actual spending.
     final rows = [_row(id: 'op-1', amount: 2000, isReversed: false)];
-    final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+    final consumed = rows
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
     expect(consumed, equals(2000));
   });
 
@@ -214,7 +223,9 @@ void main() {
     // With restated semantics, the repository returns NO reversed rows,
     // so consumption is zero for a set of all-reversed operations.
     final rows = <BudgetTransactionRow>[];
-    final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+    final consumed = rows
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
     expect(consumed, equals(0));
   });
 
@@ -224,7 +235,9 @@ void main() {
       _row(id: 'op-1', amount: 1500, isReversed: false),
       _row(id: 'op-2', amount: 2500, isReversed: false),
     ];
-    final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+    final consumed = rows
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
     expect(consumed, equals(4000));
   });
 
