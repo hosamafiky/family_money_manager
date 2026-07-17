@@ -16,6 +16,7 @@ flutter test
 ```
 
 And where applicable:
+
 ```bash
 flutter build apk --debug
 flutter build apk --release
@@ -29,6 +30,7 @@ flutter build ios --release --no-codesign
 ## Phase Gate Checklist
 
 ### Phase 1 (Foundation)
+
 - [ ] Project creates and runs on Android emulator
 - [ ] Project creates and runs on iOS simulator
 - [ ] Arabic RTL renders correctly on both platforms
@@ -43,6 +45,7 @@ flutter build ios --release --no-codesign
 - [ ] `flutter test` passes
 
 ### Phase 2 (Financial Ledger)
+
 - [ ] All financial invariant tests pass (see FINANCIAL_INVARIANTS.md)
 - [ ] Money type: no double used for any persisted amount
 - [ ] Transfer tests: source and destination balance sum unchanged
@@ -52,12 +55,14 @@ flutter build ios --release --no-codesign
 - [ ] Net worth tests: all 9 scenarios in FINANCIAL_INVARIANTS.md INV-009
 
 ### Phase 3 (Household Model)
+
 - [ ] Spouse wallet balance formula verified by tests
 - [ ] Child fund protected withdrawal warning renders in Arabic
 - [ ] Child fund audit: immutable (update/delete rejected)
 - [ ] Expense scope correctly filters in reports
 
 ### Phase 4 (Core UI)
+
 - [ ] Dashboard loads without error on both platforms
 - [ ] Add income flow complete
 - [ ] Add expense flow complete
@@ -68,35 +73,42 @@ flutter build ios --release --no-codesign
 - [ ] Offline indicator shown when connectivity lost
 
 ### Phase 5 (Budgets and Goals)
+
 - [ ] Transfer not counted in budget spending
 - [ ] Budget warning triggers at configured threshold
 - [ ] Goal funding creates transfer to goal reserve
 
 ### Phase 6 (Banks, Certificates, Gold)
+
 - [ ] Certificate principal not in bank balance simultaneously
 - [ ] Gold weight stored as milligrams (integer)
 - [ ] Making charges recorded as expense
 
 ### Phase 7 (Liabilities)
+
 - [ ] Net worth = assets − liabilities verified in UI
 - [ ] Repayment: principal and interest separated
 
 ### Phase 8 (Reports)
+
 - [ ] Transfers excluded from all income/expense reports
 - [ ] Arabic numerals in report figures
 
 ### Phase 9 (Zakat)
+
 - [ ] Disclaimer displayed in Arabic and English
 - [ ] Zakat not auto-calculated without user confirmation
 - [ ] Sadaqah: linked expense not double-counted
 
 ### Phase 10 (Voice/AI)
+
 - [ ] AI output treated as untrusted input (validated before display)
 - [ ] AI confirmation required before any write
 - [ ] App works identically with AI disabled
 - [ ] No AI API key embedded in app binary
 
 ### Phase 11 (Security, Backup)
+
 - [ ] PIN lock works: wrong PIN → backoff
 - [ ] Biometric unlock works
 - [ ] Auto-lock on background configured
@@ -105,6 +117,7 @@ flutter build ios --release --no-codesign
 - [ ] Import: invalid schema version rejected
 
 ### Phase 12 (Hardening)
+
 - [ ] Firebase Emulator rules tests: all pass
 - [ ] Performance: dashboard loads < 500ms on mid-range device
 - [ ] Accessibility: no semantic label violations
