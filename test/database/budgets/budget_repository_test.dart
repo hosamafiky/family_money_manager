@@ -33,6 +33,8 @@
 /// 30. getBudgetTransactions — adjustment excluded
 /// 31. Phase 4B gate: dashboard total == report total
 /// 32. Phase 4B gate: spouse-wallet reversals correct
+/// 33. Budget mutations do not write to operations table (no money moved)
+/// 34. report_vs_budget semantic distinction: cross-period reversal appears in report, not in budget
 library;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -979,4 +981,106 @@ void main() {
     // Balance: 5000 funded - 2000 spent + reversal credit
     expect(sw.currentBalanceMinorUnits, equals(5000));
   });
+
+  // ── Section 5: Budget mutations must NOT write to the operations table ─────
+
+  test(
+    '33. Budget mutations do not write to operations table (no money moved)',
+    () async {
+      // Verify 0 operations before any budget work.
+      Future<int> countOps() async {
+        final rows = await db
+            .customSelect('SELECT COUNT(*) AS cnt FROM operations')
+            .get();
+        return rows.first.read<int>('cnt');
+      }
+
+      expect(await countOps(), equals(0), reason: 'should start with 0 ops');
+
+      // 1. Create budget.
+      final plan = plan0(id: 'budget-no-money', idempotencyKey: 'ik-no-money');
+      await budgetRepo.createBudget(plan);
+      expect(await countOps(), equals(0), reason: 'create must not write ops');
+
+      // 2. Update budget.
+      final updated = BudgetPlan(
+        id: plan.id,
+        householdId: plan.householdId,
+        name: 'Updated Name',
+        currencyCode: plan.currencyCode,
+        limitMinorUnits: 99000,
+        periodDefinition: plan.periodDefinition,
+        filter: plan.filter,
+        isArchived: plan.isArchived,
+        createdAt: plan.createdAt,
+        updatedAt: plan.updatedAt,
+        idempotencyKey: plan.idempotencyKey,
+        idempotencyPayload: plan.idempotencyPayload,
+      );
+      await budgetRepo.updateBudget(updated);
+      expect(await countOps(), equals(0), reason: 'update must not write ops');
+
+      // 3. Archive budget.
+      await budgetRepo.archiveBudget(plan.id);
+      expect(await countOps(), equals(0), reason: 'archive must not write ops');
+
+      // 4. Restore budget.
+      await budgetRepo.restoreBudget(plan.id);
+      expect(await countOps(), equals(0), reason: 'restore must not write ops');
+    },
+  );
+
+  // ── Section 10: Report append-only vs budget restated distinction ──────────
+
+  test(
+    '34. report_vs_budget semantic distinction: cross-period reversal',
+    () async {
+      // Expense in January; reversal in February.
+      // Report: January STILL shows the gross expense (append-only).
+      // Budget: January shows 0 consumption (restated — is_reversed=1 excluded).
+      final acc = await createAccount(id: 'acc-sem-dist', householdId: _hh);
+      await income(_hh, acc, 'op-sd-inc', 20000, '2024-01-01');
+      await expense(_hh, acc, 'op-sd-exp', 6000, '2024-01-15');
+      await reversal(_hh, 'op-sd-exp', 'rev-sd', '2024-02-03');
+
+      // — Budget view (restated) —
+      final budgetJan = await budgetRepo.getBudgetTransactions(
+        householdId: _hh,
+        currencyCode: 'EGP',
+        periodStart: '2024-01-01',
+        periodEnd: '2024-02-01',
+        filter: const BudgetFilter(),
+      );
+      final budgetRows = (budgetJan as AppOk<List<BudgetTransactionRow>>).value;
+      // Reversed expense is excluded → 0 consumption in January budget.
+      expect(
+        budgetRows,
+        isEmpty,
+        reason: 'budget restated: reversed expense excluded',
+      );
+
+      // — Report view (append-only) —
+      final reportJan = await reportRepo.incomeExpenseFlow(
+        FinancialReportRequest(
+          householdId: _hh,
+          period: DashboardPeriod.custom(
+            startDate: '2024-01-01',
+            endDate: '2024-02-01',
+          ),
+        ),
+      );
+      final janEgp = reportJan.firstWhere((r) => r.currencyCode == 'EGP');
+      // Report shows the original expense (append-only); reversal not yet in Jan.
+      expect(
+        janEgp.grossExpenseMinorUnits,
+        equals(6000),
+        reason: 'report append-only: original expense still visible in Jan',
+      );
+      expect(
+        janEgp.expenseReversalMinorUnits,
+        equals(0),
+        reason: 'report append-only: reversal was in Feb, not Jan',
+      );
+    },
+  );
 }

@@ -24,6 +24,8 @@
 /// 21. BudgetFilter.hasAnyFilter is true when category set
 /// 22. January rollover: month=12, next month is 1 of next year
 /// 23. Leap year: February has 29 days in 2024
+/// 24. KWD (scale=3) integer arithmetic: 800.000 KWD of 1000.000 KWD → 80%
+/// 25. JPY (scale=0) integer arithmetic: 800 JPY of 1000 JPY → 80%
 library;
 
 import 'package:family_money_manager/features/budgets/application/budget_use_cases.dart';
@@ -277,5 +279,24 @@ void main() {
     final end = DateTime.parse(range.end);
     final days = end.difference(start).inDays;
     expect(days, equals(29));
+  });
+
+  // ── Currency scale safety (Section 11) ───────────────────────────────────
+
+  test('24. KWD (scale=3): 800.000 KWD of 1000.000 KWD → nearLimit (80%)', () {
+    // KWD uses 3 decimal places: 1 KWD = 1000 minor units (fils).
+    // 800.000 KWD = 800000 minor units; 1000.000 KWD = 1000000 minor units.
+    final p = _progress(consumed: 800000, limit: 1000000);
+    expect(p.percentageUsed, equals(80));
+    expect(p.usageState, BudgetUsageState.nearLimit);
+    expect(p.remainingMinorUnits, equals(200000));
+  });
+
+  test('25. JPY (scale=0): 800 JPY of 1000 JPY → nearLimit (80%)', () {
+    // JPY has no minor units: 1 JPY = 1 minor unit.
+    final p = _progress(consumed: 800, limit: 1000);
+    expect(p.percentageUsed, equals(80));
+    expect(p.usageState, BudgetUsageState.nearLimit);
+    expect(p.remainingMinorUnits, equals(200));
   });
 }
