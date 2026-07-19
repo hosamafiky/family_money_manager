@@ -1,7 +1,7 @@
 # Phase 5B.8 Report — Remove Persisted Target-Reached; Ledger-Derived Progress Only
 
 **Date:** 2026-07-20  
-**Feature commit:** *(set after commit)*  
+**Feature commit:** `04ef81fd450c1b5ada8b6d3da7efca4735a0efc3`  
 **Base HEAD before work:** `45b89c22565634962b3177a37b1d2d008303412b`  
 **Phase 5B.7 feature commit:** `1aaadca8af4970a2a679a3b8396167f356e8dfde`  
 **Working tree before work:** CLEAN
@@ -212,8 +212,10 @@ Production encryption via SQLite3MultipleCiphers / Keystore-Keychain key injecti
 
 ## 14. Final clean status
 
-Feature commit message:
+Feature commit (primary):
 
-`feat: Phase 5B.8 – remove persisted target-reached; ledger-derived progress only`
+`04ef81fd450c1b5ada8b6d3da7efca4735a0efc3` — `feat: Phase 5B.8 – remove persisted target-reached; ledger-derived progress only`
 
-Post-commit: clean working tree; schema **16**; tests **1322**.
+Docs pin commit follows on `main` immediately after the feature commit.
+
+Post-feature-commit validation: clean working tree; schema **16**; tests **1322**.
