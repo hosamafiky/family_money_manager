@@ -440,6 +440,12 @@ final class DriftLedgerRepository implements LedgerRepository {
         'Account: ${params.accountId}',
       );
     }
+    if (acct.type == FinancialAccountType.certificate) {
+      throw ArgumentError(
+        'Certificate accounts cannot receive opening balances. '
+        'Account: ${params.accountId}',
+      );
+    }
 
     // Idempotency check: if this exact operation ID already exists → safe retry.
     final existing = await findOperation(
@@ -540,6 +546,12 @@ final class DriftLedgerRepository implements LedgerRepository {
     if (account.type == FinancialAccountType.goalReserve) {
       throw ArgumentError(
         'Goal reserve accounts cannot be adjusted directly. '
+        'Account: ${params.accountId}',
+      );
+    }
+    if (account.type == FinancialAccountType.certificate) {
+      throw ArgumentError(
+        'Certificate accounts cannot be adjusted directly. '
         'Account: ${params.accountId}',
       );
     }

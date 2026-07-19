@@ -1034,4 +1034,216 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalReservedBalances => 'Goal reserves';
+
+  @override
+  String get certificatesTitle => 'Certificates';
+
+  @override
+  String get certificateNew => 'New Certificate';
+
+  @override
+  String get certificateEmpty =>
+      'No certificates yet. Add one to track your fixed-term deposits.';
+
+  @override
+  String get certificateInstitution => 'Institution';
+
+  @override
+  String get certificatePrincipal => 'Principal';
+
+  @override
+  String get certificateProfit => 'Profit';
+
+  @override
+  String get certificateMaturityDate => 'Maturity date';
+
+  @override
+  String get certificateStartDate => 'Start date';
+
+  @override
+  String get certificateReference => 'Reference / certificate number';
+
+  @override
+  String get certificateAnnualRate => 'Annual rate (basis points)';
+
+  @override
+  String get certificateProfitFrequency => 'Profit frequency';
+
+  @override
+  String get certificateSourceAccount => 'Funding source account';
+
+  @override
+  String get certificateDestinationAccount => 'Destination account';
+
+  @override
+  String get certificateRedeem => 'Redeem';
+
+  @override
+  String get certificateRedeemTitle => 'Redeem Certificate';
+
+  @override
+  String get certificateProfitTitle => 'Record Profit';
+
+  @override
+  String get certificateRecordProfit => 'Record Profit';
+
+  @override
+  String get certificateLifecycleActive => 'Active';
+
+  @override
+  String get certificateLifecycleRedeemed => 'Redeemed';
+
+  @override
+  String get certificateLifecycleArchived => 'Archived';
+
+  @override
+  String get certificateTermNotStarted => 'Not Started';
+
+  @override
+  String get certificateTermActive => 'Active Term';
+
+  @override
+  String get certificateTermMatured => 'Matured';
+
+  @override
+  String get certificateTermOverdue => 'Overdue Redemption';
+
+  @override
+  String get certificateTermFullyRedeemed => 'Fully Redeemed';
+
+  @override
+  String get certificateProfitFreqMonthly => 'Monthly';
+
+  @override
+  String get certificateProfitFreqQuarterly => 'Quarterly';
+
+  @override
+  String get certificateProfitFreqSemiAnnual => 'Semi-Annual';
+
+  @override
+  String get certificateProfitFreqAnnual => 'Annual';
+
+  @override
+  String get certificateProfitFreqAtMaturity => 'At Maturity';
+
+  @override
+  String get certificateProfitFreqOther => 'Other';
+
+  @override
+  String get certificatePrincipalBalance => 'Principal balance';
+
+  @override
+  String get certificateOriginalPrincipal => 'Original principal';
+
+  @override
+  String get certificateNote => 'Note';
+
+  @override
+  String get certificateAmount => 'Amount';
+
+  @override
+  String get certificatePrincipalSection => 'Principal';
+
+  @override
+  String get certificateProfitSection => 'Profit';
+
+  @override
+  String get certificateRedeemPrincipalOnly => 'Principal only';
+
+  @override
+  String get certificateRedeemProfitOnly => 'Profit only';
+
+  @override
+  String get certificateRedeemCombined => 'Principal + profit';
+
+  @override
+  String get certificateReviewTitle => 'Review Certificate';
+
+  @override
+  String get catCertificateProfit => 'Certificate Profit';
+
+  @override
+  String get errorCertificateInstitutionRequired =>
+      'Institution name is required';
+
+  @override
+  String get errorCertificatePrincipalZero =>
+      'Principal must be greater than zero';
+
+  @override
+  String get errorCertificateCurrencyRequired => 'Currency is required';
+
+  @override
+  String get errorCertificateDatesRequired =>
+      'Start and maturity dates are required';
+
+  @override
+  String get errorCertificateMaturityBeforeStart =>
+      'Maturity date must be after start date';
+
+  @override
+  String get errorCertificateSourceRequired =>
+      'Funding source account is required';
+
+  @override
+  String get errorCertificateSourceIsProtected =>
+      'Funding from a protected child account is not allowed';
+
+  @override
+  String get errorCertificateAccountNotAllowedAsSource =>
+      'A certificate account cannot be used as a funding source';
+
+  @override
+  String get errorCertificateAccountNotAllowedAsDestination =>
+      'A certificate account cannot be used as a destination';
+
+  @override
+  String get errorCertificateAccountNotAllowedInOrdinaryTransaction =>
+      'Certificate accounts cannot be used in ordinary transactions';
+
+  @override
+  String get errorCertificateArchived => 'Certificate is archived';
+
+  @override
+  String get errorCertificateNotActive => 'Certificate is not active';
+
+  @override
+  String get errorCertificateArchiveNonzeroBalance =>
+      'Cannot archive a certificate with remaining principal. Redeem first.';
+
+  @override
+  String get errorCertificateRestoreRequiresArchived =>
+      'Certificate must be archived to restore';
+
+  @override
+  String get errorCertificateIdempotencyConflict =>
+      'Duplicate certificate creation conflict';
+
+  @override
+  String get errorCertificateReversalRequiresActive =>
+      'Certificate must be active to reverse purchase';
+
+  @override
+  String get errorCertificateReversalNotAllowedAfterHistory =>
+      'Cannot reverse purchase after profit or redemption';
+
+  @override
+  String get errorCertificateProfitReversalInvalidType =>
+      'Target operation is not a profit income operation';
+
+  @override
+  String get errorCertificateRedemptionReversalNotSupported =>
+      'Redemption reversal is not supported';
+
+  @override
+  String get errorCertificateNotMatured =>
+      'Certificate has not reached maturity';
+
+  @override
+  String get errorCertificateNoPrincipal =>
+      'Certificate has no remaining principal to redeem';
+
+  @override
+  String get errorCertificateFullRedemptionOnly =>
+      'Only full principal redemption is supported';
 }

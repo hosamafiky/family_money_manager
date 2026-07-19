@@ -7,6 +7,11 @@ import 'package:family_money_manager/features/budgets/presentation/budget_creati
 import 'package:family_money_manager/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:family_money_manager/features/budgets/presentation/budgets_list_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:family_money_manager/features/certificates/presentation/certificate_creation_screen.dart';
+import 'package:family_money_manager/features/certificates/presentation/certificate_detail_screen.dart';
+import 'package:family_money_manager/features/certificates/presentation/certificates_list_screen.dart';
+import 'package:family_money_manager/features/certificates/presentation/record_certificate_profit_screen.dart';
+import 'package:family_money_manager/features/certificates/presentation/redeem_certificate_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/fund_goal_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/goal_creation_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/goal_detail_screen.dart';
@@ -294,6 +299,38 @@ abstract final class AppRouter {
                   path: 'release',
                   builder: (context, state) => ReleaseGoalScreen(
                     goalId: state.pathParameters['goalId']!,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        // ── Phase 6A certificate routes ─────────────────────────────────────
+        GoRoute(
+          path: '/certificates',
+          builder: (context, state) => const CertificatesListScreen(),
+          routes: [
+            GoRoute(
+              path: 'new',
+              builder: (context, state) => const CertificateCreationScreen(),
+            ),
+            GoRoute(
+              path: ':certificateId',
+              builder: (context, state) => CertificateDetailScreen(
+                certificateId: state.pathParameters['certificateId']!,
+              ),
+              routes: [
+                GoRoute(
+                  path: 'profit',
+                  builder: (context, state) => RecordCertificateProfitScreen(
+                    certificateId: state.pathParameters['certificateId']!,
+                  ),
+                ),
+                GoRoute(
+                  path: 'redeem',
+                  builder: (context, state) => RedeemCertificateScreen(
+                    certificateId: state.pathParameters['certificateId']!,
                   ),
                 ),
               ],

@@ -1022,4 +1022,209 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goalReservedBalances => 'احتياطيات الأهداف';
+
+  @override
+  String get certificatesTitle => 'الشهادات';
+
+  @override
+  String get certificateNew => 'شهادة جديدة';
+
+  @override
+  String get certificateEmpty =>
+      'لا توجد شهادات حتى الآن. أضف واحدة لتتبع ودائعك لأجل.';
+
+  @override
+  String get certificateInstitution => 'المؤسسة';
+
+  @override
+  String get certificatePrincipal => 'الأصل';
+
+  @override
+  String get certificateProfit => 'العائد';
+
+  @override
+  String get certificateMaturityDate => 'تاريخ الاستحقاق';
+
+  @override
+  String get certificateStartDate => 'تاريخ البدء';
+
+  @override
+  String get certificateReference => 'المرجع / رقم الشهادة';
+
+  @override
+  String get certificateAnnualRate => 'المعدل السنوي (نقطة أساس)';
+
+  @override
+  String get certificateProfitFrequency => 'تكرار العائد';
+
+  @override
+  String get certificateSourceAccount => 'حساب التمويل';
+
+  @override
+  String get certificateDestinationAccount => 'الحساب الوجهة';
+
+  @override
+  String get certificateRedeem => 'استرداد';
+
+  @override
+  String get certificateRedeemTitle => 'استرداد الشهادة';
+
+  @override
+  String get certificateProfitTitle => 'تسجيل عائد';
+
+  @override
+  String get certificateRecordProfit => 'تسجيل عائد';
+
+  @override
+  String get certificateLifecycleActive => 'نشطة';
+
+  @override
+  String get certificateLifecycleRedeemed => 'مستردة';
+
+  @override
+  String get certificateLifecycleArchived => 'مؤرشفة';
+
+  @override
+  String get certificateTermNotStarted => 'لم تبدأ';
+
+  @override
+  String get certificateTermActive => 'ضمن المدة';
+
+  @override
+  String get certificateTermMatured => 'استحقت';
+
+  @override
+  String get certificateTermOverdue => 'متأخرة الاسترداد';
+
+  @override
+  String get certificateTermFullyRedeemed => 'مستردة بالكامل';
+
+  @override
+  String get certificateProfitFreqMonthly => 'شهري';
+
+  @override
+  String get certificateProfitFreqQuarterly => 'ربع سنوي';
+
+  @override
+  String get certificateProfitFreqSemiAnnual => 'نصف سنوي';
+
+  @override
+  String get certificateProfitFreqAnnual => 'سنوي';
+
+  @override
+  String get certificateProfitFreqAtMaturity => 'عند الاستحقاق';
+
+  @override
+  String get certificateProfitFreqOther => 'أخرى';
+
+  @override
+  String get certificatePrincipalBalance => 'رصيد الأصل';
+
+  @override
+  String get certificateOriginalPrincipal => 'الأصل الأصلي';
+
+  @override
+  String get certificateNote => 'ملاحظة';
+
+  @override
+  String get certificateAmount => 'المبلغ';
+
+  @override
+  String get certificatePrincipalSection => 'الأصل';
+
+  @override
+  String get certificateProfitSection => 'العائد';
+
+  @override
+  String get certificateRedeemPrincipalOnly => 'الأصل فقط';
+
+  @override
+  String get certificateRedeemProfitOnly => 'العائد فقط';
+
+  @override
+  String get certificateRedeemCombined => 'الأصل + العائد';
+
+  @override
+  String get certificateReviewTitle => 'مراجعة الشهادة';
+
+  @override
+  String get catCertificateProfit => 'عائد الشهادة';
+
+  @override
+  String get errorCertificateInstitutionRequired => 'اسم المؤسسة مطلوب';
+
+  @override
+  String get errorCertificatePrincipalZero => 'يجب أن يكون الأصل أكبر من صفر';
+
+  @override
+  String get errorCertificateCurrencyRequired => 'العملة مطلوبة';
+
+  @override
+  String get errorCertificateDatesRequired => 'تاريخا البدء والاستحقاق مطلوبان';
+
+  @override
+  String get errorCertificateMaturityBeforeStart =>
+      'يجب أن يكون تاريخ الاستحقاق بعد تاريخ البدء';
+
+  @override
+  String get errorCertificateSourceRequired => 'حساب مصدر التمويل مطلوب';
+
+  @override
+  String get errorCertificateSourceIsProtected =>
+      'لا يُسمح بالتمويل من حساب أطفال محمي';
+
+  @override
+  String get errorCertificateAccountNotAllowedAsSource =>
+      'لا يمكن استخدام حساب الشهادة مصدرًا للتمويل';
+
+  @override
+  String get errorCertificateAccountNotAllowedAsDestination =>
+      'لا يمكن استخدام حساب الشهادة وجهةً';
+
+  @override
+  String get errorCertificateAccountNotAllowedInOrdinaryTransaction =>
+      'لا يمكن استخدام حسابات الشهادات في المعاملات العادية';
+
+  @override
+  String get errorCertificateArchived => 'الشهادة مؤرشفة';
+
+  @override
+  String get errorCertificateNotActive => 'الشهادة غير نشطة';
+
+  @override
+  String get errorCertificateArchiveNonzeroBalance =>
+      'لا يمكن أرشفة شهادة بها أصل متبقٍ. استردها أولاً.';
+
+  @override
+  String get errorCertificateRestoreRequiresArchived =>
+      'يجب أن تكون الشهادة مؤرشفة لاستعادتها';
+
+  @override
+  String get errorCertificateIdempotencyConflict => 'تعارض في إنشاء الشهادة';
+
+  @override
+  String get errorCertificateReversalRequiresActive =>
+      'يجب أن تكون الشهادة نشطة لعكس الشراء';
+
+  @override
+  String get errorCertificateReversalNotAllowedAfterHistory =>
+      'لا يمكن عكس الشراء بعد تسجيل عائد أو استرداد';
+
+  @override
+  String get errorCertificateProfitReversalInvalidType =>
+      'العملية المستهدفة ليست عملية دخل عائد';
+
+  @override
+  String get errorCertificateRedemptionReversalNotSupported =>
+      'عكس الاسترداد غير مدعوم';
+
+  @override
+  String get errorCertificateNotMatured => 'الشهادة لم تصل إلى تاريخ الاستحقاق';
+
+  @override
+  String get errorCertificateNoPrincipal => 'لا يوجد أصل متبقي لاسترداده';
+
+  @override
+  String get errorCertificateFullRedemptionOnly =>
+      'يُسمح فقط بالاسترداد الكامل للأصل';
 }

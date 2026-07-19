@@ -61,11 +61,17 @@ final class RecordIncomeUseCase {
     if (account == null) {
       return const AppNotFound();
     }
-    // Goal reserve accounts are managed exclusively by goal use cases.
+    // Goal reserve / certificate accounts are managed by feature use cases.
     if (account.type == FinancialAccountType.goalReserve) {
       return const AppValidationFailure(
         field: 'destinationAccountId',
         messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
+      );
+    }
+    if (account.type == FinancialAccountType.certificate) {
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
       );
     }
     if (account.isArchived) {

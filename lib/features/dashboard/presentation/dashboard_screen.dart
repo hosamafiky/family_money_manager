@@ -33,6 +33,15 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(l10n.dashboardTitle),
         actions: [
           Semantics(
+            label: l10n.certificatesTitle,
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.account_balance_outlined),
+              tooltip: l10n.certificatesTitle,
+              onPressed: () => context.push('/certificates'),
+            ),
+          ),
+          Semantics(
             label: l10n.goalsTitle,
             button: true,
             child: IconButton(

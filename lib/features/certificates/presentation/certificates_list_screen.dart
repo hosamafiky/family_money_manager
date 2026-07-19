@@ -1,0 +1,188 @@
+import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/features/certificates/domain/certificate.dart';
+import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
+import 'package:family_money_manager/features/certificates/presentation/providers/certificate_providers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+const _householdId = 'household-v1';
+
+class CertificatesListScreen extends ConsumerWidget {
+  const CertificatesListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final certsAsync = ref.watch(certificatesProvider(_householdId));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.certificatesTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: l10n.certificateNew,
+            onPressed: () => context.push('/certificates/new'),
+          ),
+        ],
+      ),
+      body: certsAsync.when(
+        data: (result) {
+          if (result is! AppOk<List<SavingsCertificate>>) {
+            return Center(
+              child: Text(
+                result is AppNotFound
+                    ? l10n.certificateEmpty
+                    : 'Error loading certificates',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+          final certs = result.value;
+          if (certs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.account_balance,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.certificateEmpty,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => context.push('/certificates/new'),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.certificateNew),
+                  ),
+                ],
+              ),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: certs.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, i) => _CertificateCard(cert: certs[i]),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'cert_list_fab',
+        onPressed: () => context.push('/certificates/new'),
+        icon: const Icon(Icons.add),
+        label: Text(l10n.certificateNew),
+      ),
+    );
+  }
+}
+
+class _CertificateCard extends ConsumerWidget {
+  const _CertificateCard({required this.cert});
+
+  final SavingsCertificate cert;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final progressAsync = ref.watch(certificateProgressProvider(cert.id));
+
+    final termState = progressAsync.when(
+      data: (r) => r is AppOk<CertificateProgress> ? r.value.termState : null,
+      loading: () => null,
+      error: (_, _) => null,
+    );
+
+    final principalBalance = progressAsync.when(
+      data: (r) => r is AppOk<CertificateProgress>
+          ? r.value.principalBalanceMinorUnits
+          : null,
+      loading: () => null,
+      error: (_, _) => null,
+    );
+
+    final (lifecycleLabel, lifecycleColor) = switch (cert.lifecycle) {
+      CertificateLifecycle.active => (
+        l10n.certificateLifecycleActive,
+        Colors.green,
+      ),
+      CertificateLifecycle.redeemed => (
+        l10n.certificateLifecycleRedeemed,
+        Colors.blue,
+      ),
+      CertificateLifecycle.archived => (
+        l10n.certificateLifecycleArchived,
+        Colors.grey,
+      ),
+    };
+
+    return Card(
+      child: ListTile(
+        onTap: () => context.push('/certificates/${cert.id}'),
+        leading: CircleAvatar(
+          backgroundColor: lifecycleColor.withValues(alpha: 0.15),
+          child: Icon(Icons.account_balance, color: lifecycleColor),
+        ),
+        title: Text(cert.institutionName),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${l10n.certificatePrincipal}: '
+              '${CertificateMoneyFormatter.format(cert.originalPrincipalMinorUnits, cert.currencyCode)} '
+              '${cert.currencyCode}',
+            ),
+            Text('${l10n.certificateMaturityDate}: ${cert.maturityDate}'),
+            if (principalBalance != null)
+              Text(
+                '${l10n.certificatePrincipalBalance}: '
+                '${CertificateMoneyFormatter.format(principalBalance, cert.currencyCode)}',
+              ),
+          ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: lifecycleColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                lifecycleLabel,
+                style: TextStyle(color: lifecycleColor, fontSize: 11),
+              ),
+            ),
+            if (termState != null)
+              Text(
+                _termLabel(l10n, termState),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+          ],
+        ),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  String _termLabel(AppLocalizations l10n, CertificateTermState state) =>
+      switch (state) {
+        CertificateTermState.notStarted => l10n.certificateTermNotStarted,
+        CertificateTermState.activeTerm => l10n.certificateTermActive,
+        CertificateTermState.matured => l10n.certificateTermMatured,
+        CertificateTermState.overdueRedemption => l10n.certificateTermOverdue,
+        CertificateTermState.fullyRedeemed => l10n.certificateTermFullyRedeemed,
+      };
+}

@@ -150,7 +150,9 @@ enum OperationType {
   bool get isExcludedFromIncomeExpenseReports {
     return this == OperationType.transfer ||
         this == OperationType.goalFunding ||
+        this == OperationType.goalWithdrawal ||
         this == OperationType.certificateFunding ||
+        this == OperationType.certificateMaturity ||
         this == OperationType.goldPurchase ||
         this == OperationType.openingBalance;
   }

@@ -63,6 +63,13 @@ final class ExecuteTransferUseCase {
         messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
       );
     }
+    // Certificate accounts are managed exclusively by certificate use cases.
+    if (source.type == FinancialAccountType.certificate) {
+      return const AppValidationFailure(
+        field: 'sourceAccountId',
+        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
+      );
+    }
     if (source.isArchived) {
       return const AppValidationFailure(
         field: 'sourceAccountId',
@@ -80,6 +87,13 @@ final class ExecuteTransferUseCase {
       return const AppValidationFailure(
         field: 'destinationAccountId',
         messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
+      );
+    }
+    // Certificate accounts are managed exclusively by certificate use cases.
+    if (destination.type == FinancialAccountType.certificate) {
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
       );
     }
     if (destination.isArchived) {

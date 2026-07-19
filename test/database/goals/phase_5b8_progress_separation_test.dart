@@ -731,7 +731,7 @@ void main() {
       addTearDown(upgraded.close);
 
       final ver = await upgraded.customSelect('PRAGMA user_version').get();
-      expect(ver.first.read<int>('user_version'), 16);
+      expect(ver.first.read<int>('user_version'), 17);
 
       final status = await upgraded
           .customSelect("SELECT status FROM goals WHERE id = 'goal-mig8'")
@@ -756,7 +756,7 @@ void main() {
               "WHERE type='trigger' AND name='$name'",
             )
             .get();
-        expect(c.first.read<int>('c'), 1, reason: '$name must exist at v16');
+        expect(c.first.read<int>('c'), 1, reason: '$name must exist at latest');
       }
     },
   );
@@ -793,9 +793,9 @@ void main() {
     expect(await dbStatus(goal.id), 'active');
   });
 
-  test('MIG-5B8-4. Schema version is 16 on fresh DB', () async {
+  test('MIG-5B8-4. Schema version is 17 on fresh DB', () async {
     final ver = await db.customSelect('PRAGMA user_version').get();
-    expect(ver.first.read<int>('user_version'), 16);
+    expect(ver.first.read<int>('user_version'), 17);
   });
 
   test('UNIT-5B8-1. GoalProgressState.fromBalance canonical derivation', () {

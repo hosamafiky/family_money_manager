@@ -22,6 +22,9 @@ enum TransactionCategory {
   businessIncome('business_income', CategoryType.income),
   giftReceived('gift_received', CategoryType.income),
   interestIncome('interest_income', CategoryType.income),
+
+  /// Profit paid on a savings certificate / fixed-term deposit (Phase 6A).
+  certificateProfit('certificate_profit', CategoryType.income),
   otherIncome('other_income', CategoryType.income);
 
   const TransactionCategory(this.code, this.type);

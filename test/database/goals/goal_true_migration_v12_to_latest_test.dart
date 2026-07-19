@@ -16,7 +16,7 @@ import '../../helpers/true_schema_v12.dart';
 
 void main() {
   test(
-    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13+v16 objects',
+    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13–v17 objects',
     () async {
       final path = await materializeTrueSchemaV12File();
       addTearDown(() async {
@@ -37,14 +37,23 @@ void main() {
             .first['c'],
         0,
       );
+      expect(
+        before
+            .select(
+              "SELECT COUNT(*) AS c FROM sqlite_master "
+              "WHERE name = 'savings_certificates'",
+            )
+            .first['c'],
+        0,
+      );
       before.close();
 
-      // Reopen with current AppDatabase → onUpgrade 12→16
+      // Reopen with current AppDatabase → onUpgrade 12→17
       final db = AppDatabase.forFile(path);
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 16);
+      expect(version.first.read<int>('user_version'), 17);
 
       expect(
         (await db
@@ -83,7 +92,7 @@ void main() {
               .first
               .read<int>('c'),
           1,
-          reason: '$name must exist after upgrade to v16',
+          reason: '$name must exist after upgrade to v17',
         );
       }
       expect(
@@ -108,6 +117,44 @@ void main() {
             .read<int>('c'),
         1,
       );
+
+      // Phase 6A tables + key triggers after v17.
+      for (final name in [
+        'savings_certificates',
+        'certificate_revisions',
+        'certificate_events',
+      ]) {
+        expect(
+          (await db
+                  .customSelect(
+                    "SELECT COUNT(*) as c FROM sqlite_master "
+                    "WHERE type='table' AND name='$name'",
+                  )
+                  .get())
+              .first
+              .read<int>('c'),
+          1,
+          reason: '$name must exist after upgrade to v17',
+        );
+      }
+      for (final name in [
+        'validate_certificate_account_on_insert',
+        'validate_certificate_purchase_event',
+        'no_update_certificate_events',
+      ]) {
+        expect(
+          (await db
+                  .customSelect(
+                    "SELECT COUNT(*) as c FROM sqlite_master "
+                    "WHERE type='trigger' AND name='$name'",
+                  )
+                  .get())
+              .first
+              .read<int>('c'),
+          1,
+          reason: '$name must exist after upgrade to v17',
+        );
+      }
 
       final bal =
           (await db

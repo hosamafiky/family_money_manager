@@ -7983,7 +7983,8 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
   /// ISO 4217 currency code. Immutable after creation.
   final String currencyCode;
 
-  /// 'active', 'targetReached', 'completed', 'archived'.
+  /// Persisted lifecycle only: 'active', 'completed', 'archived'.
+  /// Progress is never stored here (Phase 5B.8).
   final String status;
 
   /// Unique per (household_id, idempotency_key).
@@ -10580,6 +10581,2416 @@ class GoalLifecycleEventsTableCompanion
   }
 }
 
+class $SavingsCertificatesTableTable extends SavingsCertificatesTable
+    with TableInfo<$SavingsCertificatesTableTable, DbSavingsCertificate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavingsCertificatesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certificateAccountIdMeta =
+      const VerificationMeta('certificateAccountId');
+  @override
+  late final GeneratedColumn<String> certificateAccountId =
+      GeneratedColumn<String>(
+        'certificate_account_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES financial_accounts (id)',
+        ),
+      );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originalPrincipalMinorUnitsMeta =
+      const VerificationMeta('originalPrincipalMinorUnits');
+  @override
+  late final GeneratedColumn<int> originalPrincipalMinorUnits =
+      GeneratedColumn<int>(
+        'original_principal_minor_units',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _maturityDateMeta = const VerificationMeta(
+    'maturityDate',
+  );
+  @override
+  late final GeneratedColumn<String> maturityDate = GeneratedColumn<String>(
+    'maturity_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lifecycleMeta = const VerificationMeta(
+    'lifecycle',
+  );
+  @override
+  late final GeneratedColumn<String> lifecycle = GeneratedColumn<String>(
+    'lifecycle',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _idempotencyPayloadMeta =
+      const VerificationMeta('idempotencyPayload');
+  @override
+  late final GeneratedColumn<String> idempotencyPayload =
+      GeneratedColumn<String>(
+        'idempotency_payload',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _redeemedAtMeta = const VerificationMeta(
+    'redeemedAt',
+  );
+  @override
+  late final GeneratedColumn<String> redeemedAt = GeneratedColumn<String>(
+    'redeemed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _archivedAtMeta = const VerificationMeta(
+    'archivedAt',
+  );
+  @override
+  late final GeneratedColumn<String> archivedAt = GeneratedColumn<String>(
+    'archived_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    householdId,
+    certificateAccountId,
+    currencyCode,
+    originalPrincipalMinorUnits,
+    startDate,
+    maturityDate,
+    lifecycle,
+    idempotencyKey,
+    idempotencyPayload,
+    createdAt,
+    redeemedAt,
+    archivedAt,
+    schemaVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'savings_certificates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbSavingsCertificate> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('certificate_account_id')) {
+      context.handle(
+        _certificateAccountIdMeta,
+        certificateAccountId.isAcceptableOrUnknown(
+          data['certificate_account_id']!,
+          _certificateAccountIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_certificateAccountIdMeta);
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyCodeMeta);
+    }
+    if (data.containsKey('original_principal_minor_units')) {
+      context.handle(
+        _originalPrincipalMinorUnitsMeta,
+        originalPrincipalMinorUnits.isAcceptableOrUnknown(
+          data['original_principal_minor_units']!,
+          _originalPrincipalMinorUnitsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_originalPrincipalMinorUnitsMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('maturity_date')) {
+      context.handle(
+        _maturityDateMeta,
+        maturityDate.isAcceptableOrUnknown(
+          data['maturity_date']!,
+          _maturityDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_maturityDateMeta);
+    }
+    if (data.containsKey('lifecycle')) {
+      context.handle(
+        _lifecycleMeta,
+        lifecycle.isAcceptableOrUnknown(data['lifecycle']!, _lifecycleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lifecycleMeta);
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyKeyMeta);
+    }
+    if (data.containsKey('idempotency_payload')) {
+      context.handle(
+        _idempotencyPayloadMeta,
+        idempotencyPayload.isAcceptableOrUnknown(
+          data['idempotency_payload']!,
+          _idempotencyPayloadMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idempotencyPayloadMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('redeemed_at')) {
+      context.handle(
+        _redeemedAtMeta,
+        redeemedAt.isAcceptableOrUnknown(data['redeemed_at']!, _redeemedAtMeta),
+      );
+    }
+    if (data.containsKey('archived_at')) {
+      context.handle(
+        _archivedAtMeta,
+        archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
+      );
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbSavingsCertificate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbSavingsCertificate(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      certificateAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certificate_account_id'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      originalPrincipalMinorUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}original_principal_minor_units'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date'],
+      )!,
+      maturityDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}maturity_date'],
+      )!,
+      lifecycle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lifecycle'],
+      )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      )!,
+      idempotencyPayload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_payload'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      redeemedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}redeemed_at'],
+      ),
+      archivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}archived_at'],
+      ),
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+    );
+  }
+
+  @override
+  $SavingsCertificatesTableTable createAlias(String alias) {
+    return $SavingsCertificatesTableTable(attachedDatabase, alias);
+  }
+}
+
+class DbSavingsCertificate extends DataClass
+    implements Insertable<DbSavingsCertificate> {
+  final String id;
+  final String householdId;
+
+  /// FK to financial_accounts.id — dedicated certificate account (1:1).
+  final String certificateAccountId;
+
+  /// ISO 4217 currency code. Immutable.
+  final String currencyCode;
+
+  /// Original purchased principal in minor units. Immutable.
+  final int originalPrincipalMinorUnits;
+
+  /// Inclusive term start `yyyy-MM-dd`.
+  final String startDate;
+
+  /// Maturity date `yyyy-MM-dd`.
+  final String maturityDate;
+
+  /// Persisted lifecycle only: 'active', 'redeemed', 'archived'.
+  final String lifecycle;
+  final String idempotencyKey;
+  final String idempotencyPayload;
+  final String createdAt;
+  final String? redeemedAt;
+  final String? archivedAt;
+  final int schemaVersion;
+  const DbSavingsCertificate({
+    required this.id,
+    required this.householdId,
+    required this.certificateAccountId,
+    required this.currencyCode,
+    required this.originalPrincipalMinorUnits,
+    required this.startDate,
+    required this.maturityDate,
+    required this.lifecycle,
+    required this.idempotencyKey,
+    required this.idempotencyPayload,
+    required this.createdAt,
+    this.redeemedAt,
+    this.archivedAt,
+    required this.schemaVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['certificate_account_id'] = Variable<String>(certificateAccountId);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['original_principal_minor_units'] = Variable<int>(
+      originalPrincipalMinorUnits,
+    );
+    map['start_date'] = Variable<String>(startDate);
+    map['maturity_date'] = Variable<String>(maturityDate);
+    map['lifecycle'] = Variable<String>(lifecycle);
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
+    map['idempotency_payload'] = Variable<String>(idempotencyPayload);
+    map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || redeemedAt != null) {
+      map['redeemed_at'] = Variable<String>(redeemedAt);
+    }
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<String>(archivedAt);
+    }
+    map['schema_version'] = Variable<int>(schemaVersion);
+    return map;
+  }
+
+  SavingsCertificatesTableCompanion toCompanion(bool nullToAbsent) {
+    return SavingsCertificatesTableCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      certificateAccountId: Value(certificateAccountId),
+      currencyCode: Value(currencyCode),
+      originalPrincipalMinorUnits: Value(originalPrincipalMinorUnits),
+      startDate: Value(startDate),
+      maturityDate: Value(maturityDate),
+      lifecycle: Value(lifecycle),
+      idempotencyKey: Value(idempotencyKey),
+      idempotencyPayload: Value(idempotencyPayload),
+      createdAt: Value(createdAt),
+      redeemedAt: redeemedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(redeemedAt),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      schemaVersion: Value(schemaVersion),
+    );
+  }
+
+  factory DbSavingsCertificate.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbSavingsCertificate(
+      id: serializer.fromJson<String>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      certificateAccountId: serializer.fromJson<String>(
+        json['certificateAccountId'],
+      ),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      originalPrincipalMinorUnits: serializer.fromJson<int>(
+        json['originalPrincipalMinorUnits'],
+      ),
+      startDate: serializer.fromJson<String>(json['startDate']),
+      maturityDate: serializer.fromJson<String>(json['maturityDate']),
+      lifecycle: serializer.fromJson<String>(json['lifecycle']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
+      idempotencyPayload: serializer.fromJson<String>(
+        json['idempotencyPayload'],
+      ),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      redeemedAt: serializer.fromJson<String?>(json['redeemedAt']),
+      archivedAt: serializer.fromJson<String?>(json['archivedAt']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'certificateAccountId': serializer.toJson<String>(certificateAccountId),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'originalPrincipalMinorUnits': serializer.toJson<int>(
+        originalPrincipalMinorUnits,
+      ),
+      'startDate': serializer.toJson<String>(startDate),
+      'maturityDate': serializer.toJson<String>(maturityDate),
+      'lifecycle': serializer.toJson<String>(lifecycle),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
+      'idempotencyPayload': serializer.toJson<String>(idempotencyPayload),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'redeemedAt': serializer.toJson<String?>(redeemedAt),
+      'archivedAt': serializer.toJson<String?>(archivedAt),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+    };
+  }
+
+  DbSavingsCertificate copyWith({
+    String? id,
+    String? householdId,
+    String? certificateAccountId,
+    String? currencyCode,
+    int? originalPrincipalMinorUnits,
+    String? startDate,
+    String? maturityDate,
+    String? lifecycle,
+    String? idempotencyKey,
+    String? idempotencyPayload,
+    String? createdAt,
+    Value<String?> redeemedAt = const Value.absent(),
+    Value<String?> archivedAt = const Value.absent(),
+    int? schemaVersion,
+  }) => DbSavingsCertificate(
+    id: id ?? this.id,
+    householdId: householdId ?? this.householdId,
+    certificateAccountId: certificateAccountId ?? this.certificateAccountId,
+    currencyCode: currencyCode ?? this.currencyCode,
+    originalPrincipalMinorUnits:
+        originalPrincipalMinorUnits ?? this.originalPrincipalMinorUnits,
+    startDate: startDate ?? this.startDate,
+    maturityDate: maturityDate ?? this.maturityDate,
+    lifecycle: lifecycle ?? this.lifecycle,
+    idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+    idempotencyPayload: idempotencyPayload ?? this.idempotencyPayload,
+    createdAt: createdAt ?? this.createdAt,
+    redeemedAt: redeemedAt.present ? redeemedAt.value : this.redeemedAt,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+  );
+  DbSavingsCertificate copyWithCompanion(
+    SavingsCertificatesTableCompanion data,
+  ) {
+    return DbSavingsCertificate(
+      id: data.id.present ? data.id.value : this.id,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      certificateAccountId: data.certificateAccountId.present
+          ? data.certificateAccountId.value
+          : this.certificateAccountId,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      originalPrincipalMinorUnits: data.originalPrincipalMinorUnits.present
+          ? data.originalPrincipalMinorUnits.value
+          : this.originalPrincipalMinorUnits,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      maturityDate: data.maturityDate.present
+          ? data.maturityDate.value
+          : this.maturityDate,
+      lifecycle: data.lifecycle.present ? data.lifecycle.value : this.lifecycle,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      idempotencyPayload: data.idempotencyPayload.present
+          ? data.idempotencyPayload.value
+          : this.idempotencyPayload,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      redeemedAt: data.redeemedAt.present
+          ? data.redeemedAt.value
+          : this.redeemedAt,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbSavingsCertificate(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('certificateAccountId: $certificateAccountId, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('originalPrincipalMinorUnits: $originalPrincipalMinorUnits, ')
+          ..write('startDate: $startDate, ')
+          ..write('maturityDate: $maturityDate, ')
+          ..write('lifecycle: $lifecycle, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('redeemedAt: $redeemedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('schemaVersion: $schemaVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    householdId,
+    certificateAccountId,
+    currencyCode,
+    originalPrincipalMinorUnits,
+    startDate,
+    maturityDate,
+    lifecycle,
+    idempotencyKey,
+    idempotencyPayload,
+    createdAt,
+    redeemedAt,
+    archivedAt,
+    schemaVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbSavingsCertificate &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.certificateAccountId == this.certificateAccountId &&
+          other.currencyCode == this.currencyCode &&
+          other.originalPrincipalMinorUnits ==
+              this.originalPrincipalMinorUnits &&
+          other.startDate == this.startDate &&
+          other.maturityDate == this.maturityDate &&
+          other.lifecycle == this.lifecycle &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.idempotencyPayload == this.idempotencyPayload &&
+          other.createdAt == this.createdAt &&
+          other.redeemedAt == this.redeemedAt &&
+          other.archivedAt == this.archivedAt &&
+          other.schemaVersion == this.schemaVersion);
+}
+
+class SavingsCertificatesTableCompanion
+    extends UpdateCompanion<DbSavingsCertificate> {
+  final Value<String> id;
+  final Value<String> householdId;
+  final Value<String> certificateAccountId;
+  final Value<String> currencyCode;
+  final Value<int> originalPrincipalMinorUnits;
+  final Value<String> startDate;
+  final Value<String> maturityDate;
+  final Value<String> lifecycle;
+  final Value<String> idempotencyKey;
+  final Value<String> idempotencyPayload;
+  final Value<String> createdAt;
+  final Value<String?> redeemedAt;
+  final Value<String?> archivedAt;
+  final Value<int> schemaVersion;
+  final Value<int> rowid;
+  const SavingsCertificatesTableCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.certificateAccountId = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.originalPrincipalMinorUnits = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.maturityDate = const Value.absent(),
+    this.lifecycle = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.idempotencyPayload = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.redeemedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SavingsCertificatesTableCompanion.insert({
+    required String id,
+    required String householdId,
+    required String certificateAccountId,
+    required String currencyCode,
+    required int originalPrincipalMinorUnits,
+    required String startDate,
+    required String maturityDate,
+    required String lifecycle,
+    required String idempotencyKey,
+    required String idempotencyPayload,
+    required String createdAt,
+    this.redeemedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       householdId = Value(householdId),
+       certificateAccountId = Value(certificateAccountId),
+       currencyCode = Value(currencyCode),
+       originalPrincipalMinorUnits = Value(originalPrincipalMinorUnits),
+       startDate = Value(startDate),
+       maturityDate = Value(maturityDate),
+       lifecycle = Value(lifecycle),
+       idempotencyKey = Value(idempotencyKey),
+       idempotencyPayload = Value(idempotencyPayload),
+       createdAt = Value(createdAt);
+  static Insertable<DbSavingsCertificate> custom({
+    Expression<String>? id,
+    Expression<String>? householdId,
+    Expression<String>? certificateAccountId,
+    Expression<String>? currencyCode,
+    Expression<int>? originalPrincipalMinorUnits,
+    Expression<String>? startDate,
+    Expression<String>? maturityDate,
+    Expression<String>? lifecycle,
+    Expression<String>? idempotencyKey,
+    Expression<String>? idempotencyPayload,
+    Expression<String>? createdAt,
+    Expression<String>? redeemedAt,
+    Expression<String>? archivedAt,
+    Expression<int>? schemaVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (certificateAccountId != null)
+        'certificate_account_id': certificateAccountId,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (originalPrincipalMinorUnits != null)
+        'original_principal_minor_units': originalPrincipalMinorUnits,
+      if (startDate != null) 'start_date': startDate,
+      if (maturityDate != null) 'maturity_date': maturityDate,
+      if (lifecycle != null) 'lifecycle': lifecycle,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (idempotencyPayload != null) 'idempotency_payload': idempotencyPayload,
+      if (createdAt != null) 'created_at': createdAt,
+      if (redeemedAt != null) 'redeemed_at': redeemedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SavingsCertificatesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? householdId,
+    Value<String>? certificateAccountId,
+    Value<String>? currencyCode,
+    Value<int>? originalPrincipalMinorUnits,
+    Value<String>? startDate,
+    Value<String>? maturityDate,
+    Value<String>? lifecycle,
+    Value<String>? idempotencyKey,
+    Value<String>? idempotencyPayload,
+    Value<String>? createdAt,
+    Value<String?>? redeemedAt,
+    Value<String?>? archivedAt,
+    Value<int>? schemaVersion,
+    Value<int>? rowid,
+  }) {
+    return SavingsCertificatesTableCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      certificateAccountId: certificateAccountId ?? this.certificateAccountId,
+      currencyCode: currencyCode ?? this.currencyCode,
+      originalPrincipalMinorUnits:
+          originalPrincipalMinorUnits ?? this.originalPrincipalMinorUnits,
+      startDate: startDate ?? this.startDate,
+      maturityDate: maturityDate ?? this.maturityDate,
+      lifecycle: lifecycle ?? this.lifecycle,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      idempotencyPayload: idempotencyPayload ?? this.idempotencyPayload,
+      createdAt: createdAt ?? this.createdAt,
+      redeemedAt: redeemedAt ?? this.redeemedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (certificateAccountId.present) {
+      map['certificate_account_id'] = Variable<String>(
+        certificateAccountId.value,
+      );
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (originalPrincipalMinorUnits.present) {
+      map['original_principal_minor_units'] = Variable<int>(
+        originalPrincipalMinorUnits.value,
+      );
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (maturityDate.present) {
+      map['maturity_date'] = Variable<String>(maturityDate.value);
+    }
+    if (lifecycle.present) {
+      map['lifecycle'] = Variable<String>(lifecycle.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (idempotencyPayload.present) {
+      map['idempotency_payload'] = Variable<String>(idempotencyPayload.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (redeemedAt.present) {
+      map['redeemed_at'] = Variable<String>(redeemedAt.value);
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<String>(archivedAt.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsCertificatesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('certificateAccountId: $certificateAccountId, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('originalPrincipalMinorUnits: $originalPrincipalMinorUnits, ')
+          ..write('startDate: $startDate, ')
+          ..write('maturityDate: $maturityDate, ')
+          ..write('lifecycle: $lifecycle, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('idempotencyPayload: $idempotencyPayload, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('redeemedAt: $redeemedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CertificateRevisionsTableTable extends CertificateRevisionsTable
+    with TableInfo<$CertificateRevisionsTableTable, DbCertificateRevision> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CertificateRevisionsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certificateIdMeta = const VerificationMeta(
+    'certificateId',
+  );
+  @override
+  late final GeneratedColumn<String> certificateId = GeneratedColumn<String>(
+    'certificate_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES savings_certificates (id)',
+    ),
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _institutionNameMeta = const VerificationMeta(
+    'institutionName',
+  );
+  @override
+  late final GeneratedColumn<String> institutionName = GeneratedColumn<String>(
+    'institution_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _annualRateBpsMeta = const VerificationMeta(
+    'annualRateBps',
+  );
+  @override
+  late final GeneratedColumn<int> annualRateBps = GeneratedColumn<int>(
+    'annual_rate_bps',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _profitFrequencyCodeMeta =
+      const VerificationMeta('profitFrequencyCode');
+  @override
+  late final GeneratedColumn<String> profitFrequencyCode =
+      GeneratedColumn<String>(
+        'profit_frequency_code',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionReasonMeta = const VerificationMeta(
+    'revisionReason',
+  );
+  @override
+  late final GeneratedColumn<String> revisionReason = GeneratedColumn<String>(
+    'revision_reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    certificateId,
+    householdId,
+    institutionName,
+    reference,
+    note,
+    annualRateBps,
+    profitFrequencyCode,
+    createdAt,
+    revisionReason,
+    schemaVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'certificate_revisions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbCertificateRevision> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('certificate_id')) {
+      context.handle(
+        _certificateIdMeta,
+        certificateId.isAcceptableOrUnknown(
+          data['certificate_id']!,
+          _certificateIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_certificateIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('institution_name')) {
+      context.handle(
+        _institutionNameMeta,
+        institutionName.isAcceptableOrUnknown(
+          data['institution_name']!,
+          _institutionNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_institutionNameMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('annual_rate_bps')) {
+      context.handle(
+        _annualRateBpsMeta,
+        annualRateBps.isAcceptableOrUnknown(
+          data['annual_rate_bps']!,
+          _annualRateBpsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('profit_frequency_code')) {
+      context.handle(
+        _profitFrequencyCodeMeta,
+        profitFrequencyCode.isAcceptableOrUnknown(
+          data['profit_frequency_code']!,
+          _profitFrequencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('revision_reason')) {
+      context.handle(
+        _revisionReasonMeta,
+        revisionReason.isAcceptableOrUnknown(
+          data['revision_reason']!,
+          _revisionReasonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_revisionReasonMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbCertificateRevision map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbCertificateRevision(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      certificateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certificate_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      institutionName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}institution_name'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      annualRateBps: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}annual_rate_bps'],
+      ),
+      profitFrequencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profit_frequency_code'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      revisionReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}revision_reason'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+    );
+  }
+
+  @override
+  $CertificateRevisionsTableTable createAlias(String alias) {
+    return $CertificateRevisionsTableTable(attachedDatabase, alias);
+  }
+}
+
+class DbCertificateRevision extends DataClass
+    implements Insertable<DbCertificateRevision> {
+  final String id;
+  final String certificateId;
+  final String householdId;
+  final String institutionName;
+  final String? reference;
+  final String? note;
+
+  /// Optional annual rate in basis points.
+  final int? annualRateBps;
+
+  /// Optional frequency code (see CertificateProfitFrequency).
+  final String? profitFrequencyCode;
+  final String createdAt;
+  final String revisionReason;
+  final int schemaVersion;
+  const DbCertificateRevision({
+    required this.id,
+    required this.certificateId,
+    required this.householdId,
+    required this.institutionName,
+    this.reference,
+    this.note,
+    this.annualRateBps,
+    this.profitFrequencyCode,
+    required this.createdAt,
+    required this.revisionReason,
+    required this.schemaVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['certificate_id'] = Variable<String>(certificateId);
+    map['household_id'] = Variable<String>(householdId);
+    map['institution_name'] = Variable<String>(institutionName);
+    if (!nullToAbsent || reference != null) {
+      map['reference'] = Variable<String>(reference);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || annualRateBps != null) {
+      map['annual_rate_bps'] = Variable<int>(annualRateBps);
+    }
+    if (!nullToAbsent || profitFrequencyCode != null) {
+      map['profit_frequency_code'] = Variable<String>(profitFrequencyCode);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    map['revision_reason'] = Variable<String>(revisionReason);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    return map;
+  }
+
+  CertificateRevisionsTableCompanion toCompanion(bool nullToAbsent) {
+    return CertificateRevisionsTableCompanion(
+      id: Value(id),
+      certificateId: Value(certificateId),
+      householdId: Value(householdId),
+      institutionName: Value(institutionName),
+      reference: reference == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reference),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      annualRateBps: annualRateBps == null && nullToAbsent
+          ? const Value.absent()
+          : Value(annualRateBps),
+      profitFrequencyCode: profitFrequencyCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profitFrequencyCode),
+      createdAt: Value(createdAt),
+      revisionReason: Value(revisionReason),
+      schemaVersion: Value(schemaVersion),
+    );
+  }
+
+  factory DbCertificateRevision.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbCertificateRevision(
+      id: serializer.fromJson<String>(json['id']),
+      certificateId: serializer.fromJson<String>(json['certificateId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      institutionName: serializer.fromJson<String>(json['institutionName']),
+      reference: serializer.fromJson<String?>(json['reference']),
+      note: serializer.fromJson<String?>(json['note']),
+      annualRateBps: serializer.fromJson<int?>(json['annualRateBps']),
+      profitFrequencyCode: serializer.fromJson<String?>(
+        json['profitFrequencyCode'],
+      ),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      revisionReason: serializer.fromJson<String>(json['revisionReason']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'certificateId': serializer.toJson<String>(certificateId),
+      'householdId': serializer.toJson<String>(householdId),
+      'institutionName': serializer.toJson<String>(institutionName),
+      'reference': serializer.toJson<String?>(reference),
+      'note': serializer.toJson<String?>(note),
+      'annualRateBps': serializer.toJson<int?>(annualRateBps),
+      'profitFrequencyCode': serializer.toJson<String?>(profitFrequencyCode),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'revisionReason': serializer.toJson<String>(revisionReason),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+    };
+  }
+
+  DbCertificateRevision copyWith({
+    String? id,
+    String? certificateId,
+    String? householdId,
+    String? institutionName,
+    Value<String?> reference = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<int?> annualRateBps = const Value.absent(),
+    Value<String?> profitFrequencyCode = const Value.absent(),
+    String? createdAt,
+    String? revisionReason,
+    int? schemaVersion,
+  }) => DbCertificateRevision(
+    id: id ?? this.id,
+    certificateId: certificateId ?? this.certificateId,
+    householdId: householdId ?? this.householdId,
+    institutionName: institutionName ?? this.institutionName,
+    reference: reference.present ? reference.value : this.reference,
+    note: note.present ? note.value : this.note,
+    annualRateBps: annualRateBps.present
+        ? annualRateBps.value
+        : this.annualRateBps,
+    profitFrequencyCode: profitFrequencyCode.present
+        ? profitFrequencyCode.value
+        : this.profitFrequencyCode,
+    createdAt: createdAt ?? this.createdAt,
+    revisionReason: revisionReason ?? this.revisionReason,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+  );
+  DbCertificateRevision copyWithCompanion(
+    CertificateRevisionsTableCompanion data,
+  ) {
+    return DbCertificateRevision(
+      id: data.id.present ? data.id.value : this.id,
+      certificateId: data.certificateId.present
+          ? data.certificateId.value
+          : this.certificateId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      institutionName: data.institutionName.present
+          ? data.institutionName.value
+          : this.institutionName,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      note: data.note.present ? data.note.value : this.note,
+      annualRateBps: data.annualRateBps.present
+          ? data.annualRateBps.value
+          : this.annualRateBps,
+      profitFrequencyCode: data.profitFrequencyCode.present
+          ? data.profitFrequencyCode.value
+          : this.profitFrequencyCode,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      revisionReason: data.revisionReason.present
+          ? data.revisionReason.value
+          : this.revisionReason,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbCertificateRevision(')
+          ..write('id: $id, ')
+          ..write('certificateId: $certificateId, ')
+          ..write('householdId: $householdId, ')
+          ..write('institutionName: $institutionName, ')
+          ..write('reference: $reference, ')
+          ..write('note: $note, ')
+          ..write('annualRateBps: $annualRateBps, ')
+          ..write('profitFrequencyCode: $profitFrequencyCode, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('revisionReason: $revisionReason, ')
+          ..write('schemaVersion: $schemaVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    certificateId,
+    householdId,
+    institutionName,
+    reference,
+    note,
+    annualRateBps,
+    profitFrequencyCode,
+    createdAt,
+    revisionReason,
+    schemaVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbCertificateRevision &&
+          other.id == this.id &&
+          other.certificateId == this.certificateId &&
+          other.householdId == this.householdId &&
+          other.institutionName == this.institutionName &&
+          other.reference == this.reference &&
+          other.note == this.note &&
+          other.annualRateBps == this.annualRateBps &&
+          other.profitFrequencyCode == this.profitFrequencyCode &&
+          other.createdAt == this.createdAt &&
+          other.revisionReason == this.revisionReason &&
+          other.schemaVersion == this.schemaVersion);
+}
+
+class CertificateRevisionsTableCompanion
+    extends UpdateCompanion<DbCertificateRevision> {
+  final Value<String> id;
+  final Value<String> certificateId;
+  final Value<String> householdId;
+  final Value<String> institutionName;
+  final Value<String?> reference;
+  final Value<String?> note;
+  final Value<int?> annualRateBps;
+  final Value<String?> profitFrequencyCode;
+  final Value<String> createdAt;
+  final Value<String> revisionReason;
+  final Value<int> schemaVersion;
+  final Value<int> rowid;
+  const CertificateRevisionsTableCompanion({
+    this.id = const Value.absent(),
+    this.certificateId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.institutionName = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.note = const Value.absent(),
+    this.annualRateBps = const Value.absent(),
+    this.profitFrequencyCode = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.revisionReason = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CertificateRevisionsTableCompanion.insert({
+    required String id,
+    required String certificateId,
+    required String householdId,
+    required String institutionName,
+    this.reference = const Value.absent(),
+    this.note = const Value.absent(),
+    this.annualRateBps = const Value.absent(),
+    this.profitFrequencyCode = const Value.absent(),
+    required String createdAt,
+    required String revisionReason,
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       certificateId = Value(certificateId),
+       householdId = Value(householdId),
+       institutionName = Value(institutionName),
+       createdAt = Value(createdAt),
+       revisionReason = Value(revisionReason);
+  static Insertable<DbCertificateRevision> custom({
+    Expression<String>? id,
+    Expression<String>? certificateId,
+    Expression<String>? householdId,
+    Expression<String>? institutionName,
+    Expression<String>? reference,
+    Expression<String>? note,
+    Expression<int>? annualRateBps,
+    Expression<String>? profitFrequencyCode,
+    Expression<String>? createdAt,
+    Expression<String>? revisionReason,
+    Expression<int>? schemaVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (certificateId != null) 'certificate_id': certificateId,
+      if (householdId != null) 'household_id': householdId,
+      if (institutionName != null) 'institution_name': institutionName,
+      if (reference != null) 'reference': reference,
+      if (note != null) 'note': note,
+      if (annualRateBps != null) 'annual_rate_bps': annualRateBps,
+      if (profitFrequencyCode != null)
+        'profit_frequency_code': profitFrequencyCode,
+      if (createdAt != null) 'created_at': createdAt,
+      if (revisionReason != null) 'revision_reason': revisionReason,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CertificateRevisionsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? certificateId,
+    Value<String>? householdId,
+    Value<String>? institutionName,
+    Value<String?>? reference,
+    Value<String?>? note,
+    Value<int?>? annualRateBps,
+    Value<String?>? profitFrequencyCode,
+    Value<String>? createdAt,
+    Value<String>? revisionReason,
+    Value<int>? schemaVersion,
+    Value<int>? rowid,
+  }) {
+    return CertificateRevisionsTableCompanion(
+      id: id ?? this.id,
+      certificateId: certificateId ?? this.certificateId,
+      householdId: householdId ?? this.householdId,
+      institutionName: institutionName ?? this.institutionName,
+      reference: reference ?? this.reference,
+      note: note ?? this.note,
+      annualRateBps: annualRateBps ?? this.annualRateBps,
+      profitFrequencyCode: profitFrequencyCode ?? this.profitFrequencyCode,
+      createdAt: createdAt ?? this.createdAt,
+      revisionReason: revisionReason ?? this.revisionReason,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (certificateId.present) {
+      map['certificate_id'] = Variable<String>(certificateId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (institutionName.present) {
+      map['institution_name'] = Variable<String>(institutionName.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (annualRateBps.present) {
+      map['annual_rate_bps'] = Variable<int>(annualRateBps.value);
+    }
+    if (profitFrequencyCode.present) {
+      map['profit_frequency_code'] = Variable<String>(
+        profitFrequencyCode.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (revisionReason.present) {
+      map['revision_reason'] = Variable<String>(revisionReason.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CertificateRevisionsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('certificateId: $certificateId, ')
+          ..write('householdId: $householdId, ')
+          ..write('institutionName: $institutionName, ')
+          ..write('reference: $reference, ')
+          ..write('note: $note, ')
+          ..write('annualRateBps: $annualRateBps, ')
+          ..write('profitFrequencyCode: $profitFrequencyCode, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('revisionReason: $revisionReason, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CertificateEventsTableTable extends CertificateEventsTable
+    with TableInfo<$CertificateEventsTableTable, DbCertificateEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CertificateEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certificateIdMeta = const VerificationMeta(
+    'certificateId',
+  );
+  @override
+  late final GeneratedColumn<String> certificateId = GeneratedColumn<String>(
+    'certificate_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES savings_certificates (id)',
+    ),
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventTypeMeta = const VerificationMeta(
+    'eventType',
+  );
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+    'event_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _relatedOperationIdMeta =
+      const VerificationMeta('relatedOperationId');
+  @override
+  late final GeneratedColumn<String> relatedOperationId =
+      GeneratedColumn<String>(
+        'related_operation_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _amountMinorUnitsMeta = const VerificationMeta(
+    'amountMinorUnits',
+  );
+  @override
+  late final GeneratedColumn<int> amountMinorUnits = GeneratedColumn<int>(
+    'amount_minor_units',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _payloadFingerprintMeta =
+      const VerificationMeta('payloadFingerprint');
+  @override
+  late final GeneratedColumn<String> payloadFingerprint =
+      GeneratedColumn<String>(
+        'payload_fingerprint',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectiveAtMeta = const VerificationMeta(
+    'effectiveAt',
+  );
+  @override
+  late final GeneratedColumn<String> effectiveAt = GeneratedColumn<String>(
+    'effective_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    certificateId,
+    householdId,
+    eventType,
+    relatedOperationId,
+    amountMinorUnits,
+    currencyCode,
+    idempotencyKey,
+    payloadFingerprint,
+    note,
+    effectiveAt,
+    createdAt,
+    schemaVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'certificate_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbCertificateEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('certificate_id')) {
+      context.handle(
+        _certificateIdMeta,
+        certificateId.isAcceptableOrUnknown(
+          data['certificate_id']!,
+          _certificateIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_certificateIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(
+        _eventTypeMeta,
+        eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventTypeMeta);
+    }
+    if (data.containsKey('related_operation_id')) {
+      context.handle(
+        _relatedOperationIdMeta,
+        relatedOperationId.isAcceptableOrUnknown(
+          data['related_operation_id']!,
+          _relatedOperationIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount_minor_units')) {
+      context.handle(
+        _amountMinorUnitsMeta,
+        amountMinorUnits.isAcceptableOrUnknown(
+          data['amount_minor_units']!,
+          _amountMinorUnitsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payload_fingerprint')) {
+      context.handle(
+        _payloadFingerprintMeta,
+        payloadFingerprint.isAcceptableOrUnknown(
+          data['payload_fingerprint']!,
+          _payloadFingerprintMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('effective_at')) {
+      context.handle(
+        _effectiveAtMeta,
+        effectiveAt.isAcceptableOrUnknown(
+          data['effective_at']!,
+          _effectiveAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbCertificateEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbCertificateEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      certificateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certificate_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      eventType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_type'],
+      )!,
+      relatedOperationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}related_operation_id'],
+      ),
+      amountMinorUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor_units'],
+      ),
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      ),
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      ),
+      payloadFingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload_fingerprint'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      effectiveAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}effective_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+    );
+  }
+
+  @override
+  $CertificateEventsTableTable createAlias(String alias) {
+    return $CertificateEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class DbCertificateEvent extends DataClass
+    implements Insertable<DbCertificateEvent> {
+  final String id;
+  final String certificateId;
+  final String householdId;
+
+  /// See CertificateEventType.code.
+  final String eventType;
+
+  /// Linked ledger operation for financial events.
+  final String? relatedOperationId;
+  final int? amountMinorUnits;
+  final String? currencyCode;
+  final String? idempotencyKey;
+  final String? payloadFingerprint;
+  final String? note;
+  final String effectiveAt;
+  final String createdAt;
+  final int schemaVersion;
+  const DbCertificateEvent({
+    required this.id,
+    required this.certificateId,
+    required this.householdId,
+    required this.eventType,
+    this.relatedOperationId,
+    this.amountMinorUnits,
+    this.currencyCode,
+    this.idempotencyKey,
+    this.payloadFingerprint,
+    this.note,
+    required this.effectiveAt,
+    required this.createdAt,
+    required this.schemaVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['certificate_id'] = Variable<String>(certificateId);
+    map['household_id'] = Variable<String>(householdId);
+    map['event_type'] = Variable<String>(eventType);
+    if (!nullToAbsent || relatedOperationId != null) {
+      map['related_operation_id'] = Variable<String>(relatedOperationId);
+    }
+    if (!nullToAbsent || amountMinorUnits != null) {
+      map['amount_minor_units'] = Variable<int>(amountMinorUnits);
+    }
+    if (!nullToAbsent || currencyCode != null) {
+      map['currency_code'] = Variable<String>(currencyCode);
+    }
+    if (!nullToAbsent || idempotencyKey != null) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey);
+    }
+    if (!nullToAbsent || payloadFingerprint != null) {
+      map['payload_fingerprint'] = Variable<String>(payloadFingerprint);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['effective_at'] = Variable<String>(effectiveAt);
+    map['created_at'] = Variable<String>(createdAt);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    return map;
+  }
+
+  CertificateEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return CertificateEventsTableCompanion(
+      id: Value(id),
+      certificateId: Value(certificateId),
+      householdId: Value(householdId),
+      eventType: Value(eventType),
+      relatedOperationId: relatedOperationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relatedOperationId),
+      amountMinorUnits: amountMinorUnits == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountMinorUnits),
+      currencyCode: currencyCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currencyCode),
+      idempotencyKey: idempotencyKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idempotencyKey),
+      payloadFingerprint: payloadFingerprint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payloadFingerprint),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      effectiveAt: Value(effectiveAt),
+      createdAt: Value(createdAt),
+      schemaVersion: Value(schemaVersion),
+    );
+  }
+
+  factory DbCertificateEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbCertificateEvent(
+      id: serializer.fromJson<String>(json['id']),
+      certificateId: serializer.fromJson<String>(json['certificateId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      relatedOperationId: serializer.fromJson<String?>(
+        json['relatedOperationId'],
+      ),
+      amountMinorUnits: serializer.fromJson<int?>(json['amountMinorUnits']),
+      currencyCode: serializer.fromJson<String?>(json['currencyCode']),
+      idempotencyKey: serializer.fromJson<String?>(json['idempotencyKey']),
+      payloadFingerprint: serializer.fromJson<String?>(
+        json['payloadFingerprint'],
+      ),
+      note: serializer.fromJson<String?>(json['note']),
+      effectiveAt: serializer.fromJson<String>(json['effectiveAt']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'certificateId': serializer.toJson<String>(certificateId),
+      'householdId': serializer.toJson<String>(householdId),
+      'eventType': serializer.toJson<String>(eventType),
+      'relatedOperationId': serializer.toJson<String?>(relatedOperationId),
+      'amountMinorUnits': serializer.toJson<int?>(amountMinorUnits),
+      'currencyCode': serializer.toJson<String?>(currencyCode),
+      'idempotencyKey': serializer.toJson<String?>(idempotencyKey),
+      'payloadFingerprint': serializer.toJson<String?>(payloadFingerprint),
+      'note': serializer.toJson<String?>(note),
+      'effectiveAt': serializer.toJson<String>(effectiveAt),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+    };
+  }
+
+  DbCertificateEvent copyWith({
+    String? id,
+    String? certificateId,
+    String? householdId,
+    String? eventType,
+    Value<String?> relatedOperationId = const Value.absent(),
+    Value<int?> amountMinorUnits = const Value.absent(),
+    Value<String?> currencyCode = const Value.absent(),
+    Value<String?> idempotencyKey = const Value.absent(),
+    Value<String?> payloadFingerprint = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    String? effectiveAt,
+    String? createdAt,
+    int? schemaVersion,
+  }) => DbCertificateEvent(
+    id: id ?? this.id,
+    certificateId: certificateId ?? this.certificateId,
+    householdId: householdId ?? this.householdId,
+    eventType: eventType ?? this.eventType,
+    relatedOperationId: relatedOperationId.present
+        ? relatedOperationId.value
+        : this.relatedOperationId,
+    amountMinorUnits: amountMinorUnits.present
+        ? amountMinorUnits.value
+        : this.amountMinorUnits,
+    currencyCode: currencyCode.present ? currencyCode.value : this.currencyCode,
+    idempotencyKey: idempotencyKey.present
+        ? idempotencyKey.value
+        : this.idempotencyKey,
+    payloadFingerprint: payloadFingerprint.present
+        ? payloadFingerprint.value
+        : this.payloadFingerprint,
+    note: note.present ? note.value : this.note,
+    effectiveAt: effectiveAt ?? this.effectiveAt,
+    createdAt: createdAt ?? this.createdAt,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+  );
+  DbCertificateEvent copyWithCompanion(CertificateEventsTableCompanion data) {
+    return DbCertificateEvent(
+      id: data.id.present ? data.id.value : this.id,
+      certificateId: data.certificateId.present
+          ? data.certificateId.value
+          : this.certificateId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      relatedOperationId: data.relatedOperationId.present
+          ? data.relatedOperationId.value
+          : this.relatedOperationId,
+      amountMinorUnits: data.amountMinorUnits.present
+          ? data.amountMinorUnits.value
+          : this.amountMinorUnits,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      payloadFingerprint: data.payloadFingerprint.present
+          ? data.payloadFingerprint.value
+          : this.payloadFingerprint,
+      note: data.note.present ? data.note.value : this.note,
+      effectiveAt: data.effectiveAt.present
+          ? data.effectiveAt.value
+          : this.effectiveAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbCertificateEvent(')
+          ..write('id: $id, ')
+          ..write('certificateId: $certificateId, ')
+          ..write('householdId: $householdId, ')
+          ..write('eventType: $eventType, ')
+          ..write('relatedOperationId: $relatedOperationId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('payloadFingerprint: $payloadFingerprint, ')
+          ..write('note: $note, ')
+          ..write('effectiveAt: $effectiveAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('schemaVersion: $schemaVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    certificateId,
+    householdId,
+    eventType,
+    relatedOperationId,
+    amountMinorUnits,
+    currencyCode,
+    idempotencyKey,
+    payloadFingerprint,
+    note,
+    effectiveAt,
+    createdAt,
+    schemaVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbCertificateEvent &&
+          other.id == this.id &&
+          other.certificateId == this.certificateId &&
+          other.householdId == this.householdId &&
+          other.eventType == this.eventType &&
+          other.relatedOperationId == this.relatedOperationId &&
+          other.amountMinorUnits == this.amountMinorUnits &&
+          other.currencyCode == this.currencyCode &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.payloadFingerprint == this.payloadFingerprint &&
+          other.note == this.note &&
+          other.effectiveAt == this.effectiveAt &&
+          other.createdAt == this.createdAt &&
+          other.schemaVersion == this.schemaVersion);
+}
+
+class CertificateEventsTableCompanion
+    extends UpdateCompanion<DbCertificateEvent> {
+  final Value<String> id;
+  final Value<String> certificateId;
+  final Value<String> householdId;
+  final Value<String> eventType;
+  final Value<String?> relatedOperationId;
+  final Value<int?> amountMinorUnits;
+  final Value<String?> currencyCode;
+  final Value<String?> idempotencyKey;
+  final Value<String?> payloadFingerprint;
+  final Value<String?> note;
+  final Value<String> effectiveAt;
+  final Value<String> createdAt;
+  final Value<int> schemaVersion;
+  final Value<int> rowid;
+  const CertificateEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.certificateId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.relatedOperationId = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.payloadFingerprint = const Value.absent(),
+    this.note = const Value.absent(),
+    this.effectiveAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CertificateEventsTableCompanion.insert({
+    required String id,
+    required String certificateId,
+    required String householdId,
+    required String eventType,
+    this.relatedOperationId = const Value.absent(),
+    this.amountMinorUnits = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.payloadFingerprint = const Value.absent(),
+    this.note = const Value.absent(),
+    required String effectiveAt,
+    required String createdAt,
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       certificateId = Value(certificateId),
+       householdId = Value(householdId),
+       eventType = Value(eventType),
+       effectiveAt = Value(effectiveAt),
+       createdAt = Value(createdAt);
+  static Insertable<DbCertificateEvent> custom({
+    Expression<String>? id,
+    Expression<String>? certificateId,
+    Expression<String>? householdId,
+    Expression<String>? eventType,
+    Expression<String>? relatedOperationId,
+    Expression<int>? amountMinorUnits,
+    Expression<String>? currencyCode,
+    Expression<String>? idempotencyKey,
+    Expression<String>? payloadFingerprint,
+    Expression<String>? note,
+    Expression<String>? effectiveAt,
+    Expression<String>? createdAt,
+    Expression<int>? schemaVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (certificateId != null) 'certificate_id': certificateId,
+      if (householdId != null) 'household_id': householdId,
+      if (eventType != null) 'event_type': eventType,
+      if (relatedOperationId != null)
+        'related_operation_id': relatedOperationId,
+      if (amountMinorUnits != null) 'amount_minor_units': amountMinorUnits,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (payloadFingerprint != null) 'payload_fingerprint': payloadFingerprint,
+      if (note != null) 'note': note,
+      if (effectiveAt != null) 'effective_at': effectiveAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CertificateEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? certificateId,
+    Value<String>? householdId,
+    Value<String>? eventType,
+    Value<String?>? relatedOperationId,
+    Value<int?>? amountMinorUnits,
+    Value<String?>? currencyCode,
+    Value<String?>? idempotencyKey,
+    Value<String?>? payloadFingerprint,
+    Value<String?>? note,
+    Value<String>? effectiveAt,
+    Value<String>? createdAt,
+    Value<int>? schemaVersion,
+    Value<int>? rowid,
+  }) {
+    return CertificateEventsTableCompanion(
+      id: id ?? this.id,
+      certificateId: certificateId ?? this.certificateId,
+      householdId: householdId ?? this.householdId,
+      eventType: eventType ?? this.eventType,
+      relatedOperationId: relatedOperationId ?? this.relatedOperationId,
+      amountMinorUnits: amountMinorUnits ?? this.amountMinorUnits,
+      currencyCode: currencyCode ?? this.currencyCode,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      payloadFingerprint: payloadFingerprint ?? this.payloadFingerprint,
+      note: note ?? this.note,
+      effectiveAt: effectiveAt ?? this.effectiveAt,
+      createdAt: createdAt ?? this.createdAt,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (certificateId.present) {
+      map['certificate_id'] = Variable<String>(certificateId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (relatedOperationId.present) {
+      map['related_operation_id'] = Variable<String>(relatedOperationId.value);
+    }
+    if (amountMinorUnits.present) {
+      map['amount_minor_units'] = Variable<int>(amountMinorUnits.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (payloadFingerprint.present) {
+      map['payload_fingerprint'] = Variable<String>(payloadFingerprint.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (effectiveAt.present) {
+      map['effective_at'] = Variable<String>(effectiveAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CertificateEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('certificateId: $certificateId, ')
+          ..write('householdId: $householdId, ')
+          ..write('eventType: $eventType, ')
+          ..write('relatedOperationId: $relatedOperationId, ')
+          ..write('amountMinorUnits: $amountMinorUnits, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('payloadFingerprint: $payloadFingerprint, ')
+          ..write('note: $note, ')
+          ..write('effectiveAt: $effectiveAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -10603,6 +13014,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $GoalMovementsTableTable(this);
   late final $GoalLifecycleEventsTableTable goalLifecycleEventsTable =
       $GoalLifecycleEventsTableTable(this);
+  late final $SavingsCertificatesTableTable savingsCertificatesTable =
+      $SavingsCertificatesTableTable(this);
+  late final $CertificateRevisionsTableTable certificateRevisionsTable =
+      $CertificateRevisionsTableTable(this);
+  late final $CertificateEventsTableTable certificateEventsTable =
+      $CertificateEventsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10620,6 +13037,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     goalRevisionsTable,
     goalMovementsTable,
     goalLifecycleEventsTable,
+    savingsCertificatesTable,
+    certificateRevisionsTable,
+    certificateEventsTable,
   ];
 }
 
@@ -12115,6 +14535,37 @@ final class $$FinancialAccountsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $SavingsCertificatesTableTable,
+    List<DbSavingsCertificate>
+  >
+  _savingsCertificatesTableRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.savingsCertificatesTable,
+    aliasName:
+        'financial_accounts__id__savings_certificates__certificate_account_id',
+  );
+
+  $$SavingsCertificatesTableTableProcessedTableManager
+  get savingsCertificatesTableRefs {
+    final manager =
+        $$SavingsCertificatesTableTableTableManager(
+          $_db,
+          $_db.savingsCertificatesTable,
+        ).filter(
+          (f) =>
+              f.certificateAccountId.id.sqlEquals($_itemColumn<String>('id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _savingsCertificatesTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$FinancialAccountsTableFilterComposer
@@ -12377,6 +14828,33 @@ class $$FinancialAccountsTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> savingsCertificatesTableRefs(
+    Expression<bool> Function($$SavingsCertificatesTableTableFilterComposer f)
+    f,
+  ) {
+    final $$SavingsCertificatesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.certificateAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -12763,6 +15241,33 @@ class $$FinancialAccountsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> savingsCertificatesTableRefs<T extends Object>(
+    Expression<T> Function($$SavingsCertificatesTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$SavingsCertificatesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.certificateAccountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$FinancialAccountsTableTableManager
@@ -12785,6 +15290,7 @@ class $$FinancialAccountsTableTableManager
             bool destinationOperations,
             bool childWithdrawalAuditsRefs,
             bool goalsTableRefs,
+            bool savingsCertificatesTableRefs,
           })
         > {
   $$FinancialAccountsTableTableManager(
@@ -12919,6 +15425,7 @@ class $$FinancialAccountsTableTableManager
                 destinationOperations = false,
                 childWithdrawalAuditsRefs = false,
                 goalsTableRefs = false,
+                savingsCertificatesTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -12928,6 +15435,8 @@ class $$FinancialAccountsTableTableManager
                     if (destinationOperations) db.operations,
                     if (childWithdrawalAuditsRefs) db.childWithdrawalAudits,
                     if (goalsTableRefs) db.goalsTable,
+                    if (savingsCertificatesTableRefs)
+                      db.savingsCertificatesTable,
                   ],
                   addJoins:
                       <
@@ -13070,6 +15579,27 @@ class $$FinancialAccountsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (savingsCertificatesTableRefs)
+                        await $_getPrefetchedData<
+                          DbFinancialAccount,
+                          $FinancialAccountsTable,
+                          DbSavingsCertificate
+                        >(
+                          currentTable: table,
+                          referencedTable: $$FinancialAccountsTableReferences
+                              ._savingsCertificatesTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$FinancialAccountsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).savingsCertificatesTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.certificateAccountId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -13097,6 +15627,7 @@ typedef $$FinancialAccountsTableProcessedTableManager =
         bool destinationOperations,
         bool childWithdrawalAuditsRefs,
         bool goalsTableRefs,
+        bool savingsCertificatesTableRefs,
       })
     >;
 typedef $$LedgerEntriesTableCreateCompanionBuilder =
@@ -18555,6 +21086,1741 @@ typedef $$GoalLifecycleEventsTableTableProcessedTableManager =
       DbGoalLifecycleEvent,
       PrefetchHooks Function({bool goalId})
     >;
+typedef $$SavingsCertificatesTableTableCreateCompanionBuilder =
+    SavingsCertificatesTableCompanion Function({
+      required String id,
+      required String householdId,
+      required String certificateAccountId,
+      required String currencyCode,
+      required int originalPrincipalMinorUnits,
+      required String startDate,
+      required String maturityDate,
+      required String lifecycle,
+      required String idempotencyKey,
+      required String idempotencyPayload,
+      required String createdAt,
+      Value<String?> redeemedAt,
+      Value<String?> archivedAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+typedef $$SavingsCertificatesTableTableUpdateCompanionBuilder =
+    SavingsCertificatesTableCompanion Function({
+      Value<String> id,
+      Value<String> householdId,
+      Value<String> certificateAccountId,
+      Value<String> currencyCode,
+      Value<int> originalPrincipalMinorUnits,
+      Value<String> startDate,
+      Value<String> maturityDate,
+      Value<String> lifecycle,
+      Value<String> idempotencyKey,
+      Value<String> idempotencyPayload,
+      Value<String> createdAt,
+      Value<String?> redeemedAt,
+      Value<String?> archivedAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+
+final class $$SavingsCertificatesTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $SavingsCertificatesTableTable,
+          DbSavingsCertificate
+        > {
+  $$SavingsCertificatesTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $FinancialAccountsTable _certificateAccountIdTable(_$AppDatabase db) =>
+      db.financialAccounts.createAlias(
+        'savings_certificates__certificate_account_id__financial_accounts__id',
+      );
+
+  $$FinancialAccountsTableProcessedTableManager get certificateAccountId {
+    final $_column = $_itemColumn<String>('certificate_account_id')!;
+
+    final manager = $$FinancialAccountsTableTableManager(
+      $_db,
+      $_db.financialAccounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(
+      _certificateAccountIdTable($_db),
+    );
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CertificateRevisionsTableTable,
+    List<DbCertificateRevision>
+  >
+  _certificateRevisionsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.certificateRevisionsTable,
+        aliasName:
+            'savings_certificates__id__certificate_revisions__certificate_id',
+      );
+
+  $$CertificateRevisionsTableTableProcessedTableManager
+  get certificateRevisionsTableRefs {
+    final manager = $$CertificateRevisionsTableTableTableManager(
+      $_db,
+      $_db.certificateRevisionsTable,
+    ).filter((f) => f.certificateId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _certificateRevisionsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $CertificateEventsTableTable,
+    List<DbCertificateEvent>
+  >
+  _certificateEventsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.certificateEventsTable,
+        aliasName:
+            'savings_certificates__id__certificate_events__certificate_id',
+      );
+
+  $$CertificateEventsTableTableProcessedTableManager
+  get certificateEventsTableRefs {
+    final manager = $$CertificateEventsTableTableTableManager(
+      $_db,
+      $_db.certificateEventsTable,
+    ).filter((f) => f.certificateId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _certificateEventsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$SavingsCertificatesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SavingsCertificatesTableTable> {
+  $$SavingsCertificatesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get originalPrincipalMinorUnits => $composableBuilder(
+    column: $table.originalPrincipalMinorUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lifecycle => $composableBuilder(
+    column: $table.lifecycle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get redeemedAt => $composableBuilder(
+    column: $table.redeemedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$FinancialAccountsTableFilterComposer get certificateAccountId {
+    final $$FinancialAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.certificateAccountId,
+      referencedTable: $db.financialAccounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FinancialAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.financialAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> certificateRevisionsTableRefs(
+    Expression<bool> Function($$CertificateRevisionsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$CertificateRevisionsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.certificateRevisionsTable,
+          getReferencedColumn: (t) => t.certificateId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CertificateRevisionsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.certificateRevisionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> certificateEventsTableRefs(
+    Expression<bool> Function($$CertificateEventsTableTableFilterComposer f) f,
+  ) {
+    final $$CertificateEventsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.certificateEventsTable,
+          getReferencedColumn: (t) => t.certificateId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CertificateEventsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.certificateEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$SavingsCertificatesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SavingsCertificatesTableTable> {
+  $$SavingsCertificatesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get originalPrincipalMinorUnits => $composableBuilder(
+    column: $table.originalPrincipalMinorUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lifecycle => $composableBuilder(
+    column: $table.lifecycle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get redeemedAt => $composableBuilder(
+    column: $table.redeemedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$FinancialAccountsTableOrderingComposer get certificateAccountId {
+    final $$FinancialAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.certificateAccountId,
+      referencedTable: $db.financialAccounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FinancialAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.financialAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SavingsCertificatesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SavingsCertificatesTableTable> {
+  $$SavingsCertificatesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get originalPrincipalMinorUnits => $composableBuilder(
+    column: $table.originalPrincipalMinorUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get maturityDate => $composableBuilder(
+    column: $table.maturityDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lifecycle =>
+      $composableBuilder(column: $table.lifecycle, builder: (column) => column);
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyPayload => $composableBuilder(
+    column: $table.idempotencyPayload,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get redeemedAt => $composableBuilder(
+    column: $table.redeemedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  $$FinancialAccountsTableAnnotationComposer get certificateAccountId {
+    final $$FinancialAccountsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateAccountId,
+          referencedTable: $db.financialAccounts,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FinancialAccountsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.financialAccounts,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  Expression<T> certificateRevisionsTableRefs<T extends Object>(
+    Expression<T> Function($$CertificateRevisionsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$CertificateRevisionsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.certificateRevisionsTable,
+          getReferencedColumn: (t) => t.certificateId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CertificateRevisionsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.certificateRevisionsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> certificateEventsTableRefs<T extends Object>(
+    Expression<T> Function($$CertificateEventsTableTableAnnotationComposer a) f,
+  ) {
+    final $$CertificateEventsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.certificateEventsTable,
+          getReferencedColumn: (t) => t.certificateId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CertificateEventsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.certificateEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$SavingsCertificatesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SavingsCertificatesTableTable,
+          DbSavingsCertificate,
+          $$SavingsCertificatesTableTableFilterComposer,
+          $$SavingsCertificatesTableTableOrderingComposer,
+          $$SavingsCertificatesTableTableAnnotationComposer,
+          $$SavingsCertificatesTableTableCreateCompanionBuilder,
+          $$SavingsCertificatesTableTableUpdateCompanionBuilder,
+          (DbSavingsCertificate, $$SavingsCertificatesTableTableReferences),
+          DbSavingsCertificate,
+          PrefetchHooks Function({
+            bool certificateAccountId,
+            bool certificateRevisionsTableRefs,
+            bool certificateEventsTableRefs,
+          })
+        > {
+  $$SavingsCertificatesTableTableTableManager(
+    _$AppDatabase db,
+    $SavingsCertificatesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavingsCertificatesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$SavingsCertificatesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SavingsCertificatesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> certificateAccountId = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<int> originalPrincipalMinorUnits = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String> maturityDate = const Value.absent(),
+                Value<String> lifecycle = const Value.absent(),
+                Value<String> idempotencyKey = const Value.absent(),
+                Value<String> idempotencyPayload = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String?> redeemedAt = const Value.absent(),
+                Value<String?> archivedAt = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SavingsCertificatesTableCompanion(
+                id: id,
+                householdId: householdId,
+                certificateAccountId: certificateAccountId,
+                currencyCode: currencyCode,
+                originalPrincipalMinorUnits: originalPrincipalMinorUnits,
+                startDate: startDate,
+                maturityDate: maturityDate,
+                lifecycle: lifecycle,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
+                createdAt: createdAt,
+                redeemedAt: redeemedAt,
+                archivedAt: archivedAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String householdId,
+                required String certificateAccountId,
+                required String currencyCode,
+                required int originalPrincipalMinorUnits,
+                required String startDate,
+                required String maturityDate,
+                required String lifecycle,
+                required String idempotencyKey,
+                required String idempotencyPayload,
+                required String createdAt,
+                Value<String?> redeemedAt = const Value.absent(),
+                Value<String?> archivedAt = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SavingsCertificatesTableCompanion.insert(
+                id: id,
+                householdId: householdId,
+                certificateAccountId: certificateAccountId,
+                currencyCode: currencyCode,
+                originalPrincipalMinorUnits: originalPrincipalMinorUnits,
+                startDate: startDate,
+                maturityDate: maturityDate,
+                lifecycle: lifecycle,
+                idempotencyKey: idempotencyKey,
+                idempotencyPayload: idempotencyPayload,
+                createdAt: createdAt,
+                redeemedAt: redeemedAt,
+                archivedAt: archivedAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$SavingsCertificatesTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                certificateAccountId = false,
+                certificateRevisionsTableRefs = false,
+                certificateEventsTableRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (certificateRevisionsTableRefs)
+                      db.certificateRevisionsTable,
+                    if (certificateEventsTableRefs) db.certificateEventsTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (certificateAccountId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.certificateAccountId,
+                                    referencedTable:
+                                        $$SavingsCertificatesTableTableReferences
+                                            ._certificateAccountIdTable(db),
+                                    referencedColumn:
+                                        $$SavingsCertificatesTableTableReferences
+                                            ._certificateAccountIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (certificateRevisionsTableRefs)
+                        await $_getPrefetchedData<
+                          DbSavingsCertificate,
+                          $SavingsCertificatesTableTable,
+                          DbCertificateRevision
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$SavingsCertificatesTableTableReferences
+                                  ._certificateRevisionsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SavingsCertificatesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).certificateRevisionsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.certificateId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (certificateEventsTableRefs)
+                        await $_getPrefetchedData<
+                          DbSavingsCertificate,
+                          $SavingsCertificatesTableTable,
+                          DbCertificateEvent
+                        >(
+                          currentTable: table,
+                          referencedTable:
+                              $$SavingsCertificatesTableTableReferences
+                                  ._certificateEventsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SavingsCertificatesTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).certificateEventsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.certificateId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$SavingsCertificatesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SavingsCertificatesTableTable,
+      DbSavingsCertificate,
+      $$SavingsCertificatesTableTableFilterComposer,
+      $$SavingsCertificatesTableTableOrderingComposer,
+      $$SavingsCertificatesTableTableAnnotationComposer,
+      $$SavingsCertificatesTableTableCreateCompanionBuilder,
+      $$SavingsCertificatesTableTableUpdateCompanionBuilder,
+      (DbSavingsCertificate, $$SavingsCertificatesTableTableReferences),
+      DbSavingsCertificate,
+      PrefetchHooks Function({
+        bool certificateAccountId,
+        bool certificateRevisionsTableRefs,
+        bool certificateEventsTableRefs,
+      })
+    >;
+typedef $$CertificateRevisionsTableTableCreateCompanionBuilder =
+    CertificateRevisionsTableCompanion Function({
+      required String id,
+      required String certificateId,
+      required String householdId,
+      required String institutionName,
+      Value<String?> reference,
+      Value<String?> note,
+      Value<int?> annualRateBps,
+      Value<String?> profitFrequencyCode,
+      required String createdAt,
+      required String revisionReason,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+typedef $$CertificateRevisionsTableTableUpdateCompanionBuilder =
+    CertificateRevisionsTableCompanion Function({
+      Value<String> id,
+      Value<String> certificateId,
+      Value<String> householdId,
+      Value<String> institutionName,
+      Value<String?> reference,
+      Value<String?> note,
+      Value<int?> annualRateBps,
+      Value<String?> profitFrequencyCode,
+      Value<String> createdAt,
+      Value<String> revisionReason,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+
+final class $$CertificateRevisionsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CertificateRevisionsTableTable,
+          DbCertificateRevision
+        > {
+  $$CertificateRevisionsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SavingsCertificatesTableTable _certificateIdTable(_$AppDatabase db) =>
+      db.savingsCertificatesTable.createAlias(
+        'certificate_revisions__certificate_id__savings_certificates__id',
+      );
+
+  $$SavingsCertificatesTableTableProcessedTableManager get certificateId {
+    final $_column = $_itemColumn<String>('certificate_id')!;
+
+    final manager = $$SavingsCertificatesTableTableTableManager(
+      $_db,
+      $_db.savingsCertificatesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_certificateIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CertificateRevisionsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CertificateRevisionsTableTable> {
+  $$CertificateRevisionsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get institutionName => $composableBuilder(
+    column: $table.institutionName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get annualRateBps => $composableBuilder(
+    column: $table.annualRateBps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profitFrequencyCode => $composableBuilder(
+    column: $table.profitFrequencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get revisionReason => $composableBuilder(
+    column: $table.revisionReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SavingsCertificatesTableTableFilterComposer get certificateId {
+    final $$SavingsCertificatesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateRevisionsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CertificateRevisionsTableTable> {
+  $$CertificateRevisionsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get institutionName => $composableBuilder(
+    column: $table.institutionName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get annualRateBps => $composableBuilder(
+    column: $table.annualRateBps,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profitFrequencyCode => $composableBuilder(
+    column: $table.profitFrequencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get revisionReason => $composableBuilder(
+    column: $table.revisionReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SavingsCertificatesTableTableOrderingComposer get certificateId {
+    final $$SavingsCertificatesTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateRevisionsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CertificateRevisionsTableTable> {
+  $$CertificateRevisionsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get institutionName => $composableBuilder(
+    column: $table.institutionName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<int> get annualRateBps => $composableBuilder(
+    column: $table.annualRateBps,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profitFrequencyCode => $composableBuilder(
+    column: $table.profitFrequencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get revisionReason => $composableBuilder(
+    column: $table.revisionReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  $$SavingsCertificatesTableTableAnnotationComposer get certificateId {
+    final $$SavingsCertificatesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateRevisionsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CertificateRevisionsTableTable,
+          DbCertificateRevision,
+          $$CertificateRevisionsTableTableFilterComposer,
+          $$CertificateRevisionsTableTableOrderingComposer,
+          $$CertificateRevisionsTableTableAnnotationComposer,
+          $$CertificateRevisionsTableTableCreateCompanionBuilder,
+          $$CertificateRevisionsTableTableUpdateCompanionBuilder,
+          (DbCertificateRevision, $$CertificateRevisionsTableTableReferences),
+          DbCertificateRevision,
+          PrefetchHooks Function({bool certificateId})
+        > {
+  $$CertificateRevisionsTableTableTableManager(
+    _$AppDatabase db,
+    $CertificateRevisionsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CertificateRevisionsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CertificateRevisionsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CertificateRevisionsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> certificateId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> institutionName = const Value.absent(),
+                Value<String?> reference = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int?> annualRateBps = const Value.absent(),
+                Value<String?> profitFrequencyCode = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<String> revisionReason = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CertificateRevisionsTableCompanion(
+                id: id,
+                certificateId: certificateId,
+                householdId: householdId,
+                institutionName: institutionName,
+                reference: reference,
+                note: note,
+                annualRateBps: annualRateBps,
+                profitFrequencyCode: profitFrequencyCode,
+                createdAt: createdAt,
+                revisionReason: revisionReason,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String certificateId,
+                required String householdId,
+                required String institutionName,
+                Value<String?> reference = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<int?> annualRateBps = const Value.absent(),
+                Value<String?> profitFrequencyCode = const Value.absent(),
+                required String createdAt,
+                required String revisionReason,
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CertificateRevisionsTableCompanion.insert(
+                id: id,
+                certificateId: certificateId,
+                householdId: householdId,
+                institutionName: institutionName,
+                reference: reference,
+                note: note,
+                annualRateBps: annualRateBps,
+                profitFrequencyCode: profitFrequencyCode,
+                createdAt: createdAt,
+                revisionReason: revisionReason,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CertificateRevisionsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({certificateId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (certificateId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.certificateId,
+                                referencedTable:
+                                    $$CertificateRevisionsTableTableReferences
+                                        ._certificateIdTable(db),
+                                referencedColumn:
+                                    $$CertificateRevisionsTableTableReferences
+                                        ._certificateIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CertificateRevisionsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CertificateRevisionsTableTable,
+      DbCertificateRevision,
+      $$CertificateRevisionsTableTableFilterComposer,
+      $$CertificateRevisionsTableTableOrderingComposer,
+      $$CertificateRevisionsTableTableAnnotationComposer,
+      $$CertificateRevisionsTableTableCreateCompanionBuilder,
+      $$CertificateRevisionsTableTableUpdateCompanionBuilder,
+      (DbCertificateRevision, $$CertificateRevisionsTableTableReferences),
+      DbCertificateRevision,
+      PrefetchHooks Function({bool certificateId})
+    >;
+typedef $$CertificateEventsTableTableCreateCompanionBuilder =
+    CertificateEventsTableCompanion Function({
+      required String id,
+      required String certificateId,
+      required String householdId,
+      required String eventType,
+      Value<String?> relatedOperationId,
+      Value<int?> amountMinorUnits,
+      Value<String?> currencyCode,
+      Value<String?> idempotencyKey,
+      Value<String?> payloadFingerprint,
+      Value<String?> note,
+      required String effectiveAt,
+      required String createdAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+typedef $$CertificateEventsTableTableUpdateCompanionBuilder =
+    CertificateEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> certificateId,
+      Value<String> householdId,
+      Value<String> eventType,
+      Value<String?> relatedOperationId,
+      Value<int?> amountMinorUnits,
+      Value<String?> currencyCode,
+      Value<String?> idempotencyKey,
+      Value<String?> payloadFingerprint,
+      Value<String?> note,
+      Value<String> effectiveAt,
+      Value<String> createdAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+
+final class $$CertificateEventsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $CertificateEventsTableTable,
+          DbCertificateEvent
+        > {
+  $$CertificateEventsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SavingsCertificatesTableTable _certificateIdTable(_$AppDatabase db) =>
+      db.savingsCertificatesTable.createAlias(
+        'certificate_events__certificate_id__savings_certificates__id',
+      );
+
+  $$SavingsCertificatesTableTableProcessedTableManager get certificateId {
+    final $_column = $_itemColumn<String>('certificate_id')!;
+
+    final manager = $$SavingsCertificatesTableTableTableManager(
+      $_db,
+      $_db.savingsCertificatesTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_certificateIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CertificateEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CertificateEventsTableTable> {
+  $$CertificateEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get relatedOperationId => $composableBuilder(
+    column: $table.relatedOperationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payloadFingerprint => $composableBuilder(
+    column: $table.payloadFingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SavingsCertificatesTableTableFilterComposer get certificateId {
+    final $$SavingsCertificatesTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableFilterComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CertificateEventsTableTable> {
+  $$CertificateEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get relatedOperationId => $composableBuilder(
+    column: $table.relatedOperationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payloadFingerprint => $composableBuilder(
+    column: $table.payloadFingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SavingsCertificatesTableTableOrderingComposer get certificateId {
+    final $$SavingsCertificatesTableTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableOrderingComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CertificateEventsTableTable> {
+  $$CertificateEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get relatedOperationId => $composableBuilder(
+    column: $table.relatedOperationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get amountMinorUnits => $composableBuilder(
+    column: $table.amountMinorUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get payloadFingerprint => $composableBuilder(
+    column: $table.payloadFingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  $$SavingsCertificatesTableTableAnnotationComposer get certificateId {
+    final $$SavingsCertificatesTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.certificateId,
+          referencedTable: $db.savingsCertificatesTable,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsCertificatesTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.savingsCertificatesTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$CertificateEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CertificateEventsTableTable,
+          DbCertificateEvent,
+          $$CertificateEventsTableTableFilterComposer,
+          $$CertificateEventsTableTableOrderingComposer,
+          $$CertificateEventsTableTableAnnotationComposer,
+          $$CertificateEventsTableTableCreateCompanionBuilder,
+          $$CertificateEventsTableTableUpdateCompanionBuilder,
+          (DbCertificateEvent, $$CertificateEventsTableTableReferences),
+          DbCertificateEvent,
+          PrefetchHooks Function({bool certificateId})
+        > {
+  $$CertificateEventsTableTableTableManager(
+    _$AppDatabase db,
+    $CertificateEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CertificateEventsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$CertificateEventsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CertificateEventsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> certificateId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<String?> relatedOperationId = const Value.absent(),
+                Value<int?> amountMinorUnits = const Value.absent(),
+                Value<String?> currencyCode = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> payloadFingerprint = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String> effectiveAt = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CertificateEventsTableCompanion(
+                id: id,
+                certificateId: certificateId,
+                householdId: householdId,
+                eventType: eventType,
+                relatedOperationId: relatedOperationId,
+                amountMinorUnits: amountMinorUnits,
+                currencyCode: currencyCode,
+                idempotencyKey: idempotencyKey,
+                payloadFingerprint: payloadFingerprint,
+                note: note,
+                effectiveAt: effectiveAt,
+                createdAt: createdAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String certificateId,
+                required String householdId,
+                required String eventType,
+                Value<String?> relatedOperationId = const Value.absent(),
+                Value<int?> amountMinorUnits = const Value.absent(),
+                Value<String?> currencyCode = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> payloadFingerprint = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                required String effectiveAt,
+                required String createdAt,
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CertificateEventsTableCompanion.insert(
+                id: id,
+                certificateId: certificateId,
+                householdId: householdId,
+                eventType: eventType,
+                relatedOperationId: relatedOperationId,
+                amountMinorUnits: amountMinorUnits,
+                currencyCode: currencyCode,
+                idempotencyKey: idempotencyKey,
+                payloadFingerprint: payloadFingerprint,
+                note: note,
+                effectiveAt: effectiveAt,
+                createdAt: createdAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CertificateEventsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({certificateId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (certificateId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.certificateId,
+                                referencedTable:
+                                    $$CertificateEventsTableTableReferences
+                                        ._certificateIdTable(db),
+                                referencedColumn:
+                                    $$CertificateEventsTableTableReferences
+                                        ._certificateIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CertificateEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CertificateEventsTableTable,
+      DbCertificateEvent,
+      $$CertificateEventsTableTableFilterComposer,
+      $$CertificateEventsTableTableOrderingComposer,
+      $$CertificateEventsTableTableAnnotationComposer,
+      $$CertificateEventsTableTableCreateCompanionBuilder,
+      $$CertificateEventsTableTableUpdateCompanionBuilder,
+      (DbCertificateEvent, $$CertificateEventsTableTableReferences),
+      DbCertificateEvent,
+      PrefetchHooks Function({bool certificateId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -18585,5 +22851,20 @@ class $AppDatabaseManager {
       $$GoalLifecycleEventsTableTableTableManager(
         _db,
         _db.goalLifecycleEventsTable,
+      );
+  $$SavingsCertificatesTableTableTableManager get savingsCertificatesTable =>
+      $$SavingsCertificatesTableTableTableManager(
+        _db,
+        _db.savingsCertificatesTable,
+      );
+  $$CertificateRevisionsTableTableTableManager get certificateRevisionsTable =>
+      $$CertificateRevisionsTableTableTableManager(
+        _db,
+        _db.certificateRevisionsTable,
+      );
+  $$CertificateEventsTableTableTableManager get certificateEventsTable =>
+      $$CertificateEventsTableTableTableManager(
+        _db,
+        _db.certificateEventsTable,
       );
 }

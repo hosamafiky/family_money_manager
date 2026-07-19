@@ -2071,6 +2071,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Goal reserves'**
   String get goalReservedBalances;
+
+  /// Title for the savings certificates screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates'**
+  String get certificatesTitle;
+
+  /// Button/title to create a new savings certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'New Certificate'**
+  String get certificateNew;
+
+  /// Empty state message for certificates list.
+  ///
+  /// In en, this message translates to:
+  /// **'No certificates yet. Add one to track your fixed-term deposits.'**
+  String get certificateEmpty;
+
+  /// Label for the issuing institution.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution'**
+  String get certificateInstitution;
+
+  /// Label for the certificate principal amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get certificatePrincipal;
+
+  /// Label for profit on a certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get certificateProfit;
+
+  /// Label for the maturity date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Maturity date'**
+  String get certificateMaturityDate;
+
+  /// Label for the start date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get certificateStartDate;
+
+  /// Label for the optional bank reference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference / certificate number'**
+  String get certificateReference;
+
+  /// Label for annual interest rate in bps.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual rate (basis points)'**
+  String get certificateAnnualRate;
+
+  /// Label for the profit payment frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit frequency'**
+  String get certificateProfitFrequency;
+
+  /// Label for the source account in certificate creation.
+  ///
+  /// In en, this message translates to:
+  /// **'Funding source account'**
+  String get certificateSourceAccount;
+
+  /// Label for the destination account in profit/redemption.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination account'**
+  String get certificateDestinationAccount;
+
+  /// Button/title for redeeming a certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get certificateRedeem;
+
+  /// Title for the redeem certificate screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem Certificate'**
+  String get certificateRedeemTitle;
+
+  /// Title for the record profit screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Profit'**
+  String get certificateProfitTitle;
+
+  /// Button to record certificate profit.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Profit'**
+  String get certificateRecordProfit;
+
+  /// Lifecycle label: active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get certificateLifecycleActive;
+
+  /// Lifecycle label: redeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeemed'**
+  String get certificateLifecycleRedeemed;
+
+  /// Lifecycle label: archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get certificateLifecycleArchived;
+
+  /// Term state label: not started.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Started'**
+  String get certificateTermNotStarted;
+
+  /// Term state label: active term.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Term'**
+  String get certificateTermActive;
+
+  /// Term state label: matured.
+  ///
+  /// In en, this message translates to:
+  /// **'Matured'**
+  String get certificateTermMatured;
+
+  /// Term state label: overdue redemption.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue Redemption'**
+  String get certificateTermOverdue;
+
+  /// Term state label: fully redeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully Redeemed'**
+  String get certificateTermFullyRedeemed;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get certificateProfitFreqMonthly;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get certificateProfitFreqQuarterly;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-Annual'**
+  String get certificateProfitFreqSemiAnnual;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get certificateProfitFreqAnnual;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'At Maturity'**
+  String get certificateProfitFreqAtMaturity;
+
+  /// Frequency label.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get certificateProfitFreqOther;
+
+  /// Label for the current principal balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal balance'**
+  String get certificatePrincipalBalance;
+
+  /// Label for the original principal amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Original principal'**
+  String get certificateOriginalPrincipal;
+
+  /// Label for the optional note field.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get certificateNote;
+
+  /// Label for amount field in profit/redemption screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get certificateAmount;
+
+  /// Section header: principal.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get certificatePrincipalSection;
+
+  /// Section header: profit.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit'**
+  String get certificateProfitSection;
+
+  /// Redemption mode: principal only.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal only'**
+  String get certificateRedeemPrincipalOnly;
+
+  /// Redemption mode: profit only.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit only'**
+  String get certificateRedeemProfitOnly;
+
+  /// Redemption mode: principal and profit combined.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal + profit'**
+  String get certificateRedeemCombined;
+
+  /// Title for the certificate review step.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Certificate'**
+  String get certificateReviewTitle;
+
+  /// Category label for certificate profit income.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Profit'**
+  String get catCertificateProfit;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution name is required'**
+  String get errorCertificateInstitutionRequired;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal must be greater than zero'**
+  String get errorCertificatePrincipalZero;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency is required'**
+  String get errorCertificateCurrencyRequired;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Start and maturity dates are required'**
+  String get errorCertificateDatesRequired;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Maturity date must be after start date'**
+  String get errorCertificateMaturityBeforeStart;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Funding source account is required'**
+  String get errorCertificateSourceRequired;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Funding from a protected child account is not allowed'**
+  String get errorCertificateSourceIsProtected;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'A certificate account cannot be used as a funding source'**
+  String get errorCertificateAccountNotAllowedAsSource;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'A certificate account cannot be used as a destination'**
+  String get errorCertificateAccountNotAllowedAsDestination;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate accounts cannot be used in ordinary transactions'**
+  String get errorCertificateAccountNotAllowedInOrdinaryTransaction;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate is archived'**
+  String get errorCertificateArchived;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate is not active'**
+  String get errorCertificateNotActive;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot archive a certificate with remaining principal. Redeem first.'**
+  String get errorCertificateArchiveNonzeroBalance;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate must be archived to restore'**
+  String get errorCertificateRestoreRequiresArchived;
+
+  /// Idempotency conflict error.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate certificate creation conflict'**
+  String get errorCertificateIdempotencyConflict;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate must be active to reverse purchase'**
+  String get errorCertificateReversalRequiresActive;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot reverse purchase after profit or redemption'**
+  String get errorCertificateReversalNotAllowedAfterHistory;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Target operation is not a profit income operation'**
+  String get errorCertificateProfitReversalInvalidType;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Redemption reversal is not supported'**
+  String get errorCertificateRedemptionReversalNotSupported;
+
+  /// Validation error when redeeming early.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate has not reached maturity'**
+  String get errorCertificateNotMatured;
+
+  /// Validation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate has no remaining principal to redeem'**
+  String get errorCertificateNoPrincipal;
+
+  /// Validation error for partial redemption.
+  ///
+  /// In en, this message translates to:
+  /// **'Only full principal redemption is supported'**
+  String get errorCertificateFullRedemptionOnly;
 }
 
 class _AppLocalizationsDelegate

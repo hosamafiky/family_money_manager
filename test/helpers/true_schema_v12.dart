@@ -16,11 +16,17 @@ Future<String> materializeTrueSchemaV12File() async {
   final path = p.join(dir.path, 'v12.db');
 
   // Harvest CREATE TABLE DDL from a current onCreate database (tables only).
+  // Exclude tables introduced after schema v12 so onUpgrade can create them.
   final probe = AppDatabase.forTesting();
   final tableRows = await probe
       .customSelect(
         "SELECT sql FROM sqlite_master WHERE type = 'table' "
-        "AND name NOT LIKE 'sqlite_%' AND sql IS NOT NULL",
+        "AND name NOT LIKE 'sqlite_%' AND sql IS NOT NULL "
+        "AND name NOT IN ("
+        "'savings_certificates',"
+        "'certificate_revisions',"
+        "'certificate_events'"
+        ")",
       )
       .get();
   await probe.close();

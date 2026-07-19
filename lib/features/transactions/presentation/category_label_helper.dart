@@ -19,6 +19,7 @@ String categoryLabel(AppLocalizations l10n, TransactionCategory c) {
     TransactionCategory.businessIncome => l10n.catBusinessIncome,
     TransactionCategory.giftReceived => l10n.catGiftReceived,
     TransactionCategory.interestIncome => l10n.catInterestIncome,
+    TransactionCategory.certificateProfit => l10n.catCertificateProfit,
     TransactionCategory.otherIncome => l10n.catOtherIncome,
   };
 }

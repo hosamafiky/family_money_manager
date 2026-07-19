@@ -77,7 +77,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           final accounts = result.value
               .where(
                 (a) =>
-                    !a.isArchived && a.type != FinancialAccountType.goalReserve,
+                    !a.isArchived &&
+                    a.type != FinancialAccountType.goalReserve &&
+                    a.type != FinancialAccountType.certificate,
               )
               .toList();
 

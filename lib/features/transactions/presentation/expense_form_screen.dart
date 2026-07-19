@@ -102,7 +102,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 .where(
                   (a) =>
                       !a.isArchived &&
-                      a.type != FinancialAccountType.goalReserve,
+                      a.type != FinancialAccountType.goalReserve &&
+                      a.type != FinancialAccountType.certificate,
                 )
                 .toList();
             final members = memberResult.value

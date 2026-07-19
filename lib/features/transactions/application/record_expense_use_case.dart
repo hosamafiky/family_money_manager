@@ -87,6 +87,13 @@ final class RecordExpenseUseCase {
         messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
       );
     }
+    // Certificate accounts are managed exclusively by certificate use cases.
+    if (account.type == FinancialAccountType.certificate) {
+      return const AppValidationFailure(
+        field: 'paymentAccountId',
+        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
+      );
+    }
     if (account.isArchived) {
       return const AppValidationFailure(
         field: 'paymentAccountId',
