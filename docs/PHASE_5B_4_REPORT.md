@@ -27,12 +27,22 @@ git status at start: CLEAN (0 dirty files)
 
 ## Section 2 — Test Count Reconciliation
 
-Phase 5B.3 started at 1083 tests and claimed 1129 at close. The actual final count at
-the Phase 5B.3 HEAD is 1171 (all passing). The discrepancy was caused by
-additional formatter tests (FMT-13..18), migration tests (MIG-V10-1..6), and
-concurrency/lifecycle tests (CONC-5..10, GLC-1..8, REV-1..5) that were
-implemented as part of Phase 5B.4 work already applied to the working tree during
-the prior conversation session.
+Phase 5B.3 started at 1083 tests and closed at **1129** (commit `b68c710`).
+Phase 5B.4 then added 42 tests and closed at **1171** (commit `3124346`).
+
+**Correction (Phase 5B.5):** An earlier draft of this section incorrectly stated that
+“the actual final count at the Phase 5B.3 HEAD is 1171”. That figure is the
+**Phase 5B.4** total. Verified with
+`grep -cE '^\s*(test|testWidgets)\('` over all `test/**/*.dart` at each commit:
+
+| Commit | Phase | Suite total |
+|---|---|---:|
+| `b68c710` | 5B.3 | 1129 |
+| `3124346` | 5B.4 | 1171 |
+
+Goal-file delta 5B.3→5B.4 = +42, matching the suite delta. Apparent mismatches
+between “named inventory” and file counts came from brittle `sed` title extraction
+(multi-line / nested `test(` titles), not from missing tests.
 
 **Test file counts after Phase 5B.4:**
 
@@ -43,7 +53,7 @@ the prior conversation session.
 | `test/widget/features/goals/goal_money_formatter_test.dart` | 18 |
 | `test/database/goals/goal_migration_v10_to_v11_test.dart` | 12 |
 
-**Final total:** 1171 (all passing, exit 0)
+**Final total (5B.4):** 1171 (all passing, exit 0)
 
 ---
 
@@ -176,12 +186,11 @@ final results = await Future.wait([f1, f2], eagerError: false);
 | CONC-9 | Conflicting key (same key, different amount) | Exactly 1 operation committed; source balance ≥ 0 | Database-tested |
 | CONC-10 | 3-way: expense + funding + transfer from same source | Exactly 1 wins; balance ≥ 0; ledger never negative | Database-tested |
 
-**CONC-9 Architecture Note:** The ledger returns `IdempotentOperationResult.conflict`
-when the same idempotency key is reused with a different `operationId`. The
-`FundGoalUseCase` converts this to `AppOk(goal)` (same as `alreadyExists`).
-Only 1 operation is ever committed for a given key. The test was updated to
-assert this invariant (1 operation, balance ≥ 0) rather than expecting an
-`AppDuplicateConflict` which the use case layer does not currently produce.
+**CONC-9 Architecture Note (superseded by Phase 5B.5):** Phase 5B.4 documented that
+`FundGoalUseCase` converted `IdempotentOperationResult.conflict` into `AppOk`.
+That behaviour was a **bug**. Phase 5B.5 returns `AppDuplicateConflict` for
+conflicting payloads; CONC-9 now asserts one `AppOk` + one `AppDuplicateConflict`
+and a single committed operation.
 
 ---
 
@@ -377,13 +386,12 @@ Files changed by dart format:
 
 ## Section 12 — Corrections to Phase 5B.3 Inaccuracies
 
-1. **CONC-9 design**: Phase 5B.3 reported the test would catch `AppDuplicateConflict`
-   for concurrent same-key conflicting payloads. In practice, `FundGoalUseCase`
-   converts `IdempotentOperationResult.conflict` to `AppOk(goal)` (same as
-   `alreadyExists`). CONC-9 was updated to assert the correct invariant: only 1
-   operation is committed, source balance ≥ 0.
+1. **CONC-9 design (further corrected in Phase 5B.5):** Phase 5B.3 expected
+   `AppDuplicateConflict` for concurrent same-key conflicting payloads. Phase 5B.4
+   weakened the assertion because `FundGoalUseCase` incorrectly mapped `conflict` →
+   `AppOk`. Phase 5B.5 restores the correct mapping to `AppDuplicateConflict`.
 
-2. **GLC-7 household FK**: Phase 5B.3's `GoalLifecycleEventsTable.householdId` used
+2. **GLC-7 household FK:** Phase 5B.3's `GoalLifecycleEventsTable.householdId` used
    a plain `TextColumn` with no `.references()` FK. The trigger
    `fk_goal_lifecycle_event_household_id` was added in Phase 5B.4 to enforce
    referential integrity at the database layer.
@@ -392,9 +400,11 @@ Files changed by dart format:
 
 ## Section 13 — Deferred Android Encryption Risk
 
-SQLite database uses `NativeDatabase` (unencrypted) in development and test.
-Production encryption via `sqflite_sqlcipher` or equivalent is deferred. The
-encryption key injection pathway is reserved but not implemented.
+SQLite is opened with Drift `NativeDatabase` (unencrypted) in development and test.
+Selected cipher design: **sqlite3 + SQLite3MultipleCiphers** via pub build hooks
+(see `docs/DECISION_004_ASSESSMENT.md`). Platform-backed secure key storage and
+production key injection are deferred. **`sqflite_sqlcipher` is not the selected
+implementation.** Android runtime cipher verification remains deferred.
 
 ---
 
@@ -406,7 +416,7 @@ encryption key injection pathway is reserved but not implemented.
 | `goal_lifecycle_events.schema_version` column hardcoded to 11 in old inserts | Low | Cosmetic; no functional impact |
 | Reversal use case not wired to UI | Medium | Documented only |
 | Arabic-Indic digit rendering depends on platform locale | Low | Test documents ASCII-only policy |
-| `FundGoalUseCase` does not surface `AppDuplicateConflict` for conflicting idempotency keys | Medium | Documented; no UI impact currently |
+| `FundGoalUseCase` conflict → `AppOk` bug | Medium | **Fixed in Phase 5B.5** |
 
 ---
 

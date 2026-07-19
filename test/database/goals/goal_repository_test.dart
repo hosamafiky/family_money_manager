@@ -4395,13 +4395,10 @@ void main() {
   );
 
   test(
-    'CONC-9. Conflicting duplicate (same key, different amount) → exactly 1 operation committed',
+    'CONC-9. Conflicting duplicate (same key, different amount) → AppDuplicateConflict for loser',
     () async {
-      // ARCHITECTURE NOTE: The ledger's idempotency check detects a key
-      // collision (same key, different operationId) but the FundGoalUseCase
-      // converts IdempotentOperationResult.conflict → AppOk(goal) for the
-      // second caller (same as CONC-4/alreadyExists treatment). Only 1 operation
-      // is ever written to the database; the second concurrent call is a no-op.
+      // Phase 5B.5: conflicting payloads under the same scoped key must surface
+      // AppDuplicateConflict (not AppOk). Exactly 1 operation is committed.
       const srcId = 'src-conc9';
       await createAccount(id: srcId, householdId: _hh);
       await creditAccount(srcId, _hh, 50000);
@@ -4417,8 +4414,6 @@ void main() {
         householdId: _hh,
         idempotencyKey: sameKey,
       );
-      // Different amount = conflicting payload at the intent level,
-      // but the ledger returns 'conflict' which the use case treats as AppOk.
       final f2 = fundGoalUc.execute(
         goalId: goal.id,
         sourceAccountId: srcId,
@@ -4428,10 +4423,19 @@ void main() {
       );
 
       final results = await Future.wait([f1, f2], eagerError: false);
-      // Both complete without throwing.
       expect(results.length, 2, reason: 'CONC-9: both futures must complete');
 
-      // Exactly 1 operation must be committed (only 1 amount was debited).
+      final oks = results.whereType<AppOk<SavingsGoal>>().length;
+      final conflicts = results
+          .whereType<AppDuplicateConflict<SavingsGoal>>()
+          .length;
+      expect(oks, 1, reason: 'CONC-9: exactly one caller succeeds');
+      expect(
+        conflicts,
+        1,
+        reason: 'CONC-9: loser must be AppDuplicateConflict',
+      );
+
       final opCount = await db
           .customSelect(
             "SELECT COUNT(*) as c FROM operations WHERE idempotency_key = ? "
@@ -4446,7 +4450,6 @@ void main() {
             'CONC-9: exactly 1 operation must be committed for the same key',
       );
 
-      // Source balance must not go negative.
       final srcBal = await db
           .customSelect(
             'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
@@ -4915,10 +4918,7 @@ void main() {
           .get();
       final fundOpId = fundOpRows.first.read<String>('id');
 
-      final uc = ReverseGoalTransferUseCase(
-        ledgerRepository: ledgerRepo,
-        goalRepository: goalRepo,
-      );
+      final uc = ReverseGoalTransferUseCase(goalRepository: goalRepo);
       await uc.execute(
         originalOperationId: fundOpId,
         reversalOperationId: 'rev-op-rev1',
@@ -5001,10 +5001,7 @@ void main() {
                   as AppOk<int>)
               .value;
 
-      final uc = ReverseGoalTransferUseCase(
-        ledgerRepository: ledgerRepo,
-        goalRepository: goalRepo,
-      );
+      final uc = ReverseGoalTransferUseCase(goalRepository: goalRepo);
       await uc.execute(
         originalOperationId: releaseOpId,
         reversalOperationId: 'rev-op-rev2',
@@ -5064,10 +5061,7 @@ void main() {
             .first
             .read<String>('id');
 
-    await ReverseGoalTransferUseCase(
-      ledgerRepository: ledgerRepo,
-      goalRepository: goalRepo,
-    ).execute(
+    await ReverseGoalTransferUseCase(goalRepository: goalRepo).execute(
       originalOperationId: fundOpId,
       reversalOperationId: 'rev-op-rev3',
       householdId: _hh,
@@ -5136,10 +5130,7 @@ void main() {
         ((await progressUc.execute(goal.id)) as AppOk<GoalProgress>).value;
     expect(progressBefore.reserveBalanceMinorUnits, 40000);
 
-    await ReverseGoalTransferUseCase(
-      ledgerRepository: ledgerRepo,
-      goalRepository: goalRepo,
-    ).execute(
+    await ReverseGoalTransferUseCase(goalRepository: goalRepo).execute(
       originalOperationId: fundOpId,
       reversalOperationId: 'rev-op-rev4',
       householdId: _hh,
@@ -5192,10 +5183,7 @@ void main() {
               .value
               .length;
 
-      await ReverseGoalTransferUseCase(
-        ledgerRepository: ledgerRepo,
-        goalRepository: goalRepo,
-      ).execute(
+      await ReverseGoalTransferUseCase(goalRepository: goalRepo).execute(
         originalOperationId: 'op-rev5-unrelated',
         reversalOperationId: 'rev-op-rev5',
         householdId: _hh,

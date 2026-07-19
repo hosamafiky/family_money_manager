@@ -290,8 +290,15 @@ final class FundGoalUseCase {
       return const AppPersistenceFailure();
     }
 
-    // Record movement — skip if this is an idempotent replay (transfer already
-    // existed) to avoid duplicate movements for the same operation.
+    // Conflicting payload under the same scoped key must not be silently
+    // coerced into AppOk (Phase 5B.5 correction of Phase 5B.4 behaviour).
+    if (transferResult == IdempotentOperationResult.conflict) {
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    // Record movement — skip on idempotent replay (equivalent payload).
     if (transferResult == IdempotentOperationResult.created) {
       await _goals.addMovement(
         GoalMovement(
@@ -456,7 +463,13 @@ final class ReleaseGoalFundsUseCase {
       return const AppPersistenceFailure();
     }
 
-    // Record movement — skip if idempotent replay to avoid duplicate movements.
+    if (transferResult == IdempotentOperationResult.conflict) {
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    // Record movement — skip on idempotent replay (equivalent payload).
     if (transferResult == IdempotentOperationResult.created) {
       await _goals.addMovement(
         GoalMovement(
@@ -734,7 +747,10 @@ final class RestoreGoalUseCase {
 
   final GoalRepository _goals;
 
-  Future<AppResult<void>> execute({required String goalId}) async {
+  Future<AppResult<void>> execute({
+    required String goalId,
+    String? idempotencyKey,
+  }) async {
     final goalResult = await _goals.findGoalById(goalId);
     if (goalResult is! AppOk<SavingsGoal?>) {
       return const AppPersistenceFailure();
@@ -742,11 +758,34 @@ final class RestoreGoalUseCase {
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
-    return _goals.updateGoalStatus(
+    if (goal.status != GoalStatus.archived) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalRestoreRequiresArchived',
+      );
+    }
+
+    final updateResult = await _goals.updateGoalStatus(
       goalId: goalId,
       status: GoalStatus.active,
       archivedAt: null,
     );
+    if (updateResult is! AppOk<void>) return updateResult;
+
+    final now = _nowUtc();
+    final key = idempotencyKey ?? 'restore-$goalId';
+    await _goals.insertLifecycleEvent(
+      GoalLifecycleEvent(
+        id: '$goalId-lce-restore-${now.replaceAll(':', '').replaceAll('.', '')}',
+        goalId: goalId,
+        householdId: goal.householdId,
+        eventType: GoalLifecycleEventType.restored,
+        idempotencyKey: key,
+        effectiveAt: now,
+        createdAt: now,
+      ),
+    );
+    return const AppOk(null);
   }
 }
 
@@ -755,20 +794,17 @@ final class RestoreGoalUseCase {
 /// Reverses a ledger transfer and, if the transfer was a goal funding or
 /// release, creates a linked [GoalMovementType.reversal] movement on the goal.
 ///
-/// This use case composes [LedgerRepository.reverseOperation] with
-/// [GoalRepository.findMovementByOperationId] and [GoalRepository.addMovement]
-/// to keep the two repositories decoupled.
-///
-/// Phase 5B.4 implementation. The reversal movement references the original
-/// movement via [GoalMovement.reversalOfMovementId].
+/// Phase 5B.5: the entire reversal (idempotency, ledger mirrors, original
+/// operation mark, operation context, and goal movement) is performed inside a
+/// single repository transaction. Conflicting idempotency keys surface as
+/// [AppDuplicateConflict].
 final class ReverseGoalTransferUseCase {
   const ReverseGoalTransferUseCase({
-    required LedgerRepository ledgerRepository,
     required GoalRepository goalRepository,
-  }) : _ledger = ledgerRepository,
-       _goals = goalRepository;
+    // Kept for API compatibility; ledger work is inside the atomic goal repo.
+    LedgerRepository? ledgerRepository,
+  }) : _goals = goalRepository;
 
-  final LedgerRepository _ledger;
   final GoalRepository _goals;
 
   Future<AppResult<void>> execute({
@@ -778,54 +814,16 @@ final class ReverseGoalTransferUseCase {
     required String effectiveDate,
     required String createdBy,
     String? reason,
-  }) async {
-    // 1. Reverse the underlying transfer operation.
-    try {
-      await _ledger.reverseOperation(
-        ReverseOperationParams(
-          originalOperationId: originalOperationId,
-          reversalOperationId: reversalOperationId,
-          householdId: householdId,
-          effectiveDate: effectiveDate,
-          createdBy: createdBy,
-          reason: reason,
-        ),
-      );
-    } on Exception catch (_) {
-      return const AppPersistenceFailure();
-    }
-
-    // 2. Check if the original operation was a goal movement.
-    final movResult = await _goals.findMovementByOperationId(
-      originalOperationId,
-    );
-    if (movResult is! AppOk<GoalMovement?>) return const AppOk(null);
-    final originalMovement = movResult.value;
-    if (originalMovement == null) {
-      // Not a goal transfer — nothing more to do.
-      return const AppOk(null);
-    }
-
-    // 3. Create a reversal goal movement linked to the original.
-    final now = _nowUtc();
-    final reversalMovement = GoalMovement(
-      id: '$reversalOperationId-mov',
-      goalId: originalMovement.goalId,
+    String? idempotencyKey,
+  }) {
+    return _goals.reverseGoalTransfer(
+      originalOperationId: originalOperationId,
+      reversalOperationId: reversalOperationId,
       householdId: householdId,
-      transferOperationId: reversalOperationId,
-      movementType: GoalMovementType.reversal,
-      createdAt: now,
-      reversalOfMovementId: originalMovement.id,
+      effectiveDate: effectiveDate,
+      createdBy: createdBy,
+      reason: reason,
+      idempotencyKey: idempotencyKey,
     );
-
-    // Use raw SQL via DriftGoalRepository to include reversal_of_movement_id.
-    // addMovement delegates to _insertReversalMovement for reversal type.
-    final addResult = await _goals.addMovement(reversalMovement);
-    if (addResult is AppPersistenceFailure) {
-      // Reversal movement creation failed — balance is already correct via
-      // ledger entries; this is a non-fatal audit gap.
-      return const AppOk(null);
-    }
-    return const AppOk(null);
   }
 }

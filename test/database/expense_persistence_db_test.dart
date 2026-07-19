@@ -431,7 +431,7 @@ void main() {
     );
 
     test(
-      '11: conflicting retry — same idempotency key, different operation ID → conflict',
+      '11: same idempotency key, different operation ID — equivalent → alreadyExists; conflict on amount',
       () async {
         final acc = await createAccount(suffix: 't11');
         await fund(acc, 10000);
@@ -462,7 +462,21 @@ void main() {
             createdBy: 'user-1',
           ),
         );
-        expect(r2, IdempotentOperationResult.conflict);
+        expect(r2, IdempotentOperationResult.alreadyExists);
+
+        final r3 = await ledgerRepo.recordExpense(
+          RecordExpenseParams(
+            operationId: 'op-exp-t11c',
+            idempotencyKey: idemKey,
+            householdId: 'hh-exp',
+            sourceAccountId: acc,
+            amountMinorUnits: 1500,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-02',
+            createdBy: 'user-1',
+          ),
+        );
+        expect(r3, IdempotentOperationResult.conflict);
       },
     );
   });

@@ -130,15 +130,15 @@ enum IdempotentOperationResult {
   /// The operation was newly created and persisted.
   created,
 
-  /// The same idempotency key (and the same operation ID) was submitted again.
-  /// No change was made. The caller may safely treat the original result
-  /// as authoritative.
+  /// The same idempotency key was submitted again with an equivalent
+  /// normalised payload (same operation ID, or a new operation ID with
+  /// matching type/amount/accounts/currency). No change was made. The caller
+  /// may safely treat the original result as authoritative.
   alreadyExists,
 
-  /// The same idempotency key was submitted with a different operation ID,
-  /// indicating the caller is trying to create a new operation with a key
-  /// that already belongs to another operation. The caller must use a new
-  /// idempotency key or resolve the conflicting operation ID.
+  /// The same idempotency key was submitted with a conflicting payload
+  /// (different amount, accounts, currency, or type). The caller must use a
+  /// new idempotency key or resolve the conflicting operation.
   conflict,
 }
 

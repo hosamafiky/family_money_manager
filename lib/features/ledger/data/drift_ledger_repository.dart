@@ -28,7 +28,11 @@ import 'package:family_money_manager/features/ledger/domain/operation.dart';
 ///
 /// Results:
 /// - Same `operation_id` resubmitted → [IdempotentOperationResult.alreadyExists]
-/// - Same `idempotency_key` but different `operation_id` → [IdempotentOperationResult.conflict]
+/// - Same `idempotency_key` + equivalent normalised payload →
+///   [IdempotentOperationResult.alreadyExists] (safe retry, even with a new
+///   client-generated operation ID)
+/// - Same `idempotency_key` + conflicting payload →
+///   [IdempotentOperationResult.conflict]
 ///
 /// ## Transaction boundaries (INV-007)
 ///
@@ -50,9 +54,23 @@ import 'package:family_money_manager/features/ledger/domain/operation.dart';
 /// - `auditParams.accountId` matches the protected account being debited.
 /// - `auditParams.householdId` matches the operation's household.
 final class DriftLedgerRepository implements LedgerRepository {
-  const DriftLedgerRepository(this._db);
+  DriftLedgerRepository(
+    this._db, {
+    Future<void> Function()? debugTransactionBarrier,
+  }) : _debugTransactionBarrier = debugTransactionBarrier;
 
   final AppDatabase _db;
+
+  /// Test-only hook: awaited inside a write transaction after the idempotency
+  /// check and before mutating inserts. Kept package-visible so production
+  /// call sites (which omit the parameter) never see it. Never wire this from
+  /// production DI.
+  final Future<void> Function()? _debugTransactionBarrier;
+
+  Future<void> _awaitDebugBarrier() async {
+    final barrier = _debugTransactionBarrier;
+    if (barrier != null) await barrier();
+  }
 
   // ── Income ────────────────────────────────────────────────────────────────
 
@@ -71,11 +89,18 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.operationId,
         householdId: params.householdId,
         idempotencyKey: params.resolvedIdempotencyKey,
+        expectedType: OperationType.income.code,
+        expectedAmount: params.amountMinorUnits,
+        expectedCurrency: params.currencyCode,
+        expectedSourceAccountId: null,
+        expectedDestinationAccountId: params.destinationAccountId,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -167,11 +192,20 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.operationId,
         householdId: params.householdId,
         idempotencyKey: params.resolvedIdempotencyKey,
+        expectedType: account.isChildProtectedFund
+            ? OperationType.childFundWithdrawal.code
+            : OperationType.expense.code,
+        expectedAmount: params.amountMinorUnits,
+        expectedCurrency: params.currencyCode,
+        expectedSourceAccountId: params.sourceAccountId,
+        expectedDestinationAccountId: null,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
       await _checkSufficientBalance(
@@ -298,11 +332,18 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.operationId,
         householdId: params.householdId,
         idempotencyKey: params.resolvedIdempotencyKey,
+        expectedType: OperationType.transfer.code,
+        expectedAmount: params.amountMinorUnits,
+        expectedCurrency: params.currencyCode,
+        expectedSourceAccountId: params.sourceAccountId,
+        expectedDestinationAccountId: params.destinationAccountId,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
       await _checkSufficientBalance(
@@ -421,11 +462,18 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.operationId,
         householdId: params.householdId,
         idempotencyKey: params.resolvedIdempotencyKey,
+        expectedType: OperationType.openingBalance.code,
+        expectedAmount: params.amountMinorUnits,
+        expectedCurrency: params.currencyCode,
+        expectedSourceAccountId: null,
+        expectedDestinationAccountId: params.accountId,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -514,11 +562,18 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.operationId,
         householdId: params.householdId,
         idempotencyKey: params.resolvedIdempotencyKey,
+        expectedType: OperationType.adjustment.code,
+        expectedAmount: absAmount,
+        expectedCurrency: params.currencyCode,
+        expectedSourceAccountId: params.isCredit ? null : params.accountId,
+        expectedDestinationAccountId: params.isCredit ? params.accountId : null,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -663,11 +718,18 @@ final class DriftLedgerRepository implements LedgerRepository {
         operationId: params.reversalOperationId,
         householdId: params.householdId,
         idempotencyKey: params.reversalOperationId,
+        expectedType: OperationType.reversal.code,
+        expectedAmount: original.totalAmountMinorUnits,
+        expectedCurrency: original.currencyCode,
+        expectedSourceAccountId: original.destinationAccountId,
+        expectedDestinationAccountId: original.sourceAccountId,
       );
       if (idemResult != null) {
         result = idemResult;
         return;
       }
+
+      await _awaitDebugBarrier();
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -822,9 +884,16 @@ final class DriftLedgerRepository implements LedgerRepository {
   /// Returns:
   /// - `null` → no conflict; the caller should proceed with the insert.
   /// - [IdempotentOperationResult.alreadyExists] → exact retry (same operation
-  ///   ID already stored).
-  /// - [IdempotentOperationResult.conflict] → same idempotency key but a
-  ///   different operation ID is already stored; caller error.
+  ///   ID) OR same scoped key with an equivalent normalised payload.
+  /// - [IdempotentOperationResult.conflict] → same scoped key with a
+  ///   conflicting payload.
+  ///
+  /// When [expectedType]/[expectedAmount]/[expectedCurrency]/
+  /// [expectedSourceAccountId]/[expectedDestinationAccountId] are provided,
+  /// an existing key is compared against those fields. Matching fields →
+  /// alreadyExists; any mismatch → conflict. When fingerprints are omitted,
+  /// any existing key (with a different operation ID) is treated as conflict
+  /// (legacy behaviour for callers that do not yet pass fingerprints).
   ///
   /// This check must be called INSIDE a transaction so that the subsequent
   /// INSERT is atomic with the check (TOCTOU-safe).
@@ -832,6 +901,11 @@ final class DriftLedgerRepository implements LedgerRepository {
     required String operationId,
     required String householdId,
     required String idempotencyKey,
+    String? expectedType,
+    int? expectedAmount,
+    String? expectedCurrency,
+    String? expectedSourceAccountId,
+    String? expectedDestinationAccountId,
   }) async {
     // Check 1: exact operation ID already exists → safe retry.
     final existingById =
@@ -842,7 +916,7 @@ final class DriftLedgerRepository implements LedgerRepository {
             .getSingleOrNull();
     if (existingById != null) return IdempotentOperationResult.alreadyExists;
 
-    // Check 2: same scoped idempotency key but different operation ID → conflict.
+    // Check 2: same scoped idempotency key already claimed.
     if (idempotencyKey != operationId) {
       final existingByKey =
           await (_db.select(_db.operations)..where(
@@ -852,6 +926,24 @@ final class DriftLedgerRepository implements LedgerRepository {
               ))
               .getSingleOrNull();
       if (existingByKey != null) {
+        final fingerprintsProvided =
+            expectedType != null &&
+            expectedAmount != null &&
+            expectedCurrency != null;
+
+        if (fingerprintsProvided) {
+          final equivalent =
+              existingByKey.type == expectedType &&
+              existingByKey.totalAmountMinorUnits == expectedAmount &&
+              existingByKey.currencyCode == expectedCurrency &&
+              existingByKey.sourceAccountId == expectedSourceAccountId &&
+              existingByKey.destinationAccountId ==
+                  expectedDestinationAccountId;
+          return equivalent
+              ? IdempotentOperationResult.alreadyExists
+              : IdempotentOperationResult.conflict;
+        }
+
         return IdempotentOperationResult.conflict;
       }
     }

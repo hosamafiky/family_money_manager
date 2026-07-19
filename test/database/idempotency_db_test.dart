@@ -284,8 +284,8 @@ void main() {
 
   // ── Same idempotency key with conflicting payload ─────────────────────────
 
-  group('Idempotency conflict: same key, different operation_id', () {
-    test('returns conflict instead of creating a new operation', () async {
+  group('Idempotency: same key, different operation_id', () {
+    test('equivalent payload → alreadyExists (Phase 5B.5)', () async {
       await setupHousehold('hh-5');
       final acc = await createAccount('hh-5');
 
@@ -301,7 +301,7 @@ void main() {
       );
       expect(r1, IdempotentOperationResult.created);
 
-      // Different operation_id but same idempotency_key → conflict.
+      // Different operation_id but same normalised payload → alreadyExists.
       final r2 = await ledgerRepo.recordIncome(
         incomeParams(
           operationId: 'op-hh5-second',
@@ -310,7 +310,7 @@ void main() {
           idempotencyKey: sharedKey,
         ),
       );
-      expect(r2, IdempotentOperationResult.conflict);
+      expect(r2, IdempotentOperationResult.alreadyExists);
 
       // Only one operation stored.
       final ops = await ledgerRepo.operationsInRange(
@@ -320,6 +320,32 @@ void main() {
       );
       expect(ops.length, 1);
       expect(ops.first.id, 'op-hh5-first');
+    });
+
+    test('conflicting payload → conflict', () async {
+      await setupHousehold('hh-5b');
+      final acc = await createAccount('hh-5b');
+      const sharedKey = 'conflict-key-amt';
+
+      await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-hh5b-first',
+          householdId: 'hh-5b',
+          destinationAccountId: acc,
+          idempotencyKey: sharedKey,
+          amount: 1000,
+        ),
+      );
+      final r2 = await ledgerRepo.recordIncome(
+        incomeParams(
+          operationId: 'op-hh5b-second',
+          householdId: 'hh-5b',
+          destinationAccountId: acc,
+          idempotencyKey: sharedKey,
+          amount: 2000,
+        ),
+      );
+      expect(r2, IdempotentOperationResult.conflict);
     });
   });
 

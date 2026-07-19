@@ -113,4 +113,24 @@ abstract interface class GoalRepository {
   Future<AppResult<GoalMovement?>> findMovementByOperationId(
     String transferOperationId,
   );
+
+  /// Atomically reverses a goal-linked (or non-goal) ledger transfer.
+  ///
+  /// Single transaction covering: idempotency lookup, original operation /
+  /// movement validation, reversal operation insert, mirrored ledger entries,
+  /// original mark-as-reversed, operation context, and — when a goal movement
+  /// existed — the linked reversal movement (`reversal_of_movement_id`).
+  ///
+  /// Idempotency:
+  /// - Same key + equivalent payload → [AppOk] (original reversal preserved).
+  /// - Same key + conflicting payload → [AppDuplicateConflict].
+  Future<AppResult<void>> reverseGoalTransfer({
+    required String originalOperationId,
+    required String reversalOperationId,
+    required String householdId,
+    required String effectiveDate,
+    required String createdBy,
+    String? reason,
+    String? idempotencyKey,
+  });
 }

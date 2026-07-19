@@ -75,6 +75,10 @@ part 'app_database.g.dart';
 ///                 reserve owner_type = 'household' enforcement trigger;
 ///                 no_modify_reserve_owner_type trigger;
 ///                 goal_movement_transfer_type updated to allow 'reversal' ops.
+///  13 — Phase 5B.5: validate_reversal_movement_link trigger;
+///                 unique index one-reversal-per-original;
+///                 lifecycle household-matches-goal trigger;
+///                 household-scoped lifecycle idempotency index.
 @DriftDatabase(
   tables: [
     Households,
@@ -104,7 +108,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -135,6 +139,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyReserveOwnerTypeTrigger();
       await _applyGoalLifecycleEventsTriggers();
       await _applyGoalLifecycleEventsIndex();
+      await _applyPhase5B5ReversalAndLifecycleHardening();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -231,6 +236,11 @@ class AppDatabase extends _$AppDatabase {
         );
         await _applyGoalLifecycleEventsTriggers();
         await _applyGoalLifecycleEventsIndex();
+      }
+      if (from <= 12) {
+        // v12 → v13: Phase 5B.5 — reversal linkage triggers/index;
+        // lifecycle household-match trigger; household-scoped idempotency.
+        await _applyPhase5B5ReversalAndLifecycleHardening();
       }
     },
     beforeOpen: (details) async {
@@ -1142,6 +1152,64 @@ class AppDatabase extends _$AppDatabase {
         )
         OR (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0);
       END
+    ''');
+  }
+
+  // ── Phase 5B.5: Reversal linkage + lifecycle household isolation ──────────
+
+  Future<void> _applyPhase5B5ReversalAndLifecycleHardening() async {
+    // Reversal movement must reference a valid original of the same
+    // goal/household; the linked operation must be type = 'reversal'.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_reversal_movement_link
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.reversal_of_movement_id IS NOT NULL OR NEW.movement_type = 'reversal'
+      BEGIN
+        SELECT RAISE(ABORT, 'invalid goal reversal linkage')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM goal_movements orig
+          JOIN operations o ON o.id = NEW.transfer_operation_id
+          WHERE orig.id = NEW.reversal_of_movement_id
+            AND orig.goal_id = NEW.goal_id
+            AND orig.household_id = NEW.household_id
+            AND orig.movement_type IN ('funding', 'release')
+            AND o.type = 'reversal'
+            AND o.household_id = NEW.household_id
+        );
+      END
+    ''');
+
+    // V1: at most one reversal movement per original movement.
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_movements_one_reversal_per_original
+      ON goal_movements(reversal_of_movement_id)
+      WHERE reversal_of_movement_id IS NOT NULL
+    ''');
+
+    // Lifecycle event household must equal the referenced goal's household.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_lifecycle_household_matches_goal
+      BEFORE INSERT ON goal_lifecycle_events
+      FOR EACH ROW
+      BEGIN
+        SELECT RAISE(ABORT, 'lifecycle event household must match goal household')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM goals g
+          WHERE g.id = NEW.goal_id
+            AND g.household_id = NEW.household_id
+        );
+      END
+    ''');
+
+    // Replace global unique idempotency with household-scoped uniqueness.
+    await customStatement(
+      'DROP INDEX IF EXISTS idx_goal_lifecycle_events_idempotency',
+    );
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_lifecycle_hh_idem
+      ON goal_lifecycle_events(household_id, idempotency_key)
+      WHERE idempotency_key IS NOT NULL
     ''');
   }
 }

@@ -608,26 +608,29 @@ final class DriftGoalRepository implements GoalRepository {
     GoalLifecycleEvent event,
   ) async {
     try {
-      // Idempotency: check if a matching event already exists.
+      final incomingFingerprint = _lifecyclePayloadFingerprint(event);
+
+      // Idempotency: household-scoped key + payload fingerprint.
       if (event.idempotencyKey != null) {
         final existing = await _db
             .customSelect(
-              'SELECT * FROM goal_lifecycle_events WHERE idempotency_key = ?',
-              variables: [Variable.withString(event.idempotencyKey!)],
+              'SELECT * FROM goal_lifecycle_events '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(event.householdId),
+                Variable.withString(event.idempotencyKey!),
+              ],
             )
             .get();
         if (existing.isNotEmpty) {
           final row = existing.first;
-          final storedType = row.read<String>('event_type');
-          if (storedType == event.eventType.code) {
-            // Same key, same type → idempotent replay.
+          final storedFingerprint = _lifecyclePayloadFingerprintFromRow(row);
+          if (storedFingerprint == incomingFingerprint) {
             return AppOk(_rowToLifecycleEvent(row));
-          } else {
-            // Same key, different type → conflict.
-            return const AppDuplicateConflict(
-              messageKey: 'errorLifecycleEventConflict',
-            );
           }
+          return const AppDuplicateConflict(
+            messageKey: 'errorLifecycleEventConflict',
+          );
         }
       }
 
@@ -636,7 +639,7 @@ final class DriftGoalRepository implements GoalRepository {
         '(id, goal_id, household_id, event_type, completion_type, '
         'early_completion_reason, early_completion_confirmed, '
         'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 12)',
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 13)',
         [
           event.id,
           event.goalId,
@@ -656,6 +659,20 @@ final class DriftGoalRepository implements GoalRepository {
       return const AppPersistenceFailure();
     }
   }
+
+  String _lifecyclePayloadFingerprint(GoalLifecycleEvent event) =>
+      'type=${event.eventType.code}|'
+      'completion=${event.completionType ?? ''}|'
+      'reason=${event.earlyCompletionReason ?? ''}|'
+      'confirmed=${event.earlyCompletionConfirmed}|'
+      'goal=${event.goalId}';
+
+  String _lifecyclePayloadFingerprintFromRow(QueryRow row) =>
+      'type=${row.read<String>('event_type')}|'
+      'completion=${row.readNullable<String>('completion_type') ?? ''}|'
+      'reason=${row.readNullable<String>('early_completion_reason') ?? ''}|'
+      'confirmed=${row.read<int>('early_completion_confirmed') == 1}|'
+      'goal=${row.read<String>('goal_id')}';
 
   // ── findMovementByOperationId ─────────────────────────────────────────────
 
@@ -690,6 +707,233 @@ final class DriftGoalRepository implements GoalRepository {
           ),
         ),
       );
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  // ── reverseGoalTransfer (atomic) ──────────────────────────────────────────
+
+  @override
+  Future<AppResult<void>> reverseGoalTransfer({
+    required String originalOperationId,
+    required String reversalOperationId,
+    required String householdId,
+    required String effectiveDate,
+    required String createdBy,
+    String? reason,
+    String? idempotencyKey,
+  }) async {
+    final scopedKey = idempotencyKey ?? reversalOperationId;
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    try {
+      AppResult<void>? earlyResult;
+
+      await _db.transaction(() async {
+        // 1. Idempotency lookup (household-scoped).
+        final existingById = await _db
+            .customSelect(
+              'SELECT id, description, total_amount_minor_units, '
+              'currency_code, source_account_id, destination_account_id, type '
+              'FROM operations WHERE id = ? AND household_id = ?',
+              variables: [
+                Variable.withString(reversalOperationId),
+                Variable.withString(householdId),
+              ],
+            )
+            .get();
+        if (existingById.isNotEmpty) {
+          earlyResult = const AppOk(null);
+          return;
+        }
+
+        if (scopedKey != reversalOperationId) {
+          final existingByKey = await _db
+              .customSelect(
+                'SELECT id, description FROM operations '
+                'WHERE household_id = ? AND idempotency_key = ?',
+                variables: [
+                  Variable.withString(householdId),
+                  Variable.withString(scopedKey),
+                ],
+              )
+              .get();
+          if (existingByKey.isNotEmpty) {
+            final desc = existingByKey.first.readNullable<String>(
+              'description',
+            );
+            final expectedDesc =
+                reason ?? 'Reversal of operation $originalOperationId';
+            if (desc == expectedDesc) {
+              earlyResult = const AppOk(null);
+            } else {
+              earlyResult = const AppDuplicateConflict(
+                messageKey: 'errorGoalIdempotencyConflict',
+              );
+            }
+            return;
+          }
+        }
+
+        // 2. Validate original operation.
+        final originalRows = await _db
+            .customSelect(
+              'SELECT id, is_reversed, total_amount_minor_units, currency_code, '
+              'source_account_id, destination_account_id, type '
+              'FROM operations WHERE id = ? AND household_id = ?',
+              variables: [
+                Variable.withString(originalOperationId),
+                Variable.withString(householdId),
+              ],
+            )
+            .get();
+        if (originalRows.isEmpty) {
+          earlyResult = const AppNotFound();
+          return;
+        }
+        final original = originalRows.first;
+        if (original.read<int>('is_reversed') == 1) {
+          earlyResult = const AppDuplicateConflict(
+            messageKey: 'errorOperationAlreadyReversed',
+          );
+          return;
+        }
+
+        final amount = original.read<int>('total_amount_minor_units');
+        final currency = original.read<String>('currency_code');
+        final origSource = original.readNullable<String>('source_account_id');
+        final origDest = original.readNullable<String>(
+          'destination_account_id',
+        );
+        final revDescription =
+            reason ?? 'Reversal of operation $originalOperationId';
+
+        // 3. Optional: resolve original goal movement (may be null).
+        final movRows = await _db
+            .customSelect(
+              'SELECT * FROM goal_movements WHERE transfer_operation_id = ? LIMIT 1',
+              variables: [Variable.withString(originalOperationId)],
+            )
+            .get();
+        final originalMovement = movRows.isEmpty ? null : movRows.first;
+        if (originalMovement != null) {
+          final movType = originalMovement.read<String>('movement_type');
+          if (movType != 'funding' && movType != 'release') {
+            earlyResult = const AppValidationFailure(
+              field: 'originalOperationId',
+              messageKey: 'errorGoalReversalInvalidMovement',
+            );
+            return;
+          }
+        }
+
+        // 4. Insert reversal operation.
+        await _db.customStatement(
+          'INSERT INTO operations '
+          '(id, household_id, type, effective_date, recorded_at, '
+          'total_amount_minor_units, currency_code, created_by, created_at, '
+          'updated_at, description, source_account_id, destination_account_id, '
+          'idempotency_key, is_reversed) '
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
+          [
+            reversalOperationId,
+            householdId,
+            OperationType.reversal.code,
+            effectiveDate,
+            now,
+            amount,
+            currency,
+            createdBy,
+            now,
+            now,
+            revDescription,
+            origDest,
+            origSource,
+            scopedKey,
+          ],
+        );
+
+        // 5. Mirror ledger entries (debit/credit swapped).
+        final origEntries = await _db
+            .customSelect(
+              'SELECT * FROM ledger_entries '
+              'WHERE operation_id = ? AND household_id = ?',
+              variables: [
+                Variable.withString(originalOperationId),
+                Variable.withString(householdId),
+              ],
+            )
+            .get();
+
+        for (final e in origEntries) {
+          final dir = e.read<String>('direction');
+          final opposite = dir == LedgerDirection.credit.code
+              ? LedgerDirection.debit.code
+              : LedgerDirection.credit.code;
+          final entryType = dir == LedgerDirection.credit.code
+              ? LedgerEntryType.reversalDebit.code
+              : LedgerEntryType.reversalCredit.code;
+          final entryId = e.read<String>('id');
+          await _db.customStatement(
+            'INSERT INTO ledger_entries '
+            '(id, operation_id, household_id, account_id, direction, '
+            'amount_minor_units, currency_code, entry_type, effective_date, '
+            'recorded_at, created_by, is_reversal, reversal_of_entry_id) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
+            [
+              '${reversalOperationId}_rev_$entryId',
+              reversalOperationId,
+              householdId,
+              e.read<String>('account_id'),
+              opposite,
+              e.read<int>('amount_minor_units'),
+              e.read<String>('currency_code'),
+              entryType,
+              effectiveDate,
+              now,
+              createdBy,
+              entryId,
+            ],
+          );
+        }
+
+        // 6. Mark original as reversed (only permitted mutation).
+        await _db.customStatement(
+          'UPDATE operations SET is_reversed = 1, reversed_by = ?, '
+          'updated_at = ? WHERE id = ? AND household_id = ?',
+          [reversalOperationId, now, originalOperationId, householdId],
+        );
+
+        // 7. Operation context / audit.
+        await _db.customStatement(
+          'INSERT INTO operation_contexts '
+          '(operation_id, household_id, is_recurring, note, created_at) '
+          'VALUES (?, ?, 0, ?, ?)',
+          [reversalOperationId, householdId, revDescription, now],
+        );
+
+        // 8. Reversal goal movement (only when original was a goal movement).
+        if (originalMovement != null) {
+          await _db.customStatement(
+            'INSERT INTO goal_movements '
+            '(id, goal_id, household_id, transfer_operation_id, movement_type, '
+            'created_at, release_reason, reversal_of_movement_id) '
+            'VALUES (?, ?, ?, ?, ?, ?, NULL, ?)',
+            [
+              '$reversalOperationId-mov',
+              originalMovement.read<String>('goal_id'),
+              householdId,
+              reversalOperationId,
+              'reversal',
+              now,
+              originalMovement.read<String>('id'),
+            ],
+          );
+        }
+      });
+
+      return earlyResult ?? const AppOk(null);
     } on Exception catch (_) {
       return const AppPersistenceFailure();
     }

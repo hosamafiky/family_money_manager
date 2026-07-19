@@ -303,7 +303,11 @@ Clarifications added:
 - No production PIN, biometric, or secure-key implementation is currently built or verified
 - The production `AppDatabase` uses an unencrypted `NativeDatabase`
 - Key management plan (PO-3..6) is documented but not yet implemented
+- **`sqflite_sqlcipher` is not the selected implementation** (clarified again in Phase 5B.5)
 
+**Phase 5B.5 suite-count note:** Phase 5B.3 closed at **1129** tests (`b68c710`).
+Later Phase 5B.4 reports that attributed **1171** to the 5B.3 HEAD were incorrect;
+1171 is the Phase 5B.4 total.
 ---
 
 ## 13. Full Test Inventory with Classifications

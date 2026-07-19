@@ -1,5 +1,11 @@
-/// Phase 5B.3 / 5B.4 – v10→v11 and comprehensive migration tests.
+/// Phase 5B.3 / 5B.4 – Schema smoke tests (historical name: v10→v11).
 ///
+/// NOTE (Phase 5B.5): This file opens a **fresh** `AppDatabase` at the current
+/// schema version. It is useful for fixture preservation / trigger smoke checks
+/// but is **not** evidence of a true stepwise migration. For a physical-file
+/// (N−1)→N migration, see `goal_true_migration_v12_to_v13_test.dart`.
+///
+/// Historical coverage notes:
 /// v10→v11 migration adds (Phase 5B.3):
 ///  - early_completion_reason column to goals
 ///  - validate_goal_reserve_on_insert trigger
@@ -14,7 +20,7 @@
 ///  - updated goal_movement_transfer_type (allows 'reversal' ops)
 ///
 /// Since the migration only ADDs capabilities (no data transformation),
-/// the tests open a fresh database at the current schema (v12) and verify:
+/// the tests open a fresh database at the current schema and verify:
 ///  1. All pre-existing tables and data are preserved
 ///  2. New columns exist
 ///  3. New triggers are active

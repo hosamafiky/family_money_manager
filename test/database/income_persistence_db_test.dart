@@ -261,7 +261,7 @@ void main() {
     );
 
     test(
-      '7: same idempotency key + different operation ID → conflict',
+      '7: same idempotency key + different operation ID → alreadyExists when payload equivalent',
       () async {
         final acc = await createAccount(suffix: 't7');
         const idemKey = 'idem-key-t7';
@@ -291,7 +291,21 @@ void main() {
             createdBy: 'user-1',
           ),
         );
-        expect(r2, IdempotentOperationResult.conflict);
+        expect(r2, IdempotentOperationResult.alreadyExists);
+
+        final r3 = await ledgerRepo.recordIncome(
+          RecordIncomeParams(
+            operationId: 'op-inc-t7c',
+            idempotencyKey: idemKey,
+            householdId: 'hh-inc',
+            destinationAccountId: acc,
+            amountMinorUnits: 3000, // conflicting amount
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-01',
+            createdBy: 'user-1',
+          ),
+        );
+        expect(r3, IdempotentOperationResult.conflict);
       },
     );
 

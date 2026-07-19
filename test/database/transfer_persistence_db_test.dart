@@ -362,7 +362,7 @@ void main() {
     });
 
     test(
-      '9: conflicting retry — same idempotency key, different ID → conflict',
+      '9: same idempotency key, different ID — equivalent → alreadyExists; conflict on amount',
       () async {
         final src = await createAccount(suffix: 't9-src');
         final dst = await createAccount(suffix: 't9-dst');
@@ -396,7 +396,22 @@ void main() {
             createdBy: 'user-1',
           ),
         );
-        expect(r2, IdempotentOperationResult.conflict);
+        expect(r2, IdempotentOperationResult.alreadyExists);
+
+        final r3 = await ledgerRepo.executeTransfer(
+          ExecuteTransferParams(
+            operationId: 'op-tf-t9c',
+            idempotencyKey: idemKey,
+            householdId: 'hh-tf',
+            sourceAccountId: src,
+            destinationAccountId: dst,
+            amountMinorUnits: 3000,
+            currencyCode: 'EGP',
+            effectiveDate: '2024-01-02',
+            createdBy: 'user-1',
+          ),
+        );
+        expect(r3, IdempotentOperationResult.conflict);
       },
     );
 
