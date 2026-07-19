@@ -5,10 +5,9 @@ import 'package:family_money_manager/features/accounts/data/account_repository.d
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
 import 'package:family_money_manager/features/goals/data/goal_repository.dart';
+import 'package:family_money_manager/features/goals/data/goal_transfer_write_boundary.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
-import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
-import 'package:family_money_manager/features/ledger/domain/operation.dart';
 import 'package:uuid/uuid.dart';
 
 export 'complete_goal_params.dart';
@@ -50,6 +49,27 @@ AppResult<T>? _validateFundingSource<T>(FinancialAccount? source) {
     );
   }
   return null;
+}
+
+AppResult<SavingsGoal> _mapTransferFailure(
+  AppResult<GoalTransferWriteResult> result,
+) {
+  if (result is AppInsufficientFunds<GoalTransferWriteResult>) {
+    return const AppInsufficientFunds();
+  }
+  if (result is AppDuplicateConflict<GoalTransferWriteResult>) {
+    return AppDuplicateConflict(messageKey: result.messageKey);
+  }
+  if (result is AppNotFound<GoalTransferWriteResult>) {
+    return const AppNotFound();
+  }
+  if (result is AppValidationFailure<GoalTransferWriteResult>) {
+    return AppValidationFailure(
+      field: result.field,
+      messageKey: result.messageKey,
+    );
+  }
+  return const AppPersistenceFailure();
 }
 
 // ── CreateGoalUseCase ──────────────────────────────────────────────────────
@@ -202,14 +222,13 @@ final class FundGoalUseCase {
   const FundGoalUseCase({
     required GoalRepository goalRepository,
     required AccountRepository accountRepository,
-    required LedgerRepository ledgerRepository,
+    // ledgerRepository kept for API compatibility; writes go through goals.
+    LedgerRepository? ledgerRepository,
   }) : _goals = goalRepository,
-       _accounts = accountRepository,
-       _ledger = ledgerRepository;
+       _accounts = accountRepository;
 
   final GoalRepository _goals;
   final AccountRepository _accounts;
-  final LedgerRepository _ledger;
 
   Future<AppResult<SavingsGoal>> execute({
     required String goalId,
@@ -260,7 +279,7 @@ final class FundGoalUseCase {
       );
     }
 
-    // Execute the transfer.
+    // Atomic transfer + movement via unified repository boundary.
     final transferOperationId = _uuid.v4();
     final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
       0,
@@ -268,48 +287,25 @@ final class FundGoalUseCase {
     );
     final now = _nowUtc();
 
-    IdempotentOperationResult transferResult;
-    try {
-      transferResult = await _ledger.executeTransfer(
-        ExecuteTransferParams(
-          operationId: transferOperationId,
-          idempotencyKey: idempotencyKey,
-          householdId: householdId,
-          sourceAccountId: sourceAccountId,
-          destinationAccountId: goal.reserveAccountId,
-          amountMinorUnits: amountMinorUnits,
-          currencyCode: goal.currencyCode,
-          effectiveDate: effectiveDate,
-          createdBy: 'system',
-          description: 'Goal funding: ${goal.name}',
-        ),
-      );
-    } on InsufficientFundsError {
-      return const AppInsufficientFunds();
-    } catch (_) {
-      return const AppPersistenceFailure();
-    }
-
-    // Conflicting payload under the same scoped key must not be silently
-    // coerced into AppOk (Phase 5B.5 correction of Phase 5B.4 behaviour).
-    if (transferResult == IdempotentOperationResult.conflict) {
-      return const AppDuplicateConflict(
-        messageKey: 'errorGoalIdempotencyConflict',
-      );
-    }
-
-    // Record movement — skip on idempotent replay (equivalent payload).
-    if (transferResult == IdempotentOperationResult.created) {
-      await _goals.addMovement(
-        GoalMovement(
-          id: _uuid.v4(),
-          goalId: goalId,
-          householdId: householdId,
-          transferOperationId: transferOperationId,
-          movementType: GoalMovementType.funding,
-          createdAt: now,
-        ),
-      );
+    final transferResult = await _goals.fundGoalTransfer(
+      GoalAssociatedTransferParams.funding(
+        goalId: goalId,
+        householdId: householdId,
+        operationId: transferOperationId,
+        idempotencyKey: idempotencyKey,
+        sourceAccountId: sourceAccountId,
+        destinationAccountId: goal.reserveAccountId,
+        amountMinorUnits: amountMinorUnits,
+        currencyCode: goal.currencyCode,
+        effectiveDate: effectiveDate,
+        createdBy: 'system',
+        description: 'Goal funding: ${goal.name}',
+        movementId: _uuid.v4(),
+        movementCreatedAt: now,
+      ),
+    );
+    if (transferResult is! AppOk<GoalTransferWriteResult>) {
+      return _mapTransferFailure(transferResult);
     }
 
     // Check if target is now reached.
@@ -348,14 +344,13 @@ final class ReleaseGoalFundsUseCase {
   const ReleaseGoalFundsUseCase({
     required GoalRepository goalRepository,
     required AccountRepository accountRepository,
-    required LedgerRepository ledgerRepository,
+    // ledgerRepository kept for API compatibility; writes go through goals.
+    LedgerRepository? ledgerRepository,
   }) : _goals = goalRepository,
-       _accounts = accountRepository,
-       _ledger = ledgerRepository;
+       _accounts = accountRepository;
 
   final GoalRepository _goals;
   final AccountRepository _accounts;
-  final LedgerRepository _ledger;
 
   Future<AppResult<SavingsGoal>> execute({
     required String goalId,
@@ -433,7 +428,7 @@ final class ReleaseGoalFundsUseCase {
       return const AppInsufficientFunds();
     }
 
-    // Execute the transfer.
+    // Atomic transfer + movement via unified repository boundary.
     final transferOperationId = _uuid.v4();
     final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
       0,
@@ -441,47 +436,26 @@ final class ReleaseGoalFundsUseCase {
     );
     final now = _nowUtc();
 
-    IdempotentOperationResult transferResult;
-    try {
-      transferResult = await _ledger.executeTransfer(
-        ExecuteTransferParams(
-          operationId: transferOperationId,
-          idempotencyKey: idempotencyKey,
-          householdId: householdId,
-          sourceAccountId: goal.reserveAccountId,
-          destinationAccountId: destinationAccountId,
-          amountMinorUnits: amountMinorUnits,
-          currencyCode: goal.currencyCode,
-          effectiveDate: effectiveDate,
-          createdBy: 'system',
-          description: 'Goal release: ${goal.name} — ${releaseReason.trim()}',
-        ),
-      );
-    } on InsufficientFundsError {
-      return const AppInsufficientFunds();
-    } catch (_) {
-      return const AppPersistenceFailure();
-    }
-
-    if (transferResult == IdempotentOperationResult.conflict) {
-      return const AppDuplicateConflict(
-        messageKey: 'errorGoalIdempotencyConflict',
-      );
-    }
-
-    // Record movement — skip on idempotent replay (equivalent payload).
-    if (transferResult == IdempotentOperationResult.created) {
-      await _goals.addMovement(
-        GoalMovement(
-          id: _uuid.v4(),
-          goalId: goalId,
-          householdId: householdId,
-          transferOperationId: transferOperationId,
-          movementType: GoalMovementType.release,
-          createdAt: now,
-          releaseReason: releaseReason.trim(),
-        ),
-      );
+    final transferResult = await _goals.releaseGoalTransfer(
+      GoalAssociatedTransferParams.release(
+        goalId: goalId,
+        householdId: householdId,
+        operationId: transferOperationId,
+        idempotencyKey: idempotencyKey,
+        sourceAccountId: goal.reserveAccountId,
+        destinationAccountId: destinationAccountId,
+        amountMinorUnits: amountMinorUnits,
+        currencyCode: goal.currencyCode,
+        effectiveDate: effectiveDate,
+        createdBy: 'system',
+        description: 'Goal release: ${goal.name} — ${releaseReason.trim()}',
+        movementId: _uuid.v4(),
+        movementCreatedAt: now,
+        releaseReason: releaseReason.trim(),
+      ),
+    );
+    if (transferResult is! AppOk<GoalTransferWriteResult>) {
+      return _mapTransferFailure(transferResult);
     }
 
     final updatedResult = await _goals.findGoalById(goalId);

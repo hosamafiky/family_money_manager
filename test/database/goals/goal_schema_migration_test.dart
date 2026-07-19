@@ -1265,6 +1265,20 @@ void main() {
       "'$destinationAccountId', 10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
       "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
     );
+    await db.customStatement(
+      "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, "
+      "direction, amount_minor_units, currency_code, entry_type, effective_date, "
+      "recorded_at, created_by) VALUES "
+      "('${id}_debit', '$id', '$_hh', '$sourceAccountId', 'debit', 10000, "
+      "'EGP', 'transferOut', '2024-01-01', '2024-01-01T00:00:00Z', 'test')",
+    );
+    await db.customStatement(
+      "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, "
+      "direction, amount_minor_units, currency_code, entry_type, effective_date, "
+      "recorded_at, created_by) VALUES "
+      "('${id}_credit', '$id', '$_hh', '$destinationAccountId', 'credit', 10000, "
+      "'EGP', 'transferIn', '2024-01-01', '2024-01-01T00:00:00Z', 'test')",
+    );
     return id;
   }
 

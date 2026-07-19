@@ -113,7 +113,7 @@ Evidence: IDMP-1..IDMP-10 (Unit/Database-tested), CONC-9 updated, CONC-BAR-5/6.
 |---|---|---|
 | REV-ATOM-1 | First mirror entry PK occupied | `AppPersistenceFailure`; zero partial rows |
 | REV-ATOM-2 | Second-order entry PK | Full rollback |
-| REV-ATOM-3 | Pre-occupied reversal op id + context | Early `AppOk`; original unreversed |
+| REV-ATOM-3 | Pre-occupied unrelated reversal op id + context | **`AppPersistenceFailure` (not AppOk)**; original unreversed. Phase 5B.5 incorrectly documented this as early `AppOk`; corrected in Phase 5B.6. |
 | REV-ATOM-4 | Last mirror entry PK | Full rollback |
 | REV-ATOM-5 | Reversal movement PK; then clean retry | Rollback then success; conflicting second reverse → `AppDuplicateConflict` |
 
@@ -243,7 +243,11 @@ flutter test --reporter=expanded                        → exit 0, 1222/1222 pa
 | Dual-connection Completer concurrency barrier not used | Medium | Documented; yield barrier only |
 | Actor-member FK on lifecycle events | Low | No column; metadata only |
 | Mid-migration abort injection | Low | Drift transactional migrate; not fail-injected |
-| Goal funding still two steps (ledger tx + movement) outside createGoal | Medium | Conflict/alreadyExists fixed; fully single-tx fund+movement is future hardening |
+| Goal funding still two steps (ledger tx + movement) outside createGoal | Medium | **Closed in Phase 5B.6** — unified `_executeGoalAssociatedTransfer` boundary |
+
+### Phase 5B.6 correction note (REV-ATOM-3 false-success)
+
+Phase 5B.5 `reverseGoalTransfer` returned `AppOk` when an unrelated operation already occupied the requested `reversalOperationId`, even when no complete reversal existed. That is a **false-success**. Phase 5B.6 requires a fully complete equivalent reversal (type, original link, original `is_reversed`, context, and reversal movement linkage) before idempotent `AppOk`; otherwise `AppPersistenceFailure` or `AppDuplicateConflict`.
 
 ---
 

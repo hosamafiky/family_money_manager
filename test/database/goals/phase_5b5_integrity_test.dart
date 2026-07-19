@@ -615,7 +615,7 @@ void main() {
       "INSERT INTO operation_contexts (operation_id, household_id, is_recurring, created_at) "
       "VALUES ('$revId', '$_hh', 0, '2024-01-01T00:00:00Z')",
     );
-    // Occupied reversal operation id → early AppOk without mutating original.
+    // Occupied unrelated reversal operation id → PersistenceFailure (not AppOk).
     final result = await reverseUc.execute(
       originalOperationId: fundOpId,
       reversalOperationId: revId,
@@ -623,8 +623,8 @@ void main() {
       effectiveDate: '2024-01-02',
       createdBy: 'test',
     );
-    // Early alreadyExists because revId op exists (income) → AppOk without reversing.
-    expect(result, isA<AppOk<void>>());
+    // Unrelated PK collision must NOT report success.
+    expect(result, isA<AppPersistenceFailure<void>>());
     final isRev =
         (await db
                 .customSelect(
@@ -1415,20 +1415,27 @@ void main() {
   /// Completer would deadlock. The test-only hook yields briefly after the
   /// idempotency check to maximize scheduling interleaving before writes.
   void installYieldBarrier() {
-    final barrierLedger = DriftLedgerRepository(
+    final barrierGoalRepo = DriftGoalRepository(
       db,
       debugTransactionBarrier: () async {
         // Best-effort yield; single-connection Drift serializes writers.
         await Future<void>.delayed(Duration.zero);
       },
     );
+    final barrierLedger = DriftLedgerRepository(
+      db,
+      debugTransactionBarrier: () async {
+        await Future<void>.delayed(Duration.zero);
+      },
+    );
+    goalRepo = barrierGoalRepo;
     fundGoalUc = FundGoalUseCase(
-      goalRepository: goalRepo,
+      goalRepository: barrierGoalRepo,
       accountRepository: accountRepo,
       ledgerRepository: barrierLedger,
     );
     releaseGoalUc = ReleaseGoalFundsUseCase(
-      goalRepository: goalRepo,
+      goalRepository: barrierGoalRepo,
       accountRepository: accountRepo,
       ledgerRepository: barrierLedger,
     );

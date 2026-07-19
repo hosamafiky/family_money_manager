@@ -5,9 +5,11 @@ import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
 import 'package:family_money_manager/features/goals/data/goal_repository.dart';
+import 'package:family_money_manager/features/goals/data/goal_transfer_write_boundary.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart'
     show InsufficientFundsError;
+import 'package:meta/meta.dart';
 
 /// Drift-backed implementation of [GoalRepository].
 ///
@@ -19,9 +21,21 @@ import 'package:family_money_manager/features/ledger/domain/child_withdrawal_aud
 ///   inside a single database transaction.
 /// - Movements and revisions are append-only (no UPDATE or DELETE).
 final class DriftGoalRepository implements GoalRepository {
-  const DriftGoalRepository(this._db);
+  DriftGoalRepository(
+    this._db, {
+    @visibleForTesting
+    GoalTransferFailAfter debugFailAfter = GoalTransferFailAfter.none,
+    @visibleForTesting Future<void> Function()? debugTransactionBarrier,
+  }) : _debugFailAfter = debugFailAfter,
+       _debugTransactionBarrier = debugTransactionBarrier;
 
   final AppDatabase _db;
+
+  /// Test-only: throw [GoalTransferInjectedFailure] after the named step.
+  final GoalTransferFailAfter _debugFailAfter;
+
+  /// Test-only: awaited inside the write transaction after idempotency check.
+  final Future<void> Function()? _debugTransactionBarrier;
 
   // ── createGoal ────────────────────────────────────────────────────────────
 
@@ -33,7 +47,6 @@ final class DriftGoalRepository implements GoalRepository {
     GoalInitialFunding? initialFunding,
   }) async {
     final incomingPayload = _buildIdempotencyPayload(goal, initialRevision);
-    final now = DateTime.now().toUtc().toIso8601String();
 
     // Captured inside the transaction closure and read after it commits.
     AppResult<SavingsGoal>? idempotencyResult;
@@ -132,127 +145,35 @@ final class DriftGoalRepository implements GoalRepository {
               ),
             );
 
-        // ── Steps 5-10: Optional initial funding (all in the same transaction) ─
+        // ── Steps 5+: Optional initial funding via unified transfer boundary ───
         if (initialFunding != null && initialFunding.amountMinorUnits > 0) {
-          // Step 5: Balance check (TOCTOU-safe inside the write transaction).
-          final balanceRows = await _db
-              .customSelect(
-                'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
-                'ELSE -amount_minor_units END), 0) AS bal '
-                'FROM ledger_entries WHERE account_id = ? AND household_id = ?',
-                variables: [
-                  Variable.withString(LedgerDirection.credit.code),
-                  Variable.withString(initialFunding.sourceAccountId),
-                  Variable.withString(goal.householdId),
-                ],
-              )
-              .get();
-          final sourceBalance = balanceRows.first.read<int>('bal');
-          if (sourceBalance < initialFunding.amountMinorUnits) {
-            throw InsufficientFundsError(
-              accountId: initialFunding.sourceAccountId,
-              availableMinorUnits: sourceBalance,
-              requestedMinorUnits: initialFunding.amountMinorUnits,
+          final fundResult = await _runGoalAssociatedTransferSteps(
+            GoalAssociatedTransferParams.funding(
+              goalId: goal.id,
+              householdId: goal.householdId,
+              operationId: initialFunding.operationId,
+              idempotencyKey: initialFunding.idempotencyKey,
+              sourceAccountId: initialFunding.sourceAccountId,
+              destinationAccountId: reserveAccount.id,
+              amountMinorUnits: initialFunding.amountMinorUnits,
+              currencyCode: initialFunding.currencyCode,
+              effectiveDate: initialFunding.effectiveDate,
+              createdBy: 'system',
+              description: initialFunding.description,
+              movementId: initialFunding.movementId,
+              movementCreatedAt: initialFunding.movementCreatedAt,
+            ),
+          );
+          if (fundResult is AppDuplicateConflict<GoalTransferWriteResult>) {
+            idempotencyResult = AppDuplicateConflict(
+              messageKey: fundResult.messageKey,
             );
+            return;
           }
-
-          // Step 6: Insert transfer operation.
-          await _db.customStatement(
-            'INSERT INTO operations '
-            '(id, household_id, type, effective_date, recorded_at, '
-            'total_amount_minor_units, currency_code, created_by, created_at, '
-            'updated_at, description, source_account_id, destination_account_id, '
-            'idempotency_key) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [
-              initialFunding.operationId,
-              goal.householdId,
-              'transfer',
-              initialFunding.effectiveDate,
-              now,
-              initialFunding.amountMinorUnits,
-              initialFunding.currencyCode,
-              'system',
-              now,
-              now,
-              initialFunding.description,
-              initialFunding.sourceAccountId,
-              reserveAccount.id,
-              initialFunding.idempotencyKey,
-            ],
-          );
-
-          // Step 7: Insert debit ledger entry on source account.
-          await _db.customStatement(
-            'INSERT INTO ledger_entries '
-            '(id, operation_id, household_id, account_id, direction, '
-            'amount_minor_units, currency_code, entry_type, effective_date, '
-            'recorded_at, created_by) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [
-              '${initialFunding.operationId}_debit',
-              initialFunding.operationId,
-              goal.householdId,
-              initialFunding.sourceAccountId,
-              LedgerDirection.debit.code,
-              initialFunding.amountMinorUnits,
-              initialFunding.currencyCode,
-              LedgerEntryType.transferOut.code,
-              initialFunding.effectiveDate,
-              now,
-              'system',
-            ],
-          );
-
-          // Step 8: Insert credit ledger entry on reserve account.
-          await _db.customStatement(
-            'INSERT INTO ledger_entries '
-            '(id, operation_id, household_id, account_id, direction, '
-            'amount_minor_units, currency_code, entry_type, effective_date, '
-            'recorded_at, created_by) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [
-              '${initialFunding.operationId}_credit',
-              initialFunding.operationId,
-              goal.householdId,
-              reserveAccount.id,
-              LedgerDirection.credit.code,
-              initialFunding.amountMinorUnits,
-              initialFunding.currencyCode,
-              LedgerEntryType.transferIn.code,
-              initialFunding.effectiveDate,
-              now,
-              'system',
-            ],
-          );
-
-          // Step 9: Insert operation context.
-          await _db.customStatement(
-            'INSERT INTO operation_contexts '
-            '(operation_id, household_id, is_recurring, note, created_at) '
-            'VALUES (?, ?, ?, ?, ?)',
-            [
-              initialFunding.operationId,
-              goal.householdId,
-              0,
-              initialFunding.description,
-              now,
-            ],
-          );
-
-          // Step 10: Insert goal movement (validate_funding_movement trigger fires here).
-          await _db
-              .into(_db.goalMovementsTable)
-              .insert(
-                GoalMovementsTableCompanion.insert(
-                  id: initialFunding.movementId,
-                  goalId: goal.id,
-                  householdId: goal.householdId,
-                  transferOperationId: initialFunding.operationId,
-                  movementType: GoalMovementType.funding.name,
-                  createdAt: initialFunding.movementCreatedAt,
-                ),
-              );
+          if (fundResult is! AppOk<GoalTransferWriteResult>) {
+            // Must throw Exception (not Error) so the outer catch rolls back.
+            throw Exception('initial funding failed: $fundResult');
+          }
         }
       });
 
@@ -712,6 +633,24 @@ final class DriftGoalRepository implements GoalRepository {
     }
   }
 
+  // ── fundGoalTransfer / releaseGoalTransfer (atomic) ───────────────────────
+
+  @override
+  Future<AppResult<GoalTransferWriteResult>> fundGoalTransfer(
+    GoalAssociatedTransferParams params,
+  ) {
+    assert(params.kind == GoalAssociatedTransferKind.funding);
+    return _executeGoalAssociatedTransfer(params);
+  }
+
+  @override
+  Future<AppResult<GoalTransferWriteResult>> releaseGoalTransfer(
+    GoalAssociatedTransferParams params,
+  ) {
+    assert(params.kind == GoalAssociatedTransferKind.release);
+    return _executeGoalAssociatedTransfer(params);
+  }
+
   // ── reverseGoalTransfer (atomic) ──────────────────────────────────────────
 
   @override
@@ -728,212 +667,22 @@ final class DriftGoalRepository implements GoalRepository {
     final now = DateTime.now().toUtc().toIso8601String();
 
     try {
-      AppResult<void>? earlyResult;
-
+      late AppResult<void> result;
       await _db.transaction(() async {
-        // 1. Idempotency lookup (household-scoped).
-        final existingById = await _db
-            .customSelect(
-              'SELECT id, description, total_amount_minor_units, '
-              'currency_code, source_account_id, destination_account_id, type '
-              'FROM operations WHERE id = ? AND household_id = ?',
-              variables: [
-                Variable.withString(reversalOperationId),
-                Variable.withString(householdId),
-              ],
-            )
-            .get();
-        if (existingById.isNotEmpty) {
-          earlyResult = const AppOk(null);
-          return;
-        }
-
-        if (scopedKey != reversalOperationId) {
-          final existingByKey = await _db
-              .customSelect(
-                'SELECT id, description FROM operations '
-                'WHERE household_id = ? AND idempotency_key = ?',
-                variables: [
-                  Variable.withString(householdId),
-                  Variable.withString(scopedKey),
-                ],
-              )
-              .get();
-          if (existingByKey.isNotEmpty) {
-            final desc = existingByKey.first.readNullable<String>(
-              'description',
-            );
-            final expectedDesc =
-                reason ?? 'Reversal of operation $originalOperationId';
-            if (desc == expectedDesc) {
-              earlyResult = const AppOk(null);
-            } else {
-              earlyResult = const AppDuplicateConflict(
-                messageKey: 'errorGoalIdempotencyConflict',
-              );
-            }
-            return;
-          }
-        }
-
-        // 2. Validate original operation.
-        final originalRows = await _db
-            .customSelect(
-              'SELECT id, is_reversed, total_amount_minor_units, currency_code, '
-              'source_account_id, destination_account_id, type '
-              'FROM operations WHERE id = ? AND household_id = ?',
-              variables: [
-                Variable.withString(originalOperationId),
-                Variable.withString(householdId),
-              ],
-            )
-            .get();
-        if (originalRows.isEmpty) {
-          earlyResult = const AppNotFound();
-          return;
-        }
-        final original = originalRows.first;
-        if (original.read<int>('is_reversed') == 1) {
-          earlyResult = const AppDuplicateConflict(
-            messageKey: 'errorOperationAlreadyReversed',
-          );
-          return;
-        }
-
-        final amount = original.read<int>('total_amount_minor_units');
-        final currency = original.read<String>('currency_code');
-        final origSource = original.readNullable<String>('source_account_id');
-        final origDest = original.readNullable<String>(
-          'destination_account_id',
+        result = await _runGoalReversalSteps(
+          originalOperationId: originalOperationId,
+          reversalOperationId: reversalOperationId,
+          householdId: householdId,
+          effectiveDate: effectiveDate,
+          createdBy: createdBy,
+          reason: reason,
+          scopedKey: scopedKey,
+          now: now,
         );
-        final revDescription =
-            reason ?? 'Reversal of operation $originalOperationId';
-
-        // 3. Optional: resolve original goal movement (may be null).
-        final movRows = await _db
-            .customSelect(
-              'SELECT * FROM goal_movements WHERE transfer_operation_id = ? LIMIT 1',
-              variables: [Variable.withString(originalOperationId)],
-            )
-            .get();
-        final originalMovement = movRows.isEmpty ? null : movRows.first;
-        if (originalMovement != null) {
-          final movType = originalMovement.read<String>('movement_type');
-          if (movType != 'funding' && movType != 'release') {
-            earlyResult = const AppValidationFailure(
-              field: 'originalOperationId',
-              messageKey: 'errorGoalReversalInvalidMovement',
-            );
-            return;
-          }
-        }
-
-        // 4. Insert reversal operation.
-        await _db.customStatement(
-          'INSERT INTO operations '
-          '(id, household_id, type, effective_date, recorded_at, '
-          'total_amount_minor_units, currency_code, created_by, created_at, '
-          'updated_at, description, source_account_id, destination_account_id, '
-          'idempotency_key, is_reversed) '
-          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
-          [
-            reversalOperationId,
-            householdId,
-            OperationType.reversal.code,
-            effectiveDate,
-            now,
-            amount,
-            currency,
-            createdBy,
-            now,
-            now,
-            revDescription,
-            origDest,
-            origSource,
-            scopedKey,
-          ],
-        );
-
-        // 5. Mirror ledger entries (debit/credit swapped).
-        final origEntries = await _db
-            .customSelect(
-              'SELECT * FROM ledger_entries '
-              'WHERE operation_id = ? AND household_id = ?',
-              variables: [
-                Variable.withString(originalOperationId),
-                Variable.withString(householdId),
-              ],
-            )
-            .get();
-
-        for (final e in origEntries) {
-          final dir = e.read<String>('direction');
-          final opposite = dir == LedgerDirection.credit.code
-              ? LedgerDirection.debit.code
-              : LedgerDirection.credit.code;
-          final entryType = dir == LedgerDirection.credit.code
-              ? LedgerEntryType.reversalDebit.code
-              : LedgerEntryType.reversalCredit.code;
-          final entryId = e.read<String>('id');
-          await _db.customStatement(
-            'INSERT INTO ledger_entries '
-            '(id, operation_id, household_id, account_id, direction, '
-            'amount_minor_units, currency_code, entry_type, effective_date, '
-            'recorded_at, created_by, is_reversal, reversal_of_entry_id) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
-            [
-              '${reversalOperationId}_rev_$entryId',
-              reversalOperationId,
-              householdId,
-              e.read<String>('account_id'),
-              opposite,
-              e.read<int>('amount_minor_units'),
-              e.read<String>('currency_code'),
-              entryType,
-              effectiveDate,
-              now,
-              createdBy,
-              entryId,
-            ],
-          );
-        }
-
-        // 6. Mark original as reversed (only permitted mutation).
-        await _db.customStatement(
-          'UPDATE operations SET is_reversed = 1, reversed_by = ?, '
-          'updated_at = ? WHERE id = ? AND household_id = ?',
-          [reversalOperationId, now, originalOperationId, householdId],
-        );
-
-        // 7. Operation context / audit.
-        await _db.customStatement(
-          'INSERT INTO operation_contexts '
-          '(operation_id, household_id, is_recurring, note, created_at) '
-          'VALUES (?, ?, 0, ?, ?)',
-          [reversalOperationId, householdId, revDescription, now],
-        );
-
-        // 8. Reversal goal movement (only when original was a goal movement).
-        if (originalMovement != null) {
-          await _db.customStatement(
-            'INSERT INTO goal_movements '
-            '(id, goal_id, household_id, transfer_operation_id, movement_type, '
-            'created_at, release_reason, reversal_of_movement_id) '
-            'VALUES (?, ?, ?, ?, ?, ?, NULL, ?)',
-            [
-              '$reversalOperationId-mov',
-              originalMovement.read<String>('goal_id'),
-              householdId,
-              reversalOperationId,
-              'reversal',
-              now,
-              originalMovement.read<String>('id'),
-            ],
-          );
-        }
       });
-
-      return earlyResult ?? const AppOk(null);
+      return result;
+    } on GoalTransferInjectedFailure {
+      return const AppPersistenceFailure();
     } on Exception catch (_) {
       return const AppPersistenceFailure();
     }
@@ -961,4 +710,694 @@ final class DriftGoalRepository implements GoalRepository {
         'restored' => GoalLifecycleEventType.restored,
         _ => GoalLifecycleEventType.completed,
       };
+
+  // ── Unified goal-associated transfer write boundary ───────────────────────
+
+  Future<void> _awaitDebugBarrier() async {
+    final barrier = _debugTransactionBarrier;
+    if (barrier != null) await barrier();
+  }
+
+  Future<void> _failAfter(GoalTransferFailAfter step) async {
+    if (_debugFailAfter == step) {
+      throw GoalTransferInjectedFailure(step);
+    }
+  }
+
+  Future<AppResult<GoalTransferWriteResult>> _executeGoalAssociatedTransfer(
+    GoalAssociatedTransferParams params,
+  ) async {
+    try {
+      late AppResult<GoalTransferWriteResult> result;
+      await _db.transaction(() async {
+        result = await _runGoalAssociatedTransferSteps(params);
+      });
+      return result;
+    } on InsufficientFundsError {
+      return const AppInsufficientFunds();
+    } on GoalTransferInjectedFailure {
+      return const AppPersistenceFailure();
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  /// Core steps for funding/release. Caller must already be inside a transaction
+  /// when nesting under [createGoal]; otherwise use [_executeGoalAssociatedTransfer].
+  Future<AppResult<GoalTransferWriteResult>> _runGoalAssociatedTransferSteps(
+    GoalAssociatedTransferParams params,
+  ) async {
+    final scopedKey = params.idempotencyKey;
+
+    // 1. Scoped idempotency lookup
+    final existingById = await _db
+        .customSelect(
+          'SELECT id, type, total_amount_minor_units, currency_code, '
+          'source_account_id, destination_account_id, description '
+          'FROM operations WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(params.operationId),
+            Variable.withString(params.householdId),
+          ],
+        )
+        .get();
+    if (existingById.isNotEmpty) {
+      final row = existingById.first;
+      final equivalent = _transferPayloadEquivalent(
+        row: row,
+        expectedType: 'transfer',
+        amount: params.amountMinorUnits,
+        currency: params.currencyCode,
+        sourceAccountId: params.sourceAccountId,
+        destinationAccountId: params.destinationAccountId,
+      );
+      if (!equivalent) {
+        return const AppPersistenceFailure();
+      }
+      final complete = await _isCompleteGoalTransferWorkflow(
+        operationId: params.operationId,
+        householdId: params.householdId,
+        goalId: params.goalId,
+        movementType: params.movementType,
+      );
+      if (!complete) return const AppPersistenceFailure();
+      return const AppOk(GoalTransferWriteResult.alreadyExists);
+    }
+
+    if (scopedKey != params.operationId) {
+      final existingByKey = await _db
+          .customSelect(
+            'SELECT id, type, total_amount_minor_units, currency_code, '
+            'source_account_id, destination_account_id, description '
+            'FROM operations WHERE household_id = ? AND idempotency_key = ?',
+            variables: [
+              Variable.withString(params.householdId),
+              Variable.withString(scopedKey),
+            ],
+          )
+          .get();
+      if (existingByKey.isNotEmpty) {
+        final row = existingByKey.first;
+        final equivalent = _transferPayloadEquivalent(
+          row: row,
+          expectedType: 'transfer',
+          amount: params.amountMinorUnits,
+          currency: params.currencyCode,
+          sourceAccountId: params.sourceAccountId,
+          destinationAccountId: params.destinationAccountId,
+        );
+        if (!equivalent) {
+          return const AppDuplicateConflict(
+            messageKey: 'errorGoalIdempotencyConflict',
+          );
+        }
+        final existingOpId = row.read<String>('id');
+        final complete = await _isCompleteGoalTransferWorkflow(
+          operationId: existingOpId,
+          householdId: params.householdId,
+          goalId: params.goalId,
+          movementType: params.movementType,
+        );
+        if (!complete) return const AppPersistenceFailure();
+        return const AppOk(GoalTransferWriteResult.alreadyExists);
+      }
+    }
+
+    await _awaitDebugBarrier();
+
+    // 2-4. Goal + source/destination validation
+    final goalRows = await _db
+        .customSelect(
+          'SELECT id, reserve_account_id, currency_code, status, household_id '
+          'FROM goals WHERE id = ?',
+          variables: [Variable.withString(params.goalId)],
+        )
+        .get();
+    if (goalRows.isEmpty) return const AppNotFound();
+    final goal = goalRows.first;
+    if (goal.read<String>('household_id') != params.householdId) {
+      return const AppNotFound();
+    }
+
+    final srcRows = await _db
+        .customSelect(
+          'SELECT id, currency_code, is_archived, type, is_protected '
+          'FROM financial_accounts WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(params.sourceAccountId),
+            Variable.withString(params.householdId),
+          ],
+        )
+        .get();
+    final dstRows = await _db
+        .customSelect(
+          'SELECT id, currency_code, is_archived, type '
+          'FROM financial_accounts WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(params.destinationAccountId),
+            Variable.withString(params.householdId),
+          ],
+        )
+        .get();
+    if (srcRows.isEmpty || dstRows.isEmpty) return const AppNotFound();
+    final src = srcRows.first;
+    final dst = dstRows.first;
+    if (src.read<int>('is_archived') == 1 ||
+        dst.read<int>('is_archived') == 1) {
+      return const AppValidationFailure(
+        field: 'accountId',
+        messageKey: 'errorAccountArchived',
+      );
+    }
+    if (src.read<String>('currency_code') != params.currencyCode ||
+        dst.read<String>('currency_code') != params.currencyCode) {
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
+    }
+
+    // 5. Balance calculation (inside transaction)
+    final balanceRows = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+          'ELSE -amount_minor_units END), 0) AS bal '
+          'FROM ledger_entries WHERE account_id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(LedgerDirection.credit.code),
+            Variable.withString(params.sourceAccountId),
+            Variable.withString(params.householdId),
+          ],
+        )
+        .get();
+    final sourceBalance = balanceRows.first.read<int>('bal');
+
+    // 6. Sufficient-funds validation
+    if (sourceBalance < params.amountMinorUnits) {
+      throw InsufficientFundsError(
+        accountId: params.sourceAccountId,
+        availableMinorUnits: sourceBalance,
+        requestedMinorUnits: params.amountMinorUnits,
+      );
+    }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    // 7. Operation insertion
+    await _db.customStatement(
+      'INSERT INTO operations '
+      '(id, household_id, type, effective_date, recorded_at, '
+      'total_amount_minor_units, currency_code, created_by, created_at, '
+      'updated_at, description, source_account_id, destination_account_id, '
+      'idempotency_key) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        params.operationId,
+        params.householdId,
+        'transfer',
+        params.effectiveDate,
+        now,
+        params.amountMinorUnits,
+        params.currencyCode,
+        params.createdBy,
+        now,
+        now,
+        params.description,
+        params.sourceAccountId,
+        params.destinationAccountId,
+        scopedKey,
+      ],
+    );
+    await _failAfter(GoalTransferFailAfter.operationInsert);
+
+    // 8. Debit ledger entry
+    await _db.customStatement(
+      'INSERT INTO ledger_entries '
+      '(id, operation_id, household_id, account_id, direction, '
+      'amount_minor_units, currency_code, entry_type, effective_date, '
+      'recorded_at, created_by) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        '${params.operationId}_debit',
+        params.operationId,
+        params.householdId,
+        params.sourceAccountId,
+        LedgerDirection.debit.code,
+        params.amountMinorUnits,
+        params.currencyCode,
+        LedgerEntryType.transferOut.code,
+        params.effectiveDate,
+        now,
+        params.createdBy,
+      ],
+    );
+    await _failAfter(GoalTransferFailAfter.firstLedgerEntry);
+
+    // 9. Credit ledger entry
+    await _db.customStatement(
+      'INSERT INTO ledger_entries '
+      '(id, operation_id, household_id, account_id, direction, '
+      'amount_minor_units, currency_code, entry_type, effective_date, '
+      'recorded_at, created_by) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        '${params.operationId}_credit',
+        params.operationId,
+        params.householdId,
+        params.destinationAccountId,
+        LedgerDirection.credit.code,
+        params.amountMinorUnits,
+        params.currencyCode,
+        LedgerEntryType.transferIn.code,
+        params.effectiveDate,
+        now,
+        params.createdBy,
+      ],
+    );
+    await _failAfter(GoalTransferFailAfter.secondLedgerEntry);
+
+    // 10. Operation context/audit
+    await _db.customStatement(
+      'INSERT INTO operation_contexts '
+      '(operation_id, household_id, is_recurring, note, created_at) '
+      'VALUES (?, ?, ?, ?, ?)',
+      [params.operationId, params.householdId, 0, params.description, now],
+    );
+    await _failAfter(GoalTransferFailAfter.operationContext);
+
+    // 11. Goal movement
+    await _db.customStatement(
+      'INSERT INTO goal_movements '
+      '(id, goal_id, household_id, transfer_operation_id, movement_type, '
+      'created_at, release_reason, reversal_of_movement_id) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, NULL)',
+      [
+        params.movementId,
+        params.goalId,
+        params.householdId,
+        params.operationId,
+        params.movementType.name,
+        params.movementCreatedAt,
+        params.releaseReason,
+      ],
+    );
+    await _failAfter(GoalTransferFailAfter.goalMovement);
+
+    // 14. Final pre-commit point
+    await _failAfter(GoalTransferFailAfter.preCommit);
+
+    return const AppOk(GoalTransferWriteResult.created);
+  }
+
+  bool _transferPayloadEquivalent({
+    required QueryRow row,
+    required String expectedType,
+    required int amount,
+    required String currency,
+    required String? sourceAccountId,
+    required String? destinationAccountId,
+  }) {
+    return row.read<String>('type') == expectedType &&
+        row.read<int>('total_amount_minor_units') == amount &&
+        row.read<String>('currency_code') == currency &&
+        row.readNullable<String>('source_account_id') == sourceAccountId &&
+        row.readNullable<String>('destination_account_id') ==
+            destinationAccountId;
+  }
+
+  Future<bool> _isCompleteGoalTransferWorkflow({
+    required String operationId,
+    required String householdId,
+    required String goalId,
+    required GoalMovementType movementType,
+  }) async {
+    final entries = await _db
+        .customSelect(
+          'SELECT direction FROM ledger_entries '
+          'WHERE operation_id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(operationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+    if (entries.length != 2) return false;
+    final dirs = entries.map((e) => e.read<String>('direction')).toSet();
+    if (!dirs.contains('debit') || !dirs.contains('credit')) return false;
+
+    final ctx = await _db
+        .customSelect(
+          'SELECT operation_id FROM operation_contexts WHERE operation_id = ?',
+          variables: [Variable.withString(operationId)],
+        )
+        .get();
+    if (ctx.isEmpty) return false;
+
+    final mov = await _db
+        .customSelect(
+          'SELECT id FROM goal_movements '
+          'WHERE transfer_operation_id = ? AND goal_id = ? AND movement_type = ?',
+          variables: [
+            Variable.withString(operationId),
+            Variable.withString(goalId),
+            Variable.withString(movementType.name),
+          ],
+        )
+        .get();
+    return mov.isNotEmpty;
+  }
+
+  Future<AppResult<void>> _runGoalReversalSteps({
+    required String originalOperationId,
+    required String reversalOperationId,
+    required String householdId,
+    required String effectiveDate,
+    required String createdBy,
+    required String? reason,
+    required String scopedKey,
+    required String now,
+  }) async {
+    // 1. Idempotency by operation id
+    final existingById = await _db
+        .customSelect(
+          'SELECT id, type, total_amount_minor_units, currency_code, '
+          'source_account_id, destination_account_id, description '
+          'FROM operations WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(reversalOperationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+    if (existingById.isNotEmpty) {
+      return _validateCompleteReversalReplay(
+        existing: existingById.first,
+        originalOperationId: originalOperationId,
+        reversalOperationId: reversalOperationId,
+        householdId: householdId,
+        reason: reason,
+      );
+    }
+
+    // Idempotency by scoped key
+    if (scopedKey != reversalOperationId) {
+      final existingByKey = await _db
+          .customSelect(
+            'SELECT id, type, total_amount_minor_units, currency_code, '
+            'source_account_id, destination_account_id, description '
+            'FROM operations WHERE household_id = ? AND idempotency_key = ?',
+            variables: [
+              Variable.withString(householdId),
+              Variable.withString(scopedKey),
+            ],
+          )
+          .get();
+      if (existingByKey.isNotEmpty) {
+        final row = existingByKey.first;
+        final existingId = row.read<String>('id');
+        final validated = await _validateCompleteReversalReplay(
+          existing: row,
+          originalOperationId: originalOperationId,
+          reversalOperationId: existingId,
+          householdId: householdId,
+          reason: reason,
+        );
+        if (validated is AppOk<void>) return validated;
+        if (validated is AppPersistenceFailure<void>) {
+          // Existing key points at incomplete/unrelated op → conflict when
+          // payloads differ; persistence when PK/incomplete.
+          return const AppDuplicateConflict(
+            messageKey: 'errorGoalIdempotencyConflict',
+          );
+        }
+        return validated;
+      }
+    }
+
+    await _awaitDebugBarrier();
+
+    // 2. Validate original operation
+    final originalRows = await _db
+        .customSelect(
+          'SELECT id, is_reversed, total_amount_minor_units, currency_code, '
+          'source_account_id, destination_account_id, type '
+          'FROM operations WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(originalOperationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+    if (originalRows.isEmpty) return const AppNotFound();
+    final original = originalRows.first;
+    if (original.read<int>('is_reversed') == 1) {
+      return const AppDuplicateConflict(
+        messageKey: 'errorOperationAlreadyReversed',
+      );
+    }
+
+    final amount = original.read<int>('total_amount_minor_units');
+    final currency = original.read<String>('currency_code');
+    final origSource = original.readNullable<String>('source_account_id');
+    final origDest = original.readNullable<String>('destination_account_id');
+    final revDescription =
+        reason ?? 'Reversal of operation $originalOperationId';
+
+    // 3. Optional original goal movement
+    final movRows = await _db
+        .customSelect(
+          'SELECT * FROM goal_movements WHERE transfer_operation_id = ? LIMIT 1',
+          variables: [Variable.withString(originalOperationId)],
+        )
+        .get();
+    final originalMovement = movRows.isEmpty ? null : movRows.first;
+    if (originalMovement != null) {
+      final movType = originalMovement.read<String>('movement_type');
+      if (movType != 'funding' && movType != 'release') {
+        return const AppValidationFailure(
+          field: 'originalOperationId',
+          messageKey: 'errorGoalReversalInvalidMovement',
+        );
+      }
+    }
+
+    // 4. Insert reversal operation
+    await _db.customStatement(
+      'INSERT INTO operations '
+      '(id, household_id, type, effective_date, recorded_at, '
+      'total_amount_minor_units, currency_code, created_by, created_at, '
+      'updated_at, description, source_account_id, destination_account_id, '
+      'idempotency_key, is_reversed) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
+      [
+        reversalOperationId,
+        householdId,
+        OperationType.reversal.code,
+        effectiveDate,
+        now,
+        amount,
+        currency,
+        createdBy,
+        now,
+        now,
+        revDescription,
+        origDest,
+        origSource,
+        scopedKey,
+      ],
+    );
+    await _failAfter(GoalTransferFailAfter.operationInsert);
+
+    // 5. Mirror ledger entries
+    final origEntries = await _db
+        .customSelect(
+          'SELECT * FROM ledger_entries '
+          'WHERE operation_id = ? AND household_id = ? '
+          'ORDER BY id ASC',
+          variables: [
+            Variable.withString(originalOperationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+
+    for (var i = 0; i < origEntries.length; i++) {
+      final e = origEntries[i];
+      final dir = e.read<String>('direction');
+      final opposite = dir == LedgerDirection.credit.code
+          ? LedgerDirection.debit.code
+          : LedgerDirection.credit.code;
+      final entryType = dir == LedgerDirection.credit.code
+          ? LedgerEntryType.reversalDebit.code
+          : LedgerEntryType.reversalCredit.code;
+      final entryId = e.read<String>('id');
+      await _db.customStatement(
+        'INSERT INTO ledger_entries '
+        '(id, operation_id, household_id, account_id, direction, '
+        'amount_minor_units, currency_code, entry_type, effective_date, '
+        'recorded_at, created_by, is_reversal, reversal_of_entry_id) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
+        [
+          '${reversalOperationId}_rev_$entryId',
+          reversalOperationId,
+          householdId,
+          e.read<String>('account_id'),
+          opposite,
+          e.read<int>('amount_minor_units'),
+          e.read<String>('currency_code'),
+          entryType,
+          effectiveDate,
+          now,
+          createdBy,
+          entryId,
+        ],
+      );
+      if (i == 0) {
+        await _failAfter(GoalTransferFailAfter.firstLedgerEntry);
+      } else if (i == 1) {
+        await _failAfter(GoalTransferFailAfter.secondLedgerEntry);
+      }
+    }
+
+    // 6. Mark original reversed
+    await _db.customStatement(
+      'UPDATE operations SET is_reversed = 1, reversed_by = ?, '
+      'updated_at = ? WHERE id = ? AND household_id = ?',
+      [reversalOperationId, now, originalOperationId, householdId],
+    );
+
+    // 7. Operation context
+    await _db.customStatement(
+      'INSERT INTO operation_contexts '
+      '(operation_id, household_id, is_recurring, note, created_at) '
+      'VALUES (?, ?, 0, ?, ?)',
+      [reversalOperationId, householdId, revDescription, now],
+    );
+    await _failAfter(GoalTransferFailAfter.operationContext);
+
+    // 8. Reversal goal movement
+    if (originalMovement != null) {
+      await _db.customStatement(
+        'INSERT INTO goal_movements '
+        '(id, goal_id, household_id, transfer_operation_id, movement_type, '
+        'created_at, release_reason, reversal_of_movement_id) '
+        'VALUES (?, ?, ?, ?, ?, ?, NULL, ?)',
+        [
+          '$reversalOperationId-mov',
+          originalMovement.read<String>('goal_id'),
+          householdId,
+          reversalOperationId,
+          'reversal',
+          now,
+          originalMovement.read<String>('id'),
+        ],
+      );
+      await _failAfter(GoalTransferFailAfter.goalMovement);
+    }
+
+    await _failAfter(GoalTransferFailAfter.preCommit);
+    return const AppOk(null);
+  }
+
+  Future<AppResult<void>> _validateCompleteReversalReplay({
+    required QueryRow existing,
+    required String originalOperationId,
+    required String reversalOperationId,
+    required String householdId,
+    required String? reason,
+  }) async {
+    // Unrelated primary-key / row collision
+    if (existing.read<String>('type') != OperationType.reversal.code) {
+      return const AppPersistenceFailure();
+    }
+
+    final originalRows = await _db
+        .customSelect(
+          'SELECT id, is_reversed, reversed_by, total_amount_minor_units, '
+          'currency_code, source_account_id, destination_account_id '
+          'FROM operations WHERE id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(originalOperationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+    if (originalRows.isEmpty) return const AppPersistenceFailure();
+    final original = originalRows.first;
+
+    // Must reverse the requested original
+    if (original.readNullable<String>('reversed_by') != reversalOperationId) {
+      // Conflicting: existing reversal op does not reverse requested original
+      final expectedDesc =
+          reason ?? 'Reversal of operation $originalOperationId';
+      final desc = existing.readNullable<String>('description');
+      if (desc != expectedDesc) {
+        return const AppDuplicateConflict(
+          messageKey: 'errorGoalIdempotencyConflict',
+        );
+      }
+      return const AppPersistenceFailure();
+    }
+
+    if (original.read<int>('is_reversed') != 1) {
+      return const AppPersistenceFailure();
+    }
+
+    // Payload equivalence (accounts swapped relative to original)
+    final origSource = original.readNullable<String>('source_account_id');
+    final origDest = original.readNullable<String>('destination_account_id');
+    final amount = original.read<int>('total_amount_minor_units');
+    final currency = original.read<String>('currency_code');
+    final equivalent = _transferPayloadEquivalent(
+      row: existing,
+      expectedType: OperationType.reversal.code,
+      amount: amount,
+      currency: currency,
+      sourceAccountId: origDest,
+      destinationAccountId: origSource,
+    );
+    if (!equivalent) {
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    // Context must exist
+    final ctx = await _db
+        .customSelect(
+          'SELECT operation_id FROM operation_contexts WHERE operation_id = ?',
+          variables: [Variable.withString(reversalOperationId)],
+        )
+        .get();
+    if (ctx.isEmpty) return const AppPersistenceFailure();
+
+    // If original had a goal movement, reversal movement must exist and link
+    final origMov = await _db
+        .customSelect(
+          'SELECT id FROM goal_movements WHERE transfer_operation_id = ? '
+          "AND movement_type IN ('funding', 'release') LIMIT 1",
+          variables: [Variable.withString(originalOperationId)],
+        )
+        .get();
+    if (origMov.isNotEmpty) {
+      final origMovId = origMov.first.read<String>('id');
+      final revMov = await _db
+          .customSelect(
+            'SELECT id, reversal_of_movement_id FROM goal_movements '
+            'WHERE transfer_operation_id = ? AND movement_type = ?',
+            variables: [
+              Variable.withString(reversalOperationId),
+              Variable.withString('reversal'),
+            ],
+          )
+          .get();
+      if (revMov.isEmpty) return const AppPersistenceFailure();
+      if (revMov.first.readNullable<String>('reversal_of_movement_id') !=
+          origMovId) {
+        return const AppPersistenceFailure();
+      }
+    }
+
+    return const AppOk(null);
+  }
 }

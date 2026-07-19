@@ -2253,6 +2253,20 @@ void main() {
       "'$srcId', 'fi9-reserve-dummy')",
     );
     await db.customStatement(
+      "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, "
+      "direction, amount_minor_units, currency_code, entry_type, effective_date, "
+      "recorded_at, created_by) VALUES "
+      "('${opId}_debit', '$opId', '$_hh', '$srcId', 'debit', 20000, 'EGP', "
+      "'transferOut', '2024-01-01', '2024-01-01T00:00:00Z', 'test')",
+    );
+    await db.customStatement(
+      "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, "
+      "direction, amount_minor_units, currency_code, entry_type, effective_date, "
+      "recorded_at, created_by) VALUES "
+      "('${opId}_credit', '$opId', '$_hh', 'fi9-reserve-dummy', 'credit', 20000, "
+      "'EGP', 'transferIn', '2024-01-01', '2024-01-01T00:00:00Z', 'test')",
+    );
+    await db.customStatement(
       "INSERT INTO goal_movements (id, goal_id, household_id, transfer_operation_id, "
       "movement_type, created_at) VALUES ('$movId', 'fi9-goal-dummy', '$_hh', '$opId', "
       "'funding', '2024-01-01T00:00:00Z')",

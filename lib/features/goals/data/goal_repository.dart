@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
+import 'package:family_money_manager/features/goals/data/goal_transfer_write_boundary.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 
 /// Repository abstraction for savings-goal persistence.
@@ -112,6 +113,20 @@ abstract interface class GoalRepository {
   /// Returns null wrapped in [AppOk] if no movement references this operation.
   Future<AppResult<GoalMovement?>> findMovementByOperationId(
     String transferOperationId,
+  );
+
+  /// Atomically funds a goal reserve (transfer + movement) in one transaction.
+  ///
+  /// Same scoped idempotency semantics as ledger transfers: equivalent payload
+  /// → [GoalTransferWriteResult.alreadyExists]; conflicting payload →
+  /// [AppDuplicateConflict].
+  Future<AppResult<GoalTransferWriteResult>> fundGoalTransfer(
+    GoalAssociatedTransferParams params,
+  );
+
+  /// Atomically releases funds from a goal reserve in one transaction.
+  Future<AppResult<GoalTransferWriteResult>> releaseGoalTransfer(
+    GoalAssociatedTransferParams params,
   );
 
   /// Atomically reverses a goal-linked (or non-goal) ledger transfer.

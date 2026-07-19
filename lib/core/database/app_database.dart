@@ -79,6 +79,9 @@ part 'app_database.g.dart';
 ///                 unique index one-reversal-per-original;
 ///                 lifecycle household-matches-goal trigger;
 ///                 household-scoped lifecycle idempotency index.
+///  14 — Phase 5B.6: validate_goal_transfer_balanced_legs trigger —
+///                 funding/release movements require exactly two balanced
+///                 ledger legs matching operation source/destination.
 @DriftDatabase(
   tables: [
     Households,
@@ -107,8 +110,11 @@ class AppDatabase extends _$AppDatabase {
   /// Accepts a custom executor. Used for advanced testing configurations.
   AppDatabase.withExecutor(super.executor);
 
+  /// Opens a file-backed database at [path]. Used for multi-connection tests.
+  AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
+
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -140,6 +146,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyGoalLifecycleEventsTriggers();
       await _applyGoalLifecycleEventsIndex();
       await _applyPhase5B5ReversalAndLifecycleHardening();
+      await _applyPhase5B6BalancedMovementTrigger();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -241,6 +248,10 @@ class AppDatabase extends _$AppDatabase {
         // v12 → v13: Phase 5B.5 — reversal linkage triggers/index;
         // lifecycle household-match trigger; household-scoped idempotency.
         await _applyPhase5B5ReversalAndLifecycleHardening();
+      }
+      if (from <= 13) {
+        // v13 → v14: Phase 5B.6 — balanced ledger legs for goal movements.
+        await _applyPhase5B6BalancedMovementTrigger();
       }
     },
     beforeOpen: (details) async {
@@ -1211,6 +1222,60 @@ class AppDatabase extends _$AppDatabase {
       ON goal_lifecycle_events(household_id, idempotency_key)
       WHERE idempotency_key IS NOT NULL
     ''');
+  }
+
+  // ── Phase 5B.6: Balanced goal-transfer ledger linkage ─────────────────────
+  //
+  // Before a funding/release goal movement is inserted, prove the linked
+  // operation has exactly one debit and one credit, amounts equal and positive,
+  // accounts matching operation source/destination, and matching currency /
+  // household. Additional legs are rejected.
+
+  Future<void> _applyPhase5B6BalancedMovementTrigger() async {
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS validate_goal_transfer_balanced_legs '
+      'BEFORE INSERT ON goal_movements '
+      'FOR EACH ROW '
+      "WHEN NEW.movement_type IN ('funding', 'release') "
+      'BEGIN '
+      '  SELECT RAISE( '
+      '    ABORT, '
+      "    'goal movement requires exactly two balanced ledger legs matching operation' "
+      '  ) '
+      '  WHERE ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      '  ) != 2 '
+      '  OR ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      "      AND e.direction = 'debit' "
+      '  ) != 1 '
+      '  OR ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      "      AND e.direction = 'credit' "
+      '  ) != 1 '
+      '  OR NOT EXISTS ( '
+      '    SELECT 1 '
+      '    FROM operations o '
+      "    JOIN ledger_entries d ON d.operation_id = o.id AND d.direction = 'debit' "
+      "    JOIN ledger_entries c ON c.operation_id = o.id AND c.direction = 'credit' "
+      '    WHERE o.id = NEW.transfer_operation_id '
+      '      AND o.household_id = NEW.household_id '
+      '      AND d.account_id = o.source_account_id '
+      '      AND c.account_id = o.destination_account_id '
+      '      AND d.amount_minor_units = c.amount_minor_units '
+      '      AND d.amount_minor_units = o.total_amount_minor_units '
+      '      AND d.amount_minor_units > 0 '
+      '      AND c.amount_minor_units > 0 '
+      '      AND d.currency_code = o.currency_code '
+      '      AND c.currency_code = o.currency_code '
+      '      AND d.household_id = o.household_id '
+      '      AND c.household_id = o.household_id '
+      '  ); '
+      'END',
+    );
   }
 }
 
