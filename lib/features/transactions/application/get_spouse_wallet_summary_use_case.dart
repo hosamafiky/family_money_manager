@@ -14,12 +14,7 @@ final class GetSpouseWalletSummaryUseCase {
     required String toDate,
   }) async {
     try {
-      final summary = await _repo.spouseWalletSummary(
-        spouseAccountId: spouseAccountId,
-        householdId: householdId,
-        fromDate: fromDate,
-        toDate: toDate,
-      );
+      final summary = await _repo.spouseWalletSummary(spouseAccountId: spouseAccountId, householdId: householdId, fromDate: fromDate, toDate: toDate);
       return AppOk(summary);
     } catch (_) {
       return const AppPersistenceFailure();

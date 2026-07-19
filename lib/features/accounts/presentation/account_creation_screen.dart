@@ -28,8 +28,7 @@ class AccountCreationScreen extends ConsumerStatefulWidget {
   const AccountCreationScreen({super.key});
 
   @override
-  ConsumerState<AccountCreationScreen> createState() =>
-      _AccountCreationScreenState();
+  ConsumerState<AccountCreationScreen> createState() => _AccountCreationScreenState();
 }
 
 class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
@@ -72,24 +71,20 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
     });
   }
 
-  static AccountOwnerType _defaultOwner(FinancialAccountType type) =>
-      switch (type) {
-        FinancialAccountType.spouseCashWallet => AccountOwnerType.spouse,
-        FinancialAccountType.householdCash ||
-        FinancialAccountType.homeSavingsCash => AccountOwnerType.household,
-        FinancialAccountType.childProtectedFund => AccountOwnerType.child,
-        _ => AccountOwnerType.user,
-      };
+  static AccountOwnerType _defaultOwner(FinancialAccountType type) => switch (type) {
+    FinancialAccountType.spouseCashWallet => AccountOwnerType.spouse,
+    FinancialAccountType.householdCash || FinancialAccountType.homeSavingsCash => AccountOwnerType.household,
+    FinancialAccountType.childProtectedFund => AccountOwnerType.child,
+    _ => AccountOwnerType.user,
+  };
 
-  static FundPurpose _defaultPurpose(FinancialAccountType type) =>
-      switch (type) {
-        FinancialAccountType.homeSavingsCash => FundPurpose.longTermSavings,
-        FinancialAccountType.childProtectedFund => FundPurpose.childProtected,
-        _ => FundPurpose.available,
-      };
+  static FundPurpose _defaultPurpose(FinancialAccountType type) => switch (type) {
+    FinancialAccountType.homeSavingsCash => FundPurpose.longTermSavings,
+    FinancialAccountType.childProtectedFund => FundPurpose.childProtected,
+    _ => FundPurpose.available,
+  };
 
-  static bool _isProtectedType(FinancialAccountType type) =>
-      type == FinancialAccountType.childProtectedFund;
+  static bool _isProtectedType(FinancialAccountType type) => type == FinancialAccountType.childProtectedFund;
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -175,14 +170,8 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
         title: Text(l10n.accountChildFundConfirmTitle),
         content: Text(l10n.accountChildFundConfirmBody),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.confirm),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.confirm)),
         ],
       ),
     );
@@ -215,18 +204,8 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             DropdownButtonFormField<FinancialAccountType>(
               // ignore: deprecated_member_use
               value: _type,
-              decoration: InputDecoration(
-                labelText: l10n.accountOwner,
-                border: const OutlineInputBorder(),
-              ),
-              items: _supportedTypes
-                  .map(
-                    (t) => DropdownMenuItem(
-                      value: t,
-                      child: Text(_typeLabel(t, l10n)),
-                    ),
-                  )
-                  .toList(),
+              decoration: InputDecoration(labelText: l10n.accountOwner, border: const OutlineInputBorder()),
+              items: _supportedTypes.map((t) => DropdownMenuItem(value: t, child: Text(_typeLabel(t, l10n)))).toList(),
               onChanged: (t) {
                 if (t != null) _onTypeChanged(t);
               },
@@ -235,10 +214,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             // Name field
             TextFormField(
               controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.accountName,
-                border: const OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(labelText: l10n.accountName, border: const OutlineInputBorder()),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
                   return l10n.errorAccountNameEmpty;
@@ -252,15 +228,8 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             DropdownButtonFormField<String>(
               // ignore: deprecated_member_use
               value: _currencyCode,
-              decoration: InputDecoration(
-                labelText: l10n.accountCurrency,
-                border: const OutlineInputBorder(),
-              ),
-              items: Currency.values
-                  .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
-                  )
-                  .toList(),
+              decoration: InputDecoration(labelText: l10n.accountCurrency, border: const OutlineInputBorder()),
+              items: Currency.values.map((c) => DropdownMenuItem(value: c.code, child: Text(c.code))).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _currencyCode = v);
               },
@@ -269,56 +238,30 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
             // Opening balance
             TextFormField(
               controller: _balanceCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.accountOpeningBalance,
-                border: const OutlineInputBorder(),
-                suffixText: _currencyCode,
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              decoration: InputDecoration(labelText: l10n.accountOpeningBalance, border: const OutlineInputBorder(), suffixText: _currencyCode),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
             // Notes
             TextFormField(
               controller: _notesCtrl,
-              decoration: InputDecoration(
-                labelText: l10n.accountNotes,
-                border: const OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(labelText: l10n.accountNotes, border: const OutlineInputBorder()),
               maxLines: 3,
               textInputAction: TextInputAction.done,
             ),
             if (_isProtectedType(_type)) ...[
               const SizedBox(height: 12),
               Card(
-                color: Theme.of(
-                  context,
-                ).colorScheme.errorContainer.withAlpha(80),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(l10n.accountProtectedWarning),
-                ),
+                color: Theme.of(context).colorScheme.errorContainer.withAlpha(80),
+                child: Padding(padding: const EdgeInsets.all(12), child: Text(l10n.accountProtectedWarning)),
               ),
             ],
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ],
+            if (_errorMessage != null) ...[const SizedBox(height: 12), Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error))],
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.save),
+              child: _isSubmitting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.save),
             ),
           ],
         ),
@@ -326,15 +269,14 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
     );
   }
 
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
-      switch (type) {
-        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-        _ => type.code,
-      };
+  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) => switch (type) {
+    FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
+    FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
+    FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
+    FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
+    FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
+    FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
+    FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
+    _ => type.code,
+  };
 }

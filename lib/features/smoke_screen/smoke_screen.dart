@@ -35,10 +35,7 @@ class SmokeScreen extends ConsumerWidget {
             children: [
               _SectionCard(
                 title: l10n.foundationTitle,
-                child: Text(
-                  l10n.foundationSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                child: Text(l10n.foundationSubtitle, style: Theme.of(context).textTheme.bodyLarge),
               ),
               const SizedBox(height: AppTheme.space16),
               _SectionCard(
@@ -47,22 +44,14 @@ class SmokeScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isArabic
-                            ? null
-                            : () => ref
-                                  .read(appLocaleProvider.notifier)
-                                  .setLocale(const Locale('ar', 'EG')),
+                        onPressed: isArabic ? null : () => ref.read(appLocaleProvider.notifier).setLocale(const Locale('ar', 'EG')),
                         child: Text(l10n.foundationSwitchToArabic),
                       ),
                     ),
                     const SizedBox(width: AppTheme.space8),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isArabic
-                            ? () => ref
-                                  .read(appLocaleProvider.notifier)
-                                  .setLocale(const Locale('en', 'US'))
-                            : null,
+                        onPressed: isArabic ? () => ref.read(appLocaleProvider.notifier).setLocale(const Locale('en', 'US')) : null,
                         child: Text(l10n.foundationSwitchToEnglish),
                       ),
                     ),
@@ -76,22 +65,14 @@ class SmokeScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: themeMode == ThemeMode.light
-                            ? null
-                            : () => ref
-                                  .read(appThemeModeProvider.notifier)
-                                  .setThemeMode(ThemeMode.light),
+                        onPressed: themeMode == ThemeMode.light ? null : () => ref.read(appThemeModeProvider.notifier).setThemeMode(ThemeMode.light),
                         child: Text(l10n.foundationThemeLight),
                       ),
                     ),
                     const SizedBox(width: AppTheme.space8),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: themeMode == ThemeMode.dark
-                            ? null
-                            : () => ref
-                                  .read(appThemeModeProvider.notifier)
-                                  .setThemeMode(ThemeMode.dark),
+                        onPressed: themeMode == ThemeMode.dark ? null : () => ref.read(appThemeModeProvider.notifier).setThemeMode(ThemeMode.dark),
                         child: Text(l10n.foundationThemeDark),
                       ),
                     ),
@@ -101,12 +82,7 @@ class SmokeScreen extends ConsumerWidget {
               const SizedBox(height: AppTheme.space16),
               _SectionCard(
                 title: l10n.foundationDirectionLabel,
-                child: Text(
-                  isRtl
-                      ? l10n.foundationDirectionRtl
-                      : l10n.foundationDirectionLtr,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                child: Text(isRtl ? l10n.foundationDirectionRtl : l10n.foundationDirectionLtr, style: Theme.of(context).textTheme.bodyLarge),
               ),
               const SizedBox(height: AppTheme.space16),
               _NoteCard(message: l10n.foundationNote),
@@ -131,12 +107,7 @@ class _SectionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+            Text(title, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary)),
             const SizedBox(height: AppTheme.space8),
             child,
           ],
@@ -155,16 +126,8 @@ class _NoteCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppTheme.space12),
-      decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-      ),
-      child: Text(
-        message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSecondaryContainer,
-        ),
-      ),
+      decoration: BoxDecoration(color: colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(AppTheme.radiusMedium)),
+      child: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSecondaryContainer)),
     );
   }
 }

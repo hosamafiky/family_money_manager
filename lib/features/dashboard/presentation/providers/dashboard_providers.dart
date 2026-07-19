@@ -14,22 +14,15 @@ final clockProvider = Provider<Clock>((ref) => const SystemClock());
 
 // ── Repository ────────────────────────────────────────────────────────────────
 
-final dashboardQueryRepositoryProvider = Provider<DashboardQueryRepository>((
-  ref,
-) {
+final dashboardQueryRepositoryProvider = Provider<DashboardQueryRepository>((ref) {
   return DriftDashboardQueryRepository(ref.watch(appDatabaseProvider));
 });
 
 // ── Use case ──────────────────────────────────────────────────────────────────
 
-final getDashboardSummaryUseCaseProvider = Provider<GetDashboardSummaryUseCase>(
-  (ref) {
-    return GetDashboardSummaryUseCase(
-      queryRepository: ref.watch(dashboardQueryRepositoryProvider),
-      clock: ref.watch(clockProvider),
-    );
-  },
-);
+final getDashboardSummaryUseCaseProvider = Provider<GetDashboardSummaryUseCase>((ref) {
+  return GetDashboardSummaryUseCase(queryRepository: ref.watch(dashboardQueryRepositoryProvider), clock: ref.watch(clockProvider));
+});
 
 // ── Period state ──────────────────────────────────────────────────────────────
 
@@ -51,10 +44,7 @@ class DashboardPeriodNotifier extends Notifier<DashboardPeriod> {
 ///
 /// Defaults to the current calendar month in local time.
 /// Widgets and the period selector update this to trigger re-fetch.
-final dashboardPeriodProvider =
-    NotifierProvider<DashboardPeriodNotifier, DashboardPeriod>(
-      DashboardPeriodNotifier.new,
-    );
+final dashboardPeriodProvider = NotifierProvider<DashboardPeriodNotifier, DashboardPeriod>(DashboardPeriodNotifier.new);
 
 // ── Dashboard summary ─────────────────────────────────────────────────────────
 
@@ -62,9 +52,8 @@ final dashboardPeriodProvider =
 ///
 /// Parameterised by [householdId] so that multiple households can be watched
 /// independently (V1 only ever uses 'household-v1').
-final dashboardSummaryProvider = FutureProvider.autoDispose
-    .family<AppResult<DashboardSummary>, String>((ref, householdId) async {
-      final period = ref.watch(dashboardPeriodProvider);
-      final useCase = ref.watch(getDashboardSummaryUseCaseProvider);
-      return useCase.execute(householdId: householdId, period: period);
-    });
+final dashboardSummaryProvider = FutureProvider.autoDispose.family<AppResult<DashboardSummary>, String>((ref, householdId) async {
+  final period = ref.watch(dashboardPeriodProvider);
+  final useCase = ref.watch(getDashboardSummaryUseCaseProvider);
+  return useCase.execute(householdId: householdId, period: period);
+});

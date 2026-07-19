@@ -40,14 +40,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final name = _nameCtrl.text.trim();
     final db = ref.read(appDatabaseProvider);
-    final useCase = InitializeHouseholdUseCase(
-      householdRepository: DriftHouseholdRepository(db),
-    );
-    final result = await useCase.execute(
-      householdName: 'أسرتي',
-      primaryMemberName: name,
-      currencyCode: 'EGP',
-    );
+    final useCase = InitializeHouseholdUseCase(householdRepository: DriftHouseholdRepository(db));
+    final result = await useCase.execute(householdName: 'أسرتي', primaryMemberName: name, currencyCode: 'EGP');
 
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
@@ -83,17 +77,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  l10n.appTitle,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
+                Text(l10n.appTitle, style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.onboardingSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
+                Text(l10n.onboardingSubtitle, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
                 const SizedBox(height: 40),
                 TextFormField(
                   controller: _nameCtrl,
@@ -117,22 +103,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const SizedBox(height: 12),
                   Text(
                     _error!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
                     textAlign: TextAlign.center,
                   ),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _loading ? null : _submit,
-                  child: _loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.onboardingStartButton),
+                  child: _loading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.onboardingStartButton),
                 ),
               ],
             ),

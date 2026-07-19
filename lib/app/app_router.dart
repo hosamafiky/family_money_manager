@@ -87,23 +87,14 @@ abstract final class AppRouter {
       },
       routes: [
         // ── Onboarding ────────────────────────────────────────────────────
-        GoRoute(
-          path: '/onboarding',
-          builder: (context, state) => const OnboardingScreen(),
-        ),
+        GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
         // ── Phase 4A shell with bottom navigation ─────────────────────────
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) =>
-              AppShell(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
           branches: [
             // Tab 0: Dashboard
             StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/dashboard',
-                  builder: (context, state) => const DashboardScreen(),
-                ),
-              ],
+              routes: [GoRoute(path: '/dashboard', builder: (context, state) => const DashboardScreen())],
             ),
             // Tab 1: Accounts
             StatefulShellBranch(
@@ -112,16 +103,10 @@ abstract final class AppRouter {
                   path: '/accounts',
                   builder: (context, state) => const AccountsScreen(),
                   routes: [
-                    GoRoute(
-                      path: 'new',
-                      builder: (context, state) =>
-                          const AccountCreationScreen(),
-                    ),
+                    GoRoute(path: 'new', builder: (context, state) => const AccountCreationScreen()),
                     GoRoute(
                       path: ':accountId',
-                      builder: (context, state) => AccountDetailScreen(
-                        accountId: state.pathParameters['accountId']!,
-                      ),
+                      builder: (context, state) => AccountDetailScreen(accountId: state.pathParameters['accountId']!),
                     ),
                   ],
                 ),
@@ -136,56 +121,28 @@ abstract final class AppRouter {
                   routes: [
                     GoRoute(
                       path: 'new',
-                      builder: (context, state) => CreateTransactionScreen(
-                        preselectedAccountId: state.extra as String?,
-                      ),
+                      builder: (context, state) => CreateTransactionScreen(preselectedAccountId: state.extra as String?),
                       routes: [
                         GoRoute(
                           path: 'income',
-                          builder: (context, state) => IncomeFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
-                          routes: [
-                            GoRoute(
-                              path: 'review',
-                              builder: (context, state) =>
-                                  const IncomeReviewScreen(),
-                            ),
-                          ],
+                          builder: (context, state) => IncomeFormScreen(preselectedAccountId: state.extra as String?),
+                          routes: [GoRoute(path: 'review', builder: (context, state) => const IncomeReviewScreen())],
                         ),
                         GoRoute(
                           path: 'expense',
-                          builder: (context, state) => ExpenseFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
-                          routes: [
-                            GoRoute(
-                              path: 'review',
-                              builder: (context, state) =>
-                                  const ExpenseReviewScreen(),
-                            ),
-                          ],
+                          builder: (context, state) => ExpenseFormScreen(preselectedAccountId: state.extra as String?),
+                          routes: [GoRoute(path: 'review', builder: (context, state) => const ExpenseReviewScreen())],
                         ),
                         GoRoute(
                           path: 'transfer',
-                          builder: (context, state) => TransferFormScreen(
-                            preselectedAccountId: state.extra as String?,
-                          ),
-                          routes: [
-                            GoRoute(
-                              path: 'review',
-                              builder: (context, state) =>
-                                  const TransferReviewScreen(),
-                            ),
-                          ],
+                          builder: (context, state) => TransferFormScreen(preselectedAccountId: state.extra as String?),
+                          routes: [GoRoute(path: 'review', builder: (context, state) => const TransferReviewScreen())],
                         ),
                       ],
                     ),
                     GoRoute(
                       path: ':operationId',
-                      builder: (context, state) => TransactionDetailScreen(
-                        operationId: state.pathParameters['operationId']!,
-                      ),
+                      builder: (context, state) => TransactionDetailScreen(operationId: state.pathParameters['operationId']!),
                     ),
                   ],
                 ),
@@ -193,21 +150,11 @@ abstract final class AppRouter {
             ),
             // Tab 3: Family members
             StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/members',
-                  builder: (context, state) => const HouseholdMembersScreen(),
-                ),
-              ],
+              routes: [GoRoute(path: '/members', builder: (context, state) => const HouseholdMembersScreen())],
             ),
             // Tab 4: Settings
             StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/settings',
-                  builder: (context, state) => const SettingsScreen(),
-                ),
-              ],
+              routes: [GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen())],
             ),
           ],
         ),
@@ -217,39 +164,14 @@ abstract final class AppRouter {
           path: '/reports',
           builder: (context, state) => const ReportsLandingScreen(),
           routes: [
-            GoRoute(
-              path: 'income-expense',
-              builder: (context, state) => const IncomeExpenseReportScreen(),
-            ),
-            GoRoute(
-              path: 'attribution',
-              builder: (context, state) =>
-                  const SpendingAttributionReportScreen(),
-            ),
-            GoRoute(
-              path: 'categories',
-              builder: (context, state) => const CategoryReportScreen(),
-            ),
-            GoRoute(
-              path: 'accounts',
-              builder: (context, state) => const AccountFlowReportScreen(),
-            ),
-            GoRoute(
-              path: 'home-savings',
-              builder: (context, state) => const HomeSavingsReportScreen(),
-            ),
-            GoRoute(
-              path: 'spouse-wallet',
-              builder: (context, state) => const SpouseWalletReportScreen(),
-            ),
-            GoRoute(
-              path: 'protected-funds',
-              builder: (context, state) => const ProtectedFundsReportScreen(),
-            ),
-            GoRoute(
-              path: 'transactions',
-              builder: (context, state) => const ReportTransactionListScreen(),
-            ),
+            GoRoute(path: 'income-expense', builder: (context, state) => const IncomeExpenseReportScreen()),
+            GoRoute(path: 'attribution', builder: (context, state) => const SpendingAttributionReportScreen()),
+            GoRoute(path: 'categories', builder: (context, state) => const CategoryReportScreen()),
+            GoRoute(path: 'accounts', builder: (context, state) => const AccountFlowReportScreen()),
+            GoRoute(path: 'home-savings', builder: (context, state) => const HomeSavingsReportScreen()),
+            GoRoute(path: 'spouse-wallet', builder: (context, state) => const SpouseWalletReportScreen()),
+            GoRoute(path: 'protected-funds', builder: (context, state) => const ProtectedFundsReportScreen()),
+            GoRoute(path: 'transactions', builder: (context, state) => const ReportTransactionListScreen()),
           ],
         ),
 
@@ -258,15 +180,10 @@ abstract final class AppRouter {
           path: '/budgets',
           builder: (context, state) => const BudgetsListScreen(),
           routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const BudgetCreationScreen(),
-            ),
+            GoRoute(path: 'new', builder: (context, state) => const BudgetCreationScreen()),
             GoRoute(
               path: ':budgetId',
-              builder: (context, state) => BudgetDetailScreen(
-                budgetId: state.pathParameters['budgetId']!,
-              ),
+              builder: (context, state) => BudgetDetailScreen(budgetId: state.pathParameters['budgetId']!),
             ),
           ],
         ),
@@ -276,25 +193,18 @@ abstract final class AppRouter {
           path: '/goals',
           builder: (context, state) => const GoalsListScreen(),
           routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const GoalCreationScreen(),
-            ),
+            GoRoute(path: 'new', builder: (context, state) => const GoalCreationScreen()),
             GoRoute(
               path: ':goalId',
-              builder: (context, state) =>
-                  GoalDetailScreen(goalId: state.pathParameters['goalId']!),
+              builder: (context, state) => GoalDetailScreen(goalId: state.pathParameters['goalId']!),
               routes: [
                 GoRoute(
                   path: 'fund',
-                  builder: (context, state) =>
-                      FundGoalScreen(goalId: state.pathParameters['goalId']!),
+                  builder: (context, state) => FundGoalScreen(goalId: state.pathParameters['goalId']!),
                 ),
                 GoRoute(
                   path: 'release',
-                  builder: (context, state) => ReleaseGoalScreen(
-                    goalId: state.pathParameters['goalId']!,
-                  ),
+                  builder: (context, state) => ReleaseGoalScreen(goalId: state.pathParameters['goalId']!),
                 ),
               ],
             ),
@@ -324,10 +234,7 @@ class AppErrorScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(error?.toString() ?? 'Page not found'),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => const SmokeRouteData().go(context),
-              child: const Text('Go home'),
-            ),
+            ElevatedButton(onPressed: () => const SmokeRouteData().go(context), child: const Text('Go home')),
           ],
         ),
       ),

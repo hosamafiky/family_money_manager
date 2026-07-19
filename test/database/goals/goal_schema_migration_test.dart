@@ -1,14 +1,14 @@
-/// Phase 5B schema integrity and immutability tests.
+/// Phase 5B / 5B.1 schema integrity and immutability tests.
 ///
 /// Complements goal_repository_test.dart with raw-SQL-level verifications that
 /// cannot be satisfied at the repository API boundary alone.
 ///
 /// Tests (Section 4 – Schema and migration):
-///  SM-1.  Fresh schema v8 creates all goal tables
+///  SM-1.  Fresh schema v9 creates all goal tables
 ///  SM-2.  Unique index idx_goals_reserve_account is enforced
 ///  SM-3.  Unique index idx_goals_idempotency is enforced
 ///  SM-4.  Budget table from v7 is present (migration baseline)
-///  SM-5.  All prior-phase tables present in schema v8
+///  SM-5.  All prior-phase tables present in schema v9
 ///
 /// Tests (Section 5 – One-to-one goal reserve integrity):
 ///  SR-1.  Reserve account type cannot be changed (trigger)
@@ -35,6 +35,27 @@
 ///
 /// Tests (Section 7 – Zero initial funding):
 ///  ZF-1.  Zero initial funding creates no transfer, no movement
+///
+/// Phase 5B.1 additions (Section 5 – Goals table hardening):
+///  GT-1.  no_update_goal_immutable: household_id cannot change
+///  GT-2.  no_delete_goal_with_history: cannot delete goal with revisions
+///  GT-3.  goal_status_valid_transition: invalid transition (active→active) rejected
+///
+/// Phase 5B.1 additions (Section 6 – Reserve account hardening):
+///  RA-1.  no_retype_reserve_account: goalReserve type cannot change (semantic trigger)
+///  RA-2.  no_archive_active_reserve: reserve cannot be archived when goal is active
+///  RA-3.  Can archive reserve account when goal is archived
+///
+/// Phase 5B.1 additions (Section 7 – Movements hardening):
+///  MH-1.  goal_movement_release_reason: release movement requires non-empty reason
+///  MH-2.  goal_movement_transfer_type: movement must reference a transfer operation
+///  MH-3.  idx_goal_movements_unique_operation: duplicate operation rejected
+///
+/// Phase 5B.1 additions (Section 8 – Beneficiary household integrity):
+///  BH-1.  goal_revision_beneficiary_same_household: cross-household beneficiary rejected
+///
+/// Phase 5B.1 additions (Section 9 – Lifecycle vs. progress):
+///  LP-1.  GoalProgressState.targetReached is derived from balance (not from status write)
 library;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -151,7 +172,7 @@ void main() {
 
   // ── Section 4: Schema and migration ───────────────────────────────────────
 
-  test('SM-1. Fresh schema v8 creates all goal tables', () async {
+  test('SM-1. Fresh schema v9 creates all goal tables', () async {
     for (final t in ['goals', 'goal_revisions', 'goal_movements']) {
       final rows = await db.customSelect('SELECT COUNT(*) as c FROM $t').get();
       expect(
@@ -206,7 +227,7 @@ void main() {
     expect(rows.first.read<int>('c'), greaterThanOrEqualTo(0));
   });
 
-  test('SM-5. All prior-phase tables present in schema v8', () async {
+  test('SM-5. All prior-phase tables present in schema v9', () async {
     for (final t in [
       'households',
       'household_members',
@@ -668,4 +689,333 @@ void main() {
     );
     expect((balResult as AppOk<int>).value, 0);
   });
+
+  // ── Phase 5B.1 – Section 5: Goals table hardening triggers ────────────────
+
+  test('GT-1. no_update_goal_immutable: household_id cannot change', () async {
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-gt1')) as AppOk<SavingsGoal>)
+            .value;
+
+    await expectLater(
+      () => db.customStatement(
+        "UPDATE goals SET household_id = 'other-hh' WHERE id = '${goal.id}'",
+      ),
+      throwsA(anything),
+      reason: 'no_update_goal_immutable must reject household_id change',
+    );
+  });
+
+  test(
+    'GT-2. no_delete_goal_with_history: cannot delete goal with revisions',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-gt2')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Verify revision exists.
+      final revCount =
+          (await db
+                  .customSelect(
+                    "SELECT COUNT(*) as c FROM goal_revisions WHERE goal_id = '${goal.id}'",
+                  )
+                  .get())
+              .first
+              .read<int>('c');
+      expect(revCount, greaterThan(0));
+
+      await expectLater(
+        () => db.customStatement("DELETE FROM goals WHERE id = '${goal.id}'"),
+        throwsA(anything),
+        reason:
+            'no_delete_goal_with_history must block DELETE when revisions exist',
+      );
+    },
+  );
+
+  test(
+    'GT-3. goal_status_valid_transition: invalid transition (archived→completed) rejected',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-gt3')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Archive the goal (active→archived is valid).
+      await archiveGoalUc.execute(goalId: goal.id, householdId: _hh);
+
+      // Now try archived→completed which is NOT in the allowed set.
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE goals SET status = 'completed' WHERE id = '${goal.id}'",
+        ),
+        throwsA(anything),
+        reason:
+            'goal_status_valid_transition must reject archived→completed transition',
+      );
+    },
+  );
+
+  // ── Phase 5B.1 – Section 6: Reserve account hardening ─────────────────────
+
+  test(
+    'RA-1. no_retype_reserve_account: goalReserve type cannot be changed',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ra1')) as AppOk<SavingsGoal>)
+              .value;
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE financial_accounts SET type = 'personalCashWallet' "
+          "WHERE id = '${goal.reserveAccountId}'",
+        ),
+        throwsA(anything),
+        reason:
+            'no_retype_reserve_account or immutable_account_type_currency must block type change',
+      );
+    },
+  );
+
+  test(
+    'RA-2. no_archive_active_reserve: cannot archive reserve while goal is active',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ra2')) as AppOk<SavingsGoal>)
+              .value;
+      expect(goal.status, GoalStatus.active);
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE financial_accounts SET is_archived = 1 "
+          "WHERE id = '${goal.reserveAccountId}'",
+        ),
+        throwsA(anything),
+        reason:
+            'no_archive_active_reserve must block archiving reserve of an active goal',
+      );
+    },
+  );
+
+  test('RA-3. Can archive reserve account when goal is archived', () async {
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-ra3')) as AppOk<SavingsGoal>)
+            .value;
+
+    // Archive the goal first.
+    await archiveGoalUc.execute(goalId: goal.id, householdId: _hh);
+
+    // Now archiving the reserve account must NOT throw.
+    await expectLater(
+      () => db.customStatement(
+        "UPDATE financial_accounts SET is_archived = 1, archived_at = '2024-01-01', "
+        "updated_at = '2024-01-01' WHERE id = '${goal.reserveAccountId}'",
+      ),
+      returnsNormally,
+      reason: 'Archiving reserve of an archived goal must be allowed',
+    );
+  });
+
+  // ── Phase 5B.1 – Section 7: Movements hardening ───────────────────────────
+
+  test(
+    'MH-1. goal_movement_release_reason: release movement requires non-empty reason',
+    () async {
+      const srcId = 'src-mh1';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 50000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mh1')) as AppOk<SavingsGoal>)
+              .value;
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-mh1',
+      );
+
+      // Get the transfer operation id.
+      final opRows = await db
+          .customSelect(
+            "SELECT id FROM operations WHERE type = 'transfer' "
+            "AND destination_account_id = '${goal.reserveAccountId}' LIMIT 1",
+          )
+          .get();
+      final opId = opRows.first.read<String>('id');
+
+      // Try to insert a release movement without release_reason.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, transfer_operation_id, "
+          "movement_type, created_at) "
+          "VALUES ('mov-mh1-direct', '${goal.id}', '$_hh', '$opId', 'release', '2024-01-02')",
+        ),
+        throwsA(anything),
+        reason:
+            'goal_movement_release_reason must block release movement without release_reason',
+      );
+    },
+  );
+
+  test(
+    'MH-2. goal_movement_transfer_type: movement must reference a transfer operation',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mh2')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Insert an income operation (not a transfer).
+      const srcId = 'src-mh2';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 50000);
+
+      // Get the income operation id.
+      final opRows = await db
+          .customSelect(
+            "SELECT id FROM operations WHERE type = 'income' "
+            "AND household_id = '$_hh' LIMIT 1",
+          )
+          .get();
+      final incomeOpId = opRows.first.read<String>('id');
+
+      // Try to create a movement referencing an income operation.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, transfer_operation_id, "
+          "movement_type, created_at) "
+          "VALUES ('mov-mh2-direct', '${goal.id}', '$_hh', '$incomeOpId', 'funding', '2024-01-02')",
+        ),
+        throwsA(anything),
+        reason:
+            'goal_movement_transfer_type must block movement referencing a non-transfer operation',
+      );
+    },
+  );
+
+  test(
+    'MH-3. idx_goal_movements_unique_operation: duplicate operation rejected',
+    () async {
+      const srcId = 'src-mh3';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mh3')) as AppOk<SavingsGoal>)
+              .value;
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-mh3',
+      );
+
+      // Get the existing movement's transfer_operation_id.
+      final movRows = await db
+          .customSelect(
+            "SELECT transfer_operation_id FROM goal_movements "
+            "WHERE goal_id = '${goal.id}' LIMIT 1",
+          )
+          .get();
+      final transferOpId = movRows.first.read<String>('transfer_operation_id');
+
+      // Try to insert another movement with the same transfer_operation_id.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, transfer_operation_id, "
+          "movement_type, created_at) "
+          "VALUES ('mov-mh3-dup', '${goal.id}', '$_hh', '$transferOpId', 'funding', '2024-01-03')",
+        ),
+        throwsA(anything),
+        reason:
+            'idx_goal_movements_unique_operation must reject duplicate transfer_operation_id',
+      );
+    },
+  );
+
+  // ── Phase 5B.1 – Section 8: Beneficiary household integrity ──────────────
+
+  test(
+    'BH-1. goal_revision_beneficiary_same_household: cross-household beneficiary rejected',
+    () async {
+      // Create a second household.
+      const hh2 = 'hh-bh1-other';
+      await db.customStatement(
+        "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+        "VALUES ('$hh2', 'Other HH', 'u-bh1', '2024-01-01', '2024-01-01')",
+      );
+
+      // Create a member in hh2.
+      await db.customStatement(
+        "INSERT INTO household_members (id, household_id, display_name, role, "
+        "is_archived, created_at, updated_at) "
+        "VALUES ('member-hh2', '$hh2', 'Other Member', 'primary_user', 0, "
+        "'2024-01-01', '2024-01-01')",
+      );
+
+      // Create a goal in hh1 (_hh).
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-bh1')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Try to insert a revision referencing the hh2 member as beneficiary.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_revisions (id, goal_id, household_id, name, purpose_code, "
+          "target_minor_units, currency_code, created_at, revision_reason, beneficiary_member_id) "
+          "VALUES ('rev-bh1-cross', '${goal.id}', '$_hh', 'BH Test', 'other', "
+          "50000, 'EGP', '2024-01-02', 'cross-household test', 'member-hh2')",
+        ),
+        throwsA(anything),
+        reason:
+            'goal_revision_beneficiary_same_household must reject cross-household beneficiary',
+      );
+    },
+  );
+
+  // ── Phase 5B.1 – Section 9: Lifecycle vs. derived progress ───────────────
+
+  test(
+    'LP-1. GoalProgressState.targetReached derived from balance (not from status write)',
+    () async {
+      const srcId = 'src-lp1';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 200000);
+
+      // Create a goal with target = 100.00
+      final goal =
+          ((await createGoal(target: 100000, idempotencyKey: 'ik-lp1'))
+                  as AppOk<SavingsGoal>)
+              .value;
+
+      // Fund exactly to the target.
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 100000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-lp1',
+      );
+
+      // GoalProgressState must be targetReached, derived from balance.
+      final progressUc = GetGoalProgressUseCase(goalRepo);
+      final progress =
+          ((await progressUc.execute(goal.id)) as AppOk<GoalProgress>).value;
+
+      expect(
+        progress.progressState,
+        GoalProgressState.targetReached,
+        reason:
+            'progressState must be targetReached when balance equals target, '
+            'derived from ledger — no explicit status write needed',
+      );
+      expect(
+        progress.reserveBalanceMinorUnits,
+        100000,
+        reason: 'Reserve balance must equal the funded amount',
+      );
+      expect(progress.isTargetReached, isTrue);
+    },
+  );
 }

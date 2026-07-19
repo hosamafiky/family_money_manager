@@ -1,10 +1,10 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
-import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
+import 'package:family_money_manager/features/goals/presentation/goal_money_formatter.dart';
 import 'package:family_money_manager/features/goals/presentation/providers/goal_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +13,6 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 const _householdId = 'household-v1';
-const _uuid = Uuid();
 
 /// Screen to add funds from a source account to a goal's reserve.
 ///
@@ -34,6 +33,16 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
   final _amountController = TextEditingController();
   String? _selectedSourceAccountId;
   bool _isSubmitting = false;
+
+  /// Generated once per user intent in [initState].
+  /// Reused for duplicate taps and retries; rotated on success.
+  late String _idempotencyKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _idempotencyKey = const Uuid().v4();
+  }
 
   @override
   void dispose() {
@@ -61,13 +70,14 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
       sourceAccountId: _selectedSourceAccountId!,
       amountMinorUnits: amount,
       householdId: _householdId,
-      idempotencyKey: _uuid.v4(),
+      idempotencyKey: _idempotencyKey,
     );
 
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
     if (result is AppOk) {
+      _idempotencyKey = const Uuid().v4();
       ref.invalidate(goalProgressProvider(widget.goalId));
       ref.invalidate(goalsProvider(_householdId));
       context.pop();
@@ -100,7 +110,9 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
           // Filter eligible source accounts (same currency, not goalReserve, not protected).
           final sources = accountsAsync.when(
             data: (ar) {
-              if (ar is! AppOk<List<FinancialAccount>>) return <FinancialAccount>[];
+              if (ar is! AppOk<List<FinancialAccount>>) {
+                return <FinancialAccount>[];
+              }
               return ar.value
                   .where(
                     (a) =>
@@ -122,7 +134,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 Text(goal.name, style: Theme.of(context).textTheme.titleLarge),
-                Text('${l10n.goalTarget}: ${goal.currencyCode} ${_fmt(goal.targetMinorUnits, goal.currencyCode)}'),
+                Text('${l10n.goalTarget}: ${goal.currencyCode} ${GoalMoneyFormatter.format(goal.targetMinorUnits, goal.currencyCode)}'),
                 const SizedBox(height: 16),
 
                 // Source account selector
@@ -176,27 +188,5 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
         },
       ),
     );
-  }
-
-  String _fmt(int minorUnits, String currencyCode) {
-    int scale;
-    try {
-      scale = Currency.fromCode(currencyCode).minorUnitScale;
-    } catch (_) {
-      scale = 2;
-    }
-    if (scale == 0) return '$minorUnits';
-    final divisor = _pow10(scale);
-    final whole = minorUnits ~/ divisor;
-    final fraction = (minorUnits % divisor).abs().toString().padLeft(scale, '0');
-    return '$whole.$fraction';
-  }
-
-  static int _pow10(int n) {
-    var r = 1;
-    for (var i = 0; i < n; i++) {
-      r *= 10;
-    }
-    return r;
   }
 }

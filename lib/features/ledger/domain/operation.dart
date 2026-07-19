@@ -99,15 +99,13 @@ final class Operation {
   final String updatedAt;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is Operation && other.id == id;
+  bool operator ==(Object other) => identical(this, other) || other is Operation && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
 
   @override
-  String toString() =>
-      'Operation(id: $id, type: ${type.code}, date: $effectiveDate)';
+  String toString() => 'Operation(id: $id, type: ${type.code}, date: $effectiveDate)';
 }
 
 // ── Params types ─────────────────────────────────────────────────────────────
@@ -157,25 +155,13 @@ final class RecordIncomeParams {
     String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
-      throw ArgumentError.value(
-        amountMinorUnits,
-        'amountMinorUnits',
-        'Income amount must be a positive integer (> 0)',
-      );
+      throw ArgumentError.value(amountMinorUnits, 'amountMinorUnits', 'Income amount must be a positive integer (> 0)');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (destinationAccountId.isEmpty) {
-      throw ArgumentError.value(
-        destinationAccountId,
-        'destinationAccountId',
-        'must not be empty',
-      );
+      throw ArgumentError.value(destinationAccountId, 'destinationAccountId', 'must not be empty');
     }
     return RecordIncomeParams._(
       operationId: operationId,
@@ -271,25 +257,13 @@ final class RecordExpenseParams {
     String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
-      throw ArgumentError.value(
-        amountMinorUnits,
-        'amountMinorUnits',
-        'Expense amount must be a positive integer (> 0)',
-      );
+      throw ArgumentError.value(amountMinorUnits, 'amountMinorUnits', 'Expense amount must be a positive integer (> 0)');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (sourceAccountId.isEmpty) {
-      throw ArgumentError.value(
-        sourceAccountId,
-        'sourceAccountId',
-        'must not be empty',
-      );
+      throw ArgumentError.value(sourceAccountId, 'sourceAccountId', 'must not be empty');
     }
     return RecordExpenseParams._(
       operationId: operationId,
@@ -374,32 +348,16 @@ final class ExecuteTransferParams {
     String? beneficiaryMemberId,
   }) {
     if (amountMinorUnits <= 0) {
-      throw ArgumentError.value(
-        amountMinorUnits,
-        'amountMinorUnits',
-        'Transfer amount must be a positive integer (> 0)',
-      );
+      throw ArgumentError.value(amountMinorUnits, 'amountMinorUnits', 'Transfer amount must be a positive integer (> 0)');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (sourceAccountId.isEmpty) {
-      throw ArgumentError.value(
-        sourceAccountId,
-        'sourceAccountId',
-        'must not be empty',
-      );
+      throw ArgumentError.value(sourceAccountId, 'sourceAccountId', 'must not be empty');
     }
     if (destinationAccountId.isEmpty) {
-      throw ArgumentError.value(
-        destinationAccountId,
-        'destinationAccountId',
-        'must not be empty',
-      );
+      throw ArgumentError.value(destinationAccountId, 'destinationAccountId', 'must not be empty');
     }
     return ExecuteTransferParams._(
       operationId: operationId,
@@ -474,18 +432,10 @@ final class RecordOpeningBalanceParams {
       );
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (accountId.isEmpty) {
-      throw ArgumentError.value(
-        accountId,
-        'accountId',
-        'accountId must not be empty',
-      );
+      throw ArgumentError.value(accountId, 'accountId', 'accountId must not be empty');
     }
     return RecordOpeningBalanceParams._(
       operationId: operationId,
@@ -551,18 +501,10 @@ final class RecordAdjustmentParams {
       );
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (reason.isEmpty) {
-      throw ArgumentError.value(
-        reason,
-        'reason',
-        'Adjustment reason must not be empty',
-      );
+      throw ArgumentError.value(reason, 'reason', 'Adjustment reason must not be empty');
     }
     return RecordAdjustmentParams._(
       operationId: operationId,

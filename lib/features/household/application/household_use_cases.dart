@@ -10,31 +10,19 @@ import 'package:uuid/uuid.dart';
 /// Uses fixed IDs so that re-running the use case always refers to the same
 /// household row rather than creating duplicates.
 final class InitializeHouseholdUseCase {
-  const InitializeHouseholdUseCase({
-    required HouseholdRepository householdRepository,
-  }) : _repo = householdRepository;
+  const InitializeHouseholdUseCase({required HouseholdRepository householdRepository}) : _repo = householdRepository;
 
   final HouseholdRepository _repo;
 
   static const String defaultHouseholdId = 'household-v1';
   static const String defaultPrimaryMemberId = 'member-primary-v1';
 
-  Future<AppResult<HouseholdIdentity>> execute({
-    required String householdName,
-    required String primaryMemberName,
-    required String currencyCode,
-  }) async {
+  Future<AppResult<HouseholdIdentity>> execute({required String householdName, required String primaryMemberName, required String currencyCode}) async {
     if (householdName.trim().isEmpty) {
-      return const AppValidationFailure(
-        field: 'householdName',
-        messageKey: 'error_member_name_empty',
-      );
+      return const AppValidationFailure(field: 'householdName', messageKey: 'error_member_name_empty');
     }
     if (primaryMemberName.trim().isEmpty) {
-      return const AppValidationFailure(
-        field: 'primaryMemberName',
-        messageKey: 'error_member_name_empty',
-      );
+      return const AppValidationFailure(field: 'primaryMemberName', messageKey: 'error_member_name_empty');
     }
 
     try {
@@ -46,9 +34,7 @@ final class InitializeHouseholdUseCase {
         if (existing.displayName == householdName.trim()) {
           return AppOk(existing);
         }
-        return const AppDuplicateConflict(
-          messageKey: 'error_household_already_initialized',
-        );
+        return const AppDuplicateConflict(messageKey: 'error_household_already_initialized');
       }
 
       final household = await _repo.createHousehold(
@@ -57,17 +43,10 @@ final class InitializeHouseholdUseCase {
         currencyCode: currencyCode,
         ownerUserId: defaultPrimaryMemberId,
       );
-      await _repo.addMember(
-        id: defaultPrimaryMemberId,
-        householdId: defaultHouseholdId,
-        displayName: primaryMemberName.trim(),
-        role: MemberRole.primaryUser,
-      );
+      await _repo.addMember(id: defaultPrimaryMemberId, householdId: defaultHouseholdId, displayName: primaryMemberName.trim(), role: MemberRole.primaryUser);
       return AppOk(household);
     } on DuplicateSpouseError {
-      return const AppDuplicateConflict(
-        messageKey: 'error_household_already_initialized',
-      );
+      return const AppDuplicateConflict(messageKey: 'error_household_already_initialized');
     } catch (_) {
       return const AppPersistenceFailure();
     }
@@ -107,29 +86,15 @@ final class AddMemberUseCase {
   final HouseholdRepository _repo;
   static const _uuid = Uuid();
 
-  Future<AppResult<HouseholdMember>> execute({
-    required String householdId,
-    required String displayName,
-    required MemberRole role,
-  }) async {
+  Future<AppResult<HouseholdMember>> execute({required String householdId, required String displayName, required MemberRole role}) async {
     if (displayName.trim().isEmpty) {
-      return const AppValidationFailure(
-        field: 'displayName',
-        messageKey: 'error_member_name_empty',
-      );
+      return const AppValidationFailure(field: 'displayName', messageKey: 'error_member_name_empty');
     }
     try {
-      final member = await _repo.addMember(
-        id: _uuid.v4(),
-        householdId: householdId,
-        displayName: displayName.trim(),
-        role: role,
-      );
+      final member = await _repo.addMember(id: _uuid.v4(), householdId: householdId, displayName: displayName.trim(), role: role);
       return AppOk(member);
     } on DuplicateSpouseError {
-      return const AppDuplicateConflict<HouseholdMember>(
-        messageKey: 'error_spouse_duplicate',
-      );
+      return const AppDuplicateConflict<HouseholdMember>(messageKey: 'error_spouse_duplicate');
     } catch (_) {
       return const AppPersistenceFailure();
     }
@@ -140,23 +105,12 @@ final class RenameMemberUseCase {
   const RenameMemberUseCase(this._repo);
   final HouseholdRepository _repo;
 
-  Future<AppResult<HouseholdMember>> execute({
-    required String memberId,
-    required String householdId,
-    required String displayName,
-  }) async {
+  Future<AppResult<HouseholdMember>> execute({required String memberId, required String householdId, required String displayName}) async {
     if (displayName.trim().isEmpty) {
-      return const AppValidationFailure(
-        field: 'displayName',
-        messageKey: 'error_member_name_empty',
-      );
+      return const AppValidationFailure(field: 'displayName', messageKey: 'error_member_name_empty');
     }
     try {
-      final member = await _repo.renameMember(
-        memberId: memberId,
-        householdId: householdId,
-        displayName: displayName.trim(),
-      );
+      final member = await _repo.renameMember(memberId: memberId, householdId: householdId, displayName: displayName.trim());
       return AppOk(member);
     } on MemberNotFoundError {
       return const AppNotFound();
@@ -170,25 +124,14 @@ final class ArchiveMemberUseCase {
   const ArchiveMemberUseCase(this._repo);
   final HouseholdRepository _repo;
 
-  Future<AppResult<HouseholdMember>> execute({
-    required String memberId,
-    required String householdId,
-  }) async {
+  Future<AppResult<HouseholdMember>> execute({required String memberId, required String householdId}) async {
     try {
-      final member = await _repo.archiveMember(
-        memberId: memberId,
-        householdId: householdId,
-      );
+      final member = await _repo.archiveMember(memberId: memberId, householdId: householdId);
       return AppOk(member);
     } on CannotArchivePrimaryUserError {
-      return const AppValidationFailure(
-        field: 'role',
-        messageKey: 'error_cannot_archive_primary_user',
-      );
+      return const AppValidationFailure(field: 'role', messageKey: 'error_cannot_archive_primary_user');
     } on MemberAlreadyArchivedError {
-      return const AppDuplicateConflict(
-        messageKey: 'error_member_already_archived',
-      );
+      return const AppDuplicateConflict(messageKey: 'error_member_already_archived');
     } on MemberNotFoundError {
       return const AppNotFound();
     } catch (_) {

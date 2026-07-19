@@ -19,45 +19,28 @@ abstract interface class AccountRepository {
   /// Finds an account by its idempotency key within [householdId].
   ///
   /// Returns null when no account with that key exists in this household.
-  Future<FinancialAccount?> findByIdempotencyKey({
-    required String householdId,
-    required String idempotencyKey,
-  });
+  Future<FinancialAccount?> findByIdempotencyKey({required String householdId, required String idempotencyKey});
 
   /// Returns the account with [id] within [householdId], or null when not found.
-  Future<FinancialAccount?> findById({
-    required String id,
-    required String householdId,
-  });
+  Future<FinancialAccount?> findById({required String id, required String householdId});
 
   /// Returns all accounts for [householdId].
   ///
   /// Archived accounts are excluded by default. Pass [includeArchived: true]
   /// to include them (e.g. for historical reports).
-  Future<List<FinancialAccount>> findByHousehold({
-    required String householdId,
-    bool includeArchived = false,
-  });
+  Future<List<FinancialAccount>> findByHousehold({required String householdId, bool includeArchived = false});
 
   /// Checks whether an opening balance has already been recorded for [accountId].
   ///
   /// Used to enforce the single-opening-balance rule (FINANCIAL_MODEL §5.1).
-  Future<bool> hasOpeningBalance({
-    required String accountId,
-    required String householdId,
-  });
+  Future<bool> hasOpeningBalance({required String accountId, required String householdId});
 
   /// Marks the account as archived.
   ///
   /// Does NOT delete ledger entries (INV-015).
   /// Throws [AccountNotFoundError] when the account does not exist.
   /// Throws [AccountAlreadyArchivedError] when already archived.
-  Future<FinancialAccount> archiveAccount({
-    required String id,
-    required String householdId,
-    required DateTime archivedAt,
-    required String updatedAt,
-  });
+  Future<FinancialAccount> archiveAccount({required String id, required String householdId, required DateTime archivedAt, required String updatedAt});
 
   /// Updates the mutable display metadata of an account.
   ///
@@ -96,8 +79,7 @@ final class DuplicateAccountIdError extends Error {
   DuplicateAccountIdError(this.accountId);
   final String accountId;
   @override
-  String toString() =>
-      'DuplicateAccountIdError: account $accountId already exists';
+  String toString() => 'DuplicateAccountIdError: account $accountId already exists';
 }
 
 final class AccountNotFoundError extends Error {
@@ -111,8 +93,7 @@ final class AccountAlreadyArchivedError extends Error {
   AccountAlreadyArchivedError(this.accountId);
   final String accountId;
   @override
-  String toString() =>
-      'AccountAlreadyArchivedError: account $accountId is already archived';
+  String toString() => 'AccountAlreadyArchivedError: account $accountId is already archived';
 }
 
 /// Thrown when attempting to mutate a classification field (isProtected,

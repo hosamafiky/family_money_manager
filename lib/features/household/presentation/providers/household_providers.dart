@@ -26,11 +26,7 @@ final archiveMemberUseCaseProvider = Provider((ref) {
   return ArchiveMemberUseCase(ref.watch(householdRepositoryProvider));
 });
 
-final householdMembersProvider =
-    FutureProvider.family<AppResult<List<HouseholdMember>>, String>((
-      ref,
-      householdId,
-    ) {
-      final useCase = ref.watch(listMembersUseCaseProvider);
-      return useCase.execute(householdId);
-    });
+final householdMembersProvider = FutureProvider.family<AppResult<List<HouseholdMember>>, String>((ref, householdId) {
+  final useCase = ref.watch(listMembersUseCaseProvider);
+  return useCase.execute(householdId);
+});

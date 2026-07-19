@@ -55,6 +55,12 @@ part 'app_database.g.dart';
 ///   8 — Phase 5B: goals, goal_revisions, goal_movements tables for savings
 ///                 goals backed by dedicated goalReserve ledger accounts;
 ///                 immutability triggers for goal_revisions and goal_movements.
+///   9 — Phase 5B.1: goal-table field immutability trigger; delete-with-history
+///                 guard; status-transition enforcement; reserve-account
+///                 reclassification and archive-while-active guards; movements
+///                 uniqueness + release-reason + operation-type triggers;
+///                 beneficiary same-household trigger;
+///                 UNIQUE INDEX on goal_movements.transfer_operation_id.
 @DriftDatabase(
   tables: [
     Households,
@@ -83,7 +89,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -102,6 +108,11 @@ class AppDatabase extends _$AppDatabase {
       await _applyBudgetIdempotencyIndex();
       await _applyGoalImmutabilityTriggers();
       await _applyGoalIndexes();
+      await _applyGoalTableHardeningTriggers();
+      await _applyReserveAccountHardeningTriggers();
+      await _applyGoalMovementsHardeningTriggers();
+      await _applyGoalRevisionBeneficiaryTrigger();
+      await _applyGoalMovementsUniqueIndex();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -120,10 +131,7 @@ class AppDatabase extends _$AppDatabase {
         // v3 → v4: account idempotency columns, household cardinality triggers,
         // immutable type/currency trigger, scoped account idempotency index.
         await m.addColumn(financialAccounts, financialAccounts.idempotencyKey);
-        await m.addColumn(
-          financialAccounts,
-          financialAccounts.idempotencyPayload,
-        );
+        await m.addColumn(financialAccounts, financialAccounts.idempotencyPayload);
         await _applyHouseholdConstraintTriggers();
         await _applyAccountMetadataImmutabilityTrigger();
         await _applyAccountIdempotencyIndex();
@@ -150,6 +158,14 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(goalMovementsTable);
         await _applyGoalImmutabilityTriggers();
         await _applyGoalIndexes();
+      }
+      if (from <= 8) {
+        // v8 → v9: Phase 5B.1 hardening triggers and unique movement index.
+        await _applyGoalTableHardeningTriggers();
+        await _applyReserveAccountHardeningTriggers();
+        await _applyGoalMovementsHardeningTriggers();
+        await _applyGoalRevisionBeneficiaryTrigger();
+        await _applyGoalMovementsUniqueIndex();
       }
     },
     beforeOpen: (details) async {
@@ -625,6 +641,166 @@ class AppDatabase extends _$AppDatabase {
     // Enables fast lookup of all movements for a given transfer operation.
     await customStatement('''
       CREATE INDEX IF NOT EXISTS idx_goal_movements_operation
+      ON goal_movements(transfer_operation_id)
+    ''');
+  }
+
+  // ── Goal table hardening triggers (Phase 5B.1) ────────────────────────────
+  //
+  // 1. Prevents updating immutable goal fields after creation.
+  // 2. Prevents deleting a goal that has any linked revisions or movements.
+  // 3. Enforces valid status transitions.
+
+  Future<void> _applyGoalTableHardeningTriggers() async {
+    // Block mutation of structural/identity fields.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_update_goal_immutable
+      BEFORE UPDATE ON goals
+      FOR EACH ROW
+      WHEN NEW.household_id     != OLD.household_id
+        OR NEW.reserve_account_id != OLD.reserve_account_id
+        OR NEW.currency_code    != OLD.currency_code
+        OR NEW.idempotency_key  != OLD.idempotency_key
+        OR NEW.created_at       != OLD.created_at
+      BEGIN
+        SELECT RAISE(ABORT, 'goal immutable fields cannot be changed');
+      END
+    ''');
+
+    // Prevent deleting a goal that has audit history.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_delete_goal_with_history
+      BEFORE DELETE ON goals
+      FOR EACH ROW
+      BEGIN
+        SELECT RAISE(ABORT, 'cannot delete goal with revisions or movements')
+        WHERE EXISTS (SELECT 1 FROM goal_revisions WHERE goal_id = OLD.id)
+           OR EXISTS (SELECT 1 FROM goal_movements WHERE goal_id = OLD.id);
+      END
+    ''');
+
+    // Enforce recognised status transitions.
+    // Valid: active→targetReached, active→completed, active→archived,
+    //        targetReached→completed, targetReached→archived,
+    //        completed→archived, archived→active (restore).
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_status_valid_transition
+      BEFORE UPDATE ON goals
+      FOR EACH ROW
+      WHEN NEW.status != OLD.status
+      BEGIN
+        SELECT RAISE(ABORT, 'invalid goal status transition')
+        WHERE NOT (
+          (OLD.status = 'active'        AND NEW.status IN ('targetReached','completed','archived'))
+          OR (OLD.status = 'targetReached' AND NEW.status IN ('completed','archived'))
+          OR (OLD.status = 'completed'   AND NEW.status = 'archived')
+          OR (OLD.status = 'archived'    AND NEW.status = 'active')
+        );
+      END
+    ''');
+  }
+
+  // ── Reserve-account classification hardening (Phase 5B.1) ─────────────────
+  //
+  // 1. Prevents reclassifying a goalReserve account to any other type.
+  //    (Defense-in-depth: immutable_account_type_currency already blocks all
+  //    type changes; this trigger adds a clear semantic error message.)
+  // 2. Prevents archiving a reserve account while its goal is still active.
+
+  Future<void> _applyReserveAccountHardeningTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_retype_reserve_account
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN OLD.type = 'goalReserve' AND NEW.type != 'goalReserve'
+      BEGIN
+        SELECT RAISE(ABORT, 'goalReserve account type cannot be changed');
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_archive_active_reserve
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN OLD.type = 'goalReserve'
+        AND NEW.is_archived = 1
+        AND OLD.is_archived = 0
+      BEGIN
+        SELECT RAISE(ABORT, 'cannot archive reserve account of an active goal')
+        WHERE EXISTS (
+          SELECT 1 FROM goals
+          WHERE reserve_account_id = OLD.id
+            AND status != 'archived'
+        );
+      END
+    ''');
+  }
+
+  // ── Goal movements hardening (Phase 5B.1) ─────────────────────────────────
+  //
+  // 1. Release movements must have a non-empty release_reason.
+  // 2. The linked operation must exist and be of type 'transfer'.
+
+  Future<void> _applyGoalMovementsHardeningTriggers() async {
+    // Require non-empty release_reason for release movements.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_movement_release_reason
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'release'
+        AND (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0)
+      BEGIN
+        SELECT RAISE(ABORT, 'release movement must have a non-empty release_reason');
+      END
+    ''');
+
+    // Linked operation must be of type 'transfer'.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_movement_transfer_type
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      BEGIN
+        SELECT RAISE(ABORT, 'goal movement must reference a transfer operation')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations
+          WHERE id = NEW.transfer_operation_id
+            AND type = 'transfer'
+        );
+      END
+    ''');
+  }
+
+  // ── Beneficiary household integrity (Phase 5B.1) ──────────────────────────
+  //
+  // Ensures that when a beneficiary_member_id is set on a goal revision,
+  // that member belongs to the same household as the goal.
+
+  Future<void> _applyGoalRevisionBeneficiaryTrigger() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_revision_beneficiary_same_household
+      BEFORE INSERT ON goal_revisions
+      FOR EACH ROW
+      WHEN NEW.beneficiary_member_id IS NOT NULL
+      BEGIN
+        SELECT RAISE(ABORT, 'beneficiary must belong to same household as goal')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM household_members hm
+          JOIN goals g ON g.household_id = hm.household_id
+          WHERE hm.id = NEW.beneficiary_member_id
+            AND g.id  = NEW.goal_id
+        );
+      END
+    ''');
+  }
+
+  // ── Goal movements unique-operation index (Phase 5B.1) ────────────────────
+  //
+  // Each transfer operation can link to at most one goal movement,
+  // preventing duplicate movements for the same underlying transfer.
+
+  Future<void> _applyGoalMovementsUniqueIndex() async {
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_movements_unique_operation
       ON goal_movements(transfer_operation_id)
     ''');
   }

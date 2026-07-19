@@ -15,10 +15,7 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   void _onTap(int index) {
-    widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
-    );
+    widget.navigationShell.goBranch(index, initialLocation: index == widget.navigationShell.currentIndex);
   }
 
   @override
@@ -31,31 +28,15 @@ class _AppShellState extends State<AppShell> {
         onTap: _onTap,
         type: BottomNavigationBarType.fixed,
         items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
-            label: l10n.navDashboard,
-          ),
+          BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: l10n.navDashboard),
           BottomNavigationBarItem(
             icon: const Icon(Icons.account_balance_wallet_outlined),
             activeIcon: const Icon(Icons.account_balance_wallet),
             label: l10n.navAccounts,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt_long_outlined),
-            activeIcon: const Icon(Icons.receipt_long),
-            label: l10n.navTransactions,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people_outline),
-            activeIcon: const Icon(Icons.people),
-            label: l10n.navMembers,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings_outlined),
-            activeIcon: const Icon(Icons.settings),
-            label: l10n.navSettings,
-          ),
+          BottomNavigationBarItem(icon: const Icon(Icons.receipt_long_outlined), activeIcon: const Icon(Icons.receipt_long), label: l10n.navTransactions),
+          BottomNavigationBarItem(icon: const Icon(Icons.people_outline), activeIcon: const Icon(Icons.people), label: l10n.navMembers),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings_outlined), activeIcon: const Icon(Icons.settings), label: l10n.navSettings),
         ],
       ),
     );

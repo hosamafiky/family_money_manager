@@ -43,8 +43,7 @@ class ChildWithdrawalAudits extends Table {
   /// Must always be true. CHECK(warning_shown = 1) enforced in migration.
   BoolColumn get warningShown => boolean().withDefault(const Constant(true))();
 
-  BoolColumn get biometricConfirmed =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get biometricConfirmed => boolean().withDefault(const Constant(false))();
 
   TextColumn get createdAt => text()();
 

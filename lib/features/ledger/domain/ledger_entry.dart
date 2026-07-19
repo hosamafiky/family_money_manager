@@ -68,25 +68,13 @@ final class LedgerEntry {
       throw ArgumentError.value(id, 'id', 'LedgerEntry id must not be empty');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'LedgerEntry operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'LedgerEntry operationId must not be empty');
     }
     if (householdId.isEmpty) {
-      throw ArgumentError.value(
-        householdId,
-        'householdId',
-        'LedgerEntry householdId must not be empty',
-      );
+      throw ArgumentError.value(householdId, 'householdId', 'LedgerEntry householdId must not be empty');
     }
     if (accountId.isEmpty) {
-      throw ArgumentError.value(
-        accountId,
-        'accountId',
-        'LedgerEntry accountId must not be empty',
-      );
+      throw ArgumentError.value(accountId, 'accountId', 'LedgerEntry accountId must not be empty');
     }
     return LedgerEntry._(
       id: id,
@@ -140,13 +128,11 @@ final class LedgerEntry {
   final Map<String, dynamic>? metadata;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is LedgerEntry && other.id == id;
+  bool operator ==(Object other) => identical(this, other) || other is LedgerEntry && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
 
   @override
-  String toString() =>
-      'LedgerEntry(id: $id, type: ${entryType.code}, direction: ${direction.code})';
+  String toString() => 'LedgerEntry(id: $id, type: ${entryType.code}, direction: ${direction.code})';
 }

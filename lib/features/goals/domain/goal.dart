@@ -8,6 +8,11 @@ library;
 typedef GoalId = String;
 
 /// Lifecycle status of a savings goal.
+///
+/// DESIGN NOTE (Phase 5B.1): `targetReached` is a persisted status that
+/// duplicates the derived [GoalProgressState.targetReached]. A future
+/// migration should remove `targetReached` from this enum and derive it
+/// solely from the ledger balance via [GoalProgressState].
 enum GoalStatus { active, targetReached, completed, archived }
 
 /// Whether money is flowing into or out of a goal reserve.
@@ -166,6 +171,35 @@ final class SavingsGoal {
   String get name => currentRevision.name;
   GoalPurpose get purpose => currentRevision.purpose;
   int get targetMinorUnits => currentRevision.targetMinorUnits;
+}
+
+/// Parameters for optional initial funding during goal creation.
+///
+/// When provided to [GoalRepository.createGoal], the transfer, ledger entries,
+/// and movement are all inserted inside the same database transaction as the
+/// goal row — guaranteeing full atomicity and rollback on any failure.
+final class GoalInitialFunding {
+  const GoalInitialFunding({
+    required this.operationId,
+    required this.idempotencyKey,
+    required this.sourceAccountId,
+    required this.amountMinorUnits,
+    required this.currencyCode,
+    required this.effectiveDate,
+    required this.description,
+    required this.movementId,
+    required this.movementCreatedAt,
+  });
+
+  final String operationId;
+  final String idempotencyKey;
+  final String sourceAccountId;
+  final int amountMinorUnits;
+  final String currencyCode;
+  final String effectiveDate;
+  final String description;
+  final String movementId;
+  final String movementCreatedAt;
 }
 
 /// Derived progress snapshot — never persisted.

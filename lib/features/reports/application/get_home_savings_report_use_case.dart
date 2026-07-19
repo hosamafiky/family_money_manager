@@ -7,20 +7,12 @@ final class GetHomeSavingsReportUseCase {
 
   final ReportQueryRepository _repository;
 
-  Future<AppResult<List<HomeSavingsFlowSummary>>> execute(
-    FinancialReportRequest req,
-  ) async {
+  Future<AppResult<List<HomeSavingsFlowSummary>>> execute(FinancialReportRequest req) async {
     if (req.householdId.isEmpty) {
-      return const AppValidationFailure(
-        field: 'householdId',
-        messageKey: 'errorValidationGeneric',
-      );
+      return const AppValidationFailure(field: 'householdId', messageKey: 'errorValidationGeneric');
     }
     if (req.period.startDate.compareTo(req.period.endDate) >= 0) {
-      return const AppValidationFailure(
-        field: 'period',
-        messageKey: 'errorValidationGeneric',
-      );
+      return const AppValidationFailure(field: 'period', messageKey: 'errorValidationGeneric');
     }
     try {
       final data = await _repository.homeSavingsFlows(req);

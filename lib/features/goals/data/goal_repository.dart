@@ -14,7 +14,20 @@ import 'package:family_money_manager/features/goals/domain/goal.dart';
 abstract interface class GoalRepository {
   // ── Goal CRUD ─────────────────────────────────────────────────────────────
 
-  /// Creates a goal and its dedicated reserve account atomically.
+  /// Creates a goal, its dedicated reserve account, and optionally an initial
+  /// funding transfer — all within a single database transaction.
+  ///
+  /// When [initialFunding] is provided and its [GoalInitialFunding.amountMinorUnits]
+  /// is > 0, the method inserts:
+  ///   - the transfer operation row,
+  ///   - debit entry on the source account,
+  ///   - credit entry on the reserve account,
+  ///   - an operation context, and
+  ///   - the goal movement record.
+  ///
+  /// A balance check is performed inside the transaction. If the source does
+  /// not have sufficient funds [AppInsufficientFunds] is returned and every
+  /// row (goal, revision, reserve account) is rolled back.
   ///
   /// Idempotency:
   /// - Same key + same payload → returns existing goal.
@@ -23,26 +36,19 @@ abstract interface class GoalRepository {
     required SavingsGoal goal,
     required GoalRevision initialRevision,
     required FinancialAccount reserveAccount,
+    GoalInitialFunding? initialFunding,
   });
 
   /// Finds a goal by its ID within the same household.
   Future<AppResult<SavingsGoal?>> findGoalById(String goalId);
 
   /// Lists goals for a household, optionally including archived ones.
-  Future<AppResult<List<SavingsGoal>>> listGoals({
-    required String householdId,
-    bool includeArchived = false,
-  });
+  Future<AppResult<List<SavingsGoal>>> listGoals({required String householdId, bool includeArchived = false});
 
   /// Updates the goal status (and optional timestamp fields).
   ///
   /// Only [status], [completedAt], and [archivedAt] may be mutated.
-  Future<AppResult<void>> updateGoalStatus({
-    required String goalId,
-    required GoalStatus status,
-    String? completedAt,
-    String? archivedAt,
-  });
+  Future<AppResult<void>> updateGoalStatus({required String goalId, required GoalStatus status, String? completedAt, String? archivedAt});
 
   // ── Revisions ─────────────────────────────────────────────────────────────
 
@@ -66,8 +72,5 @@ abstract interface class GoalRepository {
   /// ledger (sum of CREDITs minus sum of DEBITs on [reserveAccountId]).
   ///
   /// This is the canonical balance — it is never stored as a column.
-  Future<AppResult<int>> getReserveBalance({
-    required String reserveAccountId,
-    required String householdId,
-  });
+  Future<AppResult<int>> getReserveBalance({required String reserveAccountId, required String householdId});
 }

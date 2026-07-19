@@ -16,81 +16,44 @@ final class DriftBalanceRepository implements BalanceRepository {
   final AppDatabase _db;
 
   @override
-  Future<int> currentBalanceMinorUnits({
-    required String accountId,
-    required String householdId,
-  }) async {
+  Future<int> currentBalanceMinorUnits({required String accountId, required String householdId}) async {
     final account = await _getAccount(accountId, householdId);
     if (account == null) return 0; // unknown account in this household → 0
     final entries = await _loadEntries(accountId, householdId);
     final currency = Currency.fromCode(account.currencyCode);
-    return LedgerCalculator.balance(
-      accountId: accountId,
-      entries: entries,
-      currency: currency,
-    ).minorUnits;
+    return LedgerCalculator.balance(accountId: accountId, entries: entries, currency: currency).minorUnits;
   }
 
   @override
-  Future<int> historicalBalanceMinorUnits({
-    required String accountId,
-    required String householdId,
-    required String asOfDate,
-  }) async {
+  Future<int> historicalBalanceMinorUnits({required String accountId, required String householdId, required String asOfDate}) async {
     final account = await _getAccount(accountId, householdId);
     if (account == null) return 0;
     final entries = await _loadEntries(accountId, householdId);
     final currency = Currency.fromCode(account.currencyCode);
-    return LedgerCalculator.historicalBalance(
-      accountId: accountId,
-      entries: entries,
-      currency: currency,
-      asOfDate: asOfDate,
-    ).minorUnits;
+    return LedgerCalculator.historicalBalance(accountId: accountId, entries: entries, currency: currency, asOfDate: asOfDate).minorUnits;
   }
 
   @override
-  Future<BalanceQueryResult> balanceForAccount({
-    required String accountId,
-    required String householdId,
-  }) async {
+  Future<BalanceQueryResult> balanceForAccount({required String accountId, required String householdId}) async {
     final account = await _getAccount(accountId, householdId);
     if (account == null) return const BalanceAccountNotFound();
     final entries = await _loadEntries(accountId, householdId);
     final currency = Currency.fromCode(account.currencyCode);
-    final balance = LedgerCalculator.balance(
-      accountId: accountId,
-      entries: entries,
-      currency: currency,
-    );
-    return BalanceFound(
-      minorUnits: balance.minorUnits,
-      currencyCode: account.currencyCode,
-    );
+    final balance = LedgerCalculator.balance(accountId: accountId, entries: entries, currency: currency);
+    return BalanceFound(minorUnits: balance.minorUnits, currencyCode: account.currencyCode);
   }
 
   @override
-  Future<List<AccountBalance>> netWorthBalances({
-    required String householdId,
-  }) async {
-    final accounts =
-        await (_db.select(_db.financialAccounts)..where(
-              (t) =>
-                  t.householdId.equals(householdId) &
-                  t.isArchived.equals(false) &
-                  t.includeInNetWorth.equals(true),
-            ))
-            .get();
+  Future<List<AccountBalance>> netWorthBalances({required String householdId}) async {
+    final accounts = await (_db.select(
+      _db.financialAccounts,
+    )..where((t) => t.householdId.equals(householdId) & t.isArchived.equals(false) & t.includeInNetWorth.equals(true))).get();
 
     final result = <AccountBalance>[];
     for (final account in accounts) {
       final entries = await _loadEntries(account.id, householdId);
       final currency = Currency.fromCode(account.currencyCode);
-      final balance = LedgerCalculator.balance(
-        accountId: account.id,
-        entries: entries,
-        currency: currency,
-      );
+      final balance = LedgerCalculator.balance(accountId: account.id, entries: entries, currency: currency);
       result.add(AccountBalance(accountId: account.id, balance: balance));
     }
     return result;
@@ -98,17 +61,8 @@ final class DriftBalanceRepository implements BalanceRepository {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  Future<List<LedgerEntryRecord>> _loadEntries(
-    String accountId,
-    String householdId,
-  ) async {
-    final rows =
-        await (_db.select(_db.ledgerEntries)..where(
-              (t) =>
-                  t.accountId.equals(accountId) &
-                  t.householdId.equals(householdId),
-            ))
-            .get();
+  Future<List<LedgerEntryRecord>> _loadEntries(String accountId, String householdId) async {
+    final rows = await (_db.select(_db.ledgerEntries)..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId))).get();
 
     return rows
         .map(
@@ -127,13 +81,7 @@ final class DriftBalanceRepository implements BalanceRepository {
         .toList();
   }
 
-  Future<DbFinancialAccount?> _getAccount(
-    String accountId,
-    String householdId,
-  ) async {
-    return (_db.select(_db.financialAccounts)..where(
-          (t) => t.id.equals(accountId) & t.householdId.equals(householdId),
-        ))
-        .getSingleOrNull();
+  Future<DbFinancialAccount?> _getAccount(String accountId, String householdId) async {
+    return (_db.select(_db.financialAccounts)..where((t) => t.id.equals(accountId) & t.householdId.equals(householdId))).getSingleOrNull();
   }
 }

@@ -35,10 +35,7 @@ final listAccountsUseCaseProvider = Provider((ref) {
 });
 
 final archiveAccountUseCaseProvider = Provider((ref) {
-  return ArchiveAccountUseCase(
-    accountRepository: ref.watch(accountRepositoryProvider),
-    balanceRepository: ref.watch(balanceRepositoryProvider),
-  );
+  return ArchiveAccountUseCase(accountRepository: ref.watch(accountRepositoryProvider), balanceRepository: ref.watch(balanceRepositoryProvider));
 });
 
 final updateAccountMetadataUseCaseProvider = Provider((ref) {
@@ -47,43 +44,28 @@ final updateAccountMetadataUseCaseProvider = Provider((ref) {
 
 final createAccountUseCaseProvider = Provider<CreateAccountUseCase>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return CreateAccountUseCase(
-    accountRepository: ref.watch(accountRepositoryProvider),
-    ledgerRepository: ref.watch(ledgerRepositoryProvider),
-    db: db,
-  );
+  return CreateAccountUseCase(accountRepository: ref.watch(accountRepositoryProvider), ledgerRepository: ref.watch(ledgerRepositoryProvider), db: db);
 });
 
 // ── Account list provider ─────────────────────────────────────────────────
 
-final accountsProvider =
-    FutureProvider.family<AppResult<List<FinancialAccount>>, String>((
-      ref,
-      householdId,
-    ) {
-      final useCase = ref.watch(listAccountsUseCaseProvider);
-      return useCase.execute(householdId);
-    });
+final accountsProvider = FutureProvider.family<AppResult<List<FinancialAccount>>, String>((ref, householdId) {
+  final useCase = ref.watch(listAccountsUseCaseProvider);
+  return useCase.execute(householdId);
+});
 
 // ── Single account provider ───────────────────────────────────────────────
 
-final accountDetailProvider =
-    FutureProvider.family<FinancialAccount?, (String, String)>((ref, args) {
-      final (accountId, householdId) = args;
-      final repo = ref.watch(accountRepositoryProvider);
-      return repo.findById(id: accountId, householdId: householdId);
-    });
+final accountDetailProvider = FutureProvider.family<FinancialAccount?, (String, String)>((ref, args) {
+  final (accountId, householdId) = args;
+  final repo = ref.watch(accountRepositoryProvider);
+  return repo.findById(id: accountId, householdId: householdId);
+});
 
 // ── Account balance provider ──────────────────────────────────────────────
 
-final accountBalanceProvider = FutureProvider.family<int, (String, String)>((
-  ref,
-  args,
-) {
+final accountBalanceProvider = FutureProvider.family<int, (String, String)>((ref, args) {
   final (accountId, householdId) = args;
   final repo = ref.watch(balanceRepositoryProvider);
-  return repo.currentBalanceMinorUnits(
-    accountId: accountId,
-    householdId: householdId,
-  );
+  return repo.currentBalanceMinorUnits(accountId: accountId, householdId: householdId);
 });

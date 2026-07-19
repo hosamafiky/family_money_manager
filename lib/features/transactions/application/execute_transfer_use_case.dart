@@ -12,11 +12,9 @@ import 'package:uuid/uuid.dart';
 /// Validates: accounts exist, same currency, source ≠ destination,
 /// neither archived, amount > 0. Protected source triggers audit.
 final class ExecuteTransferUseCase {
-  const ExecuteTransferUseCase({
-    required LedgerRepository ledgerRepository,
-    required AccountRepository accountRepository,
-  }) : _ledger = ledgerRepository,
-       _accounts = accountRepository;
+  const ExecuteTransferUseCase({required LedgerRepository ledgerRepository, required AccountRepository accountRepository})
+    : _ledger = ledgerRepository,
+      _accounts = accountRepository;
 
   final LedgerRepository _ledger;
   final AccountRepository _accounts;
@@ -26,65 +24,35 @@ final class ExecuteTransferUseCase {
   Future<AppResult<String>> execute(TransferContext ctx) async {
     // ── Basic validation ──────────────────────────────────────────────────
     if (ctx.amountMinorUnits <= 0) {
-      return const AppValidationFailure(
-        field: 'amount',
-        messageKey: 'error_amount_must_be_positive',
-      );
+      return const AppValidationFailure(field: 'amount', messageKey: 'error_amount_must_be_positive');
     }
     if (ctx.sourceAccountId.isEmpty || ctx.destinationAccountId.isEmpty) {
-      return const AppValidationFailure(
-        field: 'account',
-        messageKey: 'error_account_required',
-      );
+      return const AppValidationFailure(field: 'account', messageKey: 'error_account_required');
     }
     if (ctx.sourceAccountId == ctx.destinationAccountId) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorSameAccount',
-      );
+      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorSameAccount');
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(
-        field: 'effectiveDate',
-        messageKey: 'error_date_invalid',
-      );
+      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
     }
 
     // ── Account validation ────────────────────────────────────────────────
-    final source = await _accounts.findById(
-      id: ctx.sourceAccountId,
-      householdId: ctx.householdId,
-    );
+    final source = await _accounts.findById(id: ctx.sourceAccountId, householdId: ctx.householdId);
     if (source == null) return const AppNotFound();
     if (source.isArchived) {
-      return const AppValidationFailure(
-        field: 'sourceAccountId',
-        messageKey: 'errorAccountArchived',
-      );
+      return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorAccountArchived');
     }
 
-    final destination = await _accounts.findById(
-      id: ctx.destinationAccountId,
-      householdId: ctx.householdId,
-    );
+    final destination = await _accounts.findById(id: ctx.destinationAccountId, householdId: ctx.householdId);
     if (destination == null) return const AppNotFound();
     if (destination.isArchived) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorAccountArchived',
-      );
+      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorAccountArchived');
     }
     if (source.currencyCode != destination.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
     if (source.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     }
 
     // ── Protected-fund audit validation ───────────────────────────────────
@@ -92,28 +60,16 @@ final class ExecuteTransferUseCase {
     if (source.requiresWithdrawalAudit) {
       final audit = ctx.childWithdrawalAudit;
       if (audit == null) {
-        return const AppValidationFailure(
-          field: 'childWithdrawalAudit',
-          messageKey: 'errorWithdrawalReasonRequired',
-        );
+        return const AppValidationFailure(field: 'childWithdrawalAudit', messageKey: 'errorWithdrawalReasonRequired');
       }
       if (audit.reason.trim().isEmpty) {
-        return const AppValidationFailure(
-          field: 'reason',
-          messageKey: 'errorWithdrawalReasonRequired',
-        );
+        return const AppValidationFailure(field: 'reason', messageKey: 'errorWithdrawalReasonRequired');
       }
       if (!audit.warningAcknowledged) {
-        return const AppValidationFailure(
-          field: 'warningAcknowledged',
-          messageKey: 'errorWithdrawalAcknowledgmentRequired',
-        );
+        return const AppValidationFailure(field: 'warningAcknowledged', messageKey: 'errorWithdrawalAcknowledgmentRequired');
       }
       if (!audit.confirmed) {
-        return const AppValidationFailure(
-          field: 'confirmed',
-          messageKey: 'errorWithdrawalConfirmationRequired',
-        );
+        return const AppValidationFailure(field: 'confirmed', messageKey: 'errorWithdrawalConfirmationRequired');
       }
 
       auditParams = ChildWithdrawalAuditParams(
@@ -145,35 +101,21 @@ final class ExecuteTransferUseCase {
         description: ctx.note,
       );
 
-      final ledgerResult = await _ledger.executeTransfer(
-        params,
-        auditParams: auditParams,
-      );
+      final ledgerResult = await _ledger.executeTransfer(params, auditParams: auditParams);
 
       return switch (ledgerResult) {
         IdempotentOperationResult.created => AppOk(ctx.operationId),
         IdempotentOperationResult.alreadyExists => AppOk(ctx.operationId),
-        IdempotentOperationResult.conflict => const AppDuplicateConflict(
-          messageKey: 'error_account_duplicate',
-        ),
+        IdempotentOperationResult.conflict => const AppDuplicateConflict(messageKey: 'error_account_duplicate'),
       };
     } on InsufficientFundsError {
       return const AppInsufficientFunds();
     } on SameAccountTransferError {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorSameAccount',
-      );
+      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorSameAccount');
     } on CurrencyMismatchTransferError {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
+      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
     } on ArchivedAccountError {
-      return const AppValidationFailure(
-        field: 'sourceAccountId',
-        messageKey: 'errorAccountArchived',
-      );
+      return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorAccountArchived');
     } catch (_) {
       return const AppPersistenceFailure();
     }

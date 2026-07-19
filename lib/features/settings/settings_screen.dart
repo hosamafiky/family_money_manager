@@ -28,31 +28,20 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.foundationLanguageLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text(l10n.foundationLanguageLabel, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: locale.languageCode == 'ar'
-                              ? null
-                              : () => ref
-                                    .read(appLocaleProvider.notifier)
-                                    .setLocale(const Locale('ar')),
+                          onPressed: locale.languageCode == 'ar' ? null : () => ref.read(appLocaleProvider.notifier).setLocale(const Locale('ar')),
                           child: const Text('العربية'),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: locale.languageCode == 'en'
-                              ? null
-                              : () => ref
-                                    .read(appLocaleProvider.notifier)
-                                    .setLocale(const Locale('en')),
+                          onPressed: locale.languageCode == 'en' ? null : () => ref.read(appLocaleProvider.notifier).setLocale(const Locale('en')),
                           child: const Text('English'),
                         ),
                       ),
@@ -70,31 +59,20 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.foundationThemeLabel,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text(l10n.foundationThemeLabel, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: themeMode == ThemeMode.light
-                              ? null
-                              : () => ref
-                                    .read(appThemeModeProvider.notifier)
-                                    .setThemeMode(ThemeMode.light),
+                          onPressed: themeMode == ThemeMode.light ? null : () => ref.read(appThemeModeProvider.notifier).setThemeMode(ThemeMode.light),
                           child: Text(l10n.foundationThemeLight),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: themeMode == ThemeMode.dark
-                              ? null
-                              : () => ref
-                                    .read(appThemeModeProvider.notifier)
-                                    .setThemeMode(ThemeMode.dark),
+                          onPressed: themeMode == ThemeMode.dark ? null : () => ref.read(appThemeModeProvider.notifier).setThemeMode(ThemeMode.dark),
                           child: Text(l10n.foundationThemeDark),
                         ),
                       ),

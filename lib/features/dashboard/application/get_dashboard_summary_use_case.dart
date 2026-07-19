@@ -9,19 +9,12 @@ import 'package:family_money_manager/features/transactions/domain/transaction_su
 /// Executes all sub-queries in parallel via [Future.wait].
 /// Any persistence failure collapses to [AppPersistenceFailure].
 final class GetDashboardSummaryUseCase {
-  const GetDashboardSummaryUseCase({
-    required DashboardQueryRepository queryRepository,
-    required Clock clock,
-  }) : _repo = queryRepository,
-       _clock = clock;
+  const GetDashboardSummaryUseCase({required DashboardQueryRepository queryRepository, required Clock clock}) : _repo = queryRepository, _clock = clock;
 
   final DashboardQueryRepository _repo;
   final Clock _clock;
 
-  Future<AppResult<DashboardSummary>> execute({
-    required String householdId,
-    required DashboardPeriod period,
-  }) async {
+  Future<AppResult<DashboardSummary>> execute({required String householdId, required DashboardPeriod period}) async {
     try {
       final results = await Future.wait([
         _repo.spendableBalances(householdId: householdId),
@@ -40,8 +33,7 @@ final class GetDashboardSummaryUseCase {
           protectedBalances: (results[1] as List).cast<CurrencyAmountSummary>(),
           periodFlow: (results[2] as List).cast<PeriodFlowSummary>(),
           expensesByScope: (results[3] as List).cast<ExpenseScopeSummary>(),
-          spouseWallets: (results[4] as List)
-              .cast<SpouseWalletDashboardSummary>(),
+          spouseWallets: (results[4] as List).cast<SpouseWalletDashboardSummary>(),
           recentActivity: (results[5] as List).cast<TransactionSummary>(),
           generatedAt: _clock.now,
         ),

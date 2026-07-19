@@ -1,4 +1,4 @@
-/// Goal repository database tests (Phase 5B).
+/// Goal repository database tests (Phase 5B / 5B.1).
 ///
 /// Tests:
 ///  1. Create goal and reserve account atomically
@@ -36,6 +36,19 @@
 /// 33. Goal movements are append-only (no UPDATE)
 /// 34. Metadata-only update (name change via revision) does NOT write to operations
 /// 35. Migration v7 → v8: goals tables created, existing data preserved
+///
+/// Phase 5B.1 additions (Section 1 – Atomicity):
+///  A1. Rollback when initial-funding source has insufficient balance
+///  A2. Zero initial funding produces no operations or movements
+///  A3. Successful creation with initial funding has correct row counts
+///
+/// Phase 5B.1 additions (Section 4 – Balance enforcement):
+///  B1. Two sequential fund requests exceeding source balance — only first succeeds
+///  B2. Two sequential release requests exceeding reserve — only first succeeds
+///
+/// Phase 5B.1 additions (Section 3 – Idempotency):
+///  I1. Sequential retry of FundGoal with same idempotency key → single movement
+///  I2. Sequential retry of ReleaseGoal with same idempotency key → single movement
 library;
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
@@ -1025,7 +1038,7 @@ void main() {
     '35. Migration v7→v8: goals tables created and budget data preserved',
     () async {
       // In forTesting() the schema is always created fresh at the current
-      // schemaVersion (8), so all goal tables exist by definition.
+      // schemaVersion (9), so all goal tables exist by definition.
       // This test verifies the three tables are present and functional.
       final goalRows = await db
           .customSelect('SELECT COUNT(*) as cnt FROM goals')
@@ -1045,6 +1058,396 @@ void main() {
           .customSelect('SELECT COUNT(*) as cnt FROM budgets')
           .get();
       expect(budgetRows.first.read<int>('cnt'), greaterThanOrEqualTo(0));
+    },
+  );
+
+  // ── Phase 5B.1 – Section 1: Atomicity ────────────────────────────────────
+
+  test(
+    'A1. Rollback when initial-funding source has insufficient balance',
+    () async {
+      const srcId = 'src-atom-insuf';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 500); // only 5.00
+
+      // Attempt to create a goal with initial funding of 100.00 when only 5.00 available.
+      final result = await createGoalUc.execute(
+        goalName: 'Atomic Rollback Test',
+        purpose: GoalPurpose.emergencyFund,
+        currencyCode: 'EGP',
+        targetMinorUnits: 50000,
+        householdId: _hh,
+        idempotencyKey: 'ik-atom-rollback',
+        initialFundingSourceAccountId: srcId,
+        initialFundingMinorUnits: 10000, // more than available
+      );
+
+      // Should fail with insufficient funds.
+      expect(result, isA<AppInsufficientFunds<SavingsGoal>>());
+
+      // The goal must NOT exist in the DB — full rollback.
+      final goalRows = await db
+          .customSelect(
+            "SELECT COUNT(*) as cnt FROM goals WHERE idempotency_key = 'ik-atom-rollback'",
+          )
+          .get();
+      expect(
+        goalRows.first.read<int>('cnt'),
+        0,
+        reason: 'Goal row must be rolled back when initial funding fails',
+      );
+
+      // No operations should have been created.
+      final opsRows = await db
+          .customSelect(
+            "SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh' "
+            "AND description LIKE '%Atomic Rollback%'",
+          )
+          .get();
+      expect(opsRows.first.read<int>('cnt'), 0);
+    },
+  );
+
+  test(
+    'A2. Zero initial funding produces no operations or movements (atomic)',
+    () async {
+      final opsBefore =
+          (await db
+                  .customSelect(
+                    "SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'",
+                  )
+                  .get())
+              .first
+              .read<int>('cnt');
+
+      final result = await createGoalUc.execute(
+        goalName: 'Zero Funding Goal',
+        purpose: GoalPurpose.other,
+        currencyCode: 'EGP',
+        targetMinorUnits: 50000,
+        householdId: _hh,
+        idempotencyKey: 'ik-zero-fund-atomic',
+        initialFundingMinorUnits: 0,
+      );
+      expect(result, isA<AppOk<SavingsGoal>>());
+      final goal = (result as AppOk<SavingsGoal>).value;
+
+      final opsAfter =
+          (await db
+                  .customSelect(
+                    "SELECT COUNT(*) as cnt FROM operations WHERE household_id = '$_hh'",
+                  )
+                  .get())
+              .first
+              .read<int>('cnt');
+      expect(
+        opsAfter,
+        opsBefore,
+        reason: 'Zero initial funding must create no operations',
+      );
+
+      final movResult = await goalRepo.getMovements(goal.id);
+      expect(
+        (movResult as AppOk<List<GoalMovement>>).value,
+        isEmpty,
+        reason: 'Zero initial funding must create no movements',
+      );
+    },
+  );
+
+  test('A3. Successful creation with initial funding has correct row counts', () async {
+    const srcId = 'src-atom-ok';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 100000);
+
+    final result = await createGoalUc.execute(
+      goalName: 'Atomic Fund OK',
+      purpose: GoalPurpose.travel,
+      currencyCode: 'EGP',
+      targetMinorUnits: 50000,
+      householdId: _hh,
+      idempotencyKey: 'ik-atom-ok',
+      initialFundingSourceAccountId: srcId,
+      initialFundingMinorUnits: 20000,
+    );
+    expect(result, isA<AppOk<SavingsGoal>>());
+    final goal = (result as AppOk<SavingsGoal>).value;
+
+    // Exactly 1 goal row.
+    final goalCount =
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM goals WHERE id = '${goal.id}'",
+                )
+                .get())
+            .first
+            .read<int>('cnt');
+    expect(goalCount, 1);
+
+    // Exactly 1 reserve account.
+    final reserveCount =
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM financial_accounts WHERE id = '${goal.reserveAccountId}'",
+                )
+                .get())
+            .first
+            .read<int>('cnt');
+    expect(reserveCount, 1);
+
+    // Exactly 1 transfer operation.
+    final opCount =
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM operations WHERE type = 'transfer' "
+                  "AND household_id = '$_hh' AND destination_account_id = '${goal.reserveAccountId}'",
+                )
+                .get())
+            .first
+            .read<int>('cnt');
+    expect(
+      opCount,
+      1,
+      reason: 'Exactly one transfer operation for initial funding',
+    );
+
+    // Exactly 2 ledger entries (debit + credit).
+    final entryCount =
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM ledger_entries WHERE account_id = '${goal.reserveAccountId}' "
+                  "OR account_id = '$srcId'",
+                )
+                .get())
+            .first
+            .read<int>('cnt');
+    // The source account also has an income entry from creditAccount(), so we
+    // check specifically for the transfer entries.
+    final transferEntries =
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as cnt FROM ledger_entries WHERE entry_type IN ('transferIn','transferOut') "
+                  "AND household_id = '$_hh'",
+                )
+                .get())
+            .first
+            .read<int>('cnt');
+    expect(
+      transferEntries,
+      2,
+      reason: 'One debit + one credit entry for initial funding',
+    );
+    expect(entryCount, greaterThanOrEqualTo(2));
+
+    // Exactly 1 goal movement.
+    final movResult = await goalRepo.getMovements(goal.id);
+    final movements = (movResult as AppOk<List<GoalMovement>>).value;
+    expect(movements.length, 1);
+    expect(movements.first.movementType, GoalMovementType.funding);
+
+    // Reserve balance reflects the funding.
+    final balResult = await goalRepo.getReserveBalance(
+      reserveAccountId: goal.reserveAccountId,
+      householdId: _hh,
+    );
+    expect((balResult as AppOk<int>).value, 20000);
+  });
+
+  // ── Phase 5B.1 – Section 4: Balance enforcement ───────────────────────────
+
+  test(
+    'B1. Two sequential fund requests exceeding source balance — only first succeeds',
+    () async {
+      const srcId = 'src-b1';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 30000); // 300.00 available
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-b1');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      // First request: 200.00 — should succeed.
+      final r1 = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-b1-1',
+      );
+      expect(r1, isA<AppOk<SavingsGoal>>());
+
+      // Second request: 200.00 — should fail (only 100.00 left).
+      final r2 = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-b1-2',
+      );
+      expect(
+        r2,
+        isA<AppInsufficientFunds<SavingsGoal>>(),
+        reason: 'Second request must fail: combined 40000 > available 30000',
+      );
+
+      // Reserve balance must be exactly the first funding amount.
+      final balResult = await goalRepo.getReserveBalance(
+        reserveAccountId: goal.reserveAccountId,
+        householdId: _hh,
+      );
+      expect((balResult as AppOk<int>).value, 20000);
+    },
+  );
+
+  test(
+    'B2. Two sequential release requests exceeding reserve — only first succeeds',
+    () async {
+      const srcId = 'src-b2';
+      const dstId = 'dst-b2';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 100000);
+
+      final goalResult = await createGoal(
+        idempotencyKey: 'ik-b2',
+        sourceAccountId: srcId,
+        initialFunding: 30000,
+      );
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      // First release: 200.00 — should succeed.
+      final r1 = await releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 20000,
+        releaseReason: 'First release',
+        householdId: _hh,
+        idempotencyKey: 'ik-release-b2-1',
+      );
+      expect(r1, isA<AppOk<SavingsGoal>>());
+
+      // Second release: 200.00 — should fail (only 100.00 left in reserve).
+      final r2 = await releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 20000,
+        releaseReason: 'Second release',
+        householdId: _hh,
+        idempotencyKey: 'ik-release-b2-2',
+      );
+      expect(
+        r2,
+        isA<AppInsufficientFunds<SavingsGoal>>(),
+        reason:
+            'Second release must fail: reserve only has 10000 after first release',
+      );
+    },
+  );
+
+  // ── Phase 5B.1 – Section 3: Idempotency ──────────────────────────────────
+
+  test(
+    'I1. FundGoal retry with same idempotency key produces single movement',
+    () async {
+      const srcId = 'src-i1';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 100000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-i1');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      const idempotencyKey = 'ik-fund-i1-retry';
+
+      // First call: creates transfer + movement.
+      final r1 = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: idempotencyKey,
+      );
+      expect(r1, isA<AppOk<SavingsGoal>>());
+
+      // Second call with same key: transfer is idempotent, no new movement.
+      final r2 = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: idempotencyKey,
+      );
+      expect(r2, isA<AppOk<SavingsGoal>>());
+
+      // Must have exactly 1 movement.
+      final movResult = await goalRepo.getMovements(goal.id);
+      final movements = (movResult as AppOk<List<GoalMovement>>).value;
+      expect(
+        movements.length,
+        1,
+        reason:
+            'Retry with same idempotency key must not create duplicate movement',
+      );
+
+      // Reserve balance unchanged from first call.
+      final balResult = await goalRepo.getReserveBalance(
+        reserveAccountId: goal.reserveAccountId,
+        householdId: _hh,
+      );
+      expect((balResult as AppOk<int>).value, 10000);
+    },
+  );
+
+  test(
+    'I2. ReleaseGoal retry with same idempotency key produces single movement',
+    () async {
+      const srcId = 'src-i2';
+      const dstId = 'dst-i2';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 100000);
+
+      final goalResult = await createGoal(
+        idempotencyKey: 'ik-i2',
+        sourceAccountId: srcId,
+        initialFunding: 50000,
+      );
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      const idempotencyKey = 'ik-release-i2-retry';
+
+      // First call.
+      final r1 = await releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 10000,
+        releaseReason: 'Test release',
+        householdId: _hh,
+        idempotencyKey: idempotencyKey,
+      );
+      expect(r1, isA<AppOk<SavingsGoal>>());
+
+      // Retry with same key.
+      final r2 = await releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 10000,
+        releaseReason: 'Test release',
+        householdId: _hh,
+        idempotencyKey: idempotencyKey,
+      );
+      expect(r2, isA<AppOk<SavingsGoal>>());
+
+      // Must have exactly 2 movements: 1 funding (initial) + 1 release.
+      final movResult = await goalRepo.getMovements(goal.id);
+      final movements = (movResult as AppOk<List<GoalMovement>>).value;
+      final releaseMovements = movements
+          .where((m) => m.movementType == GoalMovementType.release)
+          .toList();
+      expect(
+        releaseMovements.length,
+        1,
+        reason:
+            'Retry with same idempotency key must not create duplicate release movement',
+      );
     },
   );
 }

@@ -36,9 +36,7 @@ final class DriftAccountRepository implements AccountRepository {
       createdAt: now,
       updatedAt: now,
       notes: Value(params.notes),
-      metadata: Value(
-        params.metadata != null ? jsonEncode(params.metadata) : null,
-      ),
+      metadata: Value(params.metadata != null ? jsonEncode(params.metadata) : null),
       idempotencyKey: Value(params.idempotencyKey),
       idempotencyPayload: Value(params.idempotencyPayload),
     );
@@ -52,46 +50,25 @@ final class DriftAccountRepository implements AccountRepository {
       rethrow;
     }
 
-    return _toAccount(
-      await (_db.select(
-        _db.financialAccounts,
-      )..where((t) => t.id.equals(params.id))).getSingle(),
-    );
+    return _toAccount(await (_db.select(_db.financialAccounts)..where((t) => t.id.equals(params.id))).getSingle());
   }
 
   @override
-  Future<FinancialAccount?> findByIdempotencyKey({
-    required String householdId,
-    required String idempotencyKey,
-  }) async {
-    final row =
-        await (_db.select(_db.financialAccounts)..where(
-              (t) =>
-                  t.householdId.equals(householdId) &
-                  t.idempotencyKey.equals(idempotencyKey),
-            ))
-            .getSingleOrNull();
+  Future<FinancialAccount?> findByIdempotencyKey({required String householdId, required String idempotencyKey}) async {
+    final row = await (_db.select(
+      _db.financialAccounts,
+    )..where((t) => t.householdId.equals(householdId) & t.idempotencyKey.equals(idempotencyKey))).getSingleOrNull();
     return row == null ? null : _toAccount(row);
   }
 
   @override
-  Future<FinancialAccount?> findById({
-    required String id,
-    required String householdId,
-  }) async {
-    final row =
-        await (_db.select(_db.financialAccounts)..where(
-              (t) => t.id.equals(id) & t.householdId.equals(householdId),
-            ))
-            .getSingleOrNull();
+  Future<FinancialAccount?> findById({required String id, required String householdId}) async {
+    final row = await (_db.select(_db.financialAccounts)..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).getSingleOrNull();
     return row == null ? null : _toAccount(row);
   }
 
   @override
-  Future<List<FinancialAccount>> findByHousehold({
-    required String householdId,
-    bool includeArchived = false,
-  }) async {
+  Future<List<FinancialAccount>> findByHousehold({required String householdId, bool includeArchived = false}) async {
     final query = _db.select(_db.financialAccounts)
       ..where((t) {
         final base = t.householdId.equals(householdId);
@@ -104,47 +81,24 @@ final class DriftAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<bool> hasOpeningBalance({
-    required String accountId,
-    required String householdId,
-  }) async {
-    final count =
-        await (_db.select(_db.ledgerEntries)..where(
-              (t) =>
-                  t.accountId.equals(accountId) &
-                  t.householdId.equals(householdId) &
-                  t.entryType.equals('openingBalance'),
-            ))
-            .get();
+  Future<bool> hasOpeningBalance({required String accountId, required String householdId}) async {
+    final count = await (_db.select(
+      _db.ledgerEntries,
+    )..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId) & t.entryType.equals('openingBalance'))).get();
     return count.isNotEmpty;
   }
 
   @override
-  Future<FinancialAccount> archiveAccount({
-    required String id,
-    required String householdId,
-    required DateTime archivedAt,
-    required String updatedAt,
-  }) async {
+  Future<FinancialAccount> archiveAccount({required String id, required String householdId, required DateTime archivedAt, required String updatedAt}) async {
     final existing = await findById(id: id, householdId: householdId);
     if (existing == null) throw AccountNotFoundError(id);
     if (existing.isArchived) throw AccountAlreadyArchivedError(id);
 
-    await (_db.update(
-      _db.financialAccounts,
-    )..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).write(
-      FinancialAccountsCompanion(
-        isArchived: const Value(true),
-        archivedAt: Value(archivedAt.toUtc().toIso8601String()),
-        updatedAt: Value(updatedAt),
-      ),
+    await (_db.update(_db.financialAccounts)..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).write(
+      FinancialAccountsCompanion(isArchived: const Value(true), archivedAt: Value(archivedAt.toUtc().toIso8601String()), updatedAt: Value(updatedAt)),
     );
 
-    return _toAccount(
-      await (_db.select(
-        _db.financialAccounts,
-      )..where((t) => t.id.equals(id))).getSingle(),
-    );
+    return _toAccount(await (_db.select(_db.financialAccounts)..where((t) => t.id.equals(id))).getSingle());
   }
 
   @override
@@ -173,8 +127,7 @@ final class DriftAccountRepository implements AccountRepository {
       if (isProtected != null && isProtected != existing.isProtected) {
         throw ClassificationImmutabilityError(id, 'isProtected');
       }
-      if (includeInNetWorth != null &&
-          includeInNetWorth != existing.includeInNetWorth) {
+      if (includeInNetWorth != null && includeInNetWorth != existing.includeInNetWorth) {
         throw ClassificationImmutabilityError(id, 'includeInNetWorth');
       }
       if (includeInZakat != null && includeInZakat != existing.includeInZakat) {
@@ -182,39 +135,21 @@ final class DriftAccountRepository implements AccountRepository {
       }
     }
 
-    await (_db.update(
-      _db.financialAccounts,
-    )..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).write(
+    await (_db.update(_db.financialAccounts)..where((t) => t.id.equals(id) & t.householdId.equals(householdId))).write(
       FinancialAccountsCompanion(
         name: name != null ? Value(name) : const Value.absent(),
-        isSpendable: isSpendable != null
-            ? Value(isSpendable)
-            : const Value.absent(),
-        isProtected: isProtected != null
-            ? Value(isProtected)
-            : const Value.absent(),
-        includeInNetWorth: includeInNetWorth != null
-            ? Value(includeInNetWorth)
-            : const Value.absent(),
-        includeInZakat: includeInZakat != null
-            ? Value(includeInZakat)
-            : const Value.absent(),
-        displayOrder: displayOrder != null
-            ? Value(displayOrder)
-            : const Value.absent(),
+        isSpendable: isSpendable != null ? Value(isSpendable) : const Value.absent(),
+        isProtected: isProtected != null ? Value(isProtected) : const Value.absent(),
+        includeInNetWorth: includeInNetWorth != null ? Value(includeInNetWorth) : const Value.absent(),
+        includeInZakat: includeInZakat != null ? Value(includeInZakat) : const Value.absent(),
+        displayOrder: displayOrder != null ? Value(displayOrder) : const Value.absent(),
         notes: notes != null ? Value(notes) : const Value.absent(),
-        metadata: metadata != null
-            ? Value(jsonEncode(metadata))
-            : const Value.absent(),
+        metadata: metadata != null ? Value(jsonEncode(metadata)) : const Value.absent(),
         updatedAt: Value(updatedAt),
       ),
     );
 
-    return _toAccount(
-      await (_db.select(
-        _db.financialAccounts,
-      )..where((t) => t.id.equals(id))).getSingle(),
-    );
+    return _toAccount(await (_db.select(_db.financialAccounts)..where((t) => t.id.equals(id))).getSingle());
   }
 
   // ── Classification guard helper ───────────────────────────────────────────
@@ -222,11 +157,7 @@ final class DriftAccountRepository implements AccountRepository {
   Future<bool> _hasLedgerEntries(String accountId, String householdId) async {
     final rows =
         await (_db.select(_db.ledgerEntries)
-              ..where(
-                (t) =>
-                    t.accountId.equals(accountId) &
-                    t.householdId.equals(householdId),
-              )
+              ..where((t) => t.accountId.equals(accountId) & t.householdId.equals(householdId))
               ..limit(1))
             .get();
     return rows.isNotEmpty;
@@ -248,14 +179,10 @@ final class DriftAccountRepository implements AccountRepository {
       includeInNetWorth: row.includeInNetWorth,
       includeInZakat: row.includeInZakat,
       isArchived: row.isArchived,
-      archivedAt: row.archivedAt != null
-          ? DateTime.tryParse(row.archivedAt!)?.toUtc()
-          : null,
+      archivedAt: row.archivedAt != null ? DateTime.tryParse(row.archivedAt!)?.toUtc() : null,
       displayOrder: row.displayOrder,
       notes: row.notes,
-      metadata: row.metadata != null
-          ? Map<String, dynamic>.from(jsonDecode(row.metadata!) as Map)
-          : null,
+      metadata: row.metadata != null ? Map<String, dynamic>.from(jsonDecode(row.metadata!) as Map) : null,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       createdBy: row.createdBy,

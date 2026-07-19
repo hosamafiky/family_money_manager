@@ -17,28 +17,18 @@ abstract interface class BalanceRepository {
   /// Returns 0 for unknown or cross-household accounts (legacy behaviour).
   /// Prefer [balanceForAccount] for typed results that distinguish zero-balance
   /// from account-not-found.
-  Future<int> currentBalanceMinorUnits({
-    required String accountId,
-    required String householdId,
-  });
+  Future<int> currentBalanceMinorUnits({required String accountId, required String householdId});
 
   /// Returns a typed balance result for [accountId] within [householdId].
   ///
   /// - [BalanceFound] — account exists in this household; [minorUnits] may be 0.
   /// - [BalanceAccountNotFound] — account not found in this household.
-  Future<BalanceQueryResult> balanceForAccount({
-    required String accountId,
-    required String householdId,
-  });
+  Future<BalanceQueryResult> balanceForAccount({required String accountId, required String householdId});
 
   /// Returns the balance of [accountId] as of [asOfDate] (inclusive).
   ///
   /// [asOfDate] must be in "YYYY-MM-DD" format (INV-012).
-  Future<int> historicalBalanceMinorUnits({
-    required String accountId,
-    required String householdId,
-    required String asOfDate,
-  });
+  Future<int> historicalBalanceMinorUnits({required String accountId, required String householdId, required String asOfDate});
 
   /// Returns the derived balances for all non-archived accounts in
   /// [householdId] that have [includeInNetWorth] set to true.
@@ -55,30 +45,12 @@ abstract final class BalanceCalculator {
   BalanceCalculator._();
 
   /// Wraps [LedgerCalculator.balance] for consistent naming at the feature layer.
-  static int currentBalance({
-    required String accountId,
-    required List<LedgerEntryRecord> entries,
-    required Currency currency,
-  }) {
-    return LedgerCalculator.balance(
-      accountId: accountId,
-      entries: entries,
-      currency: currency,
-    ).minorUnits;
+  static int currentBalance({required String accountId, required List<LedgerEntryRecord> entries, required Currency currency}) {
+    return LedgerCalculator.balance(accountId: accountId, entries: entries, currency: currency).minorUnits;
   }
 
   /// Wraps [LedgerCalculator.historicalBalance] for consistent naming.
-  static int historicalBalance({
-    required String accountId,
-    required List<LedgerEntryRecord> entries,
-    required Currency currency,
-    required String asOfDate,
-  }) {
-    return LedgerCalculator.historicalBalance(
-      accountId: accountId,
-      entries: entries,
-      currency: currency,
-      asOfDate: asOfDate,
-    ).minorUnits;
+  static int historicalBalance({required String accountId, required List<LedgerEntryRecord> entries, required Currency currency, required String asOfDate}) {
+    return LedgerCalculator.historicalBalance(accountId: accountId, entries: entries, currency: currency, asOfDate: asOfDate).minorUnits;
   }
 }

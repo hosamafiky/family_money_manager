@@ -1,7 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
+import 'package:family_money_manager/features/goals/presentation/goal_money_formatter.dart';
 import 'package:family_money_manager/features/goals/presentation/providers/goal_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,12 +51,8 @@ class _GoalDetailContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final goal = progress.goal;
     final pct = progress.percentageFunded ?? 0;
-    final isActive =
-        goal.status == GoalStatus.active ||
-        goal.status == GoalStatus.targetReached;
-    final canArchive =
-        goal.status != GoalStatus.archived &&
-        progress.reserveBalanceMinorUnits == 0;
+    final isActive = goal.status == GoalStatus.active || goal.status == GoalStatus.targetReached;
+    final canArchive = goal.status != GoalStatus.archived && progress.reserveBalanceMinorUnits == 0;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -64,20 +60,12 @@ class _GoalDetailContent extends ConsumerWidget {
         // Status badge (text + icon — no color alone)
         Row(
           children: [
-            Expanded(
-              child: Text(
-                goal.name,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
+            Expanded(child: Text(goal.name, style: Theme.of(context).textTheme.headlineSmall)),
             _StatusBadge(status: goal.status, l10n: l10n),
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          _purposeLabel(goal.purpose, l10n),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        Text(_purposeLabel(goal.purpose, l10n), style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
 
         // Progress section
@@ -87,35 +75,14 @@ class _GoalDetailContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LinearProgressIndicator(
-                  value: (pct / 100).clamp(0.0, 1.0),
-                  minHeight: 10,
-                ),
+                LinearProgressIndicator(value: (pct / 100).clamp(0.0, 1.0), minHeight: 10),
                 const SizedBox(height: 12),
-                _InfoRow(
-                  label: l10n.goalReserveBalance,
-                  value:
-                      '${goal.currencyCode} ${_fmt(progress.reserveBalanceMinorUnits)}',
-                ),
-                _InfoRow(
-                  label: l10n.goalTarget,
-                  value: '${goal.currencyCode} ${_fmt(goal.targetMinorUnits)}',
-                ),
-                _InfoRow(
-                  label: l10n.goalRemaining,
-                  value:
-                      '${goal.currencyCode} ${_fmt(progress.remainingMinorUnits)}',
-                ),
+                _InfoRow(label: l10n.goalReserveBalance, value: '${goal.currencyCode} ${_fmt(progress.reserveBalanceMinorUnits)}'),
+                _InfoRow(label: l10n.goalTarget, value: '${goal.currencyCode} ${_fmt(goal.targetMinorUnits)}'),
+                _InfoRow(label: l10n.goalRemaining, value: '${goal.currencyCode} ${_fmt(progress.remainingMinorUnits)}'),
                 if (progress.overfundedMinorUnits > 0)
-                  _InfoRow(
-                    label: l10n.goalOverfunded,
-                    value:
-                        '${goal.currencyCode} ${_fmt(progress.overfundedMinorUnits)}',
-                  ),
-                _InfoRow(
-                  label: l10n.goalPercent(pct),
-                  value: _progressStateLabel(progress.progressState, l10n),
-                ),
+                  _InfoRow(label: l10n.goalOverfunded, value: '${goal.currencyCode} ${_fmt(progress.overfundedMinorUnits)}'),
+                _InfoRow(label: l10n.goalPercent(pct), value: _progressStateLabel(progress.progressState, l10n)),
               ],
             ),
           ),
@@ -143,11 +110,7 @@ class _GoalDetailContent extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => context.push('/goals/$goalId/fund'),
-                  icon: const Icon(Icons.add),
-                  label: Text(l10n.goalFundAction),
-                ),
+                child: ElevatedButton.icon(onPressed: () => context.push('/goals/$goalId/fund'), icon: const Icon(Icons.add), label: Text(l10n.goalFundAction)),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -202,25 +165,13 @@ class _GoalDetailContent extends ConsumerWidget {
         // Movements list
         if (progress.movements.isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text(
-            l10n.goalMovementFunding,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text(l10n.goalMovementFunding, style: Theme.of(context).textTheme.titleMedium),
           ...progress.movements.map(
             (m) => ListTile(
-              leading: Icon(
-                m.movementType == GoalMovementType.funding
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
-              ),
-              title: Text(
-                m.movementType == GoalMovementType.funding
-                    ? l10n.goalMovementFunding
-                    : l10n.goalMovementRelease,
-              ),
+              leading: Icon(m.movementType == GoalMovementType.funding ? Icons.arrow_downward : Icons.arrow_upward),
+              title: Text(m.movementType == GoalMovementType.funding ? l10n.goalMovementFunding : l10n.goalMovementRelease),
               subtitle: Text(m.releaseReason ?? m.createdAt.substring(0, 10)),
-              onTap: () =>
-                  context.push('/transactions/${m.transferOperationId}'),
+              onTap: () => context.push('/transactions/${m.transferOperationId}'),
             ),
           ),
         ],
@@ -228,21 +179,12 @@ class _GoalDetailContent extends ConsumerWidget {
         // Revisions history
         if (progress.revisions.isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text(
-            l10n.goalRevisions,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text(l10n.goalRevisions, style: Theme.of(context).textTheme.titleMedium),
           ...progress.revisions.map(
             (r) => ListTile(
               title: Text(r.name),
-              subtitle: Text(
-                '${goal.currencyCode} ${_fmt(r.targetMinorUnits)} · ${r.revisionReason}',
-              ),
-              trailing: Text(
-                r.createdAt.length >= 10
-                    ? r.createdAt.substring(0, 10)
-                    : r.createdAt,
-              ),
+              subtitle: Text('${goal.currencyCode} ${_fmt(r.targetMinorUnits)} · ${r.revisionReason}'),
+              trailing: Text(r.createdAt.length >= 10 ? r.createdAt.substring(0, 10) : r.createdAt),
             ),
           ),
         ],
@@ -251,50 +193,24 @@ class _GoalDetailContent extends ConsumerWidget {
     );
   }
 
-  String _fmt(int minorUnits) {
-    final currencyCode = progress.currencyCode;
-    int scale;
-    try {
-      scale = Currency.fromCode(currencyCode).minorUnitScale;
-    } catch (_) {
-      scale = 2;
-    }
-    if (scale == 0) return '$minorUnits';
-    final divisor = _pow10(scale);
-    final whole = minorUnits ~/ divisor;
-    final fraction = (minorUnits % divisor).abs().toString().padLeft(
-      scale,
-      '0',
-    );
-    return '$whole.$fraction';
-  }
+  String _fmt(int minorUnits) => GoalMoneyFormatter.format(minorUnits, progress.currencyCode);
 
-  static int _pow10(int n) {
-    var r = 1;
-    for (var i = 0; i < n; i++) {
-      r *= 10;
-    }
-    return r;
-  }
+  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) => switch (purpose) {
+    GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
+    GoalPurpose.homePurchase => l10n.purposeHomePurchase,
+    GoalPurpose.education => l10n.purposeEducation,
+    GoalPurpose.travel => l10n.purposeTravel,
+    GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
+    GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
+    GoalPurpose.other => l10n.purposeOther,
+  };
 
-  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) =>
-      switch (purpose) {
-        GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
-        GoalPurpose.homePurchase => l10n.purposeHomePurchase,
-        GoalPurpose.education => l10n.purposeEducation,
-        GoalPurpose.travel => l10n.purposeTravel,
-        GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
-        GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
-        GoalPurpose.other => l10n.purposeOther,
-      };
-
-  String _progressStateLabel(GoalProgressState state, AppLocalizations l10n) =>
-      switch (state) {
-        GoalProgressState.notStarted => l10n.goalProgressNotStarted,
-        GoalProgressState.inProgress => l10n.goalProgressInProgress,
-        GoalProgressState.targetReached => l10n.goalProgressTargetReached,
-        GoalProgressState.overfunded => l10n.goalProgressOverfunded,
-      };
+  String _progressStateLabel(GoalProgressState state, AppLocalizations l10n) => switch (state) {
+    GoalProgressState.notStarted => l10n.goalProgressNotStarted,
+    GoalProgressState.inProgress => l10n.goalProgressInProgress,
+    GoalProgressState.targetReached => l10n.goalProgressTargetReached,
+    GoalProgressState.overfunded => l10n.goalProgressOverfunded,
+  };
 }
 
 class _InfoRow extends StatelessWidget {
@@ -328,10 +244,7 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, icon) = switch (status) {
       GoalStatus.active => (l10n.goalStatusActive, Icons.radio_button_checked),
-      GoalStatus.targetReached => (
-        l10n.goalStatusTargetReached,
-        Icons.check_circle_outline,
-      ),
+      GoalStatus.targetReached => (l10n.goalStatusTargetReached, Icons.check_circle_outline),
       GoalStatus.completed => (l10n.goalStatusCompleted, Icons.check_circle),
       GoalStatus.archived => (l10n.goalStatusArchived, Icons.archive_outlined),
     };

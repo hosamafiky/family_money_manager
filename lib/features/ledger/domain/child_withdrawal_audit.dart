@@ -53,11 +53,7 @@ final class ChildWithdrawalAudit {
     required DateTime createdAt,
   }) {
     if (amountMinorUnits <= 0) {
-      throw ArgumentError.value(
-        amountMinorUnits,
-        'amountMinorUnits',
-        'ChildWithdrawalAudit amountMinorUnits must be positive (> 0)',
-      );
+      throw ArgumentError.value(amountMinorUnits, 'amountMinorUnits', 'ChildWithdrawalAudit amountMinorUnits must be positive (> 0)');
     }
     if (!warningShown) {
       throw ArgumentError.value(
@@ -68,25 +64,13 @@ final class ChildWithdrawalAudit {
       );
     }
     if (reason.isEmpty) {
-      throw ArgumentError.value(
-        reason,
-        'reason',
-        'ChildWithdrawalAudit reason must not be empty',
-      );
+      throw ArgumentError.value(reason, 'reason', 'ChildWithdrawalAudit reason must not be empty');
     }
     if (id.isEmpty) {
-      throw ArgumentError.value(
-        id,
-        'id',
-        'ChildWithdrawalAudit id must not be empty',
-      );
+      throw ArgumentError.value(id, 'id', 'ChildWithdrawalAudit id must not be empty');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'ChildWithdrawalAudit operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'ChildWithdrawalAudit operationId must not be empty');
     }
     return ChildWithdrawalAudit._(
       id: id,
@@ -129,15 +113,13 @@ final class ChildWithdrawalAudit {
   final DateTime createdAt;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is ChildWithdrawalAudit && other.id == id;
+  bool operator ==(Object other) => identical(this, other) || other is ChildWithdrawalAudit && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
 
   @override
-  String toString() =>
-      'ChildWithdrawalAudit(operationId: $operationId, accountId: $accountId)';
+  String toString() => 'ChildWithdrawalAudit(operationId: $operationId, accountId: $accountId)';
 }
 
 /// Parameters required to record a protected-fund withdrawal.
@@ -177,11 +159,7 @@ final class ChildWithdrawalAuditParams {
     bool biometricConfirmed = false,
   }) {
     if (amountMinorUnits <= 0) {
-      throw ArgumentError.value(
-        amountMinorUnits,
-        'amountMinorUnits',
-        'ChildWithdrawalAuditParams amountMinorUnits must be positive (> 0)',
-      );
+      throw ArgumentError.value(amountMinorUnits, 'amountMinorUnits', 'ChildWithdrawalAuditParams amountMinorUnits must be positive (> 0)');
     }
     if (!warningShown) {
       throw ArgumentError.value(
@@ -192,25 +170,13 @@ final class ChildWithdrawalAuditParams {
       );
     }
     if (reason.isEmpty) {
-      throw ArgumentError.value(
-        reason,
-        'reason',
-        'ChildWithdrawalAuditParams reason must not be empty',
-      );
+      throw ArgumentError.value(reason, 'reason', 'ChildWithdrawalAuditParams reason must not be empty');
     }
     if (operationId.isEmpty) {
-      throw ArgumentError.value(
-        operationId,
-        'operationId',
-        'operationId must not be empty',
-      );
+      throw ArgumentError.value(operationId, 'operationId', 'operationId must not be empty');
     }
     if (accountId.isEmpty) {
-      throw ArgumentError.value(
-        accountId,
-        'accountId',
-        'accountId must not be empty',
-      );
+      throw ArgumentError.value(accountId, 'accountId', 'accountId must not be empty');
     }
     return ChildWithdrawalAuditParams._(
       auditId: auditId,
@@ -257,10 +223,7 @@ final class MissingProtectedWithdrawalAuditError extends Error {
 
 /// Thrown when an audit record references a different operation than expected.
 final class AuditOperationMismatchError extends Error {
-  AuditOperationMismatchError({
-    required this.auditOperationId,
-    required this.expectedOperationId,
-  });
+  AuditOperationMismatchError({required this.auditOperationId, required this.expectedOperationId});
   final String auditOperationId;
   final String expectedOperationId;
   @override
@@ -274,10 +237,7 @@ final class AuditOperationMismatchError extends Error {
 /// Thrown when an audit record references a different account than the
 /// protected account being debited.
 final class AuditAccountMismatchError extends Error {
-  AuditAccountMismatchError({
-    required this.auditAccountId,
-    required this.expectedAccountId,
-  });
+  AuditAccountMismatchError({required this.auditAccountId, required this.expectedAccountId});
   final String auditAccountId;
   final String expectedAccountId;
   @override
@@ -289,11 +249,7 @@ final class AuditAccountMismatchError extends Error {
 
 /// Thrown when an operation would cause an account to go negative (INV-005).
 final class InsufficientFundsError extends Error {
-  InsufficientFundsError({
-    required this.accountId,
-    required this.availableMinorUnits,
-    required this.requestedMinorUnits,
-  });
+  InsufficientFundsError({required this.accountId, required this.availableMinorUnits, required this.requestedMinorUnits});
   final String accountId;
   final int availableMinorUnits;
   final int requestedMinorUnits;
