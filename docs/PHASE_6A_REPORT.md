@@ -1,8 +1,8 @@
 # Phase 6A Report — Savings Certificates / Fixed-Term Deposits
 
 **Gate HEAD (Phase 5B):** `86736ca7ecd19dea3ea93568a3aecc226faf870c`  
-**Feature commit:** `2b4b68fdc29a4e4f40a97ebb9c06bcbc01764912`  
-**Branch:** `main` (clean)  
+**Feature commit:** `25347f429f0388ef5abb87fc6a15f50887cef482`  
+**Branch:** `main` (clean after pin commit if any)  
 **Schema:** 16 → **17**  
 **Tests:** **1322 → 1410** (+88)
 
@@ -294,6 +294,6 @@ Unchanged from Phase 2+: sqlite3mc-ready binary; key injection still deferred (P
 ## 21. Exact branch / commit / clean status
 
 - **Branch:** `main`
-- **Commit:** `2b4b68fdc29a4e4f40a97ebb9c06bcbc01764912`
-- **Status:** clean (`git status --short` empty after commit)
+- **Feature commit:** `25347f429f0388ef5abb87fc6a15f50887cef482`
+- **Status:** working tree clean after docs pin
 - **Message:** `feat: Phase 6A – savings certificates and fixed-term deposit assets`
