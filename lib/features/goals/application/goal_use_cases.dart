@@ -251,8 +251,7 @@ final class FundGoalUseCase {
     }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
-    if (goal.status != GoalStatus.active &&
-        goal.status != GoalStatus.targetReached) {
+    if (goal.status != GoalStatus.active) {
       return const AppValidationFailure(
         field: 'goalId',
         messageKey: 'errorGoalNotActive',
@@ -308,28 +307,8 @@ final class FundGoalUseCase {
       return _mapTransferFailure(transferResult);
     }
 
-    // Check if target is now reached.
-    final balanceResult = await _goals.getReserveBalance(
-      reserveAccountId: goal.reserveAccountId,
-      householdId: householdId,
-    );
-    if (balanceResult is AppOk<int>) {
-      final balance = balanceResult.value;
-      if (balance >= goal.targetMinorUnits &&
-          goal.status == GoalStatus.active) {
-        await _goals.updateGoalStatus(
-          goalId: goalId,
-          status: GoalStatus.targetReached,
-        );
-        // Return an updated goal reflecting new status.
-        final updatedResult = await _goals.findGoalById(goalId);
-        if (updatedResult is AppOk<SavingsGoal?> &&
-            updatedResult.value != null) {
-          return AppOk(updatedResult.value!);
-        }
-      }
-    }
-
+    // Funding changes ledger + movements only — never goals.status.
+    // Progress is derived on read from reserve balance vs current target.
     final updatedResult = await _goals.findGoalById(goalId);
     if (updatedResult is AppOk<SavingsGoal?> && updatedResult.value != null) {
       return AppOk(updatedResult.value!);
@@ -498,15 +477,10 @@ final class GetGoalProgressUseCase {
     if (balanceResult is! AppOk<int>) return const AppPersistenceFailure();
 
     final balance = balanceResult.value;
-    final target = goal.targetMinorUnits;
-
-    final progressState = balance == 0
-        ? GoalProgressState.notStarted
-        : balance > target
-        ? GoalProgressState.overfunded
-        : balance == target
-        ? GoalProgressState.targetReached
-        : GoalProgressState.inProgress;
+    final progressState = GoalProgressState.fromBalance(
+      balance,
+      goal.targetMinorUnits,
+    );
 
     return AppOk(
       GoalProgress(
@@ -581,10 +555,12 @@ final class UpdateGoalRevisionUseCase {
 
 // ── CompleteGoalUseCase ────────────────────────────────────────────────────
 
-/// Transitions an active (or targetReached) goal to [GoalStatus.completed].
+/// Transitions an active goal to [GoalStatus.completed].
 ///
-/// All validation, status update, completedAt, and immutable lifecycle-event
-/// insertion run inside a single repository transaction (Phase 5B.7).
+/// Normal completion requires derived reserve balance >= current target
+/// (not a persisted progress status). All validation, status update,
+/// completedAt, and immutable lifecycle-event insertion run inside a
+/// single repository transaction (Phase 5B.7).
 final class CompleteGoalUseCase {
   const CompleteGoalUseCase(this._goals);
 

@@ -106,10 +106,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
-    if (result is AppOk<dynamic>) {
+    if (result is AppOk<SavingsGoal>) {
       // Rotate key so that navigating back and creating another goal is fresh.
       _idempotencyKey = const Uuid().v4();
-      ref.invalidate(goalsProvider);
+      invalidateGoalMoneyProviders(ref, goalId: result.value.id);
       context.pop();
     } else if (result is AppValidationFailure<SavingsGoal>) {
       ScaffoldMessenger.of(

@@ -134,7 +134,7 @@ Three localization files were in the working tree as unstaged changes at the tim
 | `household_id`        | TEXT    | FK to households                           |
 | `reserve_account_id`  | TEXT    | FK to financial_accounts                   |
 | `currency_code`       | TEXT    | ISO 4217, immutable                        |
-| `status`              | TEXT    | active/targetReached/completed/archived    |
+| `status`              | TEXT    | active/completed/archived (progress is derived; see Phase 5B.8) |
 | `idempotency_key`     | TEXT    | Unique per household                       |
 | `idempotency_payload` | TEXT    | Payload fingerprint for conflict detection |
 | `created_at`          | TEXT    | UTC ISO 8601                               |
@@ -285,7 +285,7 @@ The optional initial funding transfer is performed **outside** the transaction (
 
 `FundGoalUseCase` validates:
 
-- Goal must be `active` or `targetReached`
+- Goal must be `active` (Phase 5B.8: funding no longer treats persisted `targetReached` as a status)
 - Source ≠ reserve account
 - Source not archived, not protected, not `goalReserve` type
 - Same household (source looked up with household scope)

@@ -142,7 +142,7 @@ void main() {
             .first;
     expect(
       row.read<String>('status'),
-      isIn(['active', 'targetReached']),
+      isIn(['active']),
       reason: 'goal must remain non-completed after rollback',
     );
     expect(row.readNullable<String>('completed_at'), isNull);

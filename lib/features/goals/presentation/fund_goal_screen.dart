@@ -80,8 +80,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
 
     if (result is AppOk) {
       _idempotencyKey = const Uuid().v4();
-      ref.invalidate(goalProgressProvider(widget.goalId));
-      ref.invalidate(goalsProvider(_householdId));
+      invalidateGoalMoneyProviders(ref, goalId: widget.goalId);
       context.pop();
     } else if (result is AppInsufficientFunds) {
       ScaffoldMessenger.of(context).showSnackBar(

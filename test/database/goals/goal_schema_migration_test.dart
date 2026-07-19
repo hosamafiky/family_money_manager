@@ -1037,6 +1037,11 @@ void main() {
         reason: 'Reserve balance must equal the funded amount',
       );
       expect(progress.isTargetReached, isTrue);
+      // Phase 5B.8: funding must not persist targetReached as lifecycle status.
+      final refreshed =
+          ((await goalRepo.findGoalById(goal.id)) as AppOk<SavingsGoal?>)
+              .value!;
+      expect(refreshed.status, GoalStatus.active);
     },
   );
 

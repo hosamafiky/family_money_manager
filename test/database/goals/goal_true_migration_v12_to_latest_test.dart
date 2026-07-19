@@ -16,7 +16,7 @@ import '../../helpers/true_schema_v12.dart';
 
 void main() {
   test(
-    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13+v15 objects',
+    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13+v16 objects',
     () async {
       final path = await materializeTrueSchemaV12File();
       addTearDown(() async {
@@ -39,12 +39,12 @@ void main() {
       );
       before.close();
 
-      // Reopen with current AppDatabase → onUpgrade 12→15
+      // Reopen with current AppDatabase → onUpgrade 12→16
       final db = AppDatabase.forFile(path);
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 15);
+      expect(version.first.read<int>('user_version'), 16);
 
       expect(
         (await db
@@ -83,7 +83,7 @@ void main() {
               .first
               .read<int>('c'),
           1,
-          reason: '$name must exist after upgrade to v15',
+          reason: '$name must exist after upgrade to v16',
         );
       }
       expect(

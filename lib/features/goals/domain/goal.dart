@@ -7,13 +7,13 @@ library;
 /// Stable client-generated identifier for a savings goal.
 typedef GoalId = String;
 
-/// Lifecycle status of a savings goal.
+/// Persisted lifecycle status of a savings goal.
 ///
-/// DESIGN NOTE (Phase 5B.1): `targetReached` is a persisted status that
-/// duplicates the derived [GoalProgressState.targetReached]. A future
-/// migration should remove `targetReached` from this enum and derive it
-/// solely from the ledger balance via [GoalProgressState].
-enum GoalStatus { active, targetReached, completed, archived }
+/// Phase 5B.8: only `active`, `completed`, and `archived` are persisted.
+/// Funding progress (`notStarted` / `inProgress` / `targetReached` /
+/// `overfunded`) is derived solely via [GoalProgressState] from the reserve
+/// ledger balance vs the current target revision — never written to `goals.status`.
+enum GoalStatus { active, completed, archived }
 
 /// Whether money is flowing into or out of a goal reserve, or reversing a prior movement.
 enum GoalMovementType { funding, release, reversal }
@@ -43,7 +43,7 @@ enum GoalPurpose {
 }
 
 /// Derived progress state — computed from balance vs target.
-/// Independent from [GoalStatus].
+/// Independent from [GoalStatus]. Never persisted.
 enum GoalProgressState {
   /// Balance is exactly zero.
   notStarted,
@@ -51,11 +51,19 @@ enum GoalProgressState {
   /// 0 < balance < target.
   inProgress,
 
-  /// balance >= target (at or above target).
+  /// balance == target (exact).
   targetReached,
 
   /// balance > target (strictly over).
-  overfunded,
+  overfunded;
+
+  /// Sole canonical derivation path: reserve balance vs current target.
+  static GoalProgressState fromBalance(int balance, int target) {
+    if (balance == 0) return GoalProgressState.notStarted;
+    if (balance > target) return GoalProgressState.overfunded;
+    if (balance == target) return GoalProgressState.targetReached;
+    return GoalProgressState.inProgress;
+  }
 }
 
 /// A single funding, release, or reversal movement linking a ledger transfer to a goal.

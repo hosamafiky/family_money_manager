@@ -58,7 +58,9 @@ Test-only `GoalLifecycleFailAfter` (`debugLifecycleFailAfter` on `DriftGoalRepos
 | COMP-ROLL-5 | afterLifecycleEventInsertion |
 | COMP-ROLL-6 | preCommit |
 
-After every injected failure: status remains non-completed (`active`/`targetReached`), `completed_at` null, no completed lifecycle event, no extra ledger ops/entries/movements, identity safely retryable → retry yields exactly one completed goal + one lifecycle event.
+After every injected failure: status remains non-completed (`active`), `completed_at` null, no completed lifecycle event, no extra ledger ops/entries/movements, identity safely retryable → retry yields exactly one completed goal + one lifecycle event.
+
+> **Phase 5B.8 note:** earlier wording referenced `active`/`targetReached` as non-completed statuses. As of 5B.8, `targetReached` is no longer a persisted lifecycle value.
 
 ---
 
@@ -89,13 +91,13 @@ Material transitions go **only** through typed workflows:
 
 | Transition | Workflow |
 |---|---|
-| active/targetReached → completed | `CompleteGoalUseCase` → `completeGoal` |
-| active/targetReached/completed → archived | `ArchiveGoalUseCase` → `archiveGoal` |
+| active → completed | `CompleteGoalUseCase` → `completeGoal` |
+| active/completed → archived | `ArchiveGoalUseCase` → `archiveGoal` |
 | archived → active | `RestoreGoalUseCase` → `restoreGoal` |
 | completed → active | **FORBIDDEN** |
 | archived → completed | **FORBIDDEN** |
 
-`updateGoalStatus` rejects `completed` / `archived` / `active` (messageKey `errorGoalLifecycleRequiresTypedWorkflow`). Only `targetReached` remains for FundGoal progress persistence.
+`updateGoalStatus` rejects all statuses (messageKey `errorGoalLifecycleRequiresTypedWorkflow`). **Phase 5B.8 correction:** persisted `targetReached` was removed; progress is ledger-derived only via `GoalProgressState`.
 
 DB: `reject_unsupported_goal_status_transition` (plus existing `goal_status_valid_transition`).
 
@@ -204,7 +206,7 @@ Unchanged: encryption-ready sqlite3mc binary via pub hooks; production key injec
 | Android SQLite3MultipleCiphers runtime unverified | High | Deferred |
 | Deterministic dual-connection Completer barrier | Medium | Unverified |
 | Mid-migration abort injection | Low | Not fail-injected |
-| `targetReached` persists as status (may be derived later) | Low | Documented earlier |
+| ~~`targetReached` persists as status~~ | — | **Closed in Phase 5B.8** — ledger-derived only |
 
 ---
 

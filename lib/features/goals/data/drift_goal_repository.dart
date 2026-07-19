@@ -242,29 +242,12 @@ final class DriftGoalRepository implements GoalRepository {
     String? completedAt,
     String? archivedAt,
   }) async {
-    // Material lifecycle transitions require typed atomic workflows.
-    if (status == GoalStatus.completed ||
-        status == GoalStatus.archived ||
-        status == GoalStatus.active) {
-      return const AppValidationFailure(
-        field: 'status',
-        messageKey: 'errorGoalLifecycleRequiresTypedWorkflow',
-      );
-    }
-    try {
-      await (_db.update(
-        _db.goalsTable,
-      )..where((t) => t.id.equals(goalId))).write(
-        GoalsTableCompanion(
-          status: Value(status.name),
-          completedAt: Value(completedAt),
-          archivedAt: Value(archivedAt),
-        ),
-      );
-      return const AppOk(null);
-    } on Exception catch (_) {
-      return const AppPersistenceFailure();
-    }
+    // Phase 5B.8: no direct status writes. Lifecycle uses typed workflows;
+    // progress is ledger-derived and never persisted on goals.status.
+    return const AppValidationFailure(
+      field: 'status',
+      messageKey: 'errorGoalLifecycleRequiresTypedWorkflow',
+    );
   }
 
   // ── completeGoal (atomic) ─────────────────────────────────────────────────
@@ -1020,7 +1003,8 @@ final class DriftGoalRepository implements GoalRepository {
 
   GoalStatus _statusFromCode(String code) => switch (code) {
     'active' => GoalStatus.active,
-    'targetReached' => GoalStatus.targetReached,
+    // Legacy pre-5B.8 value migrated to active; treat as active if seen.
+    'targetReached' => GoalStatus.active,
     'completed' => GoalStatus.completed,
     'archived' => GoalStatus.archived,
     _ => GoalStatus.active,

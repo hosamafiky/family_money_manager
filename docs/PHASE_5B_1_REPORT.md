@@ -184,14 +184,14 @@ Test GR-3 in `goal_schema_migration_test.dart` verifies cross-household insertio
 
 `GoalStatus` (persisted): `active`, `completed`, `archived`
 
-`GoalProgressState` (derived from ledger balance):
+`GoalProgressState` (derived from ledger balance; never persisted — Phase 5B.8 closure):
 
 - `notStarted` — reserve balance = 0
 - `inProgress` — 0 < balance < target
-- `targetReached` — balance ≥ target (exact)
+- `targetReached` — balance == target (exact)
 - `overfunded` — balance > target
 
-There is no persisted `is_target_reached` column. Progress is computed in `GoalProgress.fromBalance()` using the live reserve balance.
+There is no persisted `is_target_reached` column. Progress is computed via `GoalProgressState.fromBalance(balance, target)` using the live reserve balance (Phase 5B.8).
 
 Tests GP-1 through GP-3 in `goal_schema_migration_test.dart` verify correct state derivation after funding and overfunding.
 

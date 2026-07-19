@@ -156,11 +156,32 @@ void main() {
       expect(GoalMovementType.values, contains(GoalMovementType.release));
     });
 
-    test('13. GoalStatus transitions exist', () {
-      expect(GoalStatus.values, contains(GoalStatus.active));
-      expect(GoalStatus.values, contains(GoalStatus.targetReached));
-      expect(GoalStatus.values, contains(GoalStatus.completed));
-      expect(GoalStatus.values, contains(GoalStatus.archived));
+    test('13. GoalStatus has only active/completed/archived', () {
+      expect(GoalStatus.values, [
+        GoalStatus.active,
+        GoalStatus.completed,
+        GoalStatus.archived,
+      ]);
+      expect(GoalStatus.values.length, 3);
+    });
+
+    test('13b. GoalProgressState.fromBalance is sole derivation path', () {
+      expect(
+        GoalProgressState.fromBalance(0, 10),
+        GoalProgressState.notStarted,
+      );
+      expect(
+        GoalProgressState.fromBalance(5, 10),
+        GoalProgressState.inProgress,
+      );
+      expect(
+        GoalProgressState.fromBalance(10, 10),
+        GoalProgressState.targetReached,
+      );
+      expect(
+        GoalProgressState.fromBalance(11, 10),
+        GoalProgressState.overfunded,
+      );
     });
   });
 

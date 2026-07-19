@@ -28,7 +28,8 @@ class GoalsTable extends Table {
   /// ISO 4217 currency code. Immutable after creation.
   TextColumn get currencyCode => text()();
 
-  /// 'active', 'targetReached', 'completed', 'archived'.
+  /// Persisted lifecycle only: 'active', 'completed', 'archived'.
+  /// Progress is never stored here (Phase 5B.8).
   TextColumn get status => text()();
 
   /// Unique per (household_id, idempotency_key).

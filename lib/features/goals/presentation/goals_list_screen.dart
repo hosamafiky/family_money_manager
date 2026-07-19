@@ -12,8 +12,8 @@ const _householdId = 'household-v1';
 /// Screen listing all savings goals for the current household.
 ///
 /// Shows each goal's name, purpose, currency, target, reserve balance,
-/// progress percentage, and status badge (text + icon, never color alone).
-/// No mixed-currency totals are displayed.
+/// progress percentage, lifecycle badge, and derived progress badge
+/// (text + icon, never color alone). No mixed-currency totals.
 class GoalsListScreen extends ConsumerWidget {
   const GoalsListScreen({super.key});
 
@@ -106,7 +106,7 @@ class _GoalCard extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                  _StatusBadge(status: goal.status, l10n: l10n),
+                  _LifecycleBadge(status: goal.status, l10n: l10n),
                 ],
               ),
               const SizedBox(height: 4),
@@ -127,6 +127,8 @@ class _GoalCard extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _ProgressBadge(state: progress.progressState, l10n: l10n),
+                      const SizedBox(height: 6),
                       LinearProgressIndicator(
                         value: (pct / 100).clamp(0.0, 1.0),
                         minHeight: 6,
@@ -172,8 +174,8 @@ class _GoalCard extends ConsumerWidget {
       };
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status, required this.l10n});
+class _LifecycleBadge extends StatelessWidget {
+  const _LifecycleBadge({required this.status, required this.l10n});
 
   final GoalStatus status;
   final AppLocalizations l10n;
@@ -182,12 +184,45 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, icon) = switch (status) {
       GoalStatus.active => (l10n.goalStatusActive, Icons.radio_button_checked),
-      GoalStatus.targetReached => (
-        l10n.goalStatusTargetReached,
-        Icons.check_circle_outline,
-      ),
       GoalStatus.completed => (l10n.goalStatusCompleted, Icons.check_circle),
       GoalStatus.archived => (l10n.goalStatusArchived, Icons.archive_outlined),
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+}
+
+class _ProgressBadge extends StatelessWidget {
+  const _ProgressBadge({required this.state, required this.l10n});
+
+  final GoalProgressState state;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, icon) = switch (state) {
+      GoalProgressState.notStarted => (
+        l10n.goalProgressNotStarted,
+        Icons.flag_outlined,
+      ),
+      GoalProgressState.inProgress => (
+        l10n.goalProgressInProgress,
+        Icons.trending_up,
+      ),
+      GoalProgressState.targetReached => (
+        l10n.goalProgressTargetReached,
+        Icons.flag,
+      ),
+      GoalProgressState.overfunded => (
+        l10n.goalProgressOverfunded,
+        Icons.insights,
+      ),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,

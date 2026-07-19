@@ -86,6 +86,9 @@ part 'app_database.g.dart';
 ///                 reversal movements require balanced mirror legs, inverse
 ///                 accounts vs original, operation type reversal, and unique
 ///                 linkage; reject_unsupported_goal_status_transition alias.
+///  16 — Phase 5B.8: migrate persisted targetReached → active; lifecycle
+///                 status CHECK triggers (active/completed/archived only);
+///                 status-transition triggers without targetReached.
 @DriftDatabase(
   tables: [
     Households,
@@ -118,7 +121,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -152,6 +155,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyPhase5B5ReversalAndLifecycleHardening();
       await _applyPhase5B6BalancedMovementTrigger();
       await _applyPhase5B7ReversalBalancedAndStatusTriggers();
+      await _applyPhase5B8LifecycleProgressSeparation();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -261,6 +265,10 @@ class AppDatabase extends _$AppDatabase {
       if (from <= 14) {
         // v14 → v15: Phase 5B.7 — reversal balanced legs + status alias.
         await _applyPhase5B7ReversalBalancedAndStatusTriggers();
+      }
+      if (from <= 15) {
+        // v15 → v16: Phase 5B.8 — lifecycle/progress separation.
+        await _applyPhase5B8LifecycleProgressSeparation();
       }
     },
     beforeOpen: (details) async {
@@ -774,10 +782,10 @@ class AppDatabase extends _$AppDatabase {
       END
     ''');
 
-    // Enforce recognised status transitions.
-    // Valid: active→targetReached, active→completed, active→archived,
-    //        targetReached→completed, targetReached→archived,
+    // Enforce recognised lifecycle status transitions (Phase 5B.8).
+    // Valid: active→completed, active→archived,
     //        completed→archived, archived→active (restore).
+    // Progress is never persisted — no targetReached transitions.
     await customStatement('''
       CREATE TRIGGER IF NOT EXISTS goal_status_valid_transition
       BEFORE UPDATE ON goals
@@ -786,10 +794,9 @@ class AppDatabase extends _$AppDatabase {
       BEGIN
         SELECT RAISE(ABORT, 'invalid goal status transition')
         WHERE NOT (
-          (OLD.status = 'active'        AND NEW.status IN ('targetReached','completed','archived'))
-          OR (OLD.status = 'targetReached' AND NEW.status IN ('completed','archived'))
-          OR (OLD.status = 'completed'   AND NEW.status = 'archived')
-          OR (OLD.status = 'archived'    AND NEW.status = 'active')
+          (OLD.status = 'active'    AND NEW.status IN ('completed','archived'))
+          OR (OLD.status = 'completed' AND NEW.status = 'archived')
+          OR (OLD.status = 'archived'  AND NEW.status = 'active')
         );
       END
     ''');
@@ -1353,20 +1360,94 @@ class AppDatabase extends _$AppDatabase {
     );
 
     // Explicit product-policy alias (same allowed set as goal_status_valid_transition).
-    // Forbidden: completed→active, archived→completed, and any other unsupported path.
+    // Forbidden: completed→active, archived→completed, targetReached, and any other path.
     await customStatement('''
       CREATE TRIGGER IF NOT EXISTS reject_unsupported_goal_status_transition
       BEFORE UPDATE OF status ON goals
       FOR EACH ROW
       WHEN NEW.status != OLD.status
         AND NOT (
-          (OLD.status = 'active' AND NEW.status IN ('targetReached','completed','archived'))
-          OR (OLD.status = 'targetReached' AND NEW.status IN ('completed','archived'))
+          (OLD.status = 'active' AND NEW.status IN ('completed','archived'))
           OR (OLD.status = 'completed' AND NEW.status = 'archived')
           OR (OLD.status = 'archived' AND NEW.status = 'active')
         )
       BEGIN
         SELECT RAISE(ABORT, 'unsupported goal status transition');
+      END
+    ''');
+  }
+
+  // ── Phase 5B.8: Lifecycle / derived-progress separation ───────────────────
+
+  Future<void> _applyPhase5B8LifecycleProgressSeparation() async {
+    // Drop transition triggers BEFORE migrating rows: the legacy allowed set
+    // never included targetReached→active, so the data fix would abort.
+    await customStatement(
+      'DROP TRIGGER IF EXISTS goal_status_valid_transition',
+    );
+    await customStatement(
+      'DROP TRIGGER IF EXISTS reject_unsupported_goal_status_transition',
+    );
+    await customStatement('DROP TRIGGER IF EXISTS check_goal_lifecycle_status');
+    await customStatement(
+      'DROP TRIGGER IF EXISTS check_goal_lifecycle_status_update',
+    );
+
+    // Migrate any persisted progress-as-lifecycle rows to active.
+    // Does NOT insert completion lifecycle events.
+    await customStatement(
+      "UPDATE goals SET status = 'active' WHERE status = 'targetReached'",
+    );
+
+    // Recreate transition triggers without targetReached.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_status_valid_transition
+      BEFORE UPDATE ON goals
+      FOR EACH ROW
+      WHEN NEW.status != OLD.status
+      BEGIN
+        SELECT RAISE(ABORT, 'invalid goal status transition')
+        WHERE NOT (
+          (OLD.status = 'active'    AND NEW.status IN ('completed','archived'))
+          OR (OLD.status = 'completed' AND NEW.status = 'archived')
+          OR (OLD.status = 'archived'  AND NEW.status = 'active')
+        );
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS reject_unsupported_goal_status_transition
+      BEFORE UPDATE OF status ON goals
+      FOR EACH ROW
+      WHEN NEW.status != OLD.status
+        AND NOT (
+          (OLD.status = 'active' AND NEW.status IN ('completed','archived'))
+          OR (OLD.status = 'completed' AND NEW.status = 'archived')
+          OR (OLD.status = 'archived' AND NEW.status = 'active')
+        )
+      BEGIN
+        SELECT RAISE(ABORT, 'unsupported goal status transition');
+      END
+    ''');
+
+    // Reject invalid lifecycle values on INSERT / UPDATE OF status.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_goal_lifecycle_status
+      BEFORE INSERT ON goals
+      FOR EACH ROW
+      WHEN NEW.status NOT IN ('active', 'completed', 'archived')
+      BEGIN
+        SELECT RAISE(ABORT, 'invalid goal lifecycle status');
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS check_goal_lifecycle_status_update
+      BEFORE UPDATE OF status ON goals
+      FOR EACH ROW
+      WHEN NEW.status NOT IN ('active', 'completed', 'archived')
+      BEGIN
+        SELECT RAISE(ABORT, 'invalid goal lifecycle status');
       END
     ''');
   }

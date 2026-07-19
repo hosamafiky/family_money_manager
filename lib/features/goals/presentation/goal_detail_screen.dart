@@ -13,8 +13,8 @@ const _householdId = 'household-v1';
 /// Detail screen for a single savings goal.
 ///
 /// Shows: name, purpose, currency, target, reserve balance, remaining,
-/// percentage, status, progress bar, movements list, revisions, and action
-/// buttons. Status badge always uses text + icon, never color alone.
+/// percentage, lifecycle status, derived progress, movements, revisions,
+/// and action buttons. Badges always use text + icon, never color alone.
 class GoalDetailScreen extends ConsumerWidget {
   const GoalDetailScreen({required this.goalId, super.key});
 
@@ -47,22 +47,25 @@ class _GoalDetailContent extends ConsumerWidget {
   final GoalProgress progress;
   final String goalId;
 
+  void _invalidateAfterLifecycle(WidgetRef ref) {
+    invalidateGoalLifecycleProviders(ref, goalId: goalId);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final goal = progress.goal;
     final pct = progress.percentageFunded ?? 0;
-    final isActive =
-        goal.status == GoalStatus.active ||
-        goal.status == GoalStatus.targetReached;
+    final isActive = goal.status == GoalStatus.active;
     final canArchive =
         goal.status != GoalStatus.archived &&
         progress.reserveBalanceMinorUnits == 0;
+    // Completed goals may still release retained reserve; status stays completed.
+    final canRelease = goal.status != GoalStatus.archived;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Status badge (text + icon — no color alone)
         Row(
           children: [
             Expanded(
@@ -71,9 +74,11 @@ class _GoalDetailContent extends ConsumerWidget {
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
-            _StatusBadge(status: goal.status, l10n: l10n),
+            _LifecycleBadge(status: goal.status, l10n: l10n),
           ],
         ),
+        const SizedBox(height: 8),
+        _ProgressBadge(state: progress.progressState, l10n: l10n),
         const SizedBox(height: 4),
         Text(
           _purposeLabel(goal.purpose, l10n),
@@ -81,7 +86,6 @@ class _GoalDetailContent extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
 
-        // Progress section
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -123,7 +127,6 @@ class _GoalDetailContent extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
 
-        // Child-fund separation note
         Card(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Padding(
@@ -139,7 +142,6 @@ class _GoalDetailContent extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
 
-        // Action buttons
         if (isActive)
           Row(
             children: [
@@ -160,6 +162,14 @@ class _GoalDetailContent extends ConsumerWidget {
               ),
             ],
           ),
+        if (!isActive && canRelease) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/goals/$goalId/release'),
+            icon: const Icon(Icons.arrow_upward),
+            label: Text(l10n.goalReleaseAction),
+          ),
+        ],
         if (isActive) ...[
           const SizedBox(height: 8),
           OutlinedButton.icon(
@@ -175,8 +185,7 @@ class _GoalDetailContent extends ConsumerWidget {
                   earlyCompletionReason: 'Completed from goal detail screen',
                 ),
               );
-              ref.invalidate(goalProgressProvider(goalId));
-              ref.invalidate(goalsProvider(_householdId));
+              _invalidateAfterLifecycle(ref);
             },
             icon: const Icon(Icons.check_circle_outline),
             label: Text(l10n.goalCompleteAction),
@@ -188,8 +197,7 @@ class _GoalDetailContent extends ConsumerWidget {
             onPressed: () async {
               final uc = ref.read(archiveGoalUseCaseProvider);
               await uc.execute(goalId: goalId, householdId: _householdId);
-              ref.invalidate(goalProgressProvider(goalId));
-              ref.invalidate(goalsProvider(_householdId));
+              _invalidateAfterLifecycle(ref);
             },
             icon: const Icon(Icons.archive_outlined),
             label: Text(l10n.goalArchiveAction),
@@ -201,15 +209,13 @@ class _GoalDetailContent extends ConsumerWidget {
             onPressed: () async {
               final uc = ref.read(restoreGoalUseCaseProvider);
               await uc.execute(goalId: goalId, householdId: _householdId);
-              ref.invalidate(goalProgressProvider(goalId));
-              ref.invalidate(goalsProvider(_householdId));
+              _invalidateAfterLifecycle(ref);
             },
             icon: const Icon(Icons.restore),
             label: Text(l10n.goalRestoreAction),
           ),
         ],
 
-        // Movements list
         if (progress.movements.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text(
@@ -235,7 +241,6 @@ class _GoalDetailContent extends ConsumerWidget {
           ),
         ],
 
-        // Revisions history
         if (progress.revisions.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text(
@@ -305,8 +310,8 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status, required this.l10n});
+class _LifecycleBadge extends StatelessWidget {
+  const _LifecycleBadge({required this.status, required this.l10n});
 
   final GoalStatus status;
   final AppLocalizations l10n;
@@ -315,12 +320,45 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, icon) = switch (status) {
       GoalStatus.active => (l10n.goalStatusActive, Icons.radio_button_checked),
-      GoalStatus.targetReached => (
-        l10n.goalStatusTargetReached,
-        Icons.check_circle_outline,
-      ),
       GoalStatus.completed => (l10n.goalStatusCompleted, Icons.check_circle),
       GoalStatus.archived => (l10n.goalStatusArchived, Icons.archive_outlined),
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 13)),
+      ],
+    );
+  }
+}
+
+class _ProgressBadge extends StatelessWidget {
+  const _ProgressBadge({required this.state, required this.l10n});
+
+  final GoalProgressState state;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, icon) = switch (state) {
+      GoalProgressState.notStarted => (
+        l10n.goalProgressNotStarted,
+        Icons.flag_outlined,
+      ),
+      GoalProgressState.inProgress => (
+        l10n.goalProgressInProgress,
+        Icons.trending_up,
+      ),
+      GoalProgressState.targetReached => (
+        l10n.goalProgressTargetReached,
+        Icons.flag,
+      ),
+      GoalProgressState.overfunded => (
+        l10n.goalProgressOverfunded,
+        Icons.insights,
+      ),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,

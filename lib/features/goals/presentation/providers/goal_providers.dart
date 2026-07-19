@@ -1,11 +1,39 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/database_providers.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
+import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/goals/application/goal_use_cases.dart';
 import 'package:family_money_manager/features/goals/data/drift_goal_repository.dart';
 import 'package:family_money_manager/features/goals/data/goal_repository.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
+import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
+import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
+import 'package:family_money_manager/features/transactions/presentation/providers/transaction_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _goalHouseholdId = 'household-v1';
+
+/// Invalidates goal + account/ledger consumers after funding, release, or
+/// reversal. Does not rely on lifecycle status mutations to trigger refresh.
+void invalidateGoalMoneyProviders(WidgetRef ref, {required String goalId}) {
+  ref.invalidate(goalProgressProvider(goalId));
+  ref.invalidate(goalDetailProvider(goalId));
+  ref.invalidate(goalsProvider(_goalHouseholdId));
+  ref.invalidate(accountsProvider(_goalHouseholdId));
+  ref.invalidate(accountBalanceProvider);
+  ref.invalidate(dashboardSummaryProvider(_goalHouseholdId));
+  ref.invalidate(accountFlowReportProvider);
+  ref.invalidate(
+    transactionListProvider((_goalHouseholdId, const TransactionFilter())),
+  );
+}
+
+/// Invalidates goal consumers after complete / archive / restore.
+void invalidateGoalLifecycleProviders(WidgetRef ref, {required String goalId}) {
+  ref.invalidate(goalProgressProvider(goalId));
+  ref.invalidate(goalDetailProvider(goalId));
+  ref.invalidate(goalsProvider(_goalHouseholdId));
+}
 
 // ── Repository ────────────────────────────────────────────────────────────
 

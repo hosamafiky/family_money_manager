@@ -50,14 +50,14 @@ abstract interface class GoalRepository {
     bool includeArchived = false,
   });
 
-  /// Updates non-lifecycle status fields only.
+  /// Rejected for all statuses (Phase 5B.8).
   ///
   /// Material lifecycle transitions ([GoalStatus.completed],
   /// [GoalStatus.archived], restore-to-[GoalStatus.active]) MUST go through
-  /// [completeGoal], [archiveGoal], or [restoreGoal]. Calling this with those
-  /// statuses returns [AppValidationFailure].
+  /// [completeGoal], [archiveGoal], or [restoreGoal].
   ///
-  /// Allowed: [GoalStatus.targetReached] (derived progress persistence).
+  /// Progress (`targetReached` / overfunded / etc.) is never persisted on the
+  /// goal row — it is derived from the reserve ledger on read.
   Future<AppResult<void>> updateGoalStatus({
     required String goalId,
     required GoalStatus status,
