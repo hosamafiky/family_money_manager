@@ -12,7 +12,7 @@
 |---|---|---|
 | 5B.5 | `b53cef5` | Goal idempotency, reversal atomicity, evidence closure (schema 13) |
 | 5B.6 | `5f92e2e` | Unified goal-transfer boundary + evidence closure (schema 14) |
-| 5B.7 | `1de1083` | Atomic goal lifecycle + reversal balanced validation (schema 15) |
+| 5B.7 | `1aaadca` | Atomic goal lifecycle + reversal balanced validation (schema 15) |
 
 Working tree at Phase 5B.7 start: **CLEAN** at `5f92e2eabb295963016c097b92c7f1bbd24236f5`.
 
@@ -227,6 +227,6 @@ Unchanged: encryption-ready sqlite3mc binary via pub hooks; production key injec
 Branch: main
 Schema: 15
 Tests: 1289/1289 passed
-HEAD: `1de108390a379f5e56b7da8b88c105188cacf169`
+HEAD: `1aaadca8af4970a2a679a3b8396167f356e8dfde`
 Working tree: CLEAN
 ```
