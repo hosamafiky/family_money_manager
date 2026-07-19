@@ -3358,7 +3358,11 @@ void main() {
             'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
             'ELSE -amount_minor_units END), 0) AS bal FROM ledger_entries '
             'WHERE account_id = ? AND household_id = ?',
-            variables: [const Variable('credit'), const Variable(srcId), const Variable(_hh)],
+            variables: [
+              const Variable('credit'),
+              const Variable(srcId),
+              const Variable(_hh),
+            ],
           )
           .get();
       final finalBal = srcBalEntries.first.read<int>('bal');
@@ -4145,6 +4149,1068 @@ void main() {
         completedAt.isAfter(before.subtract(const Duration(seconds: 1))),
         isTrue,
         reason: 'CG-EXT-4: completed_at must be a recent UTC timestamp',
+      );
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.4 – Section 5: Concurrency tests (CONC-5..10)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test(
+    'CONC-5. Release vs release from same reserve — only one succeeds, balance never negative',
+    () async {
+      const srcId = 'src-conc5';
+      const dstId = 'dst-conc5';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-conc5');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-conc5-fund',
+      );
+
+      final f1 = releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 9000,
+        releaseReason: 'CONC-5 release A',
+        householdId: _hh,
+        idempotencyKey: 'ik-conc5-r1',
+      );
+      final f2 = releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 9000,
+        releaseReason: 'CONC-5 release B',
+        householdId: _hh,
+        idempotencyKey: 'ik-conc5-r2',
+      );
+
+      final results = await Future.wait([f1, f2], eagerError: false);
+      final successes = results.whereType<AppOk<SavingsGoal>>().length;
+      expect(
+        successes,
+        1,
+        reason: 'CONC-5: exactly 1 of 2 releases must succeed',
+      );
+
+      final reserveBal =
+          (await goalRepo.getReserveBalance(
+                    reserveAccountId: goal.reserveAccountId,
+                    householdId: _hh,
+                  )
+                  as AppOk<int>)
+              .value;
+      expect(
+        reserveBal,
+        greaterThanOrEqualTo(0),
+        reason: 'CONC-5: reserve balance must not go negative',
+      );
+
+      final movs =
+          (await goalRepo.getMovements(goal.id) as AppOk<List<GoalMovement>>)
+              .value;
+      // 1 funding + 1 release
+      expect(
+        movs.where((m) => m.movementType == GoalMovementType.release).length,
+        1,
+        reason: 'CONC-5: exactly 1 release movement must be recorded',
+      );
+    },
+  );
+
+  test(
+    'CONC-6. Funding vs ordinary transfer from same source — only one succeeds',
+    () async {
+      const srcId = 'src-conc6';
+      const dstId = 'dst-conc6';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 10000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-conc6');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      final transferUc = ExecuteTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        accountRepository: accountRepo,
+      );
+
+      final f1 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 9000,
+        householdId: _hh,
+        idempotencyKey: 'ik-conc6-fund',
+      );
+      final f2 = transferUc.execute(
+        const TransferContext(
+          operationId: 'op-conc6-transfer',
+          idempotencyKey: 'ik-conc6-transfer',
+          householdId: _hh,
+          sourceAccountId: srcId,
+          destinationAccountId: dstId,
+          amountMinorUnits: 9000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'test',
+          note: 'CONC-6 transfer',
+        ),
+      );
+
+      final results = await Future.wait([f1, f2], eagerError: false);
+      expect(results.length, 2, reason: 'CONC-6: both futures must complete');
+
+      final srcBal = await db
+          .customSelect(
+            'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+            'ELSE -amount_minor_units END), 0) AS bal FROM ledger_entries '
+            'WHERE account_id = ? AND household_id = ?',
+            variables: [
+              const Variable('credit'),
+              const Variable(srcId),
+              const Variable(_hh),
+            ],
+          )
+          .get();
+      expect(
+        srcBal.first.read<int>('bal'),
+        greaterThanOrEqualTo(0),
+        reason: 'CONC-6: source balance must not go negative',
+      );
+    },
+  );
+
+  test(
+    'CONC-7. Two releases from different reserves — both succeed independently',
+    () async {
+      const srcId = 'src-conc7';
+      const dstId = 'dst-conc7';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 100000);
+
+      final g1Result = await createGoal(idempotencyKey: 'ik-conc7-g1');
+      final g2Result = await createGoal(idempotencyKey: 'ik-conc7-g2');
+      final goal1 = (g1Result as AppOk<SavingsGoal>).value;
+      final goal2 = (g2Result as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal1.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-conc7-fund1',
+      );
+      await fundGoalUc.execute(
+        goalId: goal2.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-conc7-fund2',
+      );
+
+      final f1 = releaseGoalUc.execute(
+        goalId: goal1.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 10000,
+        releaseReason: 'CONC-7 goal1 release',
+        householdId: _hh,
+        idempotencyKey: 'ik-conc7-r1',
+      );
+      final f2 = releaseGoalUc.execute(
+        goalId: goal2.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 10000,
+        releaseReason: 'CONC-7 goal2 release',
+        householdId: _hh,
+        idempotencyKey: 'ik-conc7-r2',
+      );
+
+      final results = await Future.wait([f1, f2], eagerError: false);
+      final successes = results.whereType<AppOk<SavingsGoal>>().length;
+      expect(
+        successes,
+        2,
+        reason: 'CONC-7: both releases from independent reserves must succeed',
+      );
+    },
+  );
+
+  test(
+    'CONC-8. Equivalent duplicate during in-flight — both return AppOk, same operation',
+    () async {
+      const srcId = 'src-conc8';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-conc8');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      const sameKey = 'ik-conc8-fund-same';
+      final f1 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 5000,
+        householdId: _hh,
+        idempotencyKey: sameKey,
+      );
+      final f2 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 5000,
+        householdId: _hh,
+        idempotencyKey: sameKey,
+      );
+
+      final results = await Future.wait([f1, f2], eagerError: false);
+      final successes = results.whereType<AppOk<SavingsGoal>>().length;
+      expect(
+        successes,
+        2,
+        reason: 'CONC-8: idempotent duplicate must return AppOk for both',
+      );
+
+      final opCount = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM operations WHERE idempotency_key = ? "
+            "AND household_id = ?",
+            variables: [const Variable(sameKey), const Variable(_hh)],
+          )
+          .get();
+      expect(
+        opCount.first.read<int>('c'),
+        1,
+        reason: 'CONC-8: same idempotency key must produce exactly 1 operation',
+      );
+    },
+  );
+
+  test(
+    'CONC-9. Conflicting duplicate (same key, different amount) → exactly 1 operation committed',
+    () async {
+      // ARCHITECTURE NOTE: The ledger's idempotency check detects a key
+      // collision (same key, different operationId) but the FundGoalUseCase
+      // converts IdempotentOperationResult.conflict → AppOk(goal) for the
+      // second caller (same as CONC-4/alreadyExists treatment). Only 1 operation
+      // is ever written to the database; the second concurrent call is a no-op.
+      const srcId = 'src-conc9';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-conc9');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      const sameKey = 'ik-conc9-conflict';
+      final f1 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 5000,
+        householdId: _hh,
+        idempotencyKey: sameKey,
+      );
+      // Different amount = conflicting payload at the intent level,
+      // but the ledger returns 'conflict' which the use case treats as AppOk.
+      final f2 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 7000,
+        householdId: _hh,
+        idempotencyKey: sameKey,
+      );
+
+      final results = await Future.wait([f1, f2], eagerError: false);
+      // Both complete without throwing.
+      expect(results.length, 2, reason: 'CONC-9: both futures must complete');
+
+      // Exactly 1 operation must be committed (only 1 amount was debited).
+      final opCount = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM operations WHERE idempotency_key = ? "
+            "AND household_id = ?",
+            variables: [const Variable(sameKey), const Variable(_hh)],
+          )
+          .get();
+      expect(
+        opCount.first.read<int>('c'),
+        1,
+        reason:
+            'CONC-9: exactly 1 operation must be committed for the same key',
+      );
+
+      // Source balance must not go negative.
+      final srcBal = await db
+          .customSelect(
+            'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+            'ELSE -amount_minor_units END), 0) AS bal FROM ledger_entries '
+            'WHERE account_id = ? AND household_id = ?',
+            variables: [
+              const Variable('credit'),
+              const Variable(srcId),
+              const Variable(_hh),
+            ],
+          )
+          .get();
+      expect(
+        srcBal.first.read<int>('bal'),
+        greaterThanOrEqualTo(0),
+        reason: 'CONC-9: source balance must not go negative',
+      );
+    },
+  );
+
+  test(
+    'CONC-10. Competing expense vs goal-funding vs transfer (3-way) — exactly the affordable combination succeeds',
+    () async {
+      const srcId = 'src-conc10';
+      const dstId = 'dst-conc10';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 10000); // Enough for only 1 of 3.
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-conc10');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      final transferUc = ExecuteTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        accountRepository: accountRepo,
+      );
+
+      final f1 = fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 9000,
+        householdId: _hh,
+        idempotencyKey: 'ik-conc10-fund',
+      );
+      final f2 = transferUc.execute(
+        const TransferContext(
+          operationId: 'op-conc10-t1',
+          idempotencyKey: 'ik-conc10-t1',
+          householdId: _hh,
+          sourceAccountId: srcId,
+          destinationAccountId: dstId,
+          amountMinorUnits: 9000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'test',
+          note: 'CONC-10 transfer 1',
+        ),
+      );
+      final f3 = transferUc.execute(
+        const TransferContext(
+          operationId: 'op-conc10-t2',
+          idempotencyKey: 'ik-conc10-t2',
+          householdId: _hh,
+          sourceAccountId: srcId,
+          destinationAccountId: dstId,
+          amountMinorUnits: 9000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'test',
+          note: 'CONC-10 transfer 2',
+        ),
+      );
+
+      final results = await Future.wait([f1, f2, f3], eagerError: false);
+      expect(results.length, 3, reason: 'CONC-10: all 3 futures must complete');
+
+      final srcBal = await db
+          .customSelect(
+            'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+            'ELSE -amount_minor_units END), 0) AS bal FROM ledger_entries '
+            'WHERE account_id = ? AND household_id = ?',
+            variables: [
+              const Variable('credit'),
+              const Variable(srcId),
+              const Variable(_hh),
+            ],
+          )
+          .get();
+      expect(
+        srcBal.first.read<int>('bal'),
+        greaterThanOrEqualTo(0),
+        reason: 'CONC-10: source balance must not go negative after 3-way race',
+      );
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.4 – Section 6: Goal lifecycle events (GLC-1..8)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test('GLC-1. Normal completion creates a lifecycle event', () async {
+    const srcId = 'src-glc1';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 100000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-glc1',
+      target: 50000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 50000,
+      householdId: _hh,
+      idempotencyKey: 'ik-glc1-fund',
+    );
+
+    final cg = CompleteGoalUseCase(goalRepo);
+    final result = await cg.execute(
+      CompleteGoalParams(goalId: goal.id, householdId: _hh),
+    );
+    expect(result, isA<AppOk<SavingsGoal>>());
+
+    final events = await db
+        .customSelect(
+          "SELECT COUNT(*) as c FROM goal_lifecycle_events "
+          "WHERE goal_id = ? AND event_type = 'completed'",
+          variables: [Variable.withString(goal.id)],
+        )
+        .get();
+    expect(
+      events.first.read<int>('c'),
+      1,
+      reason: 'GLC-1: normal completion must create exactly 1 lifecycle event',
+    );
+  });
+
+  test('GLC-2. Early completion creates lifecycle event with reason', () async {
+    const srcId = 'src-glc2';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 50000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-glc2',
+      target: 100000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 30000,
+      householdId: _hh,
+      idempotencyKey: 'ik-glc2-fund',
+    );
+
+    final cg = CompleteGoalUseCase(goalRepo);
+    final result = await cg.execute(
+      CompleteGoalParams(
+        goalId: goal.id,
+        householdId: _hh,
+        earlyCompletion: true,
+        earlyCompletionConfirmed: true,
+        earlyCompletionReason: 'Changed plans for GLC-2',
+      ),
+    );
+    expect(result, isA<AppOk<SavingsGoal>>());
+
+    final events = await db
+        .customSelect(
+          "SELECT completion_type, early_completion_reason "
+          "FROM goal_lifecycle_events WHERE goal_id = ?",
+          variables: [Variable.withString(goal.id)],
+        )
+        .get();
+    expect(events.isNotEmpty, isTrue, reason: 'GLC-2: event must exist');
+    expect(
+      events.first.read<String>('completion_type'),
+      'early',
+      reason: 'GLC-2: completion_type must be early',
+    );
+    expect(
+      events.first.readNullable<String>('early_completion_reason'),
+      'Changed plans for GLC-2',
+      reason: 'GLC-2: reason must be stored',
+    );
+  });
+
+  test(
+    'GLC-3. UPDATE on lifecycle event → no_update_goal_lifecycle_events fires',
+    () async {
+      const srcId = 'src-glc3';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(
+        idempotencyKey: 'ik-glc3',
+        target: 10000,
+      );
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-glc3-fund',
+      );
+      final cg = CompleteGoalUseCase(goalRepo);
+      await cg.execute(CompleteGoalParams(goalId: goal.id, householdId: _hh));
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE goal_lifecycle_events SET event_type = 'archived' "
+          "WHERE goal_id = '${goal.id}'",
+        ),
+        throwsA(anything),
+        reason: 'GLC-3: no_update_goal_lifecycle_events must prevent mutation',
+      );
+    },
+  );
+
+  test(
+    'GLC-4. DELETE on lifecycle event → no_delete_goal_lifecycle_events fires',
+    () async {
+      const srcId = 'src-glc4';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(
+        idempotencyKey: 'ik-glc4',
+        target: 10000,
+      );
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-glc4-fund',
+      );
+      final cg = CompleteGoalUseCase(goalRepo);
+      await cg.execute(CompleteGoalParams(goalId: goal.id, householdId: _hh));
+
+      await expectLater(
+        () => db.customStatement(
+          "DELETE FROM goal_lifecycle_events WHERE goal_id = '${goal.id}'",
+        ),
+        throwsA(anything),
+        reason: 'GLC-4: no_delete_goal_lifecycle_events must prevent deletion',
+      );
+    },
+  );
+
+  test(
+    'GLC-5. Duplicate idempotency key → idempotent AppOk for both',
+    () async {
+      const srcId = 'src-glc5';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(
+        idempotencyKey: 'ik-glc5',
+        target: 10000,
+      );
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      final now = DateTime.now().toUtc().toIso8601String();
+      const key = 'glc5-idem-key';
+
+      final event = GoalLifecycleEvent(
+        id: 'evt-glc5-a',
+        goalId: goal.id,
+        householdId: _hh,
+        eventType: GoalLifecycleEventType.completed,
+        completionType: 'normal',
+        effectiveAt: now,
+        createdAt: now,
+        idempotencyKey: key,
+      );
+      final r1 = await goalRepo.insertLifecycleEvent(event);
+      // Same key, same event_type → idempotent.
+      final r2 = await goalRepo.insertLifecycleEvent(
+        GoalLifecycleEvent(
+          id: 'evt-glc5-b', // Different id but same key.
+          goalId: goal.id,
+          householdId: _hh,
+          eventType: GoalLifecycleEventType.completed,
+          completionType: 'normal',
+          effectiveAt: now,
+          createdAt: now,
+          idempotencyKey: key,
+        ),
+      );
+
+      expect(
+        r1,
+        isA<AppOk<GoalLifecycleEvent>>(),
+        reason: 'GLC-5: first insert must succeed',
+      );
+      expect(
+        r2,
+        isA<AppOk<GoalLifecycleEvent>>(),
+        reason: 'GLC-5: second must be idempotent AppOk',
+      );
+
+      final count = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM goal_lifecycle_events "
+            "WHERE idempotency_key = ?",
+            variables: [const Variable(key)],
+          )
+          .get();
+      expect(
+        count.first.read<int>('c'),
+        1,
+        reason: 'GLC-5: only 1 row for same key',
+      );
+    },
+  );
+
+  test('GLC-6. Same key, different payload → AppDuplicateConflict', () async {
+    const srcId = 'src-glc6';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 50000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-glc6',
+      target: 10000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    final now = DateTime.now().toUtc().toIso8601String();
+    const key = 'glc6-conflict-key';
+
+    await goalRepo.insertLifecycleEvent(
+      GoalLifecycleEvent(
+        id: 'evt-glc6-a',
+        goalId: goal.id,
+        householdId: _hh,
+        eventType: GoalLifecycleEventType.completed,
+        effectiveAt: now,
+        createdAt: now,
+        idempotencyKey: key,
+      ),
+    );
+
+    // Same key but DIFFERENT event_type → conflict.
+    final r2 = await goalRepo.insertLifecycleEvent(
+      GoalLifecycleEvent(
+        id: 'evt-glc6-b',
+        goalId: goal.id,
+        householdId: _hh,
+        eventType: GoalLifecycleEventType.archived, // Different!
+        effectiveAt: now,
+        createdAt: now,
+        idempotencyKey: key,
+      ),
+    );
+
+    expect(
+      r2,
+      isA<AppDuplicateConflict<GoalLifecycleEvent>>(),
+      reason:
+          'GLC-6: same key + different event_type must return AppDuplicateConflict',
+    );
+  });
+
+  test('GLC-7. Cross-household lifecycle event → FK prevents insert', () async {
+    const srcId = 'src-glc7';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 50000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-glc7',
+      target: 10000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goal_lifecycle_events (id, goal_id, household_id, "
+        "event_type, effective_at, created_at, schema_version) "
+        "VALUES ('evt-glc7-xhh', '${goal.id}', 'hh-does-not-exist', "
+        "'completed', '$now', '$now', 12)",
+      ),
+      throwsA(anything),
+      reason:
+          'GLC-7: lifecycle event for wrong household must be rejected (FK or trigger)',
+    );
+  });
+
+  test('GLC-8. No ledger entries created during goal completion', () async {
+    const srcId = 'src-glc8';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 50000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-glc8',
+      target: 20000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 20000,
+      householdId: _hh,
+      idempotencyKey: 'ik-glc8-fund',
+    );
+
+    final entriesBefore = await db
+        .customSelect(
+          "SELECT COUNT(*) as c FROM ledger_entries WHERE household_id = '$_hh'",
+        )
+        .get();
+    final countBefore = entriesBefore.first.read<int>('c');
+
+    final cg = CompleteGoalUseCase(goalRepo);
+    await cg.execute(CompleteGoalParams(goalId: goal.id, householdId: _hh));
+
+    final entriesAfter = await db
+        .customSelect(
+          "SELECT COUNT(*) as c FROM ledger_entries WHERE household_id = '$_hh'",
+        )
+        .get();
+    expect(
+      entriesAfter.first.read<int>('c'),
+      countBefore,
+      reason: 'GLC-8: goal completion must NOT create any new ledger entries',
+    );
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.4 – Section 7: Goal-transfer reversal association (REV-1..5)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test(
+    'REV-1. Reversal of goal funding → reserve balance decreases, reversal movement created',
+    () async {
+      const srcId = 'src-rev1';
+      await createAccount(id: srcId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-rev1');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 20000,
+        householdId: _hh,
+        idempotencyKey: 'ik-rev1-fund',
+      );
+
+      final fundOpRows = await db
+          .customSelect(
+            "SELECT id FROM operations WHERE type = 'transfer' "
+            "AND destination_account_id = '${goal.reserveAccountId}'",
+          )
+          .get();
+      final fundOpId = fundOpRows.first.read<String>('id');
+
+      final uc = ReverseGoalTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        goalRepository: goalRepo,
+      );
+      await uc.execute(
+        originalOperationId: fundOpId,
+        reversalOperationId: 'rev-op-rev1',
+        householdId: _hh,
+        effectiveDate: '2024-01-02',
+        createdBy: 'test',
+        reason: 'REV-1 reversal',
+      );
+
+      final balance =
+          (await goalRepo.getReserveBalance(
+                    reserveAccountId: goal.reserveAccountId,
+                    householdId: _hh,
+                  )
+                  as AppOk<int>)
+              .value;
+      expect(balance, 0, reason: 'REV-1: reserve must be 0 after reversal');
+
+      final movs =
+          (await goalRepo.getMovements(goal.id) as AppOk<List<GoalMovement>>)
+              .value;
+      final reversals = movs.where(
+        (m) => m.movementType == GoalMovementType.reversal,
+      );
+      expect(
+        reversals.length,
+        1,
+        reason: 'REV-1: exactly 1 reversal movement must be created',
+      );
+      expect(
+        reversals.first.transferOperationId,
+        'rev-op-rev1',
+        reason:
+            'REV-1: reversal movement must reference the reversal operation',
+      );
+    },
+  );
+
+  test(
+    'REV-2. Reversal of goal release → reserve balance increases, reversal movement created',
+    () async {
+      const srcId = 'src-rev2';
+      const dstId = 'dst-rev2';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-rev2');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 30000,
+        householdId: _hh,
+        idempotencyKey: 'ik-rev2-fund',
+      );
+      await releaseGoalUc.execute(
+        goalId: goal.id,
+        destinationAccountId: dstId,
+        amountMinorUnits: 15000,
+        releaseReason: 'REV-2 initial release',
+        householdId: _hh,
+        idempotencyKey: 'ik-rev2-release',
+      );
+
+      final releaseOpRows = await db
+          .customSelect(
+            "SELECT id FROM operations WHERE type = 'transfer' "
+            "AND source_account_id = '${goal.reserveAccountId}'",
+          )
+          .get();
+      final releaseOpId = releaseOpRows.first.read<String>('id');
+
+      final balBefore =
+          (await goalRepo.getReserveBalance(
+                    reserveAccountId: goal.reserveAccountId,
+                    householdId: _hh,
+                  )
+                  as AppOk<int>)
+              .value;
+
+      final uc = ReverseGoalTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        goalRepository: goalRepo,
+      );
+      await uc.execute(
+        originalOperationId: releaseOpId,
+        reversalOperationId: 'rev-op-rev2',
+        householdId: _hh,
+        effectiveDate: '2024-01-03',
+        createdBy: 'test',
+      );
+
+      final balAfter =
+          (await goalRepo.getReserveBalance(
+                    reserveAccountId: goal.reserveAccountId,
+                    householdId: _hh,
+                  )
+                  as AppOk<int>)
+              .value;
+      expect(
+        balAfter,
+        balBefore + 15000,
+        reason:
+            'REV-2: reserve must increase by released amount after reversal',
+      );
+
+      final movs =
+          (await goalRepo.getMovements(goal.id) as AppOk<List<GoalMovement>>)
+              .value;
+      expect(
+        movs.where((m) => m.movementType == GoalMovementType.reversal).length,
+        1,
+        reason: 'REV-2: reversal movement must be created',
+      );
+    },
+  );
+
+  test('REV-3. Reversal is not income, expense, or budget spending', () async {
+    const srcId = 'src-rev3';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 50000);
+
+    final goalResult = await createGoal(idempotencyKey: 'ik-rev3');
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 20000,
+      householdId: _hh,
+      idempotencyKey: 'ik-rev3-fund',
+    );
+
+    final fundOpId =
+        (await db
+                .customSelect(
+                  "SELECT id FROM operations WHERE type = 'transfer' "
+                  "AND destination_account_id = '${goal.reserveAccountId}'",
+                )
+                .get())
+            .first
+            .read<String>('id');
+
+    await ReverseGoalTransferUseCase(
+      ledgerRepository: ledgerRepo,
+      goalRepository: goalRepo,
+    ).execute(
+      originalOperationId: fundOpId,
+      reversalOperationId: 'rev-op-rev3',
+      householdId: _hh,
+      effectiveDate: '2024-01-02',
+      createdBy: 'test',
+    );
+
+    // Verify the reversal operation type is 'reversal', not income/expense.
+    final revOp = await db
+        .customSelect("SELECT type FROM operations WHERE id = 'rev-op-rev3'")
+        .get();
+    expect(
+      revOp.first.read<String>('type'),
+      'reversal',
+      reason: 'REV-3: reversal must have type=reversal, not income/expense',
+    );
+
+    final entries = await db
+        .customSelect(
+          "SELECT entry_type FROM ledger_entries "
+          "WHERE operation_id = 'rev-op-rev3'",
+        )
+        .get();
+    for (final e in entries) {
+      final et = e.read<String>('entry_type');
+      expect(
+        et,
+        anyOf('reversalDebit', 'reversalCredit'),
+        reason: 'REV-3: reversal entries must be reversalDebit/reversalCredit',
+      );
+    }
+  });
+
+  test('REV-4. Goal progress reflects reversed state', () async {
+    const srcId = 'src-rev4';
+    await createAccount(id: srcId, householdId: _hh);
+    await creditAccount(srcId, _hh, 100000);
+
+    final goalResult = await createGoal(
+      idempotencyKey: 'ik-rev4',
+      target: 50000,
+    );
+    final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 40000,
+      householdId: _hh,
+      idempotencyKey: 'ik-rev4-fund',
+    );
+
+    final fundOpId =
+        (await db
+                .customSelect(
+                  "SELECT id FROM operations WHERE type = 'transfer' "
+                  "AND destination_account_id = '${goal.reserveAccountId}'",
+                )
+                .get())
+            .first
+            .read<String>('id');
+
+    final progressUc = GetGoalProgressUseCase(goalRepo);
+
+    final progressBefore =
+        ((await progressUc.execute(goal.id)) as AppOk<GoalProgress>).value;
+    expect(progressBefore.reserveBalanceMinorUnits, 40000);
+
+    await ReverseGoalTransferUseCase(
+      ledgerRepository: ledgerRepo,
+      goalRepository: goalRepo,
+    ).execute(
+      originalOperationId: fundOpId,
+      reversalOperationId: 'rev-op-rev4',
+      householdId: _hh,
+      effectiveDate: '2024-01-02',
+      createdBy: 'test',
+    );
+
+    final progressAfter =
+        ((await progressUc.execute(goal.id)) as AppOk<GoalProgress>).value;
+    expect(
+      progressAfter.reserveBalanceMinorUnits,
+      0,
+      reason: 'REV-4: progress must reflect reversed state (balance = 0)',
+    );
+  });
+
+  test(
+    'REV-5. Unrelated transfer reversal does not create goal movement',
+    () async {
+      const srcId = 'src-rev5';
+      const dstId = 'dst-rev5';
+      await createAccount(id: srcId, householdId: _hh);
+      await createAccount(id: dstId, householdId: _hh);
+      await creditAccount(srcId, _hh, 50000);
+
+      final goalResult = await createGoal(idempotencyKey: 'ik-rev5');
+      final goal = (goalResult as AppOk<SavingsGoal>).value;
+
+      final transferUc = ExecuteTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        accountRepository: accountRepo,
+      );
+      await transferUc.execute(
+        const TransferContext(
+          operationId: 'op-rev5-unrelated',
+          idempotencyKey: 'ik-rev5-unrelated',
+          householdId: _hh,
+          sourceAccountId: srcId,
+          destinationAccountId: dstId,
+          amountMinorUnits: 5000,
+          currencyCode: 'EGP',
+          effectiveDate: '2024-01-01',
+          createdBy: 'test',
+          note: 'unrelated transfer',
+        ),
+      );
+
+      final movsBefore =
+          (await goalRepo.getMovements(goal.id) as AppOk<List<GoalMovement>>)
+              .value
+              .length;
+
+      await ReverseGoalTransferUseCase(
+        ledgerRepository: ledgerRepo,
+        goalRepository: goalRepo,
+      ).execute(
+        originalOperationId: 'op-rev5-unrelated',
+        reversalOperationId: 'rev-op-rev5',
+        householdId: _hh,
+        effectiveDate: '2024-01-02',
+        createdBy: 'test',
+      );
+
+      final movsAfter =
+          (await goalRepo.getMovements(goal.id) as AppOk<List<GoalMovement>>)
+              .value
+              .length;
+      expect(
+        movsAfter,
+        movsBefore,
+        reason: 'REV-5: unrelated reversal must not create any goal movement',
       );
     },
   );

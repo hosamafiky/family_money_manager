@@ -41,13 +41,14 @@ final class GoalMoneyFormatter {
   }
 
   static String _formatWithScale(int minorUnits, int scale) {
+    // Negative balances are a financial invariant violation in the goal
+    // reserve context (balance must always be ≥ 0). Display '—' instead
+    // of a raw negative number to prevent confusing users.
+    if (minorUnits < 0) return '—';
     if (scale == 0) return '$minorUnits';
     final divisor = _pow10(scale);
     final whole = minorUnits ~/ divisor;
-    final fraction = (minorUnits % divisor).abs().toString().padLeft(
-      scale,
-      '0',
-    );
+    final fraction = (minorUnits % divisor).toString().padLeft(scale, '0');
     return '$whole.$fraction';
   }
 

@@ -15,8 +15,18 @@ typedef GoalId = String;
 /// solely from the ledger balance via [GoalProgressState].
 enum GoalStatus { active, targetReached, completed, archived }
 
-/// Whether money is flowing into or out of a goal reserve.
-enum GoalMovementType { funding, release }
+/// Whether money is flowing into or out of a goal reserve, or reversing a prior movement.
+enum GoalMovementType { funding, release, reversal }
+
+/// Lifecycle event category for [GoalLifecycleEvent].
+enum GoalLifecycleEventType {
+  created,
+  completed,
+  archived,
+  restored;
+
+  String get code => name;
+}
 
 /// The intended purpose of a savings goal.
 enum GoalPurpose {
@@ -48,7 +58,7 @@ enum GoalProgressState {
   overfunded,
 }
 
-/// A single funding or release movement linking a ledger transfer to a goal.
+/// A single funding, release, or reversal movement linking a ledger transfer to a goal.
 ///
 /// Append-only: no UPDATE or DELETE is ever issued on this record.
 final class GoalMovement {
@@ -60,13 +70,14 @@ final class GoalMovement {
     required this.movementType,
     required this.createdAt,
     this.releaseReason,
+    this.reversalOfMovementId,
   });
 
   final String id;
   final GoalId goalId;
   final String householdId;
 
-  /// The [operations.id] of the underlying ledger transfer.
+  /// The [operations.id] of the underlying ledger transfer or reversal operation.
   final String transferOperationId;
 
   final GoalMovementType movementType;
@@ -76,6 +87,55 @@ final class GoalMovement {
 
   /// Required when [movementType] == [GoalMovementType.release].
   final String? releaseReason;
+
+  /// When [movementType] == [GoalMovementType.reversal], the ID of the
+  /// original movement being reversed. Added in Phase 5B.4.
+  final String? reversalOfMovementId;
+}
+
+/// An immutable lifecycle event recording a goal status transition.
+///
+/// Write-once: no UPDATE or DELETE is permitted (enforced by DB triggers).
+final class GoalLifecycleEvent {
+  const GoalLifecycleEvent({
+    required this.id,
+    required this.goalId,
+    required this.householdId,
+    required this.eventType,
+    required this.effectiveAt,
+    required this.createdAt,
+    this.completionType,
+    this.earlyCompletionReason,
+    this.earlyCompletionConfirmed = false,
+    this.idempotencyKey,
+    this.actorMetadata,
+  });
+
+  final String id;
+  final GoalId goalId;
+  final String householdId;
+  final GoalLifecycleEventType eventType;
+
+  /// 'normal' or 'early' — only for [GoalLifecycleEventType.completed].
+  final String? completionType;
+
+  /// Non-empty when [completionType] == 'early'.
+  final String? earlyCompletionReason;
+
+  /// Must be true when [completionType] == 'early'.
+  final bool earlyCompletionConfirmed;
+
+  /// Optional per-call idempotency key scoped to the events table.
+  final String? idempotencyKey;
+
+  /// Arbitrary actor metadata (JSON string).
+  final String? actorMetadata;
+
+  /// Business-effective timestamp (ISO 8601 UTC).
+  final String effectiveAt;
+
+  /// Row-creation timestamp (ISO 8601 UTC).
+  final String createdAt;
 }
 
 /// An auditable snapshot of goal definition at a point in time.

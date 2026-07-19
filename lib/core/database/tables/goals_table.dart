@@ -104,7 +104,7 @@ class GoalRevisionsTable extends Table {
 
 /// Drift table definition for the `goal_movements` table (Phase 5B).
 ///
-/// Links each funding or release ledger transfer to the owning goal.
+/// Links each funding, release, or reversal ledger transfer to the owning goal.
 /// Append-only: no UPDATE or DELETE is ever issued on this table.
 ///
 /// Row type: [DbGoalMovement].
@@ -114,10 +114,10 @@ class GoalMovementsTable extends Table {
   TextColumn get goalId => text().references(GoalsTable, #id)();
   TextColumn get householdId => text()();
 
-  /// References [operations.id] of the underlying ledger transfer.
+  /// References [operations.id] of the underlying ledger transfer or reversal.
   TextColumn get transferOperationId => text()();
 
-  /// 'funding' or 'release'.
+  /// 'funding', 'release', or 'reversal'.
   TextColumn get movementType => text()();
 
   /// UTC ISO 8601 timestamp.
@@ -126,6 +126,10 @@ class GoalMovementsTable extends Table {
   /// Required when movementType = 'release'.
   TextColumn get releaseReason => text().nullable()();
 
+  /// When movementType = 'reversal', references the original movement being reversed.
+  /// Added in schema v12 (Phase 5B.4).
+  TextColumn get reversalOfMovementId => text().nullable()();
+
   IntColumn get schemaVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -133,4 +137,50 @@ class GoalMovementsTable extends Table {
 
   @override
   String get tableName => 'goal_movements';
+}
+
+/// Drift table definition for the `goal_lifecycle_events` table (Phase 5B.4).
+///
+/// Immutable append-only audit trail of goal lifecycle transitions
+/// (created, completed, archived, restored). Each event is write-once.
+///
+/// Row type: [DbGoalLifecycleEvent].
+@DataClassName('DbGoalLifecycleEvent')
+class GoalLifecycleEventsTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get goalId => text().references(GoalsTable, #id)();
+  TextColumn get householdId => text()();
+
+  /// 'created', 'completed', 'archived', 'restored'.
+  TextColumn get eventType => text()();
+
+  /// 'normal' or 'early' — only for completed events.
+  TextColumn get completionType => text().nullable()();
+
+  /// Non-empty when completionType = 'early'.
+  TextColumn get earlyCompletionReason => text().nullable()();
+
+  /// Must be 1 when completionType = 'early'.
+  IntColumn get earlyCompletionConfirmed =>
+      integer().withDefault(const Constant(0))();
+
+  /// Scoped idempotency key; UNIQUE across the table.
+  TextColumn get idempotencyKey => text().nullable()();
+
+  /// Arbitrary JSON actor metadata (user id, device, session).
+  TextColumn get actorMetadata => text().nullable()();
+
+  /// Business-effective timestamp (ISO 8601 UTC).
+  TextColumn get effectiveAt => text()();
+
+  /// Row-creation timestamp (ISO 8601 UTC).
+  TextColumn get createdAt => text()();
+
+  IntColumn get schemaVersion => integer().withDefault(const Constant(12))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  String get tableName => 'goal_lifecycle_events';
 }

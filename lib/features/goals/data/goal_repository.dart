@@ -92,4 +92,25 @@ abstract interface class GoalRepository {
     required String reserveAccountId,
     required String householdId,
   });
+
+  // ── Lifecycle events ──────────────────────────────────────────────────────
+
+  /// Inserts an immutable lifecycle event for this goal.
+  ///
+  /// Idempotency:
+  /// - Same [idempotencyKey] + same [eventType] → [AppOk] (idempotent replay).
+  /// - Same [idempotencyKey] + different [eventType] → [AppDuplicateConflict].
+  /// - No [idempotencyKey] → always inserts a new row.
+  Future<AppResult<GoalLifecycleEvent>> insertLifecycleEvent(
+    GoalLifecycleEvent event,
+  );
+
+  // ── Reversal movement lookup ──────────────────────────────────────────────
+
+  /// Finds the goal movement linked to [transferOperationId], if any.
+  ///
+  /// Returns null wrapped in [AppOk] if no movement references this operation.
+  Future<AppResult<GoalMovement?>> findMovementByOperationId(
+    String transferOperationId,
+  );
 }

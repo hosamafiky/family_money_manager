@@ -9256,6 +9256,17 @@ class $GoalMovementsTableTable extends GoalMovementsTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reversalOfMovementIdMeta =
+      const VerificationMeta('reversalOfMovementId');
+  @override
+  late final GeneratedColumn<String> reversalOfMovementId =
+      GeneratedColumn<String>(
+        'reversal_of_movement_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
     'schemaVersion',
   );
@@ -9277,6 +9288,7 @@ class $GoalMovementsTableTable extends GoalMovementsTable
     movementType,
     createdAt,
     releaseReason,
+    reversalOfMovementId,
     schemaVersion,
   ];
   @override
@@ -9354,6 +9366,15 @@ class $GoalMovementsTableTable extends GoalMovementsTable
         ),
       );
     }
+    if (data.containsKey('reversal_of_movement_id')) {
+      context.handle(
+        _reversalOfMovementIdMeta,
+        reversalOfMovementId.isAcceptableOrUnknown(
+          data['reversal_of_movement_id']!,
+          _reversalOfMovementIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('schema_version')) {
       context.handle(
         _schemaVersionMeta,
@@ -9400,6 +9421,10 @@ class $GoalMovementsTableTable extends GoalMovementsTable
         DriftSqlType.string,
         data['${effectivePrefix}release_reason'],
       ),
+      reversalOfMovementId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reversal_of_movement_id'],
+      ),
       schemaVersion: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}schema_version'],
@@ -9418,10 +9443,10 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
   final String goalId;
   final String householdId;
 
-  /// References [operations.id] of the underlying ledger transfer.
+  /// References [operations.id] of the underlying ledger transfer or reversal.
   final String transferOperationId;
 
-  /// 'funding' or 'release'.
+  /// 'funding', 'release', or 'reversal'.
   final String movementType;
 
   /// UTC ISO 8601 timestamp.
@@ -9429,6 +9454,10 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
 
   /// Required when movementType = 'release'.
   final String? releaseReason;
+
+  /// When movementType = 'reversal', references the original movement being reversed.
+  /// Added in schema v12 (Phase 5B.4).
+  final String? reversalOfMovementId;
   final int schemaVersion;
   const DbGoalMovement({
     required this.id,
@@ -9438,6 +9467,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
     required this.movementType,
     required this.createdAt,
     this.releaseReason,
+    this.reversalOfMovementId,
     required this.schemaVersion,
   });
   @override
@@ -9451,6 +9481,9 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
     map['created_at'] = Variable<String>(createdAt);
     if (!nullToAbsent || releaseReason != null) {
       map['release_reason'] = Variable<String>(releaseReason);
+    }
+    if (!nullToAbsent || reversalOfMovementId != null) {
+      map['reversal_of_movement_id'] = Variable<String>(reversalOfMovementId);
     }
     map['schema_version'] = Variable<int>(schemaVersion);
     return map;
@@ -9467,6 +9500,9 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
       releaseReason: releaseReason == null && nullToAbsent
           ? const Value.absent()
           : Value(releaseReason),
+      reversalOfMovementId: reversalOfMovementId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reversalOfMovementId),
       schemaVersion: Value(schemaVersion),
     );
   }
@@ -9486,6 +9522,9 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
       movementType: serializer.fromJson<String>(json['movementType']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       releaseReason: serializer.fromJson<String?>(json['releaseReason']),
+      reversalOfMovementId: serializer.fromJson<String?>(
+        json['reversalOfMovementId'],
+      ),
       schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
     );
   }
@@ -9500,6 +9539,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
       'movementType': serializer.toJson<String>(movementType),
       'createdAt': serializer.toJson<String>(createdAt),
       'releaseReason': serializer.toJson<String?>(releaseReason),
+      'reversalOfMovementId': serializer.toJson<String?>(reversalOfMovementId),
       'schemaVersion': serializer.toJson<int>(schemaVersion),
     };
   }
@@ -9512,6 +9552,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
     String? movementType,
     String? createdAt,
     Value<String?> releaseReason = const Value.absent(),
+    Value<String?> reversalOfMovementId = const Value.absent(),
     int? schemaVersion,
   }) => DbGoalMovement(
     id: id ?? this.id,
@@ -9523,6 +9564,9 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
     releaseReason: releaseReason.present
         ? releaseReason.value
         : this.releaseReason,
+    reversalOfMovementId: reversalOfMovementId.present
+        ? reversalOfMovementId.value
+        : this.reversalOfMovementId,
     schemaVersion: schemaVersion ?? this.schemaVersion,
   );
   DbGoalMovement copyWithCompanion(GoalMovementsTableCompanion data) {
@@ -9542,6 +9586,9 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
       releaseReason: data.releaseReason.present
           ? data.releaseReason.value
           : this.releaseReason,
+      reversalOfMovementId: data.reversalOfMovementId.present
+          ? data.reversalOfMovementId.value
+          : this.reversalOfMovementId,
       schemaVersion: data.schemaVersion.present
           ? data.schemaVersion.value
           : this.schemaVersion,
@@ -9558,6 +9605,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
           ..write('movementType: $movementType, ')
           ..write('createdAt: $createdAt, ')
           ..write('releaseReason: $releaseReason, ')
+          ..write('reversalOfMovementId: $reversalOfMovementId, ')
           ..write('schemaVersion: $schemaVersion')
           ..write(')'))
         .toString();
@@ -9572,6 +9620,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
     movementType,
     createdAt,
     releaseReason,
+    reversalOfMovementId,
     schemaVersion,
   );
   @override
@@ -9585,6 +9634,7 @@ class DbGoalMovement extends DataClass implements Insertable<DbGoalMovement> {
           other.movementType == this.movementType &&
           other.createdAt == this.createdAt &&
           other.releaseReason == this.releaseReason &&
+          other.reversalOfMovementId == this.reversalOfMovementId &&
           other.schemaVersion == this.schemaVersion);
 }
 
@@ -9596,6 +9646,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
   final Value<String> movementType;
   final Value<String> createdAt;
   final Value<String?> releaseReason;
+  final Value<String?> reversalOfMovementId;
   final Value<int> schemaVersion;
   final Value<int> rowid;
   const GoalMovementsTableCompanion({
@@ -9606,6 +9657,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
     this.movementType = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.releaseReason = const Value.absent(),
+    this.reversalOfMovementId = const Value.absent(),
     this.schemaVersion = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -9617,6 +9669,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
     required String movementType,
     required String createdAt,
     this.releaseReason = const Value.absent(),
+    this.reversalOfMovementId = const Value.absent(),
     this.schemaVersion = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -9633,6 +9686,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
     Expression<String>? movementType,
     Expression<String>? createdAt,
     Expression<String>? releaseReason,
+    Expression<String>? reversalOfMovementId,
     Expression<int>? schemaVersion,
     Expression<int>? rowid,
   }) {
@@ -9645,6 +9699,8 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
       if (movementType != null) 'movement_type': movementType,
       if (createdAt != null) 'created_at': createdAt,
       if (releaseReason != null) 'release_reason': releaseReason,
+      if (reversalOfMovementId != null)
+        'reversal_of_movement_id': reversalOfMovementId,
       if (schemaVersion != null) 'schema_version': schemaVersion,
       if (rowid != null) 'rowid': rowid,
     });
@@ -9658,6 +9714,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
     Value<String>? movementType,
     Value<String>? createdAt,
     Value<String?>? releaseReason,
+    Value<String?>? reversalOfMovementId,
     Value<int>? schemaVersion,
     Value<int>? rowid,
   }) {
@@ -9669,6 +9726,7 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
       movementType: movementType ?? this.movementType,
       createdAt: createdAt ?? this.createdAt,
       releaseReason: releaseReason ?? this.releaseReason,
+      reversalOfMovementId: reversalOfMovementId ?? this.reversalOfMovementId,
       schemaVersion: schemaVersion ?? this.schemaVersion,
       rowid: rowid ?? this.rowid,
     );
@@ -9700,6 +9758,11 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
     if (releaseReason.present) {
       map['release_reason'] = Variable<String>(releaseReason.value);
     }
+    if (reversalOfMovementId.present) {
+      map['reversal_of_movement_id'] = Variable<String>(
+        reversalOfMovementId.value,
+      );
+    }
     if (schemaVersion.present) {
       map['schema_version'] = Variable<int>(schemaVersion.value);
     }
@@ -9719,6 +9782,797 @@ class GoalMovementsTableCompanion extends UpdateCompanion<DbGoalMovement> {
           ..write('movementType: $movementType, ')
           ..write('createdAt: $createdAt, ')
           ..write('releaseReason: $releaseReason, ')
+          ..write('reversalOfMovementId: $reversalOfMovementId, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GoalLifecycleEventsTableTable extends GoalLifecycleEventsTable
+    with TableInfo<$GoalLifecycleEventsTableTable, DbGoalLifecycleEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GoalLifecycleEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goalIdMeta = const VerificationMeta('goalId');
+  @override
+  late final GeneratedColumn<String> goalId = GeneratedColumn<String>(
+    'goal_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES goals (id)',
+    ),
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventTypeMeta = const VerificationMeta(
+    'eventType',
+  );
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+    'event_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completionTypeMeta = const VerificationMeta(
+    'completionType',
+  );
+  @override
+  late final GeneratedColumn<String> completionType = GeneratedColumn<String>(
+    'completion_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _earlyCompletionReasonMeta =
+      const VerificationMeta('earlyCompletionReason');
+  @override
+  late final GeneratedColumn<String> earlyCompletionReason =
+      GeneratedColumn<String>(
+        'early_completion_reason',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _earlyCompletionConfirmedMeta =
+      const VerificationMeta('earlyCompletionConfirmed');
+  @override
+  late final GeneratedColumn<int> earlyCompletionConfirmed =
+      GeneratedColumn<int>(
+        'early_completion_confirmed',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _idempotencyKeyMeta = const VerificationMeta(
+    'idempotencyKey',
+  );
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+    'idempotency_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _actorMetadataMeta = const VerificationMeta(
+    'actorMetadata',
+  );
+  @override
+  late final GeneratedColumn<String> actorMetadata = GeneratedColumn<String>(
+    'actor_metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectiveAtMeta = const VerificationMeta(
+    'effectiveAt',
+  );
+  @override
+  late final GeneratedColumn<String> effectiveAt = GeneratedColumn<String>(
+    'effective_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(12),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    goalId,
+    householdId,
+    eventType,
+    completionType,
+    earlyCompletionReason,
+    earlyCompletionConfirmed,
+    idempotencyKey,
+    actorMetadata,
+    effectiveAt,
+    createdAt,
+    schemaVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'goal_lifecycle_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbGoalLifecycleEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('goal_id')) {
+      context.handle(
+        _goalIdMeta,
+        goalId.isAcceptableOrUnknown(data['goal_id']!, _goalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_goalIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(
+        _eventTypeMeta,
+        eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventTypeMeta);
+    }
+    if (data.containsKey('completion_type')) {
+      context.handle(
+        _completionTypeMeta,
+        completionType.isAcceptableOrUnknown(
+          data['completion_type']!,
+          _completionTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('early_completion_reason')) {
+      context.handle(
+        _earlyCompletionReasonMeta,
+        earlyCompletionReason.isAcceptableOrUnknown(
+          data['early_completion_reason']!,
+          _earlyCompletionReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('early_completion_confirmed')) {
+      context.handle(
+        _earlyCompletionConfirmedMeta,
+        earlyCompletionConfirmed.isAcceptableOrUnknown(
+          data['early_completion_confirmed']!,
+          _earlyCompletionConfirmedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+        _idempotencyKeyMeta,
+        idempotencyKey.isAcceptableOrUnknown(
+          data['idempotency_key']!,
+          _idempotencyKeyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('actor_metadata')) {
+      context.handle(
+        _actorMetadataMeta,
+        actorMetadata.isAcceptableOrUnknown(
+          data['actor_metadata']!,
+          _actorMetadataMeta,
+        ),
+      );
+    }
+    if (data.containsKey('effective_at')) {
+      context.handle(
+        _effectiveAtMeta,
+        effectiveAt.isAcceptableOrUnknown(
+          data['effective_at']!,
+          _effectiveAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbGoalLifecycleEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbGoalLifecycleEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      goalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}goal_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      eventType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_type'],
+      )!,
+      completionType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completion_type'],
+      ),
+      earlyCompletionReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}early_completion_reason'],
+      ),
+      earlyCompletionConfirmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}early_completion_confirmed'],
+      )!,
+      idempotencyKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idempotency_key'],
+      ),
+      actorMetadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor_metadata'],
+      ),
+      effectiveAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}effective_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+    );
+  }
+
+  @override
+  $GoalLifecycleEventsTableTable createAlias(String alias) {
+    return $GoalLifecycleEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class DbGoalLifecycleEvent extends DataClass
+    implements Insertable<DbGoalLifecycleEvent> {
+  final String id;
+  final String goalId;
+  final String householdId;
+
+  /// 'created', 'completed', 'archived', 'restored'.
+  final String eventType;
+
+  /// 'normal' or 'early' — only for completed events.
+  final String? completionType;
+
+  /// Non-empty when completionType = 'early'.
+  final String? earlyCompletionReason;
+
+  /// Must be 1 when completionType = 'early'.
+  final int earlyCompletionConfirmed;
+
+  /// Scoped idempotency key; UNIQUE across the table.
+  final String? idempotencyKey;
+
+  /// Arbitrary JSON actor metadata (user id, device, session).
+  final String? actorMetadata;
+
+  /// Business-effective timestamp (ISO 8601 UTC).
+  final String effectiveAt;
+
+  /// Row-creation timestamp (ISO 8601 UTC).
+  final String createdAt;
+  final int schemaVersion;
+  const DbGoalLifecycleEvent({
+    required this.id,
+    required this.goalId,
+    required this.householdId,
+    required this.eventType,
+    this.completionType,
+    this.earlyCompletionReason,
+    required this.earlyCompletionConfirmed,
+    this.idempotencyKey,
+    this.actorMetadata,
+    required this.effectiveAt,
+    required this.createdAt,
+    required this.schemaVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['goal_id'] = Variable<String>(goalId);
+    map['household_id'] = Variable<String>(householdId);
+    map['event_type'] = Variable<String>(eventType);
+    if (!nullToAbsent || completionType != null) {
+      map['completion_type'] = Variable<String>(completionType);
+    }
+    if (!nullToAbsent || earlyCompletionReason != null) {
+      map['early_completion_reason'] = Variable<String>(earlyCompletionReason);
+    }
+    map['early_completion_confirmed'] = Variable<int>(earlyCompletionConfirmed);
+    if (!nullToAbsent || idempotencyKey != null) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey);
+    }
+    if (!nullToAbsent || actorMetadata != null) {
+      map['actor_metadata'] = Variable<String>(actorMetadata);
+    }
+    map['effective_at'] = Variable<String>(effectiveAt);
+    map['created_at'] = Variable<String>(createdAt);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    return map;
+  }
+
+  GoalLifecycleEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return GoalLifecycleEventsTableCompanion(
+      id: Value(id),
+      goalId: Value(goalId),
+      householdId: Value(householdId),
+      eventType: Value(eventType),
+      completionType: completionType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completionType),
+      earlyCompletionReason: earlyCompletionReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(earlyCompletionReason),
+      earlyCompletionConfirmed: Value(earlyCompletionConfirmed),
+      idempotencyKey: idempotencyKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idempotencyKey),
+      actorMetadata: actorMetadata == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actorMetadata),
+      effectiveAt: Value(effectiveAt),
+      createdAt: Value(createdAt),
+      schemaVersion: Value(schemaVersion),
+    );
+  }
+
+  factory DbGoalLifecycleEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbGoalLifecycleEvent(
+      id: serializer.fromJson<String>(json['id']),
+      goalId: serializer.fromJson<String>(json['goalId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      completionType: serializer.fromJson<String?>(json['completionType']),
+      earlyCompletionReason: serializer.fromJson<String?>(
+        json['earlyCompletionReason'],
+      ),
+      earlyCompletionConfirmed: serializer.fromJson<int>(
+        json['earlyCompletionConfirmed'],
+      ),
+      idempotencyKey: serializer.fromJson<String?>(json['idempotencyKey']),
+      actorMetadata: serializer.fromJson<String?>(json['actorMetadata']),
+      effectiveAt: serializer.fromJson<String>(json['effectiveAt']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'goalId': serializer.toJson<String>(goalId),
+      'householdId': serializer.toJson<String>(householdId),
+      'eventType': serializer.toJson<String>(eventType),
+      'completionType': serializer.toJson<String?>(completionType),
+      'earlyCompletionReason': serializer.toJson<String?>(
+        earlyCompletionReason,
+      ),
+      'earlyCompletionConfirmed': serializer.toJson<int>(
+        earlyCompletionConfirmed,
+      ),
+      'idempotencyKey': serializer.toJson<String?>(idempotencyKey),
+      'actorMetadata': serializer.toJson<String?>(actorMetadata),
+      'effectiveAt': serializer.toJson<String>(effectiveAt),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+    };
+  }
+
+  DbGoalLifecycleEvent copyWith({
+    String? id,
+    String? goalId,
+    String? householdId,
+    String? eventType,
+    Value<String?> completionType = const Value.absent(),
+    Value<String?> earlyCompletionReason = const Value.absent(),
+    int? earlyCompletionConfirmed,
+    Value<String?> idempotencyKey = const Value.absent(),
+    Value<String?> actorMetadata = const Value.absent(),
+    String? effectiveAt,
+    String? createdAt,
+    int? schemaVersion,
+  }) => DbGoalLifecycleEvent(
+    id: id ?? this.id,
+    goalId: goalId ?? this.goalId,
+    householdId: householdId ?? this.householdId,
+    eventType: eventType ?? this.eventType,
+    completionType: completionType.present
+        ? completionType.value
+        : this.completionType,
+    earlyCompletionReason: earlyCompletionReason.present
+        ? earlyCompletionReason.value
+        : this.earlyCompletionReason,
+    earlyCompletionConfirmed:
+        earlyCompletionConfirmed ?? this.earlyCompletionConfirmed,
+    idempotencyKey: idempotencyKey.present
+        ? idempotencyKey.value
+        : this.idempotencyKey,
+    actorMetadata: actorMetadata.present
+        ? actorMetadata.value
+        : this.actorMetadata,
+    effectiveAt: effectiveAt ?? this.effectiveAt,
+    createdAt: createdAt ?? this.createdAt,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+  );
+  DbGoalLifecycleEvent copyWithCompanion(
+    GoalLifecycleEventsTableCompanion data,
+  ) {
+    return DbGoalLifecycleEvent(
+      id: data.id.present ? data.id.value : this.id,
+      goalId: data.goalId.present ? data.goalId.value : this.goalId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      completionType: data.completionType.present
+          ? data.completionType.value
+          : this.completionType,
+      earlyCompletionReason: data.earlyCompletionReason.present
+          ? data.earlyCompletionReason.value
+          : this.earlyCompletionReason,
+      earlyCompletionConfirmed: data.earlyCompletionConfirmed.present
+          ? data.earlyCompletionConfirmed.value
+          : this.earlyCompletionConfirmed,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      actorMetadata: data.actorMetadata.present
+          ? data.actorMetadata.value
+          : this.actorMetadata,
+      effectiveAt: data.effectiveAt.present
+          ? data.effectiveAt.value
+          : this.effectiveAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbGoalLifecycleEvent(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('householdId: $householdId, ')
+          ..write('eventType: $eventType, ')
+          ..write('completionType: $completionType, ')
+          ..write('earlyCompletionReason: $earlyCompletionReason, ')
+          ..write('earlyCompletionConfirmed: $earlyCompletionConfirmed, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('actorMetadata: $actorMetadata, ')
+          ..write('effectiveAt: $effectiveAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('schemaVersion: $schemaVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    goalId,
+    householdId,
+    eventType,
+    completionType,
+    earlyCompletionReason,
+    earlyCompletionConfirmed,
+    idempotencyKey,
+    actorMetadata,
+    effectiveAt,
+    createdAt,
+    schemaVersion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbGoalLifecycleEvent &&
+          other.id == this.id &&
+          other.goalId == this.goalId &&
+          other.householdId == this.householdId &&
+          other.eventType == this.eventType &&
+          other.completionType == this.completionType &&
+          other.earlyCompletionReason == this.earlyCompletionReason &&
+          other.earlyCompletionConfirmed == this.earlyCompletionConfirmed &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.actorMetadata == this.actorMetadata &&
+          other.effectiveAt == this.effectiveAt &&
+          other.createdAt == this.createdAt &&
+          other.schemaVersion == this.schemaVersion);
+}
+
+class GoalLifecycleEventsTableCompanion
+    extends UpdateCompanion<DbGoalLifecycleEvent> {
+  final Value<String> id;
+  final Value<String> goalId;
+  final Value<String> householdId;
+  final Value<String> eventType;
+  final Value<String?> completionType;
+  final Value<String?> earlyCompletionReason;
+  final Value<int> earlyCompletionConfirmed;
+  final Value<String?> idempotencyKey;
+  final Value<String?> actorMetadata;
+  final Value<String> effectiveAt;
+  final Value<String> createdAt;
+  final Value<int> schemaVersion;
+  final Value<int> rowid;
+  const GoalLifecycleEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.goalId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.completionType = const Value.absent(),
+    this.earlyCompletionReason = const Value.absent(),
+    this.earlyCompletionConfirmed = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.actorMetadata = const Value.absent(),
+    this.effectiveAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GoalLifecycleEventsTableCompanion.insert({
+    required String id,
+    required String goalId,
+    required String householdId,
+    required String eventType,
+    this.completionType = const Value.absent(),
+    this.earlyCompletionReason = const Value.absent(),
+    this.earlyCompletionConfirmed = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.actorMetadata = const Value.absent(),
+    required String effectiveAt,
+    required String createdAt,
+    this.schemaVersion = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       goalId = Value(goalId),
+       householdId = Value(householdId),
+       eventType = Value(eventType),
+       effectiveAt = Value(effectiveAt),
+       createdAt = Value(createdAt);
+  static Insertable<DbGoalLifecycleEvent> custom({
+    Expression<String>? id,
+    Expression<String>? goalId,
+    Expression<String>? householdId,
+    Expression<String>? eventType,
+    Expression<String>? completionType,
+    Expression<String>? earlyCompletionReason,
+    Expression<int>? earlyCompletionConfirmed,
+    Expression<String>? idempotencyKey,
+    Expression<String>? actorMetadata,
+    Expression<String>? effectiveAt,
+    Expression<String>? createdAt,
+    Expression<int>? schemaVersion,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (goalId != null) 'goal_id': goalId,
+      if (householdId != null) 'household_id': householdId,
+      if (eventType != null) 'event_type': eventType,
+      if (completionType != null) 'completion_type': completionType,
+      if (earlyCompletionReason != null)
+        'early_completion_reason': earlyCompletionReason,
+      if (earlyCompletionConfirmed != null)
+        'early_completion_confirmed': earlyCompletionConfirmed,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (actorMetadata != null) 'actor_metadata': actorMetadata,
+      if (effectiveAt != null) 'effective_at': effectiveAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GoalLifecycleEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? goalId,
+    Value<String>? householdId,
+    Value<String>? eventType,
+    Value<String?>? completionType,
+    Value<String?>? earlyCompletionReason,
+    Value<int>? earlyCompletionConfirmed,
+    Value<String?>? idempotencyKey,
+    Value<String?>? actorMetadata,
+    Value<String>? effectiveAt,
+    Value<String>? createdAt,
+    Value<int>? schemaVersion,
+    Value<int>? rowid,
+  }) {
+    return GoalLifecycleEventsTableCompanion(
+      id: id ?? this.id,
+      goalId: goalId ?? this.goalId,
+      householdId: householdId ?? this.householdId,
+      eventType: eventType ?? this.eventType,
+      completionType: completionType ?? this.completionType,
+      earlyCompletionReason:
+          earlyCompletionReason ?? this.earlyCompletionReason,
+      earlyCompletionConfirmed:
+          earlyCompletionConfirmed ?? this.earlyCompletionConfirmed,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      actorMetadata: actorMetadata ?? this.actorMetadata,
+      effectiveAt: effectiveAt ?? this.effectiveAt,
+      createdAt: createdAt ?? this.createdAt,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (goalId.present) {
+      map['goal_id'] = Variable<String>(goalId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (completionType.present) {
+      map['completion_type'] = Variable<String>(completionType.value);
+    }
+    if (earlyCompletionReason.present) {
+      map['early_completion_reason'] = Variable<String>(
+        earlyCompletionReason.value,
+      );
+    }
+    if (earlyCompletionConfirmed.present) {
+      map['early_completion_confirmed'] = Variable<int>(
+        earlyCompletionConfirmed.value,
+      );
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (actorMetadata.present) {
+      map['actor_metadata'] = Variable<String>(actorMetadata.value);
+    }
+    if (effectiveAt.present) {
+      map['effective_at'] = Variable<String>(effectiveAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoalLifecycleEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('goalId: $goalId, ')
+          ..write('householdId: $householdId, ')
+          ..write('eventType: $eventType, ')
+          ..write('completionType: $completionType, ')
+          ..write('earlyCompletionReason: $earlyCompletionReason, ')
+          ..write('earlyCompletionConfirmed: $earlyCompletionConfirmed, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('actorMetadata: $actorMetadata, ')
+          ..write('effectiveAt: $effectiveAt, ')
+          ..write('createdAt: $createdAt, ')
           ..write('schemaVersion: $schemaVersion, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -9747,6 +10601,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $GoalRevisionsTableTable(this);
   late final $GoalMovementsTableTable goalMovementsTable =
       $GoalMovementsTableTable(this);
+  late final $GoalLifecycleEventsTableTable goalLifecycleEventsTable =
+      $GoalLifecycleEventsTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -9763,6 +10619,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     goalsTable,
     goalRevisionsTable,
     goalMovementsTable,
+    goalLifecycleEventsTable,
   ];
 }
 
@@ -15626,6 +16483,31 @@ final class $$GoalsTableTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $GoalLifecycleEventsTableTable,
+    List<DbGoalLifecycleEvent>
+  >
+  _goalLifecycleEventsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.goalLifecycleEventsTable,
+        aliasName: 'goals__id__goal_lifecycle_events__goal_id',
+      );
+
+  $$GoalLifecycleEventsTableTableProcessedTableManager
+  get goalLifecycleEventsTableRefs {
+    final manager = $$GoalLifecycleEventsTableTableTableManager(
+      $_db,
+      $_db.goalLifecycleEventsTable,
+    ).filter((f) => f.goalId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _goalLifecycleEventsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$GoalsTableTableFilterComposer
@@ -15762,6 +16644,33 @@ class $$GoalsTableTableFilterComposer
                 $removeJoinBuilderFromRootComposer,
           ),
     );
+    return f(composer);
+  }
+
+  Expression<bool> goalLifecycleEventsTableRefs(
+    Expression<bool> Function($$GoalLifecycleEventsTableTableFilterComposer f)
+    f,
+  ) {
+    final $$GoalLifecycleEventsTableTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.goalLifecycleEventsTable,
+          getReferencedColumn: (t) => t.goalId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$GoalLifecycleEventsTableTableFilterComposer(
+                $db: $db,
+                $table: $db.goalLifecycleEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -15987,6 +16896,33 @@ class $$GoalsTableTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> goalLifecycleEventsTableRefs<T extends Object>(
+    Expression<T> Function($$GoalLifecycleEventsTableTableAnnotationComposer a)
+    f,
+  ) {
+    final $$GoalLifecycleEventsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.goalLifecycleEventsTable,
+          getReferencedColumn: (t) => t.goalId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$GoalLifecycleEventsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.goalLifecycleEventsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$GoalsTableTableTableManager
@@ -16006,6 +16942,7 @@ class $$GoalsTableTableTableManager
             bool reserveAccountId,
             bool goalRevisionsTableRefs,
             bool goalMovementsTableRefs,
+            bool goalLifecycleEventsTableRefs,
           })
         > {
   $$GoalsTableTableTableManager(_$AppDatabase db, $GoalsTableTable table)
@@ -16092,12 +17029,15 @@ class $$GoalsTableTableTableManager
                 reserveAccountId = false,
                 goalRevisionsTableRefs = false,
                 goalMovementsTableRefs = false,
+                goalLifecycleEventsTableRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (goalRevisionsTableRefs) db.goalRevisionsTable,
                     if (goalMovementsTableRefs) db.goalMovementsTable,
+                    if (goalLifecycleEventsTableRefs)
+                      db.goalLifecycleEventsTable,
                   ],
                   addJoins:
                       <
@@ -16176,6 +17116,27 @@ class $$GoalsTableTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (goalLifecycleEventsTableRefs)
+                        await $_getPrefetchedData<
+                          DbGoal,
+                          $GoalsTableTable,
+                          DbGoalLifecycleEvent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$GoalsTableTableReferences
+                              ._goalLifecycleEventsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$GoalsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).goalLifecycleEventsTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.goalId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -16200,6 +17161,7 @@ typedef $$GoalsTableTableProcessedTableManager =
         bool reserveAccountId,
         bool goalRevisionsTableRefs,
         bool goalMovementsTableRefs,
+        bool goalLifecycleEventsTableRefs,
       })
     >;
 typedef $$GoalRevisionsTableTableCreateCompanionBuilder =
@@ -16693,6 +17655,7 @@ typedef $$GoalMovementsTableTableCreateCompanionBuilder =
       required String movementType,
       required String createdAt,
       Value<String?> releaseReason,
+      Value<String?> reversalOfMovementId,
       Value<int> schemaVersion,
       Value<int> rowid,
     });
@@ -16705,6 +17668,7 @@ typedef $$GoalMovementsTableTableUpdateCompanionBuilder =
       Value<String> movementType,
       Value<String> createdAt,
       Value<String?> releaseReason,
+      Value<String?> reversalOfMovementId,
       Value<int> schemaVersion,
       Value<int> rowid,
     });
@@ -16779,6 +17743,11 @@ class $$GoalMovementsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get reversalOfMovementId => $composableBuilder(
+    column: $table.reversalOfMovementId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get schemaVersion => $composableBuilder(
     column: $table.schemaVersion,
     builder: (column) => ColumnFilters(column),
@@ -16847,6 +17816,11 @@ class $$GoalMovementsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get reversalOfMovementId => $composableBuilder(
+    column: $table.reversalOfMovementId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get schemaVersion => $composableBuilder(
     column: $table.schemaVersion,
     builder: (column) => ColumnOrderings(column),
@@ -16908,6 +17882,11 @@ class $$GoalMovementsTableTableAnnotationComposer
 
   GeneratedColumn<String> get releaseReason => $composableBuilder(
     column: $table.releaseReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reversalOfMovementId => $composableBuilder(
+    column: $table.reversalOfMovementId,
     builder: (column) => column,
   );
 
@@ -16980,6 +17959,7 @@ class $$GoalMovementsTableTableTableManager
                 Value<String> movementType = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String?> releaseReason = const Value.absent(),
+                Value<String?> reversalOfMovementId = const Value.absent(),
                 Value<int> schemaVersion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalMovementsTableCompanion(
@@ -16990,6 +17970,7 @@ class $$GoalMovementsTableTableTableManager
                 movementType: movementType,
                 createdAt: createdAt,
                 releaseReason: releaseReason,
+                reversalOfMovementId: reversalOfMovementId,
                 schemaVersion: schemaVersion,
                 rowid: rowid,
               ),
@@ -17002,6 +17983,7 @@ class $$GoalMovementsTableTableTableManager
                 required String movementType,
                 required String createdAt,
                 Value<String?> releaseReason = const Value.absent(),
+                Value<String?> reversalOfMovementId = const Value.absent(),
                 Value<int> schemaVersion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalMovementsTableCompanion.insert(
@@ -17012,6 +17994,7 @@ class $$GoalMovementsTableTableTableManager
                 movementType: movementType,
                 createdAt: createdAt,
                 releaseReason: releaseReason,
+                reversalOfMovementId: reversalOfMovementId,
                 schemaVersion: schemaVersion,
                 rowid: rowid,
               ),
@@ -17084,6 +18067,494 @@ typedef $$GoalMovementsTableTableProcessedTableManager =
       DbGoalMovement,
       PrefetchHooks Function({bool goalId})
     >;
+typedef $$GoalLifecycleEventsTableTableCreateCompanionBuilder =
+    GoalLifecycleEventsTableCompanion Function({
+      required String id,
+      required String goalId,
+      required String householdId,
+      required String eventType,
+      Value<String?> completionType,
+      Value<String?> earlyCompletionReason,
+      Value<int> earlyCompletionConfirmed,
+      Value<String?> idempotencyKey,
+      Value<String?> actorMetadata,
+      required String effectiveAt,
+      required String createdAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+typedef $$GoalLifecycleEventsTableTableUpdateCompanionBuilder =
+    GoalLifecycleEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> goalId,
+      Value<String> householdId,
+      Value<String> eventType,
+      Value<String?> completionType,
+      Value<String?> earlyCompletionReason,
+      Value<int> earlyCompletionConfirmed,
+      Value<String?> idempotencyKey,
+      Value<String?> actorMetadata,
+      Value<String> effectiveAt,
+      Value<String> createdAt,
+      Value<int> schemaVersion,
+      Value<int> rowid,
+    });
+
+final class $$GoalLifecycleEventsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $GoalLifecycleEventsTableTable,
+          DbGoalLifecycleEvent
+        > {
+  $$GoalLifecycleEventsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $GoalsTableTable _goalIdTable(_$AppDatabase db) =>
+      db.goalsTable.createAlias('goal_lifecycle_events__goal_id__goals__id');
+
+  $$GoalsTableTableProcessedTableManager get goalId {
+    final $_column = $_itemColumn<String>('goal_id')!;
+
+    final manager = $$GoalsTableTableTableManager(
+      $_db,
+      $_db.goalsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_goalIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$GoalLifecycleEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $GoalLifecycleEventsTableTable> {
+  $$GoalLifecycleEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completionType => $composableBuilder(
+    column: $table.completionType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get earlyCompletionConfirmed => $composableBuilder(
+    column: $table.earlyCompletionConfirmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actorMetadata => $composableBuilder(
+    column: $table.actorMetadata,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$GoalsTableTableFilterComposer get goalId {
+    final $$GoalsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goalsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.goalsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$GoalLifecycleEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $GoalLifecycleEventsTableTable> {
+  $$GoalLifecycleEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completionType => $composableBuilder(
+    column: $table.completionType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get earlyCompletionConfirmed => $composableBuilder(
+    column: $table.earlyCompletionConfirmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actorMetadata => $composableBuilder(
+    column: $table.actorMetadata,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$GoalsTableTableOrderingComposer get goalId {
+    final $$GoalsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goalsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.goalsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$GoalLifecycleEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GoalLifecycleEventsTableTable> {
+  $$GoalLifecycleEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get completionType => $composableBuilder(
+    column: $table.completionType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get earlyCompletionConfirmed => $composableBuilder(
+    column: $table.earlyCompletionConfirmed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+    column: $table.idempotencyKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get actorMetadata => $composableBuilder(
+    column: $table.actorMetadata,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get effectiveAt => $composableBuilder(
+    column: $table.effectiveAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  $$GoalsTableTableAnnotationComposer get goalId {
+    final $$GoalsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goalsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.goalsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$GoalLifecycleEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GoalLifecycleEventsTableTable,
+          DbGoalLifecycleEvent,
+          $$GoalLifecycleEventsTableTableFilterComposer,
+          $$GoalLifecycleEventsTableTableOrderingComposer,
+          $$GoalLifecycleEventsTableTableAnnotationComposer,
+          $$GoalLifecycleEventsTableTableCreateCompanionBuilder,
+          $$GoalLifecycleEventsTableTableUpdateCompanionBuilder,
+          (DbGoalLifecycleEvent, $$GoalLifecycleEventsTableTableReferences),
+          DbGoalLifecycleEvent,
+          PrefetchHooks Function({bool goalId})
+        > {
+  $$GoalLifecycleEventsTableTableTableManager(
+    _$AppDatabase db,
+    $GoalLifecycleEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GoalLifecycleEventsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$GoalLifecycleEventsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$GoalLifecycleEventsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> goalId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<String?> completionType = const Value.absent(),
+                Value<String?> earlyCompletionReason = const Value.absent(),
+                Value<int> earlyCompletionConfirmed = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> actorMetadata = const Value.absent(),
+                Value<String> effectiveAt = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GoalLifecycleEventsTableCompanion(
+                id: id,
+                goalId: goalId,
+                householdId: householdId,
+                eventType: eventType,
+                completionType: completionType,
+                earlyCompletionReason: earlyCompletionReason,
+                earlyCompletionConfirmed: earlyCompletionConfirmed,
+                idempotencyKey: idempotencyKey,
+                actorMetadata: actorMetadata,
+                effectiveAt: effectiveAt,
+                createdAt: createdAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String goalId,
+                required String householdId,
+                required String eventType,
+                Value<String?> completionType = const Value.absent(),
+                Value<String?> earlyCompletionReason = const Value.absent(),
+                Value<int> earlyCompletionConfirmed = const Value.absent(),
+                Value<String?> idempotencyKey = const Value.absent(),
+                Value<String?> actorMetadata = const Value.absent(),
+                required String effectiveAt,
+                required String createdAt,
+                Value<int> schemaVersion = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GoalLifecycleEventsTableCompanion.insert(
+                id: id,
+                goalId: goalId,
+                householdId: householdId,
+                eventType: eventType,
+                completionType: completionType,
+                earlyCompletionReason: earlyCompletionReason,
+                earlyCompletionConfirmed: earlyCompletionConfirmed,
+                idempotencyKey: idempotencyKey,
+                actorMetadata: actorMetadata,
+                effectiveAt: effectiveAt,
+                createdAt: createdAt,
+                schemaVersion: schemaVersion,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$GoalLifecycleEventsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({goalId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (goalId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.goalId,
+                                referencedTable:
+                                    $$GoalLifecycleEventsTableTableReferences
+                                        ._goalIdTable(db),
+                                referencedColumn:
+                                    $$GoalLifecycleEventsTableTableReferences
+                                        ._goalIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$GoalLifecycleEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GoalLifecycleEventsTableTable,
+      DbGoalLifecycleEvent,
+      $$GoalLifecycleEventsTableTableFilterComposer,
+      $$GoalLifecycleEventsTableTableOrderingComposer,
+      $$GoalLifecycleEventsTableTableAnnotationComposer,
+      $$GoalLifecycleEventsTableTableCreateCompanionBuilder,
+      $$GoalLifecycleEventsTableTableUpdateCompanionBuilder,
+      (DbGoalLifecycleEvent, $$GoalLifecycleEventsTableTableReferences),
+      DbGoalLifecycleEvent,
+      PrefetchHooks Function({bool goalId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -17110,4 +18581,9 @@ class $AppDatabaseManager {
       $$GoalRevisionsTableTableTableManager(_db, _db.goalRevisionsTable);
   $$GoalMovementsTableTableTableManager get goalMovementsTable =>
       $$GoalMovementsTableTableTableManager(_db, _db.goalMovementsTable);
+  $$GoalLifecycleEventsTableTableTableManager get goalLifecycleEventsTable =>
+      $$GoalLifecycleEventsTableTableTableManager(
+        _db,
+        _db.goalLifecycleEventsTable,
+      );
 }

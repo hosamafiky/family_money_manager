@@ -404,19 +404,40 @@ final class DriftGoalRepository implements GoalRepository {
   @override
   Future<AppResult<void>> addMovement(GoalMovement movement) async {
     try {
-      await _db
-          .into(_db.goalMovementsTable)
-          .insert(
-            GoalMovementsTableCompanion.insert(
-              id: movement.id,
-              goalId: movement.goalId,
-              householdId: movement.householdId,
-              transferOperationId: movement.transferOperationId,
-              movementType: movement.movementType.name,
-              createdAt: movement.createdAt,
-              releaseReason: Value(movement.releaseReason),
-            ),
-          );
+      if (movement.movementType == GoalMovementType.reversal) {
+        // Reversal movements include reversal_of_movement_id — use raw SQL
+        // since the companion does not expose this column in older migrations.
+        await _db.customStatement(
+          'INSERT INTO goal_movements '
+          '(id, goal_id, household_id, transfer_operation_id, movement_type, '
+          'created_at, release_reason, reversal_of_movement_id) '
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            movement.id,
+            movement.goalId,
+            movement.householdId,
+            movement.transferOperationId,
+            'reversal',
+            movement.createdAt,
+            movement.releaseReason,
+            movement.reversalOfMovementId,
+          ],
+        );
+      } else {
+        await _db
+            .into(_db.goalMovementsTable)
+            .insert(
+              GoalMovementsTableCompanion.insert(
+                id: movement.id,
+                goalId: movement.goalId,
+                householdId: movement.householdId,
+                transferOperationId: movement.transferOperationId,
+                movementType: movement.movementType.name,
+                createdAt: movement.createdAt,
+                releaseReason: Value(movement.releaseReason),
+              ),
+            );
+      }
       return const AppOk(null);
     } on Exception catch (_) {
       return const AppPersistenceFailure();
@@ -549,11 +570,14 @@ final class DriftGoalRepository implements GoalRepository {
     goalId: row.goalId,
     householdId: row.householdId,
     transferOperationId: row.transferOperationId,
-    movementType: row.movementType == 'funding'
-        ? GoalMovementType.funding
-        : GoalMovementType.release,
+    movementType: switch (row.movementType) {
+      'funding' => GoalMovementType.funding,
+      'reversal' => GoalMovementType.reversal,
+      _ => GoalMovementType.release,
+    },
     createdAt: row.createdAt,
     releaseReason: row.releaseReason,
+    reversalOfMovementId: row.reversalOfMovementId,
   );
 
   GoalStatus _statusFromCode(String code) => switch (code) {
@@ -576,4 +600,121 @@ final class DriftGoalRepository implements GoalRepository {
       'hh=${goal.householdId}|name=${revision.name}|'
       'cur=${goal.currencyCode}|target=${revision.targetMinorUnits}|'
       'purpose=${revision.purpose.code}';
+
+  // ── insertLifecycleEvent ──────────────────────────────────────────────────
+
+  @override
+  Future<AppResult<GoalLifecycleEvent>> insertLifecycleEvent(
+    GoalLifecycleEvent event,
+  ) async {
+    try {
+      // Idempotency: check if a matching event already exists.
+      if (event.idempotencyKey != null) {
+        final existing = await _db
+            .customSelect(
+              'SELECT * FROM goal_lifecycle_events WHERE idempotency_key = ?',
+              variables: [Variable.withString(event.idempotencyKey!)],
+            )
+            .get();
+        if (existing.isNotEmpty) {
+          final row = existing.first;
+          final storedType = row.read<String>('event_type');
+          if (storedType == event.eventType.code) {
+            // Same key, same type → idempotent replay.
+            return AppOk(_rowToLifecycleEvent(row));
+          } else {
+            // Same key, different type → conflict.
+            return const AppDuplicateConflict(
+              messageKey: 'errorLifecycleEventConflict',
+            );
+          }
+        }
+      }
+
+      await _db.customStatement(
+        'INSERT INTO goal_lifecycle_events '
+        '(id, goal_id, household_id, event_type, completion_type, '
+        'early_completion_reason, early_completion_confirmed, '
+        'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 12)',
+        [
+          event.id,
+          event.goalId,
+          event.householdId,
+          event.eventType.code,
+          event.completionType,
+          event.earlyCompletionReason,
+          event.earlyCompletionConfirmed ? 1 : 0,
+          event.idempotencyKey,
+          event.actorMetadata,
+          event.effectiveAt,
+          event.createdAt,
+        ],
+      );
+      return AppOk(event);
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  // ── findMovementByOperationId ─────────────────────────────────────────────
+
+  @override
+  Future<AppResult<GoalMovement?>> findMovementByOperationId(
+    String transferOperationId,
+  ) async {
+    try {
+      final rows = await _db
+          .customSelect(
+            'SELECT * FROM goal_movements WHERE transfer_operation_id = ? LIMIT 1',
+            variables: [Variable.withString(transferOperationId)],
+          )
+          .get();
+      if (rows.isEmpty) return const AppOk(null);
+      final row = rows.first;
+      return AppOk(
+        GoalMovement(
+          id: row.read<String>('id'),
+          goalId: row.read<String>('goal_id'),
+          householdId: row.read<String>('household_id'),
+          transferOperationId: row.read<String>('transfer_operation_id'),
+          movementType: switch (row.read<String>('movement_type')) {
+            'funding' => GoalMovementType.funding,
+            'reversal' => GoalMovementType.reversal,
+            _ => GoalMovementType.release,
+          },
+          createdAt: row.read<String>('created_at'),
+          releaseReason: row.readNullable<String>('release_reason'),
+          reversalOfMovementId: row.readNullable<String>(
+            'reversal_of_movement_id',
+          ),
+        ),
+      );
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  GoalLifecycleEvent _rowToLifecycleEvent(QueryRow row) => GoalLifecycleEvent(
+    id: row.read<String>('id'),
+    goalId: row.read<String>('goal_id'),
+    householdId: row.read<String>('household_id'),
+    eventType: _lifecycleEventTypeFromCode(row.read<String>('event_type')),
+    completionType: row.readNullable<String>('completion_type'),
+    earlyCompletionReason: row.readNullable<String>('early_completion_reason'),
+    earlyCompletionConfirmed: row.read<int>('early_completion_confirmed') == 1,
+    idempotencyKey: row.readNullable<String>('idempotency_key'),
+    actorMetadata: row.readNullable<String>('actor_metadata'),
+    effectiveAt: row.read<String>('effective_at'),
+    createdAt: row.read<String>('created_at'),
+  );
+
+  GoalLifecycleEventType _lifecycleEventTypeFromCode(String code) =>
+      switch (code) {
+        'created' => GoalLifecycleEventType.created,
+        'completed' => GoalLifecycleEventType.completed,
+        'archived' => GoalLifecycleEventType.archived,
+        'restored' => GoalLifecycleEventType.restored,
+        _ => GoalLifecycleEventType.completed,
+      };
 }

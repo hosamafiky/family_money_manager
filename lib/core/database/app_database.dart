@@ -5,7 +5,12 @@ import 'package:drift/native.dart';
 import 'package:family_money_manager/core/database/tables/budgets_table.dart';
 import 'package:family_money_manager/core/database/tables/child_withdrawal_audits_table.dart';
 import 'package:family_money_manager/core/database/tables/financial_accounts_table.dart';
-import 'package:family_money_manager/core/database/tables/goals_table.dart';
+import 'package:family_money_manager/core/database/tables/goals_table.dart'
+    show
+        GoalLifecycleEventsTable,
+        GoalMovementsTable,
+        GoalRevisionsTable,
+        GoalsTable;
 import 'package:family_money_manager/core/database/tables/household_members_table.dart';
 import 'package:family_money_manager/core/database/tables/households_table.dart';
 import 'package:family_money_manager/core/database/tables/ledger_entries_table.dart';
@@ -63,6 +68,13 @@ part 'app_database.g.dart';
 ///                 UNIQUE INDEX on goal_movements.transfer_operation_id.
 ///  10 — Phase 5B.2: reserve is_spendable/is_protected immutability triggers;
 ///                 funding/release movement direction-validation triggers.
+///  11 — Phase 5B.3: early_completion_reason column; goal-reserve INSERT
+///                 validator; extended movement household triggers.
+///  12 — Phase 5B.4: goal_lifecycle_events table (immutable event log);
+///                 reversal_of_movement_id column on goal_movements;
+///                 reserve owner_type = 'household' enforcement trigger;
+///                 no_modify_reserve_owner_type trigger;
+///                 goal_movement_transfer_type updated to allow 'reversal' ops.
 @DriftDatabase(
   tables: [
     Households,
@@ -76,6 +88,7 @@ part 'app_database.g.dart';
     GoalsTable,
     GoalRevisionsTable,
     GoalMovementsTable,
+    GoalLifecycleEventsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -91,7 +104,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -112,13 +125,16 @@ class AppDatabase extends _$AppDatabase {
       await _applyGoalIndexes();
       await _applyGoalTableHardeningTriggers();
       await _applyReserveAccountHardeningTriggers();
-      await _applyGoalMovementsHardeningTriggers();
+      await _applyGoalMovementsHardeningTriggersV12();
       await _applyGoalRevisionBeneficiaryTrigger();
       await _applyGoalMovementsUniqueIndex();
       await _applyReserveSpendableProtectedTriggers();
       await _applyGoalMovementsDirectionTriggers();
-      await _applyGoalReserveInsertValidator();
+      await _applyGoalReserveInsertValidatorV12();
       await _applyGoalMovementsHouseholdTriggers();
+      await _applyReserveOwnerTypeTrigger();
+      await _applyGoalLifecycleEventsTriggers();
+      await _applyGoalLifecycleEventsIndex();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -188,6 +204,33 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(goalsTable, goalsTable.earlyCompletionReason);
         await _applyGoalReserveInsertValidator();
         await _applyGoalMovementsHouseholdTriggers();
+      }
+      if (from <= 11) {
+        // v11 → v12: Phase 5B.4 — goal_lifecycle_events table;
+        // reversal_of_movement_id column; owner_type enforcement;
+        // no_modify_reserve_owner_type trigger; lifecycle event triggers;
+        // updated goal_movement_transfer_type (allows 'reversal' ops).
+        await m.createTable(goalLifecycleEventsTable);
+        await m.addColumn(
+          goalMovementsTable,
+          goalMovementsTable.reversalOfMovementId,
+        );
+        // Replace v11 trigger with v12 version that includes owner_type check.
+        await customStatement(
+          'DROP TRIGGER IF EXISTS validate_goal_reserve_on_insert',
+        );
+        await _applyGoalReserveInsertValidatorV12();
+        // Replace v8/v9 trigger with v12 version that allows 'reversal' ops.
+        await customStatement(
+          'DROP TRIGGER IF EXISTS goal_movement_transfer_type',
+        );
+        await _applyGoalMovementsHardeningTriggersV12();
+        await _applyReserveOwnerTypeTrigger();
+        await customStatement(
+          'DROP TRIGGER IF EXISTS fk_goal_lifecycle_event_household_id',
+        );
+        await _applyGoalLifecycleEventsTriggers();
+        await _applyGoalLifecycleEventsIndex();
       }
     },
     beforeOpen: (details) async {
@@ -758,13 +801,17 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
-  // ── Goal movements hardening (Phase 5B.1) ─────────────────────────────────
+  // ── Goal movements hardening (Phase 5B.1 / 5B.4) ─────────────────────────
   //
   // 1. Release movements must have a non-empty release_reason.
-  // 2. The linked operation must exist and be of type 'transfer'.
+  // 2. The linked operation must exist and be of type 'transfer' (v11) or
+  //    'reversal' (v12+, for reversal goal movements).
+  //
+  // Use [_applyGoalMovementsHardeningTriggersV12] for all fresh installs.
+  // The legacy [_applyGoalMovementsHardeningTriggers] kept for reference;
+  // call only during historical migration paths that don't reach v12 yet.
 
   Future<void> _applyGoalMovementsHardeningTriggers() async {
-    // Require non-empty release_reason for release movements.
     await customStatement('''
       CREATE TRIGGER IF NOT EXISTS goal_movement_release_reason
       BEFORE INSERT ON goal_movements
@@ -776,7 +823,6 @@ class AppDatabase extends _$AppDatabase {
       END
     ''');
 
-    // Linked operation must be of type 'transfer'.
     await customStatement('''
       CREATE TRIGGER IF NOT EXISTS goal_movement_transfer_type
       BEFORE INSERT ON goal_movements
@@ -787,6 +833,35 @@ class AppDatabase extends _$AppDatabase {
           SELECT 1 FROM operations
           WHERE id = NEW.transfer_operation_id
             AND type = 'transfer'
+        );
+      END
+    ''');
+  }
+
+  Future<void> _applyGoalMovementsHardeningTriggersV12() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_movement_release_reason
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'release'
+        AND (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0)
+      BEGIN
+        SELECT RAISE(ABORT, 'release movement must have a non-empty release_reason');
+      END
+    ''');
+
+    // In v12+, reversal goal movements reference a 'reversal' operation;
+    // allow both 'transfer' and 'reversal' operation types.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS goal_movement_transfer_type
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      BEGIN
+        SELECT RAISE(ABORT, 'goal movement must reference a transfer or reversal operation')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations
+          WHERE id = NEW.transfer_operation_id
+            AND type IN ('transfer', 'reversal')
         );
       END
     ''');
@@ -902,11 +977,14 @@ class AppDatabase extends _$AppDatabase {
     ''');
   }
 
-  // ── Phase 5B.3: Goal-reserve INSERT validator ─────────────────────────────
+  // ── Phase 5B.3: Goal-reserve INSERT validator (legacy, v11 only) ──────────
   //
   // Ensures every new goal row references an account that is a goalReserve
   // type in the same household with the same currency, is not spendable,
   // and is not protected.
+  //
+  // Use [_applyGoalReserveInsertValidatorV12] for all fresh installs and v12+
+  // migrations — it additionally enforces owner_type = 'household'.
 
   Future<void> _applyGoalReserveInsertValidator() async {
     await customStatement('''
@@ -924,6 +1002,92 @@ class AppDatabase extends _$AppDatabase {
             AND fa.is_protected = 0
         );
       END
+    ''');
+  }
+
+  // ── Phase 5B.4: Goal-reserve INSERT validator (v12) ───────────────────────
+  //
+  // Extended to also require owner_type = 'household', rejecting child,
+  // spouse, and personal-owner reserves.
+
+  Future<void> _applyGoalReserveInsertValidatorV12() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_goal_reserve_on_insert
+      BEFORE INSERT ON goals
+      BEGIN
+        SELECT RAISE(ABORT, 'goal reserve must be a goalReserve account: correct type, household, currency, owner')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM financial_accounts fa
+          WHERE fa.id = NEW.reserve_account_id
+            AND fa.type = 'goalReserve'
+            AND fa.household_id = NEW.household_id
+            AND fa.currency_code = NEW.currency_code
+            AND fa.is_spendable = 0
+            AND fa.is_protected = 0
+            AND fa.owner_type = 'household'
+        );
+      END
+    ''');
+  }
+
+  // ── Phase 5B.4: Reserve owner_type immutability trigger ──────────────────
+  //
+  // Prevents post-linkage mutation of owner_type on a goalReserve account.
+
+  Future<void> _applyReserveOwnerTypeTrigger() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_modify_reserve_owner_type
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN OLD.type = 'goalReserve' AND NEW.owner_type != OLD.owner_type
+      BEGIN
+        SELECT RAISE(ABORT, 'goalReserve owner_type cannot be changed after linkage');
+      END
+    ''');
+  }
+
+  // ── Phase 5B.4: Goal lifecycle events triggers ────────────────────────────
+  //
+  // goal_lifecycle_events rows are write-once (no UPDATE or DELETE).
+
+  Future<void> _applyGoalLifecycleEventsTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_update_goal_lifecycle_events
+      BEFORE UPDATE ON goal_lifecycle_events
+      BEGIN
+        SELECT RAISE(ABORT, 'goal lifecycle events are immutable');
+      END
+    ''');
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_delete_goal_lifecycle_events
+      BEFORE DELETE ON goal_lifecycle_events
+      BEGIN
+        SELECT RAISE(ABORT, 'goal lifecycle events cannot be deleted');
+      END
+    ''');
+    // Enforce household_id FK: the goal_lifecycle_events.household_id must
+    // reference an existing row in households (simulated FK since the Drift
+    // table definition uses plain TextColumn, not .references()).
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS fk_goal_lifecycle_event_household_id
+      BEFORE INSERT ON goal_lifecycle_events
+      FOR EACH ROW
+      BEGIN
+        SELECT RAISE(ABORT, 'goal_lifecycle_events.household_id must reference a valid household')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM households WHERE id = NEW.household_id
+        );
+      END
+    ''');
+  }
+
+  // ── Phase 5B.4: Goal lifecycle events idempotency index ──────────────────
+
+  Future<void> _applyGoalLifecycleEventsIndex() async {
+    await customStatement('''
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_lifecycle_events_idempotency
+      ON goal_lifecycle_events(idempotency_key)
+      WHERE idempotency_key IS NOT NULL
     ''');
   }
 

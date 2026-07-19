@@ -1887,4 +1887,388 @@ void main() {
       reason: 'MVEXT-4: valid same-household movement must be accepted',
     );
   });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.4 – Section 3: Movement-to-ledger guarantees (LEDG-1..6)
+  // ══════════════════════════════════════════════════════════════════════════
+  //
+  // These tests prove the enforcement boundary for each ledger invariant:
+  //  - DB-level: trigger name cited.
+  //  - Use-case-level: enforced by FundGoalUseCase atomicity (no partial writes).
+  //
+  //  LEDG-1. Missing debit → use case prevents partial write (atomicity).
+  //          Mechanism: DriftGoalRepository.createGoal / fundGoal always inserts
+  //          both legs inside a single DB transaction; no trigger needed.
+  //  LEDG-2. Missing credit → same atomicity guarantee.
+  //  LEDG-3. Unequal amounts → enforced by ledger repository code, not a trigger.
+  //  LEDG-4. Wrong destination in funding → validate_funding_movement trigger.
+  //  LEDG-5. Cross-household → validate_funding_movement_household trigger.
+  //  LEDG-6. Non-transfer operation → goal_movement_transfer_type trigger.
+
+  test(
+    'LEDG-1. Funding with zero balance → use case fails, no partial entries',
+    () async {
+      const srcId = 'src-ledg1';
+      await createAccount(id: srcId);
+      // Deliberately do NOT credit srcId — balance = 0.
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ledg1')) as AppOk<SavingsGoal>)
+              .value;
+
+      final entriesBefore = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM ledger_entries "
+            "WHERE household_id = '$_hh'",
+          )
+          .get();
+      final countBefore = entriesBefore.first.read<int>('c');
+
+      final result = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 10000,
+        householdId: _hh,
+        idempotencyKey: 'ik-ledg1-fund',
+      );
+      expect(
+        result,
+        isA<AppInsufficientFunds<SavingsGoal>>(),
+        reason: 'LEDG-1: use case must reject funding with no balance',
+      );
+
+      final entriesAfter = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM ledger_entries "
+            "WHERE household_id = '$_hh'",
+          )
+          .get();
+      expect(
+        entriesAfter.first.read<int>('c'),
+        countBefore,
+        reason: 'LEDG-1: no partial entries must be written on failure',
+      );
+    },
+  );
+
+  test('LEDG-2. Funding insufficient balance → no partial movements', () async {
+    const srcId = 'src-ledg2';
+    await createAccount(id: srcId);
+    await creditAccount(srcId, 1000); // Only 1000, but request 5000.
+
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-ledg2')) as AppOk<SavingsGoal>)
+            .value;
+
+    final movsBefore = await db
+        .customSelect("SELECT COUNT(*) as c FROM goal_movements")
+        .get();
+    final movCountBefore = movsBefore.first.read<int>('c');
+
+    final result = await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: srcId,
+      amountMinorUnits: 5000,
+      householdId: _hh,
+      idempotencyKey: 'ik-ledg2-fund',
+    );
+    expect(
+      result,
+      isA<AppInsufficientFunds<SavingsGoal>>(),
+      reason: 'LEDG-2: insufficient balance must be rejected',
+    );
+
+    final movsAfter = await db
+        .customSelect("SELECT COUNT(*) as c FROM goal_movements")
+        .get();
+    expect(
+      movsAfter.first.read<int>('c'),
+      movCountBefore,
+      reason: 'LEDG-2: no partial movements on failure',
+    );
+  });
+
+  test(
+    'LEDG-3. Funding amount = 0 → use case rejects before DB (amount > 0 enforced)',
+    () async {
+      const srcId = 'src-ledg3';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 50000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ledg3')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Amount = 0 is blocked at the use-case validation level or DB
+      // check_ledger_entry_amount trigger (amount_minor_units > 0).
+      final result = await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 0,
+        householdId: _hh,
+        idempotencyKey: 'ik-ledg3-fund',
+      );
+      expect(
+        result,
+        isNot(isA<AppOk<SavingsGoal>>()),
+        reason:
+            'LEDG-3: zero-amount funding must be rejected (use-case or DB trigger)',
+      );
+    },
+  );
+
+  test(
+    'LEDG-4. Goal movement with wrong destination → validate_funding_movement fires',
+    () async {
+      const srcId = 'src-ledg4';
+      const wrongDstId = 'dst-ledg4-wrong';
+      await createAccount(id: srcId);
+      await createAccount(id: wrongDstId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ledg4')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Insert a transfer to the WRONG destination (not the reserve).
+      final opId = await insertTransferOp(
+        id: 'op-ledg4-wrong',
+        sourceAccountId: srcId,
+        destinationAccountId: wrongDstId,
+      );
+
+      // Attempt to create a funding movement referencing this misrouted transfer.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at) "
+          "VALUES ('mov-ledg4', '${goal.id}', '$_hh', 'funding', "
+          "'$opId', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason:
+            'LEDG-4: validate_funding_movement must reject wrong destination',
+      );
+    },
+  );
+
+  test(
+    'LEDG-5. Cross-household account in movement → validate_funding_movement_household fires',
+    () async {
+      // Create an account in a DIFFERENT household.
+      const otherHh = 'hh-ledg5-other';
+      await db.customStatement(
+        "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+        "VALUES ('$otherHh', 'Other HH', 'u-ledg5', '2024-01-01', '2024-01-01')",
+      );
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('xhh-src-ledg5', '$otherHh', 'Cross-HH Src', 'personalCashWallet', "
+        "'user', 'available', 'EGP', 1, 0, 1, 0, 1, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ledg5')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Insert a transfer where source is in the other household.
+      await db.customStatement(
+        "INSERT INTO operations (id, household_id, type, effective_date, "
+        "recorded_at, total_amount_minor_units, currency_code, created_by, "
+        "created_at, updated_at, source_account_id, destination_account_id) "
+        "VALUES ('op-ledg5-xhh', '$_hh', 'transfer', '2024-01-01', '2024-01-01', "
+        "1000, 'EGP', 'test', '2024-01-01', '2024-01-01', 'xhh-src-ledg5', "
+        "'${goal.reserveAccountId}')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at) "
+          "VALUES ('mov-ledg5', '${goal.id}', '$_hh', 'funding', "
+          "'op-ledg5-xhh', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason:
+            'LEDG-5: validate_funding_movement_household must reject cross-household source',
+      );
+    },
+  );
+
+  test(
+    'LEDG-6. Unrelated transfer attached to goal movement → goal_movement_transfer_type or validate_funding_movement fires',
+    () async {
+      const srcId = 'src-ledg6';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 50000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-ledg6')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Get the income operation id (type = 'income', not 'transfer').
+      final opRows = await db
+          .customSelect(
+            "SELECT id FROM operations WHERE type = 'income' "
+            "AND household_id = '$_hh' LIMIT 1",
+          )
+          .get();
+      final incomeOpId = opRows.first.read<String>('id');
+
+      // Attempt to attach an income operation to a goal movement.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at) "
+          "VALUES ('mov-ledg6', '${goal.id}', '$_hh', 'funding', "
+          "'$incomeOpId', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason:
+            'LEDG-6: goal_movement_transfer_type trigger must block non-transfer ops',
+      );
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.4 – Section 4: Reserve ownership classification (OWN-1..5)
+  // ══════════════════════════════════════════════════════════════════════════
+  //
+  // The v12 trigger validate_goal_reserve_on_insert enforces
+  //   fa.owner_type = 'household'
+  // rejecting child, spouse, user (personal), and shared owner types.
+
+  test(
+    'OWN-1. Goal with child-owner reserve → validate_goal_reserve_on_insert fires',
+    () async {
+      const reserveId = 'reserve-own1-child';
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('$reserveId', '$_hh', 'Child Reserve', 'goalReserve', 'child', "
+        "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+          "status, idempotency_key, idempotency_payload, created_at) "
+          "VALUES ('goal-own1', '$_hh', '$reserveId', 'EGP', 'active', "
+          "'ik-own1', 'payload-own1', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason: 'OWN-1: child-owner reserve must be rejected by trigger',
+      );
+    },
+  );
+
+  test(
+    'OWN-2. Goal with spouse-owner reserve → validate_goal_reserve_on_insert fires',
+    () async {
+      const reserveId = 'reserve-own2-spouse';
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('$reserveId', '$_hh', 'Spouse Reserve', 'goalReserve', 'spouse', "
+        "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+          "status, idempotency_key, idempotency_payload, created_at) "
+          "VALUES ('goal-own2', '$_hh', '$reserveId', 'EGP', 'active', "
+          "'ik-own2', 'payload-own2', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason: 'OWN-2: spouse-owner reserve must be rejected',
+      );
+    },
+  );
+
+  test(
+    'OWN-3. Goal with user (personal) owner reserve → validate_goal_reserve_on_insert fires',
+    () async {
+      const reserveId = 'reserve-own3-user';
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('$reserveId', '$_hh', 'User Reserve', 'goalReserve', 'user', "
+        "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+          "status, idempotency_key, idempotency_payload, created_at) "
+          "VALUES ('goal-own3', '$_hh', '$reserveId', 'EGP', 'active', "
+          "'ik-own3', 'payload-own3', '2024-01-01T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason: 'OWN-3: user (personal) owner reserve must be rejected',
+      );
+    },
+  );
+
+  test(
+    'OWN-4. Change owner_type of existing goalReserve → no_modify_reserve_owner_type fires',
+    () async {
+      const reserveId = 'reserve-own4';
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('$reserveId', '$_hh', 'Reserve Own4', 'goalReserve', 'household', "
+        "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE financial_accounts SET owner_type = 'user' WHERE id = '$reserveId'",
+        ),
+        throwsA(anything),
+        reason:
+            'OWN-4: no_modify_reserve_owner_type must prevent owner_type change on goalReserve',
+      );
+
+      // Verify value unchanged.
+      final row = await db
+          .customSelect(
+            "SELECT owner_type FROM financial_accounts WHERE id = '$reserveId'",
+          )
+          .get();
+      expect(
+        row.first.read<String>('owner_type'),
+        'household',
+        reason: 'OWN-4: owner_type must remain household',
+      );
+    },
+  );
+
+  test('OWN-5. Goal with household-owner reserve → succeeds', () async {
+    // createGoal via use case sets ownerType = household; must succeed.
+    final result = await createGoal(idempotencyKey: 'ik-own5');
+    expect(
+      result,
+      isA<AppOk<SavingsGoal>>(),
+      reason: 'OWN-5: household-owner reserve must be accepted',
+    );
+
+    final goal = (result as AppOk<SavingsGoal>).value;
+    final row = await db
+        .customSelect(
+          "SELECT owner_type FROM financial_accounts WHERE id = '${goal.reserveAccountId}'",
+        )
+        .get();
+    expect(
+      row.first.read<String>('owner_type'),
+      'household',
+      reason: 'OWN-5: reserve owner_type must be household',
+    );
+  });
 }

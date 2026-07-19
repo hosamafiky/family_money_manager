@@ -63,10 +63,7 @@ void main() {
             type: FinancialAccountType.goalReserve,
             isSpendable: false,
           ),
-          _makeAccount(
-            id: 'normal-2',
-            type: FinancialAccountType.bankAccount,
-          ),
+          _makeAccount(id: 'normal-2', type: FinancialAccountType.bankAccount),
         ];
 
         // The accounts_screen filters out goalReserve accounts.
