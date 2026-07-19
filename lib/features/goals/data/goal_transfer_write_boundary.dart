@@ -94,3 +94,28 @@ final class GoalTransferInjectedFailure implements Exception {
   @override
   String toString() => 'GoalTransferInjectedFailure($after)';
 }
+
+/// Steps used for failure injection inside goal lifecycle write boundaries
+/// (complete / archive / restore).
+///
+/// Production code defaults to [none]; tests pass non-none values via
+/// `DriftGoalRepository(debugLifecycleFailAfter: ...)`.
+enum GoalLifecycleFailAfter {
+  none,
+  afterGoalValidation,
+  afterBalanceCalculation,
+  afterGoalStatusUpdate,
+  afterCompletionTimestampUpdate,
+  afterLifecycleEventInsertion,
+  preCommit,
+}
+
+/// Thrown by test-only lifecycle fail-after hooks to abort mid-transaction.
+final class GoalLifecycleInjectedFailure implements Exception {
+  const GoalLifecycleInjectedFailure(this.after);
+
+  final GoalLifecycleFailAfter after;
+
+  @override
+  String toString() => 'GoalLifecycleInjectedFailure($after)';
+}

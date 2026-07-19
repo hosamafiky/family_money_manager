@@ -200,7 +200,7 @@ class _GoalDetailContent extends ConsumerWidget {
           ElevatedButton.icon(
             onPressed: () async {
               final uc = ref.read(restoreGoalUseCaseProvider);
-              await uc.execute(goalId: goalId);
+              await uc.execute(goalId: goalId, householdId: _householdId);
               ref.invalidate(goalProgressProvider(goalId));
               ref.invalidate(goalsProvider(_householdId));
             },

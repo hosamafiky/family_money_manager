@@ -25,14 +25,21 @@ final class DriftGoalRepository implements GoalRepository {
     this._db, {
     @visibleForTesting
     GoalTransferFailAfter debugFailAfter = GoalTransferFailAfter.none,
+    @visibleForTesting
+    GoalLifecycleFailAfter debugLifecycleFailAfter =
+        GoalLifecycleFailAfter.none,
     @visibleForTesting Future<void> Function()? debugTransactionBarrier,
   }) : _debugFailAfter = debugFailAfter,
+       _debugLifecycleFailAfter = debugLifecycleFailAfter,
        _debugTransactionBarrier = debugTransactionBarrier;
 
   final AppDatabase _db;
 
   /// Test-only: throw [GoalTransferInjectedFailure] after the named step.
   final GoalTransferFailAfter _debugFailAfter;
+
+  /// Test-only: throw [GoalLifecycleInjectedFailure] after the named step.
+  final GoalLifecycleFailAfter _debugLifecycleFailAfter;
 
   /// Test-only: awaited inside the write transaction after idempotency check.
   final Future<void> Function()? _debugTransactionBarrier;
@@ -235,6 +242,15 @@ final class DriftGoalRepository implements GoalRepository {
     String? completedAt,
     String? archivedAt,
   }) async {
+    // Material lifecycle transitions require typed atomic workflows.
+    if (status == GoalStatus.completed ||
+        status == GoalStatus.archived ||
+        status == GoalStatus.active) {
+      return const AppValidationFailure(
+        field: 'status',
+        messageKey: 'errorGoalLifecycleRequiresTypedWorkflow',
+      );
+    }
     try {
       await (_db.update(
         _db.goalsTable,
@@ -251,28 +267,529 @@ final class DriftGoalRepository implements GoalRepository {
     }
   }
 
-  // ── completeGoal ──────────────────────────────────────────────────────────
+  // ── completeGoal (atomic) ─────────────────────────────────────────────────
 
   @override
   Future<AppResult<SavingsGoal>> completeGoal(CompleteGoalParams params) async {
+    final scopedKey = 'complete-${params.idempotencyKey}';
+    final completionType = params.earlyCompletion ? 'early' : 'normal';
+    final normalizedReason = params.earlyCompletion
+        ? (params.earlyCompletionReason?.trim() ?? '')
+        : '';
+    final incomingPayload = _completionPayloadFingerprint(
+      goalId: params.goalId,
+      householdId: params.householdId,
+      completionType: completionType,
+      earlyCompletionConfirmed: params.earlyCompletionConfirmed,
+      earlyCompletionReason: normalizedReason,
+      actorMetadata: params.actorMetadata,
+    );
+
     try {
-      final completedAt = DateTime.now().toUtc().toIso8601String();
-      await (_db.update(
-        _db.goalsTable,
-      )..where((t) => t.id.equals(params.goalId))).write(
-        GoalsTableCompanion(
-          status: Value(GoalStatus.completed.name),
-          completedAt: Value(completedAt),
-          earlyCompletionReason: params.earlyCompletion
-              ? Value(params.earlyCompletionReason)
-              : const Value.absent(),
-        ),
-      );
-      final found = await _findById(params.goalId);
-      if (found == null) return const AppNotFound();
-      return AppOk(found);
+      late AppResult<SavingsGoal> result;
+      await _db.transaction(() async {
+        result = await _runCompleteGoalSteps(
+          params: params,
+          scopedKey: scopedKey,
+          completionType: completionType,
+          normalizedReason: normalizedReason,
+          incomingPayload: incomingPayload,
+        );
+      });
+      return result;
+    } on GoalLifecycleInjectedFailure {
+      return const AppPersistenceFailure();
     } on Exception catch (_) {
       return const AppPersistenceFailure();
+    }
+  }
+
+  Future<AppResult<SavingsGoal>> _runCompleteGoalSteps({
+    required CompleteGoalParams params,
+    required String scopedKey,
+    required String completionType,
+    required String normalizedReason,
+    required String incomingPayload,
+  }) async {
+    // 1–2. Completion idempotency lookup + payload equivalence/conflict
+    final existingEvents = await _db
+        .customSelect(
+          'SELECT * FROM goal_lifecycle_events '
+          'WHERE household_id = ? AND idempotency_key = ?',
+          variables: [
+            Variable.withString(params.householdId),
+            Variable.withString(scopedKey),
+          ],
+        )
+        .get();
+    if (existingEvents.isNotEmpty) {
+      final row = existingEvents.first;
+      final stored = _completionPayloadFromLifecycleRow(row);
+      if (stored == incomingPayload) {
+        final found = await _findById(params.goalId);
+        if (found == null) return const AppPersistenceFailure();
+        return AppOk(found);
+      }
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    // 3–5. Goal lookup, household validation, current lifecycle validation
+    final goalRows = await _db
+        .customSelect(
+          'SELECT * FROM goals WHERE id = ?',
+          variables: [Variable.withString(params.goalId)],
+        )
+        .get();
+    if (goalRows.isEmpty) return const AppNotFound();
+    final goalRow = goalRows.first;
+    final householdId = goalRow.read<String>('household_id');
+    if (householdId != params.householdId) return const AppNotFound();
+
+    final statusCode = goalRow.read<String>('status');
+    final status = _statusFromCode(statusCode);
+
+    if (status == GoalStatus.archived) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalArchived',
+      );
+    }
+
+    if (status == GoalStatus.completed) {
+      // Already completed without this key — compare against original event.
+      final completedEvents = await _db
+          .customSelect(
+            "SELECT * FROM goal_lifecycle_events "
+            "WHERE goal_id = ? AND household_id = ? AND event_type = 'completed' "
+            'ORDER BY created_at ASC LIMIT 1',
+            variables: [
+              Variable.withString(params.goalId),
+              Variable.withString(params.householdId),
+            ],
+          )
+          .get();
+      if (completedEvents.isEmpty) {
+        // Fallback to columns on the goal row.
+        final storedType =
+            (goalRow.readNullable<String>('early_completion_reason') != null &&
+                (goalRow.readNullable<String>('early_completion_reason') ?? '')
+                    .isNotEmpty)
+            ? 'early'
+            : 'normal';
+        final storedReason =
+            goalRow.readNullable<String>('early_completion_reason')?.trim() ??
+            '';
+        final storedPayload = _completionPayloadFingerprint(
+          goalId: params.goalId,
+          householdId: params.householdId,
+          completionType: storedType,
+          earlyCompletionConfirmed: storedType == 'early',
+          earlyCompletionReason: storedReason,
+          actorMetadata: null,
+        );
+        if (storedPayload == incomingPayload) {
+          final found = await _findById(params.goalId);
+          if (found == null) return const AppPersistenceFailure();
+          return AppOk(found);
+        }
+        return const AppDuplicateConflict(
+          messageKey: 'errorGoalIdempotencyConflict',
+        );
+      }
+      final stored = _completionPayloadFromLifecycleRow(completedEvents.first);
+      if (stored == incomingPayload) {
+        final found = await _findById(params.goalId);
+        if (found == null) return const AppPersistenceFailure();
+        return AppOk(found);
+      }
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalValidation);
+
+    // 6–8. Reserve balance + target / early completion checks
+    final reserveAccountId = goalRow.read<String>('reserve_account_id');
+    final targetRows = await _db
+        .customSelect(
+          'SELECT target_minor_units FROM goal_revisions '
+          'WHERE goal_id = ? ORDER BY created_at DESC, id DESC LIMIT 1',
+          variables: [Variable.withString(params.goalId)],
+        )
+        .get();
+    if (targetRows.isEmpty) return const AppPersistenceFailure();
+    final target = targetRows.first.read<int>('target_minor_units');
+
+    final balanceRows = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+          'ELSE -amount_minor_units END), 0) AS bal '
+          'FROM ledger_entries WHERE account_id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(LedgerDirection.credit.code),
+            Variable.withString(reserveAccountId),
+            Variable.withString(params.householdId),
+          ],
+        )
+        .get();
+    final balance = balanceRows.first.read<int>('bal');
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterBalanceCalculation);
+
+    if (params.earlyCompletion) {
+      if (!params.earlyCompletionConfirmed) {
+        return const AppValidationFailure(
+          field: 'earlyCompletionConfirmed',
+          messageKey: 'errorEarlyCompletionConfirmationRequired',
+        );
+      }
+      if (normalizedReason.isEmpty) {
+        return const AppValidationFailure(
+          field: 'earlyCompletionReason',
+          messageKey: 'errorEarlyCompletionReasonRequired',
+        );
+      }
+    } else {
+      if (balance < target) {
+        return const AppValidationFailure(
+          field: 'balance',
+          messageKey: 'errorGoalNormalCompletionRequiresTarget',
+        );
+      }
+    }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    // 9. Goal status update
+    await _db.customStatement(
+      "UPDATE goals SET status = 'completed' WHERE id = ? AND household_id = ?",
+      [params.goalId, params.householdId],
+    );
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalStatusUpdate);
+
+    // 10. Completion timestamp (+ early reason) update
+    await _db.customStatement(
+      'UPDATE goals SET completed_at = ?, early_completion_reason = ? '
+      'WHERE id = ? AND household_id = ?',
+      [
+        now,
+        params.earlyCompletion ? normalizedReason : null,
+        params.goalId,
+        params.householdId,
+      ],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterCompletionTimestampUpdate,
+    );
+
+    // 11. Immutable lifecycle-event insertion
+    final eventId =
+        '${params.goalId}-lce-complete-${now.replaceAll(':', '').replaceAll('.', '')}';
+    await _db.customStatement(
+      'INSERT INTO goal_lifecycle_events '
+      '(id, goal_id, household_id, event_type, completion_type, '
+      'early_completion_reason, early_completion_confirmed, '
+      'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 15)',
+      [
+        eventId,
+        params.goalId,
+        params.householdId,
+        GoalLifecycleEventType.completed.code,
+        completionType,
+        params.earlyCompletion ? normalizedReason : null,
+        params.earlyCompletionConfirmed ? 1 : 0,
+        scopedKey,
+        params.actorMetadata,
+        now,
+        now,
+      ],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterLifecycleEventInsertion,
+    );
+
+    // 12. Final pre-commit boundary
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.preCommit);
+
+    final found = await _findById(params.goalId);
+    if (found == null) return const AppPersistenceFailure();
+    return AppOk(found);
+  }
+
+  String _completionPayloadFingerprint({
+    required String goalId,
+    required String householdId,
+    required String completionType,
+    required bool earlyCompletionConfirmed,
+    required String earlyCompletionReason,
+    required String? actorMetadata,
+  }) =>
+      'goal=$goalId|hh=$householdId|type=$completionType|'
+      'confirmed=$earlyCompletionConfirmed|'
+      'reason=$earlyCompletionReason|'
+      'actor=${actorMetadata ?? ''}';
+
+  String _completionPayloadFromLifecycleRow(QueryRow row) =>
+      _completionPayloadFingerprint(
+        goalId: row.read<String>('goal_id'),
+        householdId: row.read<String>('household_id'),
+        completionType: row.readNullable<String>('completion_type') ?? '',
+        earlyCompletionConfirmed:
+            row.read<int>('early_completion_confirmed') == 1,
+        earlyCompletionReason:
+            row.readNullable<String>('early_completion_reason')?.trim() ?? '',
+        actorMetadata: row.readNullable<String>('actor_metadata'),
+      );
+
+  // ── archiveGoal (atomic) ──────────────────────────────────────────────────
+
+  @override
+  Future<AppResult<void>> archiveGoal({
+    required String goalId,
+    required String householdId,
+    String? idempotencyKey,
+  }) async {
+    final scopedKey = idempotencyKey ?? 'archive-$goalId';
+    try {
+      late AppResult<void> result;
+      await _db.transaction(() async {
+        result = await _runArchiveGoalSteps(
+          goalId: goalId,
+          householdId: householdId,
+          scopedKey: scopedKey,
+        );
+      });
+      return result;
+    } on GoalLifecycleInjectedFailure {
+      return const AppPersistenceFailure();
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  Future<AppResult<void>> _runArchiveGoalSteps({
+    required String goalId,
+    required String householdId,
+    required String scopedKey,
+  }) async {
+    final existing = await _db
+        .customSelect(
+          'SELECT id FROM goal_lifecycle_events '
+          'WHERE household_id = ? AND idempotency_key = ?',
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(scopedKey),
+          ],
+        )
+        .get();
+    if (existing.isNotEmpty) {
+      final goal = await _findById(goalId);
+      if (goal != null && goal.status == GoalStatus.archived) {
+        return const AppOk(null);
+      }
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    final goalRows = await _db
+        .customSelect(
+          'SELECT id, household_id, reserve_account_id, status FROM goals '
+          'WHERE id = ?',
+          variables: [Variable.withString(goalId)],
+        )
+        .get();
+    if (goalRows.isEmpty) return const AppNotFound();
+    final goalRow = goalRows.first;
+    if (goalRow.read<String>('household_id') != householdId) {
+      return const AppNotFound();
+    }
+    final status = _statusFromCode(goalRow.read<String>('status'));
+    if (status == GoalStatus.archived) return const AppOk(null);
+
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalValidation);
+
+    final reserveAccountId = goalRow.read<String>('reserve_account_id');
+    final balanceRows = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
+          'ELSE -amount_minor_units END), 0) AS bal '
+          'FROM ledger_entries WHERE account_id = ? AND household_id = ?',
+          variables: [
+            Variable.withString(LedgerDirection.credit.code),
+            Variable.withString(reserveAccountId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+    final balance = balanceRows.first.read<int>('bal');
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterBalanceCalculation);
+
+    if (balance != 0) {
+      return const AppValidationFailure(
+        field: 'balance',
+        messageKey: 'errorGoalArchiveNonzeroBalance',
+      );
+    }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _db.customStatement(
+      "UPDATE goals SET status = 'archived' WHERE id = ? AND household_id = ?",
+      [goalId, householdId],
+    );
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalStatusUpdate);
+
+    await _db.customStatement(
+      'UPDATE goals SET archived_at = ? WHERE id = ? AND household_id = ?',
+      [now, goalId, householdId],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterCompletionTimestampUpdate,
+    );
+
+    await _db.customStatement(
+      'INSERT INTO goal_lifecycle_events '
+      '(id, goal_id, household_id, event_type, completion_type, '
+      'early_completion_reason, early_completion_confirmed, '
+      'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
+      'VALUES (?, ?, ?, ?, NULL, NULL, 0, ?, NULL, ?, ?, 15)',
+      [
+        '$goalId-lce-archive-${now.replaceAll(':', '').replaceAll('.', '')}',
+        goalId,
+        householdId,
+        GoalLifecycleEventType.archived.code,
+        scopedKey,
+        now,
+        now,
+      ],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterLifecycleEventInsertion,
+    );
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.preCommit);
+    return const AppOk(null);
+  }
+
+  // ── restoreGoal (atomic) ──────────────────────────────────────────────────
+
+  @override
+  Future<AppResult<void>> restoreGoal({
+    required String goalId,
+    required String householdId,
+    String? idempotencyKey,
+  }) async {
+    final scopedKey = idempotencyKey ?? 'restore-$goalId';
+    try {
+      late AppResult<void> result;
+      await _db.transaction(() async {
+        result = await _runRestoreGoalSteps(
+          goalId: goalId,
+          householdId: householdId,
+          scopedKey: scopedKey,
+        );
+      });
+      return result;
+    } on GoalLifecycleInjectedFailure {
+      return const AppPersistenceFailure();
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  Future<AppResult<void>> _runRestoreGoalSteps({
+    required String goalId,
+    required String householdId,
+    required String scopedKey,
+  }) async {
+    final existing = await _db
+        .customSelect(
+          'SELECT id FROM goal_lifecycle_events '
+          'WHERE household_id = ? AND idempotency_key = ?',
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(scopedKey),
+          ],
+        )
+        .get();
+    if (existing.isNotEmpty) {
+      final goal = await _findById(goalId);
+      if (goal != null && goal.status == GoalStatus.active) {
+        return const AppOk(null);
+      }
+      return const AppDuplicateConflict(
+        messageKey: 'errorGoalIdempotencyConflict',
+      );
+    }
+
+    final goalRows = await _db
+        .customSelect(
+          'SELECT id, household_id, status FROM goals WHERE id = ?',
+          variables: [Variable.withString(goalId)],
+        )
+        .get();
+    if (goalRows.isEmpty) return const AppNotFound();
+    final goalRow = goalRows.first;
+    if (goalRow.read<String>('household_id') != householdId) {
+      return const AppNotFound();
+    }
+    final status = _statusFromCode(goalRow.read<String>('status'));
+    if (status != GoalStatus.archived) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalRestoreRequiresArchived',
+      );
+    }
+
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalValidation);
+    // Balance calc not required for restore; honour fail-after slot for matrix.
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterBalanceCalculation);
+
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _db.customStatement(
+      "UPDATE goals SET status = 'active' WHERE id = ? AND household_id = ?",
+      [goalId, householdId],
+    );
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.afterGoalStatusUpdate);
+
+    await _db.customStatement(
+      'UPDATE goals SET archived_at = NULL WHERE id = ? AND household_id = ?',
+      [goalId, householdId],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterCompletionTimestampUpdate,
+    );
+
+    await _db.customStatement(
+      'INSERT INTO goal_lifecycle_events '
+      '(id, goal_id, household_id, event_type, completion_type, '
+      'early_completion_reason, early_completion_confirmed, '
+      'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
+      'VALUES (?, ?, ?, ?, NULL, NULL, 0, ?, NULL, ?, ?, 15)',
+      [
+        '$goalId-lce-restore-${now.replaceAll(':', '').replaceAll('.', '')}',
+        goalId,
+        householdId,
+        GoalLifecycleEventType.restored.code,
+        scopedKey,
+        now,
+        now,
+      ],
+    );
+    await _lifecycleFailAfter(
+      GoalLifecycleFailAfter.afterLifecycleEventInsertion,
+    );
+    await _lifecycleFailAfter(GoalLifecycleFailAfter.preCommit);
+    return const AppOk(null);
+  }
+
+  Future<void> _lifecycleFailAfter(GoalLifecycleFailAfter step) async {
+    if (_debugLifecycleFailAfter == step) {
+      throw GoalLifecycleInjectedFailure(step);
     }
   }
 
@@ -560,7 +1077,7 @@ final class DriftGoalRepository implements GoalRepository {
         '(id, goal_id, household_id, event_type, completion_type, '
         'early_completion_reason, early_completion_confirmed, '
         'idempotency_key, actor_metadata, effective_at, created_at, schema_version) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 13)',
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 15)',
         [
           event.id,
           event.goalId,

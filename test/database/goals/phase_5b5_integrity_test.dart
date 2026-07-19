@@ -1394,6 +1394,7 @@ void main() {
     );
     final r = await restoreGoalUc.execute(
       goalId: goal.id,
+      householdId: _hh,
       idempotencyKey: 'ik-glcx6-restore',
     );
     expect(r, isA<AppOk<void>>());

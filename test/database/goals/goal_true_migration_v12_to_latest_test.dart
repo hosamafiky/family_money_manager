@@ -1,4 +1,4 @@
-/// Phase 5B.6 – True physical schema-12 → latest migration.
+/// Phase 5B.7 – True physical schema-12 → latest migration.
 ///
 /// Builds a version-12 database from historical onCreate objects
 /// (`test/fixtures/schema_v12_objects.sql` from commit 3124346) plus Drift
@@ -16,7 +16,7 @@ import '../../helpers/true_schema_v12.dart';
 
 void main() {
   test(
-    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13+v14 objects',
+    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13+v15 objects',
     () async {
       final path = await materializeTrueSchemaV12File();
       addTearDown(() async {
@@ -39,12 +39,12 @@ void main() {
       );
       before.close();
 
-      // Reopen with current AppDatabase → onUpgrade 12→14
+      // Reopen with current AppDatabase → onUpgrade 12→15
       final db = AppDatabase.forFile(path);
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 14);
+      expect(version.first.read<int>('user_version'), 15);
 
       expect(
         (await db
@@ -70,6 +70,8 @@ void main() {
         'validate_reversal_movement_link',
         'goal_lifecycle_household_matches_goal',
         'validate_goal_transfer_balanced_legs',
+        'validate_goal_reversal_balanced_legs',
+        'reject_unsupported_goal_status_transition',
       ]) {
         expect(
           (await db
@@ -81,7 +83,7 @@ void main() {
               .first
               .read<int>('c'),
           1,
-          reason: '$name must exist after upgrade',
+          reason: '$name must exist after upgrade to v15',
         );
       }
       expect(

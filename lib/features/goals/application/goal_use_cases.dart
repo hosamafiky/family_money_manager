@@ -583,95 +583,15 @@ final class UpdateGoalRevisionUseCase {
 
 /// Transitions an active (or targetReached) goal to [GoalStatus.completed].
 ///
-/// RULES:
-/// - Archived goal → [AppValidationFailure] ('errorGoalArchived').
-/// - Already completed → returns the existing goal idempotently (no mutation).
-/// - Normal completion (earlyCompletion = false): allowed only when
-///   reserveBalance >= targetMinorUnits.
-/// - Early completion (earlyCompletion = true): any balance is allowed, but
-///   earlyCompletionReason must be non-empty.
-/// - No financial operation, ledger entry, or goal movement is created.
-/// - Phase 5B.4: inserts an immutable [GoalLifecycleEvent] after completion.
+/// All validation, status update, completedAt, and immutable lifecycle-event
+/// insertion run inside a single repository transaction (Phase 5B.7).
 final class CompleteGoalUseCase {
   const CompleteGoalUseCase(this._goals);
 
   final GoalRepository _goals;
 
-  Future<AppResult<SavingsGoal>> execute(CompleteGoalParams params) async {
-    // Load goal.
-    final goalResult = await _goals.findGoalById(params.goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) {
-      return const AppPersistenceFailure();
-    }
-    final goal = goalResult.value;
-    if (goal == null) return const AppNotFound();
-
-    // Archived goals cannot be completed.
-    if (goal.status == GoalStatus.archived) {
-      return const AppValidationFailure(
-        field: 'goalId',
-        messageKey: 'errorGoalArchived',
-      );
-    }
-
-    // Already completed → idempotent.
-    if (goal.status == GoalStatus.completed) return AppOk(goal);
-
-    if (params.earlyCompletion) {
-      // Early completion requires explicit confirmation flag.
-      if (!params.earlyCompletionConfirmed) {
-        return const AppValidationFailure(
-          field: 'earlyCompletionConfirmed',
-          messageKey: 'errorEarlyCompletionConfirmationRequired',
-        );
-      }
-      // Early completion requires a non-empty reason.
-      final reason = params.earlyCompletionReason?.trim() ?? '';
-      if (reason.isEmpty) {
-        return const AppValidationFailure(
-          field: 'earlyCompletionReason',
-          messageKey: 'errorEarlyCompletionReasonRequired',
-        );
-      }
-    } else {
-      // Normal completion: reserve balance must be >= target.
-      final balResult = await _goals.getReserveBalance(
-        reserveAccountId: goal.reserveAccountId,
-        householdId: params.householdId,
-      );
-      if (balResult is! AppOk<int>) return const AppPersistenceFailure();
-      final balance = balResult.value;
-      if (balance < goal.targetMinorUnits) {
-        return const AppValidationFailure(
-          field: 'balance',
-          messageKey: 'errorGoalNormalCompletionRequiresTarget',
-        );
-      }
-    }
-
-    final result = await _goals.completeGoal(params);
-    if (result is! AppOk<SavingsGoal>) return result;
-
-    // Insert an immutable lifecycle event recording this completion.
-    final now = _nowUtc();
-    final lifecycleEvent = GoalLifecycleEvent(
-      id: '${params.goalId}-lce-complete-${now.replaceAll(':', '').replaceAll('.', '')}',
-      goalId: params.goalId,
-      householdId: params.householdId,
-      eventType: GoalLifecycleEventType.completed,
-      completionType: params.earlyCompletion ? 'early' : 'normal',
-      earlyCompletionReason: params.earlyCompletion
-          ? params.earlyCompletionReason
-          : null,
-      earlyCompletionConfirmed: params.earlyCompletionConfirmed,
-      idempotencyKey: 'complete-${params.idempotencyKey}',
-      effectiveAt: now,
-      createdAt: now,
-    );
-    // Lifecycle event insertion failure is non-fatal (best-effort audit).
-    await _goals.insertLifecycleEvent(lifecycleEvent);
-
-    return result;
+  Future<AppResult<SavingsGoal>> execute(CompleteGoalParams params) {
+    return _goals.completeGoal(params);
   }
 }
 
@@ -685,31 +605,12 @@ final class ArchiveGoalUseCase {
   Future<AppResult<void>> execute({
     required String goalId,
     required String householdId,
-  }) async {
-    final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) {
-      return const AppPersistenceFailure();
-    }
-    final goal = goalResult.value;
-    if (goal == null) return const AppNotFound();
-
-    // Balance must be zero before archiving.
-    final balanceResult = await _goals.getReserveBalance(
-      reserveAccountId: goal.reserveAccountId,
-      householdId: householdId,
-    );
-    if (balanceResult is! AppOk<int>) return const AppPersistenceFailure();
-    if (balanceResult.value != 0) {
-      return const AppValidationFailure(
-        field: 'balance',
-        messageKey: 'errorGoalArchiveNonzeroBalance',
-      );
-    }
-
-    return _goals.updateGoalStatus(
+    String? idempotencyKey,
+  }) {
+    return _goals.archiveGoal(
       goalId: goalId,
-      status: GoalStatus.archived,
-      archivedAt: _nowUtc(),
+      householdId: householdId,
+      idempotencyKey: idempotencyKey,
     );
   }
 }
@@ -723,43 +624,14 @@ final class RestoreGoalUseCase {
 
   Future<AppResult<void>> execute({
     required String goalId,
+    required String householdId,
     String? idempotencyKey,
-  }) async {
-    final goalResult = await _goals.findGoalById(goalId);
-    if (goalResult is! AppOk<SavingsGoal?>) {
-      return const AppPersistenceFailure();
-    }
-    final goal = goalResult.value;
-    if (goal == null) return const AppNotFound();
-
-    if (goal.status != GoalStatus.archived) {
-      return const AppValidationFailure(
-        field: 'goalId',
-        messageKey: 'errorGoalRestoreRequiresArchived',
-      );
-    }
-
-    final updateResult = await _goals.updateGoalStatus(
+  }) {
+    return _goals.restoreGoal(
       goalId: goalId,
-      status: GoalStatus.active,
-      archivedAt: null,
+      householdId: householdId,
+      idempotencyKey: idempotencyKey,
     );
-    if (updateResult is! AppOk<void>) return updateResult;
-
-    final now = _nowUtc();
-    final key = idempotencyKey ?? 'restore-$goalId';
-    await _goals.insertLifecycleEvent(
-      GoalLifecycleEvent(
-        id: '$goalId-lce-restore-${now.replaceAll(':', '').replaceAll('.', '')}',
-        goalId: goalId,
-        householdId: goal.householdId,
-        eventType: GoalLifecycleEventType.restored,
-        idempotencyKey: key,
-        effectiveAt: now,
-        createdAt: now,
-      ),
-    );
-    return const AppOk(null);
   }
 }
 

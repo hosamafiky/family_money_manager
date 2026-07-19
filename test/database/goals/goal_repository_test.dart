@@ -981,7 +981,10 @@ void main() {
     final goal = (goalResult as AppOk<SavingsGoal>).value;
 
     await archiveGoalUc.execute(goalId: goal.id, householdId: _hh);
-    final restoreResult = await restoreGoalUc.execute(goalId: goal.id);
+    final restoreResult = await restoreGoalUc.execute(
+      goalId: goal.id,
+      householdId: _hh,
+    );
     expect(restoreResult, isA<AppOk<void>>());
 
     final refreshed = await goalRepo.findGoalById(goal.id);

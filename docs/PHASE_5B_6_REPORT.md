@@ -12,7 +12,7 @@
 |---|---|---|
 | 5B.4 | `3124346` | Evidence reconciliation and integrity closure (schema 12) |
 | 5B.5 | `b53cef5` | Goal idempotency, reversal atomicity, evidence closure (schema 13) |
-| 5B.6 | *(message: `feat: Phase 5B.6 – unified atomic…`)* | Unified goal-transfer boundary + evidence closure (schema 14) |
+| 5B.6 | `5f92e2e` | Unified goal-transfer boundary + evidence closure (schema 14) |
 
 
 Working tree at Phase 5B.6 start: **CLEAN** at `b53cef5`.
@@ -109,9 +109,15 @@ Evidence: BAL-MV-1..BAL-MV-11.
 
 ## 6. Multi-Connection Concurrency (MC-CONC-1..6)
 
-**Classification:** Database-tested
+**Classification (corrected Phase 5B.7):**
 
-Two `AppDatabase.forFile` connections on one temp SQLite file; `Future.wait` launches overlapping requests.
+| Claim | Classification |
+|---|---|
+| Balance check + write in one transaction | Database-tested |
+| Two-connection contention / SQLite locking | Database-tested |
+| Deterministic both-at-boundary barrier | **Unverified** |
+
+Two `AppDatabase.forFile` connections on one temp SQLite file; `Future.wait` launches overlapping requests. These prove serialization / busy-timeout behaviour under contention — **not** a controlled simultaneous-boundary race with a deterministic Completer barrier.
 
 | Test | Scenario |
 |---|---|
@@ -123,6 +129,8 @@ Two `AppDatabase.forFile` connections on one temp SQLite file; `Future.wait` lau
 | MC-CONC-6 | Conflicting duplicate |
 
 **Observed SQLite behaviour:** WAL + `PRAGMA busy_timeout = 3000` on both connections; under contention writers serialize or surface busy/lock mapped to typed failures / catch blocks. Invariant: non-negative balances; at most one complete conflicting workflow; op/movement counts remain consistent (no incomplete workflows retained).
+
+Do **not** claim controlled simultaneous-boundary concurrency without a deterministic barrier.
 
 ---
 
@@ -199,9 +207,9 @@ Unchanged: encryption-ready sqlite3mc binary via pub hooks; production key injec
 |---|---|---|
 | Production DB encryption not implemented | High | Deferred |
 | Android SQLite3MultipleCiphers runtime unverified | High | Deferred |
-| Dual-connection Completer barrier still unused | Medium | Documented; busy_timeout + Future.wait used |
+| Dual-connection Completer barrier still unused | Medium | Documented; busy_timeout + Future.wait used; deterministic both-at-boundary **Unverified** |
 | Mid-migration abort injection | Low | Not fail-injected |
-| Goal lifecycle event insert after completeGoal still best-effort | Low | Documented earlier |
+| Goal lifecycle event insert after completeGoal was best-effort | Low | **Corrected in Phase 5B.7** — completion/archive/restore are atomic |
 
 ---
 
@@ -224,6 +232,6 @@ Unchanged: encryption-ready sqlite3mc binary via pub hooks; production key injec
 Branch: main
 Schema: 14
 Tests: 1258/1258 passed
-HEAD: resolve with `git rev-parse HEAD` on this phase commit
+HEAD: `5f92e2eabb295963016c097b92c7f1bbd24236f5`
 Working tree: CLEAN
 ```

@@ -50,9 +50,14 @@ abstract interface class GoalRepository {
     bool includeArchived = false,
   });
 
-  /// Updates the goal status (and optional timestamp fields).
+  /// Updates non-lifecycle status fields only.
   ///
-  /// Only [status], [completedAt], and [archivedAt] may be mutated.
+  /// Material lifecycle transitions ([GoalStatus.completed],
+  /// [GoalStatus.archived], restore-to-[GoalStatus.active]) MUST go through
+  /// [completeGoal], [archiveGoal], or [restoreGoal]. Calling this with those
+  /// statuses returns [AppValidationFailure].
+  ///
+  /// Allowed: [GoalStatus.targetReached] (derived progress persistence).
   Future<AppResult<void>> updateGoalStatus({
     required String goalId,
     required GoalStatus status,
@@ -60,12 +65,29 @@ abstract interface class GoalRepository {
     String? archivedAt,
   });
 
-  /// Marks a goal as completed and returns the updated [SavingsGoal].
+  /// Atomically completes a goal (status + completedAt + lifecycle event).
   ///
-  /// All business validation (balance check, early-completion reason) must
-  /// be performed in the use case before calling this method. The repository
-  /// only persists the status transition and [completedAt] timestamp.
+  /// Single `db.transaction()` covering: completion idempotency lookup,
+  /// payload equivalence/conflict, goal + household + lifecycle validation,
+  /// reserve balance + target/early checks, status update, completedAt,
+  /// immutable lifecycle-event insert, and commit.
+  ///
+  /// On any failure neither status nor lifecycle event remains changed.
   Future<AppResult<SavingsGoal>> completeGoal(CompleteGoalParams params);
+
+  /// Atomically archives a goal (status + archivedAt + lifecycle event).
+  Future<AppResult<void>> archiveGoal({
+    required String goalId,
+    required String householdId,
+    String? idempotencyKey,
+  });
+
+  /// Atomically restores an archived goal (status + clear archivedAt + event).
+  Future<AppResult<void>> restoreGoal({
+    required String goalId,
+    required String householdId,
+    String? idempotencyKey,
+  });
 
   // ── Revisions ─────────────────────────────────────────────────────────────
 

@@ -82,6 +82,10 @@ part 'app_database.g.dart';
 ///  14 — Phase 5B.6: validate_goal_transfer_balanced_legs trigger —
 ///                 funding/release movements require exactly two balanced
 ///                 ledger legs matching operation source/destination.
+///  15 — Phase 5B.7: validate_goal_reversal_balanced_legs trigger —
+///                 reversal movements require balanced mirror legs, inverse
+///                 accounts vs original, operation type reversal, and unique
+///                 linkage; reject_unsupported_goal_status_transition alias.
 @DriftDatabase(
   tables: [
     Households,
@@ -114,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -147,6 +151,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyGoalLifecycleEventsIndex();
       await _applyPhase5B5ReversalAndLifecycleHardening();
       await _applyPhase5B6BalancedMovementTrigger();
+      await _applyPhase5B7ReversalBalancedAndStatusTriggers();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -252,6 +257,10 @@ class AppDatabase extends _$AppDatabase {
       if (from <= 13) {
         // v13 → v14: Phase 5B.6 — balanced ledger legs for goal movements.
         await _applyPhase5B6BalancedMovementTrigger();
+      }
+      if (from <= 14) {
+        // v14 → v15: Phase 5B.7 — reversal balanced legs + status alias.
+        await _applyPhase5B7ReversalBalancedAndStatusTriggers();
       }
     },
     beforeOpen: (details) async {
@@ -1276,6 +1285,90 @@ class AppDatabase extends _$AppDatabase {
       '  ); '
       'END',
     );
+  }
+
+  // ── Phase 5B.7: Reversal balanced legs + explicit status-transition alias ──
+
+  Future<void> _applyPhase5B7ReversalBalancedAndStatusTriggers() async {
+    // Reversal goal movements must prove balanced inverse mirror legs.
+    await customStatement(
+      'CREATE TRIGGER IF NOT EXISTS validate_goal_reversal_balanced_legs '
+      'BEFORE INSERT ON goal_movements '
+      'FOR EACH ROW '
+      "WHEN NEW.movement_type = 'reversal' "
+      'BEGIN '
+      '  SELECT RAISE( '
+      '    ABORT, '
+      "    'goal reversal movement requires balanced inverse ledger legs' "
+      '  ) '
+      '  WHERE NEW.reversal_of_movement_id IS NULL '
+      '  OR ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      '  ) != 2 '
+      '  OR ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      "      AND e.direction = 'debit' "
+      '  ) != 1 '
+      '  OR ( '
+      '    SELECT COUNT(*) FROM ledger_entries e '
+      '    WHERE e.operation_id = NEW.transfer_operation_id '
+      "      AND e.direction = 'credit' "
+      '  ) != 1 '
+      '  OR NOT EXISTS ( '
+      '    SELECT 1 '
+      '    FROM operations rev '
+      '    JOIN goal_movements orig_mov ON orig_mov.id = NEW.reversal_of_movement_id '
+      '    JOIN operations orig ON orig.id = orig_mov.transfer_operation_id '
+      "    JOIN ledger_entries d ON d.operation_id = rev.id AND d.direction = 'debit' "
+      "    JOIN ledger_entries c ON c.operation_id = rev.id AND c.direction = 'credit' "
+      '    WHERE rev.id = NEW.transfer_operation_id '
+      "      AND rev.type = 'reversal' "
+      '      AND rev.household_id = NEW.household_id '
+      '      AND orig.household_id = NEW.household_id '
+      '      AND orig_mov.goal_id = NEW.goal_id '
+      '      AND orig_mov.household_id = NEW.household_id '
+      "      AND orig_mov.movement_type IN ('funding', 'release') "
+      '      AND orig.is_reversed = 1 '
+      '      AND orig.reversed_by = rev.id '
+      // Entry accounts must be the inverse of the original transfer accounts:
+      // debit the original destination; credit the original source.
+      '      AND d.account_id = orig.destination_account_id '
+      '      AND c.account_id = orig.source_account_id '
+      '      AND d.account_id = rev.source_account_id '
+      '      AND c.account_id = rev.destination_account_id '
+      '      AND d.amount_minor_units = c.amount_minor_units '
+      '      AND d.amount_minor_units = rev.total_amount_minor_units '
+      '      AND d.amount_minor_units = orig.total_amount_minor_units '
+      '      AND d.amount_minor_units > 0 '
+      '      AND c.amount_minor_units > 0 '
+      '      AND d.currency_code = rev.currency_code '
+      '      AND c.currency_code = rev.currency_code '
+      '      AND rev.currency_code = orig.currency_code '
+      '      AND d.household_id = rev.household_id '
+      '      AND c.household_id = rev.household_id '
+      '  ); '
+      'END',
+    );
+
+    // Explicit product-policy alias (same allowed set as goal_status_valid_transition).
+    // Forbidden: completed→active, archived→completed, and any other unsupported path.
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS reject_unsupported_goal_status_transition
+      BEFORE UPDATE OF status ON goals
+      FOR EACH ROW
+      WHEN NEW.status != OLD.status
+        AND NOT (
+          (OLD.status = 'active' AND NEW.status IN ('targetReached','completed','archived'))
+          OR (OLD.status = 'targetReached' AND NEW.status IN ('completed','archived'))
+          OR (OLD.status = 'completed' AND NEW.status = 'archived')
+          OR (OLD.status = 'archived' AND NEW.status = 'active')
+        )
+      BEGIN
+        SELECT RAISE(ABORT, 'unsupported goal status transition');
+      END
+    ''');
   }
 }
 
