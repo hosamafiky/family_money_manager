@@ -36,11 +36,13 @@ class IncomeReviewScreen extends ConsumerWidget {
     }
 
     final accounts = accountsAsync.maybeWhen(
-      data: (r) => r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
+      data: (r) =>
+          r is AppOk<List<FinancialAccount>> ? r.value : <FinancialAccount>[],
       orElse: () => <FinancialAccount>[],
     );
 
-    String accountName(String id) => accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
+    String accountName(String id) =>
+        accounts.where((a) => a.id == id).firstOrNull?.name ?? id;
 
     String formatAmount(int minor, String code) {
       final currency = Currency.fromCode(code);
@@ -53,22 +55,45 @@ class IncomeReviewScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _ReviewRow(label: l10n.fieldDestinationAccount, value: accountName(ctx.destinationAccountId)),
-          _ReviewRow(label: l10n.fieldAmount, value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode)),
-          _ReviewRow(label: l10n.fieldCategory, value: categoryLabel(l10n, ctx.category)),
+          _ReviewRow(
+            label: l10n.fieldDestinationAccount,
+            value: accountName(ctx.destinationAccountId),
+          ),
+          _ReviewRow(
+            label: l10n.fieldAmount,
+            value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+          ),
+          _ReviewRow(
+            label: l10n.fieldCategory,
+            value: categoryLabel(l10n, ctx.category),
+          ),
           _ReviewRow(label: l10n.fieldEffectiveDate, value: ctx.effectiveDate),
-          if (ctx.note != null) _ReviewRow(label: l10n.fieldNote, value: ctx.note!),
+          if (ctx.note != null)
+            _ReviewRow(label: l10n.fieldNote, value: ctx.note!),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
-            child: submitting ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.confirm),
+            onPressed: submitting
+                ? null
+                : () => _submit(context, ref, l10n, ctx),
+            child: submitting
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(l10n.confirm),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _submit(BuildContext context, WidgetRef ref, AppLocalizations l10n, IncomeContext ctx) async {
+  Future<void> _submit(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    IncomeContext ctx,
+  ) async {
     ref.read(submittingProvider.notifier).setSubmitting(true);
     try {
       final useCase = ref.read(recordIncomeUseCaseProvider);
@@ -80,7 +105,9 @@ class IncomeReviewScreen extends ConsumerWidget {
         case AppOk():
           ref.read(incomeFormProvider.notifier).regenerateKey();
           ref.read(stagedIncomeContextProvider.notifier).set(null);
-          ref.invalidate(transactionListProvider((_householdId, const TransactionFilter())));
+          ref.invalidate(
+            transactionListProvider((_householdId, const TransactionFilter())),
+          );
           ref.invalidate(accountsProvider(_householdId));
           ref.invalidate(accountBalanceProvider);
           ref.invalidate(dashboardSummaryProvider(_householdId));
@@ -102,7 +129,9 @@ class IncomeReviewScreen extends ConsumerWidget {
   }
 
   void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _resolveMessage(AppLocalizations l10n, String key) {
@@ -129,10 +158,20 @@ class _ReviewRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 150,
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
           ),
           Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+            child: Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

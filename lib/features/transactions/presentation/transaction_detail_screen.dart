@@ -16,7 +16,9 @@ class TransactionDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final detailAsync = ref.watch(transactionDetailProvider((operationId, _householdId)));
+    final detailAsync = ref.watch(
+      transactionDetailProvider((operationId, _householdId)),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transactionDetailTitle)),
@@ -55,32 +57,70 @@ class _DetailBody extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(_typeLabel(l10n, op.type), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      _typeLabel(l10n, op.type),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     if (op.isReversed)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: Colors.grey.withAlpha(40), borderRadius: BorderRadius.circular(4)),
-                        child: Text(l10n.transactionReversed, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withAlpha(40),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          l10n.transactionReversed,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(color: Colors.grey),
+                        ),
                       ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text('${op.totalAmountMinorUnits} ${op.currencyCode}', style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  '${op.totalAmountMinorUnits} ${op.currencyCode}',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 12),
         _infoTile(context, l10n.fieldEffectiveDate, op.effectiveDate),
-        if (summary.categoryCode != null) _infoTile(context, l10n.fieldCategory, summary.categoryCode!),
-        if (op.sourceAccountId != null) _infoTile(context, l10n.fieldSourceAccount, op.sourceAccountId!),
-        if (op.destinationAccountId != null) _infoTile(context, l10n.fieldDestinationAccount, op.destinationAccountId!),
-        if (summary.spenderMemberId != null) _infoTile(context, l10n.fieldSpender, summary.spenderMemberId!),
-        if (summary.beneficiaryMemberId != null) _infoTile(context, l10n.fieldBeneficiary, summary.beneficiaryMemberId!),
-        if (summary.scope != null) _infoTile(context, l10n.fieldScope, summary.scope!.code),
-        _infoTile(context, l10n.fieldRecurring, summary.isRecurring ? l10n.recurringYes : l10n.recurringOneTime),
-        if (summary.note != null) _infoTile(context, l10n.fieldNote, summary.note!),
+        if (summary.categoryCode != null)
+          _infoTile(context, l10n.fieldCategory, summary.categoryCode!),
+        if (op.sourceAccountId != null)
+          _infoTile(context, l10n.fieldSourceAccount, op.sourceAccountId!),
+        if (op.destinationAccountId != null)
+          _infoTile(
+            context,
+            l10n.fieldDestinationAccount,
+            op.destinationAccountId!,
+          ),
+        if (summary.spenderMemberId != null)
+          _infoTile(context, l10n.fieldSpender, summary.spenderMemberId!),
+        if (summary.beneficiaryMemberId != null)
+          _infoTile(
+            context,
+            l10n.fieldBeneficiary,
+            summary.beneficiaryMemberId!,
+          ),
+        if (summary.scope != null)
+          _infoTile(context, l10n.fieldScope, summary.scope!.code),
+        _infoTile(
+          context,
+          l10n.fieldRecurring,
+          summary.isRecurring ? l10n.recurringYes : l10n.recurringOneTime,
+        ),
+        if (summary.note != null)
+          _infoTile(context, l10n.fieldNote, summary.note!),
       ],
     );
   }
@@ -93,24 +133,35 @@ class _DetailBody extends StatelessWidget {
         children: [
           SizedBox(
             width: 150,
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
           ),
           Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+            child: Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
     );
   }
 
-  String _typeLabel(AppLocalizations l10n, OperationType type) => switch (type) {
-    OperationType.income => l10n.transactionTypeIncome,
-    OperationType.expense => l10n.transactionTypeExpense,
-    OperationType.transfer => l10n.transactionTypeTransfer,
-    OperationType.openingBalance => l10n.transactionTypeOpeningBalance,
-    OperationType.adjustment => l10n.transactionTypeAdjustment,
-    OperationType.reversal => l10n.transactionTypeReversal,
-    OperationType.childFundWithdrawal => l10n.transactionTypeExpense,
-    _ => type.code,
-  };
+  String _typeLabel(AppLocalizations l10n, OperationType type) =>
+      switch (type) {
+        OperationType.income => l10n.transactionTypeIncome,
+        OperationType.expense => l10n.transactionTypeExpense,
+        OperationType.transfer => l10n.transactionTypeTransfer,
+        OperationType.openingBalance => l10n.transactionTypeOpeningBalance,
+        OperationType.adjustment => l10n.transactionTypeAdjustment,
+        OperationType.reversal => l10n.transactionTypeReversal,
+        OperationType.childFundWithdrawal => l10n.transactionTypeExpense,
+        _ => type.code,
+      };
 }

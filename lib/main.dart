@@ -8,5 +8,10 @@ void main() {
   const config = AppConfig.development;
   config.validate();
 
-  runApp(ProviderScope(overrides: [appConfigProvider.overrideWithValue(config)], child: const App()));
+  runApp(
+    ProviderScope(
+      overrides: [appConfigProvider.overrideWithValue(config)],
+      child: const App(),
+    ),
+  );
 }

@@ -11,7 +11,10 @@ abstract interface class TransactionQueryRepository {
   /// Returns recent operations for a household, newest first.
   ///
   /// Ordering: effective_date DESC, recorded_at DESC, id DESC.
-  Future<List<TransactionSummary>> recentOperations({required String householdId, TransactionFilter filter = const TransactionFilter()});
+  Future<List<TransactionSummary>> recentOperations({
+    required String householdId,
+    TransactionFilter filter = const TransactionFilter(),
+  });
 
   /// Returns all operations that involve [accountId] (as source or destination).
   Future<List<TransactionSummary>> operationsForAccount({
@@ -23,7 +26,10 @@ abstract interface class TransactionQueryRepository {
   /// Returns the full detail for a single operation, including context.
   ///
   /// Returns `null` when no matching operation exists in [householdId].
-  Future<TransactionSummary?> operationDetail({required String operationId, required String householdId});
+  Future<TransactionSummary?> operationDetail({
+    required String operationId,
+    required String householdId,
+  });
 
   /// Computes a spouse-wallet summary for a given date range.
   ///

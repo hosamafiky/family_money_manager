@@ -16,7 +16,9 @@ String _nowUtc() => DateTime.now().toUtc().toIso8601String();
   final start =
       '${now.year.toString().padLeft(4, '0')}-'
       '${now.month.toString().padLeft(2, '0')}-01';
-  final nextMonth = now.month == 12 ? DateTime(now.year + 1, 1, 1) : DateTime(now.year, now.month + 1, 1);
+  final nextMonth = now.month == 12
+      ? DateTime(now.year + 1, 1, 1)
+      : DateTime(now.year, now.month + 1, 1);
   final end =
       '${nextMonth.year.toString().padLeft(4, '0')}-'
       '${nextMonth.month.toString().padLeft(2, '0')}-01';
@@ -47,7 +49,8 @@ String buildIdempotencyPayload({
 }) {
   final periodStr = switch (periodDefinition) {
     MonthlyBudgetPeriod() => 'monthly',
-    FixedBudgetPeriod(:final startDateInclusive, :final endDateExclusive) => 'fixed:$startDateInclusive:$endDateExclusive',
+    FixedBudgetPeriod(:final startDateInclusive, :final endDateExclusive) =>
+      'fixed:$startDateInclusive:$endDateExclusive',
   };
   return 'hh=$householdId|name=$name|cur=$currencyCode|'
       'limit=$limitMinorUnits|period=$periodStr|'
@@ -73,21 +76,36 @@ final class CreateBudgetUseCase {
     String? idempotencyKey,
   }) async {
     if (name.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorBudgetNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorBudgetNameEmpty',
+      );
     }
     if (limitMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'limitMinorUnits', messageKey: 'errorBudgetLimitZero');
+      return const AppValidationFailure(
+        field: 'limitMinorUnits',
+        messageKey: 'errorBudgetLimitZero',
+      );
     }
 
     try {
       Currency.fromCode(currencyCode);
     } catch (_) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorBudgetCurrencyRequired');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorBudgetCurrencyRequired',
+      );
     }
 
     if (periodDefinition is FixedBudgetPeriod) {
-      if (periodDefinition.startDateInclusive.compareTo(periodDefinition.endDateExclusive) >= 0) {
-        return const AppValidationFailure(field: 'endDate', messageKey: 'errorBudgetEndBeforeStart');
+      if (periodDefinition.startDateInclusive.compareTo(
+            periodDefinition.endDateExclusive,
+          ) >=
+          0) {
+        return const AppValidationFailure(
+          field: 'endDate',
+          messageKey: 'errorBudgetEndBeforeStart',
+        );
       }
     }
 
@@ -145,12 +163,18 @@ final class UpdateBudgetUseCase {
 
     final newName = name?.trim() ?? existing.name;
     if (newName.isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorBudgetNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorBudgetNameEmpty',
+      );
     }
 
     final newLimit = limitMinorUnits ?? existing.limitMinorUnits;
     if (newLimit <= 0) {
-      return const AppValidationFailure(field: 'limitMinorUnits', messageKey: 'errorBudgetLimitZero');
+      return const AppValidationFailure(
+        field: 'limitMinorUnits',
+        messageKey: 'errorBudgetLimitZero',
+      );
     }
 
     final updated = BudgetPlan(
@@ -179,7 +203,8 @@ final class ArchiveBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<void>> execute(String budgetId) => _repository.archiveBudget(budgetId);
+  Future<AppResult<void>> execute(String budgetId) =>
+      _repository.archiveBudget(budgetId);
 }
 
 // ── RestoreBudgetUseCase ───────────────────────────────────────────────────
@@ -189,7 +214,8 @@ final class RestoreBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<void>> execute(String budgetId) => _repository.restoreBudget(budgetId);
+  Future<AppResult<void>> execute(String budgetId) =>
+      _repository.restoreBudget(budgetId);
 }
 
 // ── GetBudgetUseCase ───────────────────────────────────────────────────────
@@ -199,7 +225,8 @@ final class GetBudgetUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<BudgetPlan?>> execute(String budgetId) => _repository.findBudgetById(budgetId);
+  Future<AppResult<BudgetPlan?>> execute(String budgetId) =>
+      _repository.findBudgetById(budgetId);
 }
 
 // ── ListBudgetsUseCase ─────────────────────────────────────────────────────
@@ -209,8 +236,13 @@ final class ListBudgetsUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<List<BudgetPlan>>> execute({required String householdId, bool includeArchived = false}) =>
-      _repository.listBudgets(householdId: householdId, includeArchived: includeArchived);
+  Future<AppResult<List<BudgetPlan>>> execute({
+    required String householdId,
+    bool includeArchived = false,
+  }) => _repository.listBudgets(
+    householdId: householdId,
+    includeArchived: includeArchived,
+  );
 }
 
 // ── GetBudgetProgressUseCase ───────────────────────────────────────────────
@@ -220,7 +252,11 @@ final class GetBudgetProgressUseCase {
 
   final BudgetRepository _repository;
 
-  Future<AppResult<BudgetProgress>> execute({required String budgetId, String? overridePeriodStart, String? overridePeriodEnd}) async {
+  Future<AppResult<BudgetProgress>> execute({
+    required String budgetId,
+    String? overridePeriodStart,
+    String? overridePeriodEnd,
+  }) async {
     final findResult = await _repository.findBudgetById(budgetId);
     if (findResult is! AppOk<BudgetPlan?>) return const AppPersistenceFailure();
     final plan = findResult.value;
@@ -234,7 +270,10 @@ final class GetBudgetProgressUseCase {
         } else {
           periodRange = currentMonthRange();
         }
-      case FixedBudgetPeriod(:final startDateInclusive, :final endDateExclusive):
+      case FixedBudgetPeriod(
+        :final startDateInclusive,
+        :final endDateExclusive,
+      ):
         periodRange = (start: startDateInclusive, end: endDateExclusive);
     }
 
@@ -251,9 +290,14 @@ final class GetBudgetProgressUseCase {
     }
     final rows = txResult.value;
 
-    final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+    final consumed = rows
+        .map((r) => r.amountMinorUnits)
+        .fold(0, (a, b) => a + b);
 
-    final usageState = computeUsageState(consumedMinorUnits: consumed, limitMinorUnits: plan.limitMinorUnits);
+    final usageState = computeUsageState(
+      consumedMinorUnits: consumed,
+      limitMinorUnits: plan.limitMinorUnits,
+    );
 
     return AppOk(
       BudgetProgress(
@@ -280,7 +324,10 @@ final class GetBudgetHistoryUseCase {
 
   /// Returns progress for the last [numberOfMonths] calendar months.
   /// Only meaningful for [MonthlyBudgetPeriod] budgets.
-  Future<AppResult<List<BudgetProgress>>> execute({required String budgetId, int numberOfMonths = 6}) async {
+  Future<AppResult<List<BudgetProgress>>> execute({
+    required String budgetId,
+    int numberOfMonths = 6,
+  }) async {
     final findResult = await _repository.findBudgetById(budgetId);
     if (findResult is! AppOk<BudgetPlan?>) return const AppPersistenceFailure();
     final plan = findResult.value;
@@ -304,7 +351,9 @@ final class GetBudgetHistoryUseCase {
       if (txResult is! AppOk<List<BudgetTransactionRow>>) continue;
       final rows = txResult.value;
 
-      final consumed = rows.map((r) => r.amountMinorUnits).fold(0, (a, b) => a + b);
+      final consumed = rows
+          .map((r) => r.amountMinorUnits)
+          .fold(0, (a, b) => a + b);
 
       history.add(
         BudgetProgress(
@@ -315,7 +364,10 @@ final class GetBudgetHistoryUseCase {
           limitMinorUnits: plan.limitMinorUnits,
           currencyCode: plan.currencyCode,
           matchingTransactionCount: rows.length,
-          usageState: computeUsageState(consumedMinorUnits: consumed, limitMinorUnits: plan.limitMinorUnits),
+          usageState: computeUsageState(
+            consumedMinorUnits: consumed,
+            limitMinorUnits: plan.limitMinorUnits,
+          ),
           drillDown: rows,
         ),
       );
@@ -338,5 +390,11 @@ final class GetBudgetTransactionsUseCase {
     required String periodStart,
     required String periodEnd,
     required BudgetFilter filter,
-  }) => _repository.getBudgetTransactions(householdId: householdId, currencyCode: currencyCode, periodStart: periodStart, periodEnd: periodEnd, filter: filter);
+  }) => _repository.getBudgetTransactions(
+    householdId: householdId,
+    currencyCode: currencyCode,
+    periodStart: periodStart,
+    periodEnd: periodEnd,
+    filter: filter,
+  );
 }

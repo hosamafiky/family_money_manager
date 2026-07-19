@@ -32,40 +32,79 @@ final class RecordExpenseUseCase {
   Future<AppResult<String>> execute(ExpenseContext ctx) async {
     // ── Basic validation ──────────────────────────────────────────────────
     if (ctx.amountMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'amount', messageKey: 'error_amount_must_be_positive');
+      return const AppValidationFailure(
+        field: 'amount',
+        messageKey: 'error_amount_must_be_positive',
+      );
     }
     if (!ctx.category.isExpense) {
-      return const AppValidationFailure(field: 'category', messageKey: 'errorCategoryRequired');
+      return const AppValidationFailure(
+        field: 'category',
+        messageKey: 'errorCategoryRequired',
+      );
     }
     if (ctx.householdId.isEmpty) {
-      return const AppValidationFailure(field: 'householdId', messageKey: 'error_household_id_empty');
+      return const AppValidationFailure(
+        field: 'householdId',
+        messageKey: 'error_household_id_empty',
+      );
     }
     if (ctx.paymentAccountId.isEmpty) {
-      return const AppValidationFailure(field: 'paymentAccountId', messageKey: 'error_account_required');
+      return const AppValidationFailure(
+        field: 'paymentAccountId',
+        messageKey: 'error_account_required',
+      );
     }
     if (ctx.spenderMemberId.isEmpty) {
-      return const AppValidationFailure(field: 'spender', messageKey: 'errorSpenderRequired');
+      return const AppValidationFailure(
+        field: 'spender',
+        messageKey: 'errorSpenderRequired',
+      );
     }
     if (ctx.beneficiaryMemberId.isEmpty) {
-      return const AppValidationFailure(field: 'beneficiary', messageKey: 'errorBeneficiaryRequired');
+      return const AppValidationFailure(
+        field: 'beneficiary',
+        messageKey: 'errorBeneficiaryRequired',
+      );
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
+      return const AppValidationFailure(
+        field: 'effectiveDate',
+        messageKey: 'error_date_invalid',
+      );
     }
 
     // ── Account validation ────────────────────────────────────────────────
-    final account = await _accounts.findById(id: ctx.paymentAccountId, householdId: ctx.householdId);
+    final account = await _accounts.findById(
+      id: ctx.paymentAccountId,
+      householdId: ctx.householdId,
+    );
     if (account == null) return const AppNotFound();
+    // Goal reserve accounts are managed exclusively by goal use cases.
+    if (account.type == FinancialAccountType.goalReserve) {
+      return const AppValidationFailure(
+        field: 'paymentAccountId',
+        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
+      );
+    }
     if (account.isArchived) {
-      return const AppValidationFailure(field: 'paymentAccountId', messageKey: 'errorAccountArchived');
+      return const AppValidationFailure(
+        field: 'paymentAccountId',
+        messageKey: 'errorAccountArchived',
+      );
     }
     if (account.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // ── Scope/beneficiary consistency ─────────────────────────────────────
     final members = await _household.listMembers(ctx.householdId);
-    final beneficiary = members.where((m) => m.id == ctx.beneficiaryMemberId).firstOrNull;
+    final beneficiary = members
+        .where((m) => m.id == ctx.beneficiaryMemberId)
+        .firstOrNull;
     if (beneficiary == null) return const AppNotFound();
 
     final scopeValidation = _validateScope(ctx.scope, beneficiary.role);
@@ -76,7 +115,10 @@ final class RecordExpenseUseCase {
     if (account.requiresWithdrawalAudit) {
       final audit = ctx.childWithdrawalAudit;
       if (audit == null) {
-        return const AppValidationFailure(field: 'childWithdrawalAudit', messageKey: 'errorWithdrawalReasonRequired');
+        return const AppValidationFailure(
+          field: 'childWithdrawalAudit',
+          messageKey: 'errorWithdrawalReasonRequired',
+        );
       }
       final auditValidation = _validateAudit(audit);
       if (auditValidation != null) return auditValidation;
@@ -114,31 +156,48 @@ final class RecordExpenseUseCase {
         isRecurring: ctx.isRecurring,
       );
 
-      final ledgerResult = await _ledger.recordExpense(params, auditParams: auditParams);
+      final ledgerResult = await _ledger.recordExpense(
+        params,
+        auditParams: auditParams,
+      );
 
       return switch (ledgerResult) {
         IdempotentOperationResult.created => AppOk(ctx.operationId),
         IdempotentOperationResult.alreadyExists => AppOk(ctx.operationId),
-        IdempotentOperationResult.conflict => const AppDuplicateConflict(messageKey: 'error_account_duplicate'),
+        IdempotentOperationResult.conflict => const AppDuplicateConflict(
+          messageKey: 'error_account_duplicate',
+        ),
       };
     } on InsufficientFundsError {
       return const AppInsufficientFunds();
     } on ArchivedAccountError {
-      return const AppValidationFailure(field: 'paymentAccountId', messageKey: 'errorAccountArchived');
+      return const AppValidationFailure(
+        field: 'paymentAccountId',
+        messageKey: 'errorAccountArchived',
+      );
     } catch (_) {
       return const AppPersistenceFailure();
     }
   }
 
-  AppResult<String>? _validateScope(ExpenseScope scope, MemberRole beneficiaryRole) {
+  AppResult<String>? _validateScope(
+    ExpenseScope scope,
+    MemberRole beneficiaryRole,
+  ) {
     switch (scope) {
       case ExpenseScope.child:
         if (beneficiaryRole != MemberRole.child) {
-          return const AppValidationFailure(field: 'beneficiary', messageKey: 'errorBeneficiaryRequired');
+          return const AppValidationFailure(
+            field: 'beneficiary',
+            messageKey: 'errorBeneficiaryRequired',
+          );
         }
       case ExpenseScope.spouse:
         if (beneficiaryRole != MemberRole.spouse) {
-          return const AppValidationFailure(field: 'beneficiary', messageKey: 'errorBeneficiaryRequired');
+          return const AppValidationFailure(
+            field: 'beneficiary',
+            messageKey: 'errorBeneficiaryRequired',
+          );
         }
       case ExpenseScope.personal:
       case ExpenseScope.household:
@@ -150,13 +209,22 @@ final class RecordExpenseUseCase {
 
   AppResult<String>? _validateAudit(ChildWithdrawalContext audit) {
     if (audit.reason.trim().isEmpty) {
-      return const AppValidationFailure(field: 'reason', messageKey: 'errorWithdrawalReasonRequired');
+      return const AppValidationFailure(
+        field: 'reason',
+        messageKey: 'errorWithdrawalReasonRequired',
+      );
     }
     if (!audit.warningAcknowledged) {
-      return const AppValidationFailure(field: 'warningAcknowledged', messageKey: 'errorWithdrawalAcknowledgmentRequired');
+      return const AppValidationFailure(
+        field: 'warningAcknowledged',
+        messageKey: 'errorWithdrawalAcknowledgmentRequired',
+      );
     }
     if (!audit.confirmed) {
-      return const AppValidationFailure(field: 'confirmed', messageKey: 'errorWithdrawalConfirmationRequired');
+      return const AppValidationFailure(
+        field: 'confirmed',
+        messageKey: 'errorWithdrawalConfirmationRequired',
+      );
     }
     return null;
   }

@@ -10,7 +10,9 @@ final class DriftHouseholdRepository implements HouseholdRepository {
 
   @override
   Future<HouseholdIdentity?> findHousehold(String householdId) async {
-    final row = await (_db.select(_db.households)..where((t) => t.id.equals(householdId))).getSingleOrNull();
+    final row = await (_db.select(
+      _db.households,
+    )..where((t) => t.id.equals(householdId))).getSingleOrNull();
     return row == null ? null : _toIdentity(row);
   }
 
@@ -25,37 +27,87 @@ final class DriftHouseholdRepository implements HouseholdRepository {
     await _db
         .into(_db.households)
         .insert(
-          HouseholdsCompanion.insert(id: id, name: displayName, currencyCode: Value(currencyCode), ownerUserId: ownerUserId, createdAt: now, updatedAt: now),
+          HouseholdsCompanion.insert(
+            id: id,
+            name: displayName,
+            currencyCode: Value(currencyCode),
+            ownerUserId: ownerUserId,
+            createdAt: now,
+            updatedAt: now,
+          ),
         );
-    return _toIdentity(await (_db.select(_db.households)..where((t) => t.id.equals(id))).getSingle());
+    return _toIdentity(
+      await (_db.select(
+        _db.households,
+      )..where((t) => t.id.equals(id))).getSingle(),
+    );
   }
 
   @override
-  Future<HouseholdIdentity> updateHouseholdName({required String id, required String displayName}) async {
+  Future<HouseholdIdentity> updateHouseholdName({
+    required String id,
+    required String displayName,
+  }) async {
     final now = DateTime.now().toUtc().toIso8601String();
-    await (_db.update(_db.households)..where((t) => t.id.equals(id))).write(HouseholdsCompanion(name: Value(displayName), updatedAt: Value(now)));
-    return _toIdentity(await (_db.select(_db.households)..where((t) => t.id.equals(id))).getSingle());
+    await (_db.update(_db.households)..where((t) => t.id.equals(id))).write(
+      HouseholdsCompanion(name: Value(displayName), updatedAt: Value(now)),
+    );
+    return _toIdentity(
+      await (_db.select(
+        _db.households,
+      )..where((t) => t.id.equals(id))).getSingle(),
+    );
   }
 
   @override
-  Future<HouseholdMember> addMember({required String id, required String householdId, required String displayName, required MemberRole role}) async {
+  Future<HouseholdMember> addMember({
+    required String id,
+    required String householdId,
+    required String displayName,
+    required MemberRole role,
+  }) async {
     // V1 constraint: at most one active spouse per household.
     if (role == MemberRole.spouse) {
-      final existing = await (_db.select(
-        _db.householdMembers,
-      )..where((t) => t.householdId.equals(householdId) & t.role.equals(MemberRole.spouse.code) & t.isArchived.equals(false))).getSingleOrNull();
+      final existing =
+          await (_db.select(_db.householdMembers)..where(
+                (t) =>
+                    t.householdId.equals(householdId) &
+                    t.role.equals(MemberRole.spouse.code) &
+                    t.isArchived.equals(false),
+              ))
+              .getSingleOrNull();
       if (existing != null) throw DuplicateSpouseError();
     }
     final now = DateTime.now().toUtc().toIso8601String();
     await _db
         .into(_db.householdMembers)
-        .insert(HouseholdMembersCompanion.insert(id: id, householdId: householdId, displayName: displayName, role: role.code, createdAt: now, updatedAt: now));
-    return _toMember(await (_db.select(_db.householdMembers)..where((t) => t.id.equals(id))).getSingle());
+        .insert(
+          HouseholdMembersCompanion.insert(
+            id: id,
+            householdId: householdId,
+            displayName: displayName,
+            role: role.code,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+    return _toMember(
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(id))).getSingle(),
+    );
   }
 
   @override
-  Future<HouseholdMember?> findMember({required String memberId, required String householdId}) async {
-    final row = await (_db.select(_db.householdMembers)..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId))).getSingleOrNull();
+  Future<HouseholdMember?> findMember({
+    required String memberId,
+    required String householdId,
+  }) async {
+    final row =
+        await (_db.select(_db.householdMembers)..where(
+              (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
     return row == null ? null : _toMember(row);
   }
 
@@ -70,33 +122,72 @@ final class DriftHouseholdRepository implements HouseholdRepository {
   }
 
   @override
-  Future<HouseholdMember> renameMember({required String memberId, required String householdId, required String displayName}) async {
-    final existing = await findMember(memberId: memberId, householdId: householdId);
+  Future<HouseholdMember> renameMember({
+    required String memberId,
+    required String householdId,
+    required String displayName,
+  }) async {
+    final existing = await findMember(
+      memberId: memberId,
+      householdId: householdId,
+    );
     if (existing == null) throw MemberNotFoundError(memberId);
     final now = DateTime.now().toUtc().toIso8601String();
-    await (_db.update(_db.householdMembers)..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId))).write(
-      HouseholdMembersCompanion(displayName: Value(displayName), updatedAt: Value(now)),
+    await (_db.update(_db.householdMembers)..where(
+          (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+        ))
+        .write(
+          HouseholdMembersCompanion(
+            displayName: Value(displayName),
+            updatedAt: Value(now),
+          ),
+        );
+    return _toMember(
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(memberId))).getSingle(),
     );
-    return _toMember(await (_db.select(_db.householdMembers)..where((t) => t.id.equals(memberId))).getSingle());
   }
 
   @override
-  Future<HouseholdMember> archiveMember({required String memberId, required String householdId}) async {
-    final existing = await findMember(memberId: memberId, householdId: householdId);
+  Future<HouseholdMember> archiveMember({
+    required String memberId,
+    required String householdId,
+  }) async {
+    final existing = await findMember(
+      memberId: memberId,
+      householdId: householdId,
+    );
     if (existing == null) throw MemberNotFoundError(memberId);
     if (existing.role == MemberRole.primaryUser) {
       throw CannotArchivePrimaryUserError();
     }
     if (existing.isArchived) throw MemberAlreadyArchivedError(memberId);
     final now = DateTime.now().toUtc().toIso8601String();
-    await (_db.update(_db.householdMembers)..where((t) => t.id.equals(memberId) & t.householdId.equals(householdId))).write(
-      HouseholdMembersCompanion(isArchived: const Value(true), lifecycle: Value(MemberLifecycle.archived.code), updatedAt: Value(now)),
+    await (_db.update(_db.householdMembers)..where(
+          (t) => t.id.equals(memberId) & t.householdId.equals(householdId),
+        ))
+        .write(
+          HouseholdMembersCompanion(
+            isArchived: const Value(true),
+            lifecycle: Value(MemberLifecycle.archived.code),
+            updatedAt: Value(now),
+          ),
+        );
+    return _toMember(
+      await (_db.select(
+        _db.householdMembers,
+      )..where((t) => t.id.equals(memberId))).getSingle(),
     );
-    return _toMember(await (_db.select(_db.householdMembers)..where((t) => t.id.equals(memberId))).getSingle());
   }
 
-  HouseholdIdentity _toIdentity(DbHousehold row) =>
-      HouseholdIdentity(id: row.id, displayName: row.name, currencyCode: row.currencyCode, createdAt: row.createdAt, updatedAt: row.updatedAt);
+  HouseholdIdentity _toIdentity(DbHousehold row) => HouseholdIdentity(
+    id: row.id,
+    displayName: row.name,
+    currencyCode: row.currencyCode,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  );
 
   HouseholdMember _toMember(DbHouseholdMember row) => HouseholdMember(
     id: row.id,

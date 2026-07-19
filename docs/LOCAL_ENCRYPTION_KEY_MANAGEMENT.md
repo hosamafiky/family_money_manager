@@ -20,13 +20,13 @@ not a specification of implemented controls.
 These five controls are **not interchangeable**. Each serves a different purpose
 and operates at a different layer. Confusing them leads to design defects.
 
-| Control | What it protects | Who holds it | When it applies |
-|---|---|---|---|
-| **Database encryption** | Financial data at rest (SQLite file) | sqlite3mc (C library) | Whenever the file is opened |
-| **Secure key storage** | The random database key itself | Android Keystore / iOS Keychain | Key load/save |
-| **App lock** | Active session access | App UI layer | After inactivity timeout |
-| **Biometric/PIN authentication** | Gating access to the stored key | Device OS | On app unlock |
-| **Backup encryption** | Exported backup files | User-chosen recovery passphrase | On export/import |
+| Control                          | What it protects                     | Who holds it                    | When it applies             |
+| -------------------------------- | ------------------------------------ | ------------------------------- | --------------------------- |
+| **Database encryption**          | Financial data at rest (SQLite file) | sqlite3mc (C library)           | Whenever the file is opened |
+| **Secure key storage**           | The random database key itself       | Android Keystore / iOS Keychain | Key load/save               |
+| **App lock**                     | Active session access                | App UI layer                    | After inactivity timeout    |
+| **Biometric/PIN authentication** | Gating access to the stored key      | Device OS                       | On app unlock               |
+| **Backup encryption**            | Exported backup files                | User-chosen recovery passphrase | On export/import            |
 
 ---
 
@@ -47,17 +47,20 @@ The database key is a cryptographically random 256-bit value.
 On Android, the DEK is wrapped using a key stored in the **Android Keystore System**.
 
 ### Key creation
+
 1. On first launch after installation, a 256-bit AES key (`KEYSTORE_ALIAS_DATABASE_DEK_WRAP`) is generated inside the Android Keystore. The key never leaves the Keystore (hardware-backed on supported devices).
 2. A random 256-bit DEK is generated in Dart using `Random.secure()`.
 3. The DEK is encrypted (AES-GCM) using the Keystore-backed wrap key.
 4. The encrypted DEK blob is stored in `flutter_secure_storage` (which uses the Android Keystore internally).
 
 ### Key loading
+
 1. The app retrieves the encrypted DEK blob from secure storage.
 2. The Keystore-backed wrap key decrypts the blob.
 3. The plaintext DEK is passed to the database `setup` callback and immediately cleared from memory after use.
 
 ### Key accessibility policy
+
 - `KeyProperties.PURPOSE_ENCRYPT | PURPOSE_DECRYPT`
 - `setUserAuthenticationRequired(true)` — requires biometric or device credential to use the key after the screen lock.
 - `setInvalidatedByBiometricEnrollment(true)` — key is invalidated when new biometrics are enrolled.
@@ -69,6 +72,7 @@ On Android, the DEK is wrapped using a key stored in the **Android Keystore Syst
 On iOS, the DEK is stored directly in the **iOS Keychain** using the `kSecAttrAccessible` attribute.
 
 ### Key creation
+
 1. On first launch, a random 256-bit DEK is generated using `SecRandomCopyBytes`.
 2. The DEK is stored as a Keychain item with:
    - `kSecAttrService`: `com.familymoney.manager.db_dek`
@@ -77,6 +81,7 @@ On iOS, the DEK is stored directly in the **iOS Keychain** using the `kSecAttrAc
 3. The Keychain item is not exported in iCloud Keychain backups.
 
 ### Key loading
+
 1. The app performs a Keychain query for the DEK item.
 2. iOS presents the biometric / device-credential prompt if required.
 3. The DEK is returned to the app and passed to the database `setup` callback.
@@ -96,6 +101,7 @@ On iOS, the DEK is stored directly in the **iOS Keychain** using the `kSecAttrAc
 **Why the PIN is not the database key:**
 
 If the PIN were used as the database key (or to derive it via PBKDF2 / Argon2), then:
+
 - Changing the PIN would require re-encrypting the entire database (expensive, failure-prone).
 - A short PIN (4–6 digits) provides very low entropy (~13–20 bits) compared to a random 256-bit key.
 - A PIN change could leave the database locked if the operation is interrupted mid-flight.
@@ -156,6 +162,7 @@ App launch / database open
 Key rotation replaces the DEK without changing the database content.
 
 Planned procedure (to be implemented in the approved key-management phase):
+
 1. Open the current database with the current DEK.
 2. Generate a new random DEK.
 3. Execute `PRAGMA rekey = '<new_DEK>'` — sqlite3mc re-encrypts the database in place.
@@ -178,12 +185,13 @@ If step 3 or 4 fails, the old DEK must still be valid. A failure at step 5 resul
 
 ## 10. App Reinstall Behavior
 
-| Platform | DEK after reinstall |
-|---|---|
-| Android | **Deleted** — the Keystore key and SecureStorage entries are cleared on uninstall. The database file is also deleted with app data. |
-| iOS | **Retained by default** — Keychain items persist across reinstalls on iOS unless explicitly deleted with `kSecAttrSynchronizable: false` and `SecItemDelete`. The database file is deleted with app data. |
+| Platform | DEK after reinstall                                                                                                                                                                                       |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Android  | **Deleted** — the Keystore key and SecureStorage entries are cleared on uninstall. The database file is also deleted with app data.                                                                       |
+| iOS      | **Retained by default** — Keychain items persist across reinstalls on iOS unless explicitly deleted with `kSecAttrSynchronizable: false` and `SecItemDelete`. The database file is deleted with app data. |
 
 On iOS, a reinstalled app that finds a Keychain item but no database file must:
+
 1. Attempt to load the DEK from Keychain.
 2. Find no database file.
 3. Generate a new database (first launch).
@@ -207,6 +215,7 @@ The old device's DEK cannot be transferred — it is device-bound by Keystore / 
 ## 12. Lost-Key Behavior
 
 If the device-bound DEK is lost (factory reset, OS corruption, Keystore wipe):
+
 - The local database **cannot be opened**.
 - Recovery is possible only via an encrypted backup or Firestore cloud sync.
 - Users must be informed of this during onboarding (acceptance of the key-loss risk).
@@ -229,6 +238,7 @@ Backup files use a **separate recovery passphrase** (or generated recovery key),
 ## 14. Local-Only Mode
 
 When Firestore cloud sync is disabled:
+
 - The only recovery path is the encrypted backup file.
 - There is no server-side copy of the data or the DEK.
 - The user bears full responsibility for backup management.
@@ -238,6 +248,7 @@ When Firestore cloud sync is disabled:
 ## 15. Optional Cloud-Sync Recovery
 
 When Firestore cloud sync is enabled:
+
 - Financial records are replicated to Firestore (details in `FIRESTORE_SCHEMA.md`).
 - A device migration can restore data from Firestore rather than a backup file.
 - The DEK is still device-bound; Firestore does not store or transmit the DEK.
@@ -247,20 +258,21 @@ When Firestore cloud sync is enabled:
 
 ## 16. Failure States
 
-| Scenario | Behavior |
-|---|---|
-| sqlite3mc library absent from build | `StateError` at database open (fail-closed, release-safe) |
-| DEK not found in Keystore/Keychain | Force re-authentication or show recovery prompt |
-| Wrong DEK applied to database | Exception from `select count(*) from sqlite_master` in setup callback |
-| Keystore key invalidated by new biometric enrollment | Prompt user to re-authenticate with device credential; re-wrap DEK |
-| Database file corrupt | Offer restore from backup |
-| Backup recovery passphrase lost | Data unrecoverable (disclose during onboarding) |
+| Scenario                                             | Behavior                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| sqlite3mc library absent from build                  | `StateError` at database open (fail-closed, release-safe)             |
+| DEK not found in Keystore/Keychain                   | Force re-authentication or show recovery prompt                       |
+| Wrong DEK applied to database                        | Exception from `select count(*) from sqlite_master` in setup callback |
+| Keystore key invalidated by new biometric enrollment | Prompt user to re-authenticate with device credential; re-wrap DEK    |
+| Database file corrupt                                | Offer restore from backup                                             |
+| Backup recovery passphrase lost                      | Data unrecoverable (disclose during onboarding)                       |
 
 ---
 
 ## 17. Redacted Error Handling
 
 All database-open errors must be logged without emitting:
+
 - The DEK value (or any bytes of it)
 - The recovery passphrase
 - Any key material in any form
@@ -273,14 +285,14 @@ log sink. Error messages reference the failure category (e.g., `db_open_failed`,
 
 ## 18. Test Strategy
 
-| Test category | What it covers |
-|---|---|
-| Host unit tests | sqlite3mc presence, key-correct open, key-wrong rejection, plaintext absence, reopen persistence |
-| Widget tests | App-lock UI (show/hide, biometric prompt placeholder) |
-| Integration tests (iOS simulator) | Runtime cipher check, end-to-end key flow |
-| Integration tests (Android emulator) | Runtime cipher check, end-to-end key flow |
-| Physical device tests | Keystore hardware-backed key, BiometricPrompt, Keychain access control |
-| Backup/restore tests | Encrypted export, passphrase-based import |
+| Test category                        | What it covers                                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Host unit tests                      | sqlite3mc presence, key-correct open, key-wrong rejection, plaintext absence, reopen persistence |
+| Widget tests                         | App-lock UI (show/hide, biometric prompt placeholder)                                            |
+| Integration tests (iOS simulator)    | Runtime cipher check, end-to-end key flow                                                        |
+| Integration tests (Android emulator) | Runtime cipher check, end-to-end key flow                                                        |
+| Physical device tests                | Keystore hardware-backed key, BiometricPrompt, Keychain access control                           |
+| Backup/restore tests                 | Encrypted export, passphrase-based import                                                        |
 
 Host unit tests classify as **Host-runtime-tested**.  
 Physical Keystore and Keychain behavior is **Unverified** until physical-device tests run.  

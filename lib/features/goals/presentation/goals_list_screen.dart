@@ -45,11 +45,23 @@ class GoalsListScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.flag_outlined, size: 64, color: Colors.grey),
+                    const Icon(
+                      Icons.flag_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 16),
-                    Text(l10n.goalEmpty, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+                    Text(
+                      l10n.goalEmpty,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                     const SizedBox(height: 24),
-                    ElevatedButton.icon(onPressed: () => context.push('/goals/new'), icon: const Icon(Icons.add), label: Text(l10n.goalNew)),
+                    ElevatedButton.icon(
+                      onPressed: () => context.push('/goals/new'),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.goalNew),
+                    ),
                   ],
                 ),
               ),
@@ -88,12 +100,20 @@ class _GoalCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Expanded(child: Text(goal.name, style: Theme.of(context).textTheme.titleMedium)),
+                  Expanded(
+                    child: Text(
+                      goal.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
                   _StatusBadge(status: goal.status, l10n: l10n),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(_purposeLabel(goal.purpose, l10n), style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                _purposeLabel(goal.purpose, l10n),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 8),
               progressAsync.when(
                 loading: () => const LinearProgressIndicator(),
@@ -107,7 +127,10 @@ class _GoalCard extends ConsumerWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LinearProgressIndicator(value: (pct / 100).clamp(0.0, 1.0), minHeight: 6),
+                      LinearProgressIndicator(
+                        value: (pct / 100).clamp(0.0, 1.0),
+                        minHeight: 6,
+                      ),
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -116,7 +139,10 @@ class _GoalCard extends ConsumerWidget {
                             '${goal.currencyCode} ${GoalMoneyFormatter.format(progress.reserveBalanceMinorUnits, goal.currencyCode)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          Text(l10n.goalPercent(pct), style: Theme.of(context).textTheme.bodySmall),
+                          Text(
+                            l10n.goalPercent(pct),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           Text(
                             '${goal.currencyCode} ${GoalMoneyFormatter.format(goal.targetMinorUnits, goal.currencyCode)}',
                             style: Theme.of(context).textTheme.bodySmall,
@@ -134,15 +160,16 @@ class _GoalCard extends ConsumerWidget {
     );
   }
 
-  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) => switch (purpose) {
-    GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
-    GoalPurpose.homePurchase => l10n.purposeHomePurchase,
-    GoalPurpose.education => l10n.purposeEducation,
-    GoalPurpose.travel => l10n.purposeTravel,
-    GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
-    GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
-    GoalPurpose.other => l10n.purposeOther,
-  };
+  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) =>
+      switch (purpose) {
+        GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
+        GoalPurpose.homePurchase => l10n.purposeHomePurchase,
+        GoalPurpose.education => l10n.purposeEducation,
+        GoalPurpose.travel => l10n.purposeTravel,
+        GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
+        GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
+        GoalPurpose.other => l10n.purposeOther,
+      };
 }
 
 class _StatusBadge extends StatelessWidget {
@@ -155,7 +182,10 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, icon) = switch (status) {
       GoalStatus.active => (l10n.goalStatusActive, Icons.radio_button_checked),
-      GoalStatus.targetReached => (l10n.goalStatusTargetReached, Icons.check_circle_outline),
+      GoalStatus.targetReached => (
+        l10n.goalStatusTargetReached,
+        Icons.check_circle_outline,
+      ),
       GoalStatus.completed => (l10n.goalStatusCompleted, Icons.check_circle),
       GoalStatus.archived => (l10n.goalStatusArchived, Icons.archive_outlined),
     };

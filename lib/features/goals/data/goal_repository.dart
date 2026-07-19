@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
+import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 
 /// Repository abstraction for savings-goal persistence.
@@ -43,12 +44,27 @@ abstract interface class GoalRepository {
   Future<AppResult<SavingsGoal?>> findGoalById(String goalId);
 
   /// Lists goals for a household, optionally including archived ones.
-  Future<AppResult<List<SavingsGoal>>> listGoals({required String householdId, bool includeArchived = false});
+  Future<AppResult<List<SavingsGoal>>> listGoals({
+    required String householdId,
+    bool includeArchived = false,
+  });
 
   /// Updates the goal status (and optional timestamp fields).
   ///
   /// Only [status], [completedAt], and [archivedAt] may be mutated.
-  Future<AppResult<void>> updateGoalStatus({required String goalId, required GoalStatus status, String? completedAt, String? archivedAt});
+  Future<AppResult<void>> updateGoalStatus({
+    required String goalId,
+    required GoalStatus status,
+    String? completedAt,
+    String? archivedAt,
+  });
+
+  /// Marks a goal as completed and returns the updated [SavingsGoal].
+  ///
+  /// All business validation (balance check, early-completion reason) must
+  /// be performed in the use case before calling this method. The repository
+  /// only persists the status transition and [completedAt] timestamp.
+  Future<AppResult<SavingsGoal>> completeGoal(CompleteGoalParams params);
 
   // ── Revisions ─────────────────────────────────────────────────────────────
 
@@ -72,5 +88,8 @@ abstract interface class GoalRepository {
   /// ledger (sum of CREDITs minus sum of DEBITs on [reserveAccountId]).
   ///
   /// This is the canonical balance — it is never stored as a column.
-  Future<AppResult<int>> getReserveBalance({required String reserveAccountId, required String householdId});
+  Future<AppResult<int>> getReserveBalance({
+    required String reserveAccountId,
+    required String householdId,
+  });
 }

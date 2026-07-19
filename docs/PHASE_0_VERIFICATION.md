@@ -106,49 +106,49 @@ money_tracker_next: **3 local modifications of unknown cause.** SHA-256 hashes r
 
 Each Phase 0 deliverable is mapped to the document and section that covers it.
 
-| Required Deliverable | Covered By | Section / Heading | Coverage Assessment |
-|---|---|---|---|
-| Product specification | `PRODUCT_SPEC.md` | All sections | Complete |
-| Feature inventory | `PRODUCT_SPEC.md` | Section 6 (Feature Inventory) | Complete |
-| User journeys | `USER_JOURNEYS.md` | Journeys 1–12 | Complete |
-| Financial model | `FINANCIAL_MODEL.md` | All sections | Gaps identified — see Section 4 below |
-| Financial invariants | `FINANCIAL_INVARIANTS.md` | INV-001 through INV-018 | Complete; language corrections required |
-| Data model | `DATA_MODEL.md` | Sections 2–6 | Complete |
-| Architecture | `ARCHITECTURE.md` | Sections 1–13 | Phase plan requires correction |
-| Local database design | `LOCAL_DATABASE_SCHEMA.md` | Sections 2–6 | Complete |
-| Offline synchronization | `OFFLINE_SYNC_STRATEGY.md` | Sections 1–13 | Idempotency precision gaps; protected-child sync path missing |
-| Security threat model | `SECURITY_THREAT_MODEL.md` | T-01 through T-14 | Language overstatements; otherwise complete |
-| Firestore schema | `FIRESTORE_SCHEMA.md` | Sections 3–7 | Complete |
-| Firestore-rules strategy | `FIRESTORE_RULES_PLAN.md` | Sections 2–8 | Complete |
-| Test strategy | `TEST_STRATEGY.md` | Sections 1–11 | Complete |
-| Dependency shortlist | `ARCHITECTURE.md` | Section 10 (Key Packages) | Present; not a standalone document but adequately covered |
-| Implementation plan | `ARCHITECTURE.md` | Section 13 (CI/CD) + implied by phase descriptions | Weak: no standalone implementation-phases plan document; phase descriptions exist in the original spec. Phase plan requires correction. |
-| Open product decisions | `DECISIONS.md` | DECISION-001 through DECISION-015 | SQLCipher deadline requires correction |
+| Required Deliverable     | Covered By                 | Section / Heading                                  | Coverage Assessment                                                                                                                     |
+| ------------------------ | -------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Product specification    | `PRODUCT_SPEC.md`          | All sections                                       | Complete                                                                                                                                |
+| Feature inventory        | `PRODUCT_SPEC.md`          | Section 6 (Feature Inventory)                      | Complete                                                                                                                                |
+| User journeys            | `USER_JOURNEYS.md`         | Journeys 1–12                                      | Complete                                                                                                                                |
+| Financial model          | `FINANCIAL_MODEL.md`       | All sections                                       | Gaps identified — see Section 4 below                                                                                                   |
+| Financial invariants     | `FINANCIAL_INVARIANTS.md`  | INV-001 through INV-018                            | Complete; language corrections required                                                                                                 |
+| Data model               | `DATA_MODEL.md`            | Sections 2–6                                       | Complete                                                                                                                                |
+| Architecture             | `ARCHITECTURE.md`          | Sections 1–13                                      | Phase plan requires correction                                                                                                          |
+| Local database design    | `LOCAL_DATABASE_SCHEMA.md` | Sections 2–6                                       | Complete                                                                                                                                |
+| Offline synchronization  | `OFFLINE_SYNC_STRATEGY.md` | Sections 1–13                                      | Idempotency precision gaps; protected-child sync path missing                                                                           |
+| Security threat model    | `SECURITY_THREAT_MODEL.md` | T-01 through T-14                                  | Language overstatements; otherwise complete                                                                                             |
+| Firestore schema         | `FIRESTORE_SCHEMA.md`      | Sections 3–7                                       | Complete                                                                                                                                |
+| Firestore-rules strategy | `FIRESTORE_RULES_PLAN.md`  | Sections 2–8                                       | Complete                                                                                                                                |
+| Test strategy            | `TEST_STRATEGY.md`         | Sections 1–11                                      | Complete                                                                                                                                |
+| Dependency shortlist     | `ARCHITECTURE.md`          | Section 10 (Key Packages)                          | Present; not a standalone document but adequately covered                                                                               |
+| Implementation plan      | `ARCHITECTURE.md`          | Section 13 (CI/CD) + implied by phase descriptions | Weak: no standalone implementation-phases plan document; phase descriptions exist in the original spec. Phase plan requires correction. |
+| Open product decisions   | `DECISIONS.md`             | DECISION-001 through DECISION-015                  | SQLCipher deadline requires correction                                                                                                  |
 
 ### Gaps identified
 
-| Gap | Severity | Document | Action |
-|---|---|---|---|
-| Cross-currency policy not formally documented | High | `FINANCIAL_MODEL.md` | Add dedicated section |
-| External money-flow boundary not defined | High | `FINANCIAL_MODEL.md` | Add section |
-| Historical account-metadata change policy absent | High | `FINANCIAL_MODEL.md` | Add section |
-| Reversal specification incomplete | High | `FINANCIAL_MODEL.md` | Add section |
-| Gold: quantity vs. monetary account distinction unclear | Medium | `FINANCIAL_MODEL.md` | Clarify |
-| Liability: ledger account vs. position record not specified | Medium | `FINANCIAL_MODEL.md` | Clarify |
-| Idempotency key scope and multi-device shape not precise | High | `OFFLINE_SYNC_STRATEGY.md` | Add section |
-| Protected-child enforcement not listed for all write paths | High | `FINANCIAL_INVARIANTS.md` | Add section |
-| Phase 1 scope includes `Money` type (should be Phase 2) | High | `ARCHITECTURE.md` | Correct |
-| SQLCipher decision deadline is "Before Phase 11" (too late) | High | `DECISIONS.md` | Move to "Before Phase 2" |
-| Implementation plan has no explicit phased delivery table | Medium | New section in `ARCHITECTURE.md` | Add |
-| No standalone `IMPLEMENTATION_PLAN.md` | Low | — | Acceptable in `ARCHITECTURE.md` |
+| Gap                                                         | Severity | Document                         | Action                          |
+| ----------------------------------------------------------- | -------- | -------------------------------- | ------------------------------- |
+| Cross-currency policy not formally documented               | High     | `FINANCIAL_MODEL.md`             | Add dedicated section           |
+| External money-flow boundary not defined                    | High     | `FINANCIAL_MODEL.md`             | Add section                     |
+| Historical account-metadata change policy absent            | High     | `FINANCIAL_MODEL.md`             | Add section                     |
+| Reversal specification incomplete                           | High     | `FINANCIAL_MODEL.md`             | Add section                     |
+| Gold: quantity vs. monetary account distinction unclear     | Medium   | `FINANCIAL_MODEL.md`             | Clarify                         |
+| Liability: ledger account vs. position record not specified | Medium   | `FINANCIAL_MODEL.md`             | Clarify                         |
+| Idempotency key scope and multi-device shape not precise    | High     | `OFFLINE_SYNC_STRATEGY.md`       | Add section                     |
+| Protected-child enforcement not listed for all write paths  | High     | `FINANCIAL_INVARIANTS.md`        | Add section                     |
+| Phase 1 scope includes `Money` type (should be Phase 2)     | High     | `ARCHITECTURE.md`                | Correct                         |
+| SQLCipher decision deadline is "Before Phase 11" (too late) | High     | `DECISIONS.md`                   | Move to "Before Phase 2"        |
+| Implementation plan has no explicit phased delivery table   | Medium   | New section in `ARCHITECTURE.md` | Add                             |
+| No standalone `IMPLEMENTATION_PLAN.md`                      | Low      | —                                | Acceptable in `ARCHITECTURE.md` |
 
 ### Duplicated or contradictory coverage
 
-| Issue | Documents | Resolution |
-|---|---|---|
-| SQLCipher "effort is small" asserted without spike | `ARCHITECTURE.md` sec 3, `DECISIONS.md` DECISION-004 | Remove assertion; defer to spike |
-| "Structurally impossible" and similar language overstates current state | Multiple | Corrected in Section 5 of this document; all occurrences replaced in source docs |
-| Phase 1 scope in the original specification mentions `Money type` under foundation; ARCHITECTURE.md's structure lists `money.dart` under `core/financial/` without phase assignment | `ARCHITECTURE.md` | Phase 2 boundary clarified in ARCHITECTURE.md |
+| Issue                                                                                                                                                                               | Documents                                            | Resolution                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| SQLCipher "effort is small" asserted without spike                                                                                                                                  | `ARCHITECTURE.md` sec 3, `DECISIONS.md` DECISION-004 | Remove assertion; defer to spike                                                 |
+| "Structurally impossible" and similar language overstates current state                                                                                                             | Multiple                                             | Corrected in Section 5 of this document; all occurrences replaced in source docs |
+| Phase 1 scope in the original specification mentions `Money type` under foundation; ARCHITECTURE.md's structure lists `money.dart` under `core/financial/` without phase assignment | `ARCHITECTURE.md`                                    | Phase 2 boundary clarified in ARCHITECTURE.md                                    |
 
 ---
 
@@ -156,7 +156,7 @@ Each Phase 0 deliverable is mapped to the document and section that covers it.
 
 ### 4.1 Cross-currency policy — Status before correction
 
-The financial model stated only: *"Future multi-currency: exchange rate records will be added; cross-currency transfers will require an explicit rate."*
+The financial model stated only: _"Future multi-currency: exchange rate records will be added; cross-currency transfers will require an explicit rate."_
 
 This is insufficient. The transfer-neutrality invariant (INV-003) was expressed using a proof (`debit(source) + credit(destination)`) that silently assumes equal minor units in the same currency. The proof breaks if accounts hold different currencies.
 
@@ -176,13 +176,14 @@ No policy was defined for what happens to historical reports when an account's `
 
 ### 4.4 Reversals — Status before correction
 
-Only one sentence addressed reversals: *"Corrections are made through reversal entries."* No policy existed for duplicate reversal prevention, partial reversals, reversal of multi-leg operations, or treatment of reversed operations in reports.
+Only one sentence addressed reversals: _"Corrections are made through reversal entries."_ No policy existed for duplicate reversal prevention, partial reversals, reversal of multi-leg operations, or treatment of reversed operations in reports.
 
 **Correction:** Section 22 added to `FINANCIAL_MODEL.md`.
 
 ### 4.5 Gold model — Status before correction
 
 The model used a `goldHolding` account whose balance equals the purchase price. This is correct but was not clearly distinguished from a physical-quantity tracking model, creating a risk of confusion between:
+
 - The monetary balance of the gold account (cost basis in EGP)
 - The physical quantity (grams / milligrams)
 - The current market value
@@ -203,6 +204,7 @@ The model did not clarify whether liabilities use ledger accounts (with debit/cr
 The following specific overstatements were found and corrected in source documents. Each entry lists the file, original text, and replacement.
 
 All corrections replace present-tense implementation claims with planning language using one of:
+
 - **"Proposed design:"** — architectural choice not yet implemented
 - **"Planned:"** — intended behavior of future code
 - **"Requirement:"** — a rule the implementation must satisfy
@@ -210,55 +212,55 @@ All corrections replace present-tense implementation claims with planning langua
 
 ### FINANCIAL_INVARIANTS.md
 
-| Original | Corrected |
-|---|---|
-| `trigger-enforced in SQLite` | `proposed to be enforced via a SQLite trigger (planned)` |
-| `Firestore rules enforce the same check` | `Firestore rules are designed to enforce the same check (planned)` |
+| Original                                                      | Corrected                                                                    |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `trigger-enforced in SQLite`                                  | `proposed to be enforced via a SQLite trigger (planned)`                     |
+| `Firestore rules enforce the same check`                      | `Firestore rules are designed to enforce the same check (planned)`           |
 | `The constraint is enforced at the repository contract level` | `The constraint is designed to be enforced at the repository contract level` |
-| `Audit history is always visible` | `The design requires that audit history remains visible` |
+| `Audit history is always visible`                             | `The design requires that audit history remains visible`                     |
 
 ### FINANCIAL_MODEL.md
 
-| Original | Corrected |
-|---|---|
-| `Idempotency is enforced:` | `Idempotency is planned to be enforced:` |
-| `Transfers do not change net worth. This is enforced by design:` | `Transfers are designed not to change net worth. The mechanism is:` |
-| `Can only be created once per account (enforced by the ledger).` | `Required to be created only once per account. The ledger implementation must enforce this.` |
-| `This balance must always equal the actual cash Hana holds.` | `This balance is required to equal the actual cash held, as a design invariant to be enforced by the implementation.` |
+| Original                                                         | Corrected                                                                                                             |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `Idempotency is enforced:`                                       | `Idempotency is planned to be enforced:`                                                                              |
+| `Transfers do not change net worth. This is enforced by design:` | `Transfers are designed not to change net worth. The mechanism is:`                                                   |
+| `Can only be created once per account (enforced by the ledger).` | `Required to be created only once per account. The ledger implementation must enforce this.`                          |
+| `This balance must always equal the actual cash Hana holds.`     | `This balance is required to equal the actual cash held, as a design invariant to be enforced by the implementation.` |
 
 ### LOCAL_DATABASE_SCHEMA.md
 
-| Original | Corrected |
-|---|---|
+| Original                                                                | Corrected                                                                                          |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `No UPDATE or DELETE is permitted on... tables (enforced via trigger).` | `No UPDATE or DELETE is to be permitted on... tables. A planned SQLite trigger will enforce this.` |
-| `must always be 1; enforced by CHECK constraint` | `required to always be 1; a planned CHECK constraint will enforce this` |
+| `must always be 1; enforced by CHECK constraint`                        | `required to always be 1; a planned CHECK constraint will enforce this`                            |
 
 ### SECURITY_THREAT_MODEL.md
 
-| Original | Corrected |
-|---|---|
-| `Idempotency is enforced at every layer.` | `Idempotency is designed to be enforced at every layer.` |
-| `production flag enforced by build configuration` | `production flag is intended to be enforced by build configuration` |
-| `Rate limiting is enforced server-side per user.` | `Rate limiting is planned server-side per user.` |
-| `This method enforces audit creation as part of the same SQLite transaction.` | `This method is designed to enforce audit creation as part of the same SQLite transaction.` |
+| Original                                                                           | Corrected                                                                                         |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `Idempotency is enforced at every layer.`                                          | `Idempotency is designed to be enforced at every layer.`                                          |
+| `production flag enforced by build configuration`                                  | `production flag is intended to be enforced by build configuration`                               |
+| `Rate limiting is enforced server-side per user.`                                  | `Rate limiting is planned server-side per user.`                                                  |
+| `This method enforces audit creation as part of the same SQLite transaction.`      | `This method is designed to enforce audit creation as part of the same SQLite transaction.`       |
 | `The constraint is enforced at the repository contract level, not just in the UI.` | `The constraint is designed to be enforced at the repository contract level, not just in the UI.` |
 
 ### OFFLINE_SYNC_STRATEGY.md
 
-| Original | Corrected |
-|---|---|
+| Original                                                                  | Corrected                                                                        |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `The server's Firestore rules already enforced validation at write time.` | `The server's Firestore rules are designed to enforce validation at write time.` |
 
 ### DATA_MODEL.md
 
-| Original | Corrected |
-|---|---|
+| Original                          | Corrected                                                           |
+| --------------------------------- | ------------------------------------------------------------------- |
 | `must be true; app enforces this` | `required to be true; the planned implementation must enforce this` |
 
 ### ARCHITECTURE.md
 
-| Original | Corrected |
-|---|---|
+| Original                            | Corrected                                                                          |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
 | `## 2. Dependency Graph (enforced)` | `## 2. Dependency Graph (planned; to be enforced by code review and linter rules)` |
 
 ---
@@ -269,20 +271,20 @@ See the updated `FINANCIAL_INVARIANTS.md` INV-006 for the complete list of write
 
 The following paths were **missing** from the original INV-006 and have been added:
 
-| Write Path | Was Documented | Added |
-|---|---|---|
-| Normal withdrawal via repository | Yes | — |
-| Adjustment (adjustmentDebit) on child account | No | Added |
-| Reversal of a child-fund deposit | No | Added |
-| Sync download applying remote child-account debit | No | Added |
-| Backup import containing child-account debit | No | Added |
-| Schema migration that modifies account type | No | Added |
-| Repair or administrative ledger tool | No | Added |
-| Asset purchase funded from child account | No | Added |
-| Certificate funding from child account | No | Added |
-| Liability repayment from child account | No | Added |
-| Goal funding from child account | No | Added |
-| Transfer out of child account (including to non-child account) | No | Added |
+| Write Path                                                     | Was Documented | Added |
+| -------------------------------------------------------------- | -------------- | ----- |
+| Normal withdrawal via repository                               | Yes            | —     |
+| Adjustment (adjustmentDebit) on child account                  | No             | Added |
+| Reversal of a child-fund deposit                               | No             | Added |
+| Sync download applying remote child-account debit              | No             | Added |
+| Backup import containing child-account debit                   | No             | Added |
+| Schema migration that modifies account type                    | No             | Added |
+| Repair or administrative ledger tool                           | No             | Added |
+| Asset purchase funded from child account                       | No             | Added |
+| Certificate funding from child account                         | No             | Added |
+| Liability repayment from child account                         | No             | Added |
+| Goal funding from child account                                | No             | Added |
+| Transfer out of child account (including to non-child account) | No             | Added |
 
 ---
 
@@ -349,25 +351,25 @@ The corrected `DECISIONS.md` DECISION-004 also documents the full impact of the 
 
 Every major claim in the Phase 0 documents is classified as:
 
-| Claim category | Status |
-|---|---|
-| Financial model design | **Documented only** |
-| Financial invariants | **Documented only** |
-| Firestore rules | **Documented only** |
-| Local database schema | **Documented only** |
-| Security mitigations | **Documented only** |
-| Sync strategy | **Documented only** |
-| Test plan | **Documented only** |
-| Architecture | **Documented only** |
-| Any actual code | **None exists** |
-| Any test execution | **None executed** |
-| Any build verification | **Not run** |
-| Any device testing | **Not run** |
-| Any Firebase emulator test | **Not run** |
+| Claim category                 | Status              |
+| ------------------------------ | ------------------- |
+| Financial model design         | **Documented only** |
+| Financial invariants           | **Documented only** |
+| Firestore rules                | **Documented only** |
+| Local database schema          | **Documented only** |
+| Security mitigations           | **Documented only** |
+| Sync strategy                  | **Documented only** |
+| Test plan                      | **Documented only** |
+| Architecture                   | **Documented only** |
+| Any actual code                | **None exists**     |
+| Any test execution             | **None executed**   |
+| Any build verification         | **Not run**         |
+| Any device testing             | **Not run**         |
+| Any Firebase emulator test     | **Not run**         |
 | Any Firestore rule enforcement | **Not implemented** |
-| Any SQLite trigger | **Not implemented** |
-| Any PIN hashing | **Not implemented** |
-| Any financial invariant check | **Not implemented** |
+| Any SQLite trigger             | **Not implemented** |
+| Any PIN hashing                | **Not implemented** |
+| Any financial invariant check  | **Not implemented** |
 
 Phase 0 is complete as a documentation phase only. No behavioral guarantees exist until Phase 2 tests are written and pass.
 

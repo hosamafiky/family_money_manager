@@ -79,24 +79,39 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
           if (result is! AppOk<List<FinancialAccount>>) {
             return Center(child: Text(l10n.errorGeneric));
           }
-          final accounts = result.value.where((a) => !a.isArchived && a.type != FinancialAccountType.goalReserve).toList();
+          final accounts = result.value
+              .where(
+                (a) =>
+                    !a.isArchived && a.type != FinancialAccountType.goalReserve,
+              )
+              .toList();
 
           // Clear invalid preselected IDs (archived accounts).
-          if (_sourceAccountId != null && accounts.every((a) => a.id != _sourceAccountId)) {
+          if (_sourceAccountId != null &&
+              accounts.every((a) => a.id != _sourceAccountId)) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) setState(() => _sourceAccountId = null);
             });
           }
-          if (_destinationAccountId != null && accounts.every((a) => a.id != _destinationAccountId)) {
+          if (_destinationAccountId != null &&
+              accounts.every((a) => a.id != _destinationAccountId)) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) setState(() => _destinationAccountId = null);
             });
           }
 
-          final sourceAccount = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
-          final destAccount = accounts.where((a) => a.id == _destinationAccountId).firstOrNull;
-          final isProtectedSource = sourceAccount?.requiresWithdrawalAudit ?? false;
-          final hasCurrencyMismatch = sourceAccount != null && destAccount != null && sourceAccount.currencyCode != destAccount.currencyCode;
+          final sourceAccount = accounts
+              .where((a) => a.id == _sourceAccountId)
+              .firstOrNull;
+          final destAccount = accounts
+              .where((a) => a.id == _destinationAccountId)
+              .firstOrNull;
+          final isProtectedSource =
+              sourceAccount?.requiresWithdrawalAudit ?? false;
+          final hasCurrencyMismatch =
+              sourceAccount != null &&
+              destAccount != null &&
+              sourceAccount.currencyCode != destAccount.currencyCode;
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -129,22 +144,44 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
                   _destError = null;
                 }),
               ),
-              if (_sourceAccountId != null && _destinationAccountId != null && _sourceAccountId == _destinationAccountId)
+              if (_sourceAccountId != null &&
+                  _destinationAccountId != null &&
+                  _sourceAccountId == _destinationAccountId)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(l10n.errorSameAccount, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+                  child: Text(
+                    l10n.errorSameAccount,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               if (hasCurrencyMismatch)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(l10n.errorCurrencyMismatch, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+                  child: Text(
+                    l10n.errorCurrencyMismatch,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-                decoration: InputDecoration(labelText: l10n.fieldAmount, border: const OutlineInputBorder(), errorText: _amountError),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                ],
+                decoration: InputDecoration(
+                  labelText: l10n.fieldAmount,
+                  border: const OutlineInputBorder(),
+                  errorText: _amountError,
+                ),
                 onChanged: (_) => setState(() => _amountError = null),
               ),
               const SizedBox(height: 16),
@@ -159,22 +196,38 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
                   if (picked != null) setState(() => _effectiveDate = picked);
                 },
                 child: InputDecorator(
-                  decoration: InputDecoration(labelText: l10n.fieldEffectiveDate, border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                    labelText: l10n.fieldEffectiveDate,
+                    border: const OutlineInputBorder(),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text(_formatDate(_effectiveDate)), const Icon(Icons.calendar_today, size: 18)],
+                    children: [
+                      Text(_formatDate(_effectiveDate)),
+                      const Icon(Icons.calendar_today, size: 18),
+                    ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _noteController,
-                decoration: InputDecoration(labelText: l10n.fieldNote, border: const OutlineInputBorder()),
+                decoration: InputDecoration(
+                  labelText: l10n.fieldNote,
+                  border: const OutlineInputBorder(),
+                ),
                 maxLines: 2,
               ),
-              if (isProtectedSource) ...[const SizedBox(height: 24), _buildProtectedSection(context, l10n)],
+              if (isProtectedSource) ...[
+                const SizedBox(height: 24),
+                _buildProtectedSection(context, l10n),
+              ],
               const SizedBox(height: 24),
-              FilledButton(onPressed: () => _goToReview(context, l10n, accounts, isProtectedSource), child: Text(l10n.reviewTitle)),
+              FilledButton(
+                onPressed: () =>
+                    _goToReview(context, l10n, accounts, isProtectedSource),
+                child: Text(l10n.reviewTitle),
+              ),
             ],
           );
         },
@@ -194,8 +247,14 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     return DropdownButtonFormField<String>(
       // ignore: deprecated_member_use
       value: value,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), errorText: error),
-      items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        errorText: error,
+      ),
+      items: accounts
+          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+          .toList(),
       onChanged: onChanged,
     );
   }
@@ -221,14 +280,26 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _reasonController,
-          decoration: InputDecoration(labelText: l10n.fieldWithdrawalReason, border: const OutlineInputBorder(), errorText: _reasonError),
+          decoration: InputDecoration(
+            labelText: l10n.fieldWithdrawalReason,
+            border: const OutlineInputBorder(),
+            errorText: _reasonError,
+          ),
           onChanged: (_) => setState(() => _reasonError = null),
         ),
         const SizedBox(height: 8),
         CheckboxListTile(
           value: _warningAcknowledged,
           title: Text(l10n.fieldAcknowledgeWarning),
-          subtitle: _ackError != null ? Text(_ackError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)) : null,
+          subtitle: _ackError != null
+              ? Text(
+                  _ackError!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
           onChanged: (v) => setState(() {
             _warningAcknowledged = v ?? false;
             _ackError = null;
@@ -237,7 +308,15 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
         CheckboxListTile(
           value: _confirmed,
           title: Text(l10n.fieldConfirmWithdrawal),
-          subtitle: _confirmError != null ? Text(_confirmError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)) : null,
+          subtitle: _confirmError != null
+              ? Text(
+                  _confirmError!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
           onChanged: (v) => setState(() {
             _confirmed = v ?? false;
             _confirmError = null;
@@ -247,7 +326,12 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     );
   }
 
-  void _goToReview(BuildContext context, AppLocalizations l10n, List<FinancialAccount> accounts, bool isProtected) {
+  void _goToReview(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<FinancialAccount> accounts,
+    bool isProtected,
+  ) {
     bool hasErrors = false;
 
     if (_sourceAccountId == null) {
@@ -258,7 +342,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
       setState(() => _destError = l10n.errorGeneric);
       hasErrors = true;
     }
-    if (_sourceAccountId != null && _destinationAccountId != null && _sourceAccountId == _destinationAccountId) {
+    if (_sourceAccountId != null &&
+        _destinationAccountId != null &&
+        _sourceAccountId == _destinationAccountId) {
       setState(() => _destError = l10n.errorSameAccount);
       hasErrors = true;
     }
@@ -266,7 +352,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     // Block cross-currency transfers at the form level.
     if (_sourceAccountId != null && _destinationAccountId != null) {
       final src = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
-      final dst = accounts.where((a) => a.id == _destinationAccountId).firstOrNull;
+      final dst = accounts
+          .where((a) => a.id == _destinationAccountId)
+          .firstOrNull;
       if (src != null && dst != null && src.currencyCode != dst.currencyCode) {
         setState(() => _destError = l10n.errorCurrencyMismatch);
         hasErrors = true;
@@ -289,7 +377,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
         hasErrors = true;
       }
       if (!_confirmed) {
-        setState(() => _confirmError = l10n.errorWithdrawalConfirmationRequired);
+        setState(
+          () => _confirmError = l10n.errorWithdrawalConfirmationRequired,
+        );
         hasErrors = true;
       }
     }
@@ -327,7 +417,9 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
       currencyCode: sourceAccount.currencyCode,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       childWithdrawalAudit: withdrawalAudit,
     );
 

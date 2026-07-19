@@ -9,9 +9,15 @@ final class GetTransactionHistoryUseCase {
 
   final TransactionQueryRepository _repo;
 
-  Future<AppResult<List<TransactionSummary>>> execute({required String householdId, TransactionFilter filter = const TransactionFilter()}) async {
+  Future<AppResult<List<TransactionSummary>>> execute({
+    required String householdId,
+    TransactionFilter filter = const TransactionFilter(),
+  }) async {
     try {
-      final summaries = await _repo.recentOperations(householdId: householdId, filter: filter);
+      final summaries = await _repo.recentOperations(
+        householdId: householdId,
+        filter: filter,
+      );
       return AppOk(summaries);
     } catch (_) {
       return const AppPersistenceFailure();
@@ -24,7 +30,11 @@ final class GetTransactionHistoryUseCase {
     TransactionFilter filter = const TransactionFilter(),
   }) async {
     try {
-      final summaries = await _repo.operationsForAccount(accountId: accountId, householdId: householdId, filter: filter);
+      final summaries = await _repo.operationsForAccount(
+        accountId: accountId,
+        householdId: householdId,
+        filter: filter,
+      );
       return AppOk(summaries);
     } catch (_) {
       return const AppPersistenceFailure();

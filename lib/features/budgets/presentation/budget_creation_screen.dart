@@ -16,7 +16,8 @@ class BudgetCreationScreen extends ConsumerStatefulWidget {
   const BudgetCreationScreen({super.key});
 
   @override
-  ConsumerState<BudgetCreationScreen> createState() => _BudgetCreationScreenState();
+  ConsumerState<BudgetCreationScreen> createState() =>
+      _BudgetCreationScreenState();
 }
 
 class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
@@ -41,9 +42,16 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
   Future<void> _pickDate({required bool isStart}) async {
     final initial = isStart
         ? (_startDate ?? DateTime.now())
-        : (_endDate ?? (_startDate?.add(const Duration(days: 30)) ?? DateTime.now().add(const Duration(days: 30))));
+        : (_endDate ??
+              (_startDate?.add(const Duration(days: 30)) ??
+                  DateTime.now().add(const Duration(days: 30))));
 
-    final picked = await showDatePicker(context: context, initialDate: initial, firstDate: DateTime(2020), lastDate: DateTime(2050));
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2050),
+    );
     if (picked == null) return;
     setState(() {
       if (isStart) {
@@ -59,12 +67,16 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 
     if (_periodType == BudgetPeriodType.fixed) {
       if (_startDate == null || _endDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select start and end dates.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select start and end dates.')),
+        );
         return;
       }
       if (!_endDate!.isAfter(_startDate!)) {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorBudgetEndBeforeStart)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorBudgetEndBeforeStart)));
         return;
       }
     }
@@ -81,7 +93,10 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
       period = const MonthlyBudgetPeriod();
     } else {
       final fmt = DateFormat('yyyy-MM-dd');
-      period = FixedBudgetPeriod(startDateInclusive: fmt.format(_startDate!), endDateExclusive: fmt.format(_endDate!));
+      period = FixedBudgetPeriod(
+        startDateInclusive: fmt.format(_startDate!),
+        endDateExclusive: fmt.format(_endDate!),
+      );
     }
 
     final useCase = ref.read(createBudgetUseCaseProvider);
@@ -103,11 +118,19 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
         ref.invalidate(budgetsProvider(_householdId));
         context.go('/budgets/${value.id}');
       case AppValidationFailure(:final messageKey):
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(messageKey)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(messageKey)));
       case AppDuplicateConflict():
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('A budget with this configuration already exists.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A budget with this configuration already exists.'),
+          ),
+        );
       default:
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create budget.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to create budget.')),
+        );
     }
   }
 
@@ -133,21 +156,35 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
             // Budget name
             TextFormField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: l10n.budgetName, border: const OutlineInputBorder()),
+              decoration: InputDecoration(
+                labelText: l10n.budgetName,
+                border: const OutlineInputBorder(),
+              ),
               textInputAction: TextInputAction.next,
-              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.errorBudgetNameEmpty : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.errorBudgetNameEmpty
+                  : null,
             ),
             const SizedBox(height: 16),
 
             // Currency selector
             DropdownButtonFormField<String>(
               initialValue: _selectedCurrency,
-              decoration: InputDecoration(labelText: l10n.budgetCurrency, border: const OutlineInputBorder()),
-              items: Currency.values.map((c) => DropdownMenuItem(value: c.code, child: Text(c.code))).toList(),
+              decoration: InputDecoration(
+                labelText: l10n.budgetCurrency,
+                border: const OutlineInputBorder(),
+              ),
+              items: Currency.values
+                  .map(
+                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
+                  )
+                  .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _selectedCurrency = v);
               },
-              validator: (v) => (v == null || v.isEmpty) ? l10n.errorBudgetCurrencyRequired : null,
+              validator: (v) => (v == null || v.isEmpty)
+                  ? l10n.errorBudgetCurrencyRequired
+                  : null,
             ),
             const SizedBox(height: 16),
 
@@ -155,11 +192,17 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
             TextFormField(
               controller: _limitController,
               decoration: InputDecoration(
-                labelText: _periodType == BudgetPeriodType.monthly ? l10n.budgetLimit : l10n.budgetLimitFixed,
+                labelText: _periodType == BudgetPeriodType.monthly
+                    ? l10n.budgetLimit
+                    : l10n.budgetLimitFixed,
                 border: const OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+              ],
               validator: (v) {
                 if (v == null || v.isEmpty) return l10n.errorBudgetLimitZero;
                 final parsed = double.tryParse(v.replaceAll(',', ''));
@@ -177,12 +220,18 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
               segments: [
                 ButtonSegment(
                   value: BudgetPeriodType.monthly,
-                  label: Text(l10n.budgetPeriodMonthly, style: const TextStyle(fontSize: 12)),
+                  label: Text(
+                    l10n.budgetPeriodMonthly,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   icon: const Icon(Icons.repeat, size: 16),
                 ),
                 ButtonSegment(
                   value: BudgetPeriodType.fixed,
-                  label: Text(l10n.budgetPeriodFixed, style: const TextStyle(fontSize: 12)),
+                  label: Text(
+                    l10n.budgetPeriodFixed,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   icon: const Icon(Icons.date_range, size: 16),
                 ),
               ],
@@ -194,9 +243,17 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 
             if (_periodType == BudgetPeriodType.fixed) ...[
               const SizedBox(height: 8),
-              _DatePickerTile(label: l10n.budgetStartDate, date: _startDate, onTap: () => _pickDate(isStart: true)),
+              _DatePickerTile(
+                label: l10n.budgetStartDate,
+                date: _startDate,
+                onTap: () => _pickDate(isStart: true),
+              ),
               const SizedBox(height: 8),
-              _DatePickerTile(label: l10n.budgetEndDate, date: _endDate, onTap: () => _pickDate(isStart: false)),
+              _DatePickerTile(
+                label: l10n.budgetEndDate,
+                date: _endDate,
+                onTap: () => _pickDate(isStart: false),
+              ),
             ],
 
             const SizedBox(height: 16),
@@ -210,7 +267,12 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
                   children: [
                     const Icon(Icons.info_outline, size: 16),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(l10n.budgetOverlapNote, style: Theme.of(context).textTheme.bodySmall)),
+                    Expanded(
+                      child: Text(
+                        l10n.budgetOverlapNote,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -220,7 +282,12 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 
             FilledButton(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.budgetNew),
+              child: _isSubmitting
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.budgetNew),
             ),
           ],
         ),
@@ -230,7 +297,11 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 }
 
 class _DatePickerTile extends StatelessWidget {
-  const _DatePickerTile({required this.label, required this.date, required this.onTap});
+  const _DatePickerTile({
+    required this.label,
+    required this.date,
+    required this.onTap,
+  });
 
   final String label;
   final DateTime? date;

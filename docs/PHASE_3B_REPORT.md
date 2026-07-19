@@ -2,13 +2,14 @@
 
 ## Commit Evidence
 
-| Item | Value |
-|---|---|
+| Item                   | Value                                      |
+| ---------------------- | ------------------------------------------ |
 | Base commit (Phase 3B) | `ada7c9d6608df48b650b6faaa54f72dfda875ca3` |
-| Branch | `main` |
-| Verification commit | see Step 19 in git log |
+| Branch                 | `main`                                     |
+| Verification commit    | see Step 19 in git log                     |
 
 **`git status --short` (before verification commit):**
+
 ```
  M lib/features/transactions/application/record_expense_use_case.dart
 ```
@@ -18,64 +19,68 @@
 ## Files Created / Changed
 
 ### New test files (created by this verification pass)
-| File | Tests |
-|---|---|
-| `test/database/operation_context_db_test.dart` | 8 |
-| `test/database/operation_context_migration_db_test.dart` | 6 |
-| `test/database/income_persistence_db_test.dart` | 10 |
-| `test/database/expense_persistence_db_test.dart` | 11 |
-| `test/database/transfer_persistence_db_test.dart` | 11 (10 transfer + 1 spouse-wallet) |
-| `test/database/transaction_history_db_test.dart` | 8 |
+
+| File                                                     | Tests                              |
+| -------------------------------------------------------- | ---------------------------------- |
+| `test/database/operation_context_db_test.dart`           | 8                                  |
+| `test/database/operation_context_migration_db_test.dart` | 6                                  |
+| `test/database/income_persistence_db_test.dart`          | 10                                 |
+| `test/database/expense_persistence_db_test.dart`         | 11                                 |
+| `test/database/transfer_persistence_db_test.dart`        | 11 (10 transfer + 1 spouse-wallet) |
+| `test/database/transaction_history_db_test.dart`         | 8                                  |
 
 ### Modified test files
-| File | Change |
-|---|---|
+
+| File                                       | Change                                          |
+| ------------------------------------------ | ----------------------------------------------- |
 | `test/database/archive_rules_db_test.dart` | +1 test: reversal on archived account permitted |
 
 ### Modified source files
-| File | Change |
-|---|---|
+
+| File                                                                 | Change                                             |
+| -------------------------------------------------------------------- | -------------------------------------------------- |
 | `lib/features/transactions/application/record_expense_use_case.dart` | dart format only (pre-existing uncommitted change) |
 
 ---
 
 ## Test Count Reconciliation
 
-| Category | Before | After | Delta |
-|---|---|---|---|
-| Total `test(` / `testWidgets(` declarations | 533 | 588 | +55 |
+| Category                                    | Before | After | Delta |
+| ------------------------------------------- | ------ | ----- | ----- |
+| Total `test(` / `testWidgets(` declarations | 533    | 588   | +55   |
 
 **Per-file breakdown (DB tests):**
 
-| File | Count |
-|---|---|
-| `ledger_repository_db_test.dart` | 29 |
-| `append_only_db_test.dart` | 18 |
-| `transfer_persistence_db_test.dart` | 11 (NEW) |
-| `expense_persistence_db_test.dart` | 11 (NEW) |
-| `protected_account_db_test.dart` | 10 |
-| `income_persistence_db_test.dart` | 10 (NEW) |
-| `archive_rules_db_test.dart` | 9 (+1) |
-| `transaction_history_db_test.dart` | 8 (NEW) |
-| `operation_context_db_test.dart` | 8 (NEW) |
-| `migration_db_test.dart` | 8 |
-| `idempotency_db_test.dart` | 8 |
-| `classification_immutability_db_test.dart` | 8 |
-| `ordering_determinism_db_test.dart` | 7 |
-| `household_cardinality_db_test.dart` | 7 |
-| `transaction_boundary_db_test.dart` | 6 |
-| `operation_context_migration_db_test.dart` | 6 (NEW) |
-| `account_creation_idempotency_db_test.dart` | 6 |
-| `profile_isolation_db_test.dart` | 5 |
-| `balance_semantics_db_test.dart` | 5 |
-| `account_atomicity_db_test.dart` | 5 |
-| `historical_metadata_db_test.dart` | 4 |
+| File                                        | Count    |
+| ------------------------------------------- | -------- |
+| `ledger_repository_db_test.dart`            | 29       |
+| `append_only_db_test.dart`                  | 18       |
+| `transfer_persistence_db_test.dart`         | 11 (NEW) |
+| `expense_persistence_db_test.dart`          | 11 (NEW) |
+| `protected_account_db_test.dart`            | 10       |
+| `income_persistence_db_test.dart`           | 10 (NEW) |
+| `archive_rules_db_test.dart`                | 9 (+1)   |
+| `transaction_history_db_test.dart`          | 8 (NEW)  |
+| `operation_context_db_test.dart`            | 8 (NEW)  |
+| `migration_db_test.dart`                    | 8        |
+| `idempotency_db_test.dart`                  | 8        |
+| `classification_immutability_db_test.dart`  | 8        |
+| `ordering_determinism_db_test.dart`         | 7        |
+| `household_cardinality_db_test.dart`        | 7        |
+| `transaction_boundary_db_test.dart`         | 6        |
+| `operation_context_migration_db_test.dart`  | 6 (NEW)  |
+| `account_creation_idempotency_db_test.dart` | 6        |
+| `profile_isolation_db_test.dart`            | 5        |
+| `balance_semantics_db_test.dart`            | 5        |
+| `account_atomicity_db_test.dart`            | 5        |
+| `historical_metadata_db_test.dart`          | 4        |
 
 ---
 
 ## Step 3: Account-Creation Idempotency
 
 **UNIQUE index confirmed** in `app_database.dart` (`_applyAccountIdempotencyIndex`):
+
 ```sql
 CREATE UNIQUE INDEX IF NOT EXISTS idx_financial_accounts_idempotency
 ON financial_accounts(household_id, idempotency_key)
@@ -83,6 +88,7 @@ WHERE idempotency_key IS NOT NULL
 ```
 
 **Test coverage** (`account_creation_idempotency_db_test.dart`, 6 tests):
+
 - First creation → AppOk ✓ **Database-tested**
 - Same key + same payload → AppOk (same ID, no new row) ✓ **Database-tested**
 - Same key + different name → AppDuplicateConflict ✓ **Database-tested**
@@ -95,6 +101,7 @@ WHERE idempotency_key IS NOT NULL
 ## Step 4: Household Initialization
 
 `InitializeHouseholdUseCase.execute()` verified in `initialize_household_use_case_test.dart` (5 tests):
+
 - Empty household name → AppValidationFailure ✓ **Unit-tested**
 - Empty primary member name → AppValidationFailure ✓ **Unit-tested**
 - Valid inputs → AppOk ✓ **Unit-tested**
@@ -109,20 +116,21 @@ Archiving only active primary user blocked: `ArchiveMemberUseCase` returns `AppV
 
 ## Step 5: Historical Classification Policy
 
-| Field | After-creation mutable? | Enforcement | Test |
-|---|---|---|---|
-| `type` | Never | DB trigger `immutable_account_type_currency` + repo layer | Database-tested |
-| `currencyCode` | Never (V1) | DB trigger `immutable_account_type_currency` + repo layer | Database-tested |
-| `ownerType` | Yes (no ledger history) | Use-case / repo | Unverified (V1 assumption) |
-| `fundPurpose` | Yes (no ledger history) | Use-case / repo | Unverified (V1 assumption) |
-| `isProtected` | After ledger history: No | Repo (`ClassificationImmutabilityError`) | Database-tested (`classification_immutability_db_test.dart`) |
-| `isSpendable` | Yes | None currently | Unverified |
-| `includeInNetWorth` | After ledger history: No | Repo | Database-tested |
-| `includeInZakat` | After ledger history: No | Repo | Database-tested |
-| `name` | Yes | None | Unverified |
-| `isArchived` | Archive-only (one-way) | Repo (`AccountAlreadyArchivedError`) | Database-tested (`archive_rules_db_test.dart`) |
+| Field               | After-creation mutable?  | Enforcement                                               | Test                                                         |
+| ------------------- | ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
+| `type`              | Never                    | DB trigger `immutable_account_type_currency` + repo layer | Database-tested                                              |
+| `currencyCode`      | Never (V1)               | DB trigger `immutable_account_type_currency` + repo layer | Database-tested                                              |
+| `ownerType`         | Yes (no ledger history)  | Use-case / repo                                           | Unverified (V1 assumption)                                   |
+| `fundPurpose`       | Yes (no ledger history)  | Use-case / repo                                           | Unverified (V1 assumption)                                   |
+| `isProtected`       | After ledger history: No | Repo (`ClassificationImmutabilityError`)                  | Database-tested (`classification_immutability_db_test.dart`) |
+| `isSpendable`       | Yes                      | None currently                                            | Unverified                                                   |
+| `includeInNetWorth` | After ledger history: No | Repo                                                      | Database-tested                                              |
+| `includeInZakat`    | After ledger history: No | Repo                                                      | Database-tested                                              |
+| `name`              | Yes                      | None                                                      | Unverified                                                   |
+| `isArchived`        | Archive-only (one-way)   | Repo (`AccountAlreadyArchivedError`)                      | Database-tested (`archive_rules_db_test.dart`)               |
 
 DB trigger evidence:
+
 ```dart
 'CREATE TRIGGER IF NOT EXISTS immutable_account_type_currency '
 'BEFORE UPDATE ON financial_accounts '
@@ -137,6 +145,7 @@ DB trigger evidence:
 ## Step 6: Archived-Account Behavior
 
 `_requireAccount` in `DriftLedgerRepository` throws `ArchivedAccountError` when account is archived:
+
 ```dart
 if (row.isArchived) throw ArchivedAccountError(accountId);
 ```
@@ -157,6 +166,7 @@ Future<FinancialAccount> _loadAccount(String accountId, String householdId)
 ```
 
 **Reversal-on-archived test** added (`archive_rules_db_test.dart`, test 9):
+
 - Archives an account via raw SQL after income
 - Calls `reverseOperation` — succeeds (returns `IdempotentOperationResult.created`)
 - Balance confirmed 0 after reversal ✓ **Database-tested**
@@ -166,6 +176,7 @@ Future<FinancialAccount> _loadAccount(String accountId, String householdId)
 ## Step 7: operation_contexts Schema
 
 **Table definition** (`operation_contexts_table.dart`):
+
 - Primary key: `operationId` ✓
 - Columns: `operation_id`, `household_id`, `spender_member_id`, `beneficiary_member_id`,
   `expense_scope`, `is_recurring`, `recurring_note`, `category_code`, `note`, `created_at` ✓
@@ -173,6 +184,7 @@ Future<FinancialAccount> _loadAccount(String accountId, String householdId)
 - `category_code` is a stable string code (not localized) ✓
 
 **Triggers in** `app_database.dart` (`_applyOperationContextTriggers`):
+
 ```sql
 -- FK enforcement:
 CREATE TRIGGER IF NOT EXISTS fk_operation_context_operation_id
@@ -194,6 +206,7 @@ BEGIN SELECT RAISE(ABORT, '...'); END
 **Schema version:** `schemaVersion => 5` ✓
 
 **DB tests** (`operation_context_db_test.dart`, 8 tests):
+
 1. Context written atomically with income ✓ **Database-tested**
 2. Context written atomically with expense ✓ **Database-tested**
 3. Context written atomically with transfer ✓ **Database-tested**
@@ -208,6 +221,7 @@ BEGIN SELECT RAISE(ABORT, '...'); END
 ## Step 8: Schema Migration
 
 `app_database.dart` migration logic:
+
 ```dart
 if (from <= 4) {
   // v4 → v5: operation_contexts table for rich transaction metadata.
@@ -217,6 +231,7 @@ if (from <= 4) {
 ```
 
 **Migration DB tests** (`operation_context_migration_db_test.dart`, 6 tests):
+
 1. Fresh v5 schema includes `operation_contexts` table ✓ **Database-tested**
 2. `operation_contexts` columns match expected schema ✓ **Database-tested**
 3. FK + immutability triggers exist in v5 db ✓ **Database-tested**
@@ -297,6 +312,7 @@ if (from <= 4) {
 - Non-protected account expense without audit → succeeds ✓
 
 DB-level CHECK enforcement triggers (from `_applyCheckEnforcementTriggers`):
+
 - `check_audit_reason`: `length(trim(NEW.reason)) = 0` → ABORT ✓
 - `check_audit_warning_shown`: `NEW.warning_shown != 1` → ABORT ✓
 - `check_audit_amount`: `NEW.amount_minor_units <= 0` → ABORT ✓
@@ -341,6 +357,7 @@ DB-level CHECK enforcement triggers (from `_applyCheckEnforcementTriggers`):
 ## Step 15: UI Boundary Inspection
 
 Grep for direct DB/repository imports in `lib/features/transactions/presentation/`:
+
 ```
 lib/features/transactions/presentation/providers/transaction_providers.dart:10:
   import 'package:family_money_manager/features/transactions/data/drift_transaction_query_repository.dart';
@@ -351,6 +368,7 @@ layer to instantiate the concrete repository implementation. Widgets use `ref.wa
 access providers — no Drift types in widget files.
 
 All other `ref.watch(...)` calls in presentation files access providers only:
+
 ```
 expense_form_screen.dart: ref.watch(accountsProvider(...))
 income_form_screen.dart: ref.watch(accountsProvider(...))
@@ -365,16 +383,16 @@ No widgets directly import Drift or call repository methods. ✓
 
 ## Step 16: Scope Scan
 
-| Term | Result |
-|---|---|
-| `dashboard` / `Dashboard` | No matches |
-| `budget` / `Budget` | No matches |
-| `goal` / `Goal` | No matches |
-| `certificate` / `Certificate` | No matches |
-| `zakat` / `Zakat` | Only `includeInZakat` column in schema (permitted: data model field, not Zakat calculation) |
-| `sadaqah` / `Sadaqah` | No matches |
-| `firebase` / `Firebase` | No matches |
-| `biometric` / `Biometric` | Only `biometricConfirmed` field in `child_withdrawal_audits` schema (permitted: audit field, not biometric auth implementation) |
+| Term                          | Result                                                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `dashboard` / `Dashboard`     | No matches                                                                                                                      |
+| `budget` / `Budget`           | No matches                                                                                                                      |
+| `goal` / `Goal`               | No matches                                                                                                                      |
+| `certificate` / `Certificate` | No matches                                                                                                                      |
+| `zakat` / `Zakat`             | Only `includeInZakat` column in schema (permitted: data model field, not Zakat calculation)                                     |
+| `sadaqah` / `Sadaqah`         | No matches                                                                                                                      |
+| `firebase` / `Firebase`       | No matches                                                                                                                      |
+| `biometric` / `Biometric`     | Only `biometricConfirmed` field in `child_withdrawal_audits` schema (permitted: audit field, not biometric auth implementation) |
 
 **Verdict:** No forbidden implementations present. ✓
 
@@ -382,78 +400,78 @@ No widgets directly import Drift or call repository methods. ✓
 
 ## Validation Exit Codes
 
-| Command | Exit Code | Result |
-|---|---|---|
-| `dart format --output=none --set-exit-if-changed .` | 0 | No formatting issues |
-| `flutter analyze` | 0 | No issues found |
-| `flutter test` | 0 | 588/588 tests passed |
+| Command                                             | Exit Code | Result               |
+| --------------------------------------------------- | --------- | -------------------- |
+| `dart format --output=none --set-exit-if-changed .` | 0         | No formatting issues |
+| `flutter analyze`                                   | 0         | No issues found      |
+| `flutter test`                                      | 0         | 588/588 tests passed |
 
 ---
 
 ## Full Test Traceability Table
 
-| Behavior | Test File | Test Name | Classification |
-|---|---|---|---|
-| Account idempotency – same key same payload | `account_creation_idempotency_db_test.dart` | same key, same payload → AppOk | Database-tested |
-| Account idempotency – conflict | `account_creation_idempotency_db_test.dart` | same key, different name → conflict | Database-tested |
-| Account idempotency – cross-household | `account_creation_idempotency_db_test.dart` | same key, different household → both succeed | Database-tested |
-| Household initialization – idempotent retry | `initialize_household_use_case_test.dart` | second call same names → AppOk | Fake-tested |
-| Household initialization – conflicting retry | `initialize_household_use_case_test.dart` | second call different names → conflict | Fake-tested |
-| Second primary user blocked | `household_cardinality_db_test.dart` | one_primary_user_per_household trigger | Database-tested |
-| Archive primary user blocked | `household_use_cases_test.dart` | archive primary user → AppValidationFailure | Fake-tested |
-| Account type immutable after creation | `classification_immutability_db_test.dart` | type immutable trigger | Database-tested |
-| Currency immutable after creation | `classification_immutability_db_test.dart` | currency immutable trigger | Database-tested |
-| isProtected immutable after ledger history | `classification_immutability_db_test.dart` | isProtected immutable | Database-tested |
-| Archived account hidden by default | `archive_rules_db_test.dart` | archived hidden in findByHousehold | Database-tested |
-| Archive with balance rejected | `archive_rules_db_test.dart` | non-zero balance → AppValidationFailure | Database-tested |
-| Reversal on archived account permitted | `archive_rules_db_test.dart` | reversal of income on archived → created | Database-tested |
-| Income on archived rejected | `archive_rules_db_test.dart` | income to archived → ArchivedAccountError | Database-tested |
-| Expense on archived rejected | `archive_rules_db_test.dart` | expense to archived → ArchivedAccountError | Database-tested |
-| operation_contexts atomic with income | `operation_context_db_test.dart` | test 1 | Database-tested |
-| operation_contexts atomic with expense | `operation_context_db_test.dart` | test 2 | Database-tested |
-| operation_contexts atomic with transfer | `operation_context_db_test.dart` | test 3 | Database-tested |
-| operation_contexts UPDATE rejected | `operation_context_db_test.dart` | test 4 | Database-tested |
-| operation_contexts DELETE rejected | `operation_context_db_test.dart` | test 5 | Database-tested |
-| operation_contexts FK for non-existent op | `operation_context_db_test.dart` | test 6 | Database-tested |
-| operation_contexts duplicate PK rejected | `operation_context_db_test.dart` | test 8 | Database-tested |
-| v5 schema has operation_contexts table | `operation_context_migration_db_test.dart` | test 1 | Database-tested |
-| v5 migration triggers exist | `operation_context_migration_db_test.dart` | test 3 | Database-tested |
-| Data preserved through v5 migration | `operation_context_migration_db_test.dart` | test 4 | Database-tested |
-| Income creates op + entry + context | `income_persistence_db_test.dart` | test 1 | Database-tested |
-| Income amount 0 rejected | `income_persistence_db_test.dart` | test 2 | Database-tested |
-| Income archived destination rejected | `income_persistence_db_test.dart` | test 4 | Database-tested |
-| Income cross-household rejected | `income_persistence_db_test.dart` | test 5 | Database-tested |
-| Income idempotent retry | `income_persistence_db_test.dart` | test 6 | Database-tested |
-| Income conflicting idem key | `income_persistence_db_test.dart` | test 7 | Database-tested |
-| Income excluded from transfer totals | `income_persistence_db_test.dart` | test 8 | Database-tested |
-| Expense creates op + entry + context | `expense_persistence_db_test.dart` | test 1 | Database-tested |
-| Expense amount 0 rejected | `expense_persistence_db_test.dart` | test 2 | Database-tested |
-| Expense archived account rejected | `expense_persistence_db_test.dart` | test 3 | Database-tested |
-| Expense insufficient funds rejected | `expense_persistence_db_test.dart` | test 4 | Database-tested |
-| Expense protected requires audit | `expense_persistence_db_test.dart` | test 7 | Database-tested |
-| Expense audit atomic with operation | `expense_persistence_db_test.dart` | test 8 | Database-tested |
-| Expense concurrent overspending blocked | `expense_persistence_db_test.dart` | test 9 | Database-tested |
-| Expense is_recurring stored | `expense_persistence_db_test.dart` | test 6 | Database-tested |
-| Transfer neutral (debit + credit) | `transfer_persistence_db_test.dart` | test 1 | Database-tested |
-| Transfer same account rejected | `transfer_persistence_db_test.dart` | test 2 | Database-tested |
-| Transfer currency mismatch rejected | `transfer_persistence_db_test.dart` | test 3 | Database-tested |
-| Transfer insufficient funds rejected | `transfer_persistence_db_test.dart` | test 4 | Database-tested |
-| Transfer archived source rejected | `transfer_persistence_db_test.dart` | test 5 | Database-tested |
-| Transfer archived destination rejected | `transfer_persistence_db_test.dart` | test 6 | Database-tested |
-| Transfer type ≠ income or expense | `transfer_persistence_db_test.dart` | test 7 | Database-tested |
-| Transfer concurrent overspending blocked | `transfer_persistence_db_test.dart` | test 10 | Database-tested |
-| Spouse-wallet 7-step scenario | `transfer_persistence_db_test.dart` | test 11 | Database-tested |
-| Protected withdrawal requires audit | `protected_account_db_test.dart` | expense without audit | Database-tested |
-| Protected reversal requires audit | `protected_account_db_test.dart` | reversal without audit | Database-tested |
-| Transaction date range filter | `transaction_history_db_test.dart` | date range restricts | Database-tested |
-| Transaction account filter | `transaction_history_db_test.dart` | account filter | Database-tested |
-| Transaction type filter | `transaction_history_db_test.dart` | type filter | Database-tested |
-| Transfer excluded from income totals | `transaction_history_db_test.dart` | transfer excluded | Database-tested |
-| Reversed flag visible | `transaction_history_db_test.dart` | reversed indicator visible | Database-tested |
-| Original + reversal both visible | `transaction_history_db_test.dart` | both visible | Database-tested |
-| Opening balance distinct from income | `transaction_history_db_test.dart` | opening balance distinct | Database-tested |
-| Deterministic ordering | `transaction_history_db_test.dart` | deterministic ordering | Database-tested |
-| UI widgets don't import Drift | grep result | no Drift in presentation/*.dart | Unverified (grep evidence) |
+| Behavior                                     | Test File                                   | Test Name                                    | Classification             |
+| -------------------------------------------- | ------------------------------------------- | -------------------------------------------- | -------------------------- |
+| Account idempotency – same key same payload  | `account_creation_idempotency_db_test.dart` | same key, same payload → AppOk               | Database-tested            |
+| Account idempotency – conflict               | `account_creation_idempotency_db_test.dart` | same key, different name → conflict          | Database-tested            |
+| Account idempotency – cross-household        | `account_creation_idempotency_db_test.dart` | same key, different household → both succeed | Database-tested            |
+| Household initialization – idempotent retry  | `initialize_household_use_case_test.dart`   | second call same names → AppOk               | Fake-tested                |
+| Household initialization – conflicting retry | `initialize_household_use_case_test.dart`   | second call different names → conflict       | Fake-tested                |
+| Second primary user blocked                  | `household_cardinality_db_test.dart`        | one_primary_user_per_household trigger       | Database-tested            |
+| Archive primary user blocked                 | `household_use_cases_test.dart`             | archive primary user → AppValidationFailure  | Fake-tested                |
+| Account type immutable after creation        | `classification_immutability_db_test.dart`  | type immutable trigger                       | Database-tested            |
+| Currency immutable after creation            | `classification_immutability_db_test.dart`  | currency immutable trigger                   | Database-tested            |
+| isProtected immutable after ledger history   | `classification_immutability_db_test.dart`  | isProtected immutable                        | Database-tested            |
+| Archived account hidden by default           | `archive_rules_db_test.dart`                | archived hidden in findByHousehold           | Database-tested            |
+| Archive with balance rejected                | `archive_rules_db_test.dart`                | non-zero balance → AppValidationFailure      | Database-tested            |
+| Reversal on archived account permitted       | `archive_rules_db_test.dart`                | reversal of income on archived → created     | Database-tested            |
+| Income on archived rejected                  | `archive_rules_db_test.dart`                | income to archived → ArchivedAccountError    | Database-tested            |
+| Expense on archived rejected                 | `archive_rules_db_test.dart`                | expense to archived → ArchivedAccountError   | Database-tested            |
+| operation_contexts atomic with income        | `operation_context_db_test.dart`            | test 1                                       | Database-tested            |
+| operation_contexts atomic with expense       | `operation_context_db_test.dart`            | test 2                                       | Database-tested            |
+| operation_contexts atomic with transfer      | `operation_context_db_test.dart`            | test 3                                       | Database-tested            |
+| operation_contexts UPDATE rejected           | `operation_context_db_test.dart`            | test 4                                       | Database-tested            |
+| operation_contexts DELETE rejected           | `operation_context_db_test.dart`            | test 5                                       | Database-tested            |
+| operation_contexts FK for non-existent op    | `operation_context_db_test.dart`            | test 6                                       | Database-tested            |
+| operation_contexts duplicate PK rejected     | `operation_context_db_test.dart`            | test 8                                       | Database-tested            |
+| v5 schema has operation_contexts table       | `operation_context_migration_db_test.dart`  | test 1                                       | Database-tested            |
+| v5 migration triggers exist                  | `operation_context_migration_db_test.dart`  | test 3                                       | Database-tested            |
+| Data preserved through v5 migration          | `operation_context_migration_db_test.dart`  | test 4                                       | Database-tested            |
+| Income creates op + entry + context          | `income_persistence_db_test.dart`           | test 1                                       | Database-tested            |
+| Income amount 0 rejected                     | `income_persistence_db_test.dart`           | test 2                                       | Database-tested            |
+| Income archived destination rejected         | `income_persistence_db_test.dart`           | test 4                                       | Database-tested            |
+| Income cross-household rejected              | `income_persistence_db_test.dart`           | test 5                                       | Database-tested            |
+| Income idempotent retry                      | `income_persistence_db_test.dart`           | test 6                                       | Database-tested            |
+| Income conflicting idem key                  | `income_persistence_db_test.dart`           | test 7                                       | Database-tested            |
+| Income excluded from transfer totals         | `income_persistence_db_test.dart`           | test 8                                       | Database-tested            |
+| Expense creates op + entry + context         | `expense_persistence_db_test.dart`          | test 1                                       | Database-tested            |
+| Expense amount 0 rejected                    | `expense_persistence_db_test.dart`          | test 2                                       | Database-tested            |
+| Expense archived account rejected            | `expense_persistence_db_test.dart`          | test 3                                       | Database-tested            |
+| Expense insufficient funds rejected          | `expense_persistence_db_test.dart`          | test 4                                       | Database-tested            |
+| Expense protected requires audit             | `expense_persistence_db_test.dart`          | test 7                                       | Database-tested            |
+| Expense audit atomic with operation          | `expense_persistence_db_test.dart`          | test 8                                       | Database-tested            |
+| Expense concurrent overspending blocked      | `expense_persistence_db_test.dart`          | test 9                                       | Database-tested            |
+| Expense is_recurring stored                  | `expense_persistence_db_test.dart`          | test 6                                       | Database-tested            |
+| Transfer neutral (debit + credit)            | `transfer_persistence_db_test.dart`         | test 1                                       | Database-tested            |
+| Transfer same account rejected               | `transfer_persistence_db_test.dart`         | test 2                                       | Database-tested            |
+| Transfer currency mismatch rejected          | `transfer_persistence_db_test.dart`         | test 3                                       | Database-tested            |
+| Transfer insufficient funds rejected         | `transfer_persistence_db_test.dart`         | test 4                                       | Database-tested            |
+| Transfer archived source rejected            | `transfer_persistence_db_test.dart`         | test 5                                       | Database-tested            |
+| Transfer archived destination rejected       | `transfer_persistence_db_test.dart`         | test 6                                       | Database-tested            |
+| Transfer type ≠ income or expense            | `transfer_persistence_db_test.dart`         | test 7                                       | Database-tested            |
+| Transfer concurrent overspending blocked     | `transfer_persistence_db_test.dart`         | test 10                                      | Database-tested            |
+| Spouse-wallet 7-step scenario                | `transfer_persistence_db_test.dart`         | test 11                                      | Database-tested            |
+| Protected withdrawal requires audit          | `protected_account_db_test.dart`            | expense without audit                        | Database-tested            |
+| Protected reversal requires audit            | `protected_account_db_test.dart`            | reversal without audit                       | Database-tested            |
+| Transaction date range filter                | `transaction_history_db_test.dart`          | date range restricts                         | Database-tested            |
+| Transaction account filter                   | `transaction_history_db_test.dart`          | account filter                               | Database-tested            |
+| Transaction type filter                      | `transaction_history_db_test.dart`          | type filter                                  | Database-tested            |
+| Transfer excluded from income totals         | `transaction_history_db_test.dart`          | transfer excluded                            | Database-tested            |
+| Reversed flag visible                        | `transaction_history_db_test.dart`          | reversed indicator visible                   | Database-tested            |
+| Original + reversal both visible             | `transaction_history_db_test.dart`          | both visible                                 | Database-tested            |
+| Opening balance distinct from income         | `transaction_history_db_test.dart`          | opening balance distinct                     | Database-tested            |
+| Deterministic ordering                       | `transaction_history_db_test.dart`          | deterministic ordering                       | Database-tested            |
+| UI widgets don't import Drift                | grep result                                 | no Drift in presentation/\*.dart             | Unverified (grep evidence) |
 
 ---
 
@@ -597,11 +615,11 @@ CREATE TABLE operation_contexts (
 
 ## Remaining Business / Financial / UX Risks
 
-| Risk | Severity | Mitigation |
-|---|---|---|
-| Android DB unencrypted at rest | High | Deferred to security-hardening phase |
-| `ArchivedAccountTransferError` dead code | Low | `_requireAccount` throws `ArchivedAccountError` first; rejection is correct, class is misleading. Cosmetic fix deferred. |
-| `ownerType` / `fundPurpose` updatable without ledger history check | Medium | V1 assumption: these fields are set once at creation. Enforce in a future phase. |
-| Automatic recurring-transaction generation | Deferred | `is_recurring=true` is stored as a marker only; scheduling is out of scope for Phase 3B. |
-| No cross-currency transfer support | Known limitation | V1 business rule: same-currency transfers only. |
-| Audit `warningShown=false` blocked by DB trigger | Low | `check_audit_warning_shown` trigger enforces `warning_shown = 1`. Tested indirectly in `append_only_db_test.dart`. |
+| Risk                                                               | Severity         | Mitigation                                                                                                               |
+| ------------------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Android DB unencrypted at rest                                     | High             | Deferred to security-hardening phase                                                                                     |
+| `ArchivedAccountTransferError` dead code                           | Low              | `_requireAccount` throws `ArchivedAccountError` first; rejection is correct, class is misleading. Cosmetic fix deferred. |
+| `ownerType` / `fundPurpose` updatable without ledger history check | Medium           | V1 assumption: these fields are set once at creation. Enforce in a future phase.                                         |
+| Automatic recurring-transaction generation                         | Deferred         | `is_recurring=true` is stored as a marker only; scheduling is out of scope for Phase 3B.                                 |
+| No cross-currency transfer support                                 | Known limitation | V1 business rule: same-currency transfers only.                                                                          |
+| Audit `warningShown=false` blocked by DB trigger                   | Low              | `check_audit_warning_shown` trigger enforces `warning_shown = 1`. Tested indirectly in `append_only_db_test.dart`.       |

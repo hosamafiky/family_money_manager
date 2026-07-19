@@ -98,12 +98,22 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             if (memberResult is! AppOk<List<HouseholdMember>>) {
               return Center(child: Text(l10n.errorGeneric));
             }
-            final accounts = accountResult.value.where((a) => !a.isArchived && a.type != FinancialAccountType.goalReserve).toList();
-            final members = memberResult.value.where((m) => m.isActive).toList();
+            final accounts = accountResult.value
+                .where(
+                  (a) =>
+                      !a.isArchived &&
+                      a.type != FinancialAccountType.goalReserve,
+                )
+                .toList();
+            final members = memberResult.value
+                .where((m) => m.isActive)
+                .toList();
 
             // Sync tracked account; clear preselected ID if account is now archived.
             if (_paymentAccountId != null) {
-              final found = accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
+              final found = accounts
+                  .where((a) => a.id == _paymentAccountId)
+                  .firstOrNull;
               if (found == null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
@@ -125,18 +135,31 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.account_balance_wallet_outlined, size: 48),
+                      const Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 48,
+                      ),
                       const SizedBox(height: 16),
-                      Text(l10n.accountsEmpty, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+                      Text(
+                        l10n.accountsEmpty,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       const SizedBox(height: 16),
-                      FilledButton.icon(onPressed: () => context.push('/accounts/new'), icon: const Icon(Icons.add), label: Text(l10n.accountsAddButton)),
+                      FilledButton.icon(
+                        onPressed: () => context.push('/accounts/new'),
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.accountsAddButton),
+                      ),
                     ],
                   ),
                 ),
               );
             }
 
-            final selectedAccount = _paymentAccount ?? accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
+            final selectedAccount =
+                _paymentAccount ??
+                accounts.where((a) => a.id == _paymentAccountId).firstOrNull;
 
             if (members.isEmpty) {
               return Center(
@@ -147,7 +170,11 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                     children: [
                       const Icon(Icons.group_outlined, size: 48),
                       const SizedBox(height: 16),
-                      Text(l10n.membersTitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+                      Text(
+                        l10n.membersTitle,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: () => context.push('/members'),
@@ -159,7 +186,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 ),
               );
             }
-            final isProtected = selectedAccount?.requiresWithdrawalAudit ?? false;
+            final isProtected =
+                selectedAccount?.requiresWithdrawalAudit ?? false;
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -204,12 +232,27 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _noteController,
-                  decoration: InputDecoration(labelText: l10n.fieldNote, border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                    labelText: l10n.fieldNote,
+                    border: const OutlineInputBorder(),
+                  ),
                   maxLines: 2,
                 ),
-                if (isProtected) ...[const SizedBox(height: 24), _buildProtectedSection(context, l10n)],
+                if (isProtected) ...[
+                  const SizedBox(height: 24),
+                  _buildProtectedSection(context, l10n),
+                ],
                 const SizedBox(height: 24),
-                FilledButton(onPressed: () => _goToReview(context, l10n, accounts, members, isProtected), child: Text(l10n.reviewTitle)),
+                FilledButton(
+                  onPressed: () => _goToReview(
+                    context,
+                    l10n,
+                    accounts,
+                    members,
+                    isProtected,
+                  ),
+                  child: Text(l10n.reviewTitle),
+                ),
               ],
             );
           },
@@ -218,12 +261,22 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     );
   }
 
-  Widget _buildAccountDropdown(BuildContext context, AppLocalizations l10n, List<FinancialAccount> accounts) {
+  Widget _buildAccountDropdown(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<FinancialAccount> accounts,
+  ) {
     return DropdownButtonFormField<String>(
       // ignore: deprecated_member_use
       value: _paymentAccountId,
-      decoration: InputDecoration(labelText: l10n.fieldPaymentAccount, border: const OutlineInputBorder(), errorText: _accountError),
-      items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
+      decoration: InputDecoration(
+        labelText: l10n.fieldPaymentAccount,
+        border: const OutlineInputBorder(),
+        errorText: _accountError,
+      ),
+      items: accounts
+          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+          .toList(),
       onChanged: (v) => setState(() {
         _paymentAccountId = v;
         _paymentAccount = accounts.where((a) => a.id == v).firstOrNull;
@@ -239,7 +292,11 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       controller: _amountController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-      decoration: InputDecoration(labelText: l10n.fieldAmount, border: const OutlineInputBorder(), errorText: _amountError),
+      decoration: InputDecoration(
+        labelText: l10n.fieldAmount,
+        border: const OutlineInputBorder(),
+        errorText: _amountError,
+      ),
       onChanged: (_) => setState(() => _amountError = null),
     );
   }
@@ -248,8 +305,17 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return DropdownButtonFormField<TransactionCategory>(
       // ignore: deprecated_member_use
       value: _category,
-      decoration: InputDecoration(labelText: l10n.fieldCategory, border: const OutlineInputBorder(), errorText: _categoryError),
-      items: TransactionCategory.expenseCategories.map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c)))).toList(),
+      decoration: InputDecoration(
+        labelText: l10n.fieldCategory,
+        border: const OutlineInputBorder(),
+        errorText: _categoryError,
+      ),
+      items: TransactionCategory.expenseCategories
+          .map(
+            (c) =>
+                DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
+          )
+          .toList(),
       onChanged: (v) => setState(() {
         _category = v;
         _categoryError = null;
@@ -269,8 +335,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return DropdownButtonFormField<String>(
       // ignore: deprecated_member_use
       value: value,
-      decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), errorText: error),
-      items: members.map((m) => DropdownMenuItem(value: m.id, child: Text(m.displayName))).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        errorText: error,
+      ),
+      items: members
+          .map((m) => DropdownMenuItem(value: m.id, child: Text(m.displayName)))
+          .toList(),
       onChanged: onChanged,
     );
   }
@@ -285,8 +357,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     return DropdownButtonFormField<ExpenseScope>(
       // ignore: deprecated_member_use
       value: _scope,
-      decoration: InputDecoration(labelText: l10n.fieldScope, border: const OutlineInputBorder()),
-      items: scopeOptions.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
+      decoration: InputDecoration(
+        labelText: l10n.fieldScope,
+        border: const OutlineInputBorder(),
+      ),
+      items: scopeOptions.entries
+          .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+          .toList(),
       onChanged: (v) => setState(() => _scope = v ?? ExpenseScope.personal),
     );
   }
@@ -296,7 +373,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(l10n.fieldRecurring),
-        Switch(value: _isRecurring, onChanged: (v) => setState(() => _isRecurring = v)),
+        Switch(
+          value: _isRecurring,
+          onChanged: (v) => setState(() => _isRecurring = v),
+        ),
       ],
     );
   }
@@ -313,10 +393,16 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         if (picked != null) setState(() => _effectiveDate = picked);
       },
       child: InputDecorator(
-        decoration: InputDecoration(labelText: l10n.fieldEffectiveDate, border: const OutlineInputBorder()),
+        decoration: InputDecoration(
+          labelText: l10n.fieldEffectiveDate,
+          border: const OutlineInputBorder(),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(_formatDate(_effectiveDate)), const Icon(Icons.calendar_today, size: 18)],
+          children: [
+            Text(_formatDate(_effectiveDate)),
+            const Icon(Icons.calendar_today, size: 18),
+          ],
         ),
       ),
     );
@@ -343,14 +429,26 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         const SizedBox(height: 12),
         TextFormField(
           controller: _reasonController,
-          decoration: InputDecoration(labelText: l10n.fieldWithdrawalReason, border: const OutlineInputBorder(), errorText: _reasonError),
+          decoration: InputDecoration(
+            labelText: l10n.fieldWithdrawalReason,
+            border: const OutlineInputBorder(),
+            errorText: _reasonError,
+          ),
           onChanged: (_) => setState(() => _reasonError = null),
         ),
         const SizedBox(height: 12),
         CheckboxListTile(
           value: _warningAcknowledged,
           title: Text(l10n.fieldAcknowledgeWarning),
-          subtitle: _ackError != null ? Text(_ackError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)) : null,
+          subtitle: _ackError != null
+              ? Text(
+                  _ackError!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
           onChanged: (v) => setState(() {
             _warningAcknowledged = v ?? false;
             _ackError = null;
@@ -359,7 +457,15 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         CheckboxListTile(
           value: _confirmed,
           title: Text(l10n.fieldConfirmWithdrawal),
-          subtitle: _confirmError != null ? Text(_confirmError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)) : null,
+          subtitle: _confirmError != null
+              ? Text(
+                  _confirmError!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
+                )
+              : null,
           onChanged: (v) => setState(() {
             _confirmed = v ?? false;
             _confirmError = null;
@@ -369,7 +475,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     );
   }
 
-  void _goToReview(BuildContext context, AppLocalizations l10n, List<FinancialAccount> accounts, List<HouseholdMember> members, bool isProtected) {
+  void _goToReview(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<FinancialAccount> accounts,
+    List<HouseholdMember> members,
+    bool isProtected,
+  ) {
     bool hasErrors = false;
 
     if (_paymentAccountId == null) {
@@ -405,7 +517,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         hasErrors = true;
       }
       if (!_confirmed) {
-        setState(() => _confirmError = l10n.errorWithdrawalConfirmationRequired);
+        setState(
+          () => _confirmError = l10n.errorWithdrawalConfirmationRequired,
+        );
         hasErrors = true;
       }
     }
@@ -452,7 +566,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       isRecurring: _isRecurring,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       childWithdrawalAudit: withdrawalAudit,
     );
 

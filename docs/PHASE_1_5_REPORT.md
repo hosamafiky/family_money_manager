@@ -32,7 +32,7 @@ The correct path to encrypted databases is:
 hooks:
   user_defines:
     sqlite3:
-      source: sqlite3mc   # SQLite3MultipleCiphers
+      source: sqlite3mc # SQLite3MultipleCiphers
 ```
 
 **Claim classification:** Documented only (conceptual correction to prior error).
@@ -41,30 +41,30 @@ hooks:
 
 ## 2. Exact Encryption Candidate
 
-| Item | Value |
-|---|---|
-| Encryption library | SQLite3MultipleCiphers (sqlite3mc) — **not** SQLCipher |
-| Selection mechanism | `hooks.user_defines.sqlite3.source: sqlite3mc` in `pubspec.yaml` |
-| ORM | Drift 2.34.2 via `NativeDatabase` |
-| sqlite3 package | 3.4.0 |
-| drift_flutter | 0.3.1 |
+| Item                   | Value                                                                |
+| ---------------------- | -------------------------------------------------------------------- |
+| Encryption library     | SQLite3MultipleCiphers (sqlite3mc) — **not** SQLCipher               |
+| Selection mechanism    | `hooks.user_defines.sqlite3.source: sqlite3mc` in `pubspec.yaml`     |
+| ORM                    | Drift 2.34.2 via `NativeDatabase`                                    |
+| sqlite3 package        | 3.4.0                                                                |
+| drift_flutter          | 0.3.1                                                                |
 | Transitive no-op stubs | `sqlcipher_flutter_libs 0.7.0+eol`, `sqlite3_flutter_libs 0.6.0+eol` |
 
 ---
 
 ## 3. Exact Versions
 
-| Package | Version |
-|---|---|
-| `drift` | 2.34.2 |
-| `drift_flutter` | 0.3.1 |
-| `sqlite3` | 3.4.0 |
-| `hooks` (transitive) | 2.0.2 |
-| `code_assets` (transitive) | 1.2.1 |
-| `go_router_builder` (production dev) | 4.3.1 |
-| `build_runner` (production dev) | 2.15.1 |
-| Flutter | 3.32.4 (pinned in CI) |
-| Dart | 3.12.2 |
+| Package                              | Version               |
+| ------------------------------------ | --------------------- |
+| `drift`                              | 2.34.2                |
+| `drift_flutter`                      | 0.3.1                 |
+| `sqlite3`                            | 3.4.0                 |
+| `hooks` (transitive)                 | 2.0.2                 |
+| `code_assets` (transitive)           | 1.2.1                 |
+| `go_router_builder` (production dev) | 4.3.1                 |
+| `build_runner` (production dev)      | 2.15.1                |
+| Flutter                              | 3.32.4 (pinned in CI) |
+| Dart                                 | 3.12.2                |
 
 ---
 
@@ -106,10 +106,10 @@ spike/enc_probe/          (DELETED before final commit)
 
 ### ProbeEntries table schema (non-financial)
 
-| Column | Type | Purpose |
-|---|---|---|
-| `probe_id` | INTEGER PK autoincrement | Row identity (no financial meaning) |
-| `probe_value` | TEXT (1–200 chars) | Opaque string written before encrypt, verified after reopen |
+| Column        | Type                     | Purpose                                                     |
+| ------------- | ------------------------ | ----------------------------------------------------------- |
+| `probe_id`    | INTEGER PK autoincrement | Row identity (no financial meaning)                         |
+| `probe_value` | TEXT (1–200 chars)       | Opaque string written before encrypt, verified after reopen |
 
 No financial columns. No money, accounts, balances, transactions, or user PII.
 
@@ -119,59 +119,59 @@ No financial columns. No money, accounts, balances, transactions, or user PII.
 
 ### Checks 6–13 — Definitions
 
-| # | Check |
-|---|---|
-| 6 | sqlite3mc cipher pragma present at runtime |
-| 7 | Database opens with correct key |
-| 8 | Database rejects incorrect key |
-| 9 | Probe value absent from raw file bytes |
-| 10 | Data persists across close/reopen |
-| 11 | Encryption init before Drift schema access |
-| 12 | No key emitted through logger |
-| 13 | Fail-closed when cipher absent |
+| #   | Check                                      |
+| --- | ------------------------------------------ |
+| 6   | sqlite3mc cipher pragma present at runtime |
+| 7   | Database opens with correct key            |
+| 8   | Database rejects incorrect key             |
+| 9   | Probe value absent from raw file bytes     |
+| 10  | Data persists across close/reopen          |
+| 11  | Encryption init before Drift schema access |
+| 12  | No key emitted through logger              |
+| 13  | Fail-closed when cipher absent             |
 
 ### macOS host (arm64) — `flutter test test/`
 
-| Check | Result | Classification |
-|---|---|---|
-| 6 | PASS | Host-runtime-tested |
-| 7 | PASS | Host-runtime-tested |
-| 8 | PASS | Host-runtime-tested |
-| 9 | PASS | Host-runtime-tested |
-| 10 | PASS | Host-runtime-tested |
-| 11 | PASS | Host-runtime-tested |
-| 12a | PASS (by design, no log sink in key path) | Host-runtime-tested |
-| 12b | PASS (ephemeral keys are unique) | Host-runtime-tested |
-| 13 | PASS (unit test: verifyEncryptionPresent([]) → StateError) | Host-runtime-tested |
+| Check | Result                                                     | Classification      |
+| ----- | ---------------------------------------------------------- | ------------------- |
+| 6     | PASS                                                       | Host-runtime-tested |
+| 7     | PASS                                                       | Host-runtime-tested |
+| 8     | PASS                                                       | Host-runtime-tested |
+| 9     | PASS                                                       | Host-runtime-tested |
+| 10    | PASS                                                       | Host-runtime-tested |
+| 11    | PASS                                                       | Host-runtime-tested |
+| 12a   | PASS (by design, no log sink in key path)                  | Host-runtime-tested |
+| 12b   | PASS (ephemeral keys are unique)                           | Host-runtime-tested |
+| 13    | PASS (unit test: verifyEncryptionPresent([]) → StateError) | Host-runtime-tested |
 
 Total: 11/11 tests passed. Exit code 0.
 
 ### iOS simulator — `flutter test integration_test/` — iPhone 17 Pro
 
-| Simulator | `94E682A6-E8DC-413C-8A97-BC53FBC4873D` |
-|---|---|
-| Name | iPhone 17 Pro |
-| Runtime | iOS 26.5 / com.apple.CoreSimulator.SimRuntime.iOS-26-5 |
-| Architecture | arm64 (Apple Silicon host) |
-| Run command | `flutter test integration_test/encryption_emulator_test.dart --device-id=94E682A6-...` |
+| Simulator    | `94E682A6-E8DC-413C-8A97-BC53FBC4873D`                                                 |
+| ------------ | -------------------------------------------------------------------------------------- |
+| Name         | iPhone 17 Pro                                                                          |
+| Runtime      | iOS 26.5 / com.apple.CoreSimulator.SimRuntime.iOS-26-5                                 |
+| Architecture | arm64 (Apple Silicon host)                                                             |
+| Run command  | `flutter test integration_test/encryption_emulator_test.dart --device-id=94E682A6-...` |
 
-| Check | Result | Classification |
-|---|---|---|
-| 6 | PASS | iOS-simulator-tested |
-| 7 | PASS | iOS-simulator-tested |
-| 8 | PASS | iOS-simulator-tested |
-| 9 | PASS | iOS-simulator-tested |
-| 10 | PASS | iOS-simulator-tested |
+| Check | Result | Classification       |
+| ----- | ------ | -------------------- |
+| 6     | PASS   | iOS-simulator-tested |
+| 7     | PASS   | iOS-simulator-tested |
+| 8     | PASS   | iOS-simulator-tested |
+| 9     | PASS   | iOS-simulator-tested |
+| 10    | PASS   | iOS-simulator-tested |
 
 Total: 5/5 integration tests passed. Exit code 0.
 
 ### Android emulator
 
-| Emulator | Medium_Phone_API_36.1 (Android 14 / API 34, arm64) |
-|---|---|
-| Status | Launched; went offline before integration tests ran (sandbox instability) |
-| Compilation | Verified: debug APK, release APK, App Bundle all exit 0 |
-| Runtime checks | **Unverified** |
+| Emulator       | Medium_Phone_API_36.1 (Android 14 / API 34, arm64)                        |
+| -------------- | ------------------------------------------------------------------------- |
+| Status         | Launched; went offline before integration tests ran (sandbox instability) |
+| Compilation    | Verified: debug APK, release APK, App Bundle all exit 0                   |
+| Runtime checks | **Unverified**                                                            |
 
 The iOS simulator evidence covers the same sqlite3mc library binary path (same
 host machine, same native assets build). Android emulator runtime is the remaining gap.
@@ -182,19 +182,20 @@ host machine, same native assets build). Android emulator runtime is the remaini
 
 ### Production project tests — `flutter test` — 91 tests, all pass
 
-| File | Tests | Classification |
-|---|---|---|
-| `test/unit/app/app_config_test.dart` | 10 | Host-runtime-tested |
-| `test/unit/core/error/app_error_test.dart` | 8 | Host-runtime-tested |
-| `test/unit/core/logging/redacted_logger_test.dart` | 26 | Host-runtime-tested |
-| `test/unit/core/navigation/app_route_test.dart` | 7 | Host-runtime-tested |
-| `test/widget/app/app_test.dart` | 5 | Widget-tested |
-| `test/widget/features/foundation_detail/foundation_detail_screen_test.dart` | 5 | Widget-tested |
-| `test/widget/features/smoke_screen/smoke_screen_test.dart` | 30 | Widget-tested |
+| File                                                                        | Tests | Classification      |
+| --------------------------------------------------------------------------- | ----- | ------------------- |
+| `test/unit/app/app_config_test.dart`                                        | 10    | Host-runtime-tested |
+| `test/unit/core/error/app_error_test.dart`                                  | 8     | Host-runtime-tested |
+| `test/unit/core/logging/redacted_logger_test.dart`                          | 26    | Host-runtime-tested |
+| `test/unit/core/navigation/app_route_test.dart`                             | 7     | Host-runtime-tested |
+| `test/widget/app/app_test.dart`                                             | 5     | Widget-tested       |
+| `test/widget/features/foundation_detail/foundation_detail_screen_test.dart` | 5     | Widget-tested       |
+| `test/widget/features/smoke_screen/smoke_screen_test.dart`                  | 30    | Widget-tested       |
 
 **Total: 91/91. Exit code 0.**
 
 ### Spike host tests — `flutter test test/` — 11 tests, all pass
+
 ### Spike iOS simulator integration tests — 5 tests, all pass
 
 ---
@@ -240,12 +241,12 @@ class FoundationDetailRouteData extends GoRouteData with $FoundationDetailRouteD
 
 **Parameter serialization evidence:**
 
-| Expression | Location | Classification |
-|---|---|---|
-| `const SmokeRouteData().location` | `'/'` | Unit-tested |
-| `FoundationDetailRouteData(probeId: 'abc123').location` | `'/detail/abc123'` | Unit-tested |
-| `FoundationDetailRouteData(probeId: 'hello world').location` | `'/detail/hello%20world'` | Unit-tested |
-| Round-trip: location → URI decode → probeId | matching | Unit-tested |
+| Expression                                                   | Location                  | Classification |
+| ------------------------------------------------------------ | ------------------------- | -------------- |
+| `const SmokeRouteData().location`                            | `'/'`                     | Unit-tested    |
+| `FoundationDetailRouteData(probeId: 'abc123').location`      | `'/detail/abc123'`        | Unit-tested    |
+| `FoundationDetailRouteData(probeId: 'hello world').location` | `'/detail/hello%20world'` | Unit-tested    |
+| Round-trip: location → URI decode → probeId                  | matching                  | Unit-tested    |
 
 **Deleted:** `lib/core/navigation/app_route.dart` (Phase 1 sealed-class approach)
 
@@ -273,44 +274,44 @@ Summary:
 
 ### Production project — new files
 
-| File | Purpose |
-|---|---|
-| `lib/core/navigation/routes.dart` | Typed GoRouteData route definitions |
-| `lib/core/navigation/routes.g.dart` | Generated by go_router_builder; route factories + typed extensions |
-| `lib/features/foundation_detail/foundation_detail_screen.dart` | Typed-parameter demo screen |
-| `test/unit/core/navigation/app_route_test.dart` | 7 typed-route unit tests |
-| `test/widget/features/foundation_detail/foundation_detail_screen_test.dart` | 5 typed-route widget tests |
-| `docs/DECISION_004_ASSESSMENT.md` | Full EOL-correction + spike evidence |
-| `docs/LOCAL_ENCRYPTION_KEY_MANAGEMENT.md` | Proposed key-management architecture |
-| `docs/PHASE_1_5_REPORT.md` | This report |
+| File                                                                        | Purpose                                                            |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `lib/core/navigation/routes.dart`                                           | Typed GoRouteData route definitions                                |
+| `lib/core/navigation/routes.g.dart`                                         | Generated by go_router_builder; route factories + typed extensions |
+| `lib/features/foundation_detail/foundation_detail_screen.dart`              | Typed-parameter demo screen                                        |
+| `test/unit/core/navigation/app_route_test.dart`                             | 7 typed-route unit tests                                           |
+| `test/widget/features/foundation_detail/foundation_detail_screen_test.dart` | 5 typed-route widget tests                                         |
+| `docs/DECISION_004_ASSESSMENT.md`                                           | Full EOL-correction + spike evidence                               |
+| `docs/LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`                                   | Proposed key-management architecture                               |
+| `docs/PHASE_1_5_REPORT.md`                                                  | This report                                                        |
 
 ### Production project — modified files
 
-| File | Change |
-|---|---|
-| `lib/app/app_router.dart` | Uses `$appRoutes` from generated routes; `AppErrorScreen` navigates via `SmokeRouteData` |
-| `lib/core/localization/l10n/app_en.arb` | Added `foundationDetailTitle`, `foundationDetailProbeLabel` |
-| `lib/core/localization/l10n/app_ar.arb` | Added Arabic translations for the same keys |
-| `pubspec.yaml` | Added `go_router_builder ^4.3.1`, `build_runner ^2.15.1` to dev_dependencies |
-| `docs/DECISIONS.md` | DECISION-004 corrected + recommended approach documented |
+| File                                    | Change                                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `lib/app/app_router.dart`               | Uses `$appRoutes` from generated routes; `AppErrorScreen` navigates via `SmokeRouteData` |
+| `lib/core/localization/l10n/app_en.arb` | Added `foundationDetailTitle`, `foundationDetailProbeLabel`                              |
+| `lib/core/localization/l10n/app_ar.arb` | Added Arabic translations for the same keys                                              |
+| `pubspec.yaml`                          | Added `go_router_builder ^4.3.1`, `build_runner ^2.15.1` to dev_dependencies             |
+| `docs/DECISIONS.md`                     | DECISION-004 corrected + recommended approach documented                                 |
 
 ### Production project — deleted files
 
-| File | Reason |
-|---|---|
-| `lib/core/navigation/app_route.dart` | Replaced by `routes.dart` (GoRouteData approach) |
+| File                                   | Reason                                                    |
+| -------------------------------------- | --------------------------------------------------------- |
+| `lib/core/navigation/app_route.dart`   | Replaced by `routes.dart` (GoRouteData approach)          |
 | `spike/db_options/` (entire directory) | Old Phase 1 spike deleted; replaced by `spike/enc_probe/` |
 
 ### Spike (deleted before final commit)
 
-| File | Purpose |
-|---|---|
-| `spike/enc_probe/pubspec.yaml` | drift + sqlite3mc hook config |
-| `spike/enc_probe/lib/probe_database.dart` | Probe table + `verifyEncryptionPresent()` |
-| `spike/enc_probe/lib/probe_database.g.dart` | Generated by drift_dev |
-| `spike/enc_probe/lib/main.dart` | Minimal shell for Flutter build targets |
-| `spike/enc_probe/test/encryption_host_test.dart` | 11 host checks |
-| `spike/enc_probe/integration_test/encryption_emulator_test.dart` | 5 device checks |
+| File                                                             | Purpose                                   |
+| ---------------------------------------------------------------- | ----------------------------------------- |
+| `spike/enc_probe/pubspec.yaml`                                   | drift + sqlite3mc hook config             |
+| `spike/enc_probe/lib/probe_database.dart`                        | Probe table + `verifyEncryptionPresent()` |
+| `spike/enc_probe/lib/probe_database.g.dart`                      | Generated by drift_dev                    |
+| `spike/enc_probe/lib/main.dart`                                  | Minimal shell for Flutter build targets   |
+| `spike/enc_probe/test/encryption_host_test.dart`                 | 11 host checks                            |
+| `spike/enc_probe/integration_test/encryption_emulator_test.dart` | 5 device checks                           |
 
 ---
 
@@ -345,24 +346,24 @@ and passed before the skip instruction was issued.
 
 ### Spike builds
 
-| Build | Exit |
-|---|---|
-| `flutter build apk --debug` (spike) | 0 |
-| `flutter build apk --release` (spike) | 0 |
-| `flutter build appbundle --release` (spike) | 0 |
-| `flutter build ios --debug --no-codesign` (spike) | 0 |
-| `flutter build ios --release --no-codesign` (spike) | 0 |
+| Build                                               | Exit |
+| --------------------------------------------------- | ---- |
+| `flutter build apk --debug` (spike)                 | 0    |
+| `flutter build apk --release` (spike)               | 0    |
+| `flutter build appbundle --release` (spike)         | 0    |
+| `flutter build ios --debug --no-codesign` (spike)   | 0    |
+| `flutter build ios --release --no-codesign` (spike) | 0    |
 
 ---
 
 ## 12. Android Emulator Evidence
 
-| Item | Value |
-|---|---|
-| Emulator | Medium_Phone_API_36.1 |
-| Target SDK | Android 14 / API 34 |
-| Architecture | android-arm64 |
-| APK compilation | exit 0 (debug, release, aab) |
+| Item                | Value                                                                          |
+| ------------------- | ------------------------------------------------------------------------------ |
+| Emulator            | Medium_Phone_API_36.1                                                          |
+| Target SDK          | Android 14 / API 34                                                            |
+| Architecture        | android-arm64                                                                  |
+| APK compilation     | exit 0 (debug, release, aab)                                                   |
 | Runtime checks 6–10 | **Unverified** — emulator went offline in sandbox before integration tests ran |
 
 The Android emulator build verification confirms the sqlite3mc native library
@@ -374,14 +375,14 @@ test results (same sqlite3mc C library, same NativeDatabase API).
 
 ## 13. iOS Simulator Evidence
 
-| Item | Value |
-|---|---|
-| Simulator | iPhone 17 Pro |
-| UDID | `94E682A6-E8DC-413C-8A97-BC53FBC4873D` |
-| Runtime | com.apple.CoreSimulator.SimRuntime.iOS-26-5 |
-| Architecture | arm64 |
+| Item           | Value                                             |
+| -------------- | ------------------------------------------------- |
+| Simulator      | iPhone 17 Pro                                     |
+| UDID           | `94E682A6-E8DC-413C-8A97-BC53FBC4873D`            |
+| Runtime        | com.apple.CoreSimulator.SimRuntime.iOS-26-5       |
+| Architecture   | arm64                                             |
 | Classification | iOS-simulator-tested (not physical-device-tested) |
-| Checks 6–10 | All PASS |
+| Checks 6–10    | All PASS                                          |
 
 ---
 
@@ -389,17 +390,17 @@ test results (same sqlite3mc C library, same NativeDatabase API).
 
 The production `lib/` tree contains no:
 
-| Item | Status |
-|---|---|
-| Financial domain code | None |
-| Financial tables | None |
-| Production database initialization | None |
-| Firebase dependency | None |
-| Authentication flow | None |
-| PIN or biometric implementation | None |
-| Backup implementation | None |
-| AI or voice implementation | None |
-| Spike imports | None — `spike/` is a separate project with no cross-import |
+| Item                               | Status                                                     |
+| ---------------------------------- | ---------------------------------------------------------- |
+| Financial domain code              | None                                                       |
+| Financial tables                   | None                                                       |
+| Production database initialization | None                                                       |
+| Firebase dependency                | None                                                       |
+| Authentication flow                | None                                                       |
+| PIN or biometric implementation    | None                                                       |
+| Backup implementation              | None                                                       |
+| AI or voice implementation         | None                                                       |
+| Spike imports                      | None — `spike/` is a separate project with no cross-import |
 
 ---
 
@@ -425,30 +426,30 @@ Status: clean — no modifications
 
 ## 16. Remaining Risks
 
-| Risk | Severity | Notes |
-|---|---|---|
-| Android emulator runtime not verified | Medium | iOS simulator evidence is strong; recommend re-running emulator test outside sandbox before Phase 2 |
-| Physical-device Keystore/Keychain behavior not tested | High | Deferred to key-management phase. Cannot be inferred from simulator results. |
-| sqlite3mc license compliance | Low | SQLite3MultipleCiphers has its own license (BSD-style + SQLite public domain). Legal review needed before release. |
-| Production `flutter build` not run this phase | Low | All prior phase builds passed. Spike builds for Android/iOS passed. Format + analyze + test confirm production code is clean. |
-| Key rotation procedure not implemented | N/A | Deferred. Documented in `LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`. |
-| Recovery passphrase / backup encryption | N/A | Deferred to backup phase. |
+| Risk                                                  | Severity | Notes                                                                                                                         |
+| ----------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Android emulator runtime not verified                 | Medium   | iOS simulator evidence is strong; recommend re-running emulator test outside sandbox before Phase 2                           |
+| Physical-device Keystore/Keychain behavior not tested | High     | Deferred to key-management phase. Cannot be inferred from simulator results.                                                  |
+| sqlite3mc license compliance                          | Low      | SQLite3MultipleCiphers has its own license (BSD-style + SQLite public domain). Legal review needed before release.            |
+| Production `flutter build` not run this phase         | Low      | All prior phase builds passed. Spike builds for Android/iOS passed. Format + analyze + test confirm production code is clean. |
+| Key rotation procedure not implemented                | N/A      | Deferred. Documented in `LOCAL_ENCRYPTION_KEY_MANAGEMENT.md`.                                                                 |
+| Recovery passphrase / backup encryption               | N/A      | Deferred to backup phase.                                                                                                     |
 
 ---
 
 ## 17. Claim Classification Summary
 
-| Claim | Classification |
-|---|---|
-| EOL package correction | Documented only |
-| sqlite3mc approach (conceptual) | Documented only |
-| sqlite3mc runtime on macOS host | Host-runtime-tested |
-| sqlite3mc runtime on iOS simulator | iOS-simulator-tested |
-| sqlite3mc Android APK compilation | Build-verified |
-| sqlite3mc Android emulator runtime | Unverified |
-| Physical Keystore / Keychain behavior | Unverified |
-| Typed GoRouteData routing (compile-time) | Unit-tested |
-| Typed GoRouteData routing (widget) | Widget-tested |
-| Key-management architecture | Documented only |
-| Backup encryption architecture | Documented only |
-| Production scope (no financial code) | Analyzed (flutter analyze exit 0) |
+| Claim                                    | Classification                    |
+| ---------------------------------------- | --------------------------------- |
+| EOL package correction                   | Documented only                   |
+| sqlite3mc approach (conceptual)          | Documented only                   |
+| sqlite3mc runtime on macOS host          | Host-runtime-tested               |
+| sqlite3mc runtime on iOS simulator       | iOS-simulator-tested              |
+| sqlite3mc Android APK compilation        | Build-verified                    |
+| sqlite3mc Android emulator runtime       | Unverified                        |
+| Physical Keystore / Keychain behavior    | Unverified                        |
+| Typed GoRouteData routing (compile-time) | Unit-tested                       |
+| Typed GoRouteData routing (widget)       | Widget-tested                     |
+| Key-management architecture              | Documented only                   |
+| Backup encryption architecture           | Documented only                   |
+| Production scope (no financial code)     | Analyzed (flutter analyze exit 0) |

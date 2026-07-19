@@ -11,7 +11,8 @@ import 'package:family_money_manager/features/transactions/domain/transaction_su
 ///
 /// Uses raw `customSelect` queries for cross-table joins (operations ⟕ operation_contexts).
 /// All queries are read-only.
-final class DriftTransactionQueryRepository implements TransactionQueryRepository {
+final class DriftTransactionQueryRepository
+    implements TransactionQueryRepository {
   const DriftTransactionQueryRepository(this._db);
 
   final AppDatabase _db;
@@ -19,11 +20,20 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
   // ── recentOperations ───────────────────────────────────────────────────────
 
   @override
-  Future<List<TransactionSummary>> recentOperations({required String householdId, TransactionFilter filter = const TransactionFilter()}) async {
+  Future<List<TransactionSummary>> recentOperations({
+    required String householdId,
+    TransactionFilter filter = const TransactionFilter(),
+  }) async {
     final whereClause = StringBuffer('o.household_id = ?');
     final args = <Object?>[householdId];
 
-    _applyFilterClauses(whereClause, args, filter, tablePrefix: 'o', contextPrefix: 'oc');
+    _applyFilterClauses(
+      whereClause,
+      args,
+      filter,
+      tablePrefix: 'o',
+      contextPrefix: 'oc',
+    );
 
     final sql =
         '''
@@ -46,7 +56,9 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       LIMIT ${filter.pageSize}
     ''';
 
-    final rows = await _db.customSelect(sql, variables: _toVariables(args)).get();
+    final rows = await _db
+        .customSelect(sql, variables: _toVariables(args))
+        .get();
     return rows.map(_rowToSummary).toList();
   }
 
@@ -58,10 +70,18 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     required String householdId,
     TransactionFilter filter = const TransactionFilter(),
   }) async {
-    final whereClause = StringBuffer('o.household_id = ? AND (o.source_account_id = ? OR o.destination_account_id = ?)');
+    final whereClause = StringBuffer(
+      'o.household_id = ? AND (o.source_account_id = ? OR o.destination_account_id = ?)',
+    );
     final args = <Object?>[householdId, accountId, accountId];
 
-    _applyFilterClauses(whereClause, args, filter, tablePrefix: 'o', contextPrefix: 'oc');
+    _applyFilterClauses(
+      whereClause,
+      args,
+      filter,
+      tablePrefix: 'o',
+      contextPrefix: 'oc',
+    );
 
     final sql =
         '''
@@ -84,14 +104,19 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       LIMIT ${filter.pageSize}
     ''';
 
-    final rows = await _db.customSelect(sql, variables: _toVariables(args)).get();
+    final rows = await _db
+        .customSelect(sql, variables: _toVariables(args))
+        .get();
     return rows.map(_rowToSummary).toList();
   }
 
   // ── operationDetail ────────────────────────────────────────────────────────
 
   @override
-  Future<TransactionSummary?> operationDetail({required String operationId, required String householdId}) async {
+  Future<TransactionSummary?> operationDetail({
+    required String operationId,
+    required String householdId,
+  }) async {
     const sql = '''
       SELECT
         o.id, o.household_id, o.type, o.effective_date, o.recorded_at,
@@ -111,7 +136,15 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       LIMIT 1
     ''';
 
-    final rows = await _db.customSelect(sql, variables: [Variable.withString(operationId), Variable.withString(householdId)]).get();
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(operationId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
 
     return rows.isEmpty ? null : _rowToSummary(rows.first);
   }
@@ -129,10 +162,15 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final accountRows = await _db
         .customSelect(
           'SELECT currency_code FROM financial_accounts WHERE id = ? AND household_id = ? LIMIT 1',
-          variables: [Variable.withString(spouseAccountId), Variable.withString(householdId)],
+          variables: [
+            Variable.withString(spouseAccountId),
+            Variable.withString(householdId),
+          ],
         )
         .get();
-    final currencyCode = accountRows.isEmpty ? 'EGP' : accountRows.first.read<String>('currency_code');
+    final currencyCode = accountRows.isEmpty
+        ? 'EGP'
+        : accountRows.first.read<String>('currency_code');
 
     const sql = '''
       SELECT
@@ -154,7 +192,12 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final rows = await _db
         .customSelect(
           sql,
-          variables: [Variable.withString(spouseAccountId), Variable.withString(householdId), Variable.withString(fromDate), Variable.withString(toDate)],
+          variables: [
+            Variable.withString(spouseAccountId),
+            Variable.withString(householdId),
+            Variable.withString(fromDate),
+            Variable.withString(toDate),
+          ],
         )
         .get();
 
@@ -174,7 +217,13 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
 
   // ── Private helpers ────────────────────────────────────────────────────────
 
-  void _applyFilterClauses(StringBuffer where, List<Object?> args, TransactionFilter filter, {required String tablePrefix, required String contextPrefix}) {
+  void _applyFilterClauses(
+    StringBuffer where,
+    List<Object?> args,
+    TransactionFilter filter, {
+    required String tablePrefix,
+    required String contextPrefix,
+  }) {
     if (filter.operationType != null) {
       where.write(' AND $tablePrefix.type = ?');
       args.add(filter.operationType!.code);
@@ -220,7 +269,9 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
     final effectiveScopeStr = ctxScopeStr ?? scopeStr;
 
     final tagsStr = row.readNullable<String>('tags');
-    final tags = tagsStr != null ? tagsStr.split(',').where((s) => s.isNotEmpty).toList() : <String>[];
+    final tags = tagsStr != null
+        ? tagsStr.split(',').where((s) => s.isNotEmpty).toList()
+        : <String>[];
 
     final op = Operation(
       id: row.read<String>('id'),
@@ -253,9 +304,15 @@ final class DriftTransactionQueryRepository implements TransactionQueryRepositor
       categoryCode: row.readNullable<String>('category_code'),
       spenderMemberId: row.readNullable<String>('spender_member_id'),
       beneficiaryMemberId: row.readNullable<String>('beneficiary_member_id'),
-      scope: effectiveScopeStr != null ? ExpenseScope.fromCode(effectiveScopeStr) : null,
-      isRecurring: (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 || row.read<bool>('is_recurring'),
-      note: row.readNullable<String>('ctx_note') ?? row.readNullable<String>('description'),
+      scope: effectiveScopeStr != null
+          ? ExpenseScope.fromCode(effectiveScopeStr)
+          : null,
+      isRecurring:
+          (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 ||
+          row.read<bool>('is_recurring'),
+      note:
+          row.readNullable<String>('ctx_note') ??
+          row.readNullable<String>('description'),
     );
   }
 }

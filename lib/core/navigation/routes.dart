@@ -20,14 +20,17 @@ part 'routes.g.dart';
 /// as their screens are implemented.
 @TypedGoRoute<SmokeRouteData>(
   path: '/',
-  routes: <TypedRoute<GoRouteData>>[TypedGoRoute<FoundationDetailRouteData>(path: 'detail/:probeId')],
+  routes: <TypedRoute<GoRouteData>>[
+    TypedGoRoute<FoundationDetailRouteData>(path: 'detail/:probeId'),
+  ],
 )
 @immutable
 class SmokeRouteData extends GoRouteData with $SmokeRouteData {
   const SmokeRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SmokeScreen();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SmokeScreen();
 }
 
 /// Typed route with a single non-financial string parameter.
@@ -36,11 +39,13 @@ class SmokeRouteData extends GoRouteData with $SmokeRouteData {
 /// compile-time typed. The [probeId] parameter is a simple alphanumeric
 /// identifier with no financial meaning.
 @immutable
-class FoundationDetailRouteData extends GoRouteData with $FoundationDetailRouteData {
+class FoundationDetailRouteData extends GoRouteData
+    with $FoundationDetailRouteData {
   const FoundationDetailRouteData({required this.probeId});
 
   final String probeId;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => FoundationDetailScreen(probeId: probeId);
+  Widget build(BuildContext context, GoRouterState state) =>
+      FoundationDetailScreen(probeId: probeId);
 }

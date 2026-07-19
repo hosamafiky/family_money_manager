@@ -23,7 +23,11 @@ class BudgetDetailScreen extends ConsumerWidget {
         title: progressAsync.when(
           loading: () => Text(l10n.budgetsTitle),
           error: (_, _) => Text(l10n.budgetsTitle),
-          data: (result) => Text(result is AppOk<BudgetProgress> ? result.value.budget.name : l10n.budgetsTitle),
+          data: (result) => Text(
+            result is AppOk<BudgetProgress>
+                ? result.value.budget.name
+                : l10n.budgetsTitle,
+          ),
         ),
         actions: [
           progressAsync.whenData((result) {
@@ -35,8 +39,13 @@ class BudgetDetailScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextButton(
-                      onPressed: () => _toggleArchive(context, ref, progress.budget),
-                      child: Text(progress.budget.isArchived ? l10n.budgetRestore : l10n.budgetArchive),
+                      onPressed: () =>
+                          _toggleArchive(context, ref, progress.budget),
+                      child: Text(
+                        progress.budget.isArchived
+                            ? l10n.budgetRestore
+                            : l10n.budgetArchive,
+                      ),
                     ),
                   ],
                 );
@@ -58,7 +67,11 @@ class BudgetDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _toggleArchive(BuildContext context, WidgetRef ref, BudgetPlan plan) async {
+  Future<void> _toggleArchive(
+    BuildContext context,
+    WidgetRef ref,
+    BudgetPlan plan,
+  ) async {
     if (plan.isArchived) {
       await ref.read(restoreBudgetUseCaseProvider).execute(plan.id);
     } else {
@@ -79,11 +92,25 @@ class _DetailBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plan = progress.budget;
     final currency = progress.currencyCode;
-    final consumed = ReportAmountText.formatMinorUnits(progress.consumedMinorUnits, currency);
-    final limit = ReportAmountText.formatMinorUnits(progress.limitMinorUnits, currency);
-    final remaining = ReportAmountText.formatMinorUnits(progress.remainingMinorUnits.abs(), currency);
+    final consumed = ReportAmountText.formatMinorUnits(
+      progress.consumedMinorUnits,
+      currency,
+    );
+    final limit = ReportAmountText.formatMinorUnits(
+      progress.limitMinorUnits,
+      currency,
+    );
+    final remaining = ReportAmountText.formatMinorUnits(
+      progress.remainingMinorUnits.abs(),
+      currency,
+    );
     final pct = progress.percentageUsed;
-    final fraction = progress.limitMinorUnits > 0 ? (progress.consumedMinorUnits / progress.limitMinorUnits).clamp(0.0, 1.0) : 0.0;
+    final fraction = progress.limitMinorUnits > 0
+        ? (progress.consumedMinorUnits / progress.limitMinorUnits).clamp(
+            0.0,
+            1.0,
+          )
+        : 0.0;
 
     final isMonthly = plan.periodDefinition is MonthlyBudgetPeriod;
 
@@ -97,15 +124,24 @@ class _DetailBody extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(plan.name, style: Theme.of(context).textTheme.headlineSmall),
+                Text(
+                  plan.name,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 const SizedBox(height: 4),
-                Text('${progress.periodStart} → ${progress.periodEnd}', style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  '${progress.periodStart} → ${progress.periodEnd}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const SizedBox(height: 16),
 
                 // Progress bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(value: fraction, minHeight: 12),
+                  child: LinearProgressIndicator(
+                    value: fraction,
+                    minHeight: 12,
+                  ),
                 ),
                 const SizedBox(height: 12),
 
@@ -116,21 +152,41 @@ class _DetailBody extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.budgetConsumed, style: Theme.of(context).textTheme.labelSmall),
-                        Text(consumed, style: Theme.of(context).textTheme.titleMedium),
+                        Text(
+                          l10n.budgetConsumed,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Text(
+                          consumed,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(l10n.budgetRemaining, style: Theme.of(context).textTheme.labelSmall),
-                        Text(remaining, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: progress.remainingMinorUnits < 0 ? Colors.red : null)),
+                        Text(
+                          l10n.budgetRemaining,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Text(
+                          remaining,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: progress.remainingMinorUnits < 0
+                                    ? Colors.red
+                                    : null,
+                              ),
+                        ),
                       ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text('Limit: $limit / ${pct != null ? l10n.budgetPercent(pct) : '-'}', style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  'Limit: $limit / ${pct != null ? l10n.budgetPercent(pct) : '-'}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const SizedBox(height: 8),
 
                 // Status badge
@@ -150,7 +206,12 @@ class _DetailBody extends ConsumerWidget {
               children: [
                 const Icon(Icons.info_outline, size: 16),
                 const SizedBox(width: 8),
-                Expanded(child: Text(l10n.budgetReversalNote, style: Theme.of(context).textTheme.bodySmall)),
+                Expanded(
+                  child: Text(
+                    l10n.budgetReversalNote,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ],
             ),
           ),
@@ -161,15 +222,35 @@ class _DetailBody extends ConsumerWidget {
         Text('Transactions', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         if (progress.drillDown.isEmpty)
-          Text(l10n.budgetNoMatching, style: Theme.of(context).textTheme.bodyMedium)
+          Text(
+            l10n.budgetNoMatching,
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
         else
           ...progress.drillDown.map(
             (row) => ListTile(
               dense: true,
-              leading: Icon(row.isReversed ? Icons.undo_outlined : Icons.receipt_long_outlined, size: 20),
-              title: Text(ReportAmountText.formatMinorUnits(row.amountMinorUnits, row.currencyCode)),
-              subtitle: Text('${row.effectiveDate}${row.categoryCode != null ? ' · ${row.categoryCode}' : ''}'),
-              trailing: row.note != null ? Tooltip(message: row.note!, child: const Icon(Icons.notes, size: 16)) : null,
+              leading: Icon(
+                row.isReversed
+                    ? Icons.undo_outlined
+                    : Icons.receipt_long_outlined,
+                size: 20,
+              ),
+              title: Text(
+                ReportAmountText.formatMinorUnits(
+                  row.amountMinorUnits,
+                  row.currencyCode,
+                ),
+              ),
+              subtitle: Text(
+                '${row.effectiveDate}${row.categoryCode != null ? ' · ${row.categoryCode}' : ''}',
+              ),
+              trailing: row.note != null
+                  ? Tooltip(
+                      message: row.note!,
+                      child: const Icon(Icons.notes, size: 16),
+                    )
+                  : null,
               onTap: () => context.push('/transactions/${row.operationId}'),
             ),
           ),
@@ -177,7 +258,10 @@ class _DetailBody extends ConsumerWidget {
         // Previous periods section (monthly only)
         if (isMonthly) ...[
           const SizedBox(height: 24),
-          Text(l10n.budgetPreviousPeriods, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.budgetPreviousPeriods,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           _PreviousPeriodsSection(budgetId: plan.id, l10n: l10n),
         ],
@@ -206,12 +290,21 @@ class _PreviousPeriodsSection extends ConsumerWidget {
         // Skip the first entry as it is the current month (already shown above)
         final previousMonths = history.skip(1).take(5).toList();
         if (previousMonths.isEmpty) {
-          return Text(l10n.budgetNoMatching, style: Theme.of(context).textTheme.bodySmall);
+          return Text(
+            l10n.budgetNoMatching,
+            style: Theme.of(context).textTheme.bodySmall,
+          );
         }
         return Column(
           children: previousMonths.map((p) {
-            final consumed = ReportAmountText.formatMinorUnits(p.consumedMinorUnits, p.currencyCode);
-            final limit = ReportAmountText.formatMinorUnits(p.limitMinorUnits, p.currencyCode);
+            final consumed = ReportAmountText.formatMinorUnits(
+              p.consumedMinorUnits,
+              p.currencyCode,
+            );
+            final limit = ReportAmountText.formatMinorUnits(
+              p.limitMinorUnits,
+              p.currencyCode,
+            );
             return ListTile(
               dense: true,
               title: Text(p.periodStart),
@@ -234,11 +327,26 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, icon) = switch (state) {
-      BudgetUsageState.noSpending => (l10n.budgetStatusNoSpending, Icons.circle_outlined),
-      BudgetUsageState.onTrack => (l10n.budgetStatusOnTrack, Icons.check_circle_outline),
-      BudgetUsageState.nearLimit => (l10n.budgetStatusNearLimit, Icons.warning_amber_outlined),
-      BudgetUsageState.limitReached => (l10n.budgetStatusLimitReached, Icons.block_outlined),
-      BudgetUsageState.overBudget => (l10n.budgetStatusOverBudget, Icons.error_outline),
+      BudgetUsageState.noSpending => (
+        l10n.budgetStatusNoSpending,
+        Icons.circle_outlined,
+      ),
+      BudgetUsageState.onTrack => (
+        l10n.budgetStatusOnTrack,
+        Icons.check_circle_outline,
+      ),
+      BudgetUsageState.nearLimit => (
+        l10n.budgetStatusNearLimit,
+        Icons.warning_amber_outlined,
+      ),
+      BudgetUsageState.limitReached => (
+        l10n.budgetStatusLimitReached,
+        Icons.block_outlined,
+      ),
+      BudgetUsageState.overBudget => (
+        l10n.budgetStatusOverBudget,
+        Icons.error_outline,
+      ),
     };
     return Row(
       mainAxisSize: MainAxisSize.min,

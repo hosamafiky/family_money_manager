@@ -24,7 +24,10 @@ class FoundationDetailScreen extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.space24),
-          child: Text(l10n.foundationDetailProbeLabel(probeId), style: Theme.of(context).textTheme.bodyLarge),
+          child: Text(
+            l10n.foundationDetailProbeLabel(probeId),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
       ),
     );

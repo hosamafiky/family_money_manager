@@ -8,7 +8,10 @@ abstract interface class BudgetRepository {
   Future<AppResult<void>> archiveBudget(String budgetId);
   Future<AppResult<void>> restoreBudget(String budgetId);
   Future<AppResult<BudgetPlan?>> findBudgetById(String budgetId);
-  Future<AppResult<List<BudgetPlan>>> listBudgets({required String householdId, bool includeArchived = false});
+  Future<AppResult<List<BudgetPlan>>> listBudgets({
+    required String householdId,
+    bool includeArchived = false,
+  });
 
   /// Returns matching expense rows for budget consumption calculation.
   ///

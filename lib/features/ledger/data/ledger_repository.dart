@@ -36,7 +36,10 @@ abstract interface class LedgerRepository {
   /// Throws [MissingProtectedWithdrawalAuditError] if the source account is
   /// protected and [auditParams] is null.
   /// Throws [InsufficientFundsError] if the account would go negative.
-  Future<IdempotentOperationResult> recordExpense(RecordExpenseParams params, {ChildWithdrawalAuditParams? auditParams});
+  Future<IdempotentOperationResult> recordExpense(
+    RecordExpenseParams params, {
+    ChildWithdrawalAuditParams? auditParams,
+  });
 
   /// Executes a transfer between two accounts.
   ///
@@ -51,19 +54,27 @@ abstract interface class LedgerRepository {
   /// Throws [SameAccountTransferError], [CurrencyMismatchTransferError],
   /// [ArchivedAccountTransferError], [InsufficientFundsError],
   /// [MissingProtectedWithdrawalAuditError].
-  Future<IdempotentOperationResult> executeTransfer(ExecuteTransferParams params, {ChildWithdrawalAuditParams? auditParams});
+  Future<IdempotentOperationResult> executeTransfer(
+    ExecuteTransferParams params, {
+    ChildWithdrawalAuditParams? auditParams,
+  });
 
   /// Records an opening balance for an account.
   ///
   /// Throws [DuplicateOpeningBalanceError] if the account already has an
   /// opening balance entry (FINANCIAL_MODEL §5.1).
-  Future<IdempotentOperationResult> recordOpeningBalance(RecordOpeningBalanceParams params);
+  Future<IdempotentOperationResult> recordOpeningBalance(
+    RecordOpeningBalanceParams params,
+  );
 
   /// Records a balance adjustment (credit or debit).
   ///
   /// If the target account is protected, [auditParams] is required for debit
   /// adjustments. Credit adjustments (positive amount) do not require audit.
-  Future<IdempotentOperationResult> recordAdjustment(RecordAdjustmentParams params, {ChildWithdrawalAuditParams? auditParams});
+  Future<IdempotentOperationResult> recordAdjustment(
+    RecordAdjustmentParams params, {
+    ChildWithdrawalAuditParams? auditParams,
+  });
 
   /// Reverses a prior operation by appending opposite ledger entries.
   ///
@@ -75,7 +86,10 @@ abstract interface class LedgerRepository {
   ///
   /// Throws [OperationNotFoundError], [DuplicateReversalError],
   /// [MissingProtectedWithdrawalAuditError].
-  Future<IdempotentOperationResult> reverseOperation(ReverseOperationParams params, {ChildWithdrawalAuditParams? auditParams});
+  Future<IdempotentOperationResult> reverseOperation(
+    ReverseOperationParams params, {
+    ChildWithdrawalAuditParams? auditParams,
+  });
 
   // ── Read operations ──────────────────────────────────────────────────────────
 
@@ -89,14 +103,24 @@ abstract interface class LedgerRepository {
   ///
   /// This ordering ensures that a query executed twice returns exactly the same
   /// sequence regardless of insertion order or row storage position.
-  Future<List<LedgerEntry>> entriesForAccount({required String accountId, required String householdId});
+  Future<List<LedgerEntry>> entriesForAccount({
+    required String accountId,
+    required String householdId,
+  });
 
   /// Returns the [Operation] with [operationId], or null when not found.
-  Future<Operation?> findOperation({required String operationId, required String householdId});
+  Future<Operation?> findOperation({
+    required String operationId,
+    required String householdId,
+  });
 
   /// Returns all operations for [householdId] between [fromDate] and [toDate]
   /// inclusive ("YYYY-MM-DD" format), ordered by effective date ascending.
-  Future<List<Operation>> operationsInRange({required String householdId, required String fromDate, required String toDate});
+  Future<List<Operation>> operationsInRange({
+    required String householdId,
+    required String fromDate,
+    required String toDate,
+  });
 }
 
 // ── Result type ───────────────────────────────────────────────────────────────
@@ -124,11 +148,15 @@ final class SameAccountTransferError extends Error {
   SameAccountTransferError(this.accountId);
   final String accountId;
   @override
-  String toString() => 'SameAccountTransferError: source and destination are the same account ($accountId)';
+  String toString() =>
+      'SameAccountTransferError: source and destination are the same account ($accountId)';
 }
 
 final class CurrencyMismatchTransferError extends Error {
-  CurrencyMismatchTransferError({required this.sourceCode, required this.destinationCode});
+  CurrencyMismatchTransferError({
+    required this.sourceCode,
+    required this.destinationCode,
+  });
   final String sourceCode;
   final String destinationCode;
   @override
@@ -147,7 +175,8 @@ final class ArchivedAccountTransferError extends ArchivedAccountError {
   ArchivedAccountTransferError(super.accountId, this.role);
   final String role;
   @override
-  String toString() => 'ArchivedAccountTransferError: $role account $accountId is archived';
+  String toString() =>
+      'ArchivedAccountTransferError: $role account $accountId is archived';
 }
 
 final class DuplicateOpeningBalanceError extends Error {
@@ -164,7 +193,8 @@ final class OperationNotFoundError extends Error {
   OperationNotFoundError(this.operationId);
   final String operationId;
   @override
-  String toString() => 'OperationNotFoundError: operation $operationId not found';
+  String toString() =>
+      'OperationNotFoundError: operation $operationId not found';
 }
 
 final class DuplicateReversalError extends Error {

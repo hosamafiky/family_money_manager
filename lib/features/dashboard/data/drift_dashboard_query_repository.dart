@@ -21,7 +21,9 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   // ── spendableBalances ──────────────────────────────────────────────────────
 
   @override
-  Future<List<CurrencyAmountSummary>> spendableBalances({required String householdId}) async {
+  Future<List<CurrencyAmountSummary>> spendableBalances({
+    required String householdId,
+  }) async {
     const sql = '''
       SELECT
         le.currency_code,
@@ -40,15 +42,32 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       GROUP BY le.currency_code
     ''';
 
-    final rows = await _db.customSelect(sql, variables: [Variable.withString(householdId), Variable.withString(householdId)]).get();
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
 
-    return rows.map((r) => CurrencyAmountSummary(currencyCode: r.read<String>('currency_code'), totalMinorUnits: r.read<int>('total'))).toList();
+    return rows
+        .map(
+          (r) => CurrencyAmountSummary(
+            currencyCode: r.read<String>('currency_code'),
+            totalMinorUnits: r.read<int>('total'),
+          ),
+        )
+        .toList();
   }
 
   // ── protectedBalances ──────────────────────────────────────────────────────
 
   @override
-  Future<List<CurrencyAmountSummary>> protectedBalances({required String householdId}) async {
+  Future<List<CurrencyAmountSummary>> protectedBalances({
+    required String householdId,
+  }) async {
     const sql = '''
       SELECT
         le.currency_code,
@@ -66,9 +85,24 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       GROUP BY le.currency_code
     ''';
 
-    final rows = await _db.customSelect(sql, variables: [Variable.withString(householdId), Variable.withString(householdId)]).get();
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
 
-    return rows.map((r) => CurrencyAmountSummary(currencyCode: r.read<String>('currency_code'), totalMinorUnits: r.read<int>('total'))).toList();
+    return rows
+        .map(
+          (r) => CurrencyAmountSummary(
+            currencyCode: r.read<String>('currency_code'),
+            totalMinorUnits: r.read<int>('total'),
+          ),
+        )
+        .toList();
   }
 
   // ── periodFlow ─────────────────────────────────────────────────────────────
@@ -79,7 +113,10 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   // queried separately and linked back to the original operation type.
 
   @override
-  Future<List<PeriodFlowSummary>> periodFlow({required String householdId, required DashboardPeriod period}) async {
+  Future<List<PeriodFlowSummary>> periodFlow({
+    required String householdId,
+    required DashboardPeriod period,
+  }) async {
     // Query 1: gross income and expense (no is_reversed filter).
     const grossSql = '''
       SELECT
@@ -112,11 +149,25 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
     ''';
 
     final grossRows = await _db
-        .customSelect(grossSql, variables: [Variable.withString(householdId), Variable.withString(period.startDate), Variable.withString(period.endDate)])
+        .customSelect(
+          grossSql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(period.startDate),
+            Variable.withString(period.endDate),
+          ],
+        )
         .get();
 
     final reversalRows = await _db
-        .customSelect(reversalSql, variables: [Variable.withString(householdId), Variable.withString(period.startDate), Variable.withString(period.endDate)])
+        .customSelect(
+          reversalSql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(period.startDate),
+            Variable.withString(period.endDate),
+          ],
+        )
         .get();
 
     final map = <String, _FlowAccumulator>{};
@@ -161,7 +212,10 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   // ── expensesByScope ────────────────────────────────────────────────────────
 
   @override
-  Future<List<ExpenseScopeSummary>> expensesByScope({required String householdId, required DashboardPeriod period}) async {
+  Future<List<ExpenseScopeSummary>> expensesByScope({
+    required String householdId,
+    required DashboardPeriod period,
+  }) async {
     // Prefer expense_scope from operation_contexts; fall back to operations.scope
     const sql = '''
       SELECT
@@ -180,7 +234,14 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
     ''';
 
     final rows = await _db
-        .customSelect(sql, variables: [Variable.withString(householdId), Variable.withString(period.startDate), Variable.withString(period.endDate)])
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(period.startDate),
+            Variable.withString(period.endDate),
+          ],
+        )
         .get();
 
     final result = <ExpenseScopeSummary>[];
@@ -189,7 +250,13 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       if (scopeStr == null) continue;
       try {
         final scope = ExpenseScope.fromCode(scopeStr);
-        result.add(ExpenseScopeSummary(scope: scope, currencyCode: row.read<String>('currency_code'), totalMinorUnits: row.read<int>('total')));
+        result.add(
+          ExpenseScopeSummary(
+            scope: scope,
+            currencyCode: row.read<String>('currency_code'),
+            totalMinorUnits: row.read<int>('total'),
+          ),
+        );
       } on ArgumentError {
         // Unknown scope code — skip rather than crash
         continue;
@@ -201,7 +268,10 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   // ── spouseWalletSummaries ──────────────────────────────────────────────────
 
   @override
-  Future<List<SpouseWalletDashboardSummary>> spouseWalletSummaries({required String householdId, required DashboardPeriod period}) async {
+  Future<List<SpouseWalletDashboardSummary>> spouseWalletSummaries({
+    required String householdId,
+    required DashboardPeriod period,
+  }) async {
     // Find all spouseCashWallet accounts in the household (including archived,
     // to surface all wallets that were ever active; filter is_archived in UI).
     final accountRows = await _db
@@ -260,7 +330,15 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
           )
           .get();
 
-      final balanceRows = await _db.customSelect(balanceSql, variables: [Variable.withString(accountId), Variable.withString(householdId)]).get();
+      final balanceRows = await _db
+          .customSelect(
+            balanceSql,
+            variables: [
+              Variable.withString(accountId),
+              Variable.withString(householdId),
+            ],
+          )
+          .get();
 
       final periodRow = periodRows.isEmpty ? null : periodRows.first;
       final funded = periodRow?.read<int?>('funded') ?? 0;
@@ -288,7 +366,10 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   // ── recentActivity ─────────────────────────────────────────────────────────
 
   @override
-  Future<List<TransactionSummary>> recentActivity({required String householdId, int limit = 20}) async {
+  Future<List<TransactionSummary>> recentActivity({
+    required String householdId,
+    int limit = 20,
+  }) async {
     final sql =
         '''
       SELECT
@@ -310,7 +391,9 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       LIMIT $limit
     ''';
 
-    final rows = await _db.customSelect(sql, variables: [Variable.withString(householdId)]).get();
+    final rows = await _db
+        .customSelect(sql, variables: [Variable.withString(householdId)])
+        .get();
 
     return rows.map(_rowToTransactionSummary).toList();
   }
@@ -323,7 +406,9 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
     final effectiveScopeStr = ctxScopeStr ?? scopeStr;
 
     final tagsStr = row.readNullable<String>('tags');
-    final tags = tagsStr != null ? tagsStr.split(',').where((s) => s.isNotEmpty).toList() : <String>[];
+    final tags = tagsStr != null
+        ? tagsStr.split(',').where((s) => s.isNotEmpty).toList()
+        : <String>[];
 
     final op = Operation(
       id: row.read<String>('id'),
@@ -356,9 +441,15 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       categoryCode: row.readNullable<String>('category_code'),
       spenderMemberId: row.readNullable<String>('spender_member_id'),
       beneficiaryMemberId: row.readNullable<String>('beneficiary_member_id'),
-      scope: effectiveScopeStr != null ? ExpenseScope.fromCode(effectiveScopeStr) : null,
-      isRecurring: (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 || row.read<bool>('is_recurring'),
-      note: row.readNullable<String>('ctx_note') ?? row.readNullable<String>('description'),
+      scope: effectiveScopeStr != null
+          ? ExpenseScope.fromCode(effectiveScopeStr)
+          : null,
+      isRecurring:
+          (row.readNullable<int>('ctx_is_recurring') ?? 0) == 1 ||
+          row.read<bool>('is_recurring'),
+      note:
+          row.readNullable<String>('ctx_note') ??
+          row.readNullable<String>('description'),
     );
   }
 }

@@ -70,7 +70,9 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     final targetAmount = (double.tryParse(targetText) ?? 0) * 100;
     if (targetAmount <= 0) {
       final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGoalTargetZero)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.errorGoalTargetZero)));
       return;
     }
 
@@ -80,8 +82,11 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     final useCase = ref.read(createGoalUseCaseProvider);
 
     int initialFunding = 0;
-    if (_selectedSourceAccountId != null && _initialAmountController.text.isNotEmpty) {
-      final fundingText = _initialAmountController.text.replaceAll(',', '').trim();
+    if (_selectedSourceAccountId != null &&
+        _initialAmountController.text.isNotEmpty) {
+      final fundingText = _initialAmountController.text
+          .replaceAll(',', '')
+          .trim();
       initialFunding = ((double.tryParse(fundingText) ?? 0) * 100).round();
     }
 
@@ -107,11 +112,17 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       ref.invalidate(goalsProvider);
       context.pop();
     } else if (result is AppValidationFailure<SavingsGoal>) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.messageKey)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.messageKey)));
     } else if (result is AppInsufficientFunds) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorGoalInsufficientReserve)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGoalInsufficientReserve)),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('An error occurred. Please try again.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred. Please try again.')),
+      );
     }
   }
 
@@ -126,7 +137,14 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         if (result is! AppOk<List<FinancialAccount>>) {
           return <FinancialAccount>[];
         }
-        return result.value.where((a) => !a.isArchived && !a.isProtected && a.type != FinancialAccountType.goalReserve).toList();
+        return result.value
+            .where(
+              (a) =>
+                  !a.isArchived &&
+                  !a.isProtected &&
+                  a.type != FinancialAccountType.goalReserve,
+            )
+            .toList();
       },
       loading: () => <FinancialAccount>[],
       error: (_, _) => <FinancialAccount>[],
@@ -142,18 +160,29 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             // Goal name
             TextFormField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: l10n.goalName, border: const OutlineInputBorder()),
+              decoration: InputDecoration(
+                labelText: l10n.goalName,
+                border: const OutlineInputBorder(),
+              ),
               textInputAction: TextInputAction.next,
-              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.errorGoalNameEmpty : null,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.errorGoalNameEmpty
+                  : null,
             ),
             const SizedBox(height: 16),
 
             // Purpose
             DropdownButtonFormField<GoalPurpose>(
               initialValue: _selectedPurpose,
-              decoration: InputDecoration(labelText: l10n.goalPurpose, border: const OutlineInputBorder()),
+              decoration: InputDecoration(
+                labelText: l10n.goalPurpose,
+                border: const OutlineInputBorder(),
+              ),
               items: GoalPurpose.values.map((p) {
-                return DropdownMenuItem(value: p, child: Text(_purposeLabel(p, l10n)));
+                return DropdownMenuItem(
+                  value: p,
+                  child: Text(_purposeLabel(p, l10n)),
+                );
               }).toList(),
               onChanged: (v) => setState(() => _selectedPurpose = v!),
             ),
@@ -162,22 +191,39 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             // Currency
             DropdownButtonFormField<String>(
               initialValue: _selectedCurrency,
-              decoration: InputDecoration(labelText: l10n.goalCurrency, border: const OutlineInputBorder()),
-              items: Currency.values.map((c) => DropdownMenuItem(value: c.code, child: Text(c.code))).toList(),
+              decoration: InputDecoration(
+                labelText: l10n.goalCurrency,
+                border: const OutlineInputBorder(),
+              ),
+              items: Currency.values
+                  .map(
+                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
+                  )
+                  .toList(),
               onChanged: (v) => setState(() {
                 _selectedCurrency = v!;
                 _selectedSourceAccountId = null;
               }),
-              validator: (v) => (v == null || v.isEmpty) ? l10n.errorGoalCurrencyRequired : null,
+              validator: (v) => (v == null || v.isEmpty)
+                  ? l10n.errorGoalCurrencyRequired
+                  : null,
             ),
             const SizedBox(height: 16),
 
             // Target amount
             TextFormField(
               controller: _targetController,
-              decoration: InputDecoration(labelText: l10n.goalTarget, border: const OutlineInputBorder(), prefixText: '$_selectedCurrency '),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+              decoration: InputDecoration(
+                labelText: l10n.goalTarget,
+                border: const OutlineInputBorder(),
+                prefixText: '$_selectedCurrency ',
+              ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+              ],
               validator: (v) {
                 if (v == null || v.isEmpty) return l10n.errorGoalTargetZero;
                 final parsed = double.tryParse(v.replaceAll(',', ''));
@@ -193,22 +239,40 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.goalTargetDate),
-              subtitle: _targetDate == null ? null : Text(_targetDate!.toIso8601String().substring(0, 10)),
+              subtitle: _targetDate == null
+                  ? null
+                  : Text(_targetDate!.toIso8601String().substring(0, 10)),
               trailing: const Icon(Icons.calendar_today_outlined),
               onTap: _pickTargetDate,
             ),
             const Divider(),
 
             // Optional initial funding section
-            Text(l10n.goalInitialFunding, style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.goalInitialFunding,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
 
             DropdownButtonFormField<String>(
               initialValue: _selectedSourceAccountId,
-              decoration: InputDecoration(labelText: l10n.goalInitialFundingSource, border: const OutlineInputBorder()),
+              decoration: InputDecoration(
+                labelText: l10n.goalInitialFundingSource,
+                border: const OutlineInputBorder(),
+              ),
               items: [
-                const DropdownMenuItem<String>(value: null, child: Text('— None —')),
-                ...fundingSources.where((a) => a.currencyCode == _selectedCurrency).map((a) => DropdownMenuItem<String>(value: a.id, child: Text(a.name))),
+                const DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('— None —'),
+                ),
+                ...fundingSources
+                    .where((a) => a.currencyCode == _selectedCurrency)
+                    .map(
+                      (a) => DropdownMenuItem<String>(
+                        value: a.id,
+                        child: Text(a.name),
+                      ),
+                    ),
               ],
               onChanged: (v) => setState(() => _selectedSourceAccountId = v),
             ),
@@ -216,9 +280,17 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _initialAmountController,
-                decoration: InputDecoration(labelText: l10n.goalInitialFundingAmount, border: const OutlineInputBorder(), prefixText: '$_selectedCurrency '),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.,]'))],
+                decoration: InputDecoration(
+                  labelText: l10n.goalInitialFundingAmount,
+                  border: const OutlineInputBorder(),
+                  prefixText: '$_selectedCurrency ',
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+                ],
               ),
             ],
             const SizedBox(height: 24),
@@ -241,7 +313,13 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
 
             ElevatedButton(
               onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(l10n.goalNew),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.goalNew),
             ),
           ],
         ),
@@ -249,13 +327,14 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
     );
   }
 
-  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) => switch (purpose) {
-    GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
-    GoalPurpose.homePurchase => l10n.purposeHomePurchase,
-    GoalPurpose.education => l10n.purposeEducation,
-    GoalPurpose.travel => l10n.purposeTravel,
-    GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
-    GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
-    GoalPurpose.other => l10n.purposeOther,
-  };
+  String _purposeLabel(GoalPurpose purpose, AppLocalizations l10n) =>
+      switch (purpose) {
+        GoalPurpose.emergencyFund => l10n.purposeEmergencyFund,
+        GoalPurpose.homePurchase => l10n.purposeHomePurchase,
+        GoalPurpose.education => l10n.purposeEducation,
+        GoalPurpose.travel => l10n.purposeTravel,
+        GoalPurpose.majorPurchase => l10n.purposeMajorPurchase,
+        GoalPurpose.familyEvent => l10n.purposeFamilyEvent,
+        GoalPurpose.other => l10n.purposeOther,
+      };
 }

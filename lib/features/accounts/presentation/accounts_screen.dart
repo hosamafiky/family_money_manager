@@ -20,6 +20,10 @@ const _householdId = 'household-v1';
 /// - Account cards with balance, and badge (spendable/protected)
 /// - Empty state and error state
 /// - FAB to create a new account
+///
+/// NOTE (Phase 5B.2): Goal reserve accounts (type = goalReserve) are
+/// intentionally hidden from this list. Their balance is visible in the
+/// goal detail screen via [GoalProgress.reserveBalanceMinorUnits].
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
 
@@ -57,23 +61,33 @@ class _AccountsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    if (accounts.isEmpty) {
+    // Goal reserve accounts are managed through the goal detail screen and
+    // must not appear in the ordinary accounts list.
+    final visible = accounts
+        .where((a) => a.type != FinancialAccountType.goalReserve)
+        .toList();
+
+    if (visible.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
-          child: Text(l10n.accountsEmpty, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+          child: Text(
+            l10n.accountsEmpty,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
       );
     }
 
-    final spendable = accounts.where((a) => a.isSpendable && !a.isProtected);
-    final protected = accounts.where((a) => a.isProtected);
-    final other = accounts.where((a) => !a.isSpendable && !a.isProtected);
+    final spendable = visible.where((a) => a.isSpendable && !a.isProtected);
+    final protected = visible.where((a) => a.isProtected);
+    final other = visible.where((a) => !a.isSpendable && !a.isProtected);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       children: [
-        _TotalsRow(accounts: accounts),
+        _TotalsRow(accounts: visible),
         const SizedBox(height: 16),
         if (spendable.isNotEmpty) ...[
           _SectionHeader(label: l10n.accountsTotalSpendable),
@@ -111,9 +125,15 @@ class _TotalsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.accountsTotalSpendable, style: Theme.of(context).textTheme.labelMedium),
+                  Text(
+                    l10n.accountsTotalSpendable,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text('$spendableCount', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$spendableCount',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
@@ -121,9 +141,15 @@ class _TotalsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.accountsTotalProtected, style: Theme.of(context).textTheme.labelMedium),
+                  Text(
+                    l10n.accountsTotalProtected,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                   const SizedBox(height: 4),
-                  Text('$protectedCount', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$protectedCount',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
@@ -143,7 +169,12 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 4),
-      child: Text(label, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.primary)),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
     );
   }
 }
@@ -156,7 +187,9 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final balanceAsync = ref.watch(accountBalanceProvider((account.id, account.householdId)));
+    final balanceAsync = ref.watch(
+      accountBalanceProvider((account.id, account.householdId)),
+    );
     final typeLabel = _typeLabel(account.type, l10n);
 
     return Card(
@@ -170,12 +203,21 @@ class _AccountCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             balanceAsync.when(
-              loading: () => const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+              loading: () => const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
               error: (_, _) => const SizedBox.shrink(),
               data: (minorUnits) {
                 final currency = Currency.fromCode(account.currencyCode);
-                final formatted = MoneyInputFormatter.format(Money(minorUnits: minorUnits, currency: currency));
-                return Text('$formatted ${account.currencyCode}', style: Theme.of(context).textTheme.titleSmall);
+                final formatted = MoneyInputFormatter.format(
+                  Money(minorUnits: minorUnits, currency: currency),
+                );
+                return Text(
+                  '$formatted ${account.currencyCode}',
+                  style: Theme.of(context).textTheme.titleSmall,
+                );
               },
             ),
             const SizedBox(height: 2),
@@ -189,16 +231,17 @@ class _AccountCard extends ConsumerWidget {
     );
   }
 
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) => switch (type) {
-    FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-    FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-    FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-    FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-    FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-    FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-    FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-    _ => type.code,
-  };
+  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
+      switch (type) {
+        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
+        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
+        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
+        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
+        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
+        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
+        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
+        _ => type.code,
+      };
 }
 
 class _Badge extends StatelessWidget {
@@ -216,7 +259,10 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color.withAlpha(100)),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color)),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+      ),
     );
   }
 }
@@ -231,7 +277,11 @@ class _ErrorBody extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
       ),
     );
   }

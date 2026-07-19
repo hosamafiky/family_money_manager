@@ -7,10 +7,10 @@
 
 ## 1. Language Strategy
 
-| Language | Code | Script | Direction | Status |
-|---|---|---|---|---|
-| Arabic (Egypt) | ar | Arabic | RTL | Primary |
-| English | en | Latin | LTR | Secondary |
+| Language       | Code | Script | Direction | Status    |
+| -------------- | ---- | ------ | --------- | --------- |
+| Arabic (Egypt) | ar   | Arabic | RTL       | Primary   |
+| English        | en   | Latin  | LTR       | Secondary |
 
 Arabic is the primary language. The default locale is `ar_EG`. All strings must be translated into Arabic first, then English. No feature may launch with untranslated strings.
 
@@ -25,6 +25,7 @@ Arabic is the primary language. The default locale is `ar_EG`. All strings must 
 - `intl` package handles pluralization, date formatting, number formatting, and currency formatting.
 
 **Never:**
+
 - Use hardcoded strings in widget code.
 - Use translated text as database identifiers.
 - Use English-only keys as user-visible text.
@@ -92,10 +93,12 @@ error_invalidTransfer
 ## 4. RTL Support
 
 Flutter's `Directionality` widget is set automatically based on locale:
+
 - Arabic locale → `TextDirection.rtl`
 - English locale → `TextDirection.ltr`
 
 Guidelines:
+
 - Use `EdgeInsetsDirectional` instead of `EdgeInsets` for padding.
 - Use `AlignmentDirectional` instead of `Alignment`.
 - Use `Padding(padding: EdgeInsetsDirectional.only(start: 16))` — not `only(left: 16)`.
@@ -110,11 +113,11 @@ Guidelines:
 
 Currency: Egyptian Pound (EGP)
 
-| Amount | Arabic display | English display |
-|---|---|---|
-| 100 minor units | ١.٠٠ ج.م | EGP 1.00 |
-| 150000 minor units | ١٬٥٠٠.٠٠ ج.م | EGP 1,500.00 |
-| -50000 minor units | -٥٠٠.٠٠ ج.م | -EGP 500.00 |
+| Amount             | Arabic display | English display |
+| ------------------ | -------------- | --------------- |
+| 100 minor units    | ١.٠٠ ج.م       | EGP 1.00        |
+| 150000 minor units | ١٬٥٠٠.٠٠ ج.م   | EGP 1,500.00    |
+| -50000 minor units | -٥٠٠.٠٠ ج.م    | -EGP 500.00     |
 
 Formatter implementation:
 
@@ -145,6 +148,7 @@ class MoneyFormatter {
 ```
 
 **Rules:**
+
 - Always format with 2 decimal places.
 - Use locale-appropriate thousands separator.
 - Use locale-appropriate decimal separator.
@@ -156,13 +160,13 @@ class MoneyFormatter {
 
 ## 6. Date Formatting
 
-| Context | Arabic format | English format |
-|---|---|---|
-| Transaction date | ١٥ يوليو ٢٠٢٦ | July 15, 2026 |
-| Short date | ١٥/٠٧/٢٠٢٦ | 07/15/2026 |
-| Month + year | يوليو ٢٠٢٦ | July 2026 |
-| Relative (recent) | منذ ٣ أيام | 3 days ago |
-| Certificate maturity | ١ يناير ٢٠٢٧ | Jan 1, 2027 |
+| Context              | Arabic format | English format |
+| -------------------- | ------------- | -------------- |
+| Transaction date     | ١٥ يوليو ٢٠٢٦ | July 15, 2026  |
+| Short date           | ١٥/٠٧/٢٠٢٦    | 07/15/2026     |
+| Month + year         | يوليو ٢٠٢٦    | July 2026      |
+| Relative (recent)    | منذ ٣ أيام    | 3 days ago     |
+| Certificate maturity | ١ يناير ٢٠٢٧  | Jan 1, 2027    |
 
 Date utilities:
 
@@ -188,61 +192,61 @@ Dates are stored internally as `String` in `YYYY-MM-DD` format (Gregorian). Disp
 
 ## 7. Number Formatting
 
-| Number type | Arabic | English |
-|---|---|---|
-| Integer count | ١٢٣ | 123 |
-| Percentage | ٨٠٪ | 80% |
-| Gold weight | ١٠.٥٠٠ جرام | 10.500 g |
-| Interest rate | ٢٢٪ سنوياً | 22% annually |
+| Number type   | Arabic      | English      |
+| ------------- | ----------- | ------------ |
+| Integer count | ١٢٣         | 123          |
+| Percentage    | ٨٠٪         | 80%          |
+| Gold weight   | ١٠.٥٠٠ جرام | 10.500 g     |
+| Interest rate | ٢٢٪ سنوياً  | 22% annually |
 
 ---
 
 ## 8. Arabic Financial Terminology
 
-| English term | Arabic term |
-|---|---|
-| Income | دخل |
-| Expense | مصروف |
-| Transfer | تحويل |
-| Balance | رصيد |
-| Available | متاح |
-| Savings | مدخرات |
-| Certificate | شهادة |
-| Interest | عائد |
-| Net worth | صافي الثروة |
-| Assets | أصول |
-| Liabilities | التزامات |
-| Budget | ميزانية |
-| Goal | هدف |
-| Household | الأسرة |
-| Personal | شخصي |
-| Spouse | الزوجة / الزوج |
-| Child | الطفل |
-| Protected | محمي |
-| Gold | ذهب |
-| Karat | قيراط |
-| Gram | جرام |
-| Bank account | حساب بنكي |
-| Cash wallet | محفظة نقدية |
-| Home savings | مدخرات البيت |
-| Salary | مرتب |
-| Transfer to spouse | تحويل للزوجة |
-| Return (money) | إرجاع |
-| Spender | المنفق |
-| Beneficiary | المستفيد |
-| Zakat | زكاة |
-| Nisab | نصاب |
-| Hawl | حول |
-| Sadaqah | صدقة |
-| Opening balance | رصيد أولي |
-| Adjustment | تسوية |
-| Reversal | إلغاء/عكس |
-| Maturity | استحقاق |
-| Principal | رأس المال |
-| Realized gain | ربح محقق |
-| Unrealized gain | ربح غير محقق |
-| Liability | دَيْن / التزام |
-| Repayment | سداد |
+| English term       | Arabic term    |
+| ------------------ | -------------- |
+| Income             | دخل            |
+| Expense            | مصروف          |
+| Transfer           | تحويل          |
+| Balance            | رصيد           |
+| Available          | متاح           |
+| Savings            | مدخرات         |
+| Certificate        | شهادة          |
+| Interest           | عائد           |
+| Net worth          | صافي الثروة    |
+| Assets             | أصول           |
+| Liabilities        | التزامات       |
+| Budget             | ميزانية        |
+| Goal               | هدف            |
+| Household          | الأسرة         |
+| Personal           | شخصي           |
+| Spouse             | الزوجة / الزوج |
+| Child              | الطفل          |
+| Protected          | محمي           |
+| Gold               | ذهب            |
+| Karat              | قيراط          |
+| Gram               | جرام           |
+| Bank account       | حساب بنكي      |
+| Cash wallet        | محفظة نقدية    |
+| Home savings       | مدخرات البيت   |
+| Salary             | مرتب           |
+| Transfer to spouse | تحويل للزوجة   |
+| Return (money)     | إرجاع          |
+| Spender            | المنفق         |
+| Beneficiary        | المستفيد       |
+| Zakat              | زكاة           |
+| Nisab              | نصاب           |
+| Hawl               | حول            |
+| Sadaqah            | صدقة           |
+| Opening balance    | رصيد أولي      |
+| Adjustment         | تسوية          |
+| Reversal           | إلغاء/عكس      |
+| Maturity           | استحقاق        |
+| Principal          | رأس المال      |
+| Realized gain      | ربح محقق       |
+| Unrealized gain    | ربح غير محقق   |
+| Liability          | دَيْن / التزام |
+| Repayment          | سداد           |
 
 ---
 
@@ -258,6 +262,7 @@ Dates are stored internally as `String` in `YYYY-MM-DD` format (Gregorian). Disp
 The child's name is interpolated: replace "يوسف" with the household's configured child name.
 
 ARB entry:
+
 ```json
 "child_protected_withdrawWarning": "⚠️ هذا المال محجوز لـ{childName}.\n\nسيُسجَّل سحب هذا المبلغ بشكل دائم ولا يمكن حذفه.\nيرجى ذكر سبب السحب قبل المتابعة.",
 "@child_protected_withdrawWarning": {
@@ -272,6 +277,7 @@ ARB entry:
 ```
 
 English equivalent:
+
 ```json
 "child_protected_withdrawWarning": "⚠️ This money is reserved for {childName}.\n\nWithdrawing it will be permanently recorded and cannot be undone.\nPlease provide a reason before continuing.",
 ```
@@ -285,6 +291,7 @@ English equivalent:
 ```
 
 ARB entry:
+
 ```json
 "zakat_disclaimer": "تنبيه: هذه الأداة للمساعدة في حساب الزكاة فقط، ولا تُغني عن استشارة عالم متخصص في فقه الزكاة لحالتك الخاصة.",
 "@zakat_disclaimer": {
@@ -301,6 +308,7 @@ Arabic pluralization rules are complex (6 plural forms: zero, one, two, few, man
 Use `intl`'s `Intl.plural()` for all quantity strings.
 
 Example:
+
 ```json
 "transactionCount": "{count, plural, zero{لا توجد معاملات} one{معاملة واحدة} two{معاملتان} few{{count} معاملات} many{{count} معاملة} other{{count} معاملة}}",
 ```
@@ -324,6 +332,7 @@ Semantics(
 ```
 
 Charts must include a text summary accessible to screen readers:
+
 ```dart
 Semantics(
   label: context.l10n.netWorthChart_semantics(

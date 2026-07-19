@@ -1,14 +1,35 @@
-/// Phase 5B / 5B.1 schema integrity and immutability tests.
+/// Phase 5B / 5B.1 / 5B.2 schema integrity and immutability tests.
 ///
 /// Complements goal_repository_test.dart with raw-SQL-level verifications that
 /// cannot be satisfied at the repository API boundary alone.
 ///
 /// Tests (Section 4 – Schema and migration):
-///  SM-1.  Fresh schema v9 creates all goal tables
+///  SM-1.  Fresh schema v10 creates all goal tables
 ///  SM-2.  Unique index idx_goals_reserve_account is enforced
 ///  SM-3.  Unique index idx_goals_idempotency is enforced
 ///  SM-4.  Budget table from v7 is present (migration baseline)
-///  SM-5.  All prior-phase tables present in schema v9
+///  SM-5.  All prior-phase tables present in schema v10
+///
+/// Phase 5B.2 – Section 4 (Reserve classification DB enforcement):
+///  RC-1.  UPDATE is_spendable on goalReserve → rejected by trigger
+///  RC-2.  UPDATE is_protected on goalReserve → rejected by trigger
+///  RC-3.  UPDATE is_spendable on non-reserve account → allowed
+///  RC-4.  UPDATE is_protected on non-reserve account → allowed
+///  RC-5.  UPDATE type from goalReserve to other → rejected (SR-1 re-verify)
+///  RC-6.  INSERT second goal with same reserve_account_id → rejected
+///  RC-7.  Reserve account created with is_spendable=false enforced
+///  RC-8.  Reserve account created with is_protected=false enforced
+///  RC-9.  Trigger no-op when is_spendable unchanged on goalReserve → allowed
+///
+/// Phase 5B.2 – Section 5 (Goal movement validation):
+///  MV-1.  Valid funding movement → succeeds
+///  MV-2.  Funding movement with wrong destination account → rejected
+///  MV-3.  Funding movement referencing non-transfer operation → rejected
+///  MV-4.  Release movement with wrong source account → rejected
+///  MV-5.  Release movement without reason → rejected
+///  MV-6.  Duplicate movement for same operation → rejected
+///  MV-7.  UPDATE on goal_movements → rejected by trigger
+///  MV-8.  DELETE on goal_movements → rejected by trigger
 ///
 /// Tests (Section 5 – One-to-one goal reserve integrity):
 ///  SR-1.  Reserve account type cannot be changed (trigger)
@@ -1016,6 +1037,507 @@ void main() {
         reason: 'Reserve balance must equal the funded amount',
       );
       expect(progress.isTargetReached, isTrue);
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.2 – Section 4: Reserve classification DB enforcement (RC-1..RC-9)
+  // ══════════════════════════════════════════════════════════════════════════
+  //
+  // These tests bypass the repository layer and issue raw SQL to verify that
+  // the no_modify_reserve_spendable / no_modify_reserve_protected triggers
+  // and unique constraints reject forbidden modifications.
+
+  /// Insert a goalReserve account directly via SQL and return its ID.
+  Future<String> insertReserveAccount(String id) async {
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('$id', '$_hh', 'Reserve $id', 'goalReserve', 'household', "
+      "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+    return id;
+  }
+
+  /// Insert a normal spendable account directly via SQL and return its ID.
+  Future<String> insertNormalAccount(String id) async {
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('$id', '$_hh', 'Normal $id', 'personalCashWallet', 'user', "
+      "'available', 'EGP', 1, 0, 1, 0, 1, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+    return id;
+  }
+
+  test('RC-1. UPDATE is_spendable on goalReserve → rejected by trigger', () async {
+    await insertReserveAccount('rc1-reserve');
+
+    await expectLater(
+      () => db.customStatement(
+        "UPDATE financial_accounts SET is_spendable = 1 WHERE id = 'rc1-reserve'",
+      ),
+      throwsA(anything),
+      reason:
+          'no_modify_reserve_spendable trigger must reject is_spendable change',
+    );
+
+    // Verify the value was NOT changed.
+    final rows = await db
+        .customSelect(
+          "SELECT is_spendable FROM financial_accounts WHERE id = 'rc1-reserve'",
+        )
+        .get();
+    expect(rows.first.read<bool>('is_spendable'), isFalse);
+  });
+
+  test('RC-2. UPDATE is_protected on goalReserve → rejected by trigger', () async {
+    await insertReserveAccount('rc2-reserve');
+
+    await expectLater(
+      () => db.customStatement(
+        "UPDATE financial_accounts SET is_protected = 1 WHERE id = 'rc2-reserve'",
+      ),
+      throwsA(anything),
+      reason:
+          'no_modify_reserve_protected trigger must reject is_protected change',
+    );
+
+    final rows = await db
+        .customSelect(
+          "SELECT is_protected FROM financial_accounts WHERE id = 'rc2-reserve'",
+        )
+        .get();
+    expect(rows.first.read<bool>('is_protected'), isFalse);
+  });
+
+  test('RC-3. UPDATE is_spendable on non-reserve account → allowed', () async {
+    await insertNormalAccount('rc3-normal');
+
+    // Should NOT throw — trigger only fires on goalReserve rows.
+    await db.customStatement(
+      "UPDATE financial_accounts SET is_spendable = 0 WHERE id = 'rc3-normal'",
+    );
+
+    final rows = await db
+        .customSelect(
+          "SELECT is_spendable FROM financial_accounts WHERE id = 'rc3-normal'",
+        )
+        .get();
+    expect(rows.first.read<bool>('is_spendable'), isFalse);
+  });
+
+  test('RC-4. UPDATE is_protected on non-reserve account → allowed', () async {
+    await insertNormalAccount('rc4-normal');
+
+    await db.customStatement(
+      "UPDATE financial_accounts SET is_protected = 1 WHERE id = 'rc4-normal'",
+    );
+
+    final rows = await db
+        .customSelect(
+          "SELECT is_protected FROM financial_accounts WHERE id = 'rc4-normal'",
+        )
+        .get();
+    expect(rows.first.read<bool>('is_protected'), isTrue);
+  });
+
+  test(
+    'RC-5. UPDATE type from goalReserve to other type → rejected by trigger (SR-1 re-verify)',
+    () async {
+      await insertReserveAccount('rc5-reserve');
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE financial_accounts SET type = 'personalCashWallet' WHERE id = 'rc5-reserve'",
+        ),
+        throwsA(anything),
+        reason: 'no_retype_reserve_account trigger must prevent type change',
+      );
+
+      final rows = await db
+          .customSelect(
+            "SELECT type FROM financial_accounts WHERE id = 'rc5-reserve'",
+          )
+          .get();
+      expect(rows.first.read<String>('type'), 'goalReserve');
+    },
+  );
+
+  test(
+    'RC-6. INSERT second goal with same reserve_account_id → rejected by unique constraint',
+    () async {
+      final goal1 =
+          ((await createGoal(idempotencyKey: 'ik-rc6-g1'))
+                  as AppOk<SavingsGoal>)
+              .value;
+
+      // Attempt to create a second goal row that reuses the same reserve_account_id.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+          "status, created_at, updated_at, idempotency_key, idempotency_payload) "
+          "VALUES ('rc6-goal-dup', '$_hh', '${goal1.reserveAccountId}', 'EGP', "
+          "'active', '2024-01-01', '2024-01-01', 'ik-rc6-dup', 'payload-dup')",
+        ),
+        throwsA(anything),
+        reason:
+            'idx_goals_reserve_account unique constraint must prevent sharing a reserve account',
+      );
+    },
+  );
+
+  test(
+    'RC-7. Reserve account created with is_spendable=false (verified)',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-rc7')) as AppOk<SavingsGoal>)
+              .value;
+
+      final rows = await db
+          .customSelect(
+            "SELECT is_spendable FROM financial_accounts WHERE id = '${goal.reserveAccountId}'",
+          )
+          .get();
+      expect(rows.first.read<bool>('is_spendable'), isFalse);
+    },
+  );
+
+  test(
+    'RC-8. Reserve account created with is_protected=false (verified)',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-rc8')) as AppOk<SavingsGoal>)
+              .value;
+
+      final rows = await db
+          .customSelect(
+            "SELECT is_protected FROM financial_accounts WHERE id = '${goal.reserveAccountId}'",
+          )
+          .get();
+      expect(rows.first.read<bool>('is_protected'), isFalse);
+    },
+  );
+
+  test(
+    'RC-9. UPDATE is_spendable to same value on goalReserve → allowed (trigger no-op)',
+    () async {
+      await insertReserveAccount('rc9-reserve');
+
+      // UPDATE where the new value equals the old value — WHEN clause is false, trigger doesn't fire.
+      await db.customStatement(
+        "UPDATE financial_accounts SET is_spendable = 0 WHERE id = 'rc9-reserve'",
+      );
+
+      final rows = await db
+          .customSelect(
+            "SELECT is_spendable FROM financial_accounts WHERE id = 'rc9-reserve'",
+          )
+          .get();
+      expect(rows.first.read<bool>('is_spendable'), isFalse);
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.2 – Section 5: Goal movement validation (MV-1..MV-8)
+  // ══════════════════════════════════════════════════════════════════════════
+  //
+  // These tests bypass the repository layer and issue raw SQL to verify that
+  // the validate_funding_movement / validate_release_movement triggers and
+  // the unique index on (goal_id, transfer_operation_id) enforce direction
+  // and reason constraints.
+
+  /// Insert a minimal transfer operation and return its ID.
+  Future<String> insertTransferOp({
+    required String id,
+    required String sourceAccountId,
+    required String destinationAccountId,
+  }) async {
+    await db.customStatement(
+      "INSERT INTO operations (id, household_id, type, source_account_id, "
+      "destination_account_id, total_amount_minor_units, currency_code, effective_date, "
+      "recorded_at, created_by, created_at, updated_at) "
+      "VALUES ('$id', '$_hh', 'transfer', '$sourceAccountId', "
+      "'$destinationAccountId', 10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
+      "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+    return id;
+  }
+
+  test(
+    'MV-1. Valid funding movement (transfer to reserve) → succeeds',
+    () async {
+      const srcId = 'src-mv1';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv1')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Insert a valid transfer operation into the reserve.
+      final opId = await insertTransferOp(
+        id: 'op-mv1',
+        sourceAccountId: srcId,
+        destinationAccountId: goal.reserveAccountId,
+      );
+
+      // Insert the goal movement — must succeed.
+      await db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at, release_reason) "
+        "VALUES ('mov-mv1', '${goal.id}', '$_hh', 'funding', '$opId', "
+        "'2024-01-01T00:00:00Z', NULL)",
+      );
+
+      final rows = await db
+          .customSelect(
+            "SELECT COUNT(*) as c FROM goal_movements WHERE id = 'mov-mv1'",
+          )
+          .get();
+      expect(rows.first.read<int>('c'), 1);
+    },
+  );
+
+  test(
+    'MV-2. Funding movement with wrong destination (not reserve) → rejected',
+    () async {
+      const srcId = 'src-mv2';
+      const wrongDstId = 'dst-mv2-wrong';
+      await createAccount(id: srcId);
+      await createAccount(id: wrongDstId);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv2')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Transfer goes to wrong account (not the reserve).
+      final opId = await insertTransferOp(
+        id: 'op-mv2',
+        sourceAccountId: srcId,
+        destinationAccountId: wrongDstId,
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at, release_reason) "
+          "VALUES ('mov-mv2', '${goal.id}', '$_hh', 'funding', '$opId', "
+          "'2024-01-01T00:00:00Z', NULL)",
+        ),
+        throwsA(anything),
+        reason:
+            'validate_funding_movement must reject transfer not directed to the reserve',
+      );
+    },
+  );
+
+  test(
+    'MV-3. Funding movement referencing non-transfer operation type → rejected',
+    () async {
+      const dstId = 'dst-mv3';
+      await createAccount(id: dstId);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv3')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Insert an income operation (not a transfer) pointing to the reserve.
+      await db.customStatement(
+        "INSERT INTO operations (id, household_id, type, destination_account_id, "
+        "total_amount_minor_units, currency_code, effective_date, recorded_at, "
+        "created_by, created_at, updated_at) "
+        "VALUES ('op-mv3-income', '$_hh', 'income', '${goal.reserveAccountId}', "
+        "10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
+        "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at, release_reason) "
+          "VALUES ('mov-mv3', '${goal.id}', '$_hh', 'funding', 'op-mv3-income', "
+          "'2024-01-01T00:00:00Z', NULL)",
+        ),
+        throwsA(anything),
+        reason: 'validate_funding_movement must reject non-transfer operation',
+      );
+    },
+  );
+
+  test(
+    'MV-4. Release movement with wrong source account (not reserve) → rejected',
+    () async {
+      const srcId = 'src-mv4';
+      const wrongSrcId = 'wrong-src-mv4';
+      await createAccount(id: srcId);
+      await createAccount(id: wrongSrcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv4')) as AppOk<SavingsGoal>)
+              .value;
+
+      // Transfer FROM wrong source (not the reserve).
+      final opId = await insertTransferOp(
+        id: 'op-mv4',
+        sourceAccountId: wrongSrcId,
+        destinationAccountId: srcId,
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at, release_reason) "
+          "VALUES ('mov-mv4', '${goal.id}', '$_hh', 'release', '$opId', "
+          "'2024-01-01T00:00:00Z', 'test reason')",
+        ),
+        throwsA(anything),
+        reason:
+            'validate_release_movement must reject transfer not sourced from the reserve',
+      );
+    },
+  );
+
+  test('MV-5. Release movement without reason → rejected', () async {
+    const dstId = 'dst-mv5';
+    await createAccount(id: dstId);
+
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-mv5')) as AppOk<SavingsGoal>)
+            .value;
+
+    // Transfer FROM the reserve (correct source).
+    final opId = await insertTransferOp(
+      id: 'op-mv5',
+      sourceAccountId: goal.reserveAccountId,
+      destinationAccountId: dstId,
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at, release_reason) "
+        "VALUES ('mov-mv5', '${goal.id}', '$_hh', 'release', '$opId', "
+        "'2024-01-01T00:00:00Z', NULL)",
+      ),
+      throwsA(anything),
+      reason:
+          'validate_release_movement must require a non-null, non-empty release_reason',
+    );
+  });
+
+  test(
+    'MV-6. Duplicate movement for same operation → rejected by unique index',
+    () async {
+      const srcId = 'src-mv6';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv6')) as AppOk<SavingsGoal>)
+              .value;
+
+      final opId = await insertTransferOp(
+        id: 'op-mv6',
+        sourceAccountId: srcId,
+        destinationAccountId: goal.reserveAccountId,
+      );
+
+      // First insert succeeds.
+      await db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at, release_reason) "
+        "VALUES ('mov-mv6-1', '${goal.id}', '$_hh', 'funding', '$opId', "
+        "'2024-01-01T00:00:00Z', NULL)",
+      );
+
+      // Second insert for the same operation must fail.
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at, release_reason) "
+          "VALUES ('mov-mv6-2', '${goal.id}', '$_hh', 'funding', '$opId', "
+          "'2024-01-01T00:00:00Z', NULL)",
+        ),
+        throwsA(anything),
+        reason:
+            'idx_goal_movements_unique_operation must prevent duplicate operation reference',
+      );
+    },
+  );
+
+  test(
+    'MV-7. UPDATE on goal_movements → rejected by no_update_goal_movements trigger',
+    () async {
+      const srcId = 'src-mv7';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv7')) as AppOk<SavingsGoal>)
+              .value;
+
+      final opId = await insertTransferOp(
+        id: 'op-mv7',
+        sourceAccountId: srcId,
+        destinationAccountId: goal.reserveAccountId,
+      );
+
+      await db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at, release_reason) "
+        "VALUES ('mov-mv7', '${goal.id}', '$_hh', 'funding', '$opId', "
+        "'2024-01-01T00:00:00Z', NULL)",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "UPDATE goal_movements SET movement_type = 'release' WHERE id = 'mov-mv7'",
+        ),
+        throwsA(anything),
+        reason:
+            'no_update_goal_movements trigger must block all UPDATEs on movements',
+      );
+    },
+  );
+
+  test(
+    'MV-8. DELETE on goal_movements → rejected by no_delete_goal_movements trigger',
+    () async {
+      const srcId = 'src-mv8';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mv8')) as AppOk<SavingsGoal>)
+              .value;
+
+      final opId = await insertTransferOp(
+        id: 'op-mv8',
+        sourceAccountId: srcId,
+        destinationAccountId: goal.reserveAccountId,
+      );
+
+      await db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at, release_reason) "
+        "VALUES ('mov-mv8', '${goal.id}', '$_hh', 'funding', '$opId', "
+        "'2024-01-01T00:00:00Z', NULL)",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "DELETE FROM goal_movements WHERE id = 'mov-mv8'",
+        ),
+        throwsA(anything),
+        reason:
+            'no_delete_goal_movements trigger must block all DELETEs on movements',
+      );
     },
   );
 }

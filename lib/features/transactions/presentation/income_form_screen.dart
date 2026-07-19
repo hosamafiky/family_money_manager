@@ -74,11 +74,18 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           if (result is! AppOk<List<FinancialAccount>>) {
             return Center(child: Text(l10n.errorGeneric));
           }
-          final accounts = result.value.where((a) => !a.isArchived && a.type != FinancialAccountType.goalReserve).toList();
+          final accounts = result.value
+              .where(
+                (a) =>
+                    !a.isArchived && a.type != FinancialAccountType.goalReserve,
+              )
+              .toList();
 
           // Sync tracked account; clear preselected ID if account is now archived.
           if (_selectedAccountId != null) {
-            final found = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
+            final found = accounts
+                .where((a) => a.id == _selectedAccountId)
+                .firstOrNull;
             if (found == null) {
               // Archived or missing — schedule reset to avoid setState-in-build.
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,9 +110,17 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   children: [
                     const Icon(Icons.account_balance_wallet_outlined, size: 48),
                     const SizedBox(height: 16),
-                    Text(l10n.accountsEmpty, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+                    Text(
+                      l10n.accountsEmpty,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                     const SizedBox(height: 16),
-                    FilledButton.icon(onPressed: () => context.push('/accounts/new'), icon: const Icon(Icons.add), label: Text(l10n.accountsAddButton)),
+                    FilledButton.icon(
+                      onPressed: () => context.push('/accounts/new'),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.accountsAddButton),
+                    ),
                   ],
                 ),
               ),
@@ -132,11 +147,17 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 // Note
                 TextFormField(
                   controller: _noteController,
-                  decoration: InputDecoration(labelText: l10n.fieldNote, border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                    labelText: l10n.fieldNote,
+                    border: const OutlineInputBorder(),
+                  ),
                   maxLines: 2,
                 ),
                 const SizedBox(height: 24),
-                FilledButton(onPressed: () => _goToReview(context, l10n), child: Text(l10n.reviewTitle)),
+                FilledButton(
+                  onPressed: () => _goToReview(context, l10n),
+                  child: Text(l10n.reviewTitle),
+                ),
               ],
             ),
           );
@@ -145,14 +166,24 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     );
   }
 
-  Widget _buildAccountDropdown(BuildContext context, AppLocalizations l10n, List<FinancialAccount> accounts) {
+  Widget _buildAccountDropdown(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<FinancialAccount> accounts,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<String>(
           initialValue: _selectedAccountId,
-          decoration: InputDecoration(labelText: l10n.fieldDestinationAccount, border: const OutlineInputBorder(), errorText: _accountError),
-          items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
+          decoration: InputDecoration(
+            labelText: l10n.fieldDestinationAccount,
+            border: const OutlineInputBorder(),
+            errorText: _accountError,
+          ),
+          items: accounts
+              .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
+              .toList(),
           onChanged: (v) {
             setState(() {
               _selectedAccountId = v;
@@ -170,7 +201,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       controller: _amountController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-      decoration: InputDecoration(labelText: l10n.fieldAmount, border: const OutlineInputBorder(), errorText: _amountError),
+      decoration: InputDecoration(
+        labelText: l10n.fieldAmount,
+        border: const OutlineInputBorder(),
+        errorText: _amountError,
+      ),
       onChanged: (_) => setState(() => _amountError = null),
     );
   }
@@ -179,8 +214,17 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     return DropdownButtonFormField<TransactionCategory>(
       // ignore: deprecated_member_use
       value: _selectedCategory,
-      decoration: InputDecoration(labelText: l10n.fieldCategory, border: const OutlineInputBorder(), errorText: _categoryError),
-      items: TransactionCategory.incomeCategories.map((c) => DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c)))).toList(),
+      decoration: InputDecoration(
+        labelText: l10n.fieldCategory,
+        border: const OutlineInputBorder(),
+        errorText: _categoryError,
+      ),
+      items: TransactionCategory.incomeCategories
+          .map(
+            (c) =>
+                DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
+          )
+          .toList(),
       onChanged: (v) => setState(() {
         _selectedCategory = v;
         _categoryError = null;
@@ -200,10 +244,16 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         if (picked != null) setState(() => _effectiveDate = picked);
       },
       child: InputDecorator(
-        decoration: InputDecoration(labelText: l10n.fieldEffectiveDate, border: const OutlineInputBorder()),
+        decoration: InputDecoration(
+          labelText: l10n.fieldEffectiveDate,
+          border: const OutlineInputBorder(),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(_formatDate(_effectiveDate)), const Icon(Icons.calendar_today, size: 18)],
+          children: [
+            Text(_formatDate(_effectiveDate)),
+            const Icon(Icons.calendar_today, size: 18),
+          ],
         ),
       ),
     );
@@ -212,7 +262,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   void _goToReview(BuildContext context, AppLocalizations l10n) {
     setState(() {
       _accountError = _selectedAccountId == null ? l10n.errorGeneric : null;
-      _categoryError = _selectedCategory == null ? l10n.errorCategoryRequired : null;
+      _categoryError = _selectedCategory == null
+          ? l10n.errorCategoryRequired
+          : null;
     });
 
     if (_selectedAccountId == null || _selectedCategory == null) return;
@@ -242,7 +294,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       category: _selectedCategory!,
       effectiveDate: _formatDate(_effectiveDate),
       createdBy: _createdBy,
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
     );
 
     ref.read(stagedIncomeContextProvider.notifier).set(ctx);

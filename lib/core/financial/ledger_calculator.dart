@@ -61,7 +61,11 @@ abstract final class LedgerCalculator {
   ///
   /// [currency] is used to construct the result; it must match the currency
   /// of the entries (all entries for a single account share one currency in V1).
-  static Money balance({required String accountId, required List<LedgerEntryRecord> entries, required Currency currency}) {
+  static Money balance({
+    required String accountId,
+    required List<LedgerEntryRecord> entries,
+    required Currency currency,
+  }) {
     return _sum(accountId: accountId, entries: entries, currency: currency);
   }
 
@@ -72,8 +76,15 @@ abstract final class LedgerCalculator {
   ///
   /// [asOfDate] must be in "YYYY-MM-DD" format. Lexicographic comparison is
   /// valid for ISO 8601 date strings.
-  static Money historicalBalance({required String accountId, required List<LedgerEntryRecord> entries, required Currency currency, required String asOfDate}) {
-    final filtered = entries.where((e) => e.effectiveDate.compareTo(asOfDate) <= 0).toList();
+  static Money historicalBalance({
+    required String accountId,
+    required List<LedgerEntryRecord> entries,
+    required Currency currency,
+    required String asOfDate,
+  }) {
+    final filtered = entries
+        .where((e) => e.effectiveDate.compareTo(asOfDate) <= 0)
+        .toList();
     return _sum(accountId: accountId, entries: filtered, currency: currency);
   }
 
@@ -92,7 +103,11 @@ abstract final class LedgerCalculator {
 
   // ── Private helpers ──────────────────────────────────────────────────────────
 
-  static Money _sum({required String accountId, required List<LedgerEntryRecord> entries, required Currency currency}) {
+  static Money _sum({
+    required String accountId,
+    required List<LedgerEntryRecord> entries,
+    required Currency currency,
+  }) {
     var credits = 0;
     var debits = 0;
     for (final e in entries) {

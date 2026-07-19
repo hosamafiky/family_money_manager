@@ -76,10 +76,13 @@ final class CreateAccountWorkflowParams {
 /// Idempotency: if the same [idempotencyKey] is resubmitted, the use case
 /// returns [AppOk] with the previously created account.
 final class CreateAccountUseCase {
-  const CreateAccountUseCase({required AccountRepository accountRepository, required LedgerRepository ledgerRepository, required AppDatabase db})
-    : _accountRepository = accountRepository,
-      _ledgerRepository = ledgerRepository,
-      _db = db;
+  const CreateAccountUseCase({
+    required AccountRepository accountRepository,
+    required LedgerRepository ledgerRepository,
+    required AppDatabase db,
+  }) : _accountRepository = accountRepository,
+       _ledgerRepository = ledgerRepository,
+       _db = db;
   // Note: prefer_initializing_formals suppressed because the private field
   // names differ from the named constructor parameters.
 
@@ -89,35 +92,54 @@ final class CreateAccountUseCase {
 
   static const _uuid = Uuid();
 
-  Future<AppResult<FinancialAccount>> execute(CreateAccountWorkflowParams params) async {
+  Future<AppResult<FinancialAccount>> execute(
+    CreateAccountWorkflowParams params,
+  ) async {
     // ── Input validation ────────────────────────────────────────────────────
     if (params.name.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'error_account_name_empty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'error_account_name_empty',
+      );
     }
-    if (params.openingBalanceMinorUnits != null && params.openingBalanceMinorUnits! < 0) {
-      return const AppValidationFailure(field: 'openingBalance', messageKey: 'error_opening_balance_negative');
+    if (params.openingBalanceMinorUnits != null &&
+        params.openingBalanceMinorUnits! < 0) {
+      return const AppValidationFailure(
+        field: 'openingBalance',
+        messageKey: 'error_opening_balance_negative',
+      );
     }
 
     // ── Idempotency check ───────────────────────────────────────────────────
     // When a caller-supplied idempotency key is present, look for an existing
     // account with the same (householdId, idempotencyKey) pair.
     if (params.idempotencyKey != null) {
-      final existing = await _accountRepository.findByIdempotencyKey(householdId: params.householdId, idempotencyKey: params.idempotencyKey!);
+      final existing = await _accountRepository.findByIdempotencyKey(
+        householdId: params.householdId,
+        idempotencyKey: params.idempotencyKey!,
+      );
       if (existing != null) {
         // Compare payload fingerprints to distinguish a safe retry from a
         // conflicting call with the same key but different intent.
         final currentPayload = _buildIdempotencyPayload(params);
-        final storedPayload = await _loadStoredPayload(params.householdId, params.idempotencyKey!);
+        final storedPayload = await _loadStoredPayload(
+          params.householdId,
+          params.idempotencyKey!,
+        );
         if (storedPayload == currentPayload) {
           return AppOk(existing);
         }
-        return const AppDuplicateConflict(messageKey: 'error_account_duplicate');
+        return const AppDuplicateConflict(
+          messageKey: 'error_account_duplicate',
+        );
       }
     }
 
     final accountId = _uuid.v4();
     final idempotencyKey = params.idempotencyKey ?? accountId;
-    final idempotencyPayload = params.idempotencyKey != null ? _buildIdempotencyPayload(params) : null;
+    final idempotencyPayload = params.idempotencyKey != null
+        ? _buildIdempotencyPayload(params)
+        : null;
 
     try {
       late FinancialAccount account;
@@ -154,7 +176,9 @@ final class CreateAccountUseCase {
               accountId: accountId,
               amountMinorUnits: amount,
               currencyCode: params.currencyCode,
-              effectiveDate: params.openingBalanceDate ?? DateTime.now().toUtc().toIso8601String().substring(0, 10),
+              effectiveDate:
+                  params.openingBalanceDate ??
+                  DateTime.now().toUtc().toIso8601String().substring(0, 10),
               createdBy: params.createdBy,
               idempotencyKey: '${idempotencyKey}_opening',
             ),
@@ -166,16 +190,25 @@ final class CreateAccountUseCase {
     } on DuplicateAccountIdError {
       return const AppDuplicateConflict(messageKey: 'error_account_duplicate');
     } on ArchivedAccountError {
-      return const AppValidationFailure(field: 'account', messageKey: 'error_account_archived');
+      return const AppValidationFailure(
+        field: 'account',
+        messageKey: 'error_account_archived',
+      );
     } on ArgumentError catch (e) {
-      return AppValidationFailure(field: e.name ?? 'unknown', messageKey: 'error_validation_generic');
+      return AppValidationFailure(
+        field: e.name ?? 'unknown',
+        messageKey: 'error_validation_generic',
+      );
     } catch (_) {
       return const AppPersistenceFailure();
     }
   }
 
   /// Loads the stored idempotency payload for a given key, if any.
-  Future<String?> _loadStoredPayload(String householdId, String idempotencyKey) async {
+  Future<String?> _loadStoredPayload(
+    String householdId,
+    String idempotencyKey,
+  ) async {
     // Query the raw DB row to read the stored payload.
     final rows = await _db
         .customSelect(

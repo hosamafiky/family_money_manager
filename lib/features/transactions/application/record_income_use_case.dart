@@ -1,4 +1,5 @@
 import 'package:family_money_manager/core/application/app_result.dart';
+import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
@@ -10,9 +11,11 @@ import 'package:family_money_manager/features/transactions/domain/transaction_co
 /// Validates the context, maps to ledger params, and maps the result
 /// to [AppResult]. No raw exceptions escape to the caller.
 final class RecordIncomeUseCase {
-  const RecordIncomeUseCase({required LedgerRepository ledgerRepository, required AccountRepository accountRepository})
-    : _ledger = ledgerRepository,
-      _accounts = accountRepository;
+  const RecordIncomeUseCase({
+    required LedgerRepository ledgerRepository,
+    required AccountRepository accountRepository,
+  }) : _ledger = ledgerRepository,
+       _accounts = accountRepository;
 
   final LedgerRepository _ledger;
   final AccountRepository _accounts;
@@ -20,31 +23,62 @@ final class RecordIncomeUseCase {
   Future<AppResult<String>> execute(IncomeContext ctx) async {
     // ── Validate ──────────────────────────────────────────────────────────
     if (ctx.amountMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'amount', messageKey: 'error_amount_must_be_positive');
+      return const AppValidationFailure(
+        field: 'amount',
+        messageKey: 'error_amount_must_be_positive',
+      );
     }
     if (!ctx.category.isIncome) {
-      return const AppValidationFailure(field: 'category', messageKey: 'errorCategoryRequired');
+      return const AppValidationFailure(
+        field: 'category',
+        messageKey: 'errorCategoryRequired',
+      );
     }
     if (ctx.householdId.isEmpty) {
-      return const AppValidationFailure(field: 'householdId', messageKey: 'error_household_id_empty');
+      return const AppValidationFailure(
+        field: 'householdId',
+        messageKey: 'error_household_id_empty',
+      );
     }
     if (ctx.destinationAccountId.isEmpty) {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'error_account_required');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'error_account_required',
+      );
     }
     if (!_isValidDate(ctx.effectiveDate)) {
-      return const AppValidationFailure(field: 'effectiveDate', messageKey: 'error_date_invalid');
+      return const AppValidationFailure(
+        field: 'effectiveDate',
+        messageKey: 'error_date_invalid',
+      );
     }
 
     // ── Account existence + household scoping ─────────────────────────────
-    final account = await _accounts.findById(id: ctx.destinationAccountId, householdId: ctx.householdId);
+    final account = await _accounts.findById(
+      id: ctx.destinationAccountId,
+      householdId: ctx.householdId,
+    );
     if (account == null) {
       return const AppNotFound();
     }
+    // Goal reserve accounts are managed exclusively by goal use cases.
+    if (account.type == FinancialAccountType.goalReserve) {
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
+      );
+    }
     if (account.isArchived) {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorAccountArchived');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorAccountArchived',
+      );
     }
     if (account.currencyCode != ctx.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // ── Map and call ledger ───────────────────────────────────────────────
@@ -69,10 +103,15 @@ final class RecordIncomeUseCase {
       return switch (ledgerResult) {
         IdempotentOperationResult.created => AppOk(ctx.operationId),
         IdempotentOperationResult.alreadyExists => AppOk(ctx.operationId),
-        IdempotentOperationResult.conflict => const AppDuplicateConflict(messageKey: 'error_account_duplicate'),
+        IdempotentOperationResult.conflict => const AppDuplicateConflict(
+          messageKey: 'error_account_duplicate',
+        ),
       };
     } on ArchivedAccountError {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorAccountArchived');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorAccountArchived',
+      );
     } on InsufficientFundsError {
       return const AppInsufficientFunds();
     } catch (_) {

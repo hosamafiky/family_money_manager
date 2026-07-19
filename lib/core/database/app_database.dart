@@ -61,6 +61,8 @@ part 'app_database.g.dart';
 ///                 uniqueness + release-reason + operation-type triggers;
 ///                 beneficiary same-household trigger;
 ///                 UNIQUE INDEX on goal_movements.transfer_operation_id.
+///  10 — Phase 5B.2: reserve is_spendable/is_protected immutability triggers;
+///                 funding/release movement direction-validation triggers.
 @DriftDatabase(
   tables: [
     Households,
@@ -89,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -113,6 +115,8 @@ class AppDatabase extends _$AppDatabase {
       await _applyGoalMovementsHardeningTriggers();
       await _applyGoalRevisionBeneficiaryTrigger();
       await _applyGoalMovementsUniqueIndex();
+      await _applyReserveSpendableProtectedTriggers();
+      await _applyGoalMovementsDirectionTriggers();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -131,7 +135,10 @@ class AppDatabase extends _$AppDatabase {
         // v3 → v4: account idempotency columns, household cardinality triggers,
         // immutable type/currency trigger, scoped account idempotency index.
         await m.addColumn(financialAccounts, financialAccounts.idempotencyKey);
-        await m.addColumn(financialAccounts, financialAccounts.idempotencyPayload);
+        await m.addColumn(
+          financialAccounts,
+          financialAccounts.idempotencyPayload,
+        );
         await _applyHouseholdConstraintTriggers();
         await _applyAccountMetadataImmutabilityTrigger();
         await _applyAccountIdempotencyIndex();
@@ -166,6 +173,12 @@ class AppDatabase extends _$AppDatabase {
         await _applyGoalMovementsHardeningTriggers();
         await _applyGoalRevisionBeneficiaryTrigger();
         await _applyGoalMovementsUniqueIndex();
+      }
+      if (from <= 9) {
+        // v9 → v10: Phase 5B.2 — movement validation triggers, reserve
+        // spendable/protected locks.
+        await _applyReserveSpendableProtectedTriggers();
+        await _applyGoalMovementsDirectionTriggers();
       }
     },
     beforeOpen: (details) async {
@@ -802,6 +815,81 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE UNIQUE INDEX IF NOT EXISTS idx_goal_movements_unique_operation
       ON goal_movements(transfer_operation_id)
+    ''');
+  }
+
+  // ── Reserve is_spendable / is_protected immutability (Phase 5B.2) ─────────
+  //
+  // A goalReserve account's is_spendable and is_protected columns must never
+  // change after creation, regardless of whether financial history exists.
+  // This is defence-in-depth on top of the post-history classification lock.
+
+  Future<void> _applyReserveSpendableProtectedTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_modify_reserve_spendable
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN OLD.type = 'goalReserve' AND NEW.is_spendable != OLD.is_spendable
+      BEGIN
+        SELECT RAISE(ABORT, 'goalReserve is_spendable cannot be changed');
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS no_modify_reserve_protected
+      BEFORE UPDATE ON financial_accounts
+      FOR EACH ROW
+      WHEN OLD.type = 'goalReserve' AND NEW.is_protected != OLD.is_protected
+      BEGIN
+        SELECT RAISE(ABORT, 'goalReserve is_protected cannot be changed');
+      END
+    ''');
+  }
+
+  // ── Goal movement direction-validation triggers (Phase 5B.2) ─────────────
+  //
+  // Funding movements: the linked transfer operation must have the goal's
+  // reserve account as destination.
+  //
+  // Release movements: the linked transfer operation must have the goal's
+  // reserve account as source, AND the release_reason must be non-empty.
+
+  Future<void> _applyGoalMovementsDirectionTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_funding_movement
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'funding'
+      BEGIN
+        SELECT RAISE(ABORT, 'funding movement: operation must be a transfer to the reserve')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.destination_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+        );
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_release_movement
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'release'
+      BEGIN
+        SELECT RAISE(ABORT, 'release movement: operation must be a transfer from the reserve, reason required')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.source_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+        )
+        OR (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0);
+      END
     ''');
   }
 }

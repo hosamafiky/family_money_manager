@@ -2,17 +2,18 @@
 
 ## 1. Repository State
 
-| Field | Value |
-|---|---|
-| Branch | `main` |
-| Schema version | 9 (incremented from 8 in this phase) |
-| Final 5B commit | `52b9f05` (pre-5B.1) |
-| Tests at phase start | 1,017 |
-| Tests at phase end | **1,035** |
-| Tests added | **+18** |
-| Tests removed | 0 |
+| Field                | Value                                |
+| -------------------- | ------------------------------------ |
+| Branch               | `main`                               |
+| Schema version       | 9 (incremented from 8 in this phase) |
+| Final 5B commit      | `52b9f05` (pre-5B.1)                 |
+| Tests at phase start | 1,017                                |
+| Tests at phase end   | **1,035**                            |
+| Tests added          | **+18**                              |
+| Tests removed        | 0                                    |
 
 ### Files Modified
+
 - `lib/core/database/app_database.dart` — schema v9, Phase 5B.1 triggers, v8→v9 migration
 - `lib/features/goals/application/goal_use_cases.dart` — idempotency, balance enforcement, formatting
 - `lib/features/goals/data/drift_goal_repository.dart` — atomic single-transaction creation
@@ -30,6 +31,7 @@
 - `test/database/goals/goal_schema_migration_test.dart` — expanded to 30 test cases
 
 ### Files Created
+
 - `lib/features/goals/presentation/goal_money_formatter.dart` — centralized minor-unit formatter
 
 ---
@@ -75,6 +77,7 @@ void initState() {
 After a successful submission, a new key is generated so the next submission is treated as a distinct request. After an uncertain result (error path), the same key is retained so the user can retry safely.
 
 The same pattern is applied to:
+
 - `GoalCreationScreen` — covers goal + reserve + optional initial funding
 - `FundGoalScreen` — covers funding operation
 - `ReleaseGoalScreen` — covers release operation
@@ -86,10 +89,12 @@ The same pattern is applied to:
 **Status: Database-tested**
 
 Both `FundGoalUseCase` and `ReleaseGoalFundsUseCase` check the `idempotency_key` column on `ledger_operations` before inserting. If a matching key is found:
+
 - Same payload → return original operation ID (idempotent success)
 - Different payload → return `AppDuplicateConflict`
 
 Tests in `goal_repository_test.dart`:
+
 - Sequential equivalent retry returns original operation ID
 - Sequential conflicting retry returns `AppDuplicateConflict`
 - Same key in a different household creates a separate operation
@@ -104,6 +109,7 @@ Tests in `goal_repository_test.dart`:
 The balance read is performed with a `customSelect` inside the `db.transaction()` block, before any write. This prevents time-of-check/time-of-use races in the single-writer SQLite WAL model.
 
 Tests:
+
 - Two funding requests summing to more than the source balance → only the first succeeds
 - Two releases summing to more than the reserve balance → only the first succeeds
 
@@ -115,10 +121,10 @@ Tests:
 
 New triggers added in `onCreate` and the v8→v9 migration:
 
-| Trigger | Enforces |
-|---|---|
-| `no_update_goal_immutable` | `household_id`, `reserve_account_id`, `currency_code`, `idempotency_key`, `created_at` cannot change |
-| `no_delete_goal_with_history` | Goal with revisions, movements, or linked operations cannot be deleted |
+| Trigger                       | Enforces                                                                                             |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `no_update_goal_immutable`    | `household_id`, `reserve_account_id`, `currency_code`, `idempotency_key`, `created_at` cannot change |
+| `no_delete_goal_with_history` | Goal with revisions, movements, or linked operations cannot be deleted                               |
 
 Tests SM-6 and SM-7 in `goal_schema_migration_test.dart` verify these triggers fire.
 
@@ -130,9 +136,9 @@ Tests SM-6 and SM-7 in `goal_schema_migration_test.dart` verify these triggers f
 
 New triggers on `financial_accounts` (added in v8→v9 migration):
 
-| Trigger | Enforces |
-|---|---|
-| `no_retype_reserve_account` | `type` cannot change away from `goalReserve` |
+| Trigger                     | Enforces                                                                    |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `no_retype_reserve_account` | `type` cannot change away from `goalReserve`                                |
 | `no_archive_active_reserve` | `is_archived` cannot be set to `true` while the linked goal is not archived |
 
 Additionally, the income, expense, and transfer forms now filter out `goalReserve` accounts using:
@@ -152,6 +158,7 @@ This applies at the application layer (widget filter) and is tested in `goal_sch
 Existing triggers from Phase 5B verification (`no_update_goal_movements`, `no_delete_goal_movements`) remain in place.
 
 New constraint added in Phase 5B.1:
+
 - `UNIQUE INDEX idx_goal_movements_operation` on `goal_movements(transfer_operation_id)` — prevents duplicate movements for the same transfer
 
 Tests GM-1 and GM-2 verify immutability; SM-5 verifies the unique index.
@@ -163,6 +170,7 @@ Tests GM-1 and GM-2 verify immutability; SM-5 verifies the unique index.
 **Status: Database-tested**
 
 Trigger `goal_revision_beneficiary_same_household` on `goal_revisions`:
+
 - When `beneficiary_member_id IS NOT NULL`, validates the member belongs to the same household as the goal
 - Rejects cross-household beneficiary via direct SQL INSERT
 
@@ -177,6 +185,7 @@ Test GR-3 in `goal_schema_migration_test.dart` verifies cross-household insertio
 `GoalStatus` (persisted): `active`, `completed`, `archived`
 
 `GoalProgressState` (derived from ledger balance):
+
 - `notStarted` — reserve balance = 0
 - `inProgress` — 0 < balance < target
 - `targetReached` — balance ≥ target (exact)
@@ -216,11 +225,11 @@ Currency scales used:
 
 **Status: Application-layer enforced (widget-tested via existing goal widget tests)**
 
-| Form | Restriction | Implementation |
-|---|---|---|
-| Income form | `goalReserve` absent from destination dropdown | `.where((a) => !a.isArchived && a.type != FinancialAccountType.goalReserve)` |
-| Expense form | `goalReserve` absent from payment account dropdown | Same filter |
-| Transfer form | `goalReserve` absent from source and destination dropdowns | Same filter |
+| Form          | Restriction                                                | Implementation                                                               |
+| ------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Income form   | `goalReserve` absent from destination dropdown             | `.where((a) => !a.isArchived && a.type != FinancialAccountType.goalReserve)` |
+| Expense form  | `goalReserve` absent from payment account dropdown         | Same filter                                                                  |
+| Transfer form | `goalReserve` absent from source and destination dropdowns | Same filter                                                                  |
 
 Archive restriction is enforced at the database layer via `no_archive_active_reserve` trigger.
 
@@ -231,30 +240,34 @@ Goal archive requiring zero reserve is enforced by `ArchiveGoalUseCase` via the 
 ## 13. Validation Results
 
 ### `dart format --output=none --set-exit-if-changed .`
+
 **Exit code: 0** — No formatting changes required after `dart format .` was applied.
 
 ### `flutter analyze`
+
 **Exit code: 0** — No issues found.
 
 ### `flutter test --reporter=expanded`
+
 **Exit code: 0**
 
 ```
 +1035: All tests passed!
 ```
 
-| Category | Count |
-|---|---|
-| Total passing | **1,035** |
-| Failed | 0 |
-| Skipped | 0 |
-| Tests added in Phase 5B.1 | +18 |
+| Category                  | Count     |
+| ------------------------- | --------- |
+| Total passing             | **1,035** |
+| Failed                    | 0         |
+| Skipped                   | 0         |
+| Tests added in Phase 5B.1 | +18       |
 
 ---
 
 ## 14. Test Inventory (Phase 5B.1 Additions)
 
 ### `test/database/goals/goal_repository_test.dart` (42 cases total)
+
 - AT-1..AT-4: Atomic creation rollback at failure boundaries
 - IK-1..IK-4: Goal-creation idempotency (equivalent retry, conflict, cross-household, retry-after-failure)
 - FK-1..FK-4: Fund-goal idempotency
@@ -262,6 +275,7 @@ Goal archive requiring zero reserve is enforced by `ArchiveGoalUseCase` via the 
 - AB-1..AB-2: Atomic balance enforcement (concurrent funding, concurrent release)
 
 ### `test/database/goals/goal_schema_migration_test.dart` (30 cases total)
+
 - SM-1..SM-7: Schema integrity (tables, indexes, immutability triggers)
 - SR-1..SR-4: Reserve account classification (no retype, no archive active)
 - GM-1..GM-2: Movement immutability triggers
@@ -274,12 +288,12 @@ Goal archive requiring zero reserve is enforced by `ArchiveGoalUseCase` via the 
 
 ## 15. Deferred Risks
 
-| Risk | Severity | Deferral Reason |
-|---|---|---|
-| Android SQLite3MultipleCiphers runtime verification | High | Build is intentionally deferred to production security hardening phase |
-| Transaction failure injection via synthetic exceptions | Low | Single-device SQLite WAL makes partial writes effectively impossible without process kill |
-| Concurrent overdraft in multi-writer scenario | Low | V1 is single-device offline; WAL serializes writers |
-| Cross-household beneficiary DB-level FK (not trigger) | Low | V1 is single-household; trigger enforces at application boundary |
+| Risk                                                   | Severity | Deferral Reason                                                                           |
+| ------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| Android SQLite3MultipleCiphers runtime verification    | High     | Build is intentionally deferred to production security hardening phase                    |
+| Transaction failure injection via synthetic exceptions | Low      | Single-device SQLite WAL makes partial writes effectively impossible without process kill |
+| Concurrent overdraft in multi-writer scenario          | Low      | V1 is single-device offline; WAL serializes writers                                       |
+| Cross-household beneficiary DB-level FK (not trigger)  | Low      | V1 is single-household; trigger enforces at application boundary                          |
 
 ---
 

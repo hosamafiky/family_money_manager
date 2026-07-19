@@ -29,7 +29,7 @@ Repository
     │       └── Mark sync_status = 'pending'
     │
     └── Add to sync_queue table
-    
+
    ← UI updated immediately from local data
 
 Background:
@@ -67,21 +67,21 @@ synced + server-side rejection → conflict (surfaced to user)
 
 ### What goes into the queue
 
-| Entity | Change type | Notes |
-|---|---|---|
-| LedgerEntry | create | Append-only; never update/delete |
-| Operation | create | Core creation only |
-| Operation | update | Only for reversal flag updates |
-| FinancialAccount | create | New account |
-| FinancialAccount | update | Metadata changes only |
-| Liability | create, update | Outstanding amount changes |
-| Goal | create, update | Status changes |
-| Budget | create, update | |
-| ChildWithdrawalAudit | create | Append-only |
-| ZakatCalculation | create | Effectively immutable |
-| SadaqahRecord | create, update | |
-| RecurringRule | create, update | |
-| Household | update | Name, member names |
+| Entity               | Change type    | Notes                            |
+| -------------------- | -------------- | -------------------------------- |
+| LedgerEntry          | create         | Append-only; never update/delete |
+| Operation            | create         | Core creation only               |
+| Operation            | update         | Only for reversal flag updates   |
+| FinancialAccount     | create         | New account                      |
+| FinancialAccount     | update         | Metadata changes only            |
+| Liability            | create, update | Outstanding amount changes       |
+| Goal                 | create, update | Status changes                   |
+| Budget               | create, update |                                  |
+| ChildWithdrawalAudit | create         | Append-only                      |
+| ZakatCalculation     | create         | Effectively immutable            |
+| SadaqahRecord        | create, update |                                  |
+| RecurringRule        | create, update |                                  |
+| Household            | update         | Name, member names               |
 
 ### What does NOT go into the queue
 
@@ -99,15 +99,15 @@ class SyncService {
   void onConnectivityRestored();
   void onAppForeground();
   Future<void> runManualSync();
-  
+
   // Internal
   Future<void> _processPendingQueue();
   Future<void> _uploadItem(SyncQueueEntry entry);
   Future<SyncResult> _writeToFirestore(SyncQueueEntry entry);
-  
+
   // Conflict handling
   void _handleConflict(SyncQueueEntry entry, FirestoreConflict conflict);
-  
+
   // Status
   Stream<SyncState> get syncStateStream;
 }
@@ -146,6 +146,7 @@ Every entity has a stable client-generated UUID. On upload:
 4. Firestore transaction: `if (document does not exist) → create`
 
 For ledger entries specifically, the Firestore rule uses:
+
 ```javascript
 !exists(/databases/.../ledgerEntries/$(entryId))
 ```
@@ -158,14 +159,14 @@ This means the second attempt to write the same entry ID returns a "permission d
 Future<SyncResult> _uploadItem(SyncQueueEntry item) async {
   try {
     final docRef = _firestoreRef(item);
-    
+
     // For append-only entities (ledger entries, audits)
     if (item.entityType == 'LedgerEntry' || item.entityType == 'ChildWithdrawalAudit') {
       await docRef.set(item.payloadAsMap());
       // If permission denied because it already exists, treat as success
       return SyncResult.success();
     }
-    
+
     // For other entities: use set with merge for update, or create for new
     if (item.changeType == SyncChangeType.create) {
       await docRef.set(item.payloadAsMap());
@@ -173,7 +174,7 @@ Future<SyncResult> _uploadItem(SyncQueueEntry item) async {
       await docRef.update(item.updatedFieldsAsMap());
     }
     return SyncResult.success();
-    
+
   } on FirebaseException catch (e) {
     if (e.code == 'permission-denied') {
       // Check if the document already exists with our content
@@ -202,6 +203,7 @@ In v1, the primary user is the only writer to their household data. Multi-device
 ### Conflict detection
 
 When uploading a financial operation to Firestore, a Firestore transaction reads the current state to check:
+
 1. Does the source account have sufficient balance (accounting for all already-synced operations)?
 2. Does the operation already exist?
 
@@ -212,6 +214,7 @@ If the balance check fails (because another device already drained the account),
 **Policy: Explicit, user-visible conflict resolution. No silent last-write-wins.**
 
 When a conflict is detected:
+
 1. The item is marked `conflict` in the sync queue.
 2. A conflict notification is shown to the user (banner + notification center).
 3. The user is presented with options:
@@ -224,19 +227,20 @@ This is conservative but correct. Financial data integrity is more important tha
 
 ### Conflict types (priority order)
 
-| Conflict | Auto-resolvable | User action |
-|---|---|---|
-| Duplicate operation ID (already synced) | Yes — treat as synced | None |
-| Amount mismatch for same ID | No | User reviews |
-| Balance insufficient at sync time | No | User reviews |
-| Schema version mismatch | No | App update required |
-| Account deleted on server | No | User reviews |
+| Conflict                                | Auto-resolvable       | User action         |
+| --------------------------------------- | --------------------- | ------------------- |
+| Duplicate operation ID (already synced) | Yes — treat as synced | None                |
+| Amount mismatch for same ID             | No                    | User reviews        |
+| Balance insufficient at sync time       | No                    | User reviews        |
+| Schema version mismatch                 | No                    | App update required |
+| Account deleted on server               | No                    | User reviews        |
 
 ---
 
 ## 7. Local-Only Mode
 
 Users can opt into local-only mode:
+
 - No Firebase account required.
 - No cloud sync.
 - Sync queue remains empty.
@@ -256,6 +260,7 @@ In v1, multi-device support is best-effort:
 - Conflict detection occurs at sync time (see above).
 
 Download sync (Firestore → local):
+
 - Firestore real-time listener on the household's sub-collections.
 - New documents are applied to local database in the order of `recordedAt`.
 - Already-existing local records are not overwritten (idempotent by document ID).
@@ -265,6 +270,7 @@ Download sync (Firestore → local):
 ## 9. Sign-Out Isolation
 
 When a user signs out:
+
 1. All pending sync items are flushed (attempted to sync before sign-out, if connected).
 2. The local SQLite database is **cleared** (all tables truncated, or database file deleted).
 3. All in-memory state (Riverpod providers) is reset.
@@ -280,17 +286,18 @@ A different user signing in receives a fresh, empty local database. Their data i
 
 The dashboard shows a sync status indicator:
 
-| State | Display |
-|---|---|
-| All synced | Small green dot, no text |
-| Syncing | Animated spinner, "جاري المزامنة..." |
-| Pending items | Orange dot, count of pending items |
-| Conflict | Red dot, "تعارض — يحتاج مراجعة" |
-| Error | Red dot, "خطأ في المزامنة" |
-| Local-only mode | Cloud-off icon, "وضع محلي" |
-| Offline | Grey dot, "غير متصل" |
+| State           | Display                              |
+| --------------- | ------------------------------------ |
+| All synced      | Small green dot, no text             |
+| Syncing         | Animated spinner, "جاري المزامنة..." |
+| Pending items   | Orange dot, count of pending items   |
+| Conflict        | Red dot, "تعارض — يحتاج مراجعة"      |
+| Error           | Red dot, "خطأ في المزامنة"           |
+| Local-only mode | Cloud-off icon, "وضع محلي"           |
+| Offline         | Grey dot, "غير متصل"                 |
 
 Tapping the indicator opens the sync detail screen showing:
+
 - Last successful sync time
 - Number of pending items
 - Any conflicts with details
@@ -300,13 +307,13 @@ Tapping the indicator opens the sync detail screen showing:
 
 ## 11. Retry Policy
 
-| Retry # | Delay |
-|---|---|
-| 1 | 30 seconds |
-| 2 | 2 minutes |
-| 3 | 10 minutes |
-| 4 | 30 minutes |
-| 5+ | 1 hour (maximum) |
+| Retry # | Delay            |
+| ------- | ---------------- |
+| 1       | 30 seconds       |
+| 2       | 2 minutes        |
+| 3       | 10 minutes       |
+| 4       | 30 minutes       |
+| 5+      | 1 hour (maximum) |
 
 After 10 consecutive failures, the item is marked `failed` and a notification is shown to the user.
 
@@ -317,6 +324,7 @@ After 10 consecutive failures, the item is marked `failed` and a notification is
 When a user first logs in with a Firebase account (after using local-only mode, or on a new device):
 
 **Upload scenario (local data → cloud, new account):**
+
 1. All local entities are added to the sync queue in dependency order.
 2. Household is uploaded first.
 3. Accounts are uploaded next.
@@ -324,6 +332,7 @@ When a user first logs in with a Firebase account (after using local-only mode, 
 5. Other entities follow.
 
 **Download scenario (existing cloud data → new device):**
+
 1. App authenticates with Firebase.
 2. App reads the household document for the authenticated UID.
 3. All sub-collections are downloaded in batches.
@@ -340,6 +349,7 @@ Downloaded ledger entries are NOT re-validated against financial invariants duri
 - The client that originally uploaded the data is designed to have validated it against local invariants before upload.
 
 However, after a full download sync, the application is designed to run a consistency check:
+
 1. Verifies all `operationId` references are complete (no orphaned half-transfers).
 2. Verifies all `accountId` references exist.
 3. Reports any inconsistencies in the sync log (not shown to user unless they open the sync diagnostics screen).
@@ -362,10 +372,12 @@ Each financial operation produces one or more ledger entries. The idempotency ke
 ### 14.2 Firestore document identifiers
 
 In Firestore:
+
 - `operations/{operationId}`: the operation document ID equals the operationId.
 - `ledgerEntries/{entryId}`: each ledger entry document ID equals the entry's `id` (not the operationId).
 
 The idempotency check for ledger entries in Firestore uses the **document existence check**:
+
 ```javascript
 !exists(/databases/.../ledgerEntries/$(entryId))
 ```
@@ -375,6 +387,7 @@ If the same entry is uploaded again with the same `entryId`, the Firestore rule 
 ### 14.3 Atomic local write boundary
 
 A complete financial operation is written to local SQLite inside a single database transaction. This transaction includes:
+
 - All ledger entries for the operation
 - The operation record itself
 - Any associated audit record (e.g., ChildWithdrawalAudit)
@@ -402,6 +415,7 @@ A transfer has two ledger entries. If network failure occurs after uploading the
 ### 14.6 Retry behavior
 
 When a sync queue item fails:
+
 1. The `retry_count` is incremented.
 2. The next retry is scheduled after the backoff delay (Section 11).
 3. On retry, the item is re-submitted with the same `entryId` and `operationId`.
@@ -410,6 +424,7 @@ When a sync queue item fails:
 ### 14.7 Duplicate execution from multiple devices
 
 If Device A and Device B both create a transfer from the same account while offline:
+
 - Both create their own `operationId` (different UUIDs).
 - Both upload on sync.
 - Both may succeed if the account has sufficient balance for each individually.
@@ -447,11 +462,11 @@ Backdated operations are uploaded in `recordedAt` order (FIFO in the sync queue)
 
 ### 14.11 Effective timestamp vs. creation timestamp
 
-| Field | Meaning | Mutable? |
-|---|---|---|
-| `effectiveDate` | User-chosen date of the financial event (YYYY-MM-DD) | No (immutable after creation) |
-| `recordedAt` | System timestamp when the entry was written (UTC instant) | No (immutable after creation) |
-| `syncedAt` | Timestamp when the entry was confirmed synced to Firestore | Updated by sync service |
+| Field           | Meaning                                                    | Mutable?                      |
+| --------------- | ---------------------------------------------------------- | ----------------------------- |
+| `effectiveDate` | User-chosen date of the financial event (YYYY-MM-DD)       | No (immutable after creation) |
+| `recordedAt`    | System timestamp when the entry was written (UTC instant)  | No (immutable after creation) |
+| `syncedAt`      | Timestamp when the entry was confirmed synced to Firestore | Updated by sync service       |
 
 Historical balance queries use `effectiveDate`. Sync ordering uses `recordedAt`. The sync status uses `syncedAt`.
 
@@ -466,6 +481,7 @@ The new user's sign-in triggers a fresh download from Firestore into the empty l
 ### 14.13 Backup import interaction with sync
 
 When a backup is imported with Replace mode:
+
 1. All sync queue entries are discarded (they would reference old entity IDs).
 2. The local database is replaced with the backup content.
 3. All imported entities are marked `sync_status = 'pending'`.
@@ -474,6 +490,7 @@ When a backup is imported with Replace mode:
 6. Items that conflict with existing Firestore content are marked `conflict`.
 
 When a backup is imported with Merge mode (add-only, no replace):
+
 1. Only entities with IDs not already in the local database are inserted.
 2. Entities already present are skipped (idempotent).
 3. No sync queue entries are created for already-synced items.

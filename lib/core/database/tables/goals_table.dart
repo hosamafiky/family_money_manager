@@ -22,7 +22,8 @@ class GoalsTable extends Table {
   TextColumn get householdId => text()();
 
   /// FK to financial_accounts.id — the dedicated goalReserve account.
-  TextColumn get reserveAccountId => text().references(FinancialAccounts, #id)();
+  TextColumn get reserveAccountId =>
+      text().references(FinancialAccounts, #id)();
 
   /// ISO 4217 currency code. Immutable after creation.
   TextColumn get currencyCode => text()();

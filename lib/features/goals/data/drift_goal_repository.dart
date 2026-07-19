@@ -3,9 +3,11 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
+import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
 import 'package:family_money_manager/features/goals/data/goal_repository.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
-import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart' show InsufficientFundsError;
+import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart'
+    show InsufficientFundsError;
 
 /// Drift-backed implementation of [GoalRepository].
 ///
@@ -30,34 +32,46 @@ final class DriftGoalRepository implements GoalRepository {
     required FinancialAccount reserveAccount,
     GoalInitialFunding? initialFunding,
   }) async {
+    final incomingPayload = _buildIdempotencyPayload(goal, initialRevision);
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    // Captured inside the transaction closure and read after it commits.
+    AppResult<SavingsGoal>? idempotencyResult;
+
     try {
-      // Idempotency check: same key + same payload → return existing goal.
-      // This pre-check avoids unnecessary transaction overhead on retries.
-      final existing = await _db
-          .customSelect(
-            'SELECT id, idempotency_payload FROM goals '
-            'WHERE household_id = ? AND idempotency_key = ?',
-            variables: [Variable.withString(goal.householdId), Variable.withString(goal.idempotencyKey)],
-          )
-          .get();
-
-      if (existing.isNotEmpty) {
-        final row = existing.first;
-        final storedPayload = row.read<String>('idempotency_payload');
-        final incomingPayload = _buildIdempotencyPayload(goal, initialRevision);
-        if (storedPayload == incomingPayload) {
-          final existingId = row.read<String>('id');
-          final found = await _findById(existingId);
-          if (found != null) return AppOk(found);
-        }
-        return const AppDuplicateConflict(messageKey: 'errorGoalIdempotencyConflict');
-      }
-
-      final payload = _buildIdempotencyPayload(goal, initialRevision);
-      final now = DateTime.now().toUtc().toIso8601String();
-
       await _db.transaction(() async {
-        // 1. Insert the goalReserve financial account.
+        // ── Step 1: Idempotency reservation (inside transaction) ─────────────
+        // Checking inside the transaction makes the check+insert atomic under
+        // SQLite WAL serialised writers: no TOCTOU window for concurrent callers.
+        final existing = await _db
+            .customSelect(
+              'SELECT id, idempotency_payload FROM goals '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(goal.householdId),
+                Variable.withString(goal.idempotencyKey),
+              ],
+            )
+            .get();
+
+        if (existing.isNotEmpty) {
+          final row = existing.first;
+          final storedPayload = row.read<String>('idempotency_payload');
+          if (storedPayload == incomingPayload) {
+            final existingId = row.read<String>('id');
+            final found = await _findById(existingId);
+            idempotencyResult = found != null
+                ? AppOk(found)
+                : const AppPersistenceFailure();
+          } else {
+            idempotencyResult = const AppDuplicateConflict(
+              messageKey: 'errorGoalIdempotencyConflict',
+            );
+          }
+          return; // Exit transaction cleanly; only reads occurred.
+        }
+
+        // ── Step 2: Insert the goalReserve financial account ─────────────────
         await _db
             .into(_db.financialAccounts)
             .insert(
@@ -80,7 +94,7 @@ final class DriftGoalRepository implements GoalRepository {
               ),
             );
 
-        // 2. Insert the goal row.
+        // ── Step 3: Insert the goal row ───────────────────────────────────────
         await _db
             .into(_db.goalsTable)
             .insert(
@@ -91,14 +105,14 @@ final class DriftGoalRepository implements GoalRepository {
                 currencyCode: goal.currencyCode,
                 status: goal.status.name,
                 idempotencyKey: goal.idempotencyKey,
-                idempotencyPayload: payload,
+                idempotencyPayload: incomingPayload,
                 createdAt: goal.createdAt,
                 completedAt: Value(goal.completedAt),
                 archivedAt: Value(goal.archivedAt),
               ),
             );
 
-        // 3. Insert the initial revision.
+        // ── Step 4: Insert the initial revision ───────────────────────────────
         await _db
             .into(_db.goalRevisionsTable)
             .insert(
@@ -117,9 +131,9 @@ final class DriftGoalRepository implements GoalRepository {
               ),
             );
 
-        // 4. Optional initial funding — all within the same transaction.
+        // ── Steps 5-10: Optional initial funding (all in the same transaction) ─
         if (initialFunding != null && initialFunding.amountMinorUnits > 0) {
-          // Balance check inside the transaction (TOCTOU-safe for SQLite WAL).
+          // Step 5: Balance check (TOCTOU-safe inside the write transaction).
           final balanceRows = await _db
               .customSelect(
                 'SELECT COALESCE(SUM(CASE WHEN direction = ? THEN amount_minor_units '
@@ -141,7 +155,7 @@ final class DriftGoalRepository implements GoalRepository {
             );
           }
 
-          // Insert transfer operation.
+          // Step 6: Insert transfer operation.
           await _db.customStatement(
             'INSERT INTO operations '
             '(id, household_id, type, effective_date, recorded_at, '
@@ -167,7 +181,7 @@ final class DriftGoalRepository implements GoalRepository {
             ],
           );
 
-          // Insert debit entry on source account.
+          // Step 7: Insert debit ledger entry on source account.
           await _db.customStatement(
             'INSERT INTO ledger_entries '
             '(id, operation_id, household_id, account_id, direction, '
@@ -189,7 +203,7 @@ final class DriftGoalRepository implements GoalRepository {
             ],
           );
 
-          // Insert credit entry on reserve account.
+          // Step 8: Insert credit ledger entry on reserve account.
           await _db.customStatement(
             'INSERT INTO ledger_entries '
             '(id, operation_id, household_id, account_id, direction, '
@@ -211,15 +225,21 @@ final class DriftGoalRepository implements GoalRepository {
             ],
           );
 
-          // Insert operation context.
+          // Step 9: Insert operation context.
           await _db.customStatement(
             'INSERT INTO operation_contexts '
             '(operation_id, household_id, is_recurring, note, created_at) '
             'VALUES (?, ?, ?, ?, ?)',
-            [initialFunding.operationId, goal.householdId, 0, initialFunding.description, now],
+            [
+              initialFunding.operationId,
+              goal.householdId,
+              0,
+              initialFunding.description,
+              now,
+            ],
           );
 
-          // Insert goal movement.
+          // Step 10: Insert goal movement (validate_funding_movement trigger fires here).
           await _db
               .into(_db.goalMovementsTable)
               .insert(
@@ -235,6 +255,7 @@ final class DriftGoalRepository implements GoalRepository {
         }
       });
 
+      if (idempotencyResult != null) return idempotencyResult!;
       return AppOk(goal);
     } on InsufficientFundsError {
       return const AppInsufficientFunds();
@@ -258,7 +279,10 @@ final class DriftGoalRepository implements GoalRepository {
   // ── listGoals ─────────────────────────────────────────────────────────────
 
   @override
-  Future<AppResult<List<SavingsGoal>>> listGoals({required String householdId, bool includeArchived = false}) async {
+  Future<AppResult<List<SavingsGoal>>> listGoals({
+    required String householdId,
+    bool includeArchived = false,
+  }) async {
     try {
       final rows = await _db
           .customSelect(
@@ -283,12 +307,44 @@ final class DriftGoalRepository implements GoalRepository {
   // ── updateGoalStatus ──────────────────────────────────────────────────────
 
   @override
-  Future<AppResult<void>> updateGoalStatus({required String goalId, required GoalStatus status, String? completedAt, String? archivedAt}) async {
+  Future<AppResult<void>> updateGoalStatus({
+    required String goalId,
+    required GoalStatus status,
+    String? completedAt,
+    String? archivedAt,
+  }) async {
     try {
-      await (_db.update(_db.goalsTable)..where((t) => t.id.equals(goalId))).write(
-        GoalsTableCompanion(status: Value(status.name), completedAt: Value(completedAt), archivedAt: Value(archivedAt)),
+      await (_db.update(
+        _db.goalsTable,
+      )..where((t) => t.id.equals(goalId))).write(
+        GoalsTableCompanion(
+          status: Value(status.name),
+          completedAt: Value(completedAt),
+          archivedAt: Value(archivedAt),
+        ),
       );
       return const AppOk(null);
+    } on Exception catch (_) {
+      return const AppPersistenceFailure();
+    }
+  }
+
+  // ── completeGoal ──────────────────────────────────────────────────────────
+
+  @override
+  Future<AppResult<SavingsGoal>> completeGoal(CompleteGoalParams params) async {
+    try {
+      await (_db.update(
+        _db.goalsTable,
+      )..where((t) => t.id.equals(params.goalId))).write(
+        GoalsTableCompanion(
+          status: Value(GoalStatus.completed.name),
+          completedAt: Value(DateTime.now().toUtc().toIso8601String()),
+        ),
+      );
+      final found = await _findById(params.goalId);
+      if (found == null) return const AppNotFound();
+      return AppOk(found);
     } on Exception catch (_) {
       return const AppPersistenceFailure();
     }
@@ -385,13 +441,19 @@ final class DriftGoalRepository implements GoalRepository {
   // This is the canonical single-source-of-truth balance; it is never stored.
 
   @override
-  Future<AppResult<int>> getReserveBalance({required String reserveAccountId, required String householdId}) async {
+  Future<AppResult<int>> getReserveBalance({
+    required String reserveAccountId,
+    required String householdId,
+  }) async {
     try {
       final entries = await _db
           .customSelect(
             'SELECT direction, amount_minor_units FROM ledger_entries '
             'WHERE account_id = ? AND household_id = ?',
-            variables: [Variable.withString(reserveAccountId), Variable.withString(householdId)],
+            variables: [
+              Variable.withString(reserveAccountId),
+              Variable.withString(householdId),
+            ],
           )
           .get();
 
@@ -415,13 +477,21 @@ final class DriftGoalRepository implements GoalRepository {
 
   /// Loads a [SavingsGoal] with its current (latest) revision.
   Future<SavingsGoal?> _findById(String goalId) async {
-    final goalRows = await _db.customSelect('SELECT * FROM goals WHERE id = ?', variables: [Variable.withString(goalId)]).get();
+    final goalRows = await _db
+        .customSelect(
+          'SELECT * FROM goals WHERE id = ?',
+          variables: [Variable.withString(goalId)],
+        )
+        .get();
     if (goalRows.isEmpty) return null;
     final g = goalRows.first;
 
     // Load the most recent revision (by created_at DESC, then id DESC as tie-breaker).
     final revRows = await _db
-        .customSelect('SELECT * FROM goal_revisions WHERE goal_id = ? ORDER BY created_at DESC, id DESC LIMIT 1', variables: [Variable.withString(goalId)])
+        .customSelect(
+          'SELECT * FROM goal_revisions WHERE goal_id = ? ORDER BY created_at DESC, id DESC LIMIT 1',
+          variables: [Variable.withString(goalId)],
+        )
         .get();
     if (revRows.isEmpty) return null;
     final rev = revRows.first;
@@ -473,7 +543,9 @@ final class DriftGoalRepository implements GoalRepository {
     goalId: row.goalId,
     householdId: row.householdId,
     transferOperationId: row.transferOperationId,
-    movementType: row.movementType == 'funding' ? GoalMovementType.funding : GoalMovementType.release,
+    movementType: row.movementType == 'funding'
+        ? GoalMovementType.funding
+        : GoalMovementType.release,
     createdAt: row.createdAt,
     releaseReason: row.releaseReason,
   );

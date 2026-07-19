@@ -10,11 +10,11 @@
 
 ## 1. Validation Commands and Exit Codes
 
-| Command | Exit Code | Result |
-|---|---|---|
-| `dart format . ` | 0 | No changes required |
-| `flutter analyze` | 0 | No issues found |
-| `flutter test` | 0 | 259/259 passed |
+| Command           | Exit Code | Result              |
+| ----------------- | --------- | ------------------- |
+| `dart format . `  | 0         | No changes required |
+| `flutter analyze` | 0         | No issues found     |
+| `flutter test`    | 0         | 259/259 passed      |
 
 No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 
@@ -24,51 +24,53 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 
 ### Phase 2 Objectives → Implementation
 
-| Objective | Implemented | Tested |
-|---|---|---|
-| Integer-minor-unit money value type | `lib/core/financial/money.dart` | Unit-tested (money_test.dart, 45+ cases) |
-| Currency type with minor-unit scales | `lib/core/financial/currency.dart` | Unit-tested |
-| Owner and fund purpose enums | `lib/core/financial/account_enums.dart` | Unit-tested |
-| Ledger-backed account model | `lib/features/accounts/domain/financial_account.dart` | Unit-tested |
-| Account repository (abstract + Drift) | `account_repository.dart`, `drift_account_repository.dart` | Database-tested |
-| Income operation | `DriftLedgerRepository.recordIncome` | Database-tested |
-| Expense operation | `DriftLedgerRepository.recordExpense` | Database-tested |
-| Transfer operation | `DriftLedgerRepository.executeTransfer` | Database-tested |
-| Opening balance operation | `DriftLedgerRepository.recordOpeningBalance` | Database-tested |
-| Adjustment operation | `DriftLedgerRepository.recordAdjustment` | Database-tested |
-| Reversal operation | `DriftLedgerRepository.reverseOperation` | Database-tested |
-| Audit events (child withdrawal) | `child_withdrawal_audit.dart`, `drift_ledger_repository.dart` | Unit-tested + DB-tested |
-| Historical balances | `LedgerCalculator.historicalBalance` | Unit-tested + DB-tested |
-| Financial-invariant tests | `ledger_invariants_test.dart` | Property-tested (500+ random trials) |
-| Drift schema (5 tables) | `app_database.dart` + tables | Database-tested |
-| Repository boundaries | Abstract interfaces + Drift implementations | Enforced |
+| Objective                             | Implemented                                                   | Tested                                   |
+| ------------------------------------- | ------------------------------------------------------------- | ---------------------------------------- |
+| Integer-minor-unit money value type   | `lib/core/financial/money.dart`                               | Unit-tested (money_test.dart, 45+ cases) |
+| Currency type with minor-unit scales  | `lib/core/financial/currency.dart`                            | Unit-tested                              |
+| Owner and fund purpose enums          | `lib/core/financial/account_enums.dart`                       | Unit-tested                              |
+| Ledger-backed account model           | `lib/features/accounts/domain/financial_account.dart`         | Unit-tested                              |
+| Account repository (abstract + Drift) | `account_repository.dart`, `drift_account_repository.dart`    | Database-tested                          |
+| Income operation                      | `DriftLedgerRepository.recordIncome`                          | Database-tested                          |
+| Expense operation                     | `DriftLedgerRepository.recordExpense`                         | Database-tested                          |
+| Transfer operation                    | `DriftLedgerRepository.executeTransfer`                       | Database-tested                          |
+| Opening balance operation             | `DriftLedgerRepository.recordOpeningBalance`                  | Database-tested                          |
+| Adjustment operation                  | `DriftLedgerRepository.recordAdjustment`                      | Database-tested                          |
+| Reversal operation                    | `DriftLedgerRepository.reverseOperation`                      | Database-tested                          |
+| Audit events (child withdrawal)       | `child_withdrawal_audit.dart`, `drift_ledger_repository.dart` | Unit-tested + DB-tested                  |
+| Historical balances                   | `LedgerCalculator.historicalBalance`                          | Unit-tested + DB-tested                  |
+| Financial-invariant tests             | `ledger_invariants_test.dart`                                 | Property-tested (500+ random trials)     |
+| Drift schema (5 tables)               | `app_database.dart` + tables                                  | Database-tested                          |
+| Repository boundaries                 | Abstract interfaces + Drift implementations                   | Enforced                                 |
 
 ### Financial Invariants → Tests
 
-| Invariant | Test File | Classification |
-|---|---|---|
-| INV-001: balance = Σcredits − Σdebits | ledger_calculator_test + ledger_invariants_test | Unit-tested + Property-tested |
-| INV-002: Ledger entries immutable (no update/delete) | ledger_repository_db_test (trigger tests) | Database-tested |
-| INV-003: Transfer neutrality | ledger_calculator_test + ledger_invariants_test + ledger_repository_db_test | Unit + Property + DB-tested |
-| INV-004: Reversal nets to zero | ledger_calculator_test + ledger_invariants_test + ledger_repository_db_test | Unit + Property + DB-tested |
-| INV-005: No balance manipulation (derived only) | All balance tests use LedgerCalculator | Unit-tested |
-| INV-006: Protected withdrawal audit required | child_withdrawal_audit_test + ledger_repository_db_test | Unit-tested + DB-tested |
-| INV-007: Atomic writes in transactions | DriftLedgerRepository (all writes) | DB-tested |
-| INV-008: Idempotency (duplicate = alreadyExists) | ledger_repository_db_test (dup tests) | Database-tested |
-| INV-009: Net worth = Σ(included account balances) | balanceRepo.netWorthBalances | Documented |
-| INV-011: Transfer excluded from income/expense reports | operation_test + ledger_invariants_test | Unit-tested |
-| INV-012: Deterministic historical balances | ledger_calculator_test + ledger_invariants_test | Unit + Property-tested |
-| INV-015: Archived accounts preserve history | financial_account_test | Unit-tested |
+| Invariant                                              | Test File                                                                   | Classification                |
+| ------------------------------------------------------ | --------------------------------------------------------------------------- | ----------------------------- |
+| INV-001: balance = Σcredits − Σdebits                  | ledger_calculator_test + ledger_invariants_test                             | Unit-tested + Property-tested |
+| INV-002: Ledger entries immutable (no update/delete)   | ledger_repository_db_test (trigger tests)                                   | Database-tested               |
+| INV-003: Transfer neutrality                           | ledger_calculator_test + ledger_invariants_test + ledger_repository_db_test | Unit + Property + DB-tested   |
+| INV-004: Reversal nets to zero                         | ledger_calculator_test + ledger_invariants_test + ledger_repository_db_test | Unit + Property + DB-tested   |
+| INV-005: No balance manipulation (derived only)        | All balance tests use LedgerCalculator                                      | Unit-tested                   |
+| INV-006: Protected withdrawal audit required           | child_withdrawal_audit_test + ledger_repository_db_test                     | Unit-tested + DB-tested       |
+| INV-007: Atomic writes in transactions                 | DriftLedgerRepository (all writes)                                          | DB-tested                     |
+| INV-008: Idempotency (duplicate = alreadyExists)       | ledger_repository_db_test (dup tests)                                       | Database-tested               |
+| INV-009: Net worth = Σ(included account balances)      | balanceRepo.netWorthBalances                                                | Documented                    |
+| INV-011: Transfer excluded from income/expense reports | operation_test + ledger_invariants_test                                     | Unit-tested                   |
+| INV-012: Deterministic historical balances             | ledger_calculator_test + ledger_invariants_test                             | Unit + Property-tested        |
+| INV-015: Archived accounts preserve history            | financial_account_test                                                      | Unit-tested                   |
 
 ---
 
 ## 3. Financial Entities Implemented
 
 ### Value Types
+
 - **`Money`** — immutable, stores only `int minorUnits`, includes overflow detection, cross-currency protection, allocation, serialization, and redacted `toString()`
 - **`Currency`** — enum of ISO 4217 codes with `minorUnitScale` per currency (EGP=2, JPY=0, KWD=3, etc.)
 
 ### Enums
+
 - **`FinancialAccountType`** — 12 types, `requiresProtectedWithdrawalAudit` flag on `childProtectedFund`
 - **`AccountOwnerType`** — user, spouse, household, child, shared
 - **`FundPurpose`** — 10 purposes
@@ -78,6 +80,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - **`ExpenseScope`**, **`HouseholdMemberRole`**, **`SyncStatus`**
 
 ### Domain Entities
+
 - **`FinancialAccount`** — immutable entity; `type` and `currencyCode` excluded from `copyWith`; `requiresWithdrawalAudit`, `isChildProtectedFund` derived predicates
 - **`CreateAccountParams`** — parameter object for account creation
 - **`LedgerEntryRecord`** — pure projection for balance calculations (no Drift dependency)
@@ -86,6 +89,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - **`ChildWithdrawalAuditParams`** — caller-constructed params; enforces `warningShown=true` by assertion
 
 ### Operation Params
+
 - `RecordIncomeParams` — assert `amountMinorUnits > 0`
 - `RecordExpenseParams` — assert `amountMinorUnits > 0`
 - `ExecuteTransferParams` — assert `amountMinorUnits > 0`
@@ -94,6 +98,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `ReverseOperationParams` — optional `reason`
 
 ### Error Types
+
 - `CurrencyMismatchError`, `MoneyOverflowError` (Money layer)
 - `MissingProtectedWithdrawalAuditError`, `InsufficientFundsError` (domain layer)
 - `SameAccountTransferError`, `CurrencyMismatchTransferError`, `ArchivedAccountTransferError` (ledger layer)
@@ -104,23 +109,25 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 
 ## 4. Operation Types Implemented
 
-| Type | Direction | Entries | Protected Fund Rule |
-|---|---|---|---|
-| Opening Balance | Credit destination | 1 credit (`openingBalance`) | N/A |
-| Income | Credit destination | 1 credit (`income`) | N/A |
-| Expense | Debit source | 1 debit (`expense`) | Required if protected |
-| Transfer | Debit source + Credit destination | 2 entries (`transferOut`, `transferIn`) | Required if source protected |
-| Adjustment (credit) | Credit account | 1 credit (`adjustmentCredit`) | N/A |
-| Adjustment (debit) | Debit account | 1 debit (`adjustmentDebit`) | Required if protected |
-| Reversal | Mirror of original | Same count as original (reversed direction) | Required for any reversed debit on protected account |
+| Type                | Direction                         | Entries                                     | Protected Fund Rule                                  |
+| ------------------- | --------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| Opening Balance     | Credit destination                | 1 credit (`openingBalance`)                 | N/A                                                  |
+| Income              | Credit destination                | 1 credit (`income`)                         | N/A                                                  |
+| Expense             | Debit source                      | 1 debit (`expense`)                         | Required if protected                                |
+| Transfer            | Debit source + Credit destination | 2 entries (`transferOut`, `transferIn`)     | Required if source protected                         |
+| Adjustment (credit) | Credit account                    | 1 credit (`adjustmentCredit`)               | N/A                                                  |
+| Adjustment (debit)  | Debit account                     | 1 debit (`adjustmentDebit`)                 | Required if protected                                |
+| Reversal            | Mirror of original                | Same count as original (reversed direction) | Required for any reversed debit on protected account |
 
 **Transfer rules:**
+
 - Source ≠ Destination (SameAccountTransferError)
 - Same currency in V1 (CurrencyMismatchTransferError)
 - No archived accounts (ArchivedAccountTransferError)
 - Both entries written atomically
 
 **Reversal rules:**
+
 - Original must exist (OperationNotFoundError)
 - Original must not already be reversed (DuplicateReversalError)
 - Reversal has its own `reversalOperationId` as idempotency key
@@ -132,13 +139,13 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 
 ### Tables
 
-| Table | Rows | Key Constraints |
-|---|---|---|
-| `households` | Root household | PK: `id` |
-| `financial_accounts` | Account metadata | PK: `id`; FK → `households`; UNIQUE `id` per household |
-| `operations` | Operation records | PK: `id`; FK → `households`, `financial_accounts` (source/dest) |
-| `ledger_entries` | Individual entries | PK: `id`; FK → `operations`, `households`, `financial_accounts` |
-| `child_withdrawal_audits` | Protected-fund audit | PK: `id`; FK → `operations`; UNIQUE `operation_id` |
+| Table                     | Rows                 | Key Constraints                                                 |
+| ------------------------- | -------------------- | --------------------------------------------------------------- |
+| `households`              | Root household       | PK: `id`                                                        |
+| `financial_accounts`      | Account metadata     | PK: `id`; FK → `households`; UNIQUE `id` per household          |
+| `operations`              | Operation records    | PK: `id`; FK → `households`, `financial_accounts` (source/dest) |
+| `ledger_entries`          | Individual entries   | PK: `id`; FK → `operations`, `households`, `financial_accounts` |
+| `child_withdrawal_audits` | Protected-fund audit | PK: `id`; FK → `operations`; UNIQUE `operation_id`              |
 
 ### Additional Constraints (applied via custom SQL in `onCreate`)
 
@@ -150,10 +157,12 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - Performance indexes on `account_id`, `operation_id`, `effective_date`, `household_id`, `type`, `is_archived`
 
 ### PRAGMA settings (in `beforeOpen`)
+
 - `PRAGMA journal_mode = WAL` — for concurrent read safety
 - `PRAGMA foreign_keys = ON` — enforces FK integrity
 
 ### Schema Version: 1
+
 - `onUpgrade` hook reserved for future migrations (currently empty)
 
 ---
@@ -161,6 +170,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 ## 6. Repository Boundaries
 
 ### AccountRepository (abstract interface)
+
 - `createAccount(CreateAccountParams)` → `FinancialAccount`
 - `findById(id, householdId)` → `FinancialAccount?`
 - `findByHousehold(householdId, {includeArchived})` → `List<FinancialAccount>`
@@ -169,6 +179,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `updateAccount(id, householdId, ...mutable fields...)` → `FinancialAccount`
 
 ### LedgerRepository (abstract interface)
+
 - `recordIncome(RecordIncomeParams)` → `IdempotentOperationResult`
 - `recordExpense(RecordExpenseParams, {auditParams?})` → `IdempotentOperationResult`
 - `executeTransfer(ExecuteTransferParams, {auditParams?})` → `IdempotentOperationResult`
@@ -180,11 +191,13 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `operationsInRange(householdId, fromDate, toDate)` → `List<Operation>`
 
 ### BalanceRepository (abstract interface)
+
 - `currentBalanceMinorUnits(accountId, householdId)` → `int`
 - `historicalBalanceMinorUnits(accountId, householdId, asOfDate)` → `int`
 - `netWorthBalances(householdId)` → `List<AccountBalance>`
 
 ### LedgerCalculator (pure static class — no Flutter/Drift dependency)
+
 - `balance(accountId, entries, currency)` → `Money`
 - `historicalBalance(accountId, entries, currency, asOfDate)` → `Money`
 - `totalBalance(List<Money>)` → `Money`
@@ -196,6 +209,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 ### Unit tests (`test/unit/`)
 
 **`money_test.dart`** — 45 tests
+
 - Currency enum: fromCode, isSupported, minorUnitScale, error cases
 - Money construction: positive, zero, negative, fromMinorUnits, invalid currency
 - Predicates: isZero, isPositive, isNegative
@@ -210,6 +224,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - Different minor-unit scales: JPY (0), KWD (3), EGP (2)
 
 **`ledger_calculator_test.dart`** — 19 tests
+
 - balance: empty, single credit, credit+debit, multi-entry, cross-account filter, opening balance, reversal pair net, deficit
 - historicalBalance: future exclusion, exact-date inclusion, all-future returns zero, backdated, reversal within window
 - totalBalance: empty (EGP default), sum, single, negatives
@@ -219,6 +234,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - Deterministic ordering (order independence)
 
 **`ledger_invariants_test.dart`** — 7 test groups (500+ random trials)
+
 - INV-001: 200 random entry sequences, balance = Σcredits − Σdebits
 - INV-003: 100 random transfers, total always preserved
 - INV-004: 100 random reversal pairs, balance always restored
@@ -228,6 +244,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - Money arithmetic properties: commutativity, identity, subtraction identity, double negation, allocation sum (50 trials each)
 
 **`financial_account_test.dart`** — 19 tests
+
 - Construction and field assignment
 - Immutability: type not in copyWith, currencyCode not in copyWith, id/householdId preserved
 - copyWith: mutable fields updatable
@@ -238,6 +255,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - CreateAccountParams construction
 
 **`child_withdrawal_audit_test.dart`** — 9 tests
+
 - Valid construction
 - Assertions: warningShown=false, empty reason, amountMinorUnits=0
 - Equality by id
@@ -245,6 +263,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - Error type string contents
 
 **`operation_test.dart`** — 25 tests
+
 - Operation construction, equality
 - RecordIncomeParams: valid, zero/negative amount asserts
 - RecordExpenseParams: valid, non-positive asserts
@@ -259,6 +278,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 ### Database tests (`test/database/`)
 
 **`ledger_repository_db_test.dart`** — 29 tests (in-memory SQLite via `AppDatabase.forTesting()`)
+
 - Account CRUD: create, retrieve, duplicate ID throws, findById null, findByHousehold excludes archived, includeArchived returns all, double-archive throws
 - Income: create, duplicate ID → alreadyExists (balance not doubled)
 - Expense: create, duplicate → alreadyExists
@@ -272,6 +292,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - hasOpeningBalance: before/after
 
 ### Existing tests (Phase 1 — unchanged)
+
 - `redacted_logger_test.dart` — 20 tests
 - `app_error_test.dart` — 8 tests
 - `app_config_test.dart` — 5 tests
@@ -287,6 +308,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 ### New (Phase 2)
 
 **Core financial layer:**
+
 - `lib/core/financial/currency.dart`
 - `lib/core/financial/money.dart`
 - `lib/core/financial/account_enums.dart`
@@ -294,6 +316,7 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `lib/core/financial/ledger_calculator.dart`
 
 **Database:**
+
 - `lib/core/database/app_database.dart`
 - `lib/core/database/app_database.g.dart` (generated)
 - `lib/core/database/tables/households_table.dart`
@@ -303,11 +326,13 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `lib/core/database/tables/child_withdrawal_audits_table.dart`
 
 **Accounts feature:**
+
 - `lib/features/accounts/domain/financial_account.dart`
 - `lib/features/accounts/data/account_repository.dart`
 - `lib/features/accounts/data/drift_account_repository.dart`
 
 **Ledger feature:**
+
 - `lib/features/ledger/domain/ledger_entry.dart`
 - `lib/features/ledger/domain/operation.dart`
 - `lib/features/ledger/domain/child_withdrawal_audit.dart`
@@ -315,10 +340,12 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `lib/features/ledger/data/drift_ledger_repository.dart`
 
 **Balance feature:**
+
 - `lib/features/balance/domain/balance_repository.dart`
 - `lib/features/balance/data/drift_balance_repository.dart`
 
 **Tests:**
+
 - `test/unit/core/financial/money_test.dart`
 - `test/unit/core/financial/ledger_calculator_test.dart`
 - `test/unit/core/financial/ledger_invariants_test.dart`
@@ -328,59 +355,62 @@ No APK, App Bundle, iOS, emulator, simulator, or device build was performed.
 - `test/database/ledger_repository_db_test.dart`
 
 ### Modified (Phase 2)
+
 - `pubspec.yaml` — added `drift`, `drift_flutter`, `uuid`, `path_provider`, `meta`; added `sqlite3mc` hook
 
 ---
 
 ## 9. Dependencies and Resolved Versions
 
-| Package | Version | Role |
-|---|---|---|
-| `drift` | 2.34.2 | Type-safe SQLite ORM |
-| `drift_flutter` | 0.13.0 | Flutter SQLite executor |
-| `drift_dev` | 2.34.0 | Code generation |
-| `sqlite3` | 3.4.0 | SQLite native library (with sqlite3mc hook) |
-| `uuid` | 1.4.0 | UUID generation |
-| `path_provider` | 2.1.6 | Application documents directory |
-| `meta` | 1.9.1 | `@immutable` annotation |
+| Package         | Version | Role                                        |
+| --------------- | ------- | ------------------------------------------- |
+| `drift`         | 2.34.2  | Type-safe SQLite ORM                        |
+| `drift_flutter` | 0.13.0  | Flutter SQLite executor                     |
+| `drift_dev`     | 2.34.0  | Code generation                             |
+| `sqlite3`       | 3.4.0   | SQLite native library (with sqlite3mc hook) |
+| `uuid`          | 1.4.0   | UUID generation                             |
+| `path_provider` | 2.1.6   | Application documents directory             |
+| `meta`          | 1.9.1   | `@immutable` annotation                     |
 
 **sqlite3mc hook** (in `pubspec.yaml`):
+
 ```yaml
 hooks:
   user_defines:
     sqlite3:
       source: sqlite3mc
 ```
+
 The native binary is encryption-ready. Key injection deferred to security-hardening phase.
 
 ---
 
 ## 10. Claim Classification
 
-| Claim | Classification |
-|---|---|
-| Money type stores only integers | Unit-tested |
-| Money overflow is detected | Unit-tested |
-| Cross-currency arithmetic rejected | Unit-tested |
-| Currency minor-unit scales correct | Unit-tested |
-| Account type immutable after creation | Unit-tested |
-| Account currency immutable after creation | Unit-tested |
-| Balance = Σcredits − Σdebits | Unit-tested + Property-tested |
-| Transfer neutrality | Unit + Property + DB-tested |
-| Reversal nets to zero | Unit + Property + DB-tested |
-| Idempotent operations | Database-tested |
-| Ledger entries immutable (triggers) | Database-tested |
-| Protected withdrawal requires audit | Unit-tested + DB-tested |
-| Historical balance excludes future entries | Unit + DB-tested |
-| Balance is order-independent | Unit + Property-tested |
-| Transfers excluded from income/expense reports | Unit-tested |
-| Atomic writes (transaction) | Database-tested |
-| Opening balance distinguishable from income | Unit-tested |
-| Drift schema generates cleanly | Build-verified (build_runner) |
-| Production app builds (release APK/iOS) | **UNVERIFIED** (deferred per scope) |
-| Android SQLite3MultipleCiphers runtime | **UNVERIFIED** (deferred per Phase 1.5A decision) |
-| Encrypted key injection in production | **DOCUMENTED ONLY** (deferred to security phase) |
-| Cloud sync or conflict resolution | **NOT IMPLEMENTED** (out of scope) |
+| Claim                                          | Classification                                    |
+| ---------------------------------------------- | ------------------------------------------------- |
+| Money type stores only integers                | Unit-tested                                       |
+| Money overflow is detected                     | Unit-tested                                       |
+| Cross-currency arithmetic rejected             | Unit-tested                                       |
+| Currency minor-unit scales correct             | Unit-tested                                       |
+| Account type immutable after creation          | Unit-tested                                       |
+| Account currency immutable after creation      | Unit-tested                                       |
+| Balance = Σcredits − Σdebits                   | Unit-tested + Property-tested                     |
+| Transfer neutrality                            | Unit + Property + DB-tested                       |
+| Reversal nets to zero                          | Unit + Property + DB-tested                       |
+| Idempotent operations                          | Database-tested                                   |
+| Ledger entries immutable (triggers)            | Database-tested                                   |
+| Protected withdrawal requires audit            | Unit-tested + DB-tested                           |
+| Historical balance excludes future entries     | Unit + DB-tested                                  |
+| Balance is order-independent                   | Unit + Property-tested                            |
+| Transfers excluded from income/expense reports | Unit-tested                                       |
+| Atomic writes (transaction)                    | Database-tested                                   |
+| Opening balance distinguishable from income    | Unit-tested                                       |
+| Drift schema generates cleanly                 | Build-verified (build_runner)                     |
+| Production app builds (release APK/iOS)        | **UNVERIFIED** (deferred per scope)               |
+| Android SQLite3MultipleCiphers runtime         | **UNVERIFIED** (deferred per Phase 1.5A decision) |
+| Encrypted key injection in production          | **DOCUMENTED ONLY** (deferred to security phase)  |
+| Cloud sync or conflict resolution              | **NOT IMPLEMENTED** (out of scope)                |
 
 ---
 
@@ -454,6 +484,7 @@ Unstaged Phase 2 changes (to be committed):
 **Phase 2 is complete.**
 
 Next phase (when approved):
+
 - Household UI: account list, account creation, balance display
 - Phase 3 feature: income/expense entry screens
 

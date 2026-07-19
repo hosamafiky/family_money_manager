@@ -3,12 +3,15 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
+import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
 import 'package:family_money_manager/features/goals/data/goal_repository.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
 import 'package:family_money_manager/features/ledger/domain/operation.dart';
 import 'package:uuid/uuid.dart';
+
+export 'complete_goal_params.dart';
 
 // ── Shared helpers ─────────────────────────────────────────────────────────
 
@@ -29,13 +32,22 @@ bool _isSupportedCurrency(String code) {
 AppResult<T>? _validateFundingSource<T>(FinancialAccount? source) {
   if (source == null) return const AppNotFound();
   if (source.isArchived) {
-    return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorAccountArchived');
+    return const AppValidationFailure(
+      field: 'sourceAccountId',
+      messageKey: 'errorAccountArchived',
+    );
   }
   if (source.isProtected) {
-    return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorGoalSourceIsProtected');
+    return const AppValidationFailure(
+      field: 'sourceAccountId',
+      messageKey: 'errorGoalSourceIsProtected',
+    );
   }
   if (source.type == FinancialAccountType.goalReserve) {
-    return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorGoalSourceIsReserve');
+    return const AppValidationFailure(
+      field: 'sourceAccountId',
+      messageKey: 'errorGoalSourceIsReserve',
+    );
   }
   return null;
 }
@@ -69,13 +81,22 @@ final class CreateGoalUseCase {
   }) async {
     // ── Validation ──────────────────────────────────────────────────────────
     if (goalName.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorGoalNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorGoalNameEmpty',
+      );
     }
     if (targetMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'targetMinorUnits', messageKey: 'errorGoalTargetZero');
+      return const AppValidationFailure(
+        field: 'targetMinorUnits',
+        messageKey: 'errorGoalTargetZero',
+      );
     }
     if (currencyCode.isEmpty || !_isSupportedCurrency(currencyCode)) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorGoalCurrencyRequired');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorGoalCurrencyRequired',
+      );
     }
 
     // ── Build domain objects ─────────────────────────────────────────────────
@@ -130,12 +151,20 @@ final class CreateGoalUseCase {
 
     // ── Validate optional initial funding source ─────────────────────────────
     GoalInitialFunding? initialFunding;
-    if (initialFundingMinorUnits > 0 && initialFundingSourceAccountId != null && initialFundingSourceAccountId.isNotEmpty) {
-      final source = await _accounts.findById(id: initialFundingSourceAccountId, householdId: householdId);
+    if (initialFundingMinorUnits > 0 &&
+        initialFundingSourceAccountId != null &&
+        initialFundingSourceAccountId.isNotEmpty) {
+      final source = await _accounts.findById(
+        id: initialFundingSourceAccountId,
+        householdId: householdId,
+      );
       final sourceError = _validateFundingSource<SavingsGoal>(source);
       if (sourceError != null) return sourceError;
       if (source!.currencyCode != currencyCode) {
-        return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+        return const AppValidationFailure(
+          field: 'currencyCode',
+          messageKey: 'errorCurrencyMismatch',
+        );
       }
 
       initialFunding = GoalInitialFunding(
@@ -144,7 +173,10 @@ final class CreateGoalUseCase {
         sourceAccountId: initialFundingSourceAccountId,
         amountMinorUnits: initialFundingMinorUnits,
         currencyCode: currencyCode,
-        effectiveDate: DateTime.now().toUtc().toIso8601String().substring(0, 10),
+        effectiveDate: DateTime.now().toUtc().toIso8601String().substring(
+          0,
+          10,
+        ),
         description: 'Initial goal funding: ${goalName.trim()}',
         movementId: _uuid.v4(),
         movementCreatedAt: now,
@@ -152,7 +184,12 @@ final class CreateGoalUseCase {
     }
 
     // ── Persist goal + reserve account + optional initial funding atomically ─
-    final createResult = await _goals.createGoal(goal: goal, initialRevision: revision, reserveAccount: reserveAccount, initialFunding: initialFunding);
+    final createResult = await _goals.createGoal(
+      goal: goal,
+      initialRevision: revision,
+      reserveAccount: reserveAccount,
+      initialFunding: initialFunding,
+    );
     if (createResult is! AppOk<SavingsGoal>) return createResult;
 
     return AppOk(createResult.value);
@@ -162,10 +199,13 @@ final class CreateGoalUseCase {
 // ── FundGoalUseCase ────────────────────────────────────────────────────────
 
 final class FundGoalUseCase {
-  const FundGoalUseCase({required GoalRepository goalRepository, required AccountRepository accountRepository, required LedgerRepository ledgerRepository})
-    : _goals = goalRepository,
-      _accounts = accountRepository,
-      _ledger = ledgerRepository;
+  const FundGoalUseCase({
+    required GoalRepository goalRepository,
+    required AccountRepository accountRepository,
+    required LedgerRepository ledgerRepository,
+  }) : _goals = goalRepository,
+       _accounts = accountRepository,
+       _ledger = ledgerRepository;
 
   final GoalRepository _goals;
   final AccountRepository _accounts;
@@ -179,7 +219,10 @@ final class FundGoalUseCase {
     required String idempotencyKey,
   }) async {
     if (amountMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'amount', messageKey: 'error_amount_must_be_positive');
+      return const AppValidationFailure(
+        field: 'amount',
+        messageKey: 'error_amount_must_be_positive',
+      );
     }
 
     // Load goal.
@@ -189,24 +232,40 @@ final class FundGoalUseCase {
     }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
-    if (goal.status != GoalStatus.active && goal.status != GoalStatus.targetReached) {
-      return const AppValidationFailure(field: 'goalId', messageKey: 'errorGoalNotActive');
+    if (goal.status != GoalStatus.active &&
+        goal.status != GoalStatus.targetReached) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalNotActive',
+      );
     }
     if (sourceAccountId == goal.reserveAccountId) {
-      return const AppValidationFailure(field: 'sourceAccountId', messageKey: 'errorGoalSourceIsReserve');
+      return const AppValidationFailure(
+        field: 'sourceAccountId',
+        messageKey: 'errorGoalSourceIsReserve',
+      );
     }
 
     // Validate source account.
-    final source = await _accounts.findById(id: sourceAccountId, householdId: householdId);
+    final source = await _accounts.findById(
+      id: sourceAccountId,
+      householdId: householdId,
+    );
     final sourceError = _validateFundingSource<SavingsGoal>(source);
     if (sourceError != null) return sourceError;
     if (source!.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // Execute the transfer.
     final transferOperationId = _uuid.v4();
-    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
+      0,
+      10,
+    );
     final now = _nowUtc();
 
     IdempotentOperationResult transferResult;
@@ -247,14 +306,22 @@ final class FundGoalUseCase {
     }
 
     // Check if target is now reached.
-    final balanceResult = await _goals.getReserveBalance(reserveAccountId: goal.reserveAccountId, householdId: householdId);
+    final balanceResult = await _goals.getReserveBalance(
+      reserveAccountId: goal.reserveAccountId,
+      householdId: householdId,
+    );
     if (balanceResult is AppOk<int>) {
       final balance = balanceResult.value;
-      if (balance >= goal.targetMinorUnits && goal.status == GoalStatus.active) {
-        await _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.targetReached);
+      if (balance >= goal.targetMinorUnits &&
+          goal.status == GoalStatus.active) {
+        await _goals.updateGoalStatus(
+          goalId: goalId,
+          status: GoalStatus.targetReached,
+        );
         // Return an updated goal reflecting new status.
         final updatedResult = await _goals.findGoalById(goalId);
-        if (updatedResult is AppOk<SavingsGoal?> && updatedResult.value != null) {
+        if (updatedResult is AppOk<SavingsGoal?> &&
+            updatedResult.value != null) {
           return AppOk(updatedResult.value!);
         }
       }
@@ -292,10 +359,16 @@ final class ReleaseGoalFundsUseCase {
     required String idempotencyKey,
   }) async {
     if (amountMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'amount', messageKey: 'error_amount_must_be_positive');
+      return const AppValidationFailure(
+        field: 'amount',
+        messageKey: 'error_amount_must_be_positive',
+      );
     }
     if (releaseReason.trim().isEmpty) {
-      return const AppValidationFailure(field: 'releaseReason', messageKey: 'errorGoalReleaseReasonEmpty');
+      return const AppValidationFailure(
+        field: 'releaseReason',
+        messageKey: 'errorGoalReleaseReasonEmpty',
+      );
     }
 
     // Load goal.
@@ -306,27 +379,48 @@ final class ReleaseGoalFundsUseCase {
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
     if (goal.status == GoalStatus.archived) {
-      return const AppValidationFailure(field: 'goalId', messageKey: 'errorGoalArchived');
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalArchived',
+      );
     }
     if (destinationAccountId == goal.reserveAccountId) {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorGoalSourceIsReserve');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorGoalSourceIsReserve',
+      );
     }
 
     // Validate destination account.
-    final destination = await _accounts.findById(id: destinationAccountId, householdId: householdId);
+    final destination = await _accounts.findById(
+      id: destinationAccountId,
+      householdId: householdId,
+    );
     if (destination == null) return const AppNotFound();
     if (destination.isArchived) {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorAccountArchived');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorAccountArchived',
+      );
     }
     if (destination.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(field: 'destinationAccountId', messageKey: 'errorGoalSourceIsReserve');
+      return const AppValidationFailure(
+        field: 'destinationAccountId',
+        messageKey: 'errorGoalSourceIsReserve',
+      );
     }
     if (destination.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(field: 'currencyCode', messageKey: 'errorCurrencyMismatch');
+      return const AppValidationFailure(
+        field: 'currencyCode',
+        messageKey: 'errorCurrencyMismatch',
+      );
     }
 
     // Check reserve has sufficient balance.
-    final balanceResult = await _goals.getReserveBalance(reserveAccountId: goal.reserveAccountId, householdId: householdId);
+    final balanceResult = await _goals.getReserveBalance(
+      reserveAccountId: goal.reserveAccountId,
+      householdId: householdId,
+    );
     if (balanceResult is! AppOk<int>) return const AppPersistenceFailure();
     if (balanceResult.value < amountMinorUnits) {
       return const AppInsufficientFunds();
@@ -334,7 +428,10 @@ final class ReleaseGoalFundsUseCase {
 
     // Execute the transfer.
     final transferOperationId = _uuid.v4();
-    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+    final effectiveDate = DateTime.now().toUtc().toIso8601String().substring(
+      0,
+      10,
+    );
     final now = _nowUtc();
 
     IdempotentOperationResult transferResult;
@@ -407,7 +504,10 @@ final class GetGoalProgressUseCase {
       return const AppPersistenceFailure();
     }
 
-    final balanceResult = await _goals.getReserveBalance(reserveAccountId: goal.reserveAccountId, householdId: goal.householdId);
+    final balanceResult = await _goals.getReserveBalance(
+      reserveAccountId: goal.reserveAccountId,
+      householdId: goal.householdId,
+    );
     if (balanceResult is! AppOk<int>) return const AppPersistenceFailure();
 
     final balance = balanceResult.value;
@@ -452,10 +552,16 @@ final class UpdateGoalRevisionUseCase {
     String? newBeneficiaryMemberId,
   }) async {
     if (newName.trim().isEmpty) {
-      return const AppValidationFailure(field: 'name', messageKey: 'errorGoalNameEmpty');
+      return const AppValidationFailure(
+        field: 'name',
+        messageKey: 'errorGoalNameEmpty',
+      );
     }
     if (newTargetMinorUnits <= 0) {
-      return const AppValidationFailure(field: 'targetMinorUnits', messageKey: 'errorGoalTargetZero');
+      return const AppValidationFailure(
+        field: 'targetMinorUnits',
+        messageKey: 'errorGoalTargetZero',
+      );
     }
 
     final goalResult = await _goals.findGoalById(goalId);
@@ -475,7 +581,9 @@ final class UpdateGoalRevisionUseCase {
       // Currency and household are immutable across revisions.
       currencyCode: goal.currencyCode,
       createdAt: _nowUtc(),
-      revisionReason: revisionReason.trim().isEmpty ? 'updated' : revisionReason.trim(),
+      revisionReason: revisionReason.trim().isEmpty
+          ? 'updated'
+          : revisionReason.trim(),
       targetDate: newTargetDate,
       beneficiaryMemberId: newBeneficiaryMemberId,
     );
@@ -486,20 +594,67 @@ final class UpdateGoalRevisionUseCase {
 
 // ── CompleteGoalUseCase ────────────────────────────────────────────────────
 
+/// Transitions an active (or targetReached) goal to [GoalStatus.completed].
+///
+/// RULES:
+/// - Archived goal → [AppValidationFailure] ('errorGoalArchived').
+/// - Already completed → returns the existing goal idempotently (no mutation).
+/// - Normal completion (earlyCompletion = false): allowed only when
+///   reserveBalance >= targetMinorUnits.
+/// - Early completion (earlyCompletion = true): any balance is allowed, but
+///   earlyCompletionReason must be non-empty.
+/// - No financial operation, ledger entry, or goal movement is created.
 final class CompleteGoalUseCase {
   const CompleteGoalUseCase(this._goals);
 
   final GoalRepository _goals;
 
-  Future<AppResult<void>> execute({required String goalId}) async {
-    final goalResult = await _goals.findGoalById(goalId);
+  Future<AppResult<SavingsGoal>> execute(CompleteGoalParams params) async {
+    // Load goal.
+    final goalResult = await _goals.findGoalById(params.goalId);
     if (goalResult is! AppOk<SavingsGoal?>) {
       return const AppPersistenceFailure();
     }
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
-    return _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.completed, completedAt: _nowUtc());
+    // Archived goals cannot be completed.
+    if (goal.status == GoalStatus.archived) {
+      return const AppValidationFailure(
+        field: 'goalId',
+        messageKey: 'errorGoalArchived',
+      );
+    }
+
+    // Already completed → idempotent.
+    if (goal.status == GoalStatus.completed) return AppOk(goal);
+
+    if (params.earlyCompletion) {
+      // Early completion requires a non-empty reason.
+      final reason = params.earlyCompletionReason?.trim() ?? '';
+      if (reason.isEmpty) {
+        return const AppValidationFailure(
+          field: 'earlyCompletionReason',
+          messageKey: 'errorEarlyCompletionReasonRequired',
+        );
+      }
+    } else {
+      // Normal completion: reserve balance must be >= target.
+      final balResult = await _goals.getReserveBalance(
+        reserveAccountId: goal.reserveAccountId,
+        householdId: params.householdId,
+      );
+      if (balResult is! AppOk<int>) return const AppPersistenceFailure();
+      final balance = balResult.value;
+      if (balance < goal.targetMinorUnits) {
+        return const AppValidationFailure(
+          field: 'balance',
+          messageKey: 'errorGoalNormalCompletionRequiresTarget',
+        );
+      }
+    }
+
+    return _goals.completeGoal(params);
   }
 }
 
@@ -510,7 +665,10 @@ final class ArchiveGoalUseCase {
 
   final GoalRepository _goals;
 
-  Future<AppResult<void>> execute({required String goalId, required String householdId}) async {
+  Future<AppResult<void>> execute({
+    required String goalId,
+    required String householdId,
+  }) async {
     final goalResult = await _goals.findGoalById(goalId);
     if (goalResult is! AppOk<SavingsGoal?>) {
       return const AppPersistenceFailure();
@@ -519,13 +677,23 @@ final class ArchiveGoalUseCase {
     if (goal == null) return const AppNotFound();
 
     // Balance must be zero before archiving.
-    final balanceResult = await _goals.getReserveBalance(reserveAccountId: goal.reserveAccountId, householdId: householdId);
+    final balanceResult = await _goals.getReserveBalance(
+      reserveAccountId: goal.reserveAccountId,
+      householdId: householdId,
+    );
     if (balanceResult is! AppOk<int>) return const AppPersistenceFailure();
     if (balanceResult.value != 0) {
-      return const AppValidationFailure(field: 'balance', messageKey: 'errorGoalArchiveNonzeroBalance');
+      return const AppValidationFailure(
+        field: 'balance',
+        messageKey: 'errorGoalArchiveNonzeroBalance',
+      );
     }
 
-    return _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.archived, archivedAt: _nowUtc());
+    return _goals.updateGoalStatus(
+      goalId: goalId,
+      status: GoalStatus.archived,
+      archivedAt: _nowUtc(),
+    );
   }
 }
 
@@ -544,6 +712,10 @@ final class RestoreGoalUseCase {
     final goal = goalResult.value;
     if (goal == null) return const AppNotFound();
 
-    return _goals.updateGoalStatus(goalId: goalId, status: GoalStatus.active, archivedAt: null);
+    return _goals.updateGoalStatus(
+      goalId: goalId,
+      status: GoalStatus.active,
+      archivedAt: null,
+    );
   }
 }

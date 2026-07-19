@@ -17,14 +17,19 @@ import 'package:uuid/uuid.dart';
 
 // ── Repository provider ───────────────────────────────────────────────────────
 
-final transactionQueryRepositoryProvider = Provider<TransactionQueryRepository>((ref) {
-  return DriftTransactionQueryRepository(ref.watch(appDatabaseProvider));
-});
+final transactionQueryRepositoryProvider = Provider<TransactionQueryRepository>(
+  (ref) {
+    return DriftTransactionQueryRepository(ref.watch(appDatabaseProvider));
+  },
+);
 
 // ── Use-case providers ────────────────────────────────────────────────────────
 
 final recordIncomeUseCaseProvider = Provider<RecordIncomeUseCase>((ref) {
-  return RecordIncomeUseCase(ledgerRepository: ref.watch(ledgerRepositoryProvider), accountRepository: ref.watch(accountRepositoryProvider));
+  return RecordIncomeUseCase(
+    ledgerRepository: ref.watch(ledgerRepositoryProvider),
+    accountRepository: ref.watch(accountRepositoryProvider),
+  );
 });
 
 final recordExpenseUseCaseProvider = Provider<RecordExpenseUseCase>((ref) {
@@ -36,41 +41,72 @@ final recordExpenseUseCaseProvider = Provider<RecordExpenseUseCase>((ref) {
 });
 
 final executeTransferUseCaseProvider = Provider<ExecuteTransferUseCase>((ref) {
-  return ExecuteTransferUseCase(ledgerRepository: ref.watch(ledgerRepositoryProvider), accountRepository: ref.watch(accountRepositoryProvider));
+  return ExecuteTransferUseCase(
+    ledgerRepository: ref.watch(ledgerRepositoryProvider),
+    accountRepository: ref.watch(accountRepositoryProvider),
+  );
 });
 
-final getTransactionHistoryUseCaseProvider = Provider<GetTransactionHistoryUseCase>((ref) {
-  return GetTransactionHistoryUseCase(ref.watch(transactionQueryRepositoryProvider));
-});
+final getTransactionHistoryUseCaseProvider =
+    Provider<GetTransactionHistoryUseCase>((ref) {
+      return GetTransactionHistoryUseCase(
+        ref.watch(transactionQueryRepositoryProvider),
+      );
+    });
 
-final getSpouseWalletSummaryUseCaseProvider = Provider<GetSpouseWalletSummaryUseCase>((ref) {
-  return GetSpouseWalletSummaryUseCase(ref.watch(transactionQueryRepositoryProvider));
-});
+final getSpouseWalletSummaryUseCaseProvider =
+    Provider<GetSpouseWalletSummaryUseCase>((ref) {
+      return GetSpouseWalletSummaryUseCase(
+        ref.watch(transactionQueryRepositoryProvider),
+      );
+    });
 
 // ── Transaction list provider ─────────────────────────────────────────────────
 
-final transactionListProvider = FutureProvider.family<AppResult<List<TransactionSummary>>, (String, TransactionFilter)>((ref, args) {
-  final (householdId, filter) = args;
-  final useCase = ref.watch(getTransactionHistoryUseCaseProvider);
-  return useCase.execute(householdId: householdId, filter: filter);
-});
+final transactionListProvider =
+    FutureProvider.family<
+      AppResult<List<TransactionSummary>>,
+      (String, TransactionFilter)
+    >((ref, args) {
+      final (householdId, filter) = args;
+      final useCase = ref.watch(getTransactionHistoryUseCaseProvider);
+      return useCase.execute(householdId: householdId, filter: filter);
+    });
 
 // ── Transaction detail provider ───────────────────────────────────────────────
 
-final transactionDetailProvider = FutureProvider.family<TransactionSummary?, (String, String)>((ref, args) {
-  final (operationId, householdId) = args;
-  final repo = ref.watch(transactionQueryRepositoryProvider);
-  return repo.operationDetail(operationId: operationId, householdId: householdId);
-});
+final transactionDetailProvider =
+    FutureProvider.family<TransactionSummary?, (String, String)>((ref, args) {
+      final (operationId, householdId) = args;
+      final repo = ref.watch(transactionQueryRepositoryProvider);
+      return repo.operationDetail(
+        operationId: operationId,
+        householdId: householdId,
+      );
+    });
 
 // ── Spouse wallet summary provider ────────────────────────────────────────────
 
-typedef SpouseWalletArgs = ({String spouseAccountId, String householdId, String fromDate, String toDate});
-
-final spouseWalletSummaryProvider = FutureProvider.family<AppResult<SpouseWalletSummary>, SpouseWalletArgs>((ref, args) {
-  final useCase = ref.watch(getSpouseWalletSummaryUseCaseProvider);
-  return useCase.execute(spouseAccountId: args.spouseAccountId, householdId: args.householdId, fromDate: args.fromDate, toDate: args.toDate);
+typedef SpouseWalletArgs = ({
+  String spouseAccountId,
+  String householdId,
+  String fromDate,
+  String toDate,
 });
+
+final spouseWalletSummaryProvider =
+    FutureProvider.family<AppResult<SpouseWalletSummary>, SpouseWalletArgs>((
+      ref,
+      args,
+    ) {
+      final useCase = ref.watch(getSpouseWalletSummaryUseCaseProvider);
+      return useCase.execute(
+        spouseAccountId: args.spouseAccountId,
+        householdId: args.householdId,
+        fromDate: args.fromDate,
+        toDate: args.toDate,
+      );
+    });
 
 // ── Form state notifiers (Riverpod 3 Notifier pattern) ───────────────────────
 
@@ -91,7 +127,10 @@ class IncomeFormState {
   final String idempotencyKey;
 }
 
-final incomeFormProvider = NotifierProvider.autoDispose<IncomeFormNotifier, IncomeFormState>(IncomeFormNotifier.new);
+final incomeFormProvider =
+    NotifierProvider.autoDispose<IncomeFormNotifier, IncomeFormState>(
+      IncomeFormNotifier.new,
+    );
 
 /// Manages idempotency key for the expense form.
 class ExpenseFormKeyNotifier extends Notifier<String> {
@@ -101,7 +140,10 @@ class ExpenseFormKeyNotifier extends Notifier<String> {
   void regenerateKey() => state = const Uuid().v4();
 }
 
-final expenseFormKeyProvider = NotifierProvider.autoDispose<ExpenseFormKeyNotifier, String>(ExpenseFormKeyNotifier.new);
+final expenseFormKeyProvider =
+    NotifierProvider.autoDispose<ExpenseFormKeyNotifier, String>(
+      ExpenseFormKeyNotifier.new,
+    );
 
 /// Manages idempotency key for the transfer form.
 class TransferFormKeyNotifier extends Notifier<String> {
@@ -111,7 +153,10 @@ class TransferFormKeyNotifier extends Notifier<String> {
   void regenerateKey() => state = const Uuid().v4();
 }
 
-final transferFormKeyProvider = NotifierProvider.autoDispose<TransferFormKeyNotifier, String>(TransferFormKeyNotifier.new);
+final transferFormKeyProvider =
+    NotifierProvider.autoDispose<TransferFormKeyNotifier, String>(
+      TransferFormKeyNotifier.new,
+    );
 
 // ── Submission state ──────────────────────────────────────────────────────────
 
@@ -122,7 +167,10 @@ class SubmittingNotifier extends Notifier<bool> {
   void setSubmitting(bool value) => state = value;
 }
 
-final submittingProvider = NotifierProvider.autoDispose<SubmittingNotifier, bool>(SubmittingNotifier.new);
+final submittingProvider =
+    NotifierProvider.autoDispose<SubmittingNotifier, bool>(
+      SubmittingNotifier.new,
+    );
 
 // ── Staged context providers ──────────────────────────────────────────────────
 
@@ -133,7 +181,10 @@ class StagedIncomeContextNotifier extends Notifier<IncomeContext?> {
   void set(IncomeContext? ctx) => state = ctx;
 }
 
-final stagedIncomeContextProvider = NotifierProvider.autoDispose<StagedIncomeContextNotifier, IncomeContext?>(StagedIncomeContextNotifier.new);
+final stagedIncomeContextProvider =
+    NotifierProvider.autoDispose<StagedIncomeContextNotifier, IncomeContext?>(
+      StagedIncomeContextNotifier.new,
+    );
 
 class StagedExpenseContextNotifier extends Notifier<ExpenseContext?> {
   @override
@@ -142,7 +193,10 @@ class StagedExpenseContextNotifier extends Notifier<ExpenseContext?> {
   void set(ExpenseContext? ctx) => state = ctx;
 }
 
-final stagedExpenseContextProvider = NotifierProvider.autoDispose<StagedExpenseContextNotifier, ExpenseContext?>(StagedExpenseContextNotifier.new);
+final stagedExpenseContextProvider =
+    NotifierProvider.autoDispose<StagedExpenseContextNotifier, ExpenseContext?>(
+      StagedExpenseContextNotifier.new,
+    );
 
 class StagedTransferContextNotifier extends Notifier<TransferContext?> {
   @override
@@ -151,4 +205,8 @@ class StagedTransferContextNotifier extends Notifier<TransferContext?> {
   void set(TransferContext? ctx) => state = ctx;
 }
 
-final stagedTransferContextProvider = NotifierProvider.autoDispose<StagedTransferContextNotifier, TransferContext?>(StagedTransferContextNotifier.new);
+final stagedTransferContextProvider =
+    NotifierProvider.autoDispose<
+      StagedTransferContextNotifier,
+      TransferContext?
+    >(StagedTransferContextNotifier.new);

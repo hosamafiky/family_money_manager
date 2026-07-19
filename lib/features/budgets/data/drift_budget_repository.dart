@@ -21,7 +21,10 @@ final class DriftBudgetRepository implements BudgetRepository {
           .customSelect(
             'SELECT id, idempotency_payload FROM budgets '
             'WHERE household_id = ? AND idempotency_key = ?',
-            variables: [Variable.withString(plan.householdId), Variable.withString(plan.idempotencyKey)],
+            variables: [
+              Variable.withString(plan.householdId),
+              Variable.withString(plan.idempotencyKey),
+            ],
           )
           .get();
 
@@ -33,7 +36,9 @@ final class DriftBudgetRepository implements BudgetRepository {
           final found = await _findById(existingId);
           if (found != null) return AppOk(found);
         }
-        return const AppDuplicateConflict(messageKey: 'errorBudgetIdempotencyConflict');
+        return const AppDuplicateConflict(
+          messageKey: 'errorBudgetIdempotencyConflict',
+        );
       }
 
       await _db
@@ -100,9 +105,12 @@ final class DriftBudgetRepository implements BudgetRepository {
   Future<AppResult<void>> archiveBudget(String budgetId) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      final count = await (_db.update(
-        _db.budgets,
-      )..where((t) => t.id.equals(budgetId))).write(BudgetsCompanion(isArchived: const Value(1), updatedAt: Value(now)));
+      final count =
+          await (_db.update(
+            _db.budgets,
+          )..where((t) => t.id.equals(budgetId))).write(
+            BudgetsCompanion(isArchived: const Value(1), updatedAt: Value(now)),
+          );
       if (count == 0) return const AppNotFound();
       return const AppOk(null);
     } catch (e) {
@@ -116,9 +124,12 @@ final class DriftBudgetRepository implements BudgetRepository {
   Future<AppResult<void>> restoreBudget(String budgetId) async {
     try {
       final now = DateTime.now().toUtc().toIso8601String();
-      final count = await (_db.update(
-        _db.budgets,
-      )..where((t) => t.id.equals(budgetId))).write(BudgetsCompanion(isArchived: const Value(0), updatedAt: Value(now)));
+      final count =
+          await (_db.update(
+            _db.budgets,
+          )..where((t) => t.id.equals(budgetId))).write(
+            BudgetsCompanion(isArchived: const Value(0), updatedAt: Value(now)),
+          );
       if (count == 0) return const AppNotFound();
       return const AppOk(null);
     } catch (e) {
@@ -141,7 +152,10 @@ final class DriftBudgetRepository implements BudgetRepository {
   // ── listBudgets ───────────────────────────────────────────────────────────
 
   @override
-  Future<AppResult<List<BudgetPlan>>> listBudgets({required String householdId, bool includeArchived = false}) async {
+  Future<AppResult<List<BudgetPlan>>> listBudgets({
+    required String householdId,
+    bool includeArchived = false,
+  }) async {
     try {
       final archivedClause = includeArchived ? '' : 'AND is_archived = 0';
       final rows = await _db
@@ -195,7 +209,9 @@ final class DriftBudgetRepository implements BudgetRepository {
       ];
 
       if (filter.categoryCode != null) {
-        conditions.write(' AND COALESCE(oc.category_code, o.category_code) = ?');
+        conditions.write(
+          ' AND COALESCE(oc.category_code, o.category_code) = ?',
+        );
         vars.add(Variable.withString(filter.categoryCode!));
       }
       if (filter.scopeCode != null) {
@@ -255,7 +271,12 @@ final class DriftBudgetRepository implements BudgetRepository {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   Future<BudgetPlan?> _findById(String id) async {
-    final rows = await _db.customSelect('SELECT * FROM budgets WHERE id = ?', variables: [Variable.withString(id)]).get();
+    final rows = await _db
+        .customSelect(
+          'SELECT * FROM budgets WHERE id = ?',
+          variables: [Variable.withString(id)],
+        )
+        .get();
     if (rows.isEmpty) return null;
     return _rowToPlan(rows.first);
   }
@@ -267,7 +288,10 @@ final class DriftBudgetRepository implements BudgetRepository {
 
     BudgetPeriodDefinition period;
     if (periodTypeCode == 'fixed' && fixedStart != null && fixedEnd != null) {
-      period = FixedBudgetPeriod(startDateInclusive: fixedStart, endDateExclusive: fixedEnd);
+      period = FixedBudgetPeriod(
+        startDateInclusive: fixedStart,
+        endDateExclusive: fixedEnd,
+      );
     } else {
       period = const MonthlyBudgetPeriod();
     }
@@ -283,7 +307,9 @@ final class DriftBudgetRepository implements BudgetRepository {
         categoryCode: row.readNullable<String>('filter_category_code'),
         scopeCode: row.readNullable<String>('filter_scope_code'),
         spenderMemberId: row.readNullable<String>('filter_spender_member_id'),
-        beneficiaryMemberId: row.readNullable<String>('filter_beneficiary_member_id'),
+        beneficiaryMemberId: row.readNullable<String>(
+          'filter_beneficiary_member_id',
+        ),
         paymentAccountId: row.readNullable<String>('filter_payment_account_id'),
       ),
       isArchived: row.read<int>('is_archived') == 1,
@@ -299,7 +325,9 @@ final class DriftBudgetRepository implements BudgetRepository {
     FixedBudgetPeriod() => 'fixed',
   };
 
-  String? _fixedStart(BudgetPeriodDefinition def) => def is FixedBudgetPeriod ? def.startDateInclusive : null;
+  String? _fixedStart(BudgetPeriodDefinition def) =>
+      def is FixedBudgetPeriod ? def.startDateInclusive : null;
 
-  String? _fixedEnd(BudgetPeriodDefinition def) => def is FixedBudgetPeriod ? def.endDateExclusive : null;
+  String? _fixedEnd(BudgetPeriodDefinition def) =>
+      def is FixedBudgetPeriod ? def.endDateExclusive : null;
 }

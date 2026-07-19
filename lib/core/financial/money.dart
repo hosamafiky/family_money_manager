@@ -36,7 +36,10 @@ final class Money implements Comparable<Money> {
   ///
   /// Throws [ArgumentError] if [code] is unsupported.
   factory Money.fromMinorUnits(int minorUnits, String currencyCode) {
-    return Money(minorUnits: minorUnits, currency: Currency.fromCode(currencyCode));
+    return Money(
+      minorUnits: minorUnits,
+      currency: Currency.fromCode(currencyCode),
+    );
   }
 
   // ── Predicates ──────────────────────────────────────────────────────────────
@@ -53,7 +56,10 @@ final class Money implements Comparable<Money> {
   /// Throws [MoneyOverflowError] if the result overflows [int] range.
   Money operator +(Money other) {
     _requireSameCurrency(other);
-    return Money(minorUnits: _checkedAdd(minorUnits, other.minorUnits), currency: currency);
+    return Money(
+      minorUnits: _checkedAdd(minorUnits, other.minorUnits),
+      currency: currency,
+    );
   }
 
   /// Returns a new [Money] that is `this` minus [other].
@@ -62,7 +68,10 @@ final class Money implements Comparable<Money> {
   /// Throws [MoneyOverflowError] if the result overflows [int] range.
   Money operator -(Money other) {
     _requireSameCurrency(other);
-    return Money(minorUnits: _checkedSubtract(minorUnits, other.minorUnits), currency: currency);
+    return Money(
+      minorUnits: _checkedSubtract(minorUnits, other.minorUnits),
+      currency: currency,
+    );
   }
 
   /// Returns the arithmetic negation of this value.
@@ -71,13 +80,16 @@ final class Money implements Comparable<Money> {
   /// (2's complement overflow).
   Money operator -() {
     if (minorUnits == _minInt64) {
-      throw MoneyOverflowError('Cannot negate minimum int value; result would overflow');
+      throw MoneyOverflowError(
+        'Cannot negate minimum int value; result would overflow',
+      );
     }
     return Money(minorUnits: -minorUnits, currency: currency);
   }
 
   /// Returns the absolute value of this money.
-  Money abs() => isNegative ? Money(minorUnits: -minorUnits, currency: currency) : this;
+  Money abs() =>
+      isNegative ? Money(minorUnits: -minorUnits, currency: currency) : this;
 
   // ── Comparison ───────────────────────────────────────────────────────────────
 
@@ -148,25 +160,37 @@ final class Money implements Comparable<Money> {
     final rem = minorUnits - allocatedSum;
     allocated[0] += rem;
 
-    return allocated.map((u) => Money(minorUnits: u, currency: currency)).toList();
+    return allocated
+        .map((u) => Money(minorUnits: u, currency: currency))
+        .toList();
   }
 
   // ── Serialisation ────────────────────────────────────────────────────────────
 
   /// Serialises to a plain map suitable for storage or transport.
   /// The currency code is the stable ISO 4217 string.
-  Map<String, dynamic> toJson() => {'minorUnits': minorUnits, 'currencyCode': currency.code};
+  Map<String, dynamic> toJson() => {
+    'minorUnits': minorUnits,
+    'currencyCode': currency.code,
+  };
 
   /// Deserialises from a [toJson] map.
   /// Throws [ArgumentError] if the currency code is unsupported.
   factory Money.fromJson(Map<String, dynamic> json) {
-    return Money(minorUnits: (json['minorUnits'] as num).toInt(), currency: Currency.fromCode(json['currencyCode'] as String));
+    return Money(
+      minorUnits: (json['minorUnits'] as num).toInt(),
+      currency: Currency.fromCode(json['currencyCode'] as String),
+    );
   }
 
   // ── Equality & hashing ───────────────────────────────────────────────────────
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Money && other.minorUnits == minorUnits && other.currency == currency;
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Money &&
+          other.minorUnits == minorUnits &&
+          other.currency == currency;
 
   @override
   int get hashCode => Object.hash(minorUnits, currency);
