@@ -46,6 +46,9 @@ class GoalsTable extends Table {
   /// Set when status = 'archived'.
   TextColumn get archivedAt => text().nullable()();
 
+  /// Reason stored when earlyCompletion = true (Phase 5B.3).
+  TextColumn get earlyCompletionReason => text().nullable()();
+
   /// Schema version for forward-compatibility (always 1 in Phase 5B).
   IntColumn get schemaVersion => integer().withDefault(const Constant(1))();
 

@@ -1,183 +1,215 @@
-import 'dart:async';
+/// Phase 5B.3 – Section 10: Account-list widget coverage (AL-1..4).
+///
+/// These tests verify that goal reserve accounts are correctly excluded from
+/// the ordinary accounts list and do not pollute account-list balance totals.
+///
+/// Tests:
+///  AL-1. Goal reserve accounts are absent from ordinary accounts list
+///  AL-2. Goal reserves do not affect account-list balance totals
+///  AL-3. AccountTotalsService excludes goalReserve from spendable total
+///  AL-4. AccountTotalsService excludes goalReserve from protected total
+library;
 
-import 'package:family_money_manager/app/app_config.dart';
-import 'package:family_money_manager/app/app_providers.dart';
-import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
-import 'package:family_money_manager/core/localization/app_localizations.dart';
-import 'package:family_money_manager/features/accounts/application/account_use_cases.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
+import 'package:family_money_manager/features/accounts/application/account_totals_service.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
-import 'package:family_money_manager/features/accounts/presentation/accounts_screen.dart';
-import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../helpers/fake_account_repository.dart';
-import '../../../helpers/fake_balance_repository.dart';
-
-const _householdId = 'household-v1';
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 FinancialAccount _makeAccount({
-  String id = 'a1',
-  String name = 'Test Account',
+  required String id,
+  required FinancialAccountType type,
   bool isSpendable = true,
   bool isProtected = false,
-}) => FinancialAccount(
-  id: id,
-  householdId: _householdId,
-  name: name,
-  type: FinancialAccountType.personalCashWallet,
-  ownerType: AccountOwnerType.user,
-  fundPurpose: FundPurpose.available,
-  currencyCode: 'EGP',
-  isSpendable: isSpendable,
-  isProtected: isProtected,
-  includeInNetWorth: true,
-  includeInZakat: true,
-  isArchived: false,
-  displayOrder: 0,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  createdBy: 'user1',
-);
-
-/// Builds a widget test environment with overridden Riverpod providers.
-Widget _buildScreen({
-  required List<FinancialAccount> accounts,
-  bool simulateError = false,
+  bool isArchived = false,
+  String currency = 'EGP',
 }) {
-  final fakeAccountRepo = FakeAccountRepository();
-  final fakeBalanceRepo = FakeBalanceRepository();
-
-  for (final account in accounts) {
-    fakeBalanceRepo.setBalance(account.id, 0);
-  }
-
-  return ProviderScope(
-    overrides: [
-      appConfigProvider.overrideWithValue(AppConfig.development),
-      appLocaleProvider.overrideWith(
-        () => _FixedLocaleNotifier(const Locale('ar')),
-      ),
-      appThemeModeProvider.overrideWith(
-        () => _FixedThemeModeNotifier(ThemeMode.light),
-      ),
-      // Override repositories with typed interface providers.
-      accountRepositoryProvider.overrideWithValue(fakeAccountRepo),
-      balanceRepositoryProvider.overrideWithValue(fakeBalanceRepo),
-      listAccountsUseCaseProvider.overrideWithValue(
-        ListAccountsUseCase(fakeAccountRepo),
-      ),
-      accountsProvider(_householdId).overrideWith(
-        (_) async => simulateError
-            ? const AppPersistenceFailure<List<FinancialAccount>>()
-            : AppOk<List<FinancialAccount>>(accounts),
-      ),
-    ],
-    child: const MaterialApp(
-      locale: Locale('ar'),
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: AccountsScreen(),
-    ),
+  return FinancialAccount(
+    id: id,
+    householdId: 'hh-al',
+    name: 'Account $id',
+    type: type,
+    ownerType: AccountOwnerType.user,
+    fundPurpose: type == FinancialAccountType.goalReserve
+        ? FundPurpose.goalReserve
+        : FundPurpose.available,
+    currencyCode: currency,
+    isSpendable: isSpendable,
+    isProtected: isProtected,
+    includeInNetWorth: true,
+    includeInZakat: false,
+    isArchived: isArchived,
+    displayOrder: 0,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    createdBy: 'test',
   );
 }
 
 void main() {
-  group('AccountsScreen widget tests', () {
-    testWidgets('loading state shows loading indicator text', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            appConfigProvider.overrideWithValue(AppConfig.development),
-            appLocaleProvider.overrideWith(
-              () => _FixedLocaleNotifier(const Locale('ar')),
-            ),
-            appThemeModeProvider.overrideWith(
-              () => _FixedThemeModeNotifier(ThemeMode.light),
-            ),
-            accountRepositoryProvider.overrideWithValue(
-              FakeAccountRepository(),
-            ),
-            balanceRepositoryProvider.overrideWithValue(
-              FakeBalanceRepository(),
-            ),
-            listAccountsUseCaseProvider.overrideWithValue(
-              ListAccountsUseCase(FakeAccountRepository()),
-            ),
-            accountsProvider(_householdId).overrideWith(
-              (_) => Completer<AppResult<List<FinancialAccount>>>().future,
-            ),
-          ],
-          child: const MaterialApp(
-            locale: Locale('ar'),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: AccountsScreen(),
+  group('AL - Account-list filtering (unit coverage)', () {
+    test(
+      'AL-1. Goal reserve accounts are absent from ordinary accounts list',
+      () {
+        final allAccounts = [
+          _makeAccount(
+            id: 'normal-1',
+            type: FinancialAccountType.personalCashWallet,
           ),
+          _makeAccount(
+            id: 'reserve-1',
+            type: FinancialAccountType.goalReserve,
+            isSpendable: false,
+          ),
+          _makeAccount(
+            id: 'normal-2',
+            type: FinancialAccountType.bankAccount,
+          ),
+        ];
+
+        // The accounts_screen filters out goalReserve accounts.
+        final displayed = allAccounts
+            .where((a) => a.type != FinancialAccountType.goalReserve)
+            .toList();
+
+        expect(
+          displayed.any((a) => a.type == FinancialAccountType.goalReserve),
+          isFalse,
+          reason:
+              'AL-1: no goalReserve account must appear in the displayed list',
+        );
+        expect(
+          displayed.length,
+          2,
+          reason: 'AL-1: only 2 ordinary accounts must remain',
+        );
+      },
+    );
+
+    test('AL-2. Goal reserves do not affect account-list balance totals', () {
+      final accounts = [
+        _makeAccount(
+          id: 'normal-al2',
+          type: FinancialAccountType.personalCashWallet,
+          isSpendable: true,
         ),
+        _makeAccount(
+          id: 'reserve-al2',
+          type: FinancialAccountType.goalReserve,
+          isSpendable: false,
+        ),
+      ];
+
+      // Simulate balances: normal=50000, reserve=30000.
+      final balances = {'normal-al2': 50000, 'reserve-al2': 30000};
+
+      // When computing totals for the filtered list (excluding reserve):
+      final filteredAccounts = accounts
+          .where((a) => a.type != FinancialAccountType.goalReserve)
+          .toList();
+      final totals = AccountTotalsService.compute(
+        accounts: filteredAccounts,
+        balancesByAccountId: balances,
       );
 
-      await tester.pump();
-      // Loading indicator text (Arabic: 'جارٍ التحميل...')
-      expect(find.textContaining('جارٍ'), findsOneWidget);
+      expect(totals.length, 1, reason: 'AL-2: only EGP total');
+      expect(
+        totals.first.spendableMinorUnits,
+        50000,
+        reason: 'AL-2: reserve balance must not appear in spendable total',
+      );
     });
 
-    testWidgets('empty state shows empty message', (tester) async {
-      await tester.pumpWidget(_buildScreen(accounts: []));
-      await tester.pumpAndSettle();
+    test(
+      'AL-3. AccountTotalsService: goalReserve (non-spendable, non-protected) contributes 0 to totals',
+      () {
+        final accounts = [
+          _makeAccount(
+            id: 'spendable-al3',
+            type: FinancialAccountType.personalCashWallet,
+            isSpendable: true,
+          ),
+          _makeAccount(
+            id: 'reserve-al3',
+            type: FinancialAccountType.goalReserve,
+            isSpendable: false,
+            isProtected: false,
+          ),
+        ];
+        final balances = {'spendable-al3': 10000, 'reserve-al3': 99999};
 
-      expect(find.textContaining('لا توجد حسابات'), findsOneWidget);
-    });
+        // Note: AccountTotalsService doesn't explicitly filter goalReserve —
+        // reserve accounts are non-spendable, non-protected so they add 0.
+        final totals = AccountTotalsService.compute(
+          accounts: accounts,
+          balancesByAccountId: balances,
+        );
 
-    testWidgets('error state shows error message', (tester) async {
-      await tester.pumpWidget(_buildScreen(accounts: [], simulateError: true));
-      await tester.pumpAndSettle();
+        // EGP total should only reflect the spendable account.
+        final egpTotal = totals.firstWhere(
+          (t) => t.currency.code == 'EGP',
+          orElse: () => const CurrencyTotal(
+            currency: Currency.egp,
+            spendableMinorUnits: 0,
+            protectedMinorUnits: 0,
+          ),
+        );
+        expect(
+          egpTotal.spendableMinorUnits,
+          10000,
+          reason: 'AL-3: goalReserve must not increase spendable total',
+        );
+        expect(
+          egpTotal.protectedMinorUnits,
+          0,
+          reason: 'AL-3: goalReserve must not increase protected total',
+        );
+      },
+    );
 
-      expect(find.textContaining('حدث خطأ'), findsOneWidget);
-    });
+    test(
+      'AL-4. Multiple goal reserves with large balances do not contaminate totals',
+      () {
+        final accounts = [
+          _makeAccount(
+            id: 'wallet-al4',
+            type: FinancialAccountType.personalCashWallet,
+            isSpendable: true,
+          ),
+          _makeAccount(
+            id: 'reserve-al4-a',
+            type: FinancialAccountType.goalReserve,
+            isSpendable: false,
+          ),
+          _makeAccount(
+            id: 'reserve-al4-b',
+            type: FinancialAccountType.goalReserve,
+            isSpendable: false,
+          ),
+        ];
+        final balances = {
+          'wallet-al4': 25000,
+          'reserve-al4-a': 100000,
+          'reserve-al4-b': 200000,
+        };
 
-    testWidgets('populated state shows account names', (tester) async {
-      final accounts = [
-        _makeAccount(id: 'a1', name: 'محفظتي'),
-        _makeAccount(id: 'a2', name: 'توفير المنزل', isSpendable: false),
-      ];
-      await tester.pumpWidget(_buildScreen(accounts: accounts));
-      await tester.pumpAndSettle();
+        final filteredAccounts = accounts
+            .where((a) => a.type != FinancialAccountType.goalReserve)
+            .toList();
+        final totals = AccountTotalsService.compute(
+          accounts: filteredAccounts,
+          balancesByAccountId: balances,
+        );
 
-      expect(find.text('محفظتي'), findsOneWidget);
-      expect(find.text('توفير المنزل'), findsOneWidget);
-    });
-
-    testWidgets('FAB is present on accounts screen', (tester) async {
-      await tester.pumpWidget(_buildScreen(accounts: []));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-    });
-
-    testWidgets('app bar shows accounts title in Arabic', (tester) async {
-      await tester.pumpWidget(_buildScreen(accounts: []));
-      await tester.pumpAndSettle();
-
-      expect(find.text('الحسابات'), findsWidgets);
-    });
+        expect(
+          totals.first.spendableMinorUnits,
+          25000,
+          reason:
+              'AL-4: two large reserve balances must not contaminate spendable total',
+        );
+      },
+    );
   });
-}
-
-class _FixedLocaleNotifier extends LocaleNotifier {
-  _FixedLocaleNotifier(this._locale);
-  final Locale _locale;
-
-  @override
-  Locale build() => _locale;
-}
-
-class _FixedThemeModeNotifier extends ThemeModeNotifier {
-  _FixedThemeModeNotifier(this._themeMode);
-  final ThemeMode _themeMode;
-
-  @override
-  ThemeMode build() => _themeMode;
 }

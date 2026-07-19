@@ -109,6 +109,7 @@ final class DriftGoalRepository implements GoalRepository {
                 createdAt: goal.createdAt,
                 completedAt: Value(goal.completedAt),
                 archivedAt: Value(goal.archivedAt),
+                earlyCompletionReason: Value(goal.earlyCompletionReason),
               ),
             );
 
@@ -334,12 +335,16 @@ final class DriftGoalRepository implements GoalRepository {
   @override
   Future<AppResult<SavingsGoal>> completeGoal(CompleteGoalParams params) async {
     try {
+      final completedAt = DateTime.now().toUtc().toIso8601String();
       await (_db.update(
         _db.goalsTable,
       )..where((t) => t.id.equals(params.goalId))).write(
         GoalsTableCompanion(
           status: Value(GoalStatus.completed.name),
-          completedAt: Value(DateTime.now().toUtc().toIso8601String()),
+          completedAt: Value(completedAt),
+          earlyCompletionReason: params.earlyCompletion
+              ? Value(params.earlyCompletionReason)
+              : const Value.absent(),
         ),
       );
       final found = await _findById(params.goalId);
@@ -521,6 +526,7 @@ final class DriftGoalRepository implements GoalRepository {
       idempotencyKey: g.read<String>('idempotency_key'),
       completedAt: g.readNullable<String>('completed_at'),
       archivedAt: g.readNullable<String>('archived_at'),
+      earlyCompletionReason: g.readNullable<String>('early_completion_reason'),
     );
   }
 

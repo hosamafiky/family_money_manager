@@ -249,3 +249,37 @@ The following are **not** part of Phase 1.5 and are deferred:
 - Backup encryption with recovery passphrase
 - Cloud-sync key recovery path
 - On-device automated test on a physical Android device
+
+---
+
+## 8. Production Encryption Status (Phase 5B.3 Clarification)
+
+**IMPORTANT:** As of Phase 5B.3, no production encryption is currently implemented
+or verified in the main application code (`lib/`).
+
+Specifically:
+
+| Item | Status |
+|---|---|
+| `SQLite3MultipleCiphers` selected as cipher library | Documented and spike-verified |
+| Android runtime cipher verification | **DEFERRED** to production security hardening phase |
+| iOS runtime cipher verification | Spike-tested on simulator only (not physical device) |
+| Production PIN implementation | **Not built** |
+| Production biometric gating | **Not built** |
+| Secure key generation in production code | **Not built** |
+| Android Keystore key wrapping in production | **Not built** |
+| iOS Keychain key storage in production | **Not built** |
+| Production `AppDatabase` with encryption | **Not built** (uses unencrypted `NativeDatabase`) |
+
+The application currently opens its SQLite database via an unencrypted
+`NativeDatabase` (see `_devConnection()` in `app_database.dart`). The
+`SQLite3MultipleCiphers` cipher library has been verified in the `spike/enc_probe/`
+directory only.
+
+Key management (PO-3 through PO-6) is fully documented but **not yet implemented**
+in any production code path. No production PIN, biometric, or secure-key storage
+has been built or verified.
+
+This is an **open security risk** that must be resolved before any production
+release. Android emulator runtime verification remains **Unverified** due to
+sandbox instability in the Phase 1.5A environment.

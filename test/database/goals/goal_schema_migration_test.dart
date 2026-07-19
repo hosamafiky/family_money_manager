@@ -1540,4 +1540,351 @@ void main() {
       );
     },
   );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.3 – Section 5: Goal-to-reserve insertion validator (GR-4..GR-9)
+  // ══════════════════════════════════════════════════════════════════════════
+  //
+  // The validate_goal_reserve_on_insert trigger (v11) ensures that every
+  // new goal row references a valid goalReserve account.
+
+  test('GR-4. Insert goal with non-goalReserve account → rejected', () async {
+    final normalId = await insertNormalAccount('gr4-normal');
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+        "status, idempotency_key, idempotency_payload, created_at) "
+        "VALUES ('goal-gr4', '$_hh', '$normalId', 'EGP', 'active', "
+        "'ik-gr4', 'payload-gr4', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'GR-4: validate_goal_reserve_on_insert must reject non-goalReserve account',
+    );
+  });
+
+  test('GR-5. Insert goal with cross-household reserve → rejected', () async {
+    // Create a second household.
+    const hh2 = 'hh-gr5-other';
+    await db.customStatement(
+      "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+      "VALUES ('$hh2', 'Other HH', 'u-gr5', '2024-01-01', '2024-01-01')",
+    );
+
+    // Create a goalReserve in hh2 but try to assign it to a goal in _hh.
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('reserve-gr5-hh2', '$hh2', 'Reserve HH2', 'goalReserve', 'household', "
+      "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+        "status, idempotency_key, idempotency_payload, created_at) "
+        "VALUES ('goal-gr5', '$_hh', 'reserve-gr5-hh2', 'EGP', 'active', "
+        "'ik-gr5', 'payload-gr5', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'GR-5: validate_goal_reserve_on_insert must reject cross-household reserve',
+    );
+  });
+
+  test('GR-6. Insert goal with wrong-currency reserve → rejected', () async {
+    // Create a goalReserve in _hh with USD currency but goal uses EGP.
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('reserve-gr6-usd', '$_hh', 'USD Reserve', 'goalReserve', 'household', "
+      "'goalReserve', 'USD', 0, 0, 1, 0, 9999, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+        "status, idempotency_key, idempotency_payload, created_at) "
+        "VALUES ('goal-gr6', '$_hh', 'reserve-gr6-usd', 'EGP', 'active', "
+        "'ik-gr6', 'payload-gr6', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'GR-6: validate_goal_reserve_on_insert must reject wrong-currency reserve',
+    );
+  });
+
+  test('GR-7. Insert goal with spendable reserve → rejected', () async {
+    // Insert a goalReserve with is_spendable=1 (violates constraint).
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('reserve-gr7-spend', '$_hh', 'Spendable Reserve', 'goalReserve', 'household', "
+      "'goalReserve', 'EGP', 1, 0, 1, 0, 9999, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+        "status, idempotency_key, idempotency_payload, created_at) "
+        "VALUES ('goal-gr7', '$_hh', 'reserve-gr7-spend', 'EGP', 'active', "
+        "'ik-gr7', 'payload-gr7', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'GR-7: validate_goal_reserve_on_insert must reject spendable reserve',
+    );
+  });
+
+  test('GR-8. Insert goal with protected reserve → rejected', () async {
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('reserve-gr8-prot', '$_hh', 'Protected Reserve', 'goalReserve', 'household', "
+      "'goalReserve', 'EGP', 0, 1, 1, 0, 9999, 'test', "
+      "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+        "status, idempotency_key, idempotency_payload, created_at) "
+        "VALUES ('goal-gr8', '$_hh', 'reserve-gr8-prot', 'EGP', 'active', "
+        "'ik-gr8', 'payload-gr8', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'GR-8: validate_goal_reserve_on_insert must reject protected reserve',
+    );
+  });
+
+  test(
+    'GR-9. Insert second goal with same reserve → rejected by unique index',
+    () async {
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-gr9')) as AppOk<SavingsGoal>)
+              .value;
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goals (id, household_id, reserve_account_id, currency_code, "
+          "status, idempotency_key, idempotency_payload, created_at) "
+          "VALUES ('goal-gr9-dup', '$_hh', '${goal.reserveAccountId}', 'EGP', 'active', "
+          "'ik-gr9-dup', 'payload-dup', '2024-01-02T00:00:00Z')",
+        ),
+        throwsA(anything),
+        reason:
+            'GR-9: unique constraint must prevent two goals sharing a reserve',
+      );
+    },
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Phase 5B.3 – Section 6: Movement household validation (MVEXT-1..4)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  test('MVEXT-1. Funding movement with cross-household operation → rejected', () async {
+    const srcId = 'src-mvext1';
+    await createAccount(id: srcId);
+    await creditAccount(srcId, 100000);
+
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-mvext1')) as AppOk<SavingsGoal>)
+            .value;
+
+    // Create a second household.
+    const hh2 = 'hh-mvext1-other';
+    await db.customStatement(
+      "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+      "VALUES ('$hh2', 'Other HH', 'u-mvext1', '2024-01-01', '2024-01-01')",
+    );
+
+    // Create the same accounts in hh2 (cross-household transfer).
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('src-mvext1-hh2', '$hh2', 'Src HH2', 'personalCashWallet', 'user', "
+      "'available', 'EGP', 1, 0, 1, 0, 1, 'test', '2024-01-01', '2024-01-01')",
+    );
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('reserve-mvext1-hh2', '$hh2', 'Reserve HH2', 'goalReserve', 'household', "
+      "'goalReserve', 'EGP', 0, 0, 1, 0, 9999, 'test', '2024-01-01', '2024-01-01')",
+    );
+
+    // Insert a transfer in hh2.
+    await db.customStatement(
+      "INSERT INTO operations (id, household_id, type, source_account_id, "
+      "destination_account_id, total_amount_minor_units, currency_code, effective_date, "
+      "recorded_at, created_by, created_at, updated_at) "
+      "VALUES ('op-mvext1-xhh', '$hh2', 'transfer', 'src-mvext1-hh2', "
+      "'reserve-mvext1-hh2', 10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
+      "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    // Try to insert a movement in _hh referencing hh2's operation.
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at) "
+        "VALUES ('mov-mvext1', '${goal.id}', '$_hh', 'funding', "
+        "'op-mvext1-xhh', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'MVEXT-1: validate_funding_movement must reject cross-household operation',
+    );
+  });
+
+  test('MVEXT-2. Funding movement with cross-household source account → rejected', () async {
+    const srcId = 'src-mvext2';
+    await createAccount(id: srcId);
+    await creditAccount(srcId, 100000);
+
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-mvext2')) as AppOk<SavingsGoal>)
+            .value;
+
+    // Create a second household with a cross-household source.
+    const hh2 = 'hh-mvext2-other';
+    await db.customStatement(
+      "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+      "VALUES ('$hh2', 'Other HH', 'u-mvext2', '2024-01-01', '2024-01-01')",
+    );
+    await db.customStatement(
+      "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+      "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+      "include_in_zakat, display_order, created_by, created_at, updated_at) "
+      "VALUES ('cross-src-mvext2', '$hh2', 'Cross Src', 'personalCashWallet', 'user', "
+      "'available', 'EGP', 1, 0, 1, 0, 1, 'test', '2024-01-01', '2024-01-01')",
+    );
+
+    // Insert a transfer where source is from hh2 but destination is in _hh.
+    await db.customStatement(
+      "INSERT INTO operations (id, household_id, type, source_account_id, "
+      "destination_account_id, total_amount_minor_units, currency_code, effective_date, "
+      "recorded_at, created_by, created_at, updated_at) "
+      "VALUES ('op-mvext2-xsrc', '$_hh', 'transfer', 'cross-src-mvext2', "
+      "'${goal.reserveAccountId}', 10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
+      "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+
+    await expectLater(
+      () => db.customStatement(
+        "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+        "transfer_operation_id, created_at) "
+        "VALUES ('mov-mvext2', '${goal.id}', '$_hh', 'funding', "
+        "'op-mvext2-xsrc', '2024-01-01T00:00:00Z')",
+      ),
+      throwsA(anything),
+      reason:
+          'MVEXT-2: validate_funding_movement_household must reject cross-household source account',
+    );
+  });
+
+  test(
+    'MVEXT-3. Release movement with cross-household destination account → rejected',
+    () async {
+      const srcId = 'src-mvext3';
+      await createAccount(id: srcId);
+      await creditAccount(srcId, 100000);
+
+      final goal =
+          ((await createGoal(idempotencyKey: 'ik-mvext3'))
+                  as AppOk<SavingsGoal>)
+              .value;
+
+      // Fund the reserve.
+      await fundGoalUc.execute(
+        goalId: goal.id,
+        sourceAccountId: srcId,
+        amountMinorUnits: 50000,
+        householdId: _hh,
+        idempotencyKey: 'ik-fund-mvext3',
+      );
+
+      // Create a second household with a cross-household destination.
+      const hh2 = 'hh-mvext3-other';
+      await db.customStatement(
+        "INSERT INTO households (id, name, owner_user_id, created_at, updated_at) "
+        "VALUES ('$hh2', 'Other HH', 'u-mvext3', '2024-01-01', '2024-01-01')",
+      );
+      await db.customStatement(
+        "INSERT INTO financial_accounts (id, household_id, name, type, owner_type, "
+        "fund_purpose, currency_code, is_spendable, is_protected, include_in_net_worth, "
+        "include_in_zakat, display_order, created_by, created_at, updated_at) "
+        "VALUES ('cross-dst-mvext3', '$hh2', 'Cross Dst', 'personalCashWallet', 'user', "
+        "'available', 'EGP', 1, 0, 1, 0, 1, 'test', '2024-01-01', '2024-01-01')",
+      );
+
+      // Insert a release transfer where destination is cross-household.
+      await db.customStatement(
+        "INSERT INTO operations (id, household_id, type, source_account_id, "
+        "destination_account_id, total_amount_minor_units, currency_code, effective_date, "
+        "recorded_at, created_by, created_at, updated_at) "
+        "VALUES ('op-mvext3-xdst', '$_hh', 'transfer', '${goal.reserveAccountId}', "
+        "'cross-dst-mvext3', 10000, 'EGP', '2024-01-01', '2024-01-01T00:00:00Z', "
+        "'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+      );
+
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+          "transfer_operation_id, created_at, release_reason) "
+          "VALUES ('mov-mvext3', '${goal.id}', '$_hh', 'release', "
+          "'op-mvext3-xdst', '2024-01-01T00:00:00Z', 'reason')",
+        ),
+        throwsA(anything),
+        reason:
+            'MVEXT-3: validate_release_movement_household must reject cross-household destination',
+      );
+    },
+  );
+
+  test('MVEXT-4. Valid same-household movement → succeeds (control)', () async {
+    const srcId = 'src-mvext4';
+    await createAccount(id: srcId);
+    await creditAccount(srcId, 100000);
+
+    final goal =
+        ((await createGoal(idempotencyKey: 'ik-mvext4')) as AppOk<SavingsGoal>)
+            .value;
+
+    // Insert a valid same-household transfer.
+    final opId = await insertTransferOp(
+      id: 'op-mvext4',
+      sourceAccountId: srcId,
+      destinationAccountId: goal.reserveAccountId,
+    );
+
+    // Must succeed.
+    await db.customStatement(
+      "INSERT INTO goal_movements (id, goal_id, household_id, movement_type, "
+      "transfer_operation_id, created_at) "
+      "VALUES ('mov-mvext4', '${goal.id}', '$_hh', 'funding', '$opId', "
+      "'2024-01-01T00:00:00Z')",
+    );
+
+    final rows = await db
+        .customSelect(
+          "SELECT COUNT(*) as c FROM goal_movements WHERE id = 'mov-mvext4'",
+        )
+        .get();
+    expect(
+      rows.first.read<int>('c'),
+      1,
+      reason: 'MVEXT-4: valid same-household movement must be accepted',
+    );
+  });
 }

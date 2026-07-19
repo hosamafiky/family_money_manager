@@ -630,6 +630,13 @@ final class CompleteGoalUseCase {
     if (goal.status == GoalStatus.completed) return AppOk(goal);
 
     if (params.earlyCompletion) {
+      // Early completion requires explicit confirmation flag.
+      if (!params.earlyCompletionConfirmed) {
+        return const AppValidationFailure(
+          field: 'earlyCompletionConfirmed',
+          messageKey: 'errorEarlyCompletionConfirmationRequired',
+        );
+      }
       // Early completion requires a non-empty reason.
       final reason = params.earlyCompletionReason?.trim() ?? '';
       if (reason.isEmpty) {

@@ -91,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -117,6 +117,8 @@ class AppDatabase extends _$AppDatabase {
       await _applyGoalMovementsUniqueIndex();
       await _applyReserveSpendableProtectedTriggers();
       await _applyGoalMovementsDirectionTriggers();
+      await _applyGoalReserveInsertValidator();
+      await _applyGoalMovementsHouseholdTriggers();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -179,6 +181,13 @@ class AppDatabase extends _$AppDatabase {
         // spendable/protected locks.
         await _applyReserveSpendableProtectedTriggers();
         await _applyGoalMovementsDirectionTriggers();
+      }
+      if (from <= 10) {
+        // v10 → v11: Phase 5B.3 — early_completion_reason column, goal-reserve
+        // INSERT validator trigger, extended movement household triggers.
+        await m.addColumn(goalsTable, goalsTable.earlyCompletionReason);
+        await _applyGoalReserveInsertValidator();
+        await _applyGoalMovementsHouseholdTriggers();
       }
     },
     beforeOpen: (details) async {
@@ -887,6 +896,85 @@ class AppDatabase extends _$AppDatabase {
             AND o.type = 'transfer'
             AND o.source_account_id = g.reserve_account_id
             AND o.household_id = NEW.household_id
+        )
+        OR (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0);
+      END
+    ''');
+  }
+
+  // ── Phase 5B.3: Goal-reserve INSERT validator ─────────────────────────────
+  //
+  // Ensures every new goal row references an account that is a goalReserve
+  // type in the same household with the same currency, is not spendable,
+  // and is not protected.
+
+  Future<void> _applyGoalReserveInsertValidator() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_goal_reserve_on_insert
+      BEFORE INSERT ON goals
+      BEGIN
+        SELECT RAISE(ABORT, 'goal reserve must be a goalReserve account in the same household with same currency')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM financial_accounts fa
+          WHERE fa.id = NEW.reserve_account_id
+            AND fa.type = 'goalReserve'
+            AND fa.household_id = NEW.household_id
+            AND fa.currency_code = NEW.currency_code
+            AND fa.is_spendable = 0
+            AND fa.is_protected = 0
+        );
+      END
+    ''');
+  }
+
+  // ── Phase 5B.3: Extended movement household validation ────────────────────
+  //
+  // Validates that the operation's household, source/destination accounts'
+  // households all match the movement's household_id.
+
+  Future<void> _applyGoalMovementsHouseholdTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_funding_movement_household
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'funding'
+      BEGIN
+        SELECT RAISE(ABORT, 'funding movement validation failed: cross-household or wrong direction')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          JOIN financial_accounts src ON src.id = o.source_account_id
+          JOIN financial_accounts dst ON dst.id = o.destination_account_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.destination_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+            AND g.household_id = NEW.household_id
+            AND src.household_id = NEW.household_id
+            AND dst.household_id = NEW.household_id
+        );
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_release_movement_household
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'release'
+      BEGIN
+        SELECT RAISE(ABORT, 'release movement validation failed: cross-household or wrong direction')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          JOIN financial_accounts src ON src.id = o.source_account_id
+          JOIN financial_accounts dst ON dst.id = o.destination_account_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.source_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+            AND g.household_id = NEW.household_id
+            AND src.household_id = NEW.household_id
+            AND dst.household_id = NEW.household_id
         )
         OR (NEW.release_reason IS NULL OR length(trim(NEW.release_reason)) = 0);
       END

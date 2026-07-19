@@ -155,11 +155,6 @@ final class DriftLedgerRepository implements LedgerRepository {
       expectedOperationId: params.operationId,
       expectedHouseholdId: params.householdId,
     );
-    await _checkSufficientBalance(
-      params.sourceAccountId,
-      params.householdId,
-      params.amountMinorUnits,
-    );
 
     final now = DateTime.now().toUtc().toIso8601String();
     final entryType = account.isChildProtectedFund
@@ -177,6 +172,13 @@ final class DriftLedgerRepository implements LedgerRepository {
         result = idemResult;
         return;
       }
+
+      // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
+      await _checkSufficientBalance(
+        params.sourceAccountId,
+        params.householdId,
+        params.amountMinorUnits,
+      );
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -287,11 +289,6 @@ final class DriftLedgerRepository implements LedgerRepository {
       expectedOperationId: params.operationId,
       expectedHouseholdId: params.householdId,
     );
-    await _checkSufficientBalance(
-      params.sourceAccountId,
-      params.householdId,
-      params.amountMinorUnits,
-    );
 
     final now = DateTime.now().toUtc().toIso8601String();
     late IdempotentOperationResult result;
@@ -306,6 +303,13 @@ final class DriftLedgerRepository implements LedgerRepository {
         result = idemResult;
         return;
       }
+
+      // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
+      await _checkSufficientBalance(
+        params.sourceAccountId,
+        params.householdId,
+        params.amountMinorUnits,
+      );
 
       await _insertOp(
         OperationsCompanion.insert(
@@ -388,7 +392,13 @@ final class DriftLedgerRepository implements LedgerRepository {
   Future<IdempotentOperationResult> recordOpeningBalance(
     RecordOpeningBalanceParams params,
   ) async {
-    await _requireAccount(params.accountId, params.householdId);
+    final acct = await _requireAccount(params.accountId, params.householdId);
+    if (acct.type == FinancialAccountType.goalReserve) {
+      throw ArgumentError(
+        'Goal reserve accounts cannot receive opening balances. '
+        'Account: ${params.accountId}',
+      );
+    }
 
     // Idempotency check: if this exact operation ID already exists → safe retry.
     final existing = await findOperation(
@@ -479,6 +489,12 @@ final class DriftLedgerRepository implements LedgerRepository {
     ChildWithdrawalAuditParams? auditParams,
   }) async {
     final account = await _requireAccount(params.accountId, params.householdId);
+    if (account.type == FinancialAccountType.goalReserve) {
+      throw ArgumentError(
+        'Goal reserve accounts cannot be adjusted directly. '
+        'Account: ${params.accountId}',
+      );
+    }
 
     if (!params.isCredit) {
       _checkProtectedWithdrawal(

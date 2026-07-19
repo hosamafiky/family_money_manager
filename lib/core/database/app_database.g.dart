@@ -7745,6 +7745,17 @@ class $GoalsTableTable extends GoalsTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _earlyCompletionReasonMeta =
+      const VerificationMeta('earlyCompletionReason');
+  @override
+  late final GeneratedColumn<String> earlyCompletionReason =
+      GeneratedColumn<String>(
+        'early_completion_reason',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
     'schemaVersion',
   );
@@ -7769,6 +7780,7 @@ class $GoalsTableTable extends GoalsTable
     createdAt,
     completedAt,
     archivedAt,
+    earlyCompletionReason,
     schemaVersion,
   ];
   @override
@@ -7874,6 +7886,15 @@ class $GoalsTableTable extends GoalsTable
         archivedAt.isAcceptableOrUnknown(data['archived_at']!, _archivedAtMeta),
       );
     }
+    if (data.containsKey('early_completion_reason')) {
+      context.handle(
+        _earlyCompletionReasonMeta,
+        earlyCompletionReason.isAcceptableOrUnknown(
+          data['early_completion_reason']!,
+          _earlyCompletionReasonMeta,
+        ),
+      );
+    }
     if (data.containsKey('schema_version')) {
       context.handle(
         _schemaVersionMeta,
@@ -7932,6 +7953,10 @@ class $GoalsTableTable extends GoalsTable
         DriftSqlType.string,
         data['${effectivePrefix}archived_at'],
       ),
+      earlyCompletionReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}early_completion_reason'],
+      ),
       schemaVersion: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}schema_version'],
@@ -7976,6 +8001,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
   /// Set when status = 'archived'.
   final String? archivedAt;
 
+  /// Reason stored when earlyCompletion = true (Phase 5B.3).
+  final String? earlyCompletionReason;
+
   /// Schema version for forward-compatibility (always 1 in Phase 5B).
   final int schemaVersion;
   const DbGoal({
@@ -7989,6 +8017,7 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
     required this.createdAt,
     this.completedAt,
     this.archivedAt,
+    this.earlyCompletionReason,
     required this.schemaVersion,
   });
   @override
@@ -8007,6 +8036,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
     }
     if (!nullToAbsent || archivedAt != null) {
       map['archived_at'] = Variable<String>(archivedAt);
+    }
+    if (!nullToAbsent || earlyCompletionReason != null) {
+      map['early_completion_reason'] = Variable<String>(earlyCompletionReason);
     }
     map['schema_version'] = Variable<int>(schemaVersion);
     return map;
@@ -8028,6 +8060,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
       archivedAt: archivedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(archivedAt),
+      earlyCompletionReason: earlyCompletionReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(earlyCompletionReason),
       schemaVersion: Value(schemaVersion),
     );
   }
@@ -8050,6 +8085,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
       createdAt: serializer.fromJson<String>(json['createdAt']),
       completedAt: serializer.fromJson<String?>(json['completedAt']),
       archivedAt: serializer.fromJson<String?>(json['archivedAt']),
+      earlyCompletionReason: serializer.fromJson<String?>(
+        json['earlyCompletionReason'],
+      ),
       schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
     );
   }
@@ -8067,6 +8105,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
       'createdAt': serializer.toJson<String>(createdAt),
       'completedAt': serializer.toJson<String?>(completedAt),
       'archivedAt': serializer.toJson<String?>(archivedAt),
+      'earlyCompletionReason': serializer.toJson<String?>(
+        earlyCompletionReason,
+      ),
       'schemaVersion': serializer.toJson<int>(schemaVersion),
     };
   }
@@ -8082,6 +8123,7 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
     String? createdAt,
     Value<String?> completedAt = const Value.absent(),
     Value<String?> archivedAt = const Value.absent(),
+    Value<String?> earlyCompletionReason = const Value.absent(),
     int? schemaVersion,
   }) => DbGoal(
     id: id ?? this.id,
@@ -8094,6 +8136,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
     createdAt: createdAt ?? this.createdAt,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
     archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    earlyCompletionReason: earlyCompletionReason.present
+        ? earlyCompletionReason.value
+        : this.earlyCompletionReason,
     schemaVersion: schemaVersion ?? this.schemaVersion,
   );
   DbGoal copyWithCompanion(GoalsTableCompanion data) {
@@ -8122,6 +8167,9 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
       archivedAt: data.archivedAt.present
           ? data.archivedAt.value
           : this.archivedAt,
+      earlyCompletionReason: data.earlyCompletionReason.present
+          ? data.earlyCompletionReason.value
+          : this.earlyCompletionReason,
       schemaVersion: data.schemaVersion.present
           ? data.schemaVersion.value
           : this.schemaVersion,
@@ -8141,6 +8189,7 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
           ..write('createdAt: $createdAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('archivedAt: $archivedAt, ')
+          ..write('earlyCompletionReason: $earlyCompletionReason, ')
           ..write('schemaVersion: $schemaVersion')
           ..write(')'))
         .toString();
@@ -8158,6 +8207,7 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
     createdAt,
     completedAt,
     archivedAt,
+    earlyCompletionReason,
     schemaVersion,
   );
   @override
@@ -8174,6 +8224,7 @@ class DbGoal extends DataClass implements Insertable<DbGoal> {
           other.createdAt == this.createdAt &&
           other.completedAt == this.completedAt &&
           other.archivedAt == this.archivedAt &&
+          other.earlyCompletionReason == this.earlyCompletionReason &&
           other.schemaVersion == this.schemaVersion);
 }
 
@@ -8188,6 +8239,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
   final Value<String> createdAt;
   final Value<String?> completedAt;
   final Value<String?> archivedAt;
+  final Value<String?> earlyCompletionReason;
   final Value<int> schemaVersion;
   final Value<int> rowid;
   const GoalsTableCompanion({
@@ -8201,6 +8253,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
     this.createdAt = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.archivedAt = const Value.absent(),
+    this.earlyCompletionReason = const Value.absent(),
     this.schemaVersion = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -8215,6 +8268,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
     required String createdAt,
     this.completedAt = const Value.absent(),
     this.archivedAt = const Value.absent(),
+    this.earlyCompletionReason = const Value.absent(),
     this.schemaVersion = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -8236,6 +8290,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
     Expression<String>? createdAt,
     Expression<String>? completedAt,
     Expression<String>? archivedAt,
+    Expression<String>? earlyCompletionReason,
     Expression<int>? schemaVersion,
     Expression<int>? rowid,
   }) {
@@ -8250,6 +8305,8 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
       if (createdAt != null) 'created_at': createdAt,
       if (completedAt != null) 'completed_at': completedAt,
       if (archivedAt != null) 'archived_at': archivedAt,
+      if (earlyCompletionReason != null)
+        'early_completion_reason': earlyCompletionReason,
       if (schemaVersion != null) 'schema_version': schemaVersion,
       if (rowid != null) 'rowid': rowid,
     });
@@ -8266,6 +8323,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
     Value<String>? createdAt,
     Value<String?>? completedAt,
     Value<String?>? archivedAt,
+    Value<String?>? earlyCompletionReason,
     Value<int>? schemaVersion,
     Value<int>? rowid,
   }) {
@@ -8280,6 +8338,8 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
       archivedAt: archivedAt ?? this.archivedAt,
+      earlyCompletionReason:
+          earlyCompletionReason ?? this.earlyCompletionReason,
       schemaVersion: schemaVersion ?? this.schemaVersion,
       rowid: rowid ?? this.rowid,
     );
@@ -8318,6 +8378,11 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
     if (archivedAt.present) {
       map['archived_at'] = Variable<String>(archivedAt.value);
     }
+    if (earlyCompletionReason.present) {
+      map['early_completion_reason'] = Variable<String>(
+        earlyCompletionReason.value,
+      );
+    }
     if (schemaVersion.present) {
       map['schema_version'] = Variable<int>(schemaVersion.value);
     }
@@ -8340,6 +8405,7 @@ class GoalsTableCompanion extends UpdateCompanion<DbGoal> {
           ..write('createdAt: $createdAt, ')
           ..write('completedAt: $completedAt, ')
           ..write('archivedAt: $archivedAt, ')
+          ..write('earlyCompletionReason: $earlyCompletionReason, ')
           ..write('schemaVersion: $schemaVersion, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -15476,6 +15542,7 @@ typedef $$GoalsTableTableCreateCompanionBuilder =
       required String createdAt,
       Value<String?> completedAt,
       Value<String?> archivedAt,
+      Value<String?> earlyCompletionReason,
       Value<int> schemaVersion,
       Value<int> rowid,
     });
@@ -15491,6 +15558,7 @@ typedef $$GoalsTableTableUpdateCompanionBuilder =
       Value<String> createdAt,
       Value<String?> completedAt,
       Value<String?> archivedAt,
+      Value<String?> earlyCompletionReason,
       Value<int> schemaVersion,
       Value<int> rowid,
     });
@@ -15611,6 +15679,11 @@ class $$GoalsTableTableFilterComposer
 
   ColumnFilters<String> get archivedAt => $composableBuilder(
     column: $table.archivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15747,6 +15820,11 @@ class $$GoalsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get schemaVersion => $composableBuilder(
     column: $table.schemaVersion,
     builder: (column) => ColumnOrderings(column),
@@ -15821,6 +15899,11 @@ class $$GoalsTableTableAnnotationComposer
 
   GeneratedColumn<String> get archivedAt => $composableBuilder(
     column: $table.archivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get earlyCompletionReason => $composableBuilder(
+    column: $table.earlyCompletionReason,
     builder: (column) => column,
   );
 
@@ -15948,6 +16031,7 @@ class $$GoalsTableTableTableManager
                 Value<String> createdAt = const Value.absent(),
                 Value<String?> completedAt = const Value.absent(),
                 Value<String?> archivedAt = const Value.absent(),
+                Value<String?> earlyCompletionReason = const Value.absent(),
                 Value<int> schemaVersion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalsTableCompanion(
@@ -15961,6 +16045,7 @@ class $$GoalsTableTableTableManager
                 createdAt: createdAt,
                 completedAt: completedAt,
                 archivedAt: archivedAt,
+                earlyCompletionReason: earlyCompletionReason,
                 schemaVersion: schemaVersion,
                 rowid: rowid,
               ),
@@ -15976,6 +16061,7 @@ class $$GoalsTableTableTableManager
                 required String createdAt,
                 Value<String?> completedAt = const Value.absent(),
                 Value<String?> archivedAt = const Value.absent(),
+                Value<String?> earlyCompletionReason = const Value.absent(),
                 Value<int> schemaVersion = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalsTableCompanion.insert(
@@ -15989,6 +16075,7 @@ class $$GoalsTableTableTableManager
                 createdAt: createdAt,
                 completedAt: completedAt,
                 archivedAt: archivedAt,
+                earlyCompletionReason: earlyCompletionReason,
                 schemaVersion: schemaVersion,
                 rowid: rowid,
               ),

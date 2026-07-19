@@ -139,6 +139,7 @@ final class SavingsGoal {
     required this.idempotencyKey,
     this.completedAt,
     this.archivedAt,
+    this.earlyCompletionReason,
   });
 
   final GoalId id;
@@ -165,6 +166,9 @@ final class SavingsGoal {
 
   /// Set when status transitions to [GoalStatus.archived].
   final String? archivedAt;
+
+  /// Stored when earlyCompletion = true (Phase 5B.3).
+  final String? earlyCompletionReason;
 
   // ── Convenience delegators ───────────────────────────────────────────────
 

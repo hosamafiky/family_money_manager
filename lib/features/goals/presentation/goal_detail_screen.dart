@@ -169,7 +169,9 @@ class _GoalDetailContent extends ConsumerWidget {
                 CompleteGoalParams(
                   goalId: goalId,
                   householdId: _householdId,
+                  idempotencyKey: 'complete-$goalId',
                   earlyCompletion: true,
+                  earlyCompletionConfirmed: true,
                   earlyCompletionReason: 'Completed from goal detail screen',
                 ),
               );
