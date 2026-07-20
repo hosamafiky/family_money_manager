@@ -177,8 +177,8 @@ Two Drift connections → one physical temp SQLite file (Phase 5B.6 pattern).
 |------|------------------------|
 | MC-CERT-1 equivalent concurrent create | Prefer both `AppOk` after Phase 6A.2 re-read; exactly one certificate. Phase 6A.1 allowed `AppPersistenceFailure` as lock noise — **corrected: not acceptable as final equivalent semantic** |
 | MC-CERT-2 conflicting concurrent create | One winner; `AppDuplicateConflict` preferred (Phase 6A.2) |
-| MC-CERT-3 insufficient source race | One certificate; non-negative balance; typed insufficient preferred |
-| MC-CERT-4 purchase vs expense | Exactly one commits (Phase 6A.2 IMMEDIATE + non-neg trigger); balance ≥ 0 |
+| MC-CERT-3 insufficient source race | Exactly one `AppOk` + one `AppInsufficientFunds` (Phase 6A.3); never persistence lock noise |
+| MC-CERT-4 purchase vs expense | Exactly one success + one `AppInsufficientFunds` (Phase 6A.3); balance exact |
 | MC-CERT-5 purchase vs transfer | Same |
 
 **Classification:** Database-tested. Prior Phase 6A.1 note that dual-success / nondeterministic persistence was “acceptable concurrent idempotency” is **retracted** for equivalent keys — see Phase 6A.2.
@@ -258,7 +258,7 @@ Unchanged (PO-2): certificate data inherits plaintext-at-rest risk until securit
 
 ## 18. Remaining risks / gaps
 
-1. Multi-connection equivalent create: Phase 6A.1 accepted `AppPersistenceFailure` on loser — **Phase 6A.2 re-reads idempotency**; residual busy-timeout persistence still possible on some races (documented in 6A.2).
+1. Multi-connection equivalent create: Phase 6A.1 accepted `AppPersistenceFailure` on loser — **Phase 6A.2 re-reads idempotency**; **Phase 6A.3** shared contention retry makes both `AppOk` deterministic (residual busy-timeout persistence claim **retracted**).
 2. Purchase reversal still archives immediately (V1-simple).
 3. Partial / early redemption still deferred.
 4. Accrued interest / auto payout deferred.

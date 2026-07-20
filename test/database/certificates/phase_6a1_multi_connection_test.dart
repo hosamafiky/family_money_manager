@@ -62,7 +62,18 @@ class _NoopHouseholdRepository implements HouseholdRepository {
   }) async => null;
 
   @override
-  Future<List<HouseholdMember>> listMembers(String householdId) async => [];
+  Future<List<HouseholdMember>> listMembers(String householdId) async => [
+    HouseholdMember(
+      id: 'u1',
+      householdId: householdId,
+      displayName: 'Owner',
+      role: MemberRole.primaryUser,
+      lifecycle: MemberLifecycle.active,
+      isArchived: false,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    ),
+  ];
 
   @override
   Future<HouseholdMember> renameMember({
@@ -303,18 +314,17 @@ void main() {
     final insuff = results
         .whereType<AppInsufficientFunds<SavingsCertificate>>()
         .length;
-    final fails = results
-        .whereType<AppPersistenceFailure<SavingsCertificate>>()
-        .length;
     expect(oks, 1);
-    // Prefer typed insufficient funds; lock-timeout may still surface persistence.
-    expect(insuff + fails, 1);
+    expect(insuff, 1);
+    expect(
+      results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+      isEmpty,
+    );
     expect(
       await count(db1, 'SELECT COUNT(*) as c FROM savings_certificates'),
       1,
     );
-    expect(await bal(db1, 'src-mc3'), greaterThanOrEqualTo(0));
-    expect(await bal(db1, 'src-mc3'), lessThanOrEqualTo(50000));
+    expect(await bal(db1, 'src-mc3'), 10000);
   });
 
   test('MC-CERT-4. Purchase vs ordinary expense across connections', () async {
@@ -351,9 +361,14 @@ void main() {
     ]);
     final certOk = results[0] is AppOk<SavingsCertificate>;
     final expenseOk = results[1] is AppOk<String>;
-    // Phase 6A.2: IMMEDIATE txn + non-neg trigger → exactly one commits.
+    // Phase 6A.3: typed outcomes — exactly one success + one insufficient funds.
     expect(certOk ^ expenseOk, isTrue);
-    expect(await bal(db1, 'src-mc4'), greaterThanOrEqualTo(0));
+    final insuff =
+        (results[0] is AppInsufficientFunds<SavingsCertificate> ? 1 : 0) +
+        (results[1] is AppInsufficientFunds<String> ? 1 : 0);
+    expect(insuff, 1);
+    expect(results.any((r) => r is AppPersistenceFailure), isFalse);
+    expect(await bal(db1, 'src-mc4'), 10000);
   });
 
   test('MC-CERT-5. Purchase vs ordinary transfer across connections', () async {
@@ -388,6 +403,11 @@ void main() {
     final certOk = results[0] is AppOk<SavingsCertificate>;
     final xferOk = results[1] is AppOk<String>;
     expect(certOk ^ xferOk, isTrue);
-    expect(await bal(db1, 'src-mc5'), greaterThanOrEqualTo(0));
+    final insuff =
+        (results[0] is AppInsufficientFunds<SavingsCertificate> ? 1 : 0) +
+        (results[1] is AppInsufficientFunds<String> ? 1 : 0);
+    expect(insuff, 1);
+    expect(results.any((r) => r is AppPersistenceFailure), isFalse);
+    expect(await bal(db1, 'src-mc5'), 10000);
   });
 }

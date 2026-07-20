@@ -66,11 +66,13 @@ Two Drift connections → one physical temp SQLite file.
 | CIDMP-3 | Cross-household same key isolated |
 | CIDMP-4 | Fail-after then retry succeeds once |
 | CIDMP-5/6 | Equivalent / conflicting concurrent profit |
-| CIDMP-7 | Equivalent concurrent redeem (DB: one redeemed event) |
+| CIDMP-7 | Equivalent concurrent redeem → both `AppOk`, one redeemed event |
 | CIDMP-8 | Concurrent purchase reversal → one reversal op |
 | CIDMP-9 | Concurrent profit reversal; redemption reversal remains unsupported |
 
 After lock contention, repositories re-read the winner’s idempotency row (with short retry) so equivalent retries are not classified as final `AppPersistenceFailure` when the winner completed.
+
+**Phase 6A.3 correction:** shared bounded SQLITE_BUSY/LOCKED retry (`sqlite_contention_policy.dart`) makes equivalent / insufficient-funds / conflicting concurrent outcomes **deterministic typed results**. Residual “may still surface `AppPersistenceFailure` under busy timeout” claims below are **retracted** — see `PHASE_6A_3_REPORT.md`.
 
 **Classification:** Database-tested.
 
@@ -150,8 +152,8 @@ flutter test --reporter=expanded                      # 1507 passed; 0 failed
 
 ## 12. Gaps / residual risks
 
-1. Multi-connection insufficient-funds loser may still surface `AppPersistenceFailure` under WAL busy timeout (MC-CERT-3); DB state remains correct (one cert, balance ≥ 0).
-2. Concurrent redeem equivalent may yield one `AppOk` + persistence on loser while DB has exactly one redeemed event (CIDMP-7).
+1. ~~Multi-connection insufficient-funds loser may still surface `AppPersistenceFailure`~~ — **retracted in Phase 6A.3** (MC-CERT-3 / XDEB require exact `AppInsufficientFunds`).
+2. ~~Concurrent redeem equivalent may yield persistence on loser~~ — **retracted in Phase 6A.3** (CIDMP-7 requires both `AppOk`).
 3. Goal funding still persists operation `type='transfer'` (pre-existing); XDEB-6 counts ordinary transfers excluding goal-linked ops.
 4. Device / App Bundle builds not run (hard constraint).
 5. Phase 6B.1 not begun.

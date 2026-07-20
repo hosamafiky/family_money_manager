@@ -295,7 +295,7 @@ Unchanged from Phase 2+: sqlite3mc-ready binary; key injection still deferred (P
 1. ~~UI redeem `profitOnly` mode still routes through redeem API~~ — **fixed in Phase 6A.1** (removed; profit-only uses Record Profit).  
 2. Purchase reversal archives immediately; restore-after-redeem edge paths are V1-simple.  
 3. Certificate account appears in net-worth flag but there is **no** full net-worth product — messaging must stay careful.  
-4. Concurrent purchase under heavy WAL contention — Phase 6A.1 allowed `AppPersistenceFailure` as honest lock noise; **Phase 6A.2** re-reads idempotency after contention so equivalent concurrent create prefers `AppOk` (see `PHASE_6A_2_REPORT.md`).  
+4. Concurrent purchase under heavy WAL contention — Phase 6A.1 allowed `AppPersistenceFailure` as honest lock noise; **Phase 6A.2** re-reads idempotency; **Phase 6A.3** bounded SQLITE_BUSY/LOCKED retry yields typed outcomes only (`AppOk` / `AppDuplicateConflict` / `AppInsufficientFunds`) — persistence-as-lock-noise **retracted** (see `PHASE_6A_3_REPORT.md`).  
 5. ~~Analyzer infos (deprecated Radio APIs on redeem screen)~~ — **cleared in Phase 6A.1**.
 
 Overstated Phase 6A atomicity/idempotency claims for profit/redeem mid-failure matrices are closed by Phase 6A.1 CREATE/PROFIT/REDEEM-ROLL suites (previously only happy-path + limited concurrent create).

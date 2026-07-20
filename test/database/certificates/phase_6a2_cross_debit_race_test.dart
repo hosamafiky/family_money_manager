@@ -63,7 +63,18 @@ class _NoopHouseholdRepository implements HouseholdRepository {
   }) async => null;
 
   @override
-  Future<List<HouseholdMember>> listMembers(String householdId) async => [];
+  Future<List<HouseholdMember>> listMembers(String householdId) async => [
+    HouseholdMember(
+      id: 'u1',
+      householdId: householdId,
+      displayName: 'Owner',
+      role: MemberRole.primaryUser,
+      lifecycle: MemberLifecycle.active,
+      isArchived: false,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+    ),
+  ];
 
   @override
   Future<HouseholdMember> renameMember({
@@ -256,9 +267,12 @@ void main() {
           .whereType<AppInsufficientFunds<SavingsCertificate>>()
           .length;
       expect(oks, 1);
-      expect(oks + insuff, greaterThanOrEqualTo(1));
-      expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
-      expect(await bal(db1, 'src'), lessThanOrEqualTo(20000));
+      expect(insuff, 1);
+      expect(
+        results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+        isEmpty,
+      );
+      expect(await bal(db1, 'src'), 20000);
       expect(
         await count(db1, "SELECT COUNT(*) as c FROM savings_certificates"),
         1,
@@ -273,7 +287,23 @@ void main() {
       expect(
         await count(
           db1,
+          "SELECT COUNT(*) as c FROM certificate_events WHERE event_type='created'",
+        ),
+        1,
+      );
+      expect(
+        await count(
+          db1,
           "SELECT COUNT(*) as c FROM operations WHERE type='certificateFunding'",
+        ),
+        1,
+      );
+      expect(
+        await count(
+          db1,
+          "SELECT COUNT(*) as c FROM operation_contexts oc "
+          "JOIN operations o ON o.id = oc.operation_id "
+          "WHERE o.type='certificateFunding'",
         ),
         1,
       );
@@ -316,8 +346,20 @@ void main() {
       ]);
       final certOk = results.whereType<AppOk<SavingsCertificate>>().length;
       final expOk = results.whereType<AppOk<String>>().length;
+      final certInsuff = results
+          .whereType<AppInsufficientFunds<SavingsCertificate>>()
+          .length;
+      final expInsuff = results
+          .whereType<AppInsufficientFunds<String>>()
+          .length;
       expect(certOk + expOk, 1);
-      expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
+      expect(certInsuff + expInsuff, 1);
+      expect(
+        results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+        isEmpty,
+      );
+      expect(results.whereType<AppPersistenceFailure<String>>(), isEmpty);
+      expect(await bal(db1, 'src'), 20000);
       final certs = await count(
         db1,
         'SELECT COUNT(*) as c FROM savings_certificates',
@@ -363,8 +405,18 @@ void main() {
     ]);
     final certOk = results.whereType<AppOk<SavingsCertificate>>().length;
     final xferOk = results.whereType<AppOk<String>>().length;
+    final certInsuff = results
+        .whereType<AppInsufficientFunds<SavingsCertificate>>()
+        .length;
+    final xferInsuff = results.whereType<AppInsufficientFunds<String>>().length;
     expect(certOk + xferOk, 1);
-    expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
+    expect(certInsuff + xferInsuff, 1);
+    expect(
+      results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+      isEmpty,
+    );
+    expect(results.whereType<AppPersistenceFailure<String>>(), isEmpty);
+    expect(await bal(db1, 'src'), 20000);
     final certs = await count(
       db1,
       'SELECT COUNT(*) as c FROM savings_certificates',
@@ -401,8 +453,20 @@ void main() {
     ]);
     final certOk = results.whereType<AppOk<SavingsCertificate>>().length;
     final fundOk = results.whereType<AppOk<SavingsGoal>>().length;
+    final certInsuff = results
+        .whereType<AppInsufficientFunds<SavingsCertificate>>()
+        .length;
+    final fundInsuff = results
+        .whereType<AppInsufficientFunds<SavingsGoal>>()
+        .length;
     expect(certOk + fundOk, 1);
-    expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
+    expect(certInsuff + fundInsuff, 1);
+    expect(
+      results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+      isEmpty,
+    );
+    expect(results.whereType<AppPersistenceFailure<SavingsGoal>>(), isEmpty);
+    expect(await bal(db1, 'src'), 20000);
     final certs = await count(
       db1,
       'SELECT COUNT(*) as c FROM savings_certificates',
@@ -453,8 +517,11 @@ void main() {
       ),
     ]);
     final oks = results.whereType<AppOk<String>>().length;
+    final insuff = results.whereType<AppInsufficientFunds<String>>().length;
     expect(oks, 1);
-    expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
+    expect(insuff, 1);
+    expect(results.whereType<AppPersistenceFailure<String>>(), isEmpty);
+    expect(await bal(db1, 'src'), 20000);
     final expenses = await count(
       db1,
       "SELECT COUNT(*) as c FROM operations WHERE type='expense'",
@@ -495,7 +562,10 @@ void main() {
     ]);
     final fundOk = results.whereType<AppOk<SavingsGoal>>().length;
     final xferOk = results.whereType<AppOk<String>>().length;
-    expect(await bal(db1, 'src'), greaterThanOrEqualTo(0));
+    final fundInsuff = results
+        .whereType<AppInsufficientFunds<SavingsGoal>>()
+        .length;
+    final xferInsuff = results.whereType<AppInsufficientFunds<String>>().length;
     expect(await bal(db1, 'src'), 20000); // exactly one 80k debit from 100k
     final movs = await count(
       db1,
@@ -509,6 +579,9 @@ void main() {
       'WHERE m.transfer_operation_id = o.id)',
     );
     expect(movs + ordinaryXfers, 1);
-    expect(fundOk + xferOk, greaterThanOrEqualTo(1));
+    expect(fundOk + xferOk, 1);
+    expect(fundInsuff + xferInsuff, 1);
+    expect(results.whereType<AppPersistenceFailure<SavingsGoal>>(), isEmpty);
+    expect(results.whereType<AppPersistenceFailure<String>>(), isEmpty);
   });
 }

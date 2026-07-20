@@ -339,8 +339,19 @@ void main() {
     ]);
     expect(results.whereType<AppOk<CertificateProfitReceipt>>().length, 2);
     expect(
+      results.whereType<AppPersistenceFailure<CertificateProfitReceipt>>(),
+      isEmpty,
+    );
+    expect(
       await count(
         "SELECT COUNT(*) as c FROM certificate_events WHERE event_type='profitReceived'",
+      ),
+      1,
+    );
+    expect(
+      await count(
+        "SELECT COUNT(*) as c FROM operations WHERE type='income' "
+        "AND category_code='certificate_profit'",
       ),
       1,
     );
@@ -422,13 +433,10 @@ void main() {
       ),
     ]);
     final oks = results.whereType<AppOk<CertificateRedemptionSummary>>().length;
-    expect(oks, greaterThanOrEqualTo(1));
+    expect(oks, 2);
     expect(
-      results
-              .whereType<AppPersistenceFailure<CertificateRedemptionSummary>>()
-              .length +
-          oks,
-      2,
+      results.whereType<AppPersistenceFailure<CertificateRedemptionSummary>>(),
+      isEmpty,
     );
     expect(
       await count(
@@ -436,6 +444,18 @@ void main() {
       ),
       1,
     );
+    expect(
+      await count(
+        "SELECT COUNT(*) as c FROM operations WHERE type='certificateMaturity'",
+      ),
+      1,
+    );
+    final ids = results
+        .whereType<AppOk<CertificateRedemptionSummary>>()
+        .map((r) => r.value.event?.id)
+        .toSet();
+    expect(ids, hasLength(1));
+    expect(ids.single, isNotNull);
   });
 
   test(
@@ -468,10 +488,10 @@ void main() {
           idempotencyKey: 'cidmp-rev-b',
         ),
       ]);
-      // One succeeds; the other may succeed via re-read of already-reversed op,
-      // or fail typed — never leave incomplete workflow / double reverse.
+      // Concurrent equivalent (same purchase already-reversed path): both AppOk.
       final oks = results.whereType<AppOk<void>>().length;
-      expect(oks, greaterThanOrEqualTo(1));
+      expect(oks, 2);
+      expect(results.whereType<AppPersistenceFailure<void>>(), isEmpty);
       final reversed = await count(
         "SELECT COUNT(*) as c FROM operations WHERE type='reversal'",
       );
@@ -522,7 +542,8 @@ void main() {
           idempotencyKey: 'cidmp-pr-b',
         ),
       ]);
-      expect(results.whereType<AppOk<void>>().length, greaterThanOrEqualTo(1));
+      expect(results.whereType<AppOk<void>>().length, 2);
+      expect(results.whereType<AppPersistenceFailure<void>>(), isEmpty);
       expect(
         await count(
           "SELECT COUNT(*) as c FROM operations WHERE type='reversal'",

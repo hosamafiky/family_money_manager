@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
+import 'package:family_money_manager/core/database/sqlite_contention_policy.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
@@ -1229,16 +1230,26 @@ final class DriftGoalRepository implements GoalRepository {
     GoalAssociatedTransferParams params,
   ) async {
     try {
-      late AppResult<GoalTransferWriteResult> result;
-      await _db.transaction(() async {
-        result = await _runGoalAssociatedTransferSteps(params);
+      return await runAuthoritativeWriteWithContentionRetry(() async {
+        late AppResult<GoalTransferWriteResult> result;
+        try {
+          await _db.transaction(() async {
+            result = await _runGoalAssociatedTransferSteps(params);
+          });
+          return result;
+        } on InsufficientFundsError {
+          return const AppInsufficientFunds();
+        } on GoalTransferInjectedFailure {
+          return const AppPersistenceFailure();
+        } on Exception catch (e) {
+          if (isNegativeBalanceAbort(e)) {
+            return const AppInsufficientFunds();
+          }
+          if (isRetryableSqliteContention(e)) rethrow;
+          return const AppPersistenceFailure();
+        }
       });
-      return result;
-    } on InsufficientFundsError {
-      return const AppInsufficientFunds();
-    } on GoalTransferInjectedFailure {
-      return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } on SqliteContentionExhausted {
       return const AppPersistenceFailure();
     }
   }
