@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 FinancialAccount _acct({
   required FinancialAccountType type,
+  FundPurpose purpose = FundPurpose.available,
   bool archived = false,
   bool protected = false,
+  bool spendable = true,
   String currency = 'EGP',
 }) {
   return FinancialAccount(
@@ -15,9 +17,9 @@ FinancialAccount _acct({
     name: 'Test',
     type: type,
     ownerType: AccountOwnerType.user,
-    fundPurpose: FundPurpose.available,
+    fundPurpose: purpose,
     currencyCode: currency,
-    isSpendable: true,
+    isSpendable: spendable,
     isProtected: protected,
     includeInNetWorth: true,
     includeInZakat: false,
@@ -57,29 +59,90 @@ void main() {
     );
   });
 
-  test('goal funding source excludes protected and reserve', () {
-    expect(
-      AccountEligibility.isGoalFundingSource(
-        _acct(type: FinancialAccountType.bankAccount),
-        currencyCode: 'EGP',
-      ),
-      isTrue,
-    );
-    expect(
-      AccountEligibility.isGoalFundingSource(
-        _acct(type: FinancialAccountType.bankAccount, protected: true),
-        currencyCode: 'EGP',
-      ),
-      isFalse,
-    );
-    expect(
-      AccountEligibility.isGoalFundingSource(
-        _acct(type: FinancialAccountType.goalReserve),
-        currencyCode: 'EGP',
-      ),
-      isFalse,
-    );
-  });
+  test(
+    'goal funding source excludes protected, reserve, certificate, non-spendable',
+    () {
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(type: FinancialAccountType.bankAccount),
+          currencyCode: 'EGP',
+        ),
+        isTrue,
+      );
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(type: FinancialAccountType.bankAccount, protected: true),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(type: FinancialAccountType.goalReserve),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(type: FinancialAccountType.certificate, spendable: false),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(
+            type: FinancialAccountType.bankAccount,
+            purpose: FundPurpose.certificate,
+          ),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalFundingSource(
+          _acct(type: FinancialAccountType.bankAccount, spendable: false),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+    },
+  );
+
+  test(
+    'goal release destination excludes reserve, certificate, non-spendable',
+    () {
+      expect(
+        AccountEligibility.isGoalReleaseDestination(
+          _acct(type: FinancialAccountType.bankAccount),
+          currencyCode: 'EGP',
+        ),
+        isTrue,
+      );
+      expect(
+        AccountEligibility.isGoalReleaseDestination(
+          _acct(type: FinancialAccountType.certificate, spendable: false),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalReleaseDestination(
+          _acct(type: FinancialAccountType.goalReserve, spendable: false),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+      expect(
+        AccountEligibility.isGoalReleaseDestination(
+          _acct(type: FinancialAccountType.bankAccount, spendable: false),
+          currencyCode: 'EGP',
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test('ordinaryEndpointRejection maps reserved types', () {
     expect(
@@ -91,6 +154,16 @@ void main() {
     expect(
       AccountEligibility.ordinaryEndpointRejection(
         _acct(type: FinancialAccountType.certificate),
+      ),
+      AccountIneligibilityReason.certificate,
+    );
+  });
+
+  test('goalFundingSourceRejection maps certificate', () {
+    expect(
+      AccountEligibility.goalFundingSourceRejection(
+        _acct(type: FinancialAccountType.certificate, spendable: false),
+        currencyCode: 'EGP',
       ),
       AccountIneligibilityReason.certificate,
     );

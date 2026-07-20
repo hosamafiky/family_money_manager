@@ -1015,6 +1015,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cannot fund a goal from another goal reserve';
 
   @override
+  String get errorGoalSourceNotSpendable =>
+      'Goal funding requires a spendable account';
+
+  @override
+  String get errorGoalDestinationNotSpendable =>
+      'Goal release requires a spendable destination account';
+
+  @override
   String get goalFundTitle => 'Add Funds to Goal';
 
   @override

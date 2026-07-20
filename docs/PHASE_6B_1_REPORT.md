@@ -193,9 +193,10 @@ Schema grep: `int get schemaVersion => 18;`
 | Refactor audit | `docs/REFACTOR_AUDIT.md` |
 | Architecture | `docs/ARCHITECTURE.md` |
 | This report | `docs/PHASE_6B_1_REPORT.md` |
+| Phase 6B.1.1 follow-up | `docs/PHASE_6B_1_1_REPORT.md` |
 
 ---
 
 ## 12. Stop condition
 
-Phase **6B.1 complete**. Do **not** begin Phase 6B.2 UI redesign.
+Phase **6B.1 complete** (refactor). Certificate×goal endpoint ownership closed in **Phase 6B.1.1** — see `PHASE_6B_1_1_REPORT.md`. Do **not** begin Phase 6B.2 UI redesign in this phase.

@@ -128,9 +128,9 @@ void main() {
     }
   });
 
-  test('schemaVersion remains 18', () {
+  test('schemaVersion remains 19', () {
     final src = File('lib/core/database/app_database.dart').readAsStringSync();
-    expect(src.contains('schemaVersion => 18'), isTrue);
+    expect(src.contains('schemaVersion => 19'), isTrue);
   });
 
   test('account eligibility policy exists for ordinary endpoints', () {

@@ -104,6 +104,9 @@ part 'schema/app_database_certificate_schema.dart';
 ///  18 — Phase 6A.2: prevent_negative_account_balance AFTER INSERT on
 ///                 ledger_entries; strengthened certificate purchase /
 ///                 redemption / profit event balanced-leg validators.
+///  19 — Phase 6B.1.1: goal funding-source / release-destination eligibility
+///                 triggers — reject certificate type/purpose/linkage and
+///                 non-spendable ordinary endpoints at the DB boundary.
 @DriftDatabase(
   tables: [
     Households,
@@ -143,7 +146,7 @@ class AppDatabase extends _$AppDatabase
   AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -180,6 +183,7 @@ class AppDatabase extends _$AppDatabase
       await _applyPhase5B8LifecycleProgressSeparation();
       await _applyPhase6ACertificateSchema();
       await _applyPhase6A2DebitSafetyAndCertEventHardening();
+      await _applyPhase6B11GoalEndpointEligibilityTriggers();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -304,6 +308,10 @@ class AppDatabase extends _$AppDatabase
       if (from <= 17) {
         // v17 → v18: Phase 6A.2 — non-negative balance + cert event legs.
         await _applyPhase6A2DebitSafetyAndCertEventHardening();
+      }
+      if (from <= 18) {
+        // v18 → v19: Phase 6B.1.1 — goal funding/release endpoint eligibility.
+        await _applyPhase6B11GoalEndpointEligibilityTriggers();
       }
     },
     beforeOpen: (details) async {

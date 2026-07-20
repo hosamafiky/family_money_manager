@@ -91,6 +91,28 @@ bank_balance + certificate_balance ≠ bank_balance_before_funding + certificate
 
 ---
 
+## INV-004A — Certificate Account Workflow Ownership (Phase 6B.1.1)
+
+**Statement:** A certificate account may receive or release principal **only** via approved certificate-owned workflows (purchase, redemption, controlled purchase reversal, and other explicitly approved cert-owned operations). Certificate accounts must not be usable as goal funding sources, goal release destinations, ordinary income/expense/transfer endpoints, opening balances, adjustments, or unrelated reversals.
+
+**Enforcement:**
+- Shared `AccountEligibility` (type + fund purpose).
+- Goal application / use-case validation (typed `AppValidationFailure`).
+- Goal repository validation (including `savings_certificates` linkage).
+- Presentation account filtering (convenience only).
+- Database triggers `validate_funding_source_eligibility` and `validate_release_destination_eligibility` (schema 19) — last-line authority.
+- Ordinary I/E/transfer use cases already reject certificate endpoints.
+
+**Exceptions retained:** Certificate purchase credits the certificate account; redemption debits it; profit receipt credits a standard spendable account without altering certificate principal.
+
+**Test coverage required:**
+- Direct SQL bypass attempts rejected by triggers.
+- FundGoal / ReleaseGoal use cases return typed validation failures for certificate endpoints.
+- Selectors exclude certificate accounts (presentation class).
+- Positive controls: eligible standard fund/release; cert purchase/redemption still work.
+
+---
+
 ## INV-005 — No Negative Balance Without Overdraft
 
 **Statement:** No account may have a negative balance unless it is explicitly configured with overdraft support.

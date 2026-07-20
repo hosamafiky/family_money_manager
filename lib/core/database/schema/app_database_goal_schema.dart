@@ -768,5 +768,71 @@ mixin _AppDatabaseGoalSchema on _$AppDatabase {
     ''');
   }
 
+  // ── Phase 6B.1.1: Certificate / spendable endpoint eligibility ────────────
+  //
+  // Funding source and release destination must be spendable, non-certificate
+  // (by type, fund_purpose, or savings_certificates linkage), and must not be
+  // a goalReserve. Authoritative last line of defense beyond app/repo gates.
+
+  Future<void> _applyPhase6B11GoalEndpointEligibilityTriggers() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_funding_source_eligibility
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'funding'
+      BEGIN
+        SELECT RAISE(ABORT, 'funding source must be spendable non-certificate account')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          JOIN financial_accounts src ON src.id = o.source_account_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.destination_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+            AND g.household_id = NEW.household_id
+            AND src.household_id = NEW.household_id
+            AND src.currency_code = g.currency_code
+            AND src.is_spendable = 1
+            AND src.type NOT IN ('certificate', 'goalReserve')
+            AND src.fund_purpose != 'certificate'
+            AND NOT EXISTS (
+              SELECT 1 FROM savings_certificates sc
+              WHERE sc.certificate_account_id = src.id
+            )
+        );
+      END
+    ''');
+
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS validate_release_destination_eligibility
+      BEFORE INSERT ON goal_movements
+      FOR EACH ROW
+      WHEN NEW.movement_type = 'release'
+      BEGIN
+        SELECT RAISE(ABORT, 'release destination must be spendable non-certificate account')
+        WHERE NOT EXISTS (
+          SELECT 1 FROM operations o
+          JOIN goals g ON g.id = NEW.goal_id
+          JOIN financial_accounts dst ON dst.id = o.destination_account_id
+          WHERE o.id = NEW.transfer_operation_id
+            AND o.type = 'transfer'
+            AND o.source_account_id = g.reserve_account_id
+            AND o.household_id = NEW.household_id
+            AND g.household_id = NEW.household_id
+            AND dst.household_id = NEW.household_id
+            AND dst.currency_code = g.currency_code
+            AND dst.is_spendable = 1
+            AND dst.type NOT IN ('certificate', 'goalReserve')
+            AND dst.fund_purpose != 'certificate'
+            AND NOT EXISTS (
+              SELECT 1 FROM savings_certificates sc
+              WHERE sc.certificate_account_id = dst.id
+            )
+        );
+      END
+    ''');
+  }
+
   // ── Phase 6A: Savings certificates ────────────────────────────────────────
 }

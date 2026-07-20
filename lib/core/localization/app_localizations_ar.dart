@@ -1003,6 +1003,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGoalSourceIsReserve => 'لا يمكن تمويل هدف من احتياطي هدف آخر';
 
   @override
+  String get errorGoalSourceNotSpendable =>
+      'تمويل الهدف يتطلب حسابًا قابلًا للإنفاق';
+
+  @override
+  String get errorGoalDestinationNotSpendable =>
+      'تحرير أموال الهدف يتطلب حساب وجهة قابلًا للإنفاق';
+
+  @override
   String get goalFundTitle => 'إضافة أموال للهدف';
 
   @override

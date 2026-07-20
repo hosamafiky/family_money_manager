@@ -1,6 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
@@ -16,7 +16,8 @@ const _householdId = 'household-v1';
 /// Screen to release funds from a goal's reserve to a destination account.
 ///
 /// Requires a release reason. Displays a note that this is an internal
-/// transfer (not income).
+/// transfer (not income). Destination selector excludes goalReserve,
+/// certificate, and non-spendable accounts.
 class ReleaseGoalScreen extends ConsumerStatefulWidget {
   const ReleaseGoalScreen({required this.goalId, super.key});
 
@@ -115,7 +116,7 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
           }
           final goal = result.value!;
 
-          // Eligible destinations: same currency, not goalReserve, not archived.
+          // Eligible destinations via shared AccountEligibility.
           final destinations = accountsAsync.when(
             data: (ar) {
               if (ar is! AppOk<List<FinancialAccount>>) {
@@ -124,9 +125,10 @@ class _ReleaseGoalScreenState extends ConsumerState<ReleaseGoalScreen> {
               return ar.value
                   .where(
                     (a) =>
-                        !a.isArchived &&
-                        a.type != FinancialAccountType.goalReserve &&
-                        a.currencyCode == goal.currencyCode &&
+                        AccountEligibility.isGoalReleaseDestination(
+                          a,
+                          currencyCode: goal.currencyCode,
+                        ) &&
                         a.id != goal.reserveAccountId,
                   )
                   .toList();

@@ -1,11 +1,11 @@
 # Architecture — Family Money Manager
 
-**Version:** 6B.1  
+**Version:** 6B.1.1  
 **Date:** 2026-07-20  
-**Schema version:** **18**  
-**Companion:** `docs/REFACTOR_AUDIT.md`, `docs/FINANCIAL_INVARIANTS.md`, `docs/LOCAL_DATABASE_SCHEMA.md`
+**Schema version:** **19**  
+**Companion:** `docs/REFACTOR_AUDIT.md`, `docs/FINANCIAL_INVARIANTS.md`, `docs/LOCAL_DATABASE_SCHEMA.md`, `docs/PHASE_6B_1_1_REPORT.md`
 
-This document describes the **as-built** architecture after Phases 0–6A.4. Planned-but-unimplemented modules (auth, sync, encryption key injection, gold/Zakat calculators, net worth, etc.) are noted as deferred — not present in `lib/`.
+This document describes the **as-built** architecture after Phases 0–6B.1.1. Planned-but-unimplemented modules (auth, sync, encryption key injection, gold/Zakat calculators, net worth, etc.) are noted as deferred — not present in `lib/`.
 
 ---
 
@@ -74,7 +74,7 @@ data / infrastructure  →  domain + repository interfaces
 
 ### 3.4 Data / infrastructure
 
-- `AppDatabase` (schema 18) owns migrations, triggers, indexes
+- `AppDatabase` (schema 19) owns migrations, triggers, indexes
 - `Drift*Repository` implementations are the write/query boundary
 - `SqliteContentionPolicy` standardizes SQLITE_BUSY/LOCKED retry for authoritative writers
 - Ledger repository is the authority for ordinary I/E/transfer/opening/adjustment/reversal
@@ -119,13 +119,13 @@ Deferred product areas (not implemented): gold, investments, liabilities, net wo
 
 ## 6. Database ownership
 
-- **Single schema owner:** `AppDatabase` (`schemaVersion => 18`).
-- **Generated code:** `app_database.g.dart` — never hand-edited; regenerate via `build_runner` when tables change (not expected in 6B.1).
+- **Single schema owner:** `AppDatabase` (`schemaVersion => 19`).
+- **Generated code:** `app_database.g.dart` — never hand-edited; regenerate via `build_runner` when tables change.
 - **Triggers/indexes:** Applied in `onCreate` / `onUpgrade`; names are stable contracts for tests.
-- **Migrations:** Additive version chain 1→18; do not collapse or renumber in refactor phases.
+- **Migrations:** Additive version chain 1→19; do not collapse or renumber casually.
 - **WAL + foreign_keys:** Enabled in `beforeOpen`.
 
-Schema-helper extraction (6B.1) may move `_apply*` methods into part/collaborator files **without** changing SQL text, trigger names, or version.
+Schema-helper extraction (6B.1) moved `_apply*` methods into focused mixins **without** changing SQL text of pre-existing triggers. Phase **6B.1.1** adds `validate_funding_source_eligibility` and `validate_release_destination_eligibility` (schema 19).
 
 ---
 
@@ -193,9 +193,12 @@ Feature-owned fingerprint **builders** remain in feature modules; shared infrast
 
 ## 13. Account eligibility
 
-- **DB / repository / use case** enforce that goal-reserve and certificate accounts are not ordinary I/E/transfer endpoints.
-- **UI filters** are convenience only.
-- Shared eligibility policies (6B.1) live in domain or application so widgets do not become the sole gate.
+- **Financial invariant:** Certificate accounts are owned exclusively by approved certificate workflows (purchase, redemption, controlled purchase reversal, and other explicitly approved cert-owned ops). They must never be goal funding sources, goal release destinations, ordinary I/E/transfer endpoints, opening-balance destinations, or unrelated adjustments. Profit receipt still credits a standard spendable account and does not alter certificate principal.
+- **Goal funding source:** same household, active, same currency as reserve, spendable, not protected, not goal reserve, not certificate-owned (type / fund_purpose / `savings_certificates` linkage).
+- **Goal release destination:** same household, active, spendable, same currency, not goal reserve, not certificate-owned.
+- **Enforcement layers (all required):** shared `AccountEligibility`, goal use cases, goal repository validation, presentation account filtering, and DB triggers `validate_funding_source_eligibility` / `validate_release_destination_eligibility` (schema 19).
+- **UI filters** are convenience only — selector tests are not authoritative DB enforcement.
+- Ordinary I/E/transfer still reject goal-reserve and certificate endpoints via use case + eligibility helpers.
 
 ---
 

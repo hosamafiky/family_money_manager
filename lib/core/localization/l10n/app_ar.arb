@@ -333,6 +333,8 @@
   "errorGoalArchiveNonzeroBalance": "لا يمكن أرشفة هدف يحتوي على أموال. حرِّر جميع الأموال أولاً.",
   "errorGoalSourceIsProtected": "لا يُسمح بالتمويل من حساب أطفال محمي",
   "errorGoalSourceIsReserve": "لا يمكن تمويل هدف من احتياطي هدف آخر",
+  "errorGoalSourceNotSpendable": "تمويل الهدف يتطلب حسابًا قابلًا للإنفاق",
+  "errorGoalDestinationNotSpendable": "تحرير أموال الهدف يتطلب حساب وجهة قابلًا للإنفاق",
   "goalFundTitle": "إضافة أموال للهدف",
   "goalReleaseTitle": "تحرير أموال الهدف",
   "goalSourceAccount": "الحساب المصدر",

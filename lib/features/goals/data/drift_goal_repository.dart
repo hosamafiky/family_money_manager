@@ -1258,6 +1258,18 @@ final class DriftGoalRepository implements GoalRepository {
           if (isNegativeBalanceAbort(e)) {
             return const AppInsufficientFunds();
           }
+          if (isGoalFundingSourceEligibilityAbort(e)) {
+            return const AppValidationFailure(
+              field: 'sourceAccountId',
+              messageKey: 'errorCertificateAccountNotAllowedAsSource',
+            );
+          }
+          if (isGoalReleaseDestinationEligibilityAbort(e)) {
+            return const AppValidationFailure(
+              field: 'destinationAccountId',
+              messageKey: 'errorCertificateAccountNotAllowedAsDestination',
+            );
+          }
           if (isRetryableSqliteContention(e)) rethrow;
           return const AppPersistenceFailure();
         }
@@ -1366,7 +1378,8 @@ final class DriftGoalRepository implements GoalRepository {
 
     final srcRows = await _db
         .customSelect(
-          'SELECT id, currency_code, is_archived, type, is_protected '
+          'SELECT id, currency_code, is_archived, type, is_protected, '
+          'is_spendable, fund_purpose '
           'FROM financial_accounts WHERE id = ? AND household_id = ?',
           variables: [
             Variable.withString(params.sourceAccountId),
@@ -1376,7 +1389,8 @@ final class DriftGoalRepository implements GoalRepository {
         .get();
     final dstRows = await _db
         .customSelect(
-          'SELECT id, currency_code, is_archived, type '
+          'SELECT id, currency_code, is_archived, type, is_spendable, '
+          'fund_purpose '
           'FROM financial_accounts WHERE id = ? AND household_id = ?',
           variables: [
             Variable.withString(params.destinationAccountId),
@@ -1401,6 +1415,14 @@ final class DriftGoalRepository implements GoalRepository {
         messageKey: 'errorCurrencyMismatch',
       );
     }
+
+    // Phase 6B.1.1 — certificate / spendable endpoint ownership.
+    final endpointGate = await _validateGoalTransferEndpoints(
+      params: params,
+      src: src,
+      dst: dst,
+    );
+    if (endpointGate != null) return endpointGate;
 
     // 5. Balance calculation (inside transaction)
     final balanceRows = await _db
@@ -1532,6 +1554,83 @@ final class DriftGoalRepository implements GoalRepository {
     await _failAfter(GoalTransferFailAfter.preCommit);
 
     return const AppOk(GoalTransferWriteResult.created);
+  }
+
+  /// Validates funding source / release destination ownership (Phase 6B.1.1).
+  ///
+  /// Rejects certificate type, certificate purpose, savings_certificates
+  /// linkage, non-spendable ordinary endpoints, protected funding sources,
+  /// and goalReserve on the non-reserve side of the transfer.
+  Future<AppResult<GoalTransferWriteResult>?> _validateGoalTransferEndpoints({
+    required GoalAssociatedTransferParams params,
+    required QueryRow src,
+    required QueryRow dst,
+  }) async {
+    Future<bool> isLinkedCertificate(String accountId) async {
+      final rows = await _db
+          .customSelect(
+            'SELECT 1 AS ok FROM savings_certificates '
+            'WHERE certificate_account_id = ? LIMIT 1',
+            variables: [Variable.withString(accountId)],
+          )
+          .get();
+      return rows.isNotEmpty;
+    }
+
+    bool isCertificateMarked(QueryRow row) =>
+        row.read<String>('type') == 'certificate' ||
+        row.read<String>('fund_purpose') == 'certificate';
+
+    if (params.kind == GoalAssociatedTransferKind.funding) {
+      final srcType = src.read<String>('type');
+      if (srcType == 'goalReserve') {
+        return const AppValidationFailure(
+          field: 'sourceAccountId',
+          messageKey: 'errorGoalSourceIsReserve',
+        );
+      }
+      if (src.read<int>('is_protected') == 1) {
+        return const AppValidationFailure(
+          field: 'sourceAccountId',
+          messageKey: 'errorGoalSourceIsProtected',
+        );
+      }
+      if (isCertificateMarked(src) ||
+          await isLinkedCertificate(params.sourceAccountId)) {
+        return const AppValidationFailure(
+          field: 'sourceAccountId',
+          messageKey: 'errorCertificateAccountNotAllowedAsSource',
+        );
+      }
+      if (src.read<int>('is_spendable') != 1) {
+        return const AppValidationFailure(
+          field: 'sourceAccountId',
+          messageKey: 'errorGoalSourceNotSpendable',
+        );
+      }
+    } else if (params.kind == GoalAssociatedTransferKind.release) {
+      final dstType = dst.read<String>('type');
+      if (dstType == 'goalReserve') {
+        return const AppValidationFailure(
+          field: 'destinationAccountId',
+          messageKey: 'errorGoalSourceIsReserve',
+        );
+      }
+      if (isCertificateMarked(dst) ||
+          await isLinkedCertificate(params.destinationAccountId)) {
+        return const AppValidationFailure(
+          field: 'destinationAccountId',
+          messageKey: 'errorCertificateAccountNotAllowedAsDestination',
+        );
+      }
+      if (dst.read<int>('is_spendable') != 1) {
+        return const AppValidationFailure(
+          field: 'destinationAccountId',
+          messageKey: 'errorGoalDestinationNotSpendable',
+        );
+      }
+    }
+    return null;
   }
 
   bool _transferPayloadEquivalent({

@@ -45,7 +45,7 @@
 /// 42. certificate account excluded from ordinary transfer (destination)
 /// 43. certificate account excluded from opening balance
 /// 44. certificate account excluded from adjustment
-/// 45. Fresh schema v18: all certificate tables exist
+/// 45. Fresh schema v19: all certificate tables exist
 /// 46. Two concurrent create calls (same idem key) → one certificate
 /// 47. listCertificates: excludes archived by default
 /// 48. listCertificates: includes archived when flag set
@@ -1251,7 +1251,7 @@ void main() {
     );
   });
 
-  test('45. Fresh schema v18: all certificate tables exist', () async {
+  test('45. Fresh schema v19: all certificate tables exist', () async {
     final tables = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

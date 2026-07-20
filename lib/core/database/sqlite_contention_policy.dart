@@ -77,7 +77,24 @@ bool isRetryableSqliteContention(Object error) {
 bool isNegativeBalanceAbort(Object error) =>
     error.toString().contains('account balance cannot go negative');
 
-/// If [error] is a negative-balance abort, returns [toInsufficient]; else `null`.
+/// Abort message from Phase 6B.1.1 funding-source eligibility trigger.
+const kGoalFundingSourceEligibilityAbort =
+    'funding source must be spendable non-certificate account';
+
+/// Abort message from Phase 6B.1.1 release-destination eligibility trigger.
+const kGoalReleaseDestinationEligibilityAbort =
+    'release destination must be spendable non-certificate account';
+
+/// Whether [error] is a goal funding-source eligibility trigger abort.
+bool isGoalFundingSourceEligibilityAbort(Object error) =>
+    error.toString().contains(kGoalFundingSourceEligibilityAbort);
+
+/// Whether [error] is a goal release-destination eligibility trigger abort.
+bool isGoalReleaseDestinationEligibilityAbort(Object error) =>
+    error.toString().contains(kGoalReleaseDestinationEligibilityAbort);
+
+/// If [error] is the Phase 6A.2 non-negative balance trigger abort, returns
+/// [toInsufficient]; else `null`.
 ///
 /// Debit writers map the abort to a typed insufficient-funds outcome and must
 /// not forward raw SQLite exceptions to application callers.

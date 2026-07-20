@@ -52,7 +52,7 @@ void main() {
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 18);
+      expect(version.first.read<int>('user_version'), 19);
 
       expect(
         (await db
@@ -204,14 +204,14 @@ CREATE TABLE savings_certificates (
       );
       stuck.close();
 
-      // Reopening with AppDatabase completes onUpgrade from 16 → 18.
+      // Reopening with AppDatabase completes onUpgrade from 16 → 19.
       final db = AppDatabase.forFile(path);
       addTearDown(db.close);
       expect(
         (await db.customSelect('PRAGMA user_version').get()).first.read<int>(
           'user_version',
         ),
-        18,
+        19,
       );
       // createTable IF path: table already existed; triggers must still install.
       expect(

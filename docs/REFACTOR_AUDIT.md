@@ -4,9 +4,12 @@
 **Baseline HEAD:** `9c2ac0b04864cf49fa25af9737640671255792d1` (docs pin Phase 6A.4)  
 **Phase 6A.4 feature:** `f3d4a159805a720c4689de5be113ef12aa06f470`  
 **Analyzer follow-up:** `07d92103944035ce5a903adb8c0c2c888c265263`  
-**Schema:** **18** (must remain 18)  
-**Baseline tests:** **1547**  
+**Schema at 6B.1 close:** **18**  
+**Schema after 6B.1.1:** **19** (goal endpoint eligibility triggers)  
+**Baseline tests (6B.1):** **1547** → **1566** at 6B.1 tip  
 **Working tree at audit start:** clean  
+
+**Follow-up:** Phase **6B.1.1** closes certificate-account goal eligibility bypasses — see `docs/PHASE_6B_1_1_REPORT.md`. Certificate workflow ownership is a **financial invariant** (INV-004A), not deferred UI behavior.
 
 **Scope:** Structure, boundaries, duplication, and maintainability.  
 **Out of scope:** UI redesign (6B.2), gold/investments/liabilities/net worth/Zakat/sadaqah, sync/auth/encryption/backup/PIN/biometrics/notifications/voice/AI/exports, automatic recurring financial transactions.
@@ -61,7 +64,7 @@ data/infrastructure → domain + repository interfaces
 
 | Field | Value |
 |-------|-------|
-| Responsibility | Drift `@DriftDatabase` entry, `schemaVersion => 18`, `MigrationStrategy`, all trigger/index SQL helpers, `_devConnection` |
+| Responsibility | Drift `@DriftDatabase` entry, `schemaVersion => 19`, `MigrationStrategy`, all trigger/index SQL helpers, `_devConnection` |
 | Layer | infrastructure / data |
 | Deps | Drift, path_provider, table definitions |
 | Public types | `AppDatabase` |

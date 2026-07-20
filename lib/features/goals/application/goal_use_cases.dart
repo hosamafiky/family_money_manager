@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
+import 'package:family_money_manager/features/accounts/application/account_eligibility_results.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/goals/application/complete_goal_params.dart';
@@ -28,27 +29,13 @@ bool _isSupportedCurrency(String code) {
 /// Validates source account for goal-funding operations.
 ///
 /// Returns null when valid, or an [AppResult] error to propagate.
-AppResult<T>? _validateFundingSource<T>(FinancialAccount? source) {
+/// Certificate-owned and non-spendable accounts are rejected (Phase 6B.1.1).
+AppResult<T>? _validateFundingSource<T>(
+  FinancialAccount? source, {
+  required String currencyCode,
+}) {
   if (source == null) return const AppNotFound();
-  if (source.isArchived) {
-    return const AppValidationFailure(
-      field: 'sourceAccountId',
-      messageKey: 'errorAccountArchived',
-    );
-  }
-  if (source.isProtected) {
-    return const AppValidationFailure(
-      field: 'sourceAccountId',
-      messageKey: 'errorGoalSourceIsProtected',
-    );
-  }
-  if (source.type == FinancialAccountType.goalReserve) {
-    return const AppValidationFailure(
-      field: 'sourceAccountId',
-      messageKey: 'errorGoalSourceIsReserve',
-    );
-  }
-  return null;
+  return goalFundingSourceFailure<T>(source, currencyCode: currencyCode);
 }
 
 AppResult<SavingsGoal> _mapTransferFailure(
@@ -178,14 +165,11 @@ final class CreateGoalUseCase {
         id: initialFundingSourceAccountId,
         householdId: householdId,
       );
-      final sourceError = _validateFundingSource<SavingsGoal>(source);
+      final sourceError = _validateFundingSource<SavingsGoal>(
+        source,
+        currencyCode: currencyCode,
+      );
       if (sourceError != null) return sourceError;
-      if (source!.currencyCode != currencyCode) {
-        return const AppValidationFailure(
-          field: 'currencyCode',
-          messageKey: 'errorCurrencyMismatch',
-        );
-      }
 
       initialFunding = GoalInitialFunding(
         operationId: _uuid.v4(),
@@ -264,19 +248,16 @@ final class FundGoalUseCase {
       );
     }
 
-    // Validate source account.
+    // Validate source account (includes certificate + spendable gates).
     final source = await _accounts.findById(
       id: sourceAccountId,
       householdId: householdId,
     );
-    final sourceError = _validateFundingSource<SavingsGoal>(source);
+    final sourceError = _validateFundingSource<SavingsGoal>(
+      source,
+      currencyCode: goal.currencyCode,
+    );
     if (sourceError != null) return sourceError;
-    if (source!.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
-    }
 
     // Atomic transfer + movement via unified repository boundary.
     final transferOperationId = _uuid.v4();
@@ -372,30 +353,17 @@ final class ReleaseGoalFundsUseCase {
       );
     }
 
-    // Validate destination account.
+    // Validate destination account (includes certificate + spendable gates).
     final destination = await _accounts.findById(
       id: destinationAccountId,
       householdId: householdId,
     );
     if (destination == null) return const AppNotFound();
-    if (destination.isArchived) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorAccountArchived',
-      );
-    }
-    if (destination.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorGoalSourceIsReserve',
-      );
-    }
-    if (destination.currencyCode != goal.currencyCode) {
-      return const AppValidationFailure(
-        field: 'currencyCode',
-        messageKey: 'errorCurrencyMismatch',
-      );
-    }
+    final destError = goalReleaseDestinationFailure<SavingsGoal>(
+      destination,
+      currencyCode: goal.currencyCode,
+    );
+    if (destError != null) return destError;
 
     // Check reserve has sufficient balance.
     final balanceResult = await _goals.getReserveBalance(

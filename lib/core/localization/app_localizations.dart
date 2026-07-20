@@ -2030,6 +2030,18 @@ abstract class AppLocalizations {
   /// **'Cannot fund a goal from another goal reserve'**
   String get errorGoalSourceIsReserve;
 
+  /// Error when funding source is non-spendable.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal funding requires a spendable account'**
+  String get errorGoalSourceNotSpendable;
+
+  /// Error when release destination is non-spendable.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal release requires a spendable destination account'**
+  String get errorGoalDestinationNotSpendable;
+
   /// Title for the fund-goal screen.
   ///
   /// In en, this message translates to:

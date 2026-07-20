@@ -1,6 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
@@ -16,9 +16,10 @@ const _householdId = 'household-v1';
 
 /// Screen to add funds from a source account to a goal's reserve.
 ///
-/// Displays: source account selector (excludes goalReserve and protected
-/// accounts), amount field, projected before/after balances, and a note
-/// that this is an internal transfer (not an expense).
+/// Displays: source account selector (excludes goalReserve, certificate,
+/// protected, and non-spendable accounts), amount field, projected
+/// before/after balances, and a note that this is an internal transfer
+/// (not an expense).
 class FundGoalScreen extends ConsumerStatefulWidget {
   const FundGoalScreen({required this.goalId, super.key});
 
@@ -114,7 +115,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
           }
           final goal = result.value!;
 
-          // Filter eligible source accounts (same currency, not goalReserve, not protected).
+          // Filter eligible source accounts via shared AccountEligibility.
           final sources = accountsAsync.when(
             data: (ar) {
               if (ar is! AppOk<List<FinancialAccount>>) {
@@ -123,10 +124,10 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
               return ar.value
                   .where(
                     (a) =>
-                        !a.isArchived &&
-                        !a.isProtected &&
-                        a.type != FinancialAccountType.goalReserve &&
-                        a.currencyCode == goal.currencyCode &&
+                        AccountEligibility.isGoalFundingSource(
+                          a,
+                          currencyCode: goal.currencyCode,
+                        ) &&
                         a.id != goal.reserveAccountId,
                   )
                   .toList();

@@ -1,7 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
@@ -139,10 +139,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         }
         return result.value
             .where(
-              (a) =>
-                  !a.isArchived &&
-                  !a.isProtected &&
-                  a.type != FinancialAccountType.goalReserve,
+              (a) => AccountEligibility.isGoalFundingSource(
+                a,
+                currencyCode: _selectedCurrency,
+              ),
             )
             .toList();
       },
