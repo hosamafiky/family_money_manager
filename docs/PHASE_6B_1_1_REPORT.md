@@ -86,16 +86,16 @@ Goal release destination must be: same HH, active, spendable, same currency, not
 
 ## 5. Test reconciliation
 
-**Equation:** `1566 + additions − removals = final`
+**Equation:** `1566 + 24 − 0 = 1590`
 
 | Change | Count | Classification |
 |--------|------:|----------------|
-| Added (new 6B.1.1 tests) | **see §6** | mixed |
+| Added (new 6B.1.1 tests / expanded eligibility) | **24** | mixed |
 | Removed | **0** | — |
-| Renamed | MIG-5B8-4 / cert fresh-schema labels (18→19) | migration assertion update |
+| Renamed | MIG-5B8-4 / cert fresh-schema / DB-G-5 labels (18→19) | migration assertion update |
 | Moved | **0** | — |
 
-Final count and exit codes are recorded after the validation run in §8.
+**Final:** **1590** — all passed.
 
 ---
 
@@ -176,18 +176,20 @@ Final count and exit codes are recorded after the validation run in §8.
 
 ---
 
-## 8. Validation (filled after commit)
+## 8. Validation
 
 | Step | Exit code | Notes |
 |------|----------:|-------|
-| `dart format .` | _TBD_ | |
-| Feature commit | _TBD_ | `fix: Phase 6B.1.1 – close certificate-account eligibility bypasses` |
-| `dart format --output=none --set-exit-if-changed .` | _TBD_ | |
-| `flutter analyze` | _TBD_ | |
-| `flutter test` | _TBD_ | Final count _TBD_; equation `1566 + N - 0 = final` |
-| Docs pin commit (optional) | _TBD_ | |
-| Final HEAD | _TBD_ | |
-| Working tree | _TBD_ | |
+| `dart format .` | **0** | |
+| Feature commit | — | `e6bde6105bb2a329b6e799f137c7475c036294ab` — `fix: Phase 6B.1.1 – close certificate-account eligibility bypasses` |
+| Validation fix commit | — | `df1e8721517c770dbfd745ba5d2cc6b1ad4752f3` — schema 19 assertions + prefer_const |
+| `dart format --output=none --set-exit-if-changed .` | **0** | |
+| `flutter analyze` | **0** | No issues found |
+| `flutter test` | **0** | **1590** passed; equation `1566 + 24 − 0 = 1590` |
+| Docs pin commit | _this commit_ | |
+| Final HEAD | _after docs pin_ | |
+| Working tree | **clean** (after pin) | |
+| Schema | **19** | `int get schemaVersion => 19;` |
 
 ---
 
