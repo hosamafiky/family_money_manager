@@ -2,12 +2,13 @@
 
 **Branch:** `main`  
 **Final HEAD (docs pin):** `5216dabc905a4569735ddb524cfd01f80fe5479a`  
+**Note:** Live tip advanced with Phase **6B.1.1** / **6B.1.2** evidence; see `docs/PHASE_6B_1_1_REPORT.md` and `docs/PHASE_6B_1_2_REPORT.md`. This pin remains the Phase 6B.1 *refactor* documentation tip.  
 **Baseline HEAD:** `9c2ac0b04864cf49fa25af9737640671255792d1` (Phase 6A.4 docs pin)  
 **Phase 6A.4 feature:** `f3d4a159805a720c4689de5be113ef12aa06f470`  
 **Analyzer follow-up (6A.4):** `07d92103944035ce5a903adb8c0c2c888c265263`  
-**Schema:** **18** (unchanged)  
+**Schema (at 6B.1 close):** **18** (unchanged in 6B.1; **19** as of 6B.1.1)  
 **Baseline tests:** **1547**  
-**Final tests:** **1566**  
+**Final tests (6B.1):** **1566**  
 **Equation:** `1547 + 19 − 0 = 1566`
 
 ---
@@ -195,9 +196,10 @@ Schema grep: `int get schemaVersion => 18;`
 | Architecture | `docs/ARCHITECTURE.md` |
 | This report | `docs/PHASE_6B_1_REPORT.md` |
 | Phase 6B.1.1 follow-up | `docs/PHASE_6B_1_1_REPORT.md` |
+| Phase 6B.1.2 evidence closure | `docs/PHASE_6B_1_2_REPORT.md` |
 
 ---
 
 ## 12. Stop condition
 
-Phase **6B.1 complete** (refactor). Certificate×goal endpoint ownership closed in **Phase 6B.1.1** — see `PHASE_6B_1_1_REPORT.md`. Do **not** begin Phase 6B.2 UI redesign in this phase.
+Phase **6B.1 complete** (refactor). Certificate×goal endpoint ownership closed in **Phase 6B.1.1**; evidence closure in **Phase 6B.1.2** — see those reports. Do **not** begin Phase 6B.2 UI redesign until review.

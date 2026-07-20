@@ -178,6 +178,8 @@ Goal release destination must be: same HH, active, spendable, same currency, not
 
 ## 8. Validation
 
+> **Evidence closure:** Phase **6B.1.2** (`docs/PHASE_6B_1_2_REPORT.md`) re-validates INV-004A with release-side SQL coverage and authentic 18→19 provenance. Do not treat the Final HEAD row below as the live tip after later docs-only pins.
+
 | Step | Exit code | Notes |
 |------|----------:|-------|
 | `dart format .` | **0** | |
@@ -185,10 +187,12 @@ Goal release destination must be: same HH, active, spendable, same currency, not
 | Validation fix commit | — | `df1e8721517c770dbfd745ba5d2cc6b1ad4752f3` — schema 19 assertions + prefer_const |
 | `dart format --output=none --set-exit-if-changed .` | **0** | |
 | `flutter analyze` | **0** | No issues found |
-| `flutter test` | **0** | **1590** passed; equation `1566 + 24 − 0 = 1590` |
+| `flutter test --reporter=expanded` | **0** | **1590** passed; equation `1566 + 24 − 0 = 1590` |
 | Docs pin commit | — | `60516578565b2c98e530f849a770accea3282d83` |
-| Final HEAD | — | `d690136d215336b3510ffb6ad26cf922744800b0` |
-| Working tree | **clean** (after pin) | |
+| Named docs correction | — | `d690136d215336b3510ffb6ad26cf922744800b0` — corrects “deferred UI” gap in Phase 6B.1 report |
+| Final HEAD (report pin at close of 6B.1.1 docs chase) | — | `d690136d215336b3510ffb6ad26cf922744800b0` |
+| Why tip can differ | — | A commit cannot self-reference its own hash in the same tree; subsequent docs-only pins (`1e741da…`, etc.) advance tip without new feature work |
+| Working tree | **clean** (after 6B.1.1 pins) | |
 | Schema | **19** | `int get schemaVersion => 19;` |
 
 ---
@@ -198,6 +202,7 @@ Goal release destination must be: same HH, active, spendable, same currency, not
 | Doc | Path |
 |-----|------|
 | This report | `docs/PHASE_6B_1_1_REPORT.md` |
+| Phase 6B.1.2 evidence closure | `docs/PHASE_6B_1_2_REPORT.md` |
 | Architecture | `docs/ARCHITECTURE.md` |
 | Refactor audit | `docs/REFACTOR_AUDIT.md` |
 | Phase 6B.1 report | `docs/PHASE_6B_1_REPORT.md` |
