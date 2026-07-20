@@ -1,10 +1,11 @@
 # Phase 6A.4 Report — Reversal Idempotency & Complete Debit-Workflow Coverage
 
 **Branch:** `main`  
-**Feature commit:** *(pinned after commit)*  
+**Feature commit:** `f3d4a159805a720c4689de5be113ef12aa06f470`  
+**Analyzer-clean follow-up:** `07d92103944035ce5a903adb8c0c2c888c265263`  
 **Prior HEAD:** `2e70ae937753f8c888fce3a931116c9dfd4c8f98` (Phase 6A.3 docs pin)  
 **Phase 6A.3 feature:** `ef733acce8b939245581f63820e0b46e4ccf8a68`  
-**Analyzer follow-up:** `8daca6a624a2d2a35ea14670d70915f267b007c3`  
+**Analyzer follow-up (6A.3):** `8daca6a624a2d2a35ea14670d70915f267b007c3`  
 **Docs pins after 8daca6a:** `441b753` / `2e70ae9` (docs-only on `PHASE_6A_3_REPORT.md`)  
 **Schema:** **18** (unchanged)  
 **Tests:** **1525 → 1547** (`1525 + 22 − 0 = 1547`)
@@ -162,7 +163,7 @@ flutter analyze                                       # No issues found!
 flutter test --reporter=expanded                      # 1547 passed; 0 failed
 ```
 
-*(Filled after committed validation.)*
+Validated against committed feature `f3d4a159805a720c4689de5be113ef12aa06f470` and analyzer-clean follow-up `07d92103944035ce5a903adb8c0c2c888c265263`.
 
 ---
 
