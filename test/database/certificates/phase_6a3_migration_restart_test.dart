@@ -140,7 +140,7 @@ CREATE TABLE savings_certificates (
       (await db.customSelect('PRAGMA user_version').get()).first.read<int>(
         'user_version',
       ),
-      18,
+      19,
     );
 
     Future<int> objectCount(String type, String name) async =>

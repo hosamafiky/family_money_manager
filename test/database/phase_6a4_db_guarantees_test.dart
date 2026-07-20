@@ -200,11 +200,11 @@ void main() {
     );
   });
 
-  test('DB-G-5. Schema version remains 18', () async {
+  test('DB-G-5. Schema version remains 19', () async {
     final v = await db
         .customSelect('PRAGMA user_version')
         .get()
         .then((r) => r.first.read<int>('user_version'));
-    expect(v, 18);
+    expect(v, 19);
   });
 }

@@ -72,7 +72,7 @@ AppResult<T>? goalFundingSourceFailure<T>(
         messageKey: 'errorGoalSourceNotSpendable',
       );
     case AccountIneligibilityReason.currencyMismatch:
-      return AppValidationFailure(
+      return const AppValidationFailure(
         field: 'currencyCode',
         messageKey: 'errorCurrencyMismatch',
       );
@@ -116,7 +116,7 @@ AppResult<T>? goalReleaseDestinationFailure<T>(
         messageKey: 'errorGoalDestinationNotSpendable',
       );
     case AccountIneligibilityReason.currencyMismatch:
-      return AppValidationFailure(
+      return const AppValidationFailure(
         field: 'currencyCode',
         messageKey: 'errorCurrencyMismatch',
       );
