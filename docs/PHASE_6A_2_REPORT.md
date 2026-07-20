@@ -1,7 +1,7 @@
 # Phase 6A.2 Report — Debit Safety, Concurrent Idempotency, Authentic Migration
 
 **Branch:** `main`  
-**Feature commit:** *(recorded after commit below)*  
+**Feature commit:** `d12887718024a2d87d05c63b9c7041136d0542c5`  
 **Prior HEAD:** `d0329779ff14659902aed2105b5208aabc9d16d0`  
 **Phase 6A feature:** `25347f429f0388ef5abb87fc6a15f50887cef482`  
 **Phase 6A.1 feature:** `35602d9e9761de46a2f33afff268cbef28395e41`  
