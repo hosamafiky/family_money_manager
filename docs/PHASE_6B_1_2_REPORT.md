@@ -118,10 +118,10 @@ Validated on committed tip `4022d988674aaa832f36a9d787416042627f3517` (after fea
 | Analyzer fix | `4022d988674aaa832f36a9d787416042627f3517` — `fix: Phase 6B.1.2 – clear analyzer underscore lint on local helper` |
 | Documentation commit | `e0d3d73ce7bc77fe123bb1cff1c386f538d4b197` — `docs: Phase 6B.1.2 evidence closure report and HEAD corrections` |
 | Docs pin commit | `767d24cf6f9ab5639548ff10f3af152c0bc8465b` — `docs: pin Phase 6B.1.2 Final HEAD to documentation commit` |
-| Final HEAD | `767d24cf6f9ab5639548ff10f3af152c0bc8465b` |
+| Final HEAD | `61d05f1c9aa623bf3afedc7a38afef27443db1e9` |
 | `git status --short` | clean |
 
-> After this align commit, tip advances one hash ahead of the Final HEAD row above (self-reference lag). The authoritative feature/validation tip remains `4022d988674aaa832f36a9d787416042627f3517`.
+> Tip after this pin commit advances one hash ahead of Final HEAD `61d05f1c9aa623bf3afedc7a38afef27443db1e9` (self-reference lag). Authoritative feature/validation tip remains `4022d988674aaa832f36a9d787416042627f3517`.
 
 ---
 
