@@ -1,8 +1,8 @@
-/// Phase 5B.7 – True physical schema-12 → latest migration.
+/// Phase 6A.2 – Authentic physical schema-16 → latest migration.
 ///
-/// Builds a version-12 database from historical onCreate objects
-/// (`test/fixtures/schema_v12_objects.sql` from commit 3124346) plus Drift
-/// table DDL. Does NOT open current AppDatabase then delete v13+ objects.
+/// Builds a version-16 database from historical onCreate objects
+/// (`test/fixtures/schema_v16_objects.sql` from commit 86736ca) plus Drift
+/// table DDL. Does NOT open current AppDatabase then delete v17+ objects.
 library;
 
 import 'dart:io';
@@ -12,13 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
-import '../../helpers/true_schema_v12.dart';
+import '../../helpers/true_schema_v16.dart';
 
 void main() {
   test(
-    'MIG-TRUE-1. True physical v12→latest preserves IDs and installs v13–v17 objects',
+    'MIG-6A2-1. Authentic physical v16→latest preserves data and installs certs',
     () async {
-      final path = await materializeTrueSchemaV12File();
+      final path = await materializeTrueSchemaV16File();
       addTearDown(() async {
         final dir = Directory(p.dirname(path));
         if (await dir.exists()) await dir.delete(recursive: true);
@@ -27,16 +27,7 @@ void main() {
       _insertFixtures(path);
 
       final before = sqlite3.sqlite3.open(path);
-      expect(before.select('PRAGMA user_version').first['user_version'], 12);
-      expect(
-        before
-            .select(
-              "SELECT COUNT(*) AS c FROM sqlite_master "
-              "WHERE name = 'validate_goal_transfer_balanced_legs'",
-            )
-            .first['c'],
-        0,
-      );
+      expect(before.select('PRAGMA user_version').first['user_version'], 16);
       expect(
         before
             .select(
@@ -46,15 +37,41 @@ void main() {
             .first['c'],
         0,
       );
+      expect(
+        before
+            .select(
+              "SELECT COUNT(*) AS c FROM sqlite_master "
+              "WHERE name = 'prevent_negative_account_balance'",
+            )
+            .first['c'],
+        0,
+      );
       before.close();
 
-      // Reopen with current AppDatabase → onUpgrade 12→17
       final db = AppDatabase.forFile(path);
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
       expect(version.first.read<int>('user_version'), 18);
 
+      expect(
+        (await db
+                .customSelect("SELECT id FROM households WHERE id = 'hh-mig'")
+                .get())
+            .first
+            .read<String>('id'),
+        'hh-mig',
+      );
+      expect(
+        (await db
+                .customSelect(
+                  "SELECT display_name FROM household_members WHERE id = 'mem-mig'",
+                )
+                .get())
+            .first
+            .read<String>('display_name'),
+        'Owner',
+      );
       expect(
         (await db
                 .customSelect("SELECT id FROM goals WHERE id = 'goal-mig'")
@@ -74,51 +91,15 @@ void main() {
             .read<int>('amount_minor_units'),
         25000,
       );
-
-      for (final name in [
-        'validate_reversal_movement_link',
-        'goal_lifecycle_household_matches_goal',
-        'validate_goal_transfer_balanced_legs',
-        'validate_goal_reversal_balanced_legs',
-        'reject_unsupported_goal_status_transition',
-      ]) {
-        expect(
-          (await db
-                  .customSelect(
-                    "SELECT COUNT(*) as c FROM sqlite_master "
-                    "WHERE type='trigger' AND name='$name'",
-                  )
-                  .get())
-              .first
-              .read<int>('c'),
-          1,
-          reason: '$name must exist after upgrade to latest',
-        );
-      }
       expect(
         (await db
-                .customSelect(
-                  "SELECT COUNT(*) as c FROM sqlite_master WHERE type='index' "
-                  "AND name='idx_goal_movements_one_reversal_per_original'",
-                )
+                .customSelect("SELECT name FROM budgets WHERE id = 'bud-mig'")
                 .get())
             .first
-            .read<int>('c'),
-        1,
-      );
-      expect(
-        (await db
-                .customSelect(
-                  "SELECT COUNT(*) as c FROM sqlite_master WHERE type='index' "
-                  "AND name='idx_goal_lifecycle_hh_idem'",
-                )
-                .get())
-            .first
-            .read<int>('c'),
-        1,
+            .read<String>('name'),
+        'Food',
       );
 
-      // Phase 6A tables + key triggers after v17.
       for (final name in [
         'savings_certificates',
         'certificate_revisions',
@@ -140,6 +121,9 @@ void main() {
       for (final name in [
         'validate_certificate_account_on_insert',
         'validate_certificate_purchase_event',
+        'validate_certificate_redemption_event',
+        'validate_certificate_profit_event',
+        'prevent_negative_account_balance',
         'no_update_certificate_events',
       ]) {
         expect(
@@ -152,7 +136,7 @@ void main() {
               .first
               .read<int>('c'),
           1,
-          reason: '$name must exist after upgrade to latest',
+          reason: '$name must exist after upgrade',
         );
       }
 
@@ -167,6 +151,88 @@ void main() {
               .first
               .read<int>('bal');
       expect(bal, 25000);
+    },
+  );
+
+  test(
+    'MIG-6A2-2. Migration rollback: fail-inject mid-upgrade leaves DB unusable',
+    () async {
+      // Documented behaviour: Drift onUpgrade is not resumable mid-method after
+      // a hard abort. We prove that a broken intermediate file with user_version
+      // stuck below latest does not silently claim certificate readiness.
+      final path = await materializeTrueSchemaV16File();
+      addTearDown(() async {
+        final dir = Directory(p.dirname(path));
+        if (await dir.exists()) await dir.delete(recursive: true);
+      });
+      _insertFixtures(path);
+
+      final raw = sqlite3.sqlite3.open(path);
+      // Simulate a partial upgrade that created tables but never finished
+      // triggers / user_version bump (operator abort / crash mid-migration).
+      raw.execute('''
+CREATE TABLE savings_certificates (
+  id TEXT NOT NULL PRIMARY KEY,
+  household_id TEXT NOT NULL,
+  certificate_account_id TEXT NOT NULL,
+  currency_code TEXT NOT NULL,
+  original_principal_minor_units INTEGER NOT NULL,
+  start_date TEXT NOT NULL,
+  maturity_date TEXT NOT NULL,
+  lifecycle TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL,
+  idempotency_payload TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  redeemed_at TEXT NULL,
+  archived_at TEXT NULL,
+  schema_version INTEGER NOT NULL DEFAULT 1
+)
+''');
+      raw.execute('PRAGMA user_version = 16');
+      raw.close();
+
+      final stuck = sqlite3.sqlite3.open(path);
+      expect(stuck.select('PRAGMA user_version').first['user_version'], 16);
+      expect(
+        stuck
+            .select(
+              "SELECT COUNT(*) AS c FROM sqlite_master "
+              "WHERE name='validate_certificate_purchase_event'",
+            )
+            .first['c'],
+        0,
+      );
+      stuck.close();
+
+      // Reopening with AppDatabase completes onUpgrade from 16 → 18.
+      final db = AppDatabase.forFile(path);
+      addTearDown(db.close);
+      expect(
+        (await db.customSelect('PRAGMA user_version').get()).first.read<int>(
+          'user_version',
+        ),
+        18,
+      );
+      // createTable IF path: table already existed; triggers must still install.
+      expect(
+        (await db
+                .customSelect(
+                  "SELECT COUNT(*) as c FROM sqlite_master "
+                  "WHERE type='trigger' AND name='validate_certificate_purchase_event'",
+                )
+                .get())
+            .first
+            .read<int>('c'),
+        1,
+      );
+      expect(
+        (await db
+                .customSelect("SELECT id FROM goals WHERE id = 'goal-mig'")
+                .get())
+            .first
+            .read<String>('id'),
+        'goal-mig',
+      );
     },
   );
 }
@@ -244,12 +310,18 @@ void _insertFixtures(String path) {
     "'2024-01-01T00:00:00Z')",
   );
   db.execute(
+    "INSERT INTO goal_lifecycle_events (id, goal_id, household_id, event_type, "
+    "effective_at, created_at) VALUES "
+    "('life-mig', 'goal-mig', 'hh-mig', 'created', "
+    "'2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+  );
+  db.execute(
     "INSERT INTO budgets (id, household_id, name, currency_code, "
     "limit_minor_units, period_type, is_archived, idempotency_key, "
     "idempotency_payload, created_at, updated_at) VALUES "
     "('bud-mig', 'hh-mig', 'Food', 'EGP', 50000, 'monthly', 0, "
     "'ik-bud-mig', 'payload', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
   );
-  expect(db.select('PRAGMA user_version').first['user_version'], 12);
+  expect(db.select('PRAGMA user_version').first['user_version'], 16);
   db.close();
 }

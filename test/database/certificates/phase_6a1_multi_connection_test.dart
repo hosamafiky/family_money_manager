@@ -212,13 +212,12 @@ void main() {
       ),
     ]);
     final oks = results.whereType<AppOk<SavingsCertificate>>().toList();
-    final fails = results
-        .whereType<AppPersistenceFailure<SavingsCertificate>>()
-        .length;
-    // Under multi-connection WAL, one side may observe SQLITE_BUSY as
-    // AppPersistenceFailure while the other commits; classify honestly.
-    expect(oks.length + fails, 2);
-    expect(oks, isNotEmpty);
+    // Phase 6A.2: after lock contention, loser re-reads winner idempotency → AppOk.
+    expect(oks, hasLength(2));
+    expect(
+      results.whereType<AppPersistenceFailure<SavingsCertificate>>(),
+      isEmpty,
+    );
     expect(
       await count(db1, 'SELECT COUNT(*) as c FROM savings_certificates'),
       1,
@@ -265,12 +264,9 @@ void main() {
     final conflicts = results
         .whereType<AppDuplicateConflict<SavingsCertificate>>()
         .length;
-    final fails = results
-        .whereType<AppPersistenceFailure<SavingsCertificate>>()
-        .length;
-    // One winner; loser is conflict or transient persistence under lock.
+    // Phase 6A.2: loser re-reads conflicting payload → AppDuplicateConflict.
     expect(oks, 1);
-    expect(conflicts + fails, 1);
+    expect(conflicts, 1);
     expect(
       await count(db1, 'SELECT COUNT(*) as c FROM savings_certificates'),
       1,
@@ -310,8 +306,8 @@ void main() {
     final fails = results
         .whereType<AppPersistenceFailure<SavingsCertificate>>()
         .length;
-    // Under WAL locking one may fail with persistence rather than typed funds.
     expect(oks, 1);
+    // Prefer typed insufficient funds; lock-timeout may still surface persistence.
     expect(insuff + fails, 1);
     expect(
       await count(db1, 'SELECT COUNT(*) as c FROM savings_certificates'),
@@ -355,9 +351,8 @@ void main() {
     ]);
     final certOk = results[0] is AppOk<SavingsCertificate>;
     final expenseOk = results[1] is AppOk<String>;
-    // Classification: both may succeed under read races (nondeterministic);
-    // hard invariant is non-negative cash source balance.
-    expect(certOk || expenseOk, isTrue);
+    // Phase 6A.2: IMMEDIATE txn + non-neg trigger → exactly one commits.
+    expect(certOk ^ expenseOk, isTrue);
     expect(await bal(db1, 'src-mc4'), greaterThanOrEqualTo(0));
   });
 
@@ -390,10 +385,9 @@ void main() {
         ),
       ),
     ]);
-    expect(
-      results[0] is AppOk<SavingsCertificate> || results[1] is AppOk<String>,
-      isTrue,
-    );
+    final certOk = results[0] is AppOk<SavingsCertificate>;
+    final xferOk = results[1] is AppOk<String>;
+    expect(certOk ^ xferOk, isTrue);
     expect(await bal(db1, 'src-mc5'), greaterThanOrEqualTo(0));
   });
 }

@@ -357,9 +357,100 @@ final class DriftCertificateRepository implements CertificateRepository {
       return const AppInsufficientFunds();
     } on CertificateInjectedFailure {
       return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } catch (e) {
+      if (_isNegativeBalanceAbort(e)) {
+        return const AppInsufficientFunds();
+      }
+      // After lock contention / UNIQUE race, re-read winner's idempotency row.
+      final recovered = await _resolveCertificateIdempotency(
+        householdId: certificate.householdId,
+        idempotencyKey: certificate.idempotencyKey,
+        incomingPayload: incomingPayload,
+      );
+      if (recovered != null) return recovered;
       return const AppPersistenceFailure();
     }
+  }
+
+  /// Re-reads household-scoped certificate idempotency after a write failure.
+  ///
+  /// Equivalent concurrent create must return [AppOk] (not lock noise) once the
+  /// winner commits. Conflicting payload → [AppDuplicateConflict].
+  /// Retries briefly so a loser that timed out on BEGIN IMMEDIATE can observe
+  /// the winner after commit.
+  Future<AppResult<SavingsCertificate>?> _resolveCertificateIdempotency({
+    required String householdId,
+    required String idempotencyKey,
+    required String incomingPayload,
+  }) async {
+    for (var attempt = 0; attempt < 8; attempt++) {
+      try {
+        final existing = await _db
+            .customSelect(
+              'SELECT id, idempotency_payload FROM savings_certificates '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(householdId),
+                Variable.withString(idempotencyKey),
+              ],
+            )
+            .get();
+        if (existing.isNotEmpty) {
+          final row = existing.first;
+          final stored = row.read<String>('idempotency_payload');
+          if (stored == incomingPayload) {
+            final found = await _findById(row.read<String>('id'));
+            return found != null ? AppOk(found) : const AppPersistenceFailure();
+          }
+          return const AppDuplicateConflict(
+            messageKey: 'errorCertificateIdempotencyConflict',
+          );
+        }
+      } catch (_) {
+        // Retry below.
+      }
+      await Future<void>.delayed(Duration(milliseconds: 25 * (attempt + 1)));
+    }
+    return null;
+  }
+
+  bool _isNegativeBalanceAbort(Object error) =>
+      error.toString().contains('account balance cannot go negative');
+
+  /// Re-reads event idempotency after lock contention / UNIQUE race.
+  Future<AppResult<T>?> _resolveEventIdempotency<T>({
+    required String householdId,
+    required String idempotencyKey,
+    required String fingerprint,
+    required Future<AppResult<T>> Function(QueryRow row) onMatch,
+  }) async {
+    for (var attempt = 0; attempt < 8; attempt++) {
+      try {
+        final existing = await _db
+            .customSelect(
+              'SELECT * FROM certificate_events '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(householdId),
+                Variable.withString(idempotencyKey),
+              ],
+            )
+            .get();
+        if (existing.isNotEmpty) {
+          final row = existing.first;
+          if (row.readNullable<String>('payload_fingerprint') == fingerprint) {
+            return onMatch(row);
+          }
+          return AppDuplicateConflict<T>(
+            messageKey: 'errorCertificateIdempotencyConflict',
+          );
+        }
+      } catch (_) {
+        // Retry below.
+      }
+      await Future<void>.delayed(Duration(milliseconds: 25 * (attempt + 1)));
+    }
+    return null;
   }
 
   // ── Reads ─────────────────────────────────────────────────────────────────
@@ -710,7 +801,26 @@ final class DriftCertificateRepository implements CertificateRepository {
       return result;
     } on CertificateInjectedFailure {
       return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } catch (_) {
+      final recovered =
+          await _resolveEventIdempotency<CertificateProfitReceipt>(
+            householdId: householdId,
+            idempotencyKey: idempotencyKey,
+            fingerprint: fingerprint,
+            onMatch: (row) async {
+              final event = _rowToEvent(row);
+              return AppOk(
+                CertificateProfitReceipt(
+                  event: event,
+                  incomeOperationId: event.relatedOperationId ?? operationId,
+                  destinationAccountId: destinationAccountId,
+                  amountMinorUnits: amountMinorUnits,
+                  currencyCode: currencyCode,
+                ),
+              );
+            },
+          );
+      if (recovered != null) return recovered;
       return const AppPersistenceFailure();
     }
   }
@@ -1109,7 +1219,37 @@ final class DriftCertificateRepository implements CertificateRepository {
       return const AppInsufficientFunds();
     } on CertificateInjectedFailure {
       return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } catch (e) {
+      if (_isNegativeBalanceAbort(e)) {
+        return const AppInsufficientFunds();
+      }
+      final recovered =
+          await _resolveEventIdempotency<CertificateRedemptionSummary>(
+            householdId: householdId,
+            idempotencyKey: idempotencyKey,
+            fingerprint: fingerprint,
+            onMatch: (row) async {
+              final cert = await _findById(certificateId);
+              if (cert == null) return const AppPersistenceFailure();
+              return AppOk(
+                CertificateRedemptionSummary(
+                  certificate: cert,
+                  principalMinorUnits:
+                      row.readNullable<int>('amount_minor_units') ??
+                      principalMinorUnits,
+                  profitMinorUnits: maturityProfit?.amountMinorUnits ?? 0,
+                  destinationAccountId: destinationAccountId,
+                  currencyCode: cert.currencyCode,
+                  principalOperationId:
+                      row.readNullable<String>('related_operation_id') ??
+                      principalOperationId,
+                  profitOperationId: maturityProfit?.operationId,
+                  event: _rowToEvent(row),
+                ),
+              );
+            },
+          );
+      if (recovered != null) return recovered;
       return const AppPersistenceFailure();
     }
   }
@@ -1441,6 +1581,9 @@ final class DriftCertificateRepository implements CertificateRepository {
     } on CertificateInjectedFailure {
       return const AppPersistenceFailure();
     } on Exception catch (e) {
+      if (_isNegativeBalanceAbort(e)) {
+        return const AppInsufficientFunds();
+      }
       final msg = e.toString();
       if (msg.contains('has later')) {
         return const AppValidationFailure(
@@ -1452,6 +1595,45 @@ final class DriftCertificateRepository implements CertificateRepository {
         return const AppValidationFailure(
           field: 'lifecycle',
           messageKey: 'errorCertificateReversalRequiresActive',
+        );
+      }
+      // Concurrent equivalent purchase+reversal: winner may have already marked
+      // the purchase reversed — treat as success after re-read.
+      try {
+        final cert = await _findById(certificateId);
+        if (cert != null && cert.householdId == householdId) {
+          final purchaseEvents = await _db
+              .customSelect(
+                "SELECT related_operation_id FROM certificate_events "
+                "WHERE certificate_id = ? AND event_type = 'purchased' "
+                'ORDER BY created_at ASC LIMIT 1',
+                variables: [Variable.withString(certificateId)],
+              )
+              .get();
+          if (purchaseEvents.isNotEmpty) {
+            final opId = purchaseEvents.first.readNullable<String>(
+              'related_operation_id',
+            );
+            if (opId != null) {
+              final ops = await _db
+                  .customSelect(
+                    'SELECT is_reversed FROM operations WHERE id = ?',
+                    variables: [Variable.withString(opId)],
+                  )
+                  .get();
+              if (ops.isNotEmpty &&
+                  ops.first.readNullable<int>('is_reversed') == 1) {
+                return const AppOk(null);
+              }
+            }
+          }
+        }
+      } on Exception {
+        // fall through
+      }
+      if (msg.contains('UNIQUE') || msg.contains('unique')) {
+        return const AppDuplicateConflict(
+          messageKey: 'errorCertificateIdempotencyConflict',
         );
       }
       return const AppNotFound();
@@ -1584,7 +1766,32 @@ final class DriftCertificateRepository implements CertificateRepository {
       return const AppOk(null);
     } on CertificateInjectedFailure {
       return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      if (_isNegativeBalanceAbort(e)) {
+        return const AppInsufficientFunds();
+      }
+      // Concurrent equivalent profit reversal: winner already reversed income.
+      try {
+        final ops = await _db
+            .customSelect(
+              'SELECT is_reversed FROM operations WHERE id = ? AND household_id = ?',
+              variables: [
+                Variable.withString(originalIncomeOperationId),
+                Variable.withString(householdId),
+              ],
+            )
+            .get();
+        if (ops.isNotEmpty && ops.first.readNullable<int>('is_reversed') == 1) {
+          return const AppOk(null);
+        }
+      } on Exception {
+        // fall through
+      }
+      if (e.toString().contains('UNIQUE') || e.toString().contains('unique')) {
+        return const AppDuplicateConflict(
+          messageKey: 'errorCertificateIdempotencyConflict',
+        );
+      }
       return const AppNotFound();
     }
   }

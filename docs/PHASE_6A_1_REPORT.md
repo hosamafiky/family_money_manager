@@ -175,13 +175,13 @@ Two Drift connections → one physical temp SQLite file (Phase 5B.6 pattern).
 
 | Test | Result classification |
 |------|------------------------|
-| MC-CERT-1 equivalent concurrent create | ≥1 `AppOk`; exactly one certificate; WAL busy may yield `AppPersistenceFailure` on loser — **honest nondeterministic locking** |
-| MC-CERT-2 conflicting concurrent create | One winner; conflict or persistence on loser |
-| MC-CERT-3 insufficient source race | One certificate; non-negative balance |
-| MC-CERT-4 purchase vs expense | At least one succeeds; balance ≥ 0; race possible |
+| MC-CERT-1 equivalent concurrent create | Prefer both `AppOk` after Phase 6A.2 re-read; exactly one certificate. Phase 6A.1 allowed `AppPersistenceFailure` as lock noise — **corrected: not acceptable as final equivalent semantic** |
+| MC-CERT-2 conflicting concurrent create | One winner; `AppDuplicateConflict` preferred (Phase 6A.2) |
+| MC-CERT-3 insufficient source race | One certificate; non-negative balance; typed insufficient preferred |
+| MC-CERT-4 purchase vs expense | Exactly one commits (Phase 6A.2 IMMEDIATE + non-neg trigger); balance ≥ 0 |
 | MC-CERT-5 purchase vs transfer | Same |
 
-**Classification:** Database-tested (nondeterministic outcomes documented).
+**Classification:** Database-tested. Prior Phase 6A.1 note that dual-success / nondeterministic persistence was “acceptable concurrent idempotency” is **retracted** for equivalent keys — see Phase 6A.2.
 
 ---
 
@@ -222,18 +222,13 @@ CLS-1..8:
 
 ---
 
-## 14. True v16→v17 migration
+## 14. True v16→v17 migration — **reclassified**
 
-`certificate_true_migration_v16_to_v17_test.dart` (MIG-6A-1):
+`certificate_true_migration_v16_to_v17_test.dart` (MIG-6A-1) opened current schema then stripped Phase 6A objects. That is a **synthetic downgrade**, not authentic historical schema-16 evidence.
 
-1. Open current schema, strip Phase 6A tables/triggers/indexes, set `user_version = 16`
-2. Populate pre-6A household + account rows
-3. Reopen via `AppDatabase` → `onUpgrade` to 17
-4. Assert certificate tables + triggers exist; pre-6A rows survive
+**Superseded by Phase 6A.2:** `test/fixtures/schema_v16_objects.sql` from commit `86736ca` + `certificate_true_migration_v16_to_latest_test.dart` (MIG-6A2-1/2) upgrading to schema **18**.
 
-Not classified as `onCreate` evidence.
-
-**Classification:** Database-tested.
+**Classification (Phase 6A.1 claim):** was overstated as true historical migration — corrected to synthetic; authentic evidence lives in Phase 6A.2.
 
 ---
 
@@ -263,12 +258,12 @@ Unchanged (PO-2): certificate data inherits plaintext-at-rest risk until securit
 
 ## 18. Remaining risks / gaps
 
-1. Multi-connection equivalent create may return `AppPersistenceFailure` on the loser under WAL busy (documented; not silent corruption).
+1. Multi-connection equivalent create: Phase 6A.1 accepted `AppPersistenceFailure` on loser — **Phase 6A.2 re-reads idempotency**; residual busy-timeout persistence still possible on some races (documented in 6A.2).
 2. Purchase reversal still archives immediately (V1-simple).
 3. Partial / early redemption still deferred.
 4. Accrued interest / auto payout deferred.
 5. Device / App Bundle builds not run (hard constraint).
-6. Concurrent purchase vs expense/transfer can theoretically both succeed under read races if checks are non-atomic across connections — balance ≥ 0 asserted; stronger serialization deferred.
+6. Concurrent purchase vs expense/transfer dual-success: Phase 6A.1 deferred stronger serialization — **Phase 6A.2** adds non-neg trigger + strengthened MC-CERT/XDEB assertions.
 
 ---
 
@@ -281,10 +276,11 @@ Unchanged (PO-2): certificate data inherits plaintext-at-rest risk until securit
 | CREATE/PROFIT/REDEEM rollback matrices | Database-tested |
 | Event trigger integrity | Database-tested |
 | Reversal atomicity / redeem reject | Database-tested |
-| MC-CERT concurrency | Database-tested (nondeterministic noted) |
+| MC-CERT concurrency | Database-tested (Phase 6A.1 nondeterministic note **superseded** by 6A.2) |
 | Reports/budgets classification | Database-tested |
 | goalWithdrawal exclusion helper | Unit-tested |
-| True v16→v17 migration | Database-tested |
+| True v16→v17 migration | **Synthetic** (misclassified in 6A.1; authentic in 6A.2) |
+| Event trigger integrity (CERT-EVT) | Database-tested — Phase 6A.1 covered op-type/self-dest/category/HH/append-only; **balanced-leg cases** added in 6A.2 (do not overstate 6A.1 as full balanced-leg enforcement) |
 | Emulator / encrypted DB | Unverified |
 | Auto-accrual / partial redeem | Documented only (deferred) |
 

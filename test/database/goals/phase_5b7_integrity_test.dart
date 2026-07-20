@@ -1028,6 +1028,22 @@ void main() {
     );
     expect(rev1, isA<AppOk<void>>());
 
+    // Re-fund reserve so a second raw debit can be constructed; rejection is on
+    // the one-reversal-per-original rule, not the non-negative balance trigger.
+    await db.customStatement(
+      "INSERT INTO operations (id, household_id, type, effective_date, recorded_at, "
+      "total_amount_minor_units, currency_code, created_by, created_at, updated_at, "
+      "destination_account_id) VALUES "
+      "('seed-rb10', '$hh', 'income', '2024-01-02', '2024-01-02T00:00:00Z', 5000, "
+      "'EGP', 'test', '2024-01-02T00:00:00Z', '2024-01-02T00:00:00Z', '$reserve')",
+    );
+    await insertLeg(
+      id: 'seed-rb10-c',
+      opId: 'seed-rb10',
+      accountId: reserve,
+      direction: 'credit',
+    );
+
     // Attempt a second raw reversal movement referencing same original.
     await db.customStatement(
       "INSERT INTO operations (id, household_id, type, effective_date, recorded_at, "

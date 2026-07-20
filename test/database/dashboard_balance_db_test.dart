@@ -258,8 +258,8 @@ void main() {
       },
     );
 
-    test('8. Negative balance surfaces as isNegative flag', () async {
-      // Create account and expense more than funded (using opening balance trick)
+    test('8. Overdraft debit rejected by prevent_negative_account_balance', () async {
+      // Phase 6A.2: account balances cannot go negative at the DB boundary.
       await createAccount(id: 'acc-sp-8');
       await ledgerRepo.recordOpeningBalance(
         RecordOpeningBalanceParams(
@@ -277,27 +277,25 @@ void main() {
         amount: 1000,
         date: '2025-02-01',
       );
-      // Insert an extra debit directly to force negative balance for test
       await db.customStatement(
         "INSERT INTO operations (id, household_id, type, effective_date, recorded_at, "
         "total_amount_minor_units, currency_code, created_by, created_at, updated_at) "
         "VALUES ('op-extra-debit', '$_hh', 'adjustment', '2025-03-01', '2025-03-01T00:00:00Z', "
         "500, 'EGP', 'test', '2025-03-01T00:00:00Z', '2025-03-01T00:00:00Z')",
       );
-      await db.customStatement(
-        "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, direction, "
-        "amount_minor_units, currency_code, entry_type, effective_date, recorded_at, created_by) "
-        "VALUES ('le-extra-debit', 'op-extra-debit', '$_hh', 'acc-sp-8', 'debit', "
-        "500, 'EGP', 'adjustmentDebit', '2025-03-01', '2025-03-01T00:00:00Z', 'test')",
+      await expectLater(
+        () => db.customStatement(
+          "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, direction, "
+          "amount_minor_units, currency_code, entry_type, effective_date, recorded_at, created_by) "
+          "VALUES ('le-extra-debit', 'op-extra-debit', '$_hh', 'acc-sp-8', 'debit', "
+          "500, 'EGP', 'adjustmentDebit', '2025-03-01', '2025-03-01T00:00:00Z', 'test')",
+        ),
+        throwsA(anything),
       );
-      await db.customStatement(
-        "INSERT INTO operation_contexts (operation_id, household_id, created_at) "
-        "VALUES ('op-extra-debit', '$_hh', '2025-03-01T00:00:00Z')",
-      );
-
       final balances = await dashRepo.spendableBalances(householdId: _hh);
       final egp = balances.firstWhere((b) => b.currencyCode == 'EGP');
-      expect(egp.isNegative, isTrue);
+      expect(egp.isNegative, isFalse);
+      expect(egp.totalMinorUnits, 0);
     });
   });
 

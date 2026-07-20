@@ -1329,6 +1329,7 @@ void main() {
       const wrongDstId = 'dst-mv2-wrong';
       await createAccount(id: srcId);
       await createAccount(id: wrongDstId);
+      await creditAccount(srcId, 100000);
 
       final goal =
           ((await createGoal(idempotencyKey: 'ik-mv2')) as AppOk<SavingsGoal>)
@@ -1396,6 +1397,7 @@ void main() {
       await createAccount(id: srcId);
       await createAccount(id: wrongSrcId);
       await creditAccount(srcId, 100000);
+      await creditAccount(wrongSrcId, 100000);
 
       final goal =
           ((await createGoal(idempotencyKey: 'ik-mv4')) as AppOk<SavingsGoal>)
@@ -1429,6 +1431,23 @@ void main() {
     final goal =
         ((await createGoal(idempotencyKey: 'ik-mv5')) as AppOk<SavingsGoal>)
             .value;
+
+    // Fund reserve so the release debit can be inserted; rejection is on reason.
+    await db.customStatement(
+      "INSERT INTO operations (id, household_id, type, effective_date, recorded_at, "
+      "total_amount_minor_units, currency_code, created_by, created_at, updated_at, "
+      "destination_account_id) VALUES "
+      "('seed-mv5', '$_hh', 'income', '2024-01-01', '2024-01-01T00:00:00Z', 10000, "
+      "'EGP', 'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z', "
+      "'${goal.reserveAccountId}')",
+    );
+    await db.customStatement(
+      "INSERT INTO ledger_entries (id, operation_id, household_id, account_id, "
+      "direction, amount_minor_units, currency_code, entry_type, effective_date, "
+      "recorded_at, created_by) VALUES "
+      "('seed-mv5_c', 'seed-mv5', '$_hh', '${goal.reserveAccountId}', 'credit', "
+      "10000, 'EGP', 'income', '2024-01-01', '2024-01-01T00:00:00Z', 'test')",
+    );
 
     // Transfer FROM the reserve (correct source).
     final opId = await insertTransferOp(

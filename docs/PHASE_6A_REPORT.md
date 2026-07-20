@@ -5,9 +5,10 @@
 **Phase 6A docs pin:** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`  
 **Phase 6A.1 correction:** see `docs/PHASE_6A_1_REPORT.md` (workflow + verification closure)  
 **Branch:** `main`  
-**Schema:** 16 → **17**  
+**Schema:** 16 → **17** (Phase 6A); **18** as of Phase 6A.2 — see `docs/PHASE_6A_2_REPORT.md`  
 **Tests at Phase 6A feature gate:** **1322 → 1410** (+88 exact file reconciliation)  
-**Tests after Phase 6A.1:** **1410 → 1483** (+73)
+**Tests after Phase 6A.1:** **1410 → 1483** (+73)  
+**Tests after Phase 6A.2:** **1483 → 1507** — see `docs/PHASE_6A_2_REPORT.md`
 
 ---
 
@@ -23,7 +24,7 @@
 | No `targetReached` persistence | OK |
 | Full suite | **1322 passed** |
 
-Goals were not reopened except for unavoidable schema-version expectation updates in migration tests (`phase_5b8`, `goal_true_migration_v12_to_latest`) so they assert latest = **17**.
+Goals were not reopened except for unavoidable schema-version expectation updates in migration tests (`phase_5b8`, `goal_true_migration_v12_to_latest`) so they assert latest schema (17 at Phase 6A; **18** after Phase 6A.2).
 
 ---
 
@@ -216,7 +217,7 @@ Keys added to `app_en.arb` / `app_ar.arb` (+ `flutter gen-l10n`), including `cer
 |------|----------------|----------------|
 | Domain derivation / eligibility / payload | **Unit** | `certificate_domain_test.dart` |
 | Atomic create, idempotency, concurrency, linkage, profit, redeem+profit, reversals, ordinary guards, schema | **Database** | `certificate_repository_test.dart` |
-| True v16→v17 migration | **Database** | `certificate_true_migration_v16_to_v17_test.dart` |
+| True v16→v17 migration (Phase 6A) | **Misclassified as authentic** | Synthetic create-then-strip; **superseded** by Phase 6A.2 authentic `86736ca` fixture (`docs/PHASE_6A_2_REPORT.md`) |
 | List AR/EN, empty/error, FAB, multi-currency | **Widget** | `certificates_list_screen_test.dart` |
 | Partial/early redemption UX depth, accrued interest, YTM, tax | **Documented only** | Deferred product |
 | Device emulator / App Bundle | **Unverified** | Hard constraint — not run |
@@ -294,7 +295,7 @@ Unchanged from Phase 2+: sqlite3mc-ready binary; key injection still deferred (P
 1. ~~UI redeem `profitOnly` mode still routes through redeem API~~ — **fixed in Phase 6A.1** (removed; profit-only uses Record Profit).  
 2. Purchase reversal archives immediately; restore-after-redeem edge paths are V1-simple.  
 3. Certificate account appears in net-worth flag but there is **no** full net-worth product — messaging must stay careful.  
-4. Concurrent purchase under heavy WAL contention — MC-CERT classifies busy locks honestly (`AppPersistenceFailure` possible).  
+4. Concurrent purchase under heavy WAL contention — Phase 6A.1 allowed `AppPersistenceFailure` as honest lock noise; **Phase 6A.2** re-reads idempotency after contention so equivalent concurrent create prefers `AppOk` (see `PHASE_6A_2_REPORT.md`).  
 5. ~~Analyzer infos (deprecated Radio APIs on redeem screen)~~ — **cleared in Phase 6A.1**.
 
 Overstated Phase 6A atomicity/idempotency claims for profit/redeem mid-failure matrices are closed by Phase 6A.1 CREATE/PROFIT/REDEEM-ROLL suites (previously only happy-path + limited concurrent create).

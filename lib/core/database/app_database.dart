@@ -98,6 +98,9 @@ part 'app_database.g.dart';
 ///                 certificate_events; certificate account linkage &
 ///                 immutability triggers; event/revision append-only;
 ///                 purchase/profit/redemption financial validators.
+///  18 — Phase 6A.2: prevent_negative_account_balance AFTER INSERT on
+///                 ledger_entries; strengthened certificate purchase /
+///                 redemption / profit event balanced-leg validators.
 @DriftDatabase(
   tables: [
     Households,
@@ -133,7 +136,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -169,6 +172,7 @@ class AppDatabase extends _$AppDatabase {
       await _applyPhase5B7ReversalBalancedAndStatusTriggers();
       await _applyPhase5B8LifecycleProgressSeparation();
       await _applyPhase6ACertificateSchema();
+      await _applyPhase6A2DebitSafetyAndCertEventHardening();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -289,6 +293,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(certificateRevisionsTable);
         await m.createTable(certificateEventsTable);
         await _applyPhase6ACertificateSchema();
+      }
+      if (from <= 17) {
+        // v17 → v18: Phase 6A.2 — non-negative balance + cert event legs.
+        await _applyPhase6A2DebitSafetyAndCertEventHardening();
       }
     },
     beforeOpen: (details) async {
@@ -1711,7 +1719,8 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _applyCertificateEventFinancialTriggers() async {
-    // Purchase event must link a certificateFunding transfer INTO the cert account.
+    // Purchase event must link a certificateFunding transfer INTO the cert account
+    // with exactly two balanced legs matching operation source/destination.
     await customStatement('''
       CREATE TRIGGER IF NOT EXISTS validate_certificate_purchase_event
       BEFORE INSERT ON certificate_events
@@ -1720,28 +1729,46 @@ class AppDatabase extends _$AppDatabase {
       BEGIN
         SELECT RAISE(ABORT, 'purchase event requires balanced transfer into certificate account')
         WHERE NEW.related_operation_id IS NULL
-           OR NOT EXISTS (
-             SELECT 1 FROM operations o
-             JOIN savings_certificates sc ON sc.id = NEW.certificate_id
-             WHERE o.id = NEW.related_operation_id
-               AND o.household_id = NEW.household_id
-               AND o.type = 'certificateFunding'
-               AND o.destination_account_id = sc.certificate_account_id
-               AND o.source_account_id IS NOT NULL
-               AND o.source_account_id != sc.certificate_account_id
-               AND o.total_amount_minor_units = NEW.amount_minor_units
-               AND o.currency_code = NEW.currency_code
-           )
+           OR NEW.amount_minor_units IS NULL
+           OR NEW.currency_code IS NULL
            OR (
              SELECT COUNT(*) FROM ledger_entries le
              WHERE le.operation_id = NEW.related_operation_id
            ) != 2
            OR (
-             SELECT SUM(CASE WHEN direction='credit' THEN amount_minor_units
-                             ELSE -amount_minor_units END)
-             FROM ledger_entries
-             WHERE operation_id = NEW.related_operation_id
-           ) != 0;
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'debit'
+           ) != 1
+           OR (
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'credit'
+           ) != 1
+           OR NOT EXISTS (
+             SELECT 1
+             FROM operations o
+             JOIN savings_certificates sc ON sc.id = NEW.certificate_id
+             JOIN ledger_entries d
+               ON d.operation_id = o.id AND d.direction = 'debit'
+             JOIN ledger_entries c
+               ON c.operation_id = o.id AND c.direction = 'credit'
+             WHERE o.id = NEW.related_operation_id
+               AND o.household_id = NEW.household_id
+               AND o.type = 'certificateFunding'
+               AND o.source_account_id = d.account_id
+               AND o.destination_account_id = c.account_id
+               AND c.account_id = sc.certificate_account_id
+               AND d.account_id != sc.certificate_account_id
+               AND d.amount_minor_units = c.amount_minor_units
+               AND d.amount_minor_units = o.total_amount_minor_units
+               AND o.total_amount_minor_units = NEW.amount_minor_units
+               AND o.currency_code = NEW.currency_code
+               AND d.currency_code = NEW.currency_code
+               AND c.currency_code = NEW.currency_code
+               AND d.household_id = NEW.household_id
+               AND c.household_id = NEW.household_id
+           );
       END
     ''');
 
@@ -1754,28 +1781,46 @@ class AppDatabase extends _$AppDatabase {
       BEGIN
         SELECT RAISE(ABORT, 'redemption event requires balanced transfer out of certificate account')
         WHERE NEW.related_operation_id IS NULL
-           OR NOT EXISTS (
-             SELECT 1 FROM operations o
-             JOIN savings_certificates sc ON sc.id = NEW.certificate_id
-             WHERE o.id = NEW.related_operation_id
-               AND o.household_id = NEW.household_id
-               AND o.type = 'certificateMaturity'
-               AND o.source_account_id = sc.certificate_account_id
-               AND o.destination_account_id IS NOT NULL
-               AND o.destination_account_id != sc.certificate_account_id
-               AND o.total_amount_minor_units = NEW.amount_minor_units
-               AND o.currency_code = NEW.currency_code
-           )
+           OR NEW.amount_minor_units IS NULL
+           OR NEW.currency_code IS NULL
            OR (
              SELECT COUNT(*) FROM ledger_entries le
              WHERE le.operation_id = NEW.related_operation_id
            ) != 2
            OR (
-             SELECT SUM(CASE WHEN direction='credit' THEN amount_minor_units
-                             ELSE -amount_minor_units END)
-             FROM ledger_entries
-             WHERE operation_id = NEW.related_operation_id
-           ) != 0;
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'debit'
+           ) != 1
+           OR (
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'credit'
+           ) != 1
+           OR NOT EXISTS (
+             SELECT 1
+             FROM operations o
+             JOIN savings_certificates sc ON sc.id = NEW.certificate_id
+             JOIN ledger_entries d
+               ON d.operation_id = o.id AND d.direction = 'debit'
+             JOIN ledger_entries c
+               ON c.operation_id = o.id AND c.direction = 'credit'
+             WHERE o.id = NEW.related_operation_id
+               AND o.household_id = NEW.household_id
+               AND o.type = 'certificateMaturity'
+               AND o.source_account_id = d.account_id
+               AND o.destination_account_id = c.account_id
+               AND d.account_id = sc.certificate_account_id
+               AND c.account_id != sc.certificate_account_id
+               AND d.amount_minor_units = c.amount_minor_units
+               AND d.amount_minor_units = o.total_amount_minor_units
+               AND o.total_amount_minor_units = NEW.amount_minor_units
+               AND o.currency_code = NEW.currency_code
+               AND d.currency_code = NEW.currency_code
+               AND c.currency_code = NEW.currency_code
+               AND d.household_id = NEW.household_id
+               AND c.household_id = NEW.household_id
+           );
       END
     ''');
 
@@ -1788,25 +1833,77 @@ class AppDatabase extends _$AppDatabase {
       BEGIN
         SELECT RAISE(ABORT, 'profit event requires income operation')
         WHERE NEW.related_operation_id IS NULL
+           OR NEW.amount_minor_units IS NULL
+           OR NEW.currency_code IS NULL
+           OR (
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'credit'
+           ) != 1
+           OR (
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+           ) != 1
            OR NOT EXISTS (
              SELECT 1 FROM operations o
              JOIN savings_certificates sc ON sc.id = NEW.certificate_id
+             JOIN ledger_entries le
+               ON le.operation_id = o.id AND le.direction = 'credit'
              WHERE o.id = NEW.related_operation_id
                AND o.household_id = NEW.household_id
                AND o.type = 'income'
                AND o.category_code = 'certificate_profit'
                AND o.total_amount_minor_units = NEW.amount_minor_units
                AND o.currency_code = NEW.currency_code
+               AND o.destination_account_id = le.account_id
                AND o.destination_account_id IS NOT NULL
                AND o.destination_account_id != sc.certificate_account_id
-           )
-           OR (
-             SELECT COUNT(*) FROM ledger_entries le
-             WHERE le.operation_id = NEW.related_operation_id
-               AND le.direction = 'credit'
-           ) != 1;
+               AND le.amount_minor_units = NEW.amount_minor_units
+               AND le.currency_code = NEW.currency_code
+               AND le.household_id = NEW.household_id
+           );
       END
     ''');
+  }
+
+  // ── Phase 6A.2: Debit safety + certificate event balanced-leg hardening ───
+
+  /// Mechanism: DB-level non-negative balance enforcement (SQLite trigger).
+  ///
+  /// Combined with Drift's default `BEGIN IMMEDIATE` writer transactions, every
+  /// debit path's balance decision shares the same write lock as the ledger
+  /// insert across two connections to one SQLite file. The trigger is the
+  /// last-line guarantee that no account balance can go negative after insert.
+  Future<void> _applyPhase6A2DebitSafetyAndCertEventHardening() async {
+    await customStatement('''
+      CREATE TRIGGER IF NOT EXISTS prevent_negative_account_balance
+      AFTER INSERT ON ledger_entries
+      FOR EACH ROW
+      WHEN NEW.direction = 'debit'
+      BEGIN
+        SELECT RAISE(ABORT, 'account balance cannot go negative')
+        WHERE (
+          SELECT COALESCE(SUM(
+            CASE WHEN direction = 'credit' THEN amount_minor_units
+                 ELSE -amount_minor_units END
+          ), 0)
+          FROM ledger_entries
+          WHERE account_id = NEW.account_id
+        ) < 0;
+      END
+    ''');
+
+    // Replace Phase 6A event validators with balanced-leg enforcement.
+    await customStatement(
+      'DROP TRIGGER IF EXISTS validate_certificate_purchase_event',
+    );
+    await customStatement(
+      'DROP TRIGGER IF EXISTS validate_certificate_redemption_event',
+    );
+    await customStatement(
+      'DROP TRIGGER IF EXISTS validate_certificate_profit_event',
+    );
+    await _applyCertificateEventFinancialTriggers();
   }
 }
 

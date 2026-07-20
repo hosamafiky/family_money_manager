@@ -600,6 +600,7 @@ void main() {
   test('BAL-MV-3. Two debit legs rejected', () async {
     final (goalId, reserve, src) = await seedForBal('bal3');
     await createAcct('other-bal3');
+    await credit('other-bal3', 100000);
     await insertOp(opId: 'op-bal3', src: src, dst: reserve, amount: 1000);
     await insertLeg(
       id: 'd1',
@@ -649,6 +650,7 @@ void main() {
   test('BAL-MV-5. Debit account != operation source rejected', () async {
     final (goalId, reserve, src) = await seedForBal('bal5');
     await createAcct('other-bal5');
+    await credit('other-bal5', 100000);
     await insertOp(opId: 'op-bal5', src: src, dst: reserve, amount: 1000);
     await insertLeg(
       id: 'd',

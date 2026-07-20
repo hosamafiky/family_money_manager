@@ -187,97 +187,110 @@ final class DriftLedgerRepository implements LedgerRepository {
         : LedgerEntryType.expense;
     late IdempotentOperationResult result;
 
-    await _db.transaction(() async {
-      final idemResult = await _checkIdempotency(
-        operationId: params.operationId,
-        householdId: params.householdId,
-        idempotencyKey: params.resolvedIdempotencyKey,
-        expectedType: account.isChildProtectedFund
-            ? OperationType.childFundWithdrawal.code
-            : OperationType.expense.code,
-        expectedAmount: params.amountMinorUnits,
-        expectedCurrency: params.currencyCode,
-        expectedSourceAccountId: params.sourceAccountId,
-        expectedDestinationAccountId: null,
-      );
-      if (idemResult != null) {
-        result = idemResult;
-        return;
-      }
-
-      await _awaitDebugBarrier();
-
-      // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
-      await _checkSufficientBalance(
-        params.sourceAccountId,
-        params.householdId,
-        params.amountMinorUnits,
-      );
-
-      await _insertOp(
-        OperationsCompanion.insert(
-          id: params.operationId,
+    try {
+      await _db.transaction(() async {
+        final idemResult = await _checkIdempotency(
+          operationId: params.operationId,
           householdId: params.householdId,
-          type: account.isChildProtectedFund
+          idempotencyKey: params.resolvedIdempotencyKey,
+          expectedType: account.isChildProtectedFund
               ? OperationType.childFundWithdrawal.code
               : OperationType.expense.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          totalAmountMinorUnits: params.amountMinorUnits,
-          currencyCode: Value(params.currencyCode),
-          createdBy: params.createdBy,
-          createdAt: now,
-          updatedAt: now,
-          description: Value(params.description),
-          categoryCode: Value(params.categoryCode),
-          scope: Value(params.scope?.code),
-          spenderRole: Value(params.spenderRole?.code),
-          beneficiaryRole: Value(params.beneficiaryRole?.code),
-          sourceAccountId: Value(params.sourceAccountId),
-          tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
-          idempotencyKey: Value(params.resolvedIdempotencyKey),
-        ),
-      );
+          expectedAmount: params.amountMinorUnits,
+          expectedCurrency: params.currencyCode,
+          expectedSourceAccountId: params.sourceAccountId,
+          expectedDestinationAccountId: null,
+        );
+        if (idemResult != null) {
+          result = idemResult;
+          return;
+        }
 
-      await _insertEntry(
-        LedgerEntriesCompanion.insert(
-          id: '${params.operationId}_debit',
-          operationId: params.operationId,
-          householdId: params.householdId,
+        await _awaitDebugBarrier();
+
+        // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
+        await _checkSufficientBalance(
+          params.sourceAccountId,
+          params.householdId,
+          params.amountMinorUnits,
+        );
+
+        await _insertOp(
+          OperationsCompanion.insert(
+            id: params.operationId,
+            householdId: params.householdId,
+            type: account.isChildProtectedFund
+                ? OperationType.childFundWithdrawal.code
+                : OperationType.expense.code,
+            effectiveDate: params.effectiveDate,
+            recordedAt: now,
+            totalAmountMinorUnits: params.amountMinorUnits,
+            currencyCode: Value(params.currencyCode),
+            createdBy: params.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            description: Value(params.description),
+            categoryCode: Value(params.categoryCode),
+            scope: Value(params.scope?.code),
+            spenderRole: Value(params.spenderRole?.code),
+            beneficiaryRole: Value(params.beneficiaryRole?.code),
+            sourceAccountId: Value(params.sourceAccountId),
+            tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
+            idempotencyKey: Value(params.resolvedIdempotencyKey),
+          ),
+        );
+
+        await _insertEntry(
+          LedgerEntriesCompanion.insert(
+            id: '${params.operationId}_debit',
+            operationId: params.operationId,
+            householdId: params.householdId,
+            accountId: params.sourceAccountId,
+            direction: LedgerDirection.debit.code,
+            amountMinorUnits: params.amountMinorUnits,
+            currencyCode: Value(params.currencyCode),
+            entryType: entryType.code,
+            effectiveDate: params.effectiveDate,
+            recordedAt: now,
+            createdBy: params.createdBy,
+          ),
+        );
+
+        if (auditParams != null) {
+          await _insertAudit(auditParams, now);
+        }
+
+        await _insertContext(
+          OperationContextsCompanion.insert(
+            operationId: params.operationId,
+            householdId: params.householdId,
+            spenderMemberId: Value(params.spenderMemberId),
+            beneficiaryMemberId: Value(params.beneficiaryMemberId),
+            expenseScope: Value(params.scope?.code),
+            isRecurring: Value(params.isRecurring),
+            recurringNote: params.isRecurring
+                ? const Value('recurring_marker_not_scheduled')
+                : const Value.absent(),
+            categoryCode: Value(params.categoryCode),
+            note: Value(params.description),
+            createdAt: now,
+          ),
+        );
+
+        result = IdempotentOperationResult.created;
+      });
+    } on InsufficientFundsError {
+      rethrow;
+    } catch (e) {
+      if (e.toString().contains('account balance cannot go negative')) {
+        throw InsufficientFundsError(
           accountId: params.sourceAccountId,
-          direction: LedgerDirection.debit.code,
-          amountMinorUnits: params.amountMinorUnits,
-          currencyCode: Value(params.currencyCode),
-          entryType: entryType.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          createdBy: params.createdBy,
-        ),
-      );
-
-      if (auditParams != null) {
-        await _insertAudit(auditParams, now);
+          availableMinorUnits: 0,
+          requestedMinorUnits: params.amountMinorUnits,
+        );
       }
-
-      await _insertContext(
-        OperationContextsCompanion.insert(
-          operationId: params.operationId,
-          householdId: params.householdId,
-          spenderMemberId: Value(params.spenderMemberId),
-          beneficiaryMemberId: Value(params.beneficiaryMemberId),
-          expenseScope: Value(params.scope?.code),
-          isRecurring: Value(params.isRecurring),
-          recurringNote: params.isRecurring
-              ? const Value('recurring_marker_not_scheduled')
-              : const Value.absent(),
-          categoryCode: Value(params.categoryCode),
-          note: Value(params.description),
-          createdAt: now,
-        ),
-      );
-
-      result = IdempotentOperationResult.created;
-    });
+      rethrow;
+    }
 
     return result;
   }
@@ -327,102 +340,115 @@ final class DriftLedgerRepository implements LedgerRepository {
     final now = DateTime.now().toUtc().toIso8601String();
     late IdempotentOperationResult result;
 
-    await _db.transaction(() async {
-      final idemResult = await _checkIdempotency(
-        operationId: params.operationId,
-        householdId: params.householdId,
-        idempotencyKey: params.resolvedIdempotencyKey,
-        expectedType: OperationType.transfer.code,
-        expectedAmount: params.amountMinorUnits,
-        expectedCurrency: params.currencyCode,
-        expectedSourceAccountId: params.sourceAccountId,
-        expectedDestinationAccountId: params.destinationAccountId,
-      );
-      if (idemResult != null) {
-        result = idemResult;
-        return;
-      }
-
-      await _awaitDebugBarrier();
-
-      // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
-      await _checkSufficientBalance(
-        params.sourceAccountId,
-        params.householdId,
-        params.amountMinorUnits,
-      );
-
-      await _insertOp(
-        OperationsCompanion.insert(
-          id: params.operationId,
-          householdId: params.householdId,
-          type: OperationType.transfer.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          totalAmountMinorUnits: params.amountMinorUnits,
-          currencyCode: Value(params.currencyCode),
-          createdBy: params.createdBy,
-          createdAt: now,
-          updatedAt: now,
-          description: Value(params.description),
-          sourceAccountId: Value(params.sourceAccountId),
-          destinationAccountId: Value(params.destinationAccountId),
-          tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
-          idempotencyKey: Value(params.resolvedIdempotencyKey),
-        ),
-      );
-
-      await _insertEntry(
-        LedgerEntriesCompanion.insert(
-          id: '${params.operationId}_debit',
+    try {
+      await _db.transaction(() async {
+        final idemResult = await _checkIdempotency(
           operationId: params.operationId,
           householdId: params.householdId,
+          idempotencyKey: params.resolvedIdempotencyKey,
+          expectedType: OperationType.transfer.code,
+          expectedAmount: params.amountMinorUnits,
+          expectedCurrency: params.currencyCode,
+          expectedSourceAccountId: params.sourceAccountId,
+          expectedDestinationAccountId: params.destinationAccountId,
+        );
+        if (idemResult != null) {
+          result = idemResult;
+          return;
+        }
+
+        await _awaitDebugBarrier();
+
+        // Balance check inside the transaction (TOCTOU-safe under SQLite WAL).
+        await _checkSufficientBalance(
+          params.sourceAccountId,
+          params.householdId,
+          params.amountMinorUnits,
+        );
+
+        await _insertOp(
+          OperationsCompanion.insert(
+            id: params.operationId,
+            householdId: params.householdId,
+            type: OperationType.transfer.code,
+            effectiveDate: params.effectiveDate,
+            recordedAt: now,
+            totalAmountMinorUnits: params.amountMinorUnits,
+            currencyCode: Value(params.currencyCode),
+            createdBy: params.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            description: Value(params.description),
+            sourceAccountId: Value(params.sourceAccountId),
+            destinationAccountId: Value(params.destinationAccountId),
+            tags: Value(params.tags.isEmpty ? null : params.tags.join(',')),
+            idempotencyKey: Value(params.resolvedIdempotencyKey),
+          ),
+        );
+
+        await _insertEntry(
+          LedgerEntriesCompanion.insert(
+            id: '${params.operationId}_debit',
+            operationId: params.operationId,
+            householdId: params.householdId,
+            accountId: params.sourceAccountId,
+            direction: LedgerDirection.debit.code,
+            amountMinorUnits: params.amountMinorUnits,
+            currencyCode: Value(params.currencyCode),
+            entryType: LedgerEntryType.transferOut.code,
+            effectiveDate: params.effectiveDate,
+            recordedAt: now,
+            createdBy: params.createdBy,
+          ),
+        );
+
+        await _insertEntry(
+          LedgerEntriesCompanion.insert(
+            id: '${params.operationId}_credit',
+            operationId: params.operationId,
+            householdId: params.householdId,
+            accountId: params.destinationAccountId,
+            direction: LedgerDirection.credit.code,
+            amountMinorUnits: params.amountMinorUnits,
+            currencyCode: Value(params.currencyCode),
+            entryType: LedgerEntryType.transferIn.code,
+            effectiveDate: params.effectiveDate,
+            recordedAt: now,
+            createdBy: params.createdBy,
+          ),
+        );
+
+        if (auditParams != null) {
+          await _insertAudit(auditParams, now);
+        }
+
+        await _insertContext(
+          OperationContextsCompanion.insert(
+            operationId: params.operationId,
+            householdId: params.householdId,
+            spenderMemberId: Value(params.spenderMemberId),
+            beneficiaryMemberId: Value(params.beneficiaryMemberId),
+            expenseScope: const Value.absent(),
+            isRecurring: const Value(false),
+            note: Value(params.description),
+            createdAt: now,
+          ),
+        );
+
+        result = IdempotentOperationResult.created;
+      });
+    } on InsufficientFundsError {
+      rethrow;
+    } catch (e) {
+      if (e.toString().contains('account balance cannot go negative')) {
+        throw InsufficientFundsError(
           accountId: params.sourceAccountId,
-          direction: LedgerDirection.debit.code,
-          amountMinorUnits: params.amountMinorUnits,
-          currencyCode: Value(params.currencyCode),
-          entryType: LedgerEntryType.transferOut.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          createdBy: params.createdBy,
-        ),
-      );
-
-      await _insertEntry(
-        LedgerEntriesCompanion.insert(
-          id: '${params.operationId}_credit',
-          operationId: params.operationId,
-          householdId: params.householdId,
-          accountId: params.destinationAccountId,
-          direction: LedgerDirection.credit.code,
-          amountMinorUnits: params.amountMinorUnits,
-          currencyCode: Value(params.currencyCode),
-          entryType: LedgerEntryType.transferIn.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          createdBy: params.createdBy,
-        ),
-      );
-
-      if (auditParams != null) {
-        await _insertAudit(auditParams, now);
+          availableMinorUnits: 0,
+          requestedMinorUnits: params.amountMinorUnits,
+        );
       }
-
-      await _insertContext(
-        OperationContextsCompanion.insert(
-          operationId: params.operationId,
-          householdId: params.householdId,
-          spenderMemberId: Value(params.spenderMemberId),
-          beneficiaryMemberId: Value(params.beneficiaryMemberId),
-          expenseScope: const Value.absent(),
-          isRecurring: const Value(false),
-          note: Value(params.description),
-          createdAt: now,
-        ),
-      );
-
-      result = IdempotentOperationResult.created;
-    });
+      rethrow;
+    }
 
     return result;
   }
@@ -586,6 +612,17 @@ final class DriftLedgerRepository implements LedgerRepository {
       }
 
       await _awaitDebugBarrier();
+
+      // Debit adjustments must not drive the account negative (INV-005 /
+      // Phase 6A.2). Check inside the IMMEDIATE write transaction; the
+      // prevent_negative_account_balance trigger is the DB backstop.
+      if (!params.isCredit) {
+        await _checkSufficientBalance(
+          params.accountId,
+          params.householdId,
+          absAmount,
+        );
+      }
 
       await _insertOp(
         OperationsCompanion.insert(
