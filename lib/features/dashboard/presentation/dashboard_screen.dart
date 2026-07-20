@@ -135,7 +135,8 @@ class _QuickActionsSection extends StatelessWidget {
           runSpacing: 8,
           children: [
             FilledButton.tonalIcon(
-              onPressed: () => _pushIfRouted(context, '/transactions/new/income'),
+              onPressed: () =>
+                  _pushIfRouted(context, '/transactions/new/income'),
               icon: const Icon(Icons.south_west, size: 18),
               label: Text(l10n.actionRecordIncome),
             ),

@@ -60,7 +60,11 @@ GoRouter _testRouter() {
   );
 }
 
-Widget _app(GoRouter router, {Locale locale = const Locale('en'), Size size = const Size(390, 844)}) {
+Widget _app(
+  GoRouter router, {
+  Locale locale = const Locale('en'),
+  Size size = const Size(390, 844),
+}) {
   return MediaQuery(
     data: MediaQueryData(size: size),
     child: MaterialApp.router(
@@ -114,9 +118,7 @@ void main() {
 
   testWidgets('wide shell uses navigation rail', (tester) async {
     final router = _testRouter();
-    await tester.pumpWidget(
-      _app(router, size: const Size(1200, 800)),
-    );
+    await tester.pumpWidget(_app(router, size: const Size(1200, 800)));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);

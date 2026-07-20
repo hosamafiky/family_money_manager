@@ -76,7 +76,10 @@ void main() {
       ),
     );
     expect(find.text('100.00'), findsOneWidget);
-    expect(Directionality.of(tester.element(find.text('100.00'))), TextDirection.rtl);
+    expect(
+      Directionality.of(tester.element(find.text('100.00'))),
+      TextDirection.rtl,
+    );
   });
 
   testWidgets('planning hub lists budgets goals certificates', (tester) async {
@@ -118,10 +121,7 @@ void main() {
 
   testWidgets('wide layout still builds planning hub', (tester) async {
     await tester.pumpWidget(
-      _wrap(
-        size: const Size(1200, 800),
-        child: const PlanningHubScreen(),
-      ),
+      _wrap(size: const Size(1200, 800), child: const PlanningHubScreen()),
     );
     await tester.pumpAndSettle();
     expect(find.byType(PlanningHubScreen), findsOneWidget);
