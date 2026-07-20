@@ -116,8 +116,8 @@ Validated on committed tip `4022d988674aaa832f36a9d787416042627f3517` (after fea
 |------|-------------------|
 | Code/test commit | `223b21bab4faa3482094a40fab14164e3882ceb1` — `test: Phase 6B.1.2 – release eligibility evidence and authentic v18 fixture` |
 | Analyzer fix | `4022d988674aaa832f36a9d787416042627f3517` — `fix: Phase 6B.1.2 – clear analyzer underscore lint on local helper` |
-| Documentation commit | *(this report commit — filled at pin)* |
-| Final HEAD | *(filled at pin)* |
+| Documentation commit |  |
+| Final HEAD |  |
 | `git status --short` | *(clean after pin)* |
 
 ---
