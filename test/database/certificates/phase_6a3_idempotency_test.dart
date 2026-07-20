@@ -31,7 +31,6 @@ void main() {
   late DriftLedgerRepository ledger1;
   late CreateCertificateUseCase create1;
   late RecordCertificateProfitUseCase profit1;
-  late RecordCertificateProfitUseCase profit2;
   late RedeemCertificateUseCase redeem1;
   late RedeemCertificateUseCase redeem2;
   late ReverseCertificatePurchaseUseCase revPurch1;
@@ -101,10 +100,6 @@ void main() {
     profit1 = RecordCertificateProfitUseCase(
       certRepository: certs1,
       accountRepository: accounts1,
-    );
-    profit2 = RecordCertificateProfitUseCase(
-      certRepository: certs2,
-      accountRepository: DriftAccountRepository(db2),
     );
     redeem1 = RedeemCertificateUseCase(
       certRepository: certs1,
