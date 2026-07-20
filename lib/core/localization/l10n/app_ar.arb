@@ -406,5 +406,21 @@
   "errorCertificateRedemptionReversalNotSupported": "عكس الاسترداد غير مدعوم",
   "errorCertificateNotMatured": "الشهادة لم تصل إلى تاريخ الاستحقاق",
   "errorCertificateNoPrincipal": "لا يوجد أصل متبقي لاسترداده",
-  "errorCertificateFullRedemptionOnly": "يُسمح فقط بالاسترداد الكامل للأصل"
+  "errorCertificateFullRedemptionOnly": "يُسمح فقط بالاسترداد الكامل للأصل",
+
+  "navHome": "الرئيسية",
+  "navPlanning": "التخطيط",
+  "navReports": "التقارير",
+  "navMore": "المزيد",
+  "planningTitle": "التخطيط",
+  "planningSubtitle": "الميزانيات والأهداف والشهادات",
+  "moreTitle": "المزيد",
+  "moreSubtitle": "الحسابات والعائلة والإعدادات",
+  "dashboardQuickActions": "إجراءات سريعة",
+  "dashboardNeedsAttention": "يحتاج انتباهك",
+  "dashboardHeldBalances": "أرصدة محتفظ بها",
+  "dashboardCertificatePrincipal": "أصل الشهادات",
+  "accountRestrictionCertificate": "أصل شهادة — عبر مسارات الشهادات فقط",
+  "accountRestrictionGoalReserve": "احتياطي هدف — يُدار عبر الأهداف",
+  "accountRestrictionProtected": "محمي — قيود على السحب"
 }

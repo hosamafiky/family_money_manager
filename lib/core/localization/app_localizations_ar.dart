@@ -1235,4 +1235,50 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get errorCertificateFullRedemptionOnly =>
       'يُسمح فقط بالاسترداد الكامل للأصل';
+
+  @override
+  String get navHome => 'الرئيسية';
+
+  @override
+  String get navPlanning => 'التخطيط';
+
+  @override
+  String get navReports => 'التقارير';
+
+  @override
+  String get navMore => 'المزيد';
+
+  @override
+  String get planningTitle => 'التخطيط';
+
+  @override
+  String get planningSubtitle => 'الميزانيات والأهداف والشهادات';
+
+  @override
+  String get moreTitle => 'المزيد';
+
+  @override
+  String get moreSubtitle => 'الحسابات والعائلة والإعدادات';
+
+  @override
+  String get dashboardQuickActions => 'إجراءات سريعة';
+
+  @override
+  String get dashboardNeedsAttention => 'يحتاج انتباهك';
+
+  @override
+  String get dashboardHeldBalances => 'أرصدة محتفظ بها';
+
+  @override
+  String get dashboardCertificatePrincipal => 'أصل الشهادات';
+
+  @override
+  String get accountRestrictionCertificate =>
+      'أصل شهادة — عبر مسارات الشهادات فقط';
+
+  @override
+  String get accountRestrictionGoalReserve => 'احتياطي هدف — يُدار عبر الأهداف';
+
+  @override
+  String get accountRestrictionProtected => 'محمي — قيود على السحب';
 }

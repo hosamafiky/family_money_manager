@@ -1254,4 +1254,52 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorCertificateFullRedemptionOnly =>
       'Only full principal redemption is supported';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navPlanning => 'Planning';
+
+  @override
+  String get navReports => 'Reports';
+
+  @override
+  String get navMore => 'More';
+
+  @override
+  String get planningTitle => 'Planning';
+
+  @override
+  String get planningSubtitle => 'Budgets, goals, and certificates';
+
+  @override
+  String get moreTitle => 'More';
+
+  @override
+  String get moreSubtitle => 'Accounts, family, and settings';
+
+  @override
+  String get dashboardQuickActions => 'Quick actions';
+
+  @override
+  String get dashboardNeedsAttention => 'Needs attention';
+
+  @override
+  String get dashboardHeldBalances => 'Held balances';
+
+  @override
+  String get dashboardCertificatePrincipal => 'Certificate principal';
+
+  @override
+  String get accountRestrictionCertificate =>
+      'Certificate principal — certificate workflows only';
+
+  @override
+  String get accountRestrictionGoalReserve =>
+      'Goal reserve — manage through goals';
+
+  @override
+  String get accountRestrictionProtected =>
+      'Protected — withdrawal restrictions apply';
 }

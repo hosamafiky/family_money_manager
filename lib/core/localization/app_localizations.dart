@@ -2467,6 +2467,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only full principal redemption is supported'**
   String get errorCertificateFullRedemptionOnly;
+
+  /// Bottom navigation label for home tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom navigation label for planning tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get navPlanning;
+
+  /// Bottom navigation label for reports tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get navReports;
+
+  /// Bottom navigation label for more tab.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navMore;
+
+  /// Title for the planning hub screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get planningTitle;
+
+  /// Subtitle for the planning hub.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets, goals, and certificates'**
+  String get planningSubtitle;
+
+  /// Title for the more hub screen.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreTitle;
+
+  /// Subtitle for the more hub.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts, family, and settings'**
+  String get moreSubtitle;
+
+  /// Section heading for quick transaction actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get dashboardQuickActions;
+
+  /// Section heading for budgets/goals needing attention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get dashboardNeedsAttention;
+
+  /// Section for protected, goal, and certificate holdings.
+  ///
+  /// In en, this message translates to:
+  /// **'Held balances'**
+  String get dashboardHeldBalances;
+
+  /// Label for certificate principal on dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate principal'**
+  String get dashboardCertificatePrincipal;
+
+  /// Restriction note for certificate accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate principal — certificate workflows only'**
+  String get accountRestrictionCertificate;
+
+  /// Restriction note for goal reserve accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reserve — manage through goals'**
+  String get accountRestrictionGoalReserve;
+
+  /// Restriction note for protected accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected — withdrawal restrictions apply'**
+  String get accountRestrictionProtected;
 }
 
 class _AppLocalizationsDelegate

@@ -19,7 +19,9 @@ import 'package:family_money_manager/features/goals/presentation/goals_list_scre
 import 'package:family_money_manager/features/goals/presentation/release_goal_screen.dart';
 import 'package:family_money_manager/features/household/data/drift_household_repository.dart';
 import 'package:family_money_manager/features/household/presentation/household_members_screen.dart';
+import 'package:family_money_manager/features/more/presentation/more_hub_screen.dart';
 import 'package:family_money_manager/features/onboarding/onboarding_screen.dart';
+import 'package:family_money_manager/features/planning/presentation/planning_hub_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/account_flow_report_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/category_report_screen.dart';
 import 'package:family_money_manager/features/reports/presentation/home_savings_report_screen.dart';
@@ -96,12 +98,12 @@ abstract final class AppRouter {
           path: '/onboarding',
           builder: (context, state) => const OnboardingScreen(),
         ),
-        // ── Phase 4A shell with bottom navigation ─────────────────────────
+        // ── Phase 6B.2 shell: Home · Transactions · Planning · Reports · More ─
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
               AppShell(navigationShell: navigationShell),
           branches: [
-            // Tab 0: Dashboard
+            // Tab 0: Home (dashboard path preserved)
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -110,29 +112,7 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 1: Accounts
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/accounts',
-                  builder: (context, state) => const AccountsScreen(),
-                  routes: [
-                    GoRoute(
-                      path: 'new',
-                      builder: (context, state) =>
-                          const AccountCreationScreen(),
-                    ),
-                    GoRoute(
-                      path: ':accountId',
-                      builder: (context, state) => AccountDetailScreen(
-                        accountId: state.pathParameters['accountId']!,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Tab 2: Transactions
+            // Tab 1: Transactions
             StatefulShellBranch(
               routes: [
                 GoRoute(
@@ -196,66 +176,101 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 3: Family members
+            // Tab 2: Planning hub
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/members',
-                  builder: (context, state) => const HouseholdMembersScreen(),
+                  path: '/planning',
+                  builder: (context, state) => const PlanningHubScreen(),
                 ),
               ],
             ),
-            // Tab 4: Settings
+            // Tab 3: Reports (paths preserved under /reports)
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/settings',
-                  builder: (context, state) => const SettingsScreen(),
+                  path: '/reports',
+                  builder: (context, state) => const ReportsLandingScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'income-expense',
+                      builder: (context, state) =>
+                          const IncomeExpenseReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'attribution',
+                      builder: (context, state) =>
+                          const SpendingAttributionReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'categories',
+                      builder: (context, state) => const CategoryReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'accounts',
+                      builder: (context, state) =>
+                          const AccountFlowReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'home-savings',
+                      builder: (context, state) =>
+                          const HomeSavingsReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'spouse-wallet',
+                      builder: (context, state) =>
+                          const SpouseWalletReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'protected-funds',
+                      builder: (context, state) =>
+                          const ProtectedFundsReportScreen(),
+                    ),
+                    GoRoute(
+                      path: 'transactions',
+                      builder: (context, state) =>
+                          const ReportTransactionListScreen(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            // Tab 4: More hub
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/more',
+                  builder: (context, state) => const MoreHubScreen(),
                 ),
               ],
             ),
           ],
         ),
 
-        // ── Phase 4B report routes (pushed from dashboard, not in shell tab) ─
+        // ── Accounts / members / settings (paths preserved; opened from More) ─
         GoRoute(
-          path: '/reports',
-          builder: (context, state) => const ReportsLandingScreen(),
+          path: '/accounts',
+          builder: (context, state) => const AccountsScreen(),
           routes: [
             GoRoute(
-              path: 'income-expense',
-              builder: (context, state) => const IncomeExpenseReportScreen(),
+              path: 'new',
+              builder: (context, state) => const AccountCreationScreen(),
             ),
             GoRoute(
-              path: 'attribution',
-              builder: (context, state) =>
-                  const SpendingAttributionReportScreen(),
-            ),
-            GoRoute(
-              path: 'categories',
-              builder: (context, state) => const CategoryReportScreen(),
-            ),
-            GoRoute(
-              path: 'accounts',
-              builder: (context, state) => const AccountFlowReportScreen(),
-            ),
-            GoRoute(
-              path: 'home-savings',
-              builder: (context, state) => const HomeSavingsReportScreen(),
-            ),
-            GoRoute(
-              path: 'spouse-wallet',
-              builder: (context, state) => const SpouseWalletReportScreen(),
-            ),
-            GoRoute(
-              path: 'protected-funds',
-              builder: (context, state) => const ProtectedFundsReportScreen(),
-            ),
-            GoRoute(
-              path: 'transactions',
-              builder: (context, state) => const ReportTransactionListScreen(),
+              path: ':accountId',
+              builder: (context, state) => AccountDetailScreen(
+                accountId: state.pathParameters['accountId']!,
+              ),
             ),
           ],
+        ),
+        GoRoute(
+          path: '/members',
+          builder: (context, state) => const HouseholdMembersScreen(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
         ),
 
         // ── Phase 5A budget routes ─────────────────────────────────────────
