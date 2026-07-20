@@ -185,6 +185,7 @@ void main() {
     required String reserveId,
     required String destId,
     required String householdId,
+    String currency = 'EGP',
   }) async {
     await db.customStatement(
       "INSERT INTO operations "
@@ -192,26 +193,26 @@ void main() {
       "total_amount_minor_units, currency_code, created_by, created_at, updated_at, "
       "description, source_account_id, destination_account_id, idempotency_key) "
       "VALUES (?, ?, 'transfer', '2024-06-01', '2024-06-01T00:00:00Z', "
-      "1000, 'EGP', 'test', '2024-06-01', '2024-06-01', 'bypass', ?, ?, ?)",
-      [opId, householdId, reserveId, destId, 'ik-$opId'],
+      "1000, ?, 'test', '2024-06-01', '2024-06-01', 'bypass', ?, ?, ?)",
+      [opId, householdId, currency, reserveId, destId, 'ik-$opId'],
     );
     await db.customStatement(
       "INSERT INTO ledger_entries "
       "(id, operation_id, household_id, account_id, direction, "
       "amount_minor_units, currency_code, entry_type, effective_date, "
       "recorded_at, created_by) VALUES "
-      "(?, ?, ?, ?, 'debit', 1000, 'EGP', 'transferOut', '2024-06-01', "
+      "(?, ?, ?, ?, 'debit', 1000, ?, 'transferOut', '2024-06-01', "
       "'2024-06-01T00:00:00Z', 'test')",
-      ['${opId}_d', opId, householdId, reserveId],
+      ['${opId}_d', opId, householdId, reserveId, currency],
     );
     await db.customStatement(
       "INSERT INTO ledger_entries "
       "(id, operation_id, household_id, account_id, direction, "
       "amount_minor_units, currency_code, entry_type, effective_date, "
       "recorded_at, created_by) VALUES "
-      "(?, ?, ?, ?, 'credit', 1000, 'EGP', 'transferIn', '2024-06-01', "
+      "(?, ?, ?, ?, 'credit', 1000, ?, 'transferIn', '2024-06-01', "
       "'2024-06-01T00:00:00Z', 'test')",
-      ['${opId}_c', opId, householdId, destId],
+      ['${opId}_c', opId, householdId, destId, currency],
     );
     await db.customStatement(
       "INSERT INTO goal_movements "
@@ -501,6 +502,117 @@ void main() {
       kGoalFundingSourceEligibilityAbort,
     );
   });
+
+  // ── Release-side DB enforcement (Phase 6B.1.2 evidence closure) ───────────
+  //
+  // Also covered earlier in this suite (cited, not duplicated):
+  // - SQL-2 — linked certificate destination
+  // - SQL-7 — non-spendable ordinary destination
+  // - SQL-P2 — positive control release to eligible standard
+
+  Future<SavingsGoal> _fundedGoalForRelease({required String key}) async {
+    await createAccount(id: 'bank-$key', householdId: _hh);
+    await creditAccount('bank-$key', _hh, 80000);
+    final goal = await createGoal(key: key);
+    await fundGoalUc.execute(
+      goalId: goal.id,
+      sourceAccountId: 'bank-$key',
+      amountMinorUnits: 20000,
+      householdId: _hh,
+      idempotencyKey: 'ik-fund-$key',
+    );
+    return goal;
+  }
+
+  test(
+    'SQL-R1. Cross-household release destination rejected by trigger',
+    () async {
+      final goal = await _fundedGoalForRelease(key: 'ik-gr1');
+      await createAccount(id: 'dst-xhh', householdId: _hh2);
+      await expectAbort(
+        () => insertRawReleaseAttempt(
+          opId: 'op-bad-rel-xhh',
+          movId: 'mov-bad-rel-xhh',
+          goalId: goal.id,
+          reserveId: goal.reserveAccountId,
+          destId: 'dst-xhh',
+          householdId: _hh,
+        ),
+        kGoalReleaseDestinationEligibilityAbort,
+      );
+    },
+  );
+
+  test(
+    'SQL-R2. Currency-mismatch release destination rejected by trigger',
+    () async {
+      final goal = await _fundedGoalForRelease(key: 'ik-gr2');
+      await createAccount(id: 'dst-usd', householdId: _hh, currency: 'USD');
+      await expectAbort(
+        () => insertRawReleaseAttempt(
+          opId: 'op-bad-rel-ccy',
+          movId: 'mov-bad-rel-ccy',
+          goalId: goal.id,
+          reserveId: goal.reserveAccountId,
+          destId: 'dst-usd',
+          householdId: _hh,
+          currency: 'EGP',
+        ),
+        kGoalReleaseDestinationEligibilityAbort,
+      );
+    },
+  );
+
+  test(
+    'SQL-R3. Certificate-by-type release destination rejected by trigger',
+    () async {
+      final goal = await _fundedGoalForRelease(key: 'ik-gr3');
+      await createAccount(
+        id: 'cert-type-dst',
+        householdId: _hh,
+        type: 'certificate',
+        fundPurpose: 'certificate',
+        isSpendable: false,
+        ownerType: AccountOwnerType.household,
+      );
+      await expectAbort(
+        () => insertRawReleaseAttempt(
+          opId: 'op-bad-rel-type',
+          movId: 'mov-bad-rel-type',
+          goalId: goal.id,
+          reserveId: goal.reserveAccountId,
+          destId: 'cert-type-dst',
+          householdId: _hh,
+        ),
+        kGoalReleaseDestinationEligibilityAbort,
+      );
+    },
+  );
+
+  test(
+    'SQL-R4. Certificate-by-purpose release destination rejected by trigger',
+    () async {
+      final goal = await _fundedGoalForRelease(key: 'ik-gr4');
+      await createAccount(
+        id: 'purpose-cert-dst',
+        householdId: _hh,
+        type: 'bankAccount',
+        fundPurpose: 'certificate',
+        isSpendable: true,
+      );
+      await expectAbort(
+        () => insertRawReleaseAttempt(
+          opId: 'op-bad-rel-purpose',
+          movId: 'mov-bad-rel-purpose',
+          goalId: goal.id,
+          reserveId: goal.reserveAccountId,
+          destId: 'purpose-cert-dst',
+          householdId: _hh,
+        ),
+        kGoalReleaseDestinationEligibilityAbort,
+      );
+    },
+  );
 
   // ── Positive controls ─────────────────────────────────────────────────────
 
