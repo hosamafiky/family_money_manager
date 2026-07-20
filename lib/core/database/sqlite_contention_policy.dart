@@ -77,6 +77,15 @@ bool isRetryableSqliteContention(Object error) {
 bool isNegativeBalanceAbort(Object error) =>
     error.toString().contains('account balance cannot go negative');
 
+/// If [error] is a negative-balance abort, returns [toInsufficient]; else `null`.
+///
+/// Debit writers map the abort to a typed insufficient-funds outcome and must
+/// not forward raw SQLite exceptions to application callers.
+T? mapNegativeBalanceAbortOrNull<T>(Object error, T Function() toInsufficient) {
+  if (isNegativeBalanceAbort(error)) return toInsufficient();
+  return null;
+}
+
 /// Runs an authoritative financial write with bounded SQLITE_BUSY / LOCKED
 /// retries.
 ///
