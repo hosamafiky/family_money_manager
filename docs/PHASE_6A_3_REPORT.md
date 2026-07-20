@@ -2,7 +2,8 @@
 
 **Branch:** `main`  
 **Feature commit:** `ef733acce8b939245581f63820e0b46e4ccf8a68`  
-**Docs pin:** _(this commit)_  
+**Analyzer-clean follow-up:** `8daca6a624a2d2a35ea14670d70915f267b007c3`  
+**Docs pin:** `b9eb61e5d9b6e4974ea4799668103e2e201ae701`  
 **Prior HEAD:** `de9eacd376b0de262bca757abcdb40353659c134` (Phase 6A.2 docs pin)  
 **Phase 6A feature:** `25347f4`  
 **Phase 6A.1 feature:** `35602d9` · docs `4264b3f` · finalize `d032977`  
@@ -137,7 +138,7 @@ flutter analyze                                       # No issues found!
 flutter test --reporter=expanded                      # 1525 passed; 0 failed
 ```
 
-Validated against committed feature `ef733acce8b939245581f63820e0b46e4ccf8a68` (plus analyzer-clean follow-up if present).
+Validated against committed feature `ef733acce8b939245581f63820e0b46e4ccf8a68` and analyzer-clean follow-up `8daca6a624a2d2a35ea14670d70915f267b007c3`.
 
 ---
 
