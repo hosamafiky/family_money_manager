@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/dashboard/domain/dashboard_summary.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
@@ -33,42 +34,6 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(l10n.dashboardTitle),
         actions: [
           Semantics(
-            label: l10n.certificatesTitle,
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.account_balance_outlined),
-              tooltip: l10n.certificatesTitle,
-              onPressed: () => context.push('/certificates'),
-            ),
-          ),
-          Semantics(
-            label: l10n.goalsTitle,
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.flag_outlined),
-              tooltip: l10n.goalsTitle,
-              onPressed: () => context.push('/goals'),
-            ),
-          ),
-          Semantics(
-            label: l10n.budgetsTitle,
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.savings_outlined),
-              tooltip: l10n.budgetsTitle,
-              onPressed: () => context.push('/budgets'),
-            ),
-          ),
-          Semantics(
-            label: l10n.reportsTitle,
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.bar_chart),
-              tooltip: l10n.reportsTitle,
-              onPressed: () => context.push('/reports'),
-            ),
-          ),
-          Semantics(
             label: l10n.dashboardRefresh,
             child: IconButton(
               icon: const Icon(Icons.refresh),
@@ -83,9 +48,10 @@ class DashboardScreen extends ConsumerWidget {
         onRefresh: () async =>
             ref.invalidate(dashboardSummaryProvider(_householdId)),
         child: summaryAsync.when(
-          loading: () => _DashboardLoading(l10n: l10n),
-          error: (_, _) => _DashboardError(
-            l10n: l10n,
+          loading: () => AppLoadingState(message: l10n.dashboardLoading),
+          error: (_, _) => AppErrorState(
+            message: l10n.dashboardError,
+            retryLabel: l10n.dashboardRetry,
             onRetry: () =>
                 ref.invalidate(dashboardSummaryProvider(_householdId)),
           ),
@@ -93,8 +59,9 @@ class DashboardScreen extends ConsumerWidget {
             if (result is AppOk<DashboardSummary>) {
               return _DashboardContent(summary: result.value, l10n: l10n);
             }
-            return _DashboardError(
-              l10n: l10n,
+            return AppErrorState(
+              message: l10n.dashboardError,
+              retryLabel: l10n.dashboardRetry,
               onRetry: () =>
                   ref.invalidate(dashboardSummaryProvider(_householdId)),
             );
@@ -105,57 +72,7 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-// ── Loading state ─────────────────────────────────────────────────────────────
-
-class _DashboardLoading extends StatelessWidget {
-  const _DashboardLoading({required this.l10n});
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(l10n.dashboardLoading),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Error state ───────────────────────────────────────────────────────────────
-
-class _DashboardError extends StatelessWidget {
-  const _DashboardError({required this.l10n, required this.onRetry});
-  final AppLocalizations l10n;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              l10n.dashboardError,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(onPressed: onRetry, child: Text(l10n.dashboardRetry)),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Loading / error use shared AppLoadingState / AppErrorState.
 
 // ── Main content ──────────────────────────────────────────────────────────────
 
@@ -169,27 +86,96 @@ class _DashboardContent extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
-        _PeriodSelector(l10n: l10n),
-        const SizedBox(height: 16),
+        // 1. Spendable balances (primary)
         _SpendableBalancesSection(
           balances: summary.spendableBalances,
           l10n: l10n,
         ),
         const SizedBox(height: 12),
+        // 2. Quick transaction actions
+        _QuickActionsSection(l10n: l10n),
+        const SizedBox(height: 16),
+        // 3. Period + income/expense
+        _PeriodSelector(l10n: l10n),
+        const SizedBox(height: 12),
+        _PeriodFlowSection(flows: summary.periodFlow, l10n: l10n),
+        const SizedBox(height: 12),
+        // 4–5. Held balances (protected — quieter; goals/certs via Planning)
         _ProtectedBalancesSection(
           balances: summary.protectedBalances,
           l10n: l10n,
         ),
         const SizedBox(height: 12),
-        _PeriodFlowSection(flows: summary.periodFlow, l10n: l10n),
+        _HeldBalancesHint(l10n: l10n),
         const SizedBox(height: 12),
         _ExpenseScopesSection(scopes: summary.expensesByScope, l10n: l10n),
         const SizedBox(height: 12),
         _SpouseWalletsSection(wallets: summary.spouseWallets, l10n: l10n),
         const SizedBox(height: 12),
+        // 6. Recent activity
         _RecentActivitySection(activities: summary.recentActivity, l10n: l10n),
         const SizedBox(height: 24),
       ],
+    );
+  }
+}
+
+class _QuickActionsSection extends StatelessWidget {
+  const _QuickActionsSection({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: l10n.dashboardQuickActions),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilledButton.tonalIcon(
+              onPressed: () => _pushIfRouted(context, '/transactions/new/income'),
+              icon: const Icon(Icons.south_west, size: 18),
+              label: Text(l10n.actionRecordIncome),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: () =>
+                  _pushIfRouted(context, '/transactions/new/expense'),
+              icon: const Icon(Icons.north_east, size: 18),
+              label: Text(l10n.actionRecordExpense),
+            ),
+            OutlinedButton.icon(
+              onPressed: () =>
+                  _pushIfRouted(context, '/transactions/new/transfer'),
+              icon: const Icon(Icons.swap_horiz, size: 18),
+              label: Text(l10n.actionTransfer),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  static void _pushIfRouted(BuildContext context, String location) {
+    if (GoRouter.maybeOf(context) != null) {
+      context.push(location);
+    }
+  }
+}
+
+/// Quiet pointer to Planning for goal reserves and certificate principal
+/// without inventing new dashboard aggregates (behavior-preserving).
+class _HeldBalancesHint extends StatelessWidget {
+  const _HeldBalancesHint({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppInlineNotice(
+      message: '${l10n.dashboardHeldBalances}: ${l10n.planningSubtitle}',
+      tone: AppNoticeTone.info,
+      icon: Icons.event_note_outlined,
     );
   }
 }

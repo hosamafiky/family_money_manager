@@ -314,8 +314,9 @@ void main() {
       final summary = _summaryWithData(recent: [tx]);
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
-      // skipOffstage: false — the recent-activity section may be below
-      // the fold in the 800×600 test viewport.
+      // Recent activity sits lower after 6B.2 hierarchy; scroll to reveal.
+      await tester.drag(find.byType(ListView).first, const Offset(0, -800));
+      await tester.pumpAndSettle();
       expect(
         find.byWidgetPredicate(
           (w) =>

@@ -307,8 +307,15 @@ class AppTextRoles extends ThemeExtension<AppTextRoles> {
 }
 
 extension AppThemeExtensions on BuildContext {
-  AppFinancialColors get financialColors =>
-      Theme.of(this).extension<AppFinancialColors>()!;
+  AppFinancialColors get financialColors {
+    final ext = Theme.of(this).extension<AppFinancialColors>();
+    if (ext != null) return ext;
+    return AppFinancialColors.light(Theme.of(this).colorScheme);
+  }
 
-  AppTextRoles get textRoles => Theme.of(this).extension<AppTextRoles>()!;
+  AppTextRoles get textRoles {
+    final ext = Theme.of(this).extension<AppTextRoles>();
+    if (ext != null) return ext;
+    return AppTextRoles.fromScheme(Theme.of(this).colorScheme);
+  }
 }
