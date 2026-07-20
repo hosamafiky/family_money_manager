@@ -408,5 +408,4 @@ mixin _AppDatabaseCoreSchema on _$AppDatabase {
   // goal_revisions and goal_movements are append-only records. No application
   // code ever issues UPDATE or DELETE on these tables, but these triggers
   // enforce the constraint at the database engine level as a safety net.
-
 }

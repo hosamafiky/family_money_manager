@@ -769,5 +769,4 @@ mixin _AppDatabaseGoalSchema on _$AppDatabase {
   }
 
   // ── Phase 6A: Savings certificates ────────────────────────────────────────
-
 }

@@ -311,7 +311,6 @@ class AppDatabase extends _$AppDatabase
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
-
 }
 
 // ── Development database connection factory ───────────────────────────────
