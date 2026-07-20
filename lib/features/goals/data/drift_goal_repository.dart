@@ -1169,23 +1169,35 @@ final class DriftGoalRepository implements GoalRepository {
     final now = DateTime.now().toUtc().toIso8601String();
 
     try {
-      late AppResult<void> result;
-      await _db.transaction(() async {
-        result = await _runGoalReversalSteps(
-          originalOperationId: originalOperationId,
-          reversalOperationId: reversalOperationId,
-          householdId: householdId,
-          effectiveDate: effectiveDate,
-          createdBy: createdBy,
-          reason: reason,
-          scopedKey: scopedKey,
-          now: now,
-        );
+      return await runAuthoritativeWriteWithContentionRetry(() async {
+        try {
+          late AppResult<void> result;
+          await _db.transaction(() async {
+            result = await _runGoalReversalSteps(
+              originalOperationId: originalOperationId,
+              reversalOperationId: reversalOperationId,
+              householdId: householdId,
+              effectiveDate: effectiveDate,
+              createdBy: createdBy,
+              reason: reason,
+              scopedKey: scopedKey,
+              now: now,
+            );
+          });
+          return result;
+        } on GoalTransferInjectedFailure {
+          return const AppPersistenceFailure();
+        } on InsufficientFundsError {
+          return const AppInsufficientFunds();
+        } on Exception catch (e) {
+          if (isNegativeBalanceAbort(e)) {
+            return const AppInsufficientFunds();
+          }
+          if (isRetryableSqliteContention(e)) rethrow;
+          return const AppPersistenceFailure();
+        }
       });
-      return result;
-    } on GoalTransferInjectedFailure {
-      return const AppPersistenceFailure();
-    } on Exception catch (_) {
+    } on SqliteContentionExhausted {
       return const AppPersistenceFailure();
     }
   }

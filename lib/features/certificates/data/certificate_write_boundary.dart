@@ -94,3 +94,56 @@ String buildCertificateIdempotencyPayload({
       '|freq=${profitFrequency?.code ?? ''}'
       '|src=$sourceAccountId';
 }
+
+/// Deterministic fingerprint for purchase-reversal idempotency (Phase 6A.4).
+///
+/// Fields: household, certificate, original purchase op, reversal type,
+/// effective date, amount/currency, destination/source accounts, reason, actor.
+String buildPurchaseReversalIdempotencyPayload({
+  required String householdId,
+  required String certificateId,
+  required String originalOperationId,
+  required String effectiveDate,
+  required int amountMinorUnits,
+  required String currencyCode,
+  required String sourceAccountId,
+  required String destinationAccountId,
+  required String? reason,
+  required String createdBy,
+}) {
+  return 'revType=purchaseReverse'
+      '|hh=$householdId'
+      '|cert=$certificateId'
+      '|origOp=$originalOperationId'
+      '|date=$effectiveDate'
+      '|amt=$amountMinorUnits'
+      '|cur=$currencyCode'
+      '|src=$sourceAccountId'
+      '|dst=$destinationAccountId'
+      '|reason=${reason?.trim() ?? ''}'
+      '|actor=${createdBy.trim()}';
+}
+
+/// Deterministic fingerprint for profit-reversal idempotency (Phase 6A.4).
+String buildProfitReversalIdempotencyPayload({
+  required String householdId,
+  required String certificateId,
+  required String originalIncomeOperationId,
+  required String effectiveDate,
+  required int amountMinorUnits,
+  required String currencyCode,
+  required String destinationAccountId,
+  required String? reason,
+  required String createdBy,
+}) {
+  return 'revType=profitReverse'
+      '|hh=$householdId'
+      '|cert=$certificateId'
+      '|origOp=$originalIncomeOperationId'
+      '|date=$effectiveDate'
+      '|amt=$amountMinorUnits'
+      '|cur=$currencyCode'
+      '|dst=$destinationAccountId'
+      '|reason=${reason?.trim() ?? ''}'
+      '|actor=${createdBy.trim()}';
+}

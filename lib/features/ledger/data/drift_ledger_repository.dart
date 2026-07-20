@@ -596,97 +596,114 @@ final class DriftLedgerRepository implements LedgerRepository {
 
     final absAmount = params.adjustmentAmountMinorUnits.abs();
     final now = DateTime.now().toUtc().toIso8601String();
-    late IdempotentOperationResult result;
 
-    await _db.transaction(() async {
-      final idemResult = await _checkIdempotency(
-        operationId: params.operationId,
-        householdId: params.householdId,
-        idempotencyKey: params.resolvedIdempotencyKey,
-        expectedType: OperationType.adjustment.code,
-        expectedAmount: absAmount,
-        expectedCurrency: params.currencyCode,
-        expectedSourceAccountId: params.isCredit ? null : params.accountId,
-        expectedDestinationAccountId: params.isCredit ? params.accountId : null,
-      );
-      if (idemResult != null) {
-        result = idemResult;
-        return;
+    return runAuthoritativeWriteWithContentionRetry(() async {
+      late IdempotentOperationResult result;
+      try {
+        await _db.transaction(() async {
+          final idemResult = await _checkIdempotency(
+            operationId: params.operationId,
+            householdId: params.householdId,
+            idempotencyKey: params.resolvedIdempotencyKey,
+            expectedType: OperationType.adjustment.code,
+            expectedAmount: absAmount,
+            expectedCurrency: params.currencyCode,
+            expectedSourceAccountId: params.isCredit ? null : params.accountId,
+            expectedDestinationAccountId: params.isCredit
+                ? params.accountId
+                : null,
+          );
+          if (idemResult != null) {
+            result = idemResult;
+            return;
+          }
+
+          await _awaitDebugBarrier();
+
+          // Debit adjustments must not drive the account negative (INV-005 /
+          // Phase 6A.2). Check inside the IMMEDIATE write transaction; the
+          // prevent_negative_account_balance trigger is the DB backstop.
+          if (!params.isCredit) {
+            await _checkSufficientBalance(
+              params.accountId,
+              params.householdId,
+              absAmount,
+            );
+          }
+
+          await _insertOp(
+            OperationsCompanion.insert(
+              id: params.operationId,
+              householdId: params.householdId,
+              type: OperationType.adjustment.code,
+              effectiveDate: params.effectiveDate,
+              recordedAt: now,
+              totalAmountMinorUnits: absAmount,
+              currencyCode: Value(params.currencyCode),
+              createdBy: params.createdBy,
+              createdAt: now,
+              updatedAt: now,
+              description: Value(params.reason),
+              sourceAccountId: params.isCredit
+                  ? const Value.absent()
+                  : Value(params.accountId),
+              destinationAccountId: params.isCredit
+                  ? Value(params.accountId)
+                  : const Value.absent(),
+              idempotencyKey: Value(params.resolvedIdempotencyKey),
+            ),
+          );
+
+          await _insertEntry(
+            LedgerEntriesCompanion.insert(
+              id: '${params.operationId}_entry',
+              operationId: params.operationId,
+              householdId: params.householdId,
+              accountId: params.accountId,
+              direction: params.isCredit
+                  ? LedgerDirection.credit.code
+                  : LedgerDirection.debit.code,
+              amountMinorUnits: absAmount,
+              currencyCode: Value(params.currencyCode),
+              entryType: params.isCredit
+                  ? LedgerEntryType.adjustmentCredit.code
+                  : LedgerEntryType.adjustmentDebit.code,
+              effectiveDate: params.effectiveDate,
+              recordedAt: now,
+              createdBy: params.createdBy,
+            ),
+          );
+
+          if (auditParams != null) {
+            await _insertAudit(auditParams, now);
+          }
+
+          await _insertContext(
+            OperationContextsCompanion.insert(
+              operationId: params.operationId,
+              householdId: params.householdId,
+              note: Value(params.reason),
+              createdAt: now,
+            ),
+          );
+
+          result = IdempotentOperationResult.created;
+        });
+      } on InsufficientFundsError {
+        rethrow;
+      } catch (e) {
+        if (isNegativeBalanceAbort(e)) {
+          throw InsufficientFundsError(
+            accountId: params.accountId,
+            availableMinorUnits: 0,
+            requestedMinorUnits: absAmount,
+          );
+        }
+        if (isRetryableSqliteContention(e)) rethrow;
+        rethrow;
       }
-
-      await _awaitDebugBarrier();
-
-      // Debit adjustments must not drive the account negative (INV-005 /
-      // Phase 6A.2). Check inside the IMMEDIATE write transaction; the
-      // prevent_negative_account_balance trigger is the DB backstop.
-      if (!params.isCredit) {
-        await _checkSufficientBalance(
-          params.accountId,
-          params.householdId,
-          absAmount,
-        );
-      }
-
-      await _insertOp(
-        OperationsCompanion.insert(
-          id: params.operationId,
-          householdId: params.householdId,
-          type: OperationType.adjustment.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          totalAmountMinorUnits: absAmount,
-          currencyCode: Value(params.currencyCode),
-          createdBy: params.createdBy,
-          createdAt: now,
-          updatedAt: now,
-          description: Value(params.reason),
-          sourceAccountId: params.isCredit
-              ? const Value.absent()
-              : Value(params.accountId),
-          destinationAccountId: params.isCredit
-              ? Value(params.accountId)
-              : const Value.absent(),
-          idempotencyKey: Value(params.resolvedIdempotencyKey),
-        ),
-      );
-
-      await _insertEntry(
-        LedgerEntriesCompanion.insert(
-          id: '${params.operationId}_entry',
-          operationId: params.operationId,
-          householdId: params.householdId,
-          accountId: params.accountId,
-          direction: params.isCredit
-              ? LedgerDirection.credit.code
-              : LedgerDirection.debit.code,
-          amountMinorUnits: absAmount,
-          currencyCode: Value(params.currencyCode),
-          entryType: params.isCredit
-              ? LedgerEntryType.adjustmentCredit.code
-              : LedgerEntryType.adjustmentDebit.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          createdBy: params.createdBy,
-        ),
-      );
-
-      if (auditParams != null) {
-        await _insertAudit(auditParams, now);
-      }
-
-      await _insertContext(
-        OperationContextsCompanion.insert(
-          operationId: params.operationId,
-          householdId: params.householdId,
-          note: Value(params.reason),
-          createdAt: now,
-        ),
-      );
-
-      result = IdempotentOperationResult.created;
+      return result;
     });
-
-    return result;
   }
 
   // ── Reversal ──────────────────────────────────────────────────────────────
@@ -763,111 +780,145 @@ final class DriftLedgerRepository implements LedgerRepository {
     }
 
     final now = DateTime.now().toUtc().toIso8601String();
-    late IdempotentOperationResult result;
 
-    await _db.transaction(() async {
-      final idemResult = await _checkIdempotency(
-        operationId: params.reversalOperationId,
-        householdId: params.householdId,
-        idempotencyKey: params.reversalOperationId,
-        expectedType: OperationType.reversal.code,
-        expectedAmount: original.totalAmountMinorUnits,
-        expectedCurrency: original.currencyCode,
-        expectedSourceAccountId: original.destinationAccountId,
-        expectedDestinationAccountId: original.sourceAccountId,
-      );
-      if (idemResult != null) {
-        result = idemResult;
-        return;
-      }
-
-      await _awaitDebugBarrier();
-
-      await _insertOp(
-        OperationsCompanion.insert(
-          id: params.reversalOperationId,
-          householdId: params.householdId,
-          type: OperationType.reversal.code,
-          effectiveDate: params.effectiveDate,
-          recordedAt: now,
-          totalAmountMinorUnits: original.totalAmountMinorUnits,
-          currencyCode: Value(original.currencyCode),
-          createdBy: params.createdBy,
-          createdAt: now,
-          updatedAt: now,
-          description: Value(
-            params.reason ??
-                'Reversal of operation ${params.originalOperationId}',
-          ),
-          sourceAccountId: Value(original.destinationAccountId),
-          destinationAccountId: Value(original.sourceAccountId),
-          idempotencyKey: Value(params.reversalOperationId),
-        ),
-      );
-
-      for (final e in originalEntries) {
-        final oppositeDirection = e.direction == LedgerDirection.credit.code
-            ? LedgerDirection.debit.code
-            : LedgerDirection.credit.code;
-        final reversalEntryType = e.direction == LedgerDirection.credit.code
-            ? LedgerEntryType.reversalDebit.code
-            : LedgerEntryType.reversalCredit.code;
-
-        await _insertEntry(
-          LedgerEntriesCompanion.insert(
-            id: '${params.reversalOperationId}_rev_${e.id}',
+    return runAuthoritativeWriteWithContentionRetry(() async {
+      late IdempotentOperationResult result;
+      try {
+        await _db.transaction(() async {
+          final idemResult = await _checkIdempotency(
             operationId: params.reversalOperationId,
             householdId: params.householdId,
-            accountId: e.accountId,
-            direction: oppositeDirection,
-            amountMinorUnits: e.amountMinorUnits,
-            currencyCode: Value(e.currencyCode),
-            entryType: reversalEntryType,
-            effectiveDate: params.effectiveDate,
-            recordedAt: now,
-            createdBy: params.createdBy,
-            isReversal: const Value(true),
-            reversalOfEntryId: Value(e.id),
-          ),
-        );
-      }
+            idempotencyKey: params.reversalOperationId,
+            expectedType: OperationType.reversal.code,
+            expectedAmount: original.totalAmountMinorUnits,
+            expectedCurrency: original.currencyCode,
+            expectedSourceAccountId: original.destinationAccountId,
+            expectedDestinationAccountId: original.sourceAccountId,
+          );
+          if (idemResult != null) {
+            result = idemResult;
+            return;
+          }
 
-      // Mark the original operation as reversed. This is the ONLY permitted
-      // mutation of an operations row after creation (INV-002).
-      // The `restrict_operations_update` DB trigger enforces this restriction.
-      await (_db.update(_db.operations)..where(
-            (t) =>
-                t.id.equals(params.originalOperationId) &
-                t.householdId.equals(params.householdId),
-          ))
-          .write(
-            OperationsCompanion(
-              isReversed: const Value(true),
-              reversedBy: Value(params.reversalOperationId),
-              updatedAt: Value(now),
+          await _awaitDebugBarrier();
+
+          // Debit legs of a reversal (mirroring original credits) must not
+          // overdraft; check inside the IMMEDIATE writer txn.
+          for (final e in originalEntries) {
+            if (e.direction == LedgerDirection.credit.code) {
+              await _checkSufficientBalance(
+                e.accountId,
+                params.householdId,
+                e.amountMinorUnits,
+              );
+            }
+          }
+
+          await _insertOp(
+            OperationsCompanion.insert(
+              id: params.reversalOperationId,
+              householdId: params.householdId,
+              type: OperationType.reversal.code,
+              effectiveDate: params.effectiveDate,
+              recordedAt: now,
+              totalAmountMinorUnits: original.totalAmountMinorUnits,
+              currencyCode: Value(original.currencyCode),
+              createdBy: params.createdBy,
+              createdAt: now,
+              updatedAt: now,
+              description: Value(
+                params.reason ??
+                    'Reversal of operation ${params.originalOperationId}',
+              ),
+              sourceAccountId: Value(original.destinationAccountId),
+              destinationAccountId: Value(original.sourceAccountId),
+              idempotencyKey: Value(params.reversalOperationId),
             ),
           );
 
-      if (auditParams != null) {
-        await _insertAudit(auditParams, now);
+          for (final e in originalEntries) {
+            final oppositeDirection = e.direction == LedgerDirection.credit.code
+                ? LedgerDirection.debit.code
+                : LedgerDirection.credit.code;
+            final reversalEntryType = e.direction == LedgerDirection.credit.code
+                ? LedgerEntryType.reversalDebit.code
+                : LedgerEntryType.reversalCredit.code;
+
+            await _insertEntry(
+              LedgerEntriesCompanion.insert(
+                id: '${params.reversalOperationId}_rev_${e.id}',
+                operationId: params.reversalOperationId,
+                householdId: params.householdId,
+                accountId: e.accountId,
+                direction: oppositeDirection,
+                amountMinorUnits: e.amountMinorUnits,
+                currencyCode: Value(e.currencyCode),
+                entryType: reversalEntryType,
+                effectiveDate: params.effectiveDate,
+                recordedAt: now,
+                createdBy: params.createdBy,
+                isReversal: const Value(true),
+                reversalOfEntryId: Value(e.id),
+              ),
+            );
+          }
+
+          // Mark the original operation as reversed. This is the ONLY permitted
+          // mutation of an operations row after creation (INV-002).
+          // The `restrict_operations_update` DB trigger enforces this restriction.
+          await (_db.update(_db.operations)..where(
+                (t) =>
+                    t.id.equals(params.originalOperationId) &
+                    t.householdId.equals(params.householdId),
+              ))
+              .write(
+                OperationsCompanion(
+                  isReversed: const Value(true),
+                  reversedBy: Value(params.reversalOperationId),
+                  updatedAt: Value(now),
+                ),
+              );
+
+          if (auditParams != null) {
+            await _insertAudit(auditParams, now);
+          }
+
+          await _insertContext(
+            OperationContextsCompanion.insert(
+              operationId: params.reversalOperationId,
+              householdId: params.householdId,
+              note: Value(
+                params.reason ??
+                    'Reversal of operation ${params.originalOperationId}',
+              ),
+              createdAt: now,
+            ),
+          );
+
+          result = IdempotentOperationResult.created;
+        });
+      } on InsufficientFundsError {
+        rethrow;
+      } catch (e) {
+        if (isNegativeBalanceAbort(e)) {
+          String accountId = params.originalOperationId;
+          for (final entry in originalEntries) {
+            if (entry.direction == LedgerDirection.credit.code) {
+              accountId = entry.accountId;
+              break;
+            }
+          }
+          throw InsufficientFundsError(
+            accountId: accountId,
+            availableMinorUnits: 0,
+            requestedMinorUnits: original.totalAmountMinorUnits,
+          );
+        }
+        if (isRetryableSqliteContention(e)) rethrow;
+        rethrow;
       }
-
-      await _insertContext(
-        OperationContextsCompanion.insert(
-          operationId: params.reversalOperationId,
-          householdId: params.householdId,
-          note: Value(
-            params.reason ??
-                'Reversal of operation ${params.originalOperationId}',
-          ),
-          createdAt: now,
-        ),
-      );
-
-      result = IdempotentOperationResult.created;
+      return result;
     });
-
-    return result;
   }
 
   // ── Read operations ───────────────────────────────────────────────────────

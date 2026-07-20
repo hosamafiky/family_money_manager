@@ -76,8 +76,28 @@ Two Drift connections → one physical SQLite file. After contention handling:
 | Profit failure+retry | CIDMP-14 |
 | Redeem equiv concurrent | **Both `AppOk`** (CIDMP-7 residual closed) |
 | Redeem conflict concurrent | One ok + conflict (CIDMP-12) |
-| Purchase reverse concurrent equiv | Both `AppOk` or ok+conflict; one reversal op (CIDMP-8 / CIDMP-13) |
-| Profit reverse concurrent | CIDMP-9 / CIDMP-15; redemption reverse still unsupported |
+
+**Purchase reversal (exact rows — Phase 6A.4 separates equiv vs conflict):**
+
+| Scenario | Outcome | Evidence |
+|----------|---------|----------|
+| Equivalent sequential | Both `AppOk`; same reversal op + cert event | REV-PUR-SEQ-EQ (6A.4) |
+| Conflicting sequential | `AppOk` then `AppDuplicateConflict` | REV-PUR-SEQ-CF (6A.4) |
+| Equivalent concurrent | Both `AppOk`; one mirror ledger; one reversal event; lifecycle once | REV-PUR-CONC-EQ / CIDMP-13 / CIDMP-8 |
+| Conflicting concurrent | Exactly one `AppOk` + one `AppDuplicateConflict`; one financial reversal | REV-PUR-CONC-CF (6A.4) |
+| Failure + retry | Persistence failure then equivalent retry → one `AppOk` | REV-PUR-FAIL-RETRY (6A.4) |
+
+**Profit reversal (exact rows — Phase 6A.4 separates equiv vs conflict):**
+
+| Scenario | Outcome | Evidence |
+|----------|---------|----------|
+| Equivalent sequential | Both `AppOk`; one reversal op, ledger, context, cert event | REV-PROF-SEQ-EQ (6A.4) |
+| Conflicting sequential | `AppOk` then `AppDuplicateConflict`; no second reversal | REV-PROF-SEQ-CF (6A.4) |
+| Equivalent concurrent | Both `AppOk`; one financial reversal | REV-PROF-CONC-EQ / CIDMP-9 |
+| Conflicting concurrent | Exactly one `AppOk` + one `AppDuplicateConflict`; one reversal | REV-PROF-CONC-CF (6A.4); CIDMP-15 was same-key concurrent (now equivalent-capable) |
+| Failure + retry | Persistence failure then equivalent retry → one `AppOk` | REV-PROF-FAIL-RETRY (6A.4) |
+
+Redemption reverse remains unsupported (CIDMP-9).
 
 **Classification:** Database-tested.
 

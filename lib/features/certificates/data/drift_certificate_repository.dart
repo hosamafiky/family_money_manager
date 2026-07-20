@@ -1427,47 +1427,54 @@ final class DriftCertificateRepository implements CertificateRepository {
     required String createdBy,
     String? reason,
   }) async {
-    Future<AppResult<void>?> recoverPurchaseReversal() async {
+    Future<String?> purchaseOpId() async {
+      final purchaseEvents = await _db
+          .customSelect(
+            "SELECT related_operation_id FROM certificate_events "
+            "WHERE certificate_id = ? AND event_type = 'purchased' "
+            'ORDER BY created_at ASC LIMIT 1',
+            variables: [Variable.withString(certificateId)],
+          )
+          .get();
+      if (purchaseEvents.isEmpty) return null;
+      return purchaseEvents.first.readNullable<String>('related_operation_id');
+    }
+
+    Future<AppResult<void>?> recoverPurchaseReversal({
+      required String fingerprint,
+    }) async {
       try {
-        final cert = await _findById(certificateId);
-        if (cert != null && cert.householdId == householdId) {
-          final purchaseEvents = await _db
-              .customSelect(
-                "SELECT related_operation_id FROM certificate_events "
-                "WHERE certificate_id = ? AND event_type = 'purchased' "
-                'ORDER BY created_at ASC LIMIT 1',
-                variables: [Variable.withString(certificateId)],
-              )
-              .get();
-          if (purchaseEvents.isNotEmpty) {
-            final opId = purchaseEvents.first.readNullable<String>(
-              'related_operation_id',
-            );
-            if (opId != null) {
-              final ops = await _db
-                  .customSelect(
-                    'SELECT is_reversed FROM operations WHERE id = ?',
-                    variables: [Variable.withString(opId)],
-                  )
-                  .get();
-              if (ops.isNotEmpty &&
-                  ops.first.readNullable<int>('is_reversed') == 1) {
-                return const AppOk(null);
-              }
-            }
+        final byEvent = await _db
+            .customSelect(
+              'SELECT payload_fingerprint FROM certificate_events '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(householdId),
+                Variable.withString(idempotencyKey),
+              ],
+            )
+            .get();
+        if (byEvent.isNotEmpty) {
+          if (byEvent.first.readNullable<String>('payload_fingerprint') ==
+              fingerprint) {
+            return const AppOk(null);
           }
-          // Same idempotency key already used for a reversal op.
-          final byKey = await _db
+          return const AppDuplicateConflict(
+            messageKey: 'errorCertificateIdempotencyConflict',
+          );
+        }
+
+        final purchaseOpIdValue = await purchaseOpId();
+        if (purchaseOpIdValue != null) {
+          final ops = await _db
               .customSelect(
-                'SELECT id FROM operations WHERE household_id = ? '
-                'AND idempotency_key = ?',
-                variables: [
-                  Variable.withString(householdId),
-                  Variable.withString(idempotencyKey),
-                ],
+                'SELECT is_reversed FROM operations WHERE id = ?',
+                variables: [Variable.withString(purchaseOpIdValue)],
               )
               .get();
-          if (byKey.isNotEmpty) {
+          if (ops.isNotEmpty &&
+              ops.first.readNullable<int>('is_reversed') == 1) {
+            // Same purchase already reversed under a different key → equivalent.
             return const AppOk(null);
           }
         }
@@ -1477,57 +1484,19 @@ final class DriftCertificateRepository implements CertificateRepository {
       return null;
     }
 
+    // Provisional fingerprint before lock (amount/accounts filled inside txn).
+    // Recovery after UNIQUE uses the in-txn fingerprint; this provisional is
+    // only used when we already know purchase accounts from a prior read.
+    String? lastFingerprint;
+
     try {
       return await runAuthoritativeWriteWithContentionRetry(() async {
         try {
+          late AppResult<void> result;
           await _db.transaction(() async {
             final cert = await _findById(certificateId);
             if (cert == null || cert.householdId != householdId) {
               throw Exception('not found');
-            }
-
-            // Idempotent path first: if purchase already reversed, succeed even
-            // when lifecycle is no longer active (concurrent equivalent loser).
-            final purchaseEventsEarly = await _db
-                .customSelect(
-                  "SELECT related_operation_id FROM certificate_events "
-                  "WHERE certificate_id = ? AND event_type = 'purchased' "
-                  'ORDER BY created_at ASC LIMIT 1',
-                  variables: [Variable.withString(certificateId)],
-                )
-                .get();
-            if (purchaseEventsEarly.isNotEmpty) {
-              final earlyOpId = purchaseEventsEarly.first.readNullable<String>(
-                'related_operation_id',
-              );
-              if (earlyOpId != null) {
-                final earlyOps = await _db
-                    .customSelect(
-                      'SELECT is_reversed FROM operations WHERE id = ?',
-                      variables: [Variable.withString(earlyOpId)],
-                    )
-                    .get();
-                if (earlyOps.isNotEmpty &&
-                    earlyOps.first.readNullable<int>('is_reversed') == 1) {
-                  return;
-                }
-              }
-            }
-
-            if (cert.lifecycle != CertificateLifecycle.active) {
-              throw Exception('not active');
-            }
-
-            // Reject if later profit or redemption events exist.
-            final later = await _db
-                .customSelect(
-                  "SELECT id FROM certificate_events WHERE certificate_id = ? "
-                  "AND event_type IN ('profitReceived','redeemed') LIMIT 1",
-                  variables: [Variable.withString(certificateId)],
-                )
-                .get();
-            if (later.isNotEmpty) {
-              throw Exception('has later financial events');
             }
 
             final purchaseEvents = await _db
@@ -1554,14 +1523,69 @@ final class DriftCertificateRepository implements CertificateRepository {
                 .get();
             if (ops.isEmpty) throw Exception('missing op');
             final op = ops.first;
-            if (op.readNullable<int>('is_reversed') == 1) {
-              return; // already reversed — idempotent
-            }
-
             final amount = op.read<int>('total_amount_minor_units');
             final currency = op.read<String>('currency_code');
             final sourceAccountId = op.read<String>('source_account_id');
             final destAccountId = op.read<String>('destination_account_id');
+            final fingerprint = buildPurchaseReversalIdempotencyPayload(
+              householdId: householdId,
+              certificateId: certificateId,
+              originalOperationId: purchaseOpId,
+              effectiveDate: effectiveDate,
+              amountMinorUnits: amount,
+              currencyCode: currency,
+              sourceAccountId: sourceAccountId,
+              destinationAccountId: destAccountId,
+              reason: reason,
+              createdBy: createdBy,
+            );
+            lastFingerprint = fingerprint;
+
+            // Scoped key + fingerprint first (equivalent vs conflicting).
+            final byKey = await _db
+                .customSelect(
+                  'SELECT payload_fingerprint FROM certificate_events '
+                  'WHERE household_id = ? AND idempotency_key = ?',
+                  variables: [
+                    Variable.withString(householdId),
+                    Variable.withString(idempotencyKey),
+                  ],
+                )
+                .get();
+            if (byKey.isNotEmpty) {
+              if (byKey.first.readNullable<String>('payload_fingerprint') ==
+                  fingerprint) {
+                result = const AppOk(null);
+                return;
+              }
+              result = const AppDuplicateConflict(
+                messageKey: 'errorCertificateIdempotencyConflict',
+              );
+              return;
+            }
+
+            // Already-reversed purchase (possibly under another key) → AppOk.
+            if (op.readNullable<int>('is_reversed') == 1) {
+              result = const AppOk(null);
+              return;
+            }
+
+            if (cert.lifecycle != CertificateLifecycle.active) {
+              throw Exception('not active');
+            }
+
+            // Reject if later profit or redemption events exist.
+            final later = await _db
+                .customSelect(
+                  "SELECT id FROM certificate_events WHERE certificate_id = ? "
+                  "AND event_type IN ('profitReceived','redeemed') LIMIT 1",
+                  variables: [Variable.withString(certificateId)],
+                )
+                .get();
+            if (later.isNotEmpty) {
+              throw Exception('has later financial events');
+            }
+
             final now = DateTime.now().toUtc().toIso8601String();
 
             // Mirror reversal: credit source, debit certificate account.
@@ -1657,7 +1681,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               '(id, certificate_id, household_id, event_type, related_operation_id, '
               'amount_minor_units, currency_code, idempotency_key, payload_fingerprint, '
               'note, effective_at, created_at, schema_version) '
-              'VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, 1)',
+              'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
               [
                 _uuid.v4(),
                 certificateId,
@@ -1667,6 +1691,7 @@ final class DriftCertificateRepository implements CertificateRepository {
                 amount,
                 currency,
                 idempotencyKey,
+                fingerprint,
                 reason,
                 now,
                 now,
@@ -1698,8 +1723,9 @@ final class DriftCertificateRepository implements CertificateRepository {
               ],
             );
             await _failAfter(CertificateFailAfter.preCommit);
+            result = const AppOk(null);
           });
-          return const AppOk(null);
+          return result;
         } on CertificateInjectedFailure {
           return const AppPersistenceFailure();
         } on Exception catch (e) {
@@ -1708,10 +1734,11 @@ final class DriftCertificateRepository implements CertificateRepository {
           }
           if (isRetryableSqliteContention(e)) rethrow;
           final msg = e.toString();
-          // Prefer recovery of already-reversed purchase (concurrent equivalent)
-          // before mapping lifecycle / history validation failures.
-          final recovered = await recoverPurchaseReversal();
-          if (recovered != null) return recovered;
+          final fp = lastFingerprint;
+          if (fp != null) {
+            final recovered = await recoverPurchaseReversal(fingerprint: fp);
+            if (recovered != null) return recovered;
+          }
           if (msg.contains('has later')) {
             return const AppValidationFailure(
               field: 'certificateId',
@@ -1725,6 +1752,11 @@ final class DriftCertificateRepository implements CertificateRepository {
             );
           }
           if (msg.contains('UNIQUE') || msg.contains('unique')) {
+            // Prefer equivalent recovery; only conflict when fingerprint differs.
+            if (fp != null) {
+              final recovered = await recoverPurchaseReversal(fingerprint: fp);
+              if (recovered != null) return recovered;
+            }
             return const AppDuplicateConflict(
               messageKey: 'errorCertificateIdempotencyConflict',
             );
@@ -1733,8 +1765,11 @@ final class DriftCertificateRepository implements CertificateRepository {
         }
       });
     } on SqliteContentionExhausted {
-      final recovered = await recoverPurchaseReversal();
-      if (recovered != null) return recovered;
+      final fp = lastFingerprint;
+      if (fp != null) {
+        final recovered = await recoverPurchaseReversal(fingerprint: fp);
+        if (recovered != null) return recovered;
+      }
       return const AppPersistenceFailure();
     }
   }
@@ -1752,8 +1787,32 @@ final class DriftCertificateRepository implements CertificateRepository {
     required String createdBy,
     String? reason,
   }) async {
-    Future<AppResult<void>?> recoverProfitReversal() async {
+    String? lastFingerprint;
+
+    Future<AppResult<void>?> recoverProfitReversal({
+      required String fingerprint,
+    }) async {
       try {
+        final byEvent = await _db
+            .customSelect(
+              'SELECT payload_fingerprint FROM certificate_events '
+              'WHERE household_id = ? AND idempotency_key = ?',
+              variables: [
+                Variable.withString(householdId),
+                Variable.withString(idempotencyKey),
+              ],
+            )
+            .get();
+        if (byEvent.isNotEmpty) {
+          if (byEvent.first.readNullable<String>('payload_fingerprint') ==
+              fingerprint) {
+            return const AppOk(null);
+          }
+          return const AppDuplicateConflict(
+            messageKey: 'errorCertificateIdempotencyConflict',
+          );
+        }
+
         final ops = await _db
             .customSelect(
               'SELECT is_reversed FROM operations WHERE id = ? AND household_id = ?',
@@ -1775,6 +1834,7 @@ final class DriftCertificateRepository implements CertificateRepository {
     try {
       return await runAuthoritativeWriteWithContentionRetry(() async {
         try {
+          late AppResult<void> result;
           await _db.transaction(() async {
             final cert = await _findById(certificateId);
             if (cert == null || cert.householdId != householdId) {
@@ -1797,12 +1857,52 @@ final class DriftCertificateRepository implements CertificateRepository {
                     'certificate_profit') {
               throw Exception('not profit');
             }
-            if (op.readNullable<int>('is_reversed') == 1) return;
 
             final amount = op.read<int>('total_amount_minor_units');
             final currency = op.read<String>('currency_code');
             final dest = op.readNullable<String>('destination_account_id');
             if (dest == null) throw Exception('no dest');
+
+            final fingerprint = buildProfitReversalIdempotencyPayload(
+              householdId: householdId,
+              certificateId: certificateId,
+              originalIncomeOperationId: originalIncomeOperationId,
+              effectiveDate: effectiveDate,
+              amountMinorUnits: amount,
+              currencyCode: currency,
+              destinationAccountId: dest,
+              reason: reason,
+              createdBy: createdBy,
+            );
+            lastFingerprint = fingerprint;
+
+            final byKey = await _db
+                .customSelect(
+                  'SELECT payload_fingerprint FROM certificate_events '
+                  'WHERE household_id = ? AND idempotency_key = ?',
+                  variables: [
+                    Variable.withString(householdId),
+                    Variable.withString(idempotencyKey),
+                  ],
+                )
+                .get();
+            if (byKey.isNotEmpty) {
+              if (byKey.first.readNullable<String>('payload_fingerprint') ==
+                  fingerprint) {
+                result = const AppOk(null);
+                return;
+              }
+              result = const AppDuplicateConflict(
+                messageKey: 'errorCertificateIdempotencyConflict',
+              );
+              return;
+            }
+
+            if (op.readNullable<int>('is_reversed') == 1) {
+              result = const AppOk(null);
+              return;
+            }
+
             final now = DateTime.now().toUtc().toIso8601String();
 
             await _db.customStatement(
@@ -1872,7 +1972,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               '(id, certificate_id, household_id, event_type, related_operation_id, '
               'amount_minor_units, currency_code, idempotency_key, payload_fingerprint, '
               'note, effective_at, created_at, schema_version) '
-              'VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, 1)',
+              'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
               [
                 _uuid.v4(),
                 certificateId,
@@ -1882,6 +1982,7 @@ final class DriftCertificateRepository implements CertificateRepository {
                 amount,
                 currency,
                 idempotencyKey,
+                fingerprint,
                 reason,
                 now,
                 now,
@@ -1889,8 +1990,9 @@ final class DriftCertificateRepository implements CertificateRepository {
             );
             await _failAfter(CertificateFailAfter.eventInsert);
             await _failAfter(CertificateFailAfter.preCommit);
+            result = const AppOk(null);
           });
-          return const AppOk(null);
+          return result;
         } on CertificateInjectedFailure {
           return const AppPersistenceFailure();
         } on Exception catch (e) {
@@ -1898,10 +2000,17 @@ final class DriftCertificateRepository implements CertificateRepository {
             return const AppInsufficientFunds();
           }
           if (isRetryableSqliteContention(e)) rethrow;
-          final recovered = await recoverProfitReversal();
-          if (recovered != null) return recovered;
+          final fp = lastFingerprint;
+          if (fp != null) {
+            final recovered = await recoverProfitReversal(fingerprint: fp);
+            if (recovered != null) return recovered;
+          }
           if (e.toString().contains('UNIQUE') ||
               e.toString().contains('unique')) {
+            if (fp != null) {
+              final recovered = await recoverProfitReversal(fingerprint: fp);
+              if (recovered != null) return recovered;
+            }
             return const AppDuplicateConflict(
               messageKey: 'errorCertificateIdempotencyConflict',
             );
@@ -1910,8 +2019,11 @@ final class DriftCertificateRepository implements CertificateRepository {
         }
       });
     } on SqliteContentionExhausted {
-      final recovered = await recoverProfitReversal();
-      if (recovered != null) return recovered;
+      final fp = lastFingerprint;
+      if (fp != null) {
+        final recovered = await recoverProfitReversal(fingerprint: fp);
+        if (recovered != null) return recovered;
+      }
       return const AppPersistenceFailure();
     }
   }
