@@ -218,3 +218,13 @@ Feature commit message:
 `fix: Phase 6A.1 – certificate workflow correction and verification`
 
 Exact hash recorded after commit in §21 of this file / `PHASE_6A_REPORT.md` pin update.
+
+---
+
+## 21. Final commit hashes
+
+- **Phase 6A.1 feature:** `35602d9e9761de46a2f33afff268cbef28395e41`
+- Working tree: clean after this commit (docs pin may follow)
+- Message: `fix: Phase 6A.1 – certificate workflow correction and verification`
+- Schema version: **17**
+- Final suite: **1483** passed; `flutter analyze` → No issues found!
