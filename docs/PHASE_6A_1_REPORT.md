@@ -1,78 +1,115 @@
 # Phase 6A.1 Report — Certificate Workflow Correction and Verification
 
 **Branch:** `main`  
+**Feature commit:** `35602d9e9761de46a2f33afff268cbef28395e41`  
+**Docs pin:** `4264b3fd4b1e4fca219af9bfd4cb4d7f88e3ac7a`  
+**Prior HEAD (Phase 6A docs pin):** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`  
+**Phase 6A feature:** `25347f429f0388ef5abb87fc6a15f50887cef482`  
 **Phase 5B.8 feature:** `04ef81fd450c1b5ada8b6d3da7efca4735a0efc3`  
 **Phase 5B.8 docs pin:** `86736ca7ecd19dea3ea93568a3aecc226faf870c`  
-**Phase 6A feature:** `25347f429f0388ef5abb87fc6a15f50887cef482`  
-**Phase 6A docs pin (pre-6A.1 HEAD):** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`  
 **Schema:** **17** (unchanged)  
 **Tests:** **1410 → 1483** (+73)
 
 ---
 
-## 1. Exact repository evidence (start of Phase 6A.1)
+## 1. Exact repository evidence (pre-commit)
 
 | Item | Value |
-|------|--------|
+|------|-------|
+| `pwd` | `/Users/hussam/Desktop/hussam/family_money_manager` |
 | Branch | `main` |
-| HEAD at start | `4f81df5b88ebf1afa93455fbd738b3f03f81595b` |
-| Working tree | Dirty (parent-agent lint/RadioGroup fixes) |
-| Files dirty after `25347f4` | `app_router.dart`, certificate creation/detail/providers/profit/redeem screens, `certificate_domain_test.dart`, plus docs pin only in `PHASE_6A_REPORT.md` between feature and pin |
+| HEAD before 6A.1 commit | `4f81df5b88ebf1afa93455fbd738b3f03f81595b` |
+| Working tree | Dirty (lint fixes + 6A.1 work, then cleaned by this commit) |
+| Phase 5B.8 feature | `04ef81fd450c1b5ada8b6d3da7efca4735a0efc3` |
+| Phase 5B.8 docs pin | `86736ca7ecd19dea3ea93568a3aecc226faf870c` |
+| Phase 6A feature | `25347f429f0388ef5abb87fc6a15f50887cef482` |
+| Phase 6A docs pin | `4f81df5b88ebf1afa93455fbd738b3f03f81595b` (verified) |
+
+### Files changed after `25347f4` (included in this phase)
+
+**Modified**
+
+- `lib/app/app_router.dart` — import order
+- `lib/core/database/app_database.dart` — strengthened certificate event triggers
+- `lib/features/certificates/data/certificate_write_boundary.dart` — expanded fail-after enum
+- `lib/features/certificates/data/drift_certificate_repository.dart` — granular fail hooks + reverse hooks
+- `lib/features/certificates/presentation/certificate_creation_screen.dart` — brace lint
+- `lib/features/certificates/presentation/certificate_detail_screen.dart` — brace lint
+- `lib/features/certificates/presentation/providers/certificate_providers.dart` — import order
+- `lib/features/certificates/presentation/record_certificate_profit_screen.dart` — camelCase getters
+- `lib/features/certificates/presentation/redeem_certificate_screen.dart` — remove profit-only; RadioGroup; locked principal
+- `test/database/certificates/certificate_true_migration_v16_to_v17_test.dart` — data survival evidence
+- `test/unit/features/certificates/certificate_domain_test.dart` — camelCase lint
+
+**Added**
+
+- `test/database/certificates/phase_6a1_rollback_matrix_test.dart`
+- `test/database/certificates/phase_6a1_event_integrity_test.dart`
+- `test/database/certificates/phase_6a1_reversal_test.dart`
+- `test/database/certificates/phase_6a1_multi_connection_test.dart`
+- `test/database/certificates/phase_6a1_classification_test.dart`
+- `test/unit/features/certificates/certificate_workflow_routing_test.dart`
+- `test/widget/features/certificates/certificate_redeem_workflow_test.dart`
+- `docs/PHASE_6A_1_REPORT.md`
+- Updated `docs/PHASE_6A_REPORT.md`
 
 ---
 
-## 2. Exact test reconciliation (Phase 6A baseline)
+## 2. Exact test reconciliation
 
-Static `test(` / `testWidgets(` counts by file for certificate / modified Phase 6A paths:
+### Phase 6A gate (1322 → 1410)
 
-| File | Before (`86736ca`) | After (`25347f4`) | Added | Removed | Renamed/Moved | Classification |
-|------|-------------------:|------------------:|------:|--------:|---------------|----------------|
+Static `test(` / `testWidgets(` counts by file (86736ca → 25347f4):
+
+| File | Before | After | Added | Removed | Renamed | Classification |
+|------|--------|-------|-------|---------|---------|----------------|
 | `test/database/certificates/certificate_repository_test.dart` | 0 | 51 | 51 | 0 | — | Database-tested |
 | `test/database/certificates/certificate_true_migration_v16_to_v17_test.dart` | 0 | 1 | 1 | 0 | — | Database-tested |
 | `test/unit/features/certificates/certificate_domain_test.dart` | 0 | 26 | 26 | 0 | — | Unit-tested |
 | `test/widget/features/certificates/certificates_list_screen_test.dart` | 0 | 10 | 10 | 0 | — | Widget-tested |
-| `test/database/goals/goal_true_migration_v12_to_latest_test.dart` | 1 | 1 | 0 | 0 | — | (version expectation only) |
-| `test/database/goals/phase_5b8_progress_separation_test.dart` | 26 | 26 | 0 | 0 | — | (version expectation only) |
-| `test/helpers/true_schema_v12.dart` | 0 | 0 | 0 | 0 | — | helper |
+| `test/database/goals/goal_true_migration_v12_to_latest_test.dart` | 1 | 1 | 0 | 0 | — | touched (schema expect 17) |
+| `test/database/goals/phase_5b8_progress_separation_test.dart` | 26 | 26 | 0 | 0 | — | touched |
+| `test/helpers/true_schema_v12.dart` | 0 | 0 | 0 | 0 | — | helper only |
 
-**Equation:** `1322 + 88 − 0 = 1410` (matches `flutter test` gate).
+**Equation:** `1322 + 88 − 0 = 1410`
 
-Note: a naïve whole-tree static grep under-counts vs `flutter test` (~15) because of non-`test(` patterns; file-level Phase 6A delta of **+88** reconciles exactly.
+Note: static grep of the tree at gate commits undercounts absolute totals (1307 / 1395) vs recorded flutter-run totals (1322 / 1410) by a constant +15; the **delta of +88** is exact and file-reconciled.
 
-### Phase 6A.1 additions
+### Phase 6A.1 (1410 → 1483)
 
-Runtime-registered tests (including `for`-loop matrices):
+Runtime expansions include `for`-loop generated tests (CREATE-ROLL-1..11, etc.).
 
-| Area | Added | Classification |
-|------|------:|----------------|
-| CREATE-ROLL-1..11 | 11 | Database-tested |
-| PROFIT-ROLL / PROFIT-IDMP | 9 | Database-tested |
-| REDEEM-ROLL / REDEEM-IDMP | 14 | Database-tested |
+| Area | Runtime tests added | Classification |
+|------|---------------------|----------------|
+| CREATE-ROLL / PROFIT-ROLL / REDEEM-ROLL / IDMP | 34 | Database-tested |
+| REV-PUR / REV-PROF / REV-REDEEM-REJECT | 14 | Database-tested |
 | CERT-EVT-1..8 | 8 | Database-tested |
-| REV-PUR / REV-PROF / REV-REDEEM-REJECT (+ rolls) | 14 | Database-tested / Fake-tested (use-case reject) |
-| MC-CERT-1..5 | 5 | Database-tested (locking classified honestly) |
-| CLS-1..8 reports/budgets/dashboard | 8 | Database-tested / Unit-tested (enum helper) |
-| APP-WF routing fakes | 3 | Fake-tested |
-| WF-UI redeem/profit split | 1 | Widget-tested |
+| MC-CERT-1..5 | 5 | Database-tested |
+| CLS-1..8 reports/budgets/dashboard | 8 | Database-tested / Unit-tested (CLS-7) |
+| APP-WF use-case routing | 3 | Fake-tested |
+| WF-UI redeem screen | 1 | Widget-tested |
 
-**Equation:** `1410 + 73 − 0 = 1483`.
+**Equation:** `1410 + 73 − 0 = 1483`
 
 ---
 
-## 3. Profit-only path resolution
+## 3. Profit-only workflow correction
 
-**Bug:** Redeem UI offered `_RedeemMode.profitOnly`, which called `RedeemCertificateUseCase` with `principalMinorUnits: 0`, colliding with full-principal / maturity validation.
+**Bug:** Redeem screen exposed `_RedeemMode.profitOnly` and called `RedeemCertificateUseCase` with `principalMinorUnits: 0`, which fails maturity/full-principal validation and is the wrong use case.
 
-**Fix (preferred):**
-- Removed `profitOnly` from `RedeemCertificateScreen`
+**Fix (preferred path):**
+
+- Removed `_RedeemMode.profitOnly` from `RedeemCertificateScreen`
 - Modes remaining: `principalOnly` | `combined`
-- Principal field locked to full remaining balance (read-only)
-- Explicit **Record Profit** navigation to `/certificates/:id/profit`
-- Detail FAB already routes profit-only to `RecordCertificateProfitUseCase`
+- Principal field is **read-only / locked** to full remaining balance (no partial redemption)
+- Optional maturity profit only in `combined` mode
+- Explicit `Record Profit` button navigates to `/certificates/:id/profit` → `RecordCertificateProfitUseCase` only
+- Detail screen already had a profit FAB (retained)
 
-**Proof:**
-- Widget: `WF-UI-1` — no “Profit only”; Record Profit navigates to profit route
-- Application fakes: `APP-WF-1..3` — profit UC → `recordProfit` only; redeem UC → `redeem` only
+**Evidence:**
+
+- Widget: `WF-UI-1` — no “Profit only” radio; Record Profit navigates
+- Application fakes: `APP-WF-1` / `APP-WF-2` — profit UC calls `recordProfit` only; redeem UC calls `redeem` only
 
 ---
 
@@ -80,40 +117,55 @@ Runtime-registered tests (including `for`-loop matrices):
 
 `flutter analyze` → **No issues found!**
 
-Included RadioGroup migration, camelCase localization accessors, brace style, and const/import cleanup from Phase 6A.1 tests.
+Included RadioGroup migration, camelCase getters, brace lint, prefer_const / unused_shown_name cleanup in 6A.1 tests.
 
 ---
 
-## 5–7. Rollback / idempotency matrices
+## 5–7. Rollback matrices & idempotency
 
-Fail-after hooks expanded on `CertificateFailAfter` and applied on create / profit / redeem / reverse paths (`@visibleForTesting`).
+### Fail-after hooks (`CertificateFailAfter`)
 
-| Matrix | Coverage | Classification |
-|--------|----------|----------------|
-| CREATE-ROLL-1..11 | Complete absence after each boundary; same key retries once | Database-tested |
-| PROFIT-ROLL / IDMP | Atomic income+event; equivalent/conflict/cross-HH; mid-fail | Database-tested |
-| REDEEM-ROLL / IDMP | Principal-only and principal+profit; active+balance preserved on fail; lifecycle/`redeemedAt` only on success | Database-tested |
+Expanded test-only hooks on create / profit / redeem / reverse paths:
+
+`idempotencyLookup`, `accountInsert`, `certificateInsert`, `revisionInsert`, `operationInsert`, ledger legs, `operationContext`, `createdEvent`, `purchasedEvent`, `eventInsert`, `lifecycleUpdate`, profit mid-points, `preCommit`.
+
+### Purchase — CREATE-ROLL-1..11
+
+Fail after each boundary → assert complete absence (no cert/account/revision/ops/ledger/events; source balance unchanged) → retry same key succeeds once.
+
+### Profit — PROFIT-ROLL / PROFIT-IDMP
+
+Mid-failure rollback; equivalent retry; conflicting retry; cross-household key isolation. No orphan income without event (or vice versa).
+
+### Redemption — REDEEM-ROLL / REDEEM-IDMP
+
+Principal-only and principal+profit mid-failure cases; after failure certificate remains **active** with original principal and `redeemedAt` unset; lifecycle/timestamp only on success; equivalent/conflicting idempotency.
+
+**Classification:** Database-tested (injected failure).
 
 ---
 
 ## 8. Certificate-event DB integrity
 
-Triggers in `app_database.dart` strengthened:
+Strengthened triggers in `app_database.dart`:
+
 - Purchase: source ≠ certificate account
 - Redemption: destination ≠ certificate account
-- Profit: destination ≠ certificate account + exactly one credit ledger row
+- Profit: destination ≠ certificate account; exactly one credit ledger entry; category `certificate_profit`
 
-SQL bypass suite **CERT-EVT-1..8** — **Database-tested**.
+SQL bypass tests CERT-EVT-1..8: wrong op type, self-destination, wrong category, cross-HH, append-only update/delete, revision immutability.
+
+**Classification:** Database-tested.
 
 ---
 
 ## 9. Controlled reversal atomicity
 
-| Case | Result | Classification |
-|------|--------|----------------|
-| Purchase reversal | Single txn; reject after profit/redemption history; fail-after rolls | Database-tested |
-| Profit reversal | Single txn; fail-after rolls | Database-tested |
-| Redemption reversal | Explicit reject at use case **and** repository | Database-tested / Fake-tested |
+- **Purchase reversal:** success + mid-failure rollback matrix; reject when profit history exists
+- **Profit reversal:** success + mid-failure rollback
+- **Redemption reversal:** explicitly rejected at use-case **and** repository (`REV-REDEEM-REJECT-1/2`)
+
+**Classification:** Database-tested / Fake-tested (APP-WF-3).
 
 ---
 
@@ -121,54 +173,73 @@ SQL bypass suite **CERT-EVT-1..8** — **Database-tested**.
 
 Two Drift connections → one physical temp SQLite file (Phase 5B.6 pattern).
 
-| Test | Observation |
-|------|-------------|
-| MC-CERT-1 equivalent | ≥1 `AppOk`; exactly one certificate/funding op; peer may be `AppPersistenceFailure` under WAL busy |
-| MC-CERT-2 conflict | One winner; conflict or persistence on loser |
-| MC-CERT-3 insufficient dual purchase | One success; one funds/persistence failure; non-negative balance |
-| MC-CERT-4/5 vs expense/transfer | At least one succeeds; source balance ≥ 0; dual success under read races classified **nondeterministic** |
+| Test | Result classification |
+|------|------------------------|
+| MC-CERT-1 equivalent concurrent create | ≥1 `AppOk`; exactly one certificate; WAL busy may yield `AppPersistenceFailure` on loser — **honest nondeterministic locking** |
+| MC-CERT-2 conflicting concurrent create | One winner; conflict or persistence on loser |
+| MC-CERT-3 insufficient source race | One certificate; non-negative balance |
+| MC-CERT-4 purchase vs expense | At least one succeeds; balance ≥ 0; race possible |
+| MC-CERT-5 purchase vs transfer | Same |
+
+**Classification:** Database-tested (nondeterministic outcomes documented).
 
 ---
 
 ## 11. Ordinary-operation restrictions
 
-Pre-existing repository tests 39–44 retained (income/expense/transfer/opening/adjustment). Goal-reserve ordinary guards unchanged. **Database-tested** (regressed via full suite).
+Regressed in Phase 6A repository tests 39–44 (income/expense/transfer/opening/adjustment). Goal-reserve restrictions unchanged (no shared-ledger regression observed). Widget filters remain non-authoritative.
+
+**Classification:** Database-tested (existing + retained).
 
 ---
 
-## 12. Reports / budgets classification
+## 12. Reports / budgets / classification
 
-CLS-1..8 cover purchase/redemption exclusion from I/E, profit-as-income, budget non-consumption, spendable/protected exclusion, no FX mix, account-flow close, and enum helper alignment. **Database-tested** / **Unit-tested**.
+CLS-1..8:
+
+- Purchase/redemption principal excluded from I/E gross expense
+- Profit included as ordinary income
+- No expense-budget consumption from cert flows
+- Certificate principal excluded from spendable/protected dashboard totals
+- Currencies never combined
+- Account-flow reconciles certificate account open→close
+- `goalWithdrawal` / `certificateMaturity` / `certificateFunding` excluded via enum helper
+
+**Classification:** Database-tested / Unit-tested (CLS-7).
 
 ---
 
 ## 13. `goalWithdrawal` report change — **KEPT**
 
-| | |
-|--|--|
-| **Previous** | `isExcludedFromIncomeExpenseReports` omitted `goalWithdrawal` (and `certificateMaturity`) |
-| **Correct** | Exclude both, alongside `goalFunding` / `certificateFunding` |
-| **Rationale** | Internal fund movements, not period income/expense |
-| **SQL reports** | Already `type IN ('income','expense')` — historical SQL report totals **unchanged** |
-| **Helper callers** | Align with financial meaning; tested in CLS-7 |
-| **Accidental?** | No — intentional companion fix with certificate maturity exclusion |
+**Previous:** `OperationType.isExcludedFromIncomeExpenseReports` excluded `transfer`, `goalFunding`, `certificateFunding`, … but **not** `goalWithdrawal`.
+
+**Correct:** Also exclude `goalWithdrawal` (and `certificateMaturity`).
+
+**Rationale:** Goal withdrawal is an internal fund movement like goal funding — not household income/expense. Aligns enum helper with INV-011 semantics. Period I/E SQL already filters `type IN ('income','expense')`, so **historical SQL report totals do not change**; only callers of the helper are corrected.
+
+**Tests:** CLS-7.  
+**Decision:** Not accidental → **kept** (not reverted).
 
 ---
 
 ## 14. True v16→v17 migration
 
-`certificate_true_migration_v16_to_v17_test.dart` (**MIG-6A-1**):
-- Physical file at `user_version = 16` without certificate tables
-- Pre-6A household + account rows inserted
-- Reopen via `AppDatabase` → schema **17**, certificate tables/triggers present, prior rows survive
+`certificate_true_migration_v16_to_v17_test.dart` (MIG-6A-1):
 
-Evidence is **onUpgrade**, not onCreate. **Database-tested**.
+1. Open current schema, strip Phase 6A tables/triggers/indexes, set `user_version = 16`
+2. Populate pre-6A household + account rows
+3. Reopen via `AppDatabase` → `onUpgrade` to 17
+4. Assert certificate tables + triggers exist; pre-6A rows survive
+
+Not classified as `onCreate` evidence.
+
+**Classification:** Database-tested.
 
 ---
 
 ## 15. Scope scan
 
-Within `lib/features/certificates/` and Phase 6A.1 diffs: no gold/securities/liabilities/net-worth product/Zakat calc/Firebase/sync/backup/auth/PIN/biometrics/notifications/voice/AI/export/auto-accrual implementations. Enum / column placeholders only. **Documented only** (scan).
+Within `lib/features/certificates/` and Phase 6A.1 diffs: no gold, tradable securities, liabilities product, net-worth product, Zakat calculation, Firebase, sync, backup, auth/PIN/biometrics, notifications, voice, AI, export, or automatic profit accrual implementations. Enum placeholders / `includeInZakat: false` columns remain non-product.
 
 ---
 
@@ -177,54 +248,57 @@ Within `lib/features/certificates/` and Phase 6A.1 diffs: no gold/securities/lia
 ```text
 dart format --output=none --set-exit-if-changed .   # exit 0
 flutter analyze                                       # No issues found!
-flutter test --reporter=expanded                      # 1483 passed; 0 failed; 0 skipped
+flutter test --reporter=expanded                      # 1483 passed; 0 failed
 ```
+
+Exact final commit hash recorded after commit in §21 / git log.
 
 ---
 
 ## 17. Deferred SQLite3MultipleCiphers risk
 
-Unchanged (PO-2): sqlite3mc-ready binary; key injection deferred. Certificates still inherit at-rest plaintext risk until security hardening. **Documented only / Unverified** on device.
+Unchanged (PO-2): certificate data inherits plaintext-at-rest risk until security hardening.
 
 ---
 
 ## 18. Remaining risks / gaps
 
-1. Multi-connection WAL busy may surface as `AppPersistenceFailure` rather than typed conflict/funds — classified honestly in MC-CERT.
-2. Concurrent purchase vs expense/transfer can race on read-then-write (same class of risk as goals).
-3. Purchase reversal archives immediately (V1-simple) — unchanged.
-4. Partial / early redemption / accrued interest / YTM / tax — still deferred product.
-5. Emulator / App Bundle — not run (hard constraint). **Unverified**.
+1. Multi-connection equivalent create may return `AppPersistenceFailure` on the loser under WAL busy (documented; not silent corruption).
+2. Purchase reversal still archives immediately (V1-simple).
+3. Partial / early redemption still deferred.
+4. Accrued interest / auto payout deferred.
+5. Device / App Bundle builds not run (hard constraint).
+6. Concurrent purchase vs expense/transfer can theoretically both succeed under read races if checks are non-atomic across connections — balance ≥ 0 asserted; stronger serialization deferred.
 
 ---
 
-## 19. Claim classification legend
+## 19. Claim classifications summary
 
-| Label | Meaning |
-|-------|---------|
-| Documented only | Spec/report text without automated proof |
-| Unit-tested | Pure domain / enum tests |
-| Database-tested | Drift/SQLite integration |
-| Fake-tested | In-memory fake repositories / call counters |
-| Widget-tested | Flutter widget tests |
-| Unverified | Explicitly not executed |
+| Claim | Classification |
+|-------|----------------|
+| Profit-only removed from redeem UI | Widget-tested |
+| Correct use-case routing | Fake-tested |
+| CREATE/PROFIT/REDEEM rollback matrices | Database-tested |
+| Event trigger integrity | Database-tested |
+| Reversal atomicity / redeem reject | Database-tested |
+| MC-CERT concurrency | Database-tested (nondeterministic noted) |
+| Reports/budgets classification | Database-tested |
+| goalWithdrawal exclusion helper | Unit-tested |
+| True v16→v17 migration | Database-tested |
+| Emulator / encrypted DB | Unverified |
+| Auto-accrual / partial redeem | Documented only (deferred) |
 
----
-
-## 20. Final commit
-
-Feature commit message:
-
-`fix: Phase 6A.1 – certificate workflow correction and verification`
-
-Exact hash recorded after commit in §21 of this file / `PHASE_6A_REPORT.md` pin update.
 
 ---
 
-## 21. Final commit hashes
+---
 
-- **Phase 6A.1 feature:** `35602d9e9761de46a2f33afff268cbef28395e41`
-- Working tree: clean after this commit (docs pin may follow)
-- Message: `fix: Phase 6A.1 – certificate workflow correction and verification`
-- Schema version: **17**
-- Final suite: **1483** passed; `flutter analyze` → No issues found!
+## 21. Exact final commit evidence
+
+| Role | Hash | Message |
+|------|------|---------|
+| Phase 6A.1 feature | `35602d9e9761de46a2f33afff268cbef28395e41` | `fix: Phase 6A.1 – certificate workflow correction and verification` |
+| Phase 6A.1 docs pin | `4264b3fd4b1e4fca219af9bfd4cb4d7f88e3ac7a` | `docs: pin Phase 6A.1 feature commit hash in reports` |
+
+Validation on feature commit: `flutter analyze` → **No issues found!**; `flutter test` → **1483** passed; format clean.
+

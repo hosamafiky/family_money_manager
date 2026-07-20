@@ -306,5 +306,6 @@ Overstated Phase 6A atomicity/idempotency claims for profit/redeem mid-failure m
 - **Branch:** `main`
 - **Feature commit:** `25347f429f0388ef5abb87fc6a15f50887cef482`
 - **Docs pin:** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`
-- **Phase 6A.1:** `35602d9e9761de46a2f33afff268cbef28395e41` — `fix: Phase 6A.1 – certificate workflow correction and verification`
+- **Phase 6A.1 feature:** `35602d9e9761de46a2f33afff268cbef28395e41` — `fix: Phase 6A.1 – certificate workflow correction and verification`
+- **Phase 6A.1 docs pin:** `4264b3fd4b1e4fca219af9bfd4cb4d7f88e3ac7a`
 - **Message (6A):** `feat: Phase 6A – savings certificates and fixed-term deposit assets`
