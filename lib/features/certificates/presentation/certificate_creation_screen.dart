@@ -171,8 +171,9 @@ class _CertificateCreationScreenState
             const SizedBox(height: 12),
             accountsAsync.when(
               data: (result) {
-                if (result is! AppOk<List<FinancialAccount>>)
+                if (result is! AppOk<List<FinancialAccount>>) {
                   return const SizedBox();
+                }
                 final accounts = result.value
                     .where(
                       (a) =>

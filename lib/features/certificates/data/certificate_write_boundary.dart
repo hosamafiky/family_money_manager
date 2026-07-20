@@ -3,9 +3,16 @@ import 'package:family_money_manager/features/certificates/domain/certificate.da
 /// Outcome of a certificate financial write.
 enum CertificateWriteResult { created, alreadyExists }
 
-/// Fail-after hooks for rollback matrix tests.
+/// Fail-after hooks for rollback matrix tests (Phase 6A.1).
+///
+/// Points map to transactional boundaries on create / profit / redeem /
+/// controlled-reversal write paths.
 enum CertificateFailAfter {
   none,
+
+  /// After idempotency lookup when no prior identity was found.
+  idempotencyLookup,
+
   accountInsert,
   certificateInsert,
   revisionInsert,
@@ -13,8 +20,24 @@ enum CertificateFailAfter {
   firstLedgerEntry,
   secondLedgerEntry,
   operationContext,
+
+  /// Create path: after `created` event insert.
+  createdEvent,
+
+  /// Create path: after `purchased` event insert.
+  purchasedEvent,
+
+  /// Profit / redeem / generic event insert boundary.
   eventInsert,
+
   lifecycleUpdate,
+
+  /// Redeem with optional maturity profit — mid-profit boundaries.
+  profitOperationInsert,
+  profitLedgerEntry,
+  profitContext,
+  profitEventInsert,
+
   preCommit,
 }
 

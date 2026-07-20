@@ -14,8 +14,10 @@ import 'package:uuid/uuid.dart';
 
 const _householdId = 'household-v1';
 
-/// Redemption mode distinguishes what is being transferred.
-enum _RedeemMode { principalOnly, profitOnly, combined }
+/// Redemption mode: full remaining principal, optionally with maturity profit.
+///
+/// Profit-only receipts use [RecordCertificateProfitScreen] — never this screen.
+enum _RedeemMode { principalOnly, combined }
 
 class RedeemCertificateScreen extends ConsumerStatefulWidget {
   const RedeemCertificateScreen({super.key, required this.certificateId});
@@ -41,6 +43,8 @@ class _RedeemCertificateScreenState
   bool _loading = false;
   bool _showReview = false;
   String? _errorMessage;
+  int? _lockedPrincipalMinorUnits;
+  String? _currencyCode;
 
   @override
   void initState() {
@@ -72,13 +76,16 @@ class _RedeemCertificateScreenState
     final progress = progressAsync.when(
       data: (r) => r is AppOk<CertificateProgress> ? r.value : null,
       loading: () => null,
-      error: (_, __) => null,
+      error: (_, _) => null,
     );
 
-    if (progress != null && _principalCtrl.text.isEmpty) {
-      final bal = progress.principalBalanceMinorUnits;
-      final currency = progress.certificate.currencyCode;
-      _principalCtrl.text = CertificateMoneyFormatter.format(bal, currency);
+    if (progress != null && _lockedPrincipalMinorUnits == null) {
+      _lockedPrincipalMinorUnits = progress.principalBalanceMinorUnits;
+      _currencyCode = progress.currencyCode;
+      _principalCtrl.text = CertificateMoneyFormatter.format(
+        progress.principalBalanceMinorUnits,
+        progress.currencyCode,
+      );
     }
 
     return Scaffold(
@@ -104,6 +111,13 @@ class _RedeemCertificateScreenState
                         '${CertificateMoneyFormatter.format(progress.principalBalanceMinorUnits, progress.currencyCode)} '
                         '${progress.currencyCode}',
                       ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.push(
+                          '/certificates/${widget.certificateId}/profit',
+                        ),
+                        child: Text(l10n.certificateRecordProfit),
+                      ),
                     ],
                   ),
                 ),
@@ -113,55 +127,43 @@ class _RedeemCertificateScreenState
               l10n.certificateRedeem,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            RadioListTile<_RedeemMode>(
-              title: Text(l10n.certificateRedeemCombined),
-              value: _RedeemMode.combined,
+            RadioGroup<_RedeemMode>(
               groupValue: _mode,
-              onChanged: (v) => setState(() => _mode = v!),
-            ),
-            RadioListTile<_RedeemMode>(
-              title: Text(l10n.certificateRedeemPrincipalOnly),
-              value: _RedeemMode.principalOnly,
-              groupValue: _mode,
-              onChanged: (v) => setState(() => _mode = v!),
-            ),
-            RadioListTile<_RedeemMode>(
-              title: Text(l10n.certificateRedeemProfitOnly),
-              value: _RedeemMode.profitOnly,
-              groupValue: _mode,
-              onChanged: (v) => setState(() => _mode = v!),
+              onChanged: (v) {
+                if (v != null) setState(() => _mode = v);
+              },
+              child: Column(
+                children: [
+                  RadioListTile<_RedeemMode>(
+                    title: Text(l10n.certificateRedeemCombined),
+                    value: _RedeemMode.combined,
+                  ),
+                  RadioListTile<_RedeemMode>(
+                    title: Text(l10n.certificateRedeemPrincipalOnly),
+                    value: _RedeemMode.principalOnly,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
-            if (_mode != _RedeemMode.profitOnly)
-              TextFormField(
-                controller: _principalCtrl,
-                decoration: InputDecoration(
-                  labelText:
-                      '${l10n.certificatePrincipalSection} (${progress?.currencyCode ?? ''})',
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                ],
-                textInputAction: TextInputAction.next,
-                validator: (v) {
-                  if (_mode == _RedeemMode.profitOnly) return null;
-                  final d = double.tryParse(v ?? '');
-                  return (d == null || d <= 0)
-                      ? l10n.errorCertificatePrincipalZero
-                      : null;
-                },
+            TextFormField(
+              controller: _principalCtrl,
+              readOnly: true,
+              enabled: false,
+              decoration: InputDecoration(
+                labelText:
+                    '${l10n.certificatePrincipalSection} (${_currencyCode ?? progress?.currencyCode ?? ''})',
+                border: const OutlineInputBorder(),
+                helperText: l10n.certificatePrincipalBalance,
               ),
-            if (_mode != _RedeemMode.principalOnly) ...[
+            ),
+            if (_mode == _RedeemMode.combined) ...[
               const SizedBox(height: 12),
               TextFormField(
                 controller: _profitCtrl,
                 decoration: InputDecoration(
                   labelText:
-                      '${l10n.certificateProfitSection} (${progress?.currencyCode ?? ''})',
+                      '${l10n.certificateProfitSection} (${_currencyCode ?? progress?.currencyCode ?? ''})',
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
@@ -172,10 +174,10 @@ class _RedeemCertificateScreenState
                 ],
                 textInputAction: TextInputAction.next,
                 validator: (v) {
-                  if (_mode == _RedeemMode.principalOnly) return null;
-                  final d = double.tryParse(v ?? '');
+                  if (v == null || v.trim().isEmpty) return null;
+                  final d = double.tryParse(v);
                   return (d == null || d < 0)
-                      ? l10n.error_amount_must_be_positive
+                      ? l10n.errorAmountMustBePositive
                       : null;
                 },
               ),
@@ -183,8 +185,9 @@ class _RedeemCertificateScreenState
             const SizedBox(height: 12),
             accountsAsync.when(
               data: (result) {
-                if (result is! AppOk<List<FinancialAccount>>)
+                if (result is! AppOk<List<FinancialAccount>>) {
                   return const SizedBox();
+                }
                 final accounts = result.value
                     .where(
                       (a) =>
@@ -196,7 +199,7 @@ class _RedeemCertificateScreenState
                     )
                     .toList();
                 return DropdownButtonFormField<String>(
-                  value: _destinationAccountId,
+                  initialValue: _destinationAccountId,
                   decoration: InputDecoration(
                     labelText: l10n.certificateDestinationAccount,
                     border: const OutlineInputBorder(),
@@ -209,11 +212,11 @@ class _RedeemCertificateScreenState
                       .toList(),
                   onChanged: (v) => setState(() => _destinationAccountId = v),
                   validator: (v) =>
-                      v == null ? l10n.error_account_required : null,
+                      v == null ? l10n.errorAccountRequired : null,
                 );
               },
               loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const SizedBox(),
+              error: (_, _) => const SizedBox(),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -240,15 +243,7 @@ class _RedeemCertificateScreenState
   }
 
   Widget _buildReview(BuildContext context, AppLocalizations l10n) {
-    final progressAsync = ref.watch(
-      certificateProgressProvider(widget.certificateId),
-    );
-    final progress = progressAsync.when(
-      data: (r) => r is AppOk<CertificateProgress> ? r.value : null,
-      loading: () => null,
-      error: (_, __) => null,
-    );
-    final currency = progress?.currencyCode ?? '';
+    final currency = _currencyCode ?? '';
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.certificateReviewTitle),
@@ -264,12 +259,12 @@ class _RedeemCertificateScreenState
             label: l10n.certificateRedeem,
             value: _modeLabel(l10n, _mode),
           ),
-          if (_mode != _RedeemMode.profitOnly)
-            _ReviewRow(
-              label: l10n.certificatePrincipalSection,
-              value: '${_principalCtrl.text.trim()} $currency',
-            ),
-          if (_mode != _RedeemMode.principalOnly)
+          _ReviewRow(
+            label: l10n.certificatePrincipalSection,
+            value: '${_principalCtrl.text.trim()} $currency',
+          ),
+          if (_mode == _RedeemMode.combined &&
+              _profitCtrl.text.trim().isNotEmpty)
             _ReviewRow(
               label: l10n.certificateProfitSection,
               value: '${_profitCtrl.text.trim()} $currency',
@@ -313,29 +308,18 @@ class _RedeemCertificateScreenState
       _errorMessage = null;
     });
 
-    final principalDouble = _mode != _RedeemMode.profitOnly
-        ? (double.tryParse(_principalCtrl.text.trim()) ?? 0)
-        : 0.0;
-    final profitDouble = _mode != _RedeemMode.principalOnly
+    final principalMinorUnits = _lockedPrincipalMinorUnits ?? 0;
+    final profitDouble = _mode == _RedeemMode.combined
         ? (double.tryParse(_profitCtrl.text.trim()) ?? 0)
         : 0.0;
-
-    final principalMinorUnits = (principalDouble * 100).round();
     final profitMinorUnits = (profitDouble * 100).round();
-
-    // For profitOnly mode, we pass 1 as principal to satisfy the > 0 check
-    // but the repository will only receive the validated amount.
-    // Actually for profitOnly, we should record as a profit operation instead.
-    // But per spec, redeem handles both. We pass 0 principal with profit only.
 
     final useCase = ref.read(redeemCertificateUseCaseProvider);
     final result = await useCase.execute(
       certificateId: widget.certificateId,
       householdId: _householdId,
       destinationAccountId: _destinationAccountId ?? '',
-      principalMinorUnits: _mode == _RedeemMode.profitOnly
-          ? 0
-          : principalMinorUnits,
+      principalMinorUnits: principalMinorUnits,
       profitMinorUnits: profitMinorUnits,
       idempotencyKey: _idempotencyKey,
       note: _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
@@ -365,7 +349,6 @@ class _RedeemCertificateScreenState
 
   String _modeLabel(AppLocalizations l10n, _RedeemMode mode) => switch (mode) {
     _RedeemMode.principalOnly => l10n.certificateRedeemPrincipalOnly,
-    _RedeemMode.profitOnly => l10n.certificateRedeemProfitOnly,
     _RedeemMode.combined => l10n.certificateRedeemCombined,
   };
 }
@@ -396,8 +379,8 @@ class _ReviewRow extends StatelessWidget {
   }
 }
 
-// These keys exist in EN ARB — convenience accessors for this file.
+// Convenience accessors for form validation (English fallback strings).
 extension on AppLocalizations {
-  String get error_amount_must_be_positive => 'Amount must be positive';
-  String get error_account_required => 'Account is required';
+  String get errorAmountMustBePositive => 'Amount must be positive';
+  String get errorAccountRequired => 'Account is required';
 }

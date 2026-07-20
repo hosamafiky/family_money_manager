@@ -6,12 +6,12 @@ import 'package:family_money_manager/features/accounts/presentation/accounts_scr
 import 'package:family_money_manager/features/budgets/presentation/budget_creation_screen.dart';
 import 'package:family_money_manager/features/budgets/presentation/budget_detail_screen.dart';
 import 'package:family_money_manager/features/budgets/presentation/budgets_list_screen.dart';
-import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_creation_screen.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_detail_screen.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificates_list_screen.dart';
 import 'package:family_money_manager/features/certificates/presentation/record_certificate_profit_screen.dart';
 import 'package:family_money_manager/features/certificates/presentation/redeem_certificate_screen.dart';
+import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/fund_goal_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/goal_creation_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/goal_detail_screen.dart';

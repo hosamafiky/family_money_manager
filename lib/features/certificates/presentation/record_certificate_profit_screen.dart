@@ -103,15 +103,16 @@ class _RecordCertificateProfitScreenState
               validator: (v) {
                 final d = double.tryParse(v ?? '');
                 return (d == null || d <= 0)
-                    ? l10n.error_amount_must_be_positive
+                    ? l10n.errorAmountMustBePositive
                     : null;
               },
             ),
             const SizedBox(height: 12),
             accountsAsync.when(
               data: (result) {
-                if (result is! AppOk<List<FinancialAccount>>)
+                if (result is! AppOk<List<FinancialAccount>>) {
                   return const SizedBox();
+                }
                 final accounts = result.value
                     .where(
                       (a) =>
@@ -135,7 +136,7 @@ class _RecordCertificateProfitScreenState
                       .toList(),
                   onChanged: (v) => setState(() => _destinationAccountId = v),
                   validator: (v) =>
-                      v == null ? l10n.error_account_required : null,
+                      v == null ? l10n.errorAccountRequired : null,
                 );
               },
               loading: () => const CircularProgressIndicator(),
@@ -226,7 +227,6 @@ class _RecordCertificateProfitScreenState
       _loading = true;
       _errorMessage = null;
     });
-    final l10n = AppLocalizations.of(context);
     final amountDouble = double.tryParse(_amountCtrl.text.trim()) ?? 0;
     final amountMinorUnits = (amountDouble * 100).round();
 
@@ -288,8 +288,8 @@ class _ReviewRow extends StatelessWidget {
   }
 }
 
-// These keys exist in the EN ARB — re-exported for use in this file.
+// Convenience accessors for form validation (English fallback strings).
 extension on AppLocalizations {
-  String get error_amount_must_be_positive => 'Amount must be positive';
-  String get error_account_required => 'Account is required';
+  String get errorAmountMustBePositive => 'Amount must be positive';
+  String get errorAccountRequired => 'Account is required';
 }

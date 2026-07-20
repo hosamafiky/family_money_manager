@@ -2,9 +2,12 @@
 
 **Gate HEAD (Phase 5B):** `86736ca7ecd19dea3ea93568a3aecc226faf870c`  
 **Feature commit:** `25347f429f0388ef5abb87fc6a15f50887cef482`  
-**Branch:** `main` (clean after pin commit if any)  
+**Phase 6A docs pin:** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`  
+**Phase 6A.1 correction:** see `docs/PHASE_6A_1_REPORT.md` (workflow + verification closure)  
+**Branch:** `main`  
 **Schema:** 16 → **17**  
-**Tests:** **1322 → 1410** (+88)
+**Tests at Phase 6A feature gate:** **1322 → 1410** (+88 exact file reconciliation)  
+**Tests after Phase 6A.1:** **1410 → 1483** (+73)
 
 ---
 
@@ -114,6 +117,8 @@ Requires **positive** principal + funding source (no unfunded certificates). Fai
 - After: certificate account = 0; destination += principal; total assets unchanged for principal move  
 - UI distinguishes principal / profit / combined cash  
 
+**Phase 6A.1:** Redeem screen no longer offers profit-only mode. Profit-only receipts use `RecordCertificateProfitUseCase` / Record Profit screen exclusively.
+
 Redemption reversal: **explicitly rejected** (`errorCertificateRedemptionReversalNotSupported`).
 
 ---
@@ -216,7 +221,8 @@ Keys added to `app_en.arb` / `app_ar.arb` (+ `flutter gen-l10n`), including `cer
 | Partial/early redemption UX depth, accrued interest, YTM, tax | **Documented only** | Deferred product |
 | Device emulator / App Bundle | **Unverified** | Hard constraint — not run |
 
-Approx **+88** tests vs gate baseline.
+Approx **+88** tests vs gate baseline (exact file table in `PHASE_6A_1_REPORT.md` §2).  
+Phase 6A.1 adds **+73** rollback/idempotency/event/concurrency/classification/workflow proofs → **1483**.
 
 ---
 
@@ -241,13 +247,15 @@ Approx **+88** tests vs gate baseline.
 
 ---
 
-## 16. Validation
+## 16. Validation (Phase 6A feature gate)
 
 ```text
 dart format --output=none --set-exit-if-changed .   # pass
-flutter analyze                                       # 0 errors (info/warnings only)
+flutter analyze                                       # Phase 6A had remaining Radio/info warnings
 flutter test                                          # 1410 passed
 ```
+
+**Phase 6A.1 correction:** `flutter analyze` → **No issues found!**; suite **1483** passed. See `PHASE_6A_1_REPORT.md`.
 
 ---
 
@@ -283,11 +291,13 @@ Unchanged from Phase 2+: sqlite3mc-ready binary; key injection still deferred (P
 
 ## 20. Remaining risks
 
-1. UI redeem `profitOnly` mode still routes through redeem API with constraints that expect full principal — prefer profit use case for profit-only flows.  
+1. ~~UI redeem `profitOnly` mode still routes through redeem API~~ — **fixed in Phase 6A.1** (removed; profit-only uses Record Profit).  
 2. Purchase reversal archives immediately; restore-after-redeem edge paths are V1-simple.  
 3. Certificate account appears in net-worth flag but there is **no** full net-worth product — messaging must stay careful.  
-4. Concurrent purchase under heavy WAL contention beyond unit simulation — same as goals.  
-5. Analyzer infos (deprecated Radio APIs on redeem screen) — non-blocking.
+4. Concurrent purchase under heavy WAL contention — MC-CERT classifies busy locks honestly (`AppPersistenceFailure` possible).  
+5. ~~Analyzer infos (deprecated Radio APIs on redeem screen)~~ — **cleared in Phase 6A.1**.
+
+Overstated Phase 6A atomicity/idempotency claims for profit/redeem mid-failure matrices are closed by Phase 6A.1 CREATE/PROFIT/REDEEM-ROLL suites (previously only happy-path + limited concurrent create).
 
 ---
 
@@ -295,5 +305,6 @@ Unchanged from Phase 2+: sqlite3mc-ready binary; key injection still deferred (P
 
 - **Branch:** `main`
 - **Feature commit:** `25347f429f0388ef5abb87fc6a15f50887cef482`
-- **Status:** working tree clean after docs pin
-- **Message:** `feat: Phase 6A – savings certificates and fixed-term deposit assets`
+- **Docs pin:** `4f81df5b88ebf1afa93455fbd738b3f03f81595b`
+- **Phase 6A.1:** see latest `fix: Phase 6A.1 – certificate workflow correction and verification` commit on `main`
+- **Message (6A):** `feat: Phase 6A – savings certificates and fixed-term deposit assets`

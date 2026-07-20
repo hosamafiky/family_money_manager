@@ -100,6 +100,7 @@ final class DriftCertificateRepository implements CertificateRepository {
           return;
         }
 
+        await _failAfter(CertificateFailAfter.idempotencyLookup);
         await _awaitBarrier();
 
         // 4–5. Validate funding source + funds
@@ -322,6 +323,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             purchase.eventCreatedAt,
           ],
         );
+        await _failAfter(CertificateFailAfter.createdEvent);
 
         await _db.customStatement(
           'INSERT INTO certificate_events '
@@ -344,6 +346,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             purchase.eventCreatedAt,
           ],
         );
+        await _failAfter(CertificateFailAfter.purchasedEvent);
         await _failAfter(CertificateFailAfter.eventInsert);
         await _failAfter(CertificateFailAfter.preCommit);
       });
@@ -557,6 +560,8 @@ final class DriftCertificateRepository implements CertificateRepository {
           }
           return;
         }
+
+        await _failAfter(CertificateFailAfter.idempotencyLookup);
 
         final cert = await _findById(certificateId);
         if (cert == null || cert.householdId != householdId) {
@@ -776,6 +781,8 @@ final class DriftCertificateRepository implements CertificateRepository {
           return;
         }
 
+        await _failAfter(CertificateFailAfter.idempotencyLookup);
+
         final cert = await _findById(certificateId);
         if (cert == null || cert.householdId != householdId) {
           result = const AppNotFound();
@@ -978,6 +985,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               maturityProfit.idempotencyKey,
             ],
           );
+          await _failAfter(CertificateFailAfter.profitOperationInsert);
           await _db.customStatement(
             'INSERT INTO ledger_entries '
             '(id, operation_id, household_id, account_id, direction, '
@@ -998,6 +1006,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               createdBy,
             ],
           );
+          await _failAfter(CertificateFailAfter.profitLedgerEntry);
           await _db.customStatement(
             'INSERT INTO operation_contexts '
             '(operation_id, household_id, is_recurring, category_code, note, created_at) '
@@ -1010,6 +1019,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               now,
             ],
           );
+          await _failAfter(CertificateFailAfter.profitContext);
           await _db.customStatement(
             'INSERT INTO certificate_events '
             '(id, certificate_id, household_id, event_type, related_operation_id, '
@@ -1031,6 +1041,7 @@ final class DriftCertificateRepository implements CertificateRepository {
               now,
             ],
           );
+          await _failAfter(CertificateFailAfter.profitEventInsert);
         }
 
         await _db.customStatement(
@@ -1316,6 +1327,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             idempotencyKey,
           ],
         );
+        await _failAfter(CertificateFailAfter.operationInsert);
 
         await _db.customStatement(
           'INSERT INTO ledger_entries '
@@ -1337,6 +1349,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             createdBy,
           ],
         );
+        await _failAfter(CertificateFailAfter.firstLedgerEntry);
         await _db.customStatement(
           'INSERT INTO ledger_entries '
           '(id, operation_id, household_id, account_id, direction, '
@@ -1357,6 +1370,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             createdBy,
           ],
         );
+        await _failAfter(CertificateFailAfter.secondLedgerEntry);
         await _db.customStatement(
           'INSERT INTO operation_contexts '
           '(operation_id, household_id, is_recurring, note, created_at) '
@@ -1368,6 +1382,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             now,
           ],
         );
+        await _failAfter(CertificateFailAfter.operationContext);
 
         await _db.customStatement(
           'UPDATE operations SET is_reversed = 1, reversed_by = ?, updated_at = ? '
@@ -1395,6 +1410,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             now,
           ],
         );
+        await _failAfter(CertificateFailAfter.eventInsert);
 
         // Archive after cancel.
         await _db.customStatement(
@@ -1402,6 +1418,7 @@ final class DriftCertificateRepository implements CertificateRepository {
           'archived_at = ? WHERE id = ?',
           [now, certificateId],
         );
+        await _failAfter(CertificateFailAfter.lifecycleUpdate);
         await _db.customStatement(
           'INSERT INTO certificate_events '
           '(id, certificate_id, household_id, event_type, related_operation_id, '
@@ -1418,8 +1435,11 @@ final class DriftCertificateRepository implements CertificateRepository {
             now,
           ],
         );
+        await _failAfter(CertificateFailAfter.preCommit);
       });
       return const AppOk(null);
+    } on CertificateInjectedFailure {
+      return const AppPersistenceFailure();
     } on Exception catch (e) {
       final msg = e.toString();
       if (msg.contains('has later')) {
@@ -1504,6 +1524,7 @@ final class DriftCertificateRepository implements CertificateRepository {
             idempotencyKey,
           ],
         );
+        await _failAfter(CertificateFailAfter.operationInsert);
         await _db.customStatement(
           'INSERT INTO ledger_entries '
           '(id, operation_id, household_id, account_id, direction, '
@@ -1524,12 +1545,14 @@ final class DriftCertificateRepository implements CertificateRepository {
             createdBy,
           ],
         );
+        await _failAfter(CertificateFailAfter.firstLedgerEntry);
         await _db.customStatement(
           'INSERT INTO operation_contexts '
           '(operation_id, household_id, is_recurring, note, created_at) '
           'VALUES (?, ?, 0, ?, ?)',
           [reversalOperationId, householdId, reason ?? 'Profit reversal', now],
         );
+        await _failAfter(CertificateFailAfter.operationContext);
         await _db.customStatement(
           'UPDATE operations SET is_reversed = 1, reversed_by = ?, updated_at = ? '
           'WHERE id = ?',
@@ -1555,8 +1578,12 @@ final class DriftCertificateRepository implements CertificateRepository {
             now,
           ],
         );
+        await _failAfter(CertificateFailAfter.eventInsert);
+        await _failAfter(CertificateFailAfter.preCommit);
       });
       return const AppOk(null);
+    } on CertificateInjectedFailure {
+      return const AppPersistenceFailure();
     } on Exception catch (_) {
       return const AppNotFound();
     }

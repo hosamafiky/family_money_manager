@@ -1727,6 +1727,8 @@ class AppDatabase extends _$AppDatabase {
                AND o.household_id = NEW.household_id
                AND o.type = 'certificateFunding'
                AND o.destination_account_id = sc.certificate_account_id
+               AND o.source_account_id IS NOT NULL
+               AND o.source_account_id != sc.certificate_account_id
                AND o.total_amount_minor_units = NEW.amount_minor_units
                AND o.currency_code = NEW.currency_code
            )
@@ -1759,6 +1761,8 @@ class AppDatabase extends _$AppDatabase {
                AND o.household_id = NEW.household_id
                AND o.type = 'certificateMaturity'
                AND o.source_account_id = sc.certificate_account_id
+               AND o.destination_account_id IS NOT NULL
+               AND o.destination_account_id != sc.certificate_account_id
                AND o.total_amount_minor_units = NEW.amount_minor_units
                AND o.currency_code = NEW.currency_code
            )
@@ -1786,13 +1790,21 @@ class AppDatabase extends _$AppDatabase {
         WHERE NEW.related_operation_id IS NULL
            OR NOT EXISTS (
              SELECT 1 FROM operations o
+             JOIN savings_certificates sc ON sc.id = NEW.certificate_id
              WHERE o.id = NEW.related_operation_id
                AND o.household_id = NEW.household_id
                AND o.type = 'income'
                AND o.category_code = 'certificate_profit'
                AND o.total_amount_minor_units = NEW.amount_minor_units
                AND o.currency_code = NEW.currency_code
-           );
+               AND o.destination_account_id IS NOT NULL
+               AND o.destination_account_id != sc.certificate_account_id
+           )
+           OR (
+             SELECT COUNT(*) FROM ledger_entries le
+             WHERE le.operation_id = NEW.related_operation_id
+               AND le.direction = 'credit'
+           ) != 1;
       END
     ''');
   }

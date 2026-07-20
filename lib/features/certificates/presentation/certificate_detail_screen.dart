@@ -223,8 +223,9 @@ class _CertificateDetailFab extends ConsumerWidget {
       error: (_, _) => null,
     );
     if (progress == null) return const SizedBox();
-    if (!progress.canRecordProfit && !progress.canRedeem)
+    if (!progress.canRecordProfit && !progress.canRedeem) {
       return const SizedBox();
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -1,8 +1,8 @@
-/// Phase 6A – True physical schema-16 → 17 migration.
+/// Phase 6A – True physical schema-16 → 17 migration with data survival.
 ///
 /// Builds a schema-16 file by opening current onCreate then stripping Phase 6A
-/// tables/triggers/indexes and setting `user_version = 16`. Reopening with
-/// [AppDatabase] proves `from <= 16` installs certificate schema.
+/// tables/triggers/indexes and setting `user_version = 16`. Populates
+/// pre-6A rows, then reopening with [AppDatabase] proves `onUpgrade` runs.
 library;
 
 import 'dart:io';
@@ -68,10 +68,23 @@ void main() {
     raw.execute('PRAGMA foreign_keys = ON');
     raw.close();
 
-    final before = sqlite3.sqlite3.open(path);
-    expect(before.select('PRAGMA user_version').first['user_version'], 16);
+    // Populate representative pre-6A data while still on schema 16.
+    final pre = sqlite3.sqlite3.open(path);
+    expect(pre.select('PRAGMA user_version').first['user_version'], 16);
+    pre.execute(
+      "INSERT OR IGNORE INTO households (id, name, owner_user_id, created_at, updated_at) "
+      "VALUES ('hh-mig', 'Migrate HH', 'u1', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
+    pre.execute(
+      "INSERT OR IGNORE INTO financial_accounts "
+      "(id, household_id, name, type, owner_type, fund_purpose, currency_code, "
+      "is_spendable, is_protected, include_in_net_worth, include_in_zakat, "
+      "is_archived, display_order, created_by, created_at, updated_at) "
+      "VALUES ('acc-mig', 'hh-mig', 'Cash', 'personalCashWallet', 'user', 'available', "
+      "'EGP', 1, 0, 1, 0, 0, 0, 'test', '2024-01-01T00:00:00Z', '2024-01-01T00:00:00Z')",
+    );
     expect(
-      before
+      pre
           .select(
             "SELECT COUNT(*) AS c FROM sqlite_master "
             "WHERE type='table' AND name='savings_certificates'",
@@ -79,7 +92,21 @@ void main() {
           .first['c'],
       0,
     );
-    before.close();
+    final hhCountBefore =
+        pre
+                .select(
+                  "SELECT COUNT(*) AS c FROM households WHERE id='hh-mig'",
+                )
+                .first['c']
+            as int;
+    final accCountBefore =
+        pre
+                .select(
+                  "SELECT COUNT(*) AS c FROM financial_accounts WHERE id='acc-mig'",
+                )
+                .first['c']
+            as int;
+    pre.close();
 
     final db = AppDatabase.forFile(path);
     addTearDown(db.close);
@@ -114,6 +141,39 @@ void main() {
           .first
           .read<int>('c'),
       1,
+    );
+    expect(
+      (await db
+              .customSelect(
+                "SELECT COUNT(*) as c FROM sqlite_master "
+                "WHERE type='trigger' AND name='validate_certificate_purchase_event'",
+              )
+              .get())
+          .first
+          .read<int>('c'),
+      1,
+    );
+
+    // Pre-6A rows survive upgrade (onUpgrade, not onCreate evidence).
+    expect(
+      (await db
+              .customSelect(
+                "SELECT COUNT(*) as c FROM households WHERE id='hh-mig'",
+              )
+              .get())
+          .first
+          .read<int>('c'),
+      hhCountBefore,
+    );
+    expect(
+      (await db
+              .customSelect(
+                "SELECT COUNT(*) as c FROM financial_accounts WHERE id='acc-mig'",
+              )
+              .get())
+          .first
+          .read<int>('c'),
+      accCountBefore,
     );
   });
 }

@@ -123,12 +123,12 @@ void main() {
   });
 
   group('CertificateProgress derived properties', () {
-    CertificateProgress _makeProgress({
+    CertificateProgress makeProgress({
       required CertificateTermState termState,
       required CertificateLifecycle lifecycle,
       required int balance,
     }) {
-      final rev = CertificateRevision(
+      const rev = CertificateRevision(
         id: 'rev1',
         certificateId: 'c1',
         householdId: 'hh1',
@@ -162,7 +162,7 @@ void main() {
     }
 
     test('8. canRedeem: true when active + matured + balance > 0', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.matured,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -171,7 +171,7 @@ void main() {
     });
 
     test('8b. canRedeem: false when balance == 0', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.matured,
         lifecycle: CertificateLifecycle.active,
         balance: 0,
@@ -180,7 +180,7 @@ void main() {
     });
 
     test('8c. canRedeem: false when activeTerm', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.activeTerm,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -189,7 +189,7 @@ void main() {
     });
 
     test('9. canRecordProfit: false when archived', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.fullyRedeemed,
         lifecycle: CertificateLifecycle.archived,
         balance: 0,
@@ -198,7 +198,7 @@ void main() {
     });
 
     test('9b. canRecordProfit: true when active', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.activeTerm,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -207,7 +207,7 @@ void main() {
     });
 
     test('20. isMaturedOrOverdue: true for matured', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.matured,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -216,7 +216,7 @@ void main() {
     });
 
     test('21. isMaturedOrOverdue: true for overdueRedemption', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.overdueRedemption,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -225,7 +225,7 @@ void main() {
     });
 
     test('22. isMaturedOrOverdue: false for activeTerm', () {
-      final p = _makeProgress(
+      final p = makeProgress(
         termState: CertificateTermState.activeTerm,
         lifecycle: CertificateLifecycle.active,
         balance: 100000,
@@ -235,7 +235,7 @@ void main() {
   });
 
   test('10. CertificateRedemptionSummary.combinedCashMinorUnits', () {
-    final rev = CertificateRevision(
+    const rev = CertificateRevision(
       id: 'rev1',
       certificateId: 'c1',
       householdId: 'hh1',
@@ -243,7 +243,7 @@ void main() {
       createdAt: '2025-01-01',
       revisionReason: 'initial',
     );
-    final cert = SavingsCertificate(
+    const cert = SavingsCertificate(
       id: 'c1',
       householdId: 'hh1',
       certificateAccountId: 'ca1',
@@ -257,7 +257,7 @@ void main() {
       idempotencyKey: 'k',
       schemaVersion: 1,
     );
-    final summary = CertificateRedemptionSummary(
+    const summary = CertificateRedemptionSummary(
       certificate: cert,
       principalMinorUnits: 100000,
       profitMinorUnits: 5000,
@@ -307,7 +307,7 @@ void main() {
   });
 
   group('Idempotency payload', () {
-    CertificateRevision _rev(String institution) => CertificateRevision(
+    CertificateRevision rev0(String institution) => CertificateRevision(
       id: 'r',
       certificateId: 'c',
       householdId: 'hh',
@@ -316,7 +316,7 @@ void main() {
       revisionReason: 'initial',
     );
 
-    SavingsCertificate _cert({
+    SavingsCertificate cert0({
       String hh = 'hh',
       String institution = 'BankA',
       String currency = 'EGP',
@@ -331,14 +331,14 @@ void main() {
         startDate: '2025-01-01',
         maturityDate: '2026-01-01',
         lifecycle: CertificateLifecycle.active,
-        currentRevision: _rev(institution),
+        currentRevision: rev0(institution),
         createdAt: '2025-01-01',
         idempotencyKey: 'key',
         schemaVersion: 1,
       );
     }
 
-    String _payload(SavingsCertificate c) =>
+    String payload(SavingsCertificate c) =>
         'hh=${c.householdId}|'
         'inst=${c.currentRevision.institutionName}|'
         'ref=${c.currentRevision.reference ?? ''}|'
@@ -351,26 +351,26 @@ void main() {
         'src=fundedAtCreate';
 
     test('16. different principals produce different payloads', () {
-      final p1 = _payload(_cert(principal: 100000));
-      final p2 = _payload(_cert(principal: 200000));
+      final p1 = payload(cert0(principal: 100000));
+      final p2 = payload(cert0(principal: 200000));
       expect(p1, isNot(p2));
     });
 
     test('17. different institutions produce different payloads', () {
-      final p1 = _payload(_cert(institution: 'BankA'));
-      final p2 = _payload(_cert(institution: 'BankB'));
+      final p1 = payload(cert0(institution: 'BankA'));
+      final p2 = payload(cert0(institution: 'BankB'));
       expect(p1, isNot(p2));
     });
 
     test('18. different currencies produce different payloads', () {
-      final p1 = _payload(_cert(currency: 'EGP'));
-      final p2 = _payload(_cert(currency: 'USD'));
+      final p1 = payload(cert0(currency: 'EGP'));
+      final p2 = payload(cert0(currency: 'USD'));
       expect(p1, isNot(p2));
     });
 
     test('19. stable across two invocations with same data', () {
-      final c = _cert();
-      expect(_payload(c), _payload(c));
+      final c = cert0();
+      expect(payload(c), payload(c));
     });
   });
 }
