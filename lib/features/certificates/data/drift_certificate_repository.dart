@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
+import 'package:family_money_manager/core/database/scoped_idempotency.dart';
 import 'package:family_money_manager/core/database/sqlite_contention_policy.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -414,7 +415,11 @@ final class DriftCertificateRepository implements CertificateRepository {
         if (existing.isNotEmpty) {
           final row = existing.first;
           final stored = row.read<String>('idempotency_payload');
-          if (stored == incomingPayload) {
+          final decision = decideStringFingerprint(
+            incoming: incomingPayload,
+            stored: stored,
+          );
+          if (decision == ScopedIdempotencyDecision.replay) {
             final found = await _findById(row.read<String>('id'));
             return found != null ? AppOk(found) : const AppPersistenceFailure();
           }

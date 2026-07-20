@@ -10,6 +10,14 @@ enum GoalTransferWriteResult {
 }
 
 /// Kind of goal-associated transfer handled by the unified write boundary.
+///
+/// ## Persisted operation type (Phase 6B.1 audit — document only)
+///
+/// Funding and release insert `operations.type = 'transfer'` with
+/// `transferOut` / `transferIn` ledger legs. Goal association is via
+/// `goal_movements`, not a distinct operation type. Ordinary household
+/// transfers use the same `type` code; do not change persisted types without
+/// a separately approved migration.
 enum GoalAssociatedTransferKind { funding, release, reversal }
 
 /// Steps used for failure injection inside the unified write boundary.

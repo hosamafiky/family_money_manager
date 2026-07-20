@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/app_database.dart';
+import 'package:family_money_manager/core/database/scoped_idempotency.dart';
 import 'package:family_money_manager/core/database/sqlite_contention_policy.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -1541,12 +1542,25 @@ final class DriftGoalRepository implements GoalRepository {
     required String? sourceAccountId,
     required String? destinationAccountId,
   }) {
-    return row.read<String>('type') == expectedType &&
-        row.read<int>('total_amount_minor_units') == amount &&
-        row.read<String>('currency_code') == currency &&
-        row.readNullable<String>('source_account_id') == sourceAccountId &&
-        row.readNullable<String>('destination_account_id') ==
-            destinationAccountId;
+    return decideOperationFingerprint(
+          incoming: OperationIdempotencyFingerprint(
+            type: expectedType,
+            amountMinorUnits: amount,
+            currencyCode: currency,
+            sourceAccountId: sourceAccountId,
+            destinationAccountId: destinationAccountId,
+          ),
+          existingType: row.read<String>('type'),
+          existingAmountMinorUnits: row.read<int>('total_amount_minor_units'),
+          existingCurrencyCode: row.read<String>('currency_code'),
+          existingSourceAccountId: row.readNullable<String>(
+            'source_account_id',
+          ),
+          existingDestinationAccountId: row.readNullable<String>(
+            'destination_account_id',
+          ),
+        ) ==
+        ScopedIdempotencyDecision.replay;
   }
 
   Future<bool> _isCompleteGoalTransferWorkflow({
