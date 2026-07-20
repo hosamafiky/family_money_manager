@@ -1,692 +1,224 @@
-# Architecture
+# Architecture — Family Money Manager
 
-**Version:** 0.1.0-phase0  
-**Date:** 2026-07-15
+**Version:** 6B.1  
+**Date:** 2026-07-20  
+**Schema version:** **18**  
+**Companion:** `docs/REFACTOR_AUDIT.md`, `docs/FINANCIAL_INVARIANTS.md`, `docs/LOCAL_DATABASE_SCHEMA.md`
 
----
-
-## 1. Architectural Goals
-
-1. **Financial correctness is paramount.** The architecture must be designed to minimize the risk of accidentally bypassing financial invariants, even in the face of concurrent writes, offline operation, or future feature additions. No architecture eliminates all bypass risk; defense-in-depth is required.
-2. **Feature-first organization.** Code is organized by feature domain, not by layer. Each feature is self-contained with its own domain, data, application, and presentation sub-layers.
-3. **Domain independence.** Domain logic (financial calculations, invariant enforcement) must not depend on Flutter, Firebase, SQLite, or any external library.
-4. **Testability.** Every financial calculation must be testable in pure Dart without any Flutter framework, any network, or any database.
-5. **Offline-first.** Local SQLite is the primary database. Cloud sync is optional and additive.
-6. **Security by design.** Sensitive operations require authentication. Data is encrypted at rest and in transit.
-7. **Localization-first.** All user-visible strings go through the localization system. No hardcoded strings in UI code.
+This document describes the **as-built** architecture after Phases 0–6A.4. Planned-but-unimplemented modules (auth, sync, encryption key injection, gold/Zakat calculators, net worth, etc.) are noted as deferred — not present in `lib/`.
 
 ---
 
-## 2. Dependency Graph (planned; to be enforced by code review, linter rules, and import restrictions)
+## 1. Goals
+
+1. **Financial correctness first** — append-only ledger, DB triggers as last-line defense, typed insufficient-funds / idempotency outcomes.
+2. **Feature-first layout** — each feature owns domain / application / data / presentation as needed.
+3. **Domain purity** — domain is Flutter-free and Drift-free.
+4. **Offline-local authority** — SQLite via Drift is the system of record; cloud sync is deferred.
+5. **Localization** — user-visible strings via generated `AppLocalizations` (ARB).
+6. **Integer money** — amounts are minor units (`int`); no `double` ledger math; no `/100` in features.
+
+---
+
+## 2. Dependency direction
 
 ```
 presentation  →  application  →  domain
-presentation  →  core/ui
-application   →  core/database
-application   →  core/sync
-application   →  core/security
-domain        →  (no dependencies; pure Dart only)
-core          →  (each core module may depend on other core modules; no feature dependencies)
+                              ↓
+                    repository interfaces (often under features/*/data)
+
+data / infrastructure  →  domain + repository interfaces
+                       →  Drift / AppDatabase (implementation only)
 ```
 
-Forbidden:
-- `domain` imports Flutter, Firebase, or SQLite
-- `presentation` calls repository methods directly (must go through `application`)
-- `application` returns database model objects to `presentation` (must map to domain or UI models)
+**Forbidden:**
+
+| From | Must not depend on |
+|------|-------------------|
+| `domain/` | Flutter, Riverpod, Drift, `AppDatabase` |
+| `presentation/` | Drift, `AppDatabase`, constructing ledger rows / SQL |
+| `application/` | Drift companions / table types (prefer repository interfaces) |
+| Widgets | Business balance math, raw SQLite errors, translated persistence IDs |
+
+**Allowed:**
+
+- Presentation → application use cases + Riverpod providers + domain view models
+- Application → repository interfaces + domain + `AppResult`
+- Data (`Drift*Repository`) → `AppDatabase` + domain mapping
+- Core database / financial utilities shared across features
 
 ---
 
-## 3. Project Structure
+## 3. Layers
 
-```
-family_money_manager/
-  lib/
-    app/
-      app.dart                   // MaterialApp / root widget
-      app_config.dart            // branding, package name, currency, locale
-      app_theme.dart             // light/dark theme
-      app_router.dart            // GoRouter configuration
-    core/
-      database/
-        app_database.dart        // Drift database definition
-        database_migrations.dart
-        tables/                  // Drift table definitions (one file per table)
-      financial/
-        money.dart               // Money value type
-        money_arithmetic.dart    // add, subtract, percentage calculations
-        money_formatter.dart     // formatting for display (EGP, etc.)
-        ledger_calculator.dart   // balance computation from ledger entries
-        net_worth_calculator.dart
-        zakat_calculator.dart
-        gold_calculator.dart
-      localization/
-        app_localizations.dart   // generated
-        l10n/
-          app_ar.arb
-          app_en.arb
-      navigation/
-        app_router.dart
-        route_names.dart
-        typed_routes.dart
-      security/
-        app_lock_service.dart
-        biometric_service.dart
-        pin_service.dart
-        secure_storage_service.dart
-        privacy_mode_notifier.dart
-      sync/
-        sync_queue.dart
-        sync_service.dart
-        firestore_sync_adapter.dart
-        conflict_resolver.dart
-        sync_status_notifier.dart
-      ui/
-        design_system/
-          colors.dart
-          typography.dart
-          spacing.dart
-          icons.dart
-        widgets/
-          money_display.dart
-          account_card.dart
-          loading_overlay.dart
-          error_display.dart
-          confirmation_dialog.dart
-          protected_fund_warning_dialog.dart
-      utils/
-        date_utils.dart
-        uuid_generator.dart
-        logger.dart              // redacted logger
-        validators.dart
-        result.dart              // Result<T, E> type
-    features/
-      auth/
-        domain/
-          auth_repository.dart   // interface
-        data/
-          firebase_auth_repository.dart
-        application/
-          auth_notifier.dart
-        presentation/
-          login_screen.dart
-          register_screen.dart
-          password_reset_screen.dart
-      onboarding/
-        domain/
-          onboarding_model.dart
-        application/
-          onboarding_notifier.dart
-        presentation/
-          onboarding_screen.dart
-          language_step.dart
-          household_step.dart
-          accounts_step.dart
-      dashboard/
-        domain/
-          dashboard_summary.dart
-        application/
-          dashboard_notifier.dart
-        presentation/
-          dashboard_screen.dart
-          net_worth_card.dart
-          account_summary_card.dart
-          spending_summary_card.dart
-          spouse_wallet_card.dart
-          child_fund_card.dart
-          recent_transactions_list.dart
-      accounts/
-        domain/
-          financial_account.dart       // domain model
-          account_repository.dart      // interface
-        data/
-          account_dao.dart
-          account_repository_impl.dart
-        application/
-          accounts_notifier.dart
-          account_balance_notifier.dart
-        presentation/
-          accounts_screen.dart
-          account_detail_screen.dart
-          add_account_screen.dart
-          edit_account_screen.dart
-      transactions/
-        domain/
-          operation.dart
-          ledger_entry.dart
-          income_request.dart
-          expense_request.dart
-          operation_repository.dart    // interface
-        data/
-          operation_dao.dart
-          ledger_entry_dao.dart
-          operation_repository_impl.dart
-        application/
-          add_income_notifier.dart
-          add_expense_notifier.dart
-          transactions_list_notifier.dart
-        presentation/
-          add_income_screen.dart
-          add_expense_screen.dart
-          transaction_detail_screen.dart
-          transactions_list_screen.dart
-      transfers/
-        domain/
-          transfer_request.dart
-          transfer_result.dart
-          transfer_repository.dart
-        data/
-          transfer_repository_impl.dart
-        application/
-          transfer_notifier.dart
-        presentation/
-          transfer_screen.dart
-          transfer_detail_screen.dart
-      household/
-        domain/
-          household.dart
-          household_repository.dart
-        data/
-          household_repository_impl.dart
-        application/
-          household_notifier.dart
-        presentation/
-          household_screen.dart
-          spouse_wallet_screen.dart
-          household_expense_screen.dart
-      members/
-        domain/
-          household_member.dart
-        application/
-          members_notifier.dart
-        presentation/
-          members_screen.dart
-      budgets/
-        domain/
-          budget.dart
-          budget_calculator.dart
-          budget_repository.dart
-        data/
-          budget_repository_impl.dart
-        application/
-          budgets_notifier.dart
-          budget_detail_notifier.dart
-        presentation/
-          budgets_screen.dart
-          add_budget_screen.dart
-          budget_detail_screen.dart
-      goals/
-        domain/
-          goal.dart
-          goal_repository.dart
-        data/
-          goal_repository_impl.dart
-        application/
-          goals_notifier.dart
-          goal_funding_notifier.dart
-        presentation/
-          goals_screen.dart
-          add_goal_screen.dart
-          goal_detail_screen.dart
-      savings/
-        domain/
-          savings_account.dart
-        application/
-          savings_notifier.dart
-        presentation/
-          savings_screen.dart
-      gold/
-        domain/
-          gold_holding.dart
-          gold_repository.dart
-        data/
-          gold_repository_impl.dart
-        application/
-          gold_notifier.dart
-          buy_gold_notifier.dart
-          sell_gold_notifier.dart
-        presentation/
-          gold_screen.dart
-          buy_gold_screen.dart
-          sell_gold_screen.dart
-          gold_detail_screen.dart
-      certificates/
-        domain/
-          certificate.dart
-          certificate_repository.dart
-        data/
-          certificate_repository_impl.dart
-        application/
-          certificates_notifier.dart
-          create_certificate_notifier.dart
-        presentation/
-          certificates_screen.dart
-          create_certificate_screen.dart
-          certificate_detail_screen.dart
-      liabilities/
-        domain/
-          liability.dart
-          liability_repository.dart
-        data/
-          liability_repository_impl.dart
-        application/
-          liabilities_notifier.dart
-          repay_liability_notifier.dart
-        presentation/
-          liabilities_screen.dart
-          add_liability_screen.dart
-          repay_liability_screen.dart
-          liability_detail_screen.dart
-      net_worth/
-        domain/
-          net_worth_snapshot.dart
-        application/
-          net_worth_notifier.dart
-        presentation/
-          net_worth_screen.dart
-          net_worth_breakdown.dart
-          net_worth_history_chart.dart
-      reports/
-        domain/
-          report_filter.dart
-          report_result.dart
-          report_repository.dart
-        data/
-          report_repository_impl.dart
-        application/
-          reports_notifier.dart
-        presentation/
-          reports_screen.dart
-          spending_report_screen.dart
-          cash_flow_report_screen.dart
-          asset_trend_screen.dart
-      zakat/
-        domain/
-          zakat_calculation.dart
-          zakat_calculator.dart
-          zakat_repository.dart
-        data/
-          zakat_repository_impl.dart
-        application/
-          zakat_notifier.dart
-        presentation/
-          zakat_screen.dart
-          zakat_setup_screen.dart
-          zakat_breakdown_screen.dart
-      sadaqah/
-        domain/
-          sadaqah_record.dart
-          sadaqah_repository.dart
-        data/
-          sadaqah_repository_impl.dart
-        application/
-          sadaqah_notifier.dart
-        presentation/
-          sadaqah_screen.dart
-          add_sadaqah_screen.dart
-      notifications/
-        domain/
-          notification_rule.dart
-        application/
-          notification_service.dart
-        presentation/
-          notifications_screen.dart
-      backup/
-        domain/
-          backup_manifest.dart
-          backup_service.dart
-        data/
-          backup_service_impl.dart
-          backup_encryptor.dart
-        application/
-          backup_notifier.dart
-          restore_notifier.dart
-        presentation/
-          backup_screen.dart
-          restore_screen.dart
-          import_preview_screen.dart
-      settings/
-        domain/
-          app_settings.dart
-          settings_repository.dart
-        data/
-          settings_repository_impl.dart
-        application/
-          settings_notifier.dart
-        presentation/
-          settings_screen.dart
-          security_settings_screen.dart
-          sync_settings_screen.dart
-          category_management_screen.dart
-  test/
-    unit/
-      core/
-        financial/
-      features/
-        accounts/
-        transactions/
-        transfers/
-        household/
-        ...
-    widget/
-      features/
-        ...
-    integration/
-      ...
-    helpers/
-      test_database.dart
-      test_factories.dart
-      fake_repositories.dart
-  firestore_rules/
-    firestore.rules
-    test/
-      rules_test.js
-  docs/
-    (all planning documents)
-```
+### 3.1 Presentation
+
+- Screens, form widgets, Riverpod `Provider` / `FutureProvider` wiring
+- Formats money for display via integer-safe formatters
+- Filters account pickers for UX convenience only — **not** sole enforcement
+- Feature-owned invalidation helpers (e.g. goal/certificate money vs lifecycle)
+- No Drift imports; no direct ledger inserts
+
+### 3.2 Application
+
+- Use cases orchestrate validation + repository calls
+- Map domain/repo outcomes to `AppResult` / UI message keys
+- Own eligibility checks that reject restricted accounts even if UI is bypassed
+- Must not import Drift table companions
+
+### 3.3 Domain
+
+- Pure Dart entities, enums, value rules (goals, certificates, accounts, operations)
+- Financial enums and money types live under `lib/core/financial/` (shared domain-adjacent)
+- No Flutter / Drift / Riverpod
+
+### 3.4 Data / infrastructure
+
+- `AppDatabase` (schema 18) owns migrations, triggers, indexes
+- `Drift*Repository` implementations are the write/query boundary
+- `SqliteContentionPolicy` standardizes SQLITE_BUSY/LOCKED retry for authoritative writers
+- Ledger repository is the authority for ordinary I/E/transfer/opening/adjustment/reversal
 
 ---
 
-## 4. State Management
+## 4. Features (as-built)
 
-**Choice: Riverpod (v2)**
+| Feature | Role |
+|---------|------|
+| **ledger** | Authoritative financial operations + ledger entries + protected withdrawal audits |
+| **accounts** | Financial account CRUD/classification; opening balance via ledger |
+| **balance** | Derived balances from ledger |
+| **transactions** | Income/expense/transfer UX + history queries |
+| **goals** | Savings goals with `goalReserve` accounts + goal-associated transfers |
+| **certificates** | Savings certificates with dedicated certificate accounts |
+| **budgets** | Budget plans and progress |
+| **dashboard** | Period summary queries |
+| **reports** | Read-only analytical reports |
+| **household** | Members / roles |
+| **shell / onboarding / settings / smoke** | App chrome and scaffolding |
 
-Rationale:
-- Compile-time safety for providers.
-- AsyncNotifier for async operations.
-- Testable without Flutter context.
-- No global mutable state (providers are scoped).
-- Native support for keeping UI and state in sync.
-- StreamProvider integrates cleanly with Drift database streams.
-
-Pattern:
-- `domain/` defines interfaces and models — no Riverpod.
-- `data/` implements interfaces — no Riverpod.
-- `application/` defines Riverpod providers and Notifiers.
-- `presentation/` uses `ref.watch` and `ref.read` on providers.
-
-No `BuildContext.read()` or direct instantiation of notifiers in widgets.
+Deferred product areas (not implemented): gold, investments, liabilities, net worth UI, Zakat/sadaqah, sync, auth, encryption-at-rest activation, backup, PIN/biometrics, notifications, voice, AI, exports, automatic recurring execution.
 
 ---
 
-## 5. Local Database
+## 5. Shared core
 
-**Choice: Drift (formerly Moor)**
-
-Rationale:
-- Type-safe SQL queries in Dart.
-- Native SQLite support on Android and iOS.
-- Code generation for tables, queries, and DAOs.
-- Stream support for reactive UI.
-- Migration support with version tracking.
-- Well-maintained, production-tested.
-
-Alternative considered: `sqflite` directly — rejected because Drift provides type safety and code generation that reduces financial calculation bugs.
-
-**Open:** The SQLite driver (standard vs. SQLCipher encrypted) is an open decision (DECISION-004) that must be resolved before Phase 2 begins. See `DECISIONS.md`. The database driver selection affects `pubspec.yaml`, platform configuration on Android and iOS, key storage, and the backup/restore flow. A platform spike during Phase 1 is recommended before committing to either option.
+| Path | Responsibility |
+|------|----------------|
+| `core/database/` | `AppDatabase`, tables, contention policy, providers |
+| `core/financial/` | `Money`, `Currency`, ledger/account enums, ledger calculator |
+| `core/application/app_result.dart` | Typed app outcomes |
+| `core/error/` | App errors |
+| `core/presentation/money_input_formatter.dart` | Parse/format without doubles |
+| `core/localization/` | Generated l10n |
+| `core/logging/` | Redacted logging |
+| `core/navigation/` | Route helpers |
+| `app/` | Router, theme, config, root providers |
 
 ---
 
-## 6. Navigation
+## 6. Database ownership
 
-**Choice: GoRouter**
+- **Single schema owner:** `AppDatabase` (`schemaVersion => 18`).
+- **Generated code:** `app_database.g.dart` — never hand-edited; regenerate via `build_runner` when tables change (not expected in 6B.1).
+- **Triggers/indexes:** Applied in `onCreate` / `onUpgrade`; names are stable contracts for tests.
+- **Migrations:** Additive version chain 1→18; do not collapse or renumber in refactor phases.
+- **WAL + foreign_keys:** Enabled in `beforeOpen`.
 
-- Typed routes via code generation (`go_router_builder`).
-- Deep link support.
-- Nested navigation for tab bar.
-- Authentication guard middleware.
-- App lock guard: redirects to lock screen if app is locked.
-
----
-
-## 7. Dependency Injection
-
-Riverpod providers serve as the DI container.
-
-- Repositories are instantiated as providers.
-- Services are instantiated as providers.
-- Test overrides are done via `ProviderContainer` overrides.
-- No service locator (GetIt) — Riverpod replaces it.
+Schema-helper extraction (6B.1) may move `_apply*` methods into part/collaborator files **without** changing SQL text, trigger names, or version.
 
 ---
 
-## 8. Error Handling
+## 7. Ledger authority
 
-Central error model:
+- Ordinary income, expense, transfer, opening balance, adjustment, and reverse go through `LedgerRepository` / `DriftLedgerRepository`.
+- Goal funding/release/reversal write operations + legs inside the goal repository’s transactional boundary (associated transfer), still subject to the same non-negative balance trigger.
+- Certificate purchase/profit/redeem/reversal write inside the certificate repository’s transactional boundary.
+- **Balances** are derived from ledger entries; DB trigger `prevent_negative_account_balance` is last-line debit safety (Phase 6A.2).
 
-```dart
-sealed class AppError {
-  const AppError();
-}
+### Operation-type note (goals)
 
-final class InsufficientFundsError extends AppError {
-  final Money available;
-  final Money required;
-}
-
-final class DuplicateOperationError extends AppError {
-  final String operationId;
-}
-
-final class ProtectedFundWithdrawalError extends AppError {
-  final String accountId;
-}
-
-final class InvalidTransferError extends AppError {
-  final String reason;
-}
-
-final class DatabaseError extends AppError {
-  final String message;
-}
-
-final class NetworkError extends AppError {
-  final int? statusCode;
-}
-
-final class AuthError extends AppError {}
-
-final class BackupError extends AppError {
-  final String reason;
-}
-```
-
-All repository methods return `Result<T, AppError>`.
-
-```dart
-sealed class Result<T, E> {
-  const Result();
-}
-final class Ok<T, E> extends Result<T, E> {
-  final T value;
-  const Ok(this.value);
-}
-final class Err<T, E> extends Result<T, E> {
-  final E error;
-  const Err(this.error);
-}
-```
+Goal funding/release persist `operations.type = 'transfer'` with transfer-in/out legs. Goal association is via `goal_movements`, not a separate operation type. See `REFACTOR_AUDIT.md` §5 — **document only** in 6B.1.
 
 ---
 
-## 9. Logging
+## 8. Use cases & repositories
 
-A `RedactedLogger` wraps any log output.
-
-Rules:
-- NEVER log Money amounts or minor units.
-- NEVER log account balances.
-- NEVER log auth tokens.
-- NEVER log personal names.
-- NEVER log AI request or response bodies.
-- Log level in production: WARNING and above.
-- Log level in debug: INFO and above.
-- Log IDs (UUIDs) are acceptable.
-- Log operation types are acceptable.
-- Log error codes are acceptable.
-
-```dart
-class RedactedLogger {
-  void info(String message, {Map<String, dynamic>? context});
-  void warning(String message, {Map<String, dynamic>? context, Object? error});
-  void error(String message, {Map<String, dynamic>? context, Object? error, StackTrace? stackTrace});
-}
-```
-
-No raw print() in any production code.
+- Interfaces typically live beside Drift impls under `features/*/data/` (e.g. `ledger_repository.dart`).
+- Use cases depend on interfaces, not Drift helpers.
+- Collaborators extracted from Drift repos are **internal** to the data layer and share the same transaction / contention context as the façade.
 
 ---
 
-## 10. Key Packages (Shortlist)
+## 9. Riverpod
 
-| Package | Purpose | Justification |
-|---|---|---|
-| `flutter_riverpod` | State management | Compile-safe, testable |
-| `riverpod_annotation` | Code generation | Reduces boilerplate |
-| `drift` | Local SQLite | Type-safe queries, migrations |
-| `drift_flutter` | Drift SQLite support | Platform bindings |
-| `go_router` | Navigation | Deep links, typed routes |
-| `go_router_builder` | Route code gen | Type-safe navigation |
-| `firebase_core` | Firebase base | Required for all Firebase |
-| `firebase_auth` | Authentication | User identity |
-| `cloud_firestore` | Cloud sync | Optional sync |
-| `flutter_secure_storage` | Secure key storage | Keychain/Keystore |
-| `local_auth` | Biometric unlock | Face ID, fingerprint |
-| `encrypt` | Backup encryption | AES-256 |
-| `intl` | i18n/l10n | Date, number, plural formatting |
-| `freezed` | Immutable models | Data class generation |
-| `freezed_annotation` | Freezed annotation | |
-| `json_serializable` | JSON serialization | Schema validation |
-| `uuid` | UUID generation | Stable IDs |
-| `path_provider` | File paths | Backup file location |
-| `fl_chart` | Charts | Net worth / spending trends |
-| `speech_to_text` | Voice input | Optional AI entry |
-| `flutter_local_notifications` | Local reminders | Budget, recurring alerts |
-| `share_plus` | Backup export | Share backup file |
-
-Packages intentionally avoided:
-- `get_it` — replaced by Riverpod
-- `provider` — replaced by Riverpod
-- `hive` / `isar` — replaced by Drift for financial data
-- Any live market data package — not in v1
-- Any remote AI SDK embedded in app — API proxy required
+- Feature `*_providers.dart` wire repositories, use cases, and `FutureProvider`s.
+- Invalidation is **feature-scoped** (money vs lifecycle for goals/certificates). Avoid a global “invalidate everything” default.
+- Household id is currently a known bootstrap constant in several providers (`household-v1`) — product constraint until multi-household auth lands (deferred).
 
 ---
 
-## 11. Security Architecture
+## 10. Routing & localization
 
-See `SECURITY_THREAT_MODEL.md` for full threat model.
-
-Summary:
-- App lock: PIN + biometric, auto-lock on background.
-- Secure storage: `flutter_secure_storage` for PIN hash, auth tokens.
-- PIN never stored raw: bcrypt (or SHA-256 + salt stored in secure storage).
-- Screenshots: blocked in production via `FLAG_SECURE` (Android), `ignoresScreenshots: true` (iOS).
-- App switcher: blur overlay applied when app backgrounds.
-- Firestore rules: deny-by-default; each user can only read/write their own household.
+- `app/app_router.dart` — GoRouter routes; preserve paths/visible navigation in 6B.1.
+- ARB → `AppLocalizations`; persistence stores **codes**, never translated labels.
+- Do not change visible wording substantially during structural cleanup.
 
 ---
 
-## 12. Offline-First Architecture
+## 11. Errors, idempotency, transactions, contention
 
-See `OFFLINE_SYNC_STRATEGY.md` for full strategy.
+| Topic | Rule |
+|-------|------|
+| Errors | Map to typed domain/`AppResult` outcomes; never leak raw SQLite to UI callers |
+| Idempotency | Scoped `(household_id, idempotency_key)` + payload fingerprint / field equivalence |
+| Replay | Same key + equivalent payload → success / already-exists style `AppOk` |
+| Conflict | Same key + mismatched payload → `AppDuplicateConflict` (or ledger `conflict`) |
+| Tx boundaries | Authoritative multi-row writes in one Drift `transaction` (`BEGIN IMMEDIATE`) |
+| Contention | `runAuthoritativeWriteWithContentionRetry`; on exhaustion re-read idempotency where applicable |
+| Invalidation | Feature coordinators after successful mutations |
 
-Summary:
-1. All financial operations are written to local SQLite first.
-2. Operations are added to the sync queue with status `pending`.
-3. When connectivity is available, the sync service uploads pending items.
-4. The server validates each item (schema, auth, idempotency).
-5. On success: item marked `synced`.
-6. On conflict: item marked `conflict`, surfaced to user.
-7. The app never blocks on the network for any financial operation.
-
----
-
-## 13. CI/CD
-
-**GitHub Actions (planned)**
-
-- On every PR:
-  - `dart format --set-exit-if-changed .`
-  - `flutter analyze`
-  - `flutter test` (unit + widget)
-  - Firebase Emulator tests (Firestore rules)
-- On main merge:
-  - All of the above
-  - `flutter build apk --release`
-  - `flutter build appbundle --release`
-  - `flutter build ios --no-codesign` (on macOS runner)
-- Code coverage target: >80% for domain and application layers.
+Feature-owned fingerprint **builders** remain in feature modules; shared infrastructure handles compare / replay / conflict / contention re-read patterns.
 
 ---
 
-## 14. Implementation Plan and Phase Boundaries
+## 12. Money formatting
 
-This section defines the precise scope of each implementation phase to prevent scope creep and out-of-order implementation.
+- Ledger and persistence: integer minor units only.
+- Display: `MoneyInputFormatter` (+ thin feature policies for non-negative → em-dash).
+- Parsing: integer arithmetic; Arabic-Indic digits supported.
+- Forbidden in features: `double` for money, `/100` scaling hacks.
 
-### Phase 0 — Planning (current)
-**Deliverables:** All documentation in `docs/`. No code.  
-**Gate:** All Phase 0 documents complete and internally consistent.
+---
 
-### Phase 1 — Project Foundation (infrastructure only, no financial code)
+## 13. Account eligibility
 
-**Scope — included:**
-- `flutter create .` executed inside the existing project root (preserves `docs/`)
-- `pubspec.yaml` with all planned dependencies from Section 10
-- `analysis_options.yaml` with strict lints
-- `dart_defines.json` / `app_config.dart` for branding, currency, locale
-- `l10n.yaml` and stub ARB files (`app_ar.arb`, `app_en.arb`) with placeholder keys
-- `AppTheme` with color tokens and typography (no financial widgets)
-- `GoRouter` with placeholder route stubs (no financial screens)
-- Riverpod `ProviderScope` root (no financial providers)
-- `AppError` sealed class hierarchy
-- `RedactedLogger` wrapper
-- `uuid_generator.dart` utility
-- `date_utils.dart` utility
-- `result.dart` (Result<T,E> type)
-- Drift database package wired up: `AppDatabase` class, `NativeDatabase` connection, WAL pragma, foreign keys pragma — **no table definitions, no financial schema**
-- Test helpers: `test/helpers/test_database.dart` (in-memory Drift), `test/helpers/fake_repositories.dart` (empty interfaces)
-- GitHub Actions CI skeleton
-- README stub
+- **DB / repository / use case** enforce that goal-reserve and certificate accounts are not ordinary I/E/transfer endpoints.
+- **UI filters** are convenience only.
+- Shared eligibility policies (6B.1) live in domain or application so widgets do not become the sole gate.
 
-**Scope — explicitly deferred to Phase 2:**
-- `Money` value type
-- `MoneyFormatter`
-- `MoneyArithmetic`
-- Any `core/financial/` module implementation
-- All Drift table definitions (financial_accounts, ledger_entries, operations, etc.)
-- All DAOs
-- Any repository interfaces or implementations
-- Any financial calculations
-- Any ledger logic
-- Opening balances, adjustments, reversals, audit events
-- Financial invariant tests
+---
 
-**Navigation placeholders:** GoRouter may contain route constants and named paths, but their `builder` must return only a placeholder widget (`const Placeholder()` or a bare `Scaffold` with route name text). No financial data, no account lists, no balance displays.
+## 14. Test classifications
 
-**Project creation safety note:**  
-The directory `/Users/hussam/Desktop/hussam/family_money_manager/` already exists and contains `docs/`. Running `flutter create family_money_manager` from the parent directory would fail (directory exists) or could overwrite files. The correct command is:
-```bash
-cd /Users/hussam/Desktop/hussam/family_money_manager
-flutter create --project-name family_money_manager --org com.familymoney .
-```
-This must be verified before execution to confirm `docs/` is preserved.
+| Class | Meaning |
+|-------|---------|
+| **Unit-tested** | Pure Dart, no DB |
+| **Database-tested** | Real/in-memory SQLite via Drift |
+| **Fake-tested** | Fake repository / in-memory doubles |
+| **Widget-tested** | Flutter widget tests |
+| **Documented only** | Spec/audit without automated proof |
+| **Unverified** | Claim without evidence — avoid in reports |
 
-### Phase 2 — Financial Ledger
+Financial integrity coverage must not be reduced by refactors. Splitting test files preserves intent; moves/renames are recorded in the phase report.
 
-**Precondition:** SQLCipher decision (DECISION-004) must be made before this phase begins. The database driver choice affects all table definitions.
+Architecture enforcement tests (6B.1) guard import/boundary rules listed above.
 
-**Scope — included (Phase 2 only):**
-- `Money` value type and arithmetic
-- `MoneyFormatter`
-- All Drift table definitions from `LOCAL_DATABASE_SCHEMA.md`
-- All DAOs and repository implementations
-- Ledger calculator and balance computation
-- Net-worth calculator
-- All operation types: income, expense, transfer, opening balance, adjustment, reversal
-- Financial invariant tests (all 18 invariants, all test cases in `TEST_STRATEGY.md` sections 3.1)
-- Idempotency constraints (UNIQUE constraints, duplicate detection)
+---
 
-**Gate:** All financial invariant tests must pass before Phase 3 begins. No exceptions.
+## 15. Explicit non-goals for Phase 6B.1
 
-### Phases 3–12
-These phases follow the original specification and are described in the product requirements document. Each phase's scope must be verified against this boundary definition before work begins.
+- UI redesign / design system restyle (→ 6B.2)
+- Schema version bump
+- Changing ledger/goal/certificate/idempotency/contention/currency/report/reversal/lifecycle **semantics**
+- Implementing deferred product modules listed in §4
