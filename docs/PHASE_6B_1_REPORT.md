@@ -1,7 +1,7 @@
 # Phase 6B.1 Report — Structural Refactor (No UI Redesign)
 
 **Branch:** `main`  
-**Final HEAD (docs pin):**   
+**Final HEAD (docs pin):** `4dd019d78f9d1c1259385d412cad6ed268ed5b54`  
 **Baseline HEAD:** `9c2ac0b04864cf49fa25af9737640671255792d1` (Phase 6A.4 docs pin)  
 **Phase 6A.4 feature:** `f3d4a159805a720c4689de5be113ef12aa06f470`  
 **Analyzer follow-up (6A.4):** `07d92103944035ce5a903adb8c0c2c888c265263`  
@@ -36,10 +36,12 @@
 | `0cfe675` | refactor: consolidate eligibility, money formatting, and tx invalidation |
 | `06eaee1` | test: add architecture boundary guards and refactor unit coverage |
 | `08b2439` | style: dart format AppDatabase schema helper parts |
-|  | docs: Phase 6B.1 report and validation evidence |
+| `a7b167b` | docs: Phase 6B.1 report and validation evidence |
+| `4dd019d` | docs: pin Phase 6B.1 report commit hash |
 
-**Final feature/work HEAD before docs pin:** 
-**Docs pin (this report):** `08b24397f70920a0126a9932736f759dff38f5cf`
+**Feature/work HEAD (pre-report):** `08b24397f70920a0126a9932736f759dff38f5cf`  
+**Report commit:** `a7b167b5a4a46f07555ab696efb87c2c8912959c`  
+**Docs pin HEAD:** `4dd019d78f9d1c1259385d412cad6ed268ed5b54`
 
 ---
 
