@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/household/domain/household_member.dart';
@@ -99,12 +100,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
               return Center(child: Text(l10n.errorGeneric));
             }
             final accounts = accountResult.value
-                .where(
-                  (a) =>
-                      !a.isArchived &&
-                      a.type != FinancialAccountType.goalReserve &&
-                      a.type != FinancialAccountType.certificate,
-                )
+                .where(AccountEligibility.isOrdinaryTransactionEndpoint)
                 .toList();
             final members = memberResult.value
                 .where((m) => m.isActive)

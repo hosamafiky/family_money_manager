@@ -1,8 +1,8 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_category.dart';
@@ -75,12 +75,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
             return Center(child: Text(l10n.errorGeneric));
           }
           final accounts = result.value
-              .where(
-                (a) =>
-                    !a.isArchived &&
-                    a.type != FinancialAccountType.goalReserve &&
-                    a.type != FinancialAccountType.certificate,
-              )
+              .where(AccountEligibility.isOrdinaryTransactionEndpoint)
               .toList();
 
           // Sync tracked account; clear preselected ID if account is now archived.

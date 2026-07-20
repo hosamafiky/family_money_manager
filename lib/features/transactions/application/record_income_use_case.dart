@@ -1,5 +1,5 @@
 import 'package:family_money_manager/core/application/app_result.dart';
-import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/features/accounts/application/account_eligibility_results.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
@@ -61,25 +61,11 @@ final class RecordIncomeUseCase {
     if (account == null) {
       return const AppNotFound();
     }
-    // Goal reserve / certificate accounts are managed by feature use cases.
-    if (account.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
-      );
-    }
-    if (account.type == FinancialAccountType.certificate) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
-      );
-    }
-    if (account.isArchived) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorAccountArchived',
-      );
-    }
+    final endpointFailure = ordinaryEndpointFailure<String>(
+      account,
+      field: 'destinationAccountId',
+    );
+    if (endpointFailure != null) return endpointFailure;
     if (account.currencyCode != ctx.currencyCode) {
       return const AppValidationFailure(
         field: 'currencyCode',

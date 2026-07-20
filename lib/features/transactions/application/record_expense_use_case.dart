@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/features/accounts/application/account_eligibility_results.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/household/data/household_repository.dart';
 import 'package:family_money_manager/features/household/domain/household_member.dart';
@@ -80,26 +81,11 @@ final class RecordExpenseUseCase {
       householdId: ctx.householdId,
     );
     if (account == null) return const AppNotFound();
-    // Goal reserve accounts are managed exclusively by goal use cases.
-    if (account.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(
-        field: 'paymentAccountId',
-        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
-      );
-    }
-    // Certificate accounts are managed exclusively by certificate use cases.
-    if (account.type == FinancialAccountType.certificate) {
-      return const AppValidationFailure(
-        field: 'paymentAccountId',
-        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
-      );
-    }
-    if (account.isArchived) {
-      return const AppValidationFailure(
-        field: 'paymentAccountId',
-        messageKey: 'errorAccountArchived',
-      );
-    }
+    final endpointFailure = ordinaryEndpointFailure<String>(
+      account,
+      field: 'paymentAccountId',
+    );
+    if (endpointFailure != null) return endpointFailure;
     if (account.currencyCode != ctx.currencyCode) {
       return const AppValidationFailure(
         field: 'currencyCode',

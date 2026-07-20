@@ -5,9 +5,7 @@ import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
-import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_context.dart';
-import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
 import 'package:family_money_manager/features/transactions/presentation/providers/transaction_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,12 +99,8 @@ class TransferReviewScreen extends ConsumerWidget {
         case AppOk():
           ref.read(transferFormKeyProvider.notifier).regenerateKey();
           ref.read(stagedTransferContextProvider.notifier).set(null);
-          ref.invalidate(
-            transactionListProvider((_householdId, const TransactionFilter())),
-          );
-          ref.invalidate(accountsProvider(_householdId));
-          ref.invalidate(accountBalanceProvider);
-          ref.invalidate(dashboardSummaryProvider(_householdId));
+          invalidateTransactionMoneyProviders(ref);
+
           context.go('/transactions');
         case AppInsufficientFunds():
           _snack(context, l10n.errorInsufficientFunds);

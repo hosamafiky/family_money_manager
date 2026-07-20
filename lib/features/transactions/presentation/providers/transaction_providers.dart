@@ -1,6 +1,8 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/database_providers.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
+
+import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/household/presentation/providers/household_providers.dart';
 import 'package:family_money_manager/features/transactions/application/execute_transfer_use_case.dart';
 import 'package:family_money_manager/features/transactions/application/get_spouse_wallet_summary_use_case.dart';
@@ -14,6 +16,18 @@ import 'package:family_money_manager/features/transactions/domain/transaction_fi
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+
+const _txHouseholdId = 'household-v1';
+
+/// Invalidates transaction list + account/dashboard consumers after money writes.
+void invalidateTransactionMoneyProviders(WidgetRef ref) {
+  ref.invalidate(
+    transactionListProvider((_txHouseholdId, const TransactionFilter())),
+  );
+  ref.invalidate(accountsProvider(_txHouseholdId));
+  ref.invalidate(accountBalanceProvider);
+  ref.invalidate(dashboardSummaryProvider(_txHouseholdId));
+}
 
 // ── Repository provider ───────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-/// Goal-screen money formatting — thin delegate to [MoneyInputFormatter].
+/// Goal-screen money formatting — thin delegate to [NonNegativeMoneyFormatter].
 ///
 /// All goal-related screens use [GoalMoneyFormatter.format] to convert integer
 /// minor units into a human-readable decimal string. Formatting arithmetic is
@@ -7,12 +7,10 @@
 /// negative balances (em-dash) — reserves must remain ≥ 0.
 library;
 
-import 'package:family_money_manager/core/financial/currency.dart';
-import 'package:family_money_manager/core/financial/money.dart';
-import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/core/presentation/non_negative_money_formatter.dart';
 
 /// Formats an integer [minorUnits] amount into a human-readable decimal string
-/// using the shared [MoneyInputFormatter] (integer-only arithmetic; no
+/// using the shared [NonNegativeMoneyFormatter] (integer-only arithmetic; no
 /// `.toDouble()`, no `/ 100.0`).
 ///
 /// Examples (EGP, scale=2):
@@ -31,20 +29,7 @@ import 'package:family_money_manager/core/presentation/money_input_formatter.dar
 final class GoalMoneyFormatter {
   const GoalMoneyFormatter._();
 
-  /// Formats [minorUnits] for the given [currencyCode] via [MoneyInputFormatter].
-  static String format(int minorUnits, String currencyCode) {
-    // Goal reserves are an invariant ≥ 0. Surface a sentinel rather than a
-    // signed amount if a ledger bug produces a negative derived balance.
-    if (minorUnits < 0) return '—';
-
-    late Currency currency;
-    try {
-      currency = Currency.fromCode(currencyCode);
-    } catch (_) {
-      currency = Currency.egp;
-    }
-    return MoneyInputFormatter.format(
-      Money(minorUnits: minorUnits, currency: currency),
-    );
-  }
+  /// Formats [minorUnits] for the given [currencyCode].
+  static String format(int minorUnits, String currencyCode) =>
+      NonNegativeMoneyFormatter.format(minorUnits, currencyCode);
 }

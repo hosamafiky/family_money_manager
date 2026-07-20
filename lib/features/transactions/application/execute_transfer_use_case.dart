@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/features/accounts/application/account_eligibility_results.dart';
 import 'package:family_money_manager/features/accounts/data/account_repository.dart';
 import 'package:family_money_manager/features/ledger/data/ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/child_withdrawal_audit.dart';
@@ -56,52 +57,22 @@ final class ExecuteTransferUseCase {
       householdId: ctx.householdId,
     );
     if (source == null) return const AppNotFound();
-    // Goal reserve accounts are managed exclusively by goal use cases.
-    if (source.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(
-        field: 'sourceAccountId',
-        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
-      );
-    }
-    // Certificate accounts are managed exclusively by certificate use cases.
-    if (source.type == FinancialAccountType.certificate) {
-      return const AppValidationFailure(
-        field: 'sourceAccountId',
-        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
-      );
-    }
-    if (source.isArchived) {
-      return const AppValidationFailure(
-        field: 'sourceAccountId',
-        messageKey: 'errorAccountArchived',
-      );
-    }
+    final sourceFailure = ordinaryEndpointFailure<String>(
+      source,
+      field: 'sourceAccountId',
+    );
+    if (sourceFailure != null) return sourceFailure;
 
     final destination = await _accounts.findById(
       id: ctx.destinationAccountId,
       householdId: ctx.householdId,
     );
     if (destination == null) return const AppNotFound();
-    // Goal reserve accounts are managed exclusively by goal use cases.
-    if (destination.type == FinancialAccountType.goalReserve) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorGoalReserveNotAllowedInOrdinaryTransaction',
-      );
-    }
-    // Certificate accounts are managed exclusively by certificate use cases.
-    if (destination.type == FinancialAccountType.certificate) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorCertificateAccountNotAllowedInOrdinaryTransaction',
-      );
-    }
-    if (destination.isArchived) {
-      return const AppValidationFailure(
-        field: 'destinationAccountId',
-        messageKey: 'errorAccountArchived',
-      );
-    }
+    final destinationFailure = ordinaryEndpointFailure<String>(
+      destination,
+      field: 'destinationAccountId',
+    );
+    if (destinationFailure != null) return destinationFailure;
     if (source.currencyCode != destination.currencyCode) {
       return const AppValidationFailure(
         field: 'currencyCode',
