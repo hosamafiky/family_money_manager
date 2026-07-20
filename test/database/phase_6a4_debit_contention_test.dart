@@ -190,7 +190,7 @@ void main() {
       () async {
         try {
           return await ledger1.reverseOperation(
-            ReverseOperationParams(
+            const ReverseOperationParams(
               originalOperationId: 'inc-rev-target',
               reversalOperationId: 'rev-inc',
               householdId: _hh,
