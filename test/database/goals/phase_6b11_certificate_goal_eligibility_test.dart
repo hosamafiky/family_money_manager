@@ -510,7 +510,7 @@ void main() {
   // - SQL-7 — non-spendable ordinary destination
   // - SQL-P2 — positive control release to eligible standard
 
-  Future<SavingsGoal> _fundedGoalForRelease({required String key}) async {
+  Future<SavingsGoal> fundedGoalForRelease({required String key}) async {
     await createAccount(id: 'bank-$key', householdId: _hh);
     await creditAccount('bank-$key', _hh, 80000);
     final goal = await createGoal(key: key);
@@ -527,7 +527,7 @@ void main() {
   test(
     'SQL-R1. Cross-household release destination rejected by trigger',
     () async {
-      final goal = await _fundedGoalForRelease(key: 'ik-gr1');
+      final goal = await fundedGoalForRelease(key: 'ik-gr1');
       await createAccount(id: 'dst-xhh', householdId: _hh2);
       await expectAbort(
         () => insertRawReleaseAttempt(
@@ -546,7 +546,7 @@ void main() {
   test(
     'SQL-R2. Currency-mismatch release destination rejected by trigger',
     () async {
-      final goal = await _fundedGoalForRelease(key: 'ik-gr2');
+      final goal = await fundedGoalForRelease(key: 'ik-gr2');
       await createAccount(id: 'dst-usd', householdId: _hh, currency: 'USD');
       await expectAbort(
         () => insertRawReleaseAttempt(
@@ -566,7 +566,7 @@ void main() {
   test(
     'SQL-R3. Certificate-by-type release destination rejected by trigger',
     () async {
-      final goal = await _fundedGoalForRelease(key: 'ik-gr3');
+      final goal = await fundedGoalForRelease(key: 'ik-gr3');
       await createAccount(
         id: 'cert-type-dst',
         householdId: _hh,
@@ -592,7 +592,7 @@ void main() {
   test(
     'SQL-R4. Certificate-by-purpose release destination rejected by trigger',
     () async {
-      final goal = await _fundedGoalForRelease(key: 'ik-gr4');
+      final goal = await fundedGoalForRelease(key: 'ik-gr4');
       await createAccount(
         id: 'purpose-cert-dst',
         householdId: _hh,
