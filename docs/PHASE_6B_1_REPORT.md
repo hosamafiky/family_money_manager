@@ -182,7 +182,8 @@ Schema grep: `int get schemaVersion => 18;`
 - Further splitting `drift_goal_repository` / `drift_certificate_repository` into more collaborators (idempotency standardized; full file split optional)
 - Splitting oversized DB test files (`goal_repository_test.dart` etc.) by behavior
 - Report query repo (~1101) size — query-only, low priority
-- Goal funding UI filter still allows certificate sources (matches legacy use-case gates; not expanded)
+
+**Corrected after 6B.1 (not deferred UI):** Certificate accounts as goal funding sources / release destinations are forbidden as a **financial invariant** (INV-004A). Phase **6B.1.1** closed the bypass across eligibility, use cases, repository, UI filters, and schema-19 DB triggers — see `docs/PHASE_6B_1_1_REPORT.md`. Do not treat certificate×goal endpoint ownership as optional presentation polish.
 
 ---
 
