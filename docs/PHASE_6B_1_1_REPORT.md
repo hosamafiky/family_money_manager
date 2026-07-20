@@ -186,8 +186,8 @@ Goal release destination must be: same HH, active, spendable, same currency, not
 | `dart format --output=none --set-exit-if-changed .` | **0** | |
 | `flutter analyze` | **0** | No issues found |
 | `flutter test` | **0** | **1590** passed; equation `1566 + 24 − 0 = 1590` |
-| Docs pin commit | _this commit_ | |
-| Final HEAD | _after docs pin_ | |
+| Docs pin commit | — |  |
+| Final HEAD | — |  |
 | Working tree | **clean** (after pin) | |
 | Schema | **19** | `int get schemaVersion => 19;` |
 
