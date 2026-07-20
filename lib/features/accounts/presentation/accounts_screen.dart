@@ -3,7 +3,9 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:flutter/material.dart';
@@ -41,11 +43,11 @@ class AccountsScreen extends ConsumerWidget {
         label: Text(l10n.accountsAddButton),
       ),
       body: accountsAsync.when(
-        loading: () => Center(child: Text(l10n.loadingLabel)),
-        error: (_, _) => _ErrorBody(message: l10n.errorGeneric),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(message: l10n.errorGeneric),
         data: (result) => switch (result) {
           AppOk(:final value) => _AccountsList(accounts: value),
-          _ => _ErrorBody(message: l10n.errorGeneric),
+          _ => AppErrorState(message: l10n.errorGeneric),
         },
       ),
     );
@@ -68,21 +70,24 @@ class _AccountsList extends StatelessWidget {
         .toList();
 
     if (visible.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Text(
-            l10n.accountsEmpty,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
+      return AppEmptyState(
+        title: l10n.accountsEmpty,
+        actionLabel: l10n.accountsAddButton,
+        onAction: () => context.push('/accounts/new'),
       );
     }
 
     final spendable = visible.where((a) => a.isSpendable && !a.isProtected);
     final protected = visible.where((a) => a.isProtected);
-    final other = visible.where((a) => !a.isSpendable && !a.isProtected);
+    final certificates = visible.where(
+      (a) => a.type == FinancialAccountType.certificate,
+    );
+    final other = visible.where(
+      (a) =>
+          !a.isSpendable &&
+          !a.isProtected &&
+          a.type != FinancialAccountType.certificate,
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
@@ -90,13 +95,18 @@ class _AccountsList extends StatelessWidget {
         _TotalsRow(accounts: visible),
         const SizedBox(height: 16),
         if (spendable.isNotEmpty) ...[
-          _SectionHeader(label: l10n.accountsTotalSpendable),
+          SectionHeader(title: l10n.accountsTotalSpendable),
           ...spendable.map((a) => _AccountCard(account: a)),
           const SizedBox(height: 8),
         ],
         if (protected.isNotEmpty) ...[
-          _SectionHeader(label: l10n.accountsTotalProtected),
+          SectionHeader(title: l10n.accountsTotalProtected),
           ...protected.map((a) => _AccountCard(account: a)),
+          const SizedBox(height: 8),
+        ],
+        if (certificates.isNotEmpty) ...[
+          SectionHeader(title: l10n.certificatesTitle),
+          ...certificates.map((a) => _AccountCard(account: a)),
           const SizedBox(height: 8),
         ],
         ...other.map((a) => _AccountCard(account: a)),
@@ -160,25 +170,6 @@ class _TotalsRow extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 4),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-    );
-  }
-}
-
 class _AccountCard extends ConsumerWidget {
   const _AccountCard({required this.account});
 
@@ -221,10 +212,24 @@ class _AccountCard extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 2),
-            if (account.isProtected)
-              _Badge(label: l10n.protectedLabel, color: Colors.orange)
+            if (account.type == FinancialAccountType.certificate)
+              StatusBadge(
+                label: l10n.accountRestrictionCertificate,
+                foreground: context.financialColors.certificatePrincipal,
+                icon: Icons.lock_outline,
+              )
+            else if (account.isProtected)
+              StatusBadge(
+                label: l10n.accountRestrictionProtected,
+                foreground: context.financialColors.protectedMoney,
+                icon: Icons.lock_outline,
+              )
             else if (account.isSpendable)
-              _Badge(label: l10n.spendableLabel, color: Colors.green),
+              StatusBadge(
+                label: l10n.spendableLabel,
+                foreground: context.financialColors.income,
+                icon: Icons.check_circle_outline,
+              ),
           ],
         ),
       ),
@@ -240,49 +245,7 @@ class _AccountCard extends ConsumerWidget {
         FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
         FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
         FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
+        FinancialAccountType.certificate => l10n.certificatesTitle,
         _ => type.code,
       };
-}
-
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withAlpha(30),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withAlpha(100)),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
-      ),
-    );
-  }
-}
-
-class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ),
-    );
-  }
 }

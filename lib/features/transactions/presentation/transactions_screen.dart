@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
 import 'package:family_money_manager/features/transactions/presentation/providers/transaction_providers.dart';
@@ -30,13 +31,17 @@ class TransactionsScreen extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
       body: transactionsAsync.when(
-        loading: () => Center(child: Text(l10n.loadingLabel)),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(message: l10n.errorGeneric),
         data: (result) {
           return switch (result) {
             AppOk(:final value) =>
               value.isEmpty
-                  ? Center(child: Text(l10n.transactionsEmpty))
+                  ? AppEmptyState(
+                      title: l10n.transactionsEmpty,
+                      actionLabel: l10n.actionRecordExpense,
+                      onAction: () => context.push('/transactions/new'),
+                    )
                   : RefreshIndicator(
                       onRefresh: () async {
                         ref.invalidate(
@@ -50,7 +55,7 @@ class TransactionsScreen extends ConsumerWidget {
                             _TransactionTile(summary: value[i]),
                       ),
                     ),
-            _ => Center(child: Text(l10n.errorGeneric)),
+            _ => AppErrorState(message: l10n.errorGeneric),
           };
         },
       ),
@@ -67,43 +72,47 @@ class _TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final op = summary.operation;
-    final typeLabel = _typeLabel(l10n, op.type);
+    final kind = _typeKind(op.type);
     final isCredit =
         op.type == OperationType.income ||
         op.type == OperationType.openingBalance;
-    final amountColor = isCredit ? Colors.green : null;
+    final sign = isCredit ? '+' : '−';
+    final formatted = '$sign${op.totalAmountMinorUnits} ${op.currencyCode}';
+    final accountOrDirection = switch (op.type) {
+      OperationType.transfer =>
+        '${op.sourceAccountId ?? '—'} → ${op.destinationAccountId ?? '—'}',
+      OperationType.income || OperationType.openingBalance =>
+        op.destinationAccountId ?? op.currencyCode,
+      _ => op.sourceAccountId ?? op.currencyCode,
+    };
 
-    return ListTile(
+    return TransactionListTile(
+      typeLabel: _typeLabel(l10n, op.type),
+      typeKind: kind,
+      primaryDescription: op.description?.trim().isNotEmpty == true
+          ? op.description!
+          : (summary.note?.trim().isNotEmpty == true
+                ? summary.note!
+                : _typeLabel(l10n, op.type)),
+      accountOrDirection: accountOrDirection,
+      effectiveDate: op.effectiveDate,
+      formattedAmount: formatted,
+      memberOrCategory: summary.categoryCode,
+      isReversed: op.isReversed,
+      reversedLabel: op.isReversed ? l10n.transactionReversed : null,
       onTap: () => context.push('/transactions/${op.id}'),
-      leading: CircleAvatar(
-        backgroundColor: _typeColor(op.type).withAlpha(30),
-        child: Icon(_typeIcon(op.type), color: _typeColor(op.type), size: 18),
-      ),
-      title: Row(
-        children: [
-          Expanded(child: Text(typeLabel)),
-          if (op.isReversed)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.grey.withAlpha(40),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                l10n.transactionReversed,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.grey),
-              ),
-            ),
-        ],
-      ),
-      subtitle: Text(op.effectiveDate),
-      trailing: Text(
-        '${isCredit ? '+' : '-'}${op.totalAmountMinorUnits}',
-        style: TextStyle(color: amountColor, fontWeight: FontWeight.w600),
-      ),
     );
+  }
+
+  FinancialTypeKind _typeKind(OperationType type) {
+    return switch (type) {
+      OperationType.income => FinancialTypeKind.income,
+      OperationType.expense => FinancialTypeKind.expense,
+      OperationType.transfer => FinancialTypeKind.transfer,
+      OperationType.reversal => FinancialTypeKind.reversal,
+      OperationType.adjustment => FinancialTypeKind.adjustment,
+      _ => FinancialTypeKind.other,
+    };
   }
 
   String _typeLabel(AppLocalizations l10n, OperationType type) {
@@ -115,30 +124,6 @@ class _TransactionTile extends StatelessWidget {
       OperationType.adjustment => l10n.transactionTypeAdjustment,
       OperationType.reversal => l10n.transactionTypeReversal,
       _ => type.code,
-    };
-  }
-
-  IconData _typeIcon(OperationType type) {
-    return switch (type) {
-      OperationType.income => Icons.arrow_downward,
-      OperationType.expense => Icons.arrow_upward,
-      OperationType.transfer => Icons.swap_horiz,
-      OperationType.openingBalance => Icons.account_balance,
-      OperationType.adjustment => Icons.tune,
-      OperationType.reversal => Icons.undo,
-      _ => Icons.receipt_long_outlined,
-    };
-  }
-
-  Color _typeColor(OperationType type) {
-    return switch (type) {
-      OperationType.income => Colors.green,
-      OperationType.expense => Colors.red,
-      OperationType.transfer => Colors.blue,
-      OperationType.openingBalance => Colors.teal,
-      OperationType.adjustment => Colors.orange,
-      OperationType.reversal => Colors.grey,
-      _ => Colors.blueGrey,
     };
   }
 }
