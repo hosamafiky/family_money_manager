@@ -187,16 +187,26 @@ Unchanged from prior phases — High severity, intentionally deferred; no mobile
 
 ## 19. Commit history (this phase)
 
-Focused commits per recommended structure (hashes filled after commit):
+| Commit | Summary |
+|--------|---------|
+| `38a5b17` | Transaction forms and shared review patterns |
+| `2c5cbd9` | Budgets and goals presentation hardening |
+| `d584f68` | Certificates and reports presentation |
+| `ec2cc39` | Architecture boundaries and UI redesign widget coverage |
+| `d24e693` | Documentation and component adoption audit |
 
-1. Transaction forms and review patterns  
-2. Budgets and goals redesign  
-3. Certificates and reports redesign  
-4. Accessibility / architecture tests  
-5. Documentation and validation follow-up  
+Validated code tip for this phase (pre-docs or including docs): documentation tip `d24e693…` does not invalidate prior suite run against the same tree contents.
 
 ---
 
 ## 20. Final Git status
 
-Recorded after commits: clean `main`, tip advanced past `c4913e8`, schema 19, tests 1613.
+```
+Branch: main
+HEAD:   d24e6935f060304ee44a895acbd7215e4fe8c5c4
+Working tree: clean
+Schema: 19
+Tests: 1613 passed, 0 failed, 0 skipped
+```
+
+Phase 6B.3 complete. Stop — do not begin gold, investments, liabilities, net worth, Zakat, sadaqah, sync, security activation, backup, notifications, voice, or AI.
