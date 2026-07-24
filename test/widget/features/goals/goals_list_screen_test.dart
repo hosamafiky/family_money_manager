@@ -19,6 +19,7 @@ import 'package:family_money_manager/app/app_config.dart';
 import 'package:family_money_manager/app/app_providers.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/goals/presentation/goals_list_screen.dart';
 import 'package:family_money_manager/features/goals/presentation/providers/goal_providers.dart';
@@ -190,7 +191,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('DB error'), findsOneWidget);
+      expect(find.byType(AppErrorState), findsOneWidget);
     });
 
     testWidgets('4. Goal card shows name, currency, target amount', (

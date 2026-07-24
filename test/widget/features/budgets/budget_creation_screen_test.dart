@@ -128,6 +128,11 @@ void main() {
       await tester.tap(find.text('Fixed period'));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('End date'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Start date'), findsOneWidget);
       expect(find.text('End date'), findsOneWidget);
     });
@@ -136,6 +141,11 @@ void main() {
       await tester.pumpWidget(_buildCreationScreen());
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.textContaining('Budgets may overlap'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.textContaining('Budgets may overlap'), findsOneWidget);
     });
 
@@ -154,7 +164,11 @@ void main() {
 
       // FilledButton is the submit button (AppBar title shares text "New Budget")
       final submitButton = find.byType(FilledButton);
-      await tester.ensureVisible(submitButton);
+      await tester.scrollUntilVisible(
+        submitButton,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(submitButton);
       await tester.pump();
 
@@ -178,7 +192,11 @@ void main() {
       await tester.pump();
 
       final submitButton = find.byType(FilledButton);
-      await tester.ensureVisible(submitButton);
+      await tester.scrollUntilVisible(
+        submitButton,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(submitButton);
       await tester.pump();
 

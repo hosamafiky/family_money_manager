@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -157,6 +158,17 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            AppInlineNotice(
+              message: l10n.goalReserveDedicated,
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 8),
+            AppInlineNotice(
+              message:
+                  '${l10n.goalNotChildProtected} ${l10n.goalCurrencyImmutable}',
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 16),
             // Goal name
             TextFormField(
               controller: _nameController,

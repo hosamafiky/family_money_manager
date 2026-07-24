@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +154,18 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            AppInlineNotice(
+              message: l10n.budgetDoesNotHoldMoney,
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 8),
+            AppInlineNotice(
+              message:
+                  '${l10n.budgetOverlapIndependent} ${l10n.budgetRestatedReversals}',
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 16),
+
             // Budget name
             TextFormField(
               controller: _nameController,

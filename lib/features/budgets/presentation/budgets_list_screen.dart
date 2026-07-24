@@ -1,5 +1,7 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -46,8 +48,12 @@ class _BudgetsListScreenState extends ConsumerState<BudgetsListScreen> {
         label: Text(l10n.budgetNew),
       ),
       body: budgetsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(e.toString())),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(
+          message: l10n.errorGeneric,
+          retryLabel: l10n.retryAction,
+          onRetry: () => ref.invalidate(budgetsProvider(_householdId)),
+        ),
         data: (result) {
           if (result is! AppOk<List<BudgetPlan>>) {
             return Center(child: Text(l10n.budgetEmpty));
@@ -58,39 +64,23 @@ class _BudgetsListScreenState extends ConsumerState<BudgetsListScreen> {
               : allPlans.where((p) => !p.isArchived).toList();
 
           if (plans.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.account_balance_wallet_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.budgetEmpty,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => context.push('/budgets/new'),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.budgetNew),
-                    ),
-                  ],
-                ),
-              ),
+            return AppEmptyState(
+              title: l10n.budgetEmpty,
+              icon: Icons.account_balance_wallet_outlined,
+              actionLabel: l10n.budgetNew,
+              onAction: () => context.push('/budgets/new'),
             );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppTheme.space16,
+              AppTheme.space16,
+              AppTheme.space16,
+              100,
+            ),
             itemCount: plans.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: AppTheme.space8),
             itemBuilder: (context, index) {
               final plan = plans[index];
               return _BudgetCard(plan: plan);
@@ -191,31 +181,36 @@ class _ProgressSection extends StatelessWidget {
           )
         : 0.0;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '$consumed / $limit',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            if (pct != null)
+    return Semantics(
+      label:
+          '${l10n.budgetConsumed}: $consumed. ${l10n.budgetLimit}: $limit.'
+          '${pct != null ? ' ${l10n.budgetPercent(pct)}.' : ''}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                l10n.budgetPercent(pct),
-                style: Theme.of(context).textTheme.bodySmall,
+                '$consumed / $limit',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(value: fraction, minHeight: 8),
-        ),
-        const SizedBox(height: 8),
-        _StatusBadge(state: progress.usageState, l10n: l10n),
-      ],
+              if (pct != null)
+                Text(
+                  l10n.budgetPercent(pct),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.space8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.radiusBadge),
+            child: LinearProgressIndicator(value: fraction, minHeight: 8),
+          ),
+          const SizedBox(height: AppTheme.space8),
+          _StatusBadge(state: progress.usageState, l10n: l10n),
+        ],
+      ),
     );
   }
 }

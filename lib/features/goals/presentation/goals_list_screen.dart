@@ -1,5 +1,7 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/goals/domain/goal.dart';
 import 'package:family_money_manager/features/goals/presentation/goal_money_formatter.dart';
 import 'package:family_money_manager/features/goals/presentation/providers/goal_providers.dart';
@@ -31,46 +33,34 @@ class GoalsListScreen extends ConsumerWidget {
         label: Text(l10n.goalNew),
       ),
       body: goalsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(e.toString())),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(
+          message: l10n.errorGeneric,
+          retryLabel: l10n.retryAction,
+          onRetry: () => ref.invalidate(goalsProvider(_householdId)),
+        ),
         data: (result) {
           if (result is! AppOk<List<SavingsGoal>>) {
-            return Center(child: Text(l10n.goalEmpty));
+            return AppErrorState(message: l10n.errorGeneric);
           }
           final goals = result.value;
           if (goals.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.flag_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.goalEmpty,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => context.push('/goals/new'),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.goalNew),
-                    ),
-                  ],
-                ),
-              ),
+            return AppEmptyState(
+              title: l10n.goalEmpty,
+              icon: Icons.flag_outlined,
+              actionLabel: l10n.goalNew,
+              onAction: () => context.push('/goals/new'),
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppTheme.space16,
+              AppTheme.space16,
+              AppTheme.space16,
+              100,
+            ),
             itemCount: goals.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: AppTheme.space8),
             itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
           );
         },

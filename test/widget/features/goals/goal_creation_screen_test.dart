@@ -153,7 +153,12 @@ void main() {
       await tester.pumpWidget(_buildApp());
       await tester.pumpAndSettle();
 
-      // The initial funding section is present but optional.
+      // The initial funding section is present but optional (below the fold).
+      await tester.scrollUntilVisible(
+        find.text('Initial funding (optional)'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Initial funding (optional)'), findsOneWidget);
     });
 

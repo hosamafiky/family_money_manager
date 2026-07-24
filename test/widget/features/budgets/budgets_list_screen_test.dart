@@ -19,6 +19,7 @@ import 'package:family_money_manager/app/app_config.dart';
 import 'package:family_money_manager/app/app_providers.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/budgets_list_screen.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
@@ -188,7 +189,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('DB error'), findsOneWidget);
+      expect(find.byType(AppErrorState), findsOneWidget);
     });
 
     testWidgets('4. Budget card shows name and currency', (tester) async {
