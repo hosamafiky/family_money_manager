@@ -1,5 +1,7 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
 import 'package:family_money_manager/features/certificates/presentation/providers/certificate_providers.dart';
@@ -28,60 +30,47 @@ class CertificatesListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: certsAsync.when(
-        data: (result) {
-          if (result is! AppOk<List<SavingsCertificate>>) {
-            return Center(
-              child: Text(
-                result is AppNotFound
-                    ? l10n.certificateEmpty
-                    : 'Error loading certificates',
-                textAlign: TextAlign.center,
-              ),
-            );
-          }
-          final certs = result.value;
-          if (certs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.account_balance,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.certificateEmpty,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: () => context.push('/certificates/new'),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.certificateNew),
-                  ),
-                ],
-              ),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: certs.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, i) => _CertificateCard(cert: certs[i]),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'cert_list_fab',
         onPressed: () => context.push('/certificates/new'),
         icon: const Icon(Icons.add),
         label: Text(l10n.certificateNew),
+      ),
+      body: certsAsync.when(
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(
+          message: l10n.errorGeneric,
+          retryLabel: l10n.retryAction,
+          onRetry: () => ref.invalidate(certificatesProvider(_householdId)),
+        ),
+        data: (result) {
+          if (result is! AppOk<List<SavingsCertificate>>) {
+            return AppEmptyState(
+              title: l10n.certificateEmpty,
+              icon: Icons.account_balance,
+            );
+          }
+          final certs = result.value;
+          if (certs.isEmpty) {
+            return AppEmptyState(
+              title: l10n.certificateEmpty,
+              icon: Icons.account_balance,
+              actionLabel: l10n.certificateNew,
+              onAction: () => context.push('/certificates/new'),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppTheme.space16,
+              AppTheme.space16,
+              AppTheme.space16,
+              100,
+            ),
+            itemCount: certs.length,
+            separatorBuilder: (_, _) => const SizedBox(height: AppTheme.space8),
+            itemBuilder: (context, i) => _CertificateCard(cert: certs[i]),
+          );
+        },
       ),
     );
   }

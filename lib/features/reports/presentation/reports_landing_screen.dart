@@ -1,7 +1,9 @@
 /// Reports landing screen — navigable list of available report types.
 library;
 
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -61,25 +63,27 @@ class ReportsLandingScreen extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportsTitle)),
-      body: ListView.separated(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: entries.length,
-        separatorBuilder: (_, _) => const Divider(height: 1, indent: 56),
-        itemBuilder: (context, index) {
-          final entry = entries[index];
-          return Semantics(
-            label: entry.semanticsLabel,
-            button: true,
-            child: ListTile(
-              leading: Icon(entry.icon),
-              title: Text(entry.label),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(entry.route),
-            ),
-          );
-        },
+    return AppScreenScaffold(
+      title: Text(l10n.reportsTitle),
+      body: ResponsiveContentContainer(
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.space8),
+          itemCount: entries.length,
+          separatorBuilder: (_, _) => const Divider(height: 1, indent: 56),
+          itemBuilder: (context, index) {
+            final entry = entries[index];
+            return Semantics(
+              label: entry.semanticsLabel,
+              button: true,
+              child: ListTile(
+                leading: Icon(entry.icon),
+                title: Text(entry.label),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(entry.route),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

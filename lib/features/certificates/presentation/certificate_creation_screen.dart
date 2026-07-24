@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
@@ -77,6 +78,16 @@ class _CertificateCreationScreenState
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            AppInlineNotice(
+              message: l10n.certificatePrincipalNotExpense,
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 8),
+            AppInlineNotice(
+              message: l10n.certificatePrincipalReturnNotIncome,
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _institutionCtrl,
               decoration: InputDecoration(
