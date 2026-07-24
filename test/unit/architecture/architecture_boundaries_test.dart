@@ -133,6 +133,49 @@ void main() {
     expect(src.contains('schemaVersion => 19'), isTrue);
   });
 
+  test(
+    'shared presentation components do not import Drift or ledger writers',
+    () {
+      final violations = <String>[];
+      for (final file in dartFilesUnder('core/presentation')) {
+        final src = file.readAsStringSync();
+        if (importsPackage(src, 'drift') ||
+            RegExp(r'\bAppDatabase\b').hasMatch(src) ||
+            src.contains('OperationsCompanion') ||
+            src.contains('LedgerEntriesCompanion') ||
+            src.contains('customStatement(')) {
+          violations.add(file.path);
+        }
+      }
+      expect(violations, isEmpty, reason: violations.join('\n'));
+    },
+  );
+
+  test(
+    'presentation does not import feature data repository implementations',
+    () {
+      final violations = <String>[];
+      final banned = RegExp(
+        r"import\s+'package:family_money_manager/features/[^']+/data/"
+        r"(drift_|.*_repository)",
+      );
+      for (final file in dartFilesUnder('features')) {
+        if (!file.path.contains(
+          '${Platform.pathSeparator}presentation'
+          '${Platform.pathSeparator}',
+        )) {
+          continue;
+        }
+        if (file.path.endsWith('_providers.dart')) continue;
+        final src = file.readAsStringSync();
+        if (banned.hasMatch(src)) {
+          violations.add(file.path);
+        }
+      }
+      expect(violations, isEmpty, reason: violations.join('\n'));
+    },
+  );
+
   test('account eligibility policy exists for ordinary endpoints', () {
     final src = File(
       'lib/features/accounts/domain/account_eligibility.dart',
