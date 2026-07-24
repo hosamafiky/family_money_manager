@@ -1,6 +1,8 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -28,9 +30,11 @@ class TransferFormScreen extends ConsumerStatefulWidget {
 }
 
 class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
+  final _scrollController = ScrollController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _reasonController = TextEditingController();
+  final _amountFocus = FocusNode();
 
   String? _sourceAccountId;
   String? _destinationAccountId;
@@ -54,9 +58,11 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _amountController.dispose();
     _noteController.dispose();
     _reasonController.dispose();
+    _amountFocus.dispose();
     super.dispose();
   }
 
@@ -70,20 +76,46 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
     final l10n = AppLocalizations.of(context);
     final accountsAsync = ref.watch(accountsProvider(_householdId));
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.transferFormTitle)),
+    return AppScreenScaffold(
+      title: Text(l10n.transferFormTitle),
+      resizeToAvoidBottomInset: true,
+      bottomBar: accountsAsync.maybeWhen(
+        data: (result) {
+          if (result is! AppOk<List<FinancialAccount>>) return null;
+          final accounts = result.value
+              .where(AccountEligibility.isOrdinaryTransactionEndpoint)
+              .toList();
+          if (accounts.isEmpty) return null;
+          final sourceAccount = accounts
+              .where((a) => a.id == _sourceAccountId)
+              .firstOrNull;
+          final isProtectedSource =
+              sourceAccount?.requiresWithdrawalAudit ?? false;
+          return AppBottomActionBar(
+            child: PrimaryActionButton(
+              label: l10n.reviewTitle,
+              onPressed: () =>
+                  _goToReview(context, l10n, accounts, isProtectedSource),
+            ),
+          );
+        },
+        orElse: () => null,
+      ),
       body: accountsAsync.when(
-        loading: () => Center(child: Text(l10n.loadingLabel)),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(
+          message: l10n.errorGeneric,
+          retryLabel: l10n.retryAction,
+          onRetry: () => ref.invalidate(accountsProvider(_householdId)),
+        ),
         data: (result) {
           if (result is! AppOk<List<FinancialAccount>>) {
-            return Center(child: Text(l10n.errorGeneric));
+            return AppErrorState(message: l10n.errorGeneric);
           }
           final accounts = result.value
               .where(AccountEligibility.isOrdinaryTransactionEndpoint)
               .toList();
 
-          // Clear invalid preselected IDs (archived accounts).
           if (_sourceAccountId != null &&
               accounts.every((a) => a.id != _sourceAccountId)) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,6 +127,15 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) setState(() => _destinationAccountId = null);
             });
+          }
+
+          if (accounts.isEmpty) {
+            return AppEmptyState(
+              title: l10n.accountsEmpty,
+              icon: Icons.account_balance_wallet_outlined,
+              actionLabel: l10n.accountsAddButton,
+              onAction: () => context.push('/accounts/new'),
+            );
           }
 
           final sourceAccount = accounts
@@ -110,216 +151,195 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
               destAccount != null &&
               sourceAccount.currencyCode != destAccount.currencyCode;
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildAccountDropdown(
-                context,
-                l10n,
-                label: l10n.fieldSourceAccount,
-                value: _sourceAccountId,
-                accounts: accounts,
-                error: _sourceError,
-                onChanged: (v) => setState(() {
-                  _sourceAccountId = v;
-                  _sourceError = null;
-                  _destError = null;
-                  _warningAcknowledged = false;
-                  _confirmed = false;
-                }),
+          return ResponsiveContentContainer(
+            child: ListView(
+              controller: _scrollController,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsetsDirectional.only(
+                top: AppTheme.space16,
+                bottom: AppTheme.space32,
               ),
-              const SizedBox(height: 16),
-              _buildAccountDropdown(
-                context,
-                l10n,
-                label: l10n.fieldDestinationAccount,
-                value: _destinationAccountId,
-                accounts: accounts,
-                error: _destError,
-                onChanged: (v) => setState(() {
-                  _destinationAccountId = v;
-                  _destError = null;
-                }),
-              ),
-              if (_sourceAccountId != null &&
-                  _destinationAccountId != null &&
-                  _sourceAccountId == _destinationAccountId)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    l10n.errorSameAccount,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontSize: 12,
-                    ),
+              children: [
+                AppInlineNotice(
+                  message: l10n.transferInternalExplanation,
+                  tone: AppNoticeTone.info,
+                ),
+                const SizedBox(height: AppTheme.space16),
+                AppFormSection(
+                  title: l10n.formSectionAmount,
+                  child: AmountEntryField(
+                    controller: _amountController,
+                    label: l10n.fieldAmount,
+                    currencyCode: sourceAccount?.currencyCode,
+                    errorText: _amountError,
+                    focusNode: _amountFocus,
+                    autofocus: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                    ],
+                    onChanged: (_) => setState(() => _amountError = null),
                   ),
                 ),
-              if (hasCurrencyMismatch)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    l10n.errorCurrencyMismatch,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                ],
-                decoration: InputDecoration(
-                  labelText: l10n.fieldAmount,
-                  border: const OutlineInputBorder(),
-                  errorText: _amountError,
-                ),
-                onChanged: (_) => setState(() => _amountError = null),
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _effectiveDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (picked != null) setState(() => _effectiveDate = picked);
-                },
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: l10n.fieldEffectiveDate,
-                    border: const OutlineInputBorder(),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                AppFormSection(
+                  title: l10n.formSectionAccount,
+                  child: Column(
                     children: [
-                      Text(_formatDate(_effectiveDate)),
-                      const Icon(Icons.calendar_today, size: 18),
+                      AccountSelectorField<FinancialAccount>(
+                        label: l10n.fieldSourceAccount,
+                        items: accounts,
+                        value: sourceAccount,
+                        itemLabel: (a) => a.name,
+                        errorText: _sourceError,
+                        onChanged: (a) => setState(() {
+                          _sourceAccountId = a?.id;
+                          _sourceError = null;
+                          _destError = null;
+                          _warningAcknowledged = false;
+                          _confirmed = false;
+                        }),
+                      ),
+                      const SizedBox(height: AppTheme.space16),
+                      AccountSelectorField<FinancialAccount>(
+                        label: l10n.fieldDestinationAccount,
+                        items: accounts,
+                        value: destAccount,
+                        itemLabel: (a) => a.name,
+                        errorText: _destError,
+                        onChanged: (a) => setState(() {
+                          _destinationAccountId = a?.id;
+                          _destError = null;
+                        }),
+                      ),
+                      if (_sourceAccountId != null &&
+                          _destinationAccountId != null &&
+                          _sourceAccountId == _destinationAccountId)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            top: AppTheme.space8,
+                          ),
+                          child: Text(
+                            l10n.errorSameAccount,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      if (hasCurrencyMismatch)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            top: AppTheme.space8,
+                          ),
+                          child: Text(
+                            l10n.errorCurrencyMismatch,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _noteController,
-                decoration: InputDecoration(
-                  labelText: l10n.fieldNote,
-                  border: const OutlineInputBorder(),
+                AppExpandableDetails(
+                  title: l10n.formAdvancedDetails,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _effectiveDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
+                          );
+                          if (picked != null) {
+                            setState(() => _effectiveDate = picked);
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: l10n.fieldEffectiveDate,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(_formatDate(_effectiveDate)),
+                              ),
+                              const Icon(Icons.calendar_today, size: 18),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.space16),
+                      TextFormField(
+                        controller: _noteController,
+                        decoration: InputDecoration(labelText: l10n.fieldNote),
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
                 ),
-                maxLines: 2,
-              ),
-              if (isProtectedSource) ...[
-                const SizedBox(height: 24),
-                _buildProtectedSection(context, l10n),
+                if (isProtectedSource) ...[
+                  const SizedBox(height: AppTheme.space8),
+                  AppInlineNotice(
+                    message: l10n.protectedWithdrawalWarning,
+                    tone: AppNoticeTone.warning,
+                  ),
+                  const SizedBox(height: AppTheme.space12),
+                  TextFormField(
+                    controller: _reasonController,
+                    decoration: InputDecoration(
+                      labelText: l10n.fieldWithdrawalReason,
+                      errorText: _reasonError,
+                    ),
+                    onChanged: (_) => setState(() => _reasonError = null),
+                  ),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _warningAcknowledged,
+                    title: Text(l10n.fieldAcknowledgeWarning),
+                    subtitle: _ackError != null
+                        ? Text(
+                            _ackError!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          )
+                        : null,
+                    onChanged: (v) => setState(() {
+                      _warningAcknowledged = v ?? false;
+                      _ackError = null;
+                    }),
+                  ),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _confirmed,
+                    title: Text(l10n.fieldConfirmWithdrawal),
+                    subtitle: _confirmError != null
+                        ? Text(
+                            _confirmError!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          )
+                        : null,
+                    onChanged: (v) => setState(() {
+                      _confirmed = v ?? false;
+                      _confirmError = null;
+                    }),
+                  ),
+                ],
               ],
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () =>
-                    _goToReview(context, l10n, accounts, isProtectedSource),
-                child: Text(l10n.reviewTitle),
-              ),
-            ],
+            ),
           );
         },
       ),
-    );
-  }
-
-  Widget _buildAccountDropdown(
-    BuildContext context,
-    AppLocalizations l10n, {
-    required String label,
-    required String? value,
-    required List<FinancialAccount> accounts,
-    required String? error,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      // ignore: deprecated_member_use
-      value: value,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        errorText: error,
-      ),
-      items: accounts
-          .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-          .toList(),
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _buildProtectedSection(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Card(
-          color: Colors.orange.withAlpha(20),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                const SizedBox(width: 8),
-                Expanded(child: Text(l10n.protectedWithdrawalWarning)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextFormField(
-          controller: _reasonController,
-          decoration: InputDecoration(
-            labelText: l10n.fieldWithdrawalReason,
-            border: const OutlineInputBorder(),
-            errorText: _reasonError,
-          ),
-          onChanged: (_) => setState(() => _reasonError = null),
-        ),
-        const SizedBox(height: 8),
-        CheckboxListTile(
-          value: _warningAcknowledged,
-          title: Text(l10n.fieldAcknowledgeWarning),
-          subtitle: _ackError != null
-              ? Text(
-                  _ackError!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
-                )
-              : null,
-          onChanged: (v) => setState(() {
-            _warningAcknowledged = v ?? false;
-            _ackError = null;
-          }),
-        ),
-        CheckboxListTile(
-          value: _confirmed,
-          title: Text(l10n.fieldConfirmWithdrawal),
-          subtitle: _confirmError != null
-              ? Text(
-                  _confirmError!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
-                  ),
-                )
-              : null,
-          onChanged: (v) => setState(() {
-            _confirmed = v ?? false;
-            _confirmError = null;
-          }),
-        ),
-      ],
     );
   }
 
@@ -346,7 +366,6 @@ class _TransferFormScreenState extends ConsumerState<TransferFormScreen> {
       hasErrors = true;
     }
 
-    // Block cross-currency transfers at the form level.
     if (_sourceAccountId != null && _destinationAccountId != null) {
       final src = accounts.where((a) => a.id == _sourceAccountId).firstOrNull;
       final dst = accounts

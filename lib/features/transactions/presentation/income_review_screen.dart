@@ -1,7 +1,9 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -15,7 +17,6 @@ import 'package:go_router/go_router.dart';
 const _householdId = 'household-v1';
 
 /// Read-only review screen for an income transaction.
-/// Submits to use case on confirmation.
 class IncomeReviewScreen extends ConsumerWidget {
   const IncomeReviewScreen({super.key});
 
@@ -48,40 +49,57 @@ class IncomeReviewScreen extends ConsumerWidget {
       return '${MoneyInputFormatter.format(money)} $code';
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reviewTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _ReviewRow(
-            label: l10n.fieldDestinationAccount,
-            value: accountName(ctx.destinationAccountId),
+    return AppScreenScaffold(
+      title: Text(l10n.reviewTitle),
+      resizeToAvoidBottomInset: true,
+      bottomBar: AppBottomActionBar(
+        child: PrimaryActionButton(
+          label: l10n.confirm,
+          isLoading: submitting,
+          onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
+        ),
+      ),
+      body: ResponsiveContentContainer(
+        child: ListView(
+          padding: const EdgeInsetsDirectional.only(
+            top: AppTheme.space16,
+            bottom: AppTheme.space32,
           ),
-          _ReviewRow(
-            label: l10n.fieldAmount,
-            value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
-          ),
-          _ReviewRow(
-            label: l10n.fieldCategory,
-            value: categoryLabel(l10n, ctx.category),
-          ),
-          _ReviewRow(label: l10n.fieldEffectiveDate, value: ctx.effectiveDate),
-          if (ctx.note != null)
-            _ReviewRow(label: l10n.fieldNote, value: ctx.note!),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: submitting
-                ? null
-                : () => _submit(context, ref, l10n, ctx),
-            child: submitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.confirm),
-          ),
-        ],
+          children: [
+            AppInlineNotice(
+              message: l10n.incomeIncreasesBalance,
+              tone: AppNoticeTone.info,
+            ),
+            const SizedBox(height: AppTheme.space16),
+            AppReviewSection(
+              title: l10n.reviewTitle,
+              rows: [
+                AppReviewRowData(
+                  label: l10n.fieldOperationType,
+                  value: l10n.operationTypeIncome,
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldAmount,
+                  value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldDestinationAccount,
+                  value: accountName(ctx.destinationAccountId),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldCategory,
+                  value: categoryLabel(l10n, ctx.category),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldEffectiveDate,
+                  value: ctx.effectiveDate,
+                ),
+                if (ctx.note != null)
+                  AppReviewRowData(label: l10n.fieldNote, value: ctx.note!),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -104,8 +122,11 @@ class IncomeReviewScreen extends ConsumerWidget {
           ref.read(incomeFormProvider.notifier).regenerateKey();
           ref.read(stagedIncomeContextProvider.notifier).set(null);
           invalidateTransactionMoneyProviders(ref);
-
-          context.go('/transactions');
+          if (context.canPop()) {
+            context.go('/transactions');
+          } else {
+            context.go('/transactions');
+          }
         case AppInsufficientFunds():
           _showSnackBar(context, l10n.errorInsufficientFunds);
         case AppValidationFailure(:final messageKey):
@@ -134,41 +155,5 @@ class IncomeReviewScreen extends ConsumerWidget {
       'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
       _ => l10n.errorGeneric,
     };
-  }
-}
-
-class _ReviewRow extends StatelessWidget {
-  const _ReviewRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 150,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

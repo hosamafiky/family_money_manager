@@ -2557,6 +2557,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Protected — withdrawal restrictions apply'**
   String get accountRestrictionProtected;
+
+  /// Form section title for amount entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get formSectionAmount;
+
+  /// Form section title for account selection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get formSectionAccount;
+
+  /// Form section title for category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get formSectionCategory;
+
+  /// Form section for spender/beneficiary/scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Attribution'**
+  String get formSectionAttribution;
+
+  /// Progressive disclosure for date and notes.
+  ///
+  /// In en, this message translates to:
+  /// **'More details'**
+  String get formAdvancedDetails;
+
+  /// Review label for income operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get operationTypeIncome;
+
+  /// Review label for expense operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get operationTypeExpense;
+
+  /// Review label for transfer operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get operationTypeTransfer;
+
+  /// Review row label for operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation type'**
+  String get fieldOperationType;
+
+  /// Transfer review explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an internal transfer. The source balance decreases and the destination balance increases. It is not income and not an expense.'**
+  String get transferInternalExplanation;
+
+  /// Income review explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This income increases the destination account balance.'**
+  String get incomeIncreasesBalance;
+
+  /// Expense review explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This expense decreases the payment account balance.'**
+  String get expenseDecreasesBalance;
+
+  /// Protected withdrawal review notice.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected balance decreases. Reason and beneficiary are recorded and remain auditable.'**
+  String get protectedWithdrawalReviewNote;
+
+  /// Retry action label for error states.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryAction;
+
+  /// Budget creation explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets monitor spending. They do not hold money and do not block expenses.'**
+  String get budgetDoesNotHoldMoney;
+
+  /// Budget overlap explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlapping budgets are monitored independently.'**
+  String get budgetOverlapIndependent;
+
+  /// Budget reversal explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversed expenses use the documented restated budget view.'**
+  String get budgetRestatedReversals;
+
+  /// Goal creation funding explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'A dedicated reserve account is created for this goal. Funding is an internal transfer — total assets do not increase.'**
+  String get goalReserveDedicated;
+
+  /// Goal child-fund separation note.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal funds are not protected child funds.'**
+  String get goalNotChildProtected;
+
+  /// Goal currency immutability note.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency cannot change after creation.'**
+  String get goalCurrencyImmutable;
+
+  /// Certificate funding classification note.
+  ///
+  /// In en, this message translates to:
+  /// **'Moving principal into a certificate is not an expense.'**
+  String get certificatePrincipalNotExpense;
+
+  /// Certificate redemption classification note.
+  ///
+  /// In en, this message translates to:
+  /// **'Returning principal is not income.'**
+  String get certificatePrincipalReturnNotIncome;
+
+  /// Clear all active filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get filterClearAll;
+
+  /// Active filter count badge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} filters active'**
+  String filterActiveCount(int count);
+
+  /// Goal lifecycle status label.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle'**
+  String get lifecycleStatusLabel;
+
+  /// Goal derived progress status label.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progressStatusLabel;
 }
 
 class _AppLocalizationsDelegate

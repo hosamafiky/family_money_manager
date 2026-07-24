@@ -1281,4 +1281,91 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get accountRestrictionProtected => 'محمي — قيود على السحب';
+
+  @override
+  String get formSectionAmount => 'المبلغ';
+
+  @override
+  String get formSectionAccount => 'الحساب';
+
+  @override
+  String get formSectionCategory => 'التصنيف';
+
+  @override
+  String get formSectionAttribution => 'الإسناد';
+
+  @override
+  String get formAdvancedDetails => 'تفاصيل إضافية';
+
+  @override
+  String get operationTypeIncome => 'دخل';
+
+  @override
+  String get operationTypeExpense => 'مصروف';
+
+  @override
+  String get operationTypeTransfer => 'تحويل';
+
+  @override
+  String get fieldOperationType => 'نوع العملية';
+
+  @override
+  String get transferInternalExplanation =>
+      'هذا تحويل داخلي. ينقص رصيد المصدر ويزيد رصيد الوجهة. ليس دخلاً وليس مصروفاً.';
+
+  @override
+  String get incomeIncreasesBalance => 'يزيد هذا الدخل رصيد حساب الوجهة.';
+
+  @override
+  String get expenseDecreasesBalance => 'ينقص هذا المصروف رصيد حساب الدفع.';
+
+  @override
+  String get protectedWithdrawalReviewNote =>
+      'ينقص الرصيد المحمي. يُسجَّل السبب والمستفيد ويبقى قابلاً للتدقيق.';
+
+  @override
+  String get retryAction => 'إعادة المحاولة';
+
+  @override
+  String get budgetDoesNotHoldMoney =>
+      'الميزانيات تراقب الإنفاق. لا تحتفظ بالمال ولا تمنع المصروفات.';
+
+  @override
+  String get budgetOverlapIndependent =>
+      'الميزانيات المتداخلة تُراقب بشكل مستقل.';
+
+  @override
+  String get budgetRestatedReversals =>
+      'المصروفات المعكوسة تستخدم عرض الميزانية المُعاد بيانه كما هو موثّق.';
+
+  @override
+  String get goalReserveDedicated =>
+      'يُنشأ حساب احتياطي مخصص لهذا الهدف. التمويل تحويل داخلي — إجمالي الأصول لا يزيد.';
+
+  @override
+  String get goalNotChildProtected => 'أموال الهدف ليست صناديق أطفال محمية.';
+
+  @override
+  String get goalCurrencyImmutable => 'لا يمكن تغيير العملة بعد الإنشاء.';
+
+  @override
+  String get certificatePrincipalNotExpense =>
+      'نقل الأصل إلى شهادة ليس مصروفاً.';
+
+  @override
+  String get certificatePrincipalReturnNotIncome => 'إعادة الأصل ليست دخلاً.';
+
+  @override
+  String get filterClearAll => 'مسح الكل';
+
+  @override
+  String filterActiveCount(int count) {
+    return '$count عوامل تصفية نشطة';
+  }
+
+  @override
+  String get lifecycleStatusLabel => 'دورة الحياة';
+
+  @override
+  String get progressStatusLabel => 'التقدّم';
 }

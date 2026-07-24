@@ -1,7 +1,9 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -46,38 +48,68 @@ class TransferReviewScreen extends ConsumerWidget {
       return '${MoneyInputFormatter.format(money)} $code';
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reviewTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _Row(l10n.fieldSourceAccount, accountName(ctx.sourceAccountId)),
-          _Row(
-            l10n.fieldDestinationAccount,
-            accountName(ctx.destinationAccountId),
+    return AppScreenScaffold(
+      title: Text(l10n.reviewTitle),
+      bottomBar: AppBottomActionBar(
+        child: PrimaryActionButton(
+          label: l10n.confirm,
+          isLoading: submitting,
+          onPressed: submitting ? null : () => _submit(context, ref, l10n, ctx),
+        ),
+      ),
+      body: ResponsiveContentContainer(
+        child: ListView(
+          padding: const EdgeInsetsDirectional.only(
+            top: AppTheme.space16,
+            bottom: AppTheme.space32,
           ),
-          _Row(
-            l10n.fieldAmount,
-            formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
-          ),
-          _Row(l10n.fieldEffectiveDate, ctx.effectiveDate),
-          if (ctx.note != null) _Row(l10n.fieldNote, ctx.note!),
-          if (ctx.childWithdrawalAudit != null)
-            _Row(l10n.fieldWithdrawalReason, ctx.childWithdrawalAudit!.reason),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: submitting
-                ? null
-                : () => _submit(context, ref, l10n, ctx),
-            child: submitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.confirm),
-          ),
-        ],
+          children: [
+            AppInlineNotice(
+              message: l10n.transferInternalExplanation,
+              tone: AppNoticeTone.info,
+            ),
+            if (ctx.childWithdrawalAudit != null) ...[
+              const SizedBox(height: AppTheme.space12),
+              AppInlineNotice(
+                message: l10n.protectedWithdrawalReviewNote,
+                tone: AppNoticeTone.warning,
+              ),
+            ],
+            const SizedBox(height: AppTheme.space16),
+            AppReviewSection(
+              title: l10n.reviewTitle,
+              rows: [
+                AppReviewRowData(
+                  label: l10n.fieldOperationType,
+                  value: l10n.operationTypeTransfer,
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldAmount,
+                  value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldSourceAccount,
+                  value: accountName(ctx.sourceAccountId),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldDestinationAccount,
+                  value: accountName(ctx.destinationAccountId),
+                ),
+                AppReviewRowData(
+                  label: l10n.fieldEffectiveDate,
+                  value: ctx.effectiveDate,
+                ),
+                if (ctx.note != null)
+                  AppReviewRowData(label: l10n.fieldNote, value: ctx.note!),
+                if (ctx.childWithdrawalAudit != null)
+                  AppReviewRowData(
+                    label: l10n.fieldWithdrawalReason,
+                    value: ctx.childWithdrawalAudit!.reason,
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -100,7 +132,6 @@ class TransferReviewScreen extends ConsumerWidget {
           ref.read(transferFormKeyProvider.notifier).regenerateKey();
           ref.read(stagedTransferContextProvider.notifier).set(null);
           invalidateTransactionMoneyProviders(ref);
-
           context.go('/transactions');
         case AppInsufficientFunds():
           _snack(context, l10n.errorInsufficientFunds);
@@ -134,39 +165,4 @@ class TransferReviewScreen extends ConsumerWidget {
       l10n.errorWithdrawalConfirmationRequired,
     _ => l10n.errorGeneric,
   };
-}
-
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 150,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

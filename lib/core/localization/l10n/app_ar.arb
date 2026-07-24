@@ -422,5 +422,35 @@
   "dashboardCertificatePrincipal": "أصل الشهادات",
   "accountRestrictionCertificate": "أصل شهادة — عبر مسارات الشهادات فقط",
   "accountRestrictionGoalReserve": "احتياطي هدف — يُدار عبر الأهداف",
-  "accountRestrictionProtected": "محمي — قيود على السحب"
+  "accountRestrictionProtected": "محمي — قيود على السحب",
+
+  "formSectionAmount": "المبلغ",
+  "formSectionAccount": "الحساب",
+  "formSectionCategory": "التصنيف",
+  "formSectionAttribution": "الإسناد",
+  "formAdvancedDetails": "تفاصيل إضافية",
+  "operationTypeIncome": "دخل",
+  "operationTypeExpense": "مصروف",
+  "operationTypeTransfer": "تحويل",
+  "fieldOperationType": "نوع العملية",
+  "transferInternalExplanation": "هذا تحويل داخلي. ينقص رصيد المصدر ويزيد رصيد الوجهة. ليس دخلاً وليس مصروفاً.",
+  "incomeIncreasesBalance": "يزيد هذا الدخل رصيد حساب الوجهة.",
+  "expenseDecreasesBalance": "ينقص هذا المصروف رصيد حساب الدفع.",
+  "protectedWithdrawalReviewNote": "ينقص الرصيد المحمي. يُسجَّل السبب والمستفيد ويبقى قابلاً للتدقيق.",
+  "retryAction": "إعادة المحاولة",
+  "budgetDoesNotHoldMoney": "الميزانيات تراقب الإنفاق. لا تحتفظ بالمال ولا تمنع المصروفات.",
+  "budgetOverlapIndependent": "الميزانيات المتداخلة تُراقب بشكل مستقل.",
+  "budgetRestatedReversals": "المصروفات المعكوسة تستخدم عرض الميزانية المُعاد بيانه كما هو موثّق.",
+  "goalReserveDedicated": "يُنشأ حساب احتياطي مخصص لهذا الهدف. التمويل تحويل داخلي — إجمالي الأصول لا يزيد.",
+  "goalNotChildProtected": "أموال الهدف ليست صناديق أطفال محمية.",
+  "goalCurrencyImmutable": "لا يمكن تغيير العملة بعد الإنشاء.",
+  "certificatePrincipalNotExpense": "نقل الأصل إلى شهادة ليس مصروفاً.",
+  "certificatePrincipalReturnNotIncome": "إعادة الأصل ليست دخلاً.",
+  "filterClearAll": "مسح الكل",
+  "filterActiveCount": "{count} عوامل تصفية نشطة",
+  "@filterActiveCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "lifecycleStatusLabel": "دورة الحياة",
+  "progressStatusLabel": "التقدّم"
 }

@@ -1302,4 +1302,95 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountRestrictionProtected =>
       'Protected — withdrawal restrictions apply';
+
+  @override
+  String get formSectionAmount => 'Amount';
+
+  @override
+  String get formSectionAccount => 'Account';
+
+  @override
+  String get formSectionCategory => 'Category';
+
+  @override
+  String get formSectionAttribution => 'Attribution';
+
+  @override
+  String get formAdvancedDetails => 'More details';
+
+  @override
+  String get operationTypeIncome => 'Income';
+
+  @override
+  String get operationTypeExpense => 'Expense';
+
+  @override
+  String get operationTypeTransfer => 'Transfer';
+
+  @override
+  String get fieldOperationType => 'Operation type';
+
+  @override
+  String get transferInternalExplanation =>
+      'This is an internal transfer. The source balance decreases and the destination balance increases. It is not income and not an expense.';
+
+  @override
+  String get incomeIncreasesBalance =>
+      'This income increases the destination account balance.';
+
+  @override
+  String get expenseDecreasesBalance =>
+      'This expense decreases the payment account balance.';
+
+  @override
+  String get protectedWithdrawalReviewNote =>
+      'Protected balance decreases. Reason and beneficiary are recorded and remain auditable.';
+
+  @override
+  String get retryAction => 'Retry';
+
+  @override
+  String get budgetDoesNotHoldMoney =>
+      'Budgets monitor spending. They do not hold money and do not block expenses.';
+
+  @override
+  String get budgetOverlapIndependent =>
+      'Overlapping budgets are monitored independently.';
+
+  @override
+  String get budgetRestatedReversals =>
+      'Reversed expenses use the documented restated budget view.';
+
+  @override
+  String get goalReserveDedicated =>
+      'A dedicated reserve account is created for this goal. Funding is an internal transfer — total assets do not increase.';
+
+  @override
+  String get goalNotChildProtected =>
+      'Goal funds are not protected child funds.';
+
+  @override
+  String get goalCurrencyImmutable => 'Currency cannot change after creation.';
+
+  @override
+  String get certificatePrincipalNotExpense =>
+      'Moving principal into a certificate is not an expense.';
+
+  @override
+  String get certificatePrincipalReturnNotIncome =>
+      'Returning principal is not income.';
+
+  @override
+  String get filterClearAll => 'Clear all';
+
+  @override
+  String filterActiveCount(int count) {
+    return '$count filters active';
+  }
+
+  @override
+  String get lifecycleStatusLabel => 'Lifecycle';
+
+  @override
+  String get progressStatusLabel => 'Progress';
 }

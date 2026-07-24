@@ -107,7 +107,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(
+        find.byType(DropdownButtonFormField<FinancialAccount>),
+        findsOneWidget,
+      );
     });
 
     testWidgets('3. account name visible when dropdown opened', (tester) async {
@@ -124,13 +127,13 @@ void main() {
             locale: Locale('ar'),
             supportedLocales: [Locale('ar'), Locale('en')],
             localizationsDelegates: _localizations,
-            home: Scaffold(body: IncomeFormScreen()),
+            home: IncomeFormScreen(),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      // Open the dropdown.
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      // Open the account dropdown.
+      await tester.tap(find.byType(DropdownButtonFormField<FinancialAccount>));
       await tester.pumpAndSettle();
       expect(find.text('محفظتي'), findsWidgets);
     });

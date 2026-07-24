@@ -1,6 +1,8 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -18,7 +20,7 @@ import 'package:uuid/uuid.dart';
 const _householdId = 'household-v1';
 const _createdBy = 'member-primary-v1';
 
-/// Form for recording a new income transaction.
+/// Form for recording a new income transaction (amount-first, progressive details).
 class IncomeFormScreen extends ConsumerStatefulWidget {
   const IncomeFormScreen({this.preselectedAccountId, super.key});
 
@@ -30,11 +32,13 @@ class IncomeFormScreen extends ConsumerStatefulWidget {
 
 class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  final _amountFocus = FocusNode();
+  final _noteFocus = FocusNode();
 
   String? _selectedAccountId;
-  // Track the full account so we can read its currency at submission time.
   FinancialAccount? _selectedAccount;
   TransactionCategory? _selectedCategory;
   DateTime _effectiveDate = DateTime.now();
@@ -50,8 +54,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _amountFocus.dispose();
+    _noteFocus.dispose();
     super.dispose();
   }
 
@@ -60,31 +67,63 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
+  Future<void> _ensureVisible(FocusNode node) async {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    if (!mounted || !node.hasFocus) return;
+    final ctx = node.context;
+    if (ctx != null && ctx.mounted) {
+      await Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 200),
+        alignment: 0.2,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final accountsAsync = ref.watch(accountsProvider(_householdId));
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.incomeFormTitle)),
+    return AppScreenScaffold(
+      title: Text(l10n.incomeFormTitle),
+      resizeToAvoidBottomInset: true,
+      bottomBar: accountsAsync.maybeWhen(
+        data: (result) {
+          if (result is! AppOk<List<FinancialAccount>>) return null;
+          final accounts = result.value
+              .where(AccountEligibility.isOrdinaryTransactionEndpoint)
+              .toList();
+          if (accounts.isEmpty) return null;
+          return AppBottomActionBar(
+            child: PrimaryActionButton(
+              label: l10n.reviewTitle,
+              onPressed: () => _goToReview(context, l10n),
+            ),
+          );
+        },
+        orElse: () => null,
+      ),
       body: accountsAsync.when(
-        loading: () => Center(child: Text(l10n.loadingLabel)),
-        error: (_, _) => Center(child: Text(l10n.errorGeneric)),
+        loading: () => AppLoadingState(message: l10n.loadingLabel),
+        error: (_, _) => AppErrorState(
+          message: l10n.errorGeneric,
+          retryLabel: l10n.retryAction,
+          onRetry: () => ref.invalidate(accountsProvider(_householdId)),
+        ),
         data: (result) {
           if (result is! AppOk<List<FinancialAccount>>) {
-            return Center(child: Text(l10n.errorGeneric));
+            return AppErrorState(message: l10n.errorGeneric);
           }
           final accounts = result.value
               .where(AccountEligibility.isOrdinaryTransactionEndpoint)
               .toList();
 
-          // Sync tracked account; clear preselected ID if account is now archived.
           if (_selectedAccountId != null) {
             final found = accounts
                 .where((a) => a.id == _selectedAccountId)
                 .firstOrNull;
             if (found == null) {
-              // Archived or missing — schedule reset to avoid setState-in-build.
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   setState(() {
@@ -99,159 +138,139 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           }
 
           if (accounts.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.account_balance_wallet_outlined, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.accountsEmpty,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: () => context.push('/accounts/new'),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.accountsAddButton),
-                    ),
-                  ],
-                ),
-              ),
+            return AppEmptyState(
+              title: l10n.accountsEmpty,
+              icon: Icons.account_balance_wallet_outlined,
+              actionLabel: l10n.accountsAddButton,
+              onAction: () => context.push('/accounts/new'),
             );
           }
 
+          final currencyCode = _selectedAccount?.currencyCode;
+
           return Form(
             key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Destination Account
-                _buildAccountDropdown(context, l10n, accounts),
-                const SizedBox(height: 16),
-                // Amount
-                _buildAmountField(context, l10n),
-                const SizedBox(height: 16),
-                // Category
-                _buildCategoryDropdown(context, l10n),
-                const SizedBox(height: 16),
-                // Effective date
-                _buildDatePicker(context, l10n),
-                const SizedBox(height: 16),
-                // Note
-                TextFormField(
-                  controller: _noteController,
-                  decoration: InputDecoration(
-                    labelText: l10n.fieldNote,
-                    border: const OutlineInputBorder(),
+            child: ResponsiveContentContainer(
+              child: ListView(
+                controller: _scrollController,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsetsDirectional.only(
+                  top: AppTheme.space16,
+                  bottom: AppTheme.space32,
+                ),
+                children: [
+                  AppFormSection(
+                    title: l10n.formSectionAmount,
+                    child: AmountEntryField(
+                      controller: _amountController,
+                      label: l10n.fieldAmount,
+                      currencyCode: currencyCode,
+                      errorText: _amountError,
+                      focusNode: _amountFocus,
+                      autofocus: true,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+                      ],
+                      onChanged: (_) => setState(() => _amountError = null),
+                    ),
                   ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: () => _goToReview(context, l10n),
-                  child: Text(l10n.reviewTitle),
-                ),
-              ],
+                  AppFormSection(
+                    title: l10n.formSectionAccount,
+                    child: AccountSelectorField<FinancialAccount>(
+                      label: l10n.fieldDestinationAccount,
+                      items: accounts,
+                      value: accounts
+                          .where((a) => a.id == _selectedAccountId)
+                          .firstOrNull,
+                      itemLabel: (a) => a.name,
+                      errorText: _accountError,
+                      onChanged: (a) {
+                        setState(() {
+                          _selectedAccountId = a?.id;
+                          _selectedAccount = a;
+                          _accountError = null;
+                        });
+                      },
+                    ),
+                  ),
+                  AppFormSection(
+                    title: l10n.formSectionCategory,
+                    child: DropdownButtonFormField<TransactionCategory>(
+                      // ignore: deprecated_member_use
+                      value: _selectedCategory,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: l10n.fieldCategory,
+                        errorText: _categoryError,
+                      ),
+                      items: TransactionCategory.incomeCategories
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(categoryLabel(l10n, c)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() {
+                        _selectedCategory = v;
+                        _categoryError = null;
+                      }),
+                    ),
+                  ),
+                  AppExpandableDetails(
+                    title: l10n.formAdvancedDetails,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _effectiveDate,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                            );
+                            if (picked != null) {
+                              setState(() => _effectiveDate = picked);
+                            }
+                            if (mounted) _amountFocus.requestFocus();
+                          },
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: l10n.fieldEffectiveDate,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(_formatDate(_effectiveDate)),
+                                ),
+                                const Icon(Icons.calendar_today, size: 18),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppTheme.space16),
+                        TextFormField(
+                          controller: _noteController,
+                          focusNode: _noteFocus,
+                          textInputAction: TextInputAction.done,
+                          onTap: () => _ensureVisible(_noteFocus),
+                          decoration: InputDecoration(
+                            labelText: l10n.fieldNote,
+                          ),
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildAccountDropdown(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<FinancialAccount> accounts,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<String>(
-          initialValue: _selectedAccountId,
-          decoration: InputDecoration(
-            labelText: l10n.fieldDestinationAccount,
-            border: const OutlineInputBorder(),
-            errorText: _accountError,
-          ),
-          items: accounts
-              .map((a) => DropdownMenuItem(value: a.id, child: Text(a.name)))
-              .toList(),
-          onChanged: (v) {
-            setState(() {
-              _selectedAccountId = v;
-              _selectedAccount = accounts.where((a) => a.id == v).firstOrNull;
-              _accountError = null;
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAmountField(BuildContext context, AppLocalizations l10n) {
-    return TextFormField(
-      controller: _amountController,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-      decoration: InputDecoration(
-        labelText: l10n.fieldAmount,
-        border: const OutlineInputBorder(),
-        errorText: _amountError,
-      ),
-      onChanged: (_) => setState(() => _amountError = null),
-    );
-  }
-
-  Widget _buildCategoryDropdown(BuildContext context, AppLocalizations l10n) {
-    return DropdownButtonFormField<TransactionCategory>(
-      // ignore: deprecated_member_use
-      value: _selectedCategory,
-      decoration: InputDecoration(
-        labelText: l10n.fieldCategory,
-        border: const OutlineInputBorder(),
-        errorText: _categoryError,
-      ),
-      items: TransactionCategory.incomeCategories
-          .map(
-            (c) =>
-                DropdownMenuItem(value: c, child: Text(categoryLabel(l10n, c))),
-          )
-          .toList(),
-      onChanged: (v) => setState(() {
-        _selectedCategory = v;
-        _categoryError = null;
-      }),
-    );
-  }
-
-  Widget _buildDatePicker(BuildContext context, AppLocalizations l10n) {
-    return InkWell(
-      onTap: () async {
-        final picked = await showDatePicker(
-          context: context,
-          initialDate: _effectiveDate,
-          firstDate: DateTime(2000),
-          lastDate: DateTime.now().add(const Duration(days: 365)),
-        );
-        if (picked != null) setState(() => _effectiveDate = picked);
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: l10n.fieldEffectiveDate,
-          border: const OutlineInputBorder(),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(_formatDate(_effectiveDate)),
-            const Icon(Icons.calendar_today, size: 18),
-          ],
-        ),
       ),
     );
   }
@@ -264,18 +283,22 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           : null;
     });
 
-    if (_selectedAccountId == null || _selectedCategory == null) return;
+    if (_selectedAccountId == null || _selectedCategory == null) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+      return;
+    }
 
     final rawAmount = _amountController.text.trim();
     final currencyCode = _selectedAccount?.currencyCode ?? 'EGP';
     final currency = Currency.fromCode(currencyCode);
     final parseResult = MoneyInputFormatter.parse(rawAmount, currency);
-    if (parseResult is! MoneyParseOk) {
+    if (parseResult is! MoneyParseOk || parseResult.value.minorUnits <= 0) {
       setState(() => _amountError = l10n.errorMoneyInvalidFormat);
-      return;
-    }
-    if (parseResult.value.minorUnits <= 0) {
-      setState(() => _amountError = l10n.errorMoneyInvalidFormat);
+      _amountFocus.requestFocus();
       return;
     }
     final minorUnits = parseResult.value.minorUnits;

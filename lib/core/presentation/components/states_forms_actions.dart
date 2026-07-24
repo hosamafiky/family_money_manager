@@ -371,3 +371,81 @@ class DestructiveActionButton extends StatelessWidget {
     );
   }
 }
+
+/// Progressive disclosure for secondary form fields (notes, advanced options).
+class AppExpandableDetails extends StatelessWidget {
+  const AppExpandableDetails({
+    required this.title,
+    required this.child,
+    super.key,
+    this.initiallyExpanded = false,
+    this.subtitle,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget child;
+  final bool initiallyExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final roles = context.textRoles;
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: initiallyExpanded,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsetsDirectional.only(
+          bottom: AppTheme.space12,
+        ),
+        title: Text(title, style: roles.sectionTitle),
+        subtitle: subtitle == null
+            ? null
+            : Text(subtitle!, style: roles.supportingMeta),
+        children: [child],
+      ),
+    );
+  }
+}
+
+/// Shared confirmation dialog for sensitive / destructive actions.
+Future<bool> showAppConfirmDialog({
+  required BuildContext context,
+  required String title,
+  required String message,
+  required String confirmLabel,
+  String? cancelLabel,
+  bool isDestructive = false,
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (ctx) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              cancelLabel ?? MaterialLocalizations.of(ctx).cancelButtonLabel,
+            ),
+          ),
+          if (isDestructive)
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(ctx).colorScheme.error,
+              ),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(confirmLabel),
+            )
+          else
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(confirmLabel),
+            ),
+        ],
+      );
+    },
+  );
+  return result ?? false;
+}
