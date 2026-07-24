@@ -2,7 +2,8 @@
   "@@locale": "en",
   "appTitle": "Family Money Manager",
   "@appTitle": {
-    "description": "The main application title shown in the header and title bar."
+    "description": "The main application title shown in the header and title bar.",
+    "context": "app"
   },
   "foundationTitle": "Foundation Phase",
   "@foundationTitle": {
@@ -76,862 +77,1981 @@
   "@foundationDetailProbeLabel": {
     "description": "Label showing the typed-route probe parameter on the detail screen.",
     "placeholders": {
-      "probeId": { "type": "String" }
+      "probeId": {
+        "type": "String"
+      }
     }
   },
   "navAccounts": "Accounts",
-  "@navAccounts": { "description": "Bottom navigation label for accounts tab." },
+  "@navAccounts": {
+    "description": "Bottom navigation label for accounts tab."
+  },
   "navMembers": "Family",
-  "@navMembers": { "description": "Bottom navigation label for family members tab." },
+  "@navMembers": {
+    "description": "Bottom navigation label for family members tab."
+  },
   "navSettings": "Settings",
-  "@navSettings": { "description": "Bottom navigation label for settings tab." },
+  "@navSettings": {
+    "description": "Bottom navigation label for settings tab."
+  },
   "accountsTitle": "Accounts",
-  "@accountsTitle": { "description": "Title for the accounts screen." },
+  "@accountsTitle": {
+    "description": "Title for the accounts screen."
+  },
   "accountsEmpty": "No accounts yet. Create your first account.",
-  "@accountsEmpty": { "description": "Empty-state message on the accounts screen." },
+  "@accountsEmpty": {
+    "description": "Empty-state message on the accounts screen."
+  },
   "accountsAddButton": "Add Account",
-  "@accountsAddButton": { "description": "FAB label to create a new account." },
+  "@accountsAddButton": {
+    "description": "FAB label to create a new account."
+  },
   "accountsTotalSpendable": "Total Spendable",
-  "@accountsTotalSpendable": { "description": "Label for the total spendable amount." },
+  "@accountsTotalSpendable": {
+    "description": "Label for the total spendable amount."
+  },
   "accountsTotalProtected": "Total Protected",
-  "@accountsTotalProtected": { "description": "Label for the total protected amount." },
+  "@accountsTotalProtected": {
+    "description": "Label for the total protected amount."
+  },
   "accountTypePersonalCash": "Personal Cash Wallet",
-  "@accountTypePersonalCash": { "description": "Account type label." },
+  "@accountTypePersonalCash": {
+    "description": "Account type label."
+  },
   "accountTypeSpouseCash": "Spouse Cash Wallet",
-  "@accountTypeSpouseCash": { "description": "Account type label." },
+  "@accountTypeSpouseCash": {
+    "description": "Account type label."
+  },
   "accountTypeHouseholdCash": "Household Cash",
-  "@accountTypeHouseholdCash": { "description": "Account type label." },
+  "@accountTypeHouseholdCash": {
+    "description": "Account type label."
+  },
   "accountTypeHomeSavings": "Home Savings",
-  "@accountTypeHomeSavings": { "description": "Account type label." },
+  "@accountTypeHomeSavings": {
+    "description": "Account type label."
+  },
   "accountTypeBankAccount": "Bank Account",
-  "@accountTypeBankAccount": { "description": "Account type label." },
+  "@accountTypeBankAccount": {
+    "description": "Account type label."
+  },
   "accountTypeMobileWallet": "Mobile Wallet",
-  "@accountTypeMobileWallet": { "description": "Account type label." },
+  "@accountTypeMobileWallet": {
+    "description": "Account type label."
+  },
   "accountTypeChildFund": "Protected Child Fund",
-  "@accountTypeChildFund": { "description": "Account type label." },
+  "@accountTypeChildFund": {
+    "description": "Account type label."
+  },
   "accountCreateTitle": "New Account",
-  "@accountCreateTitle": { "description": "Title for the account creation screen." },
+  "@accountCreateTitle": {
+    "description": "Title for the account creation screen."
+  },
   "accountName": "Account Name",
-  "@accountName": { "description": "Label for the account name field." },
+  "@accountName": {
+    "description": "Label for the account name field."
+  },
   "accountOwner": "Owner",
-  "@accountOwner": { "description": "Label for the account owner field." },
+  "@accountOwner": {
+    "description": "Label for the account owner field."
+  },
   "accountCurrency": "Currency",
-  "@accountCurrency": { "description": "Label for the currency field." },
+  "@accountCurrency": {
+    "description": "Label for the currency field."
+  },
   "accountOpeningBalance": "Opening Balance",
-  "@accountOpeningBalance": { "description": "Label for the optional opening balance field." },
+  "@accountOpeningBalance": {
+    "description": "Label for the optional opening balance field."
+  },
   "accountNotes": "Notes",
-  "@accountNotes": { "description": "Label for the optional notes field." },
+  "@accountNotes": {
+    "description": "Label for the optional notes field."
+  },
   "accountProtectedWarning": "This is a protected account. Funds are not available for ordinary spending.",
-  "@accountProtectedWarning": { "description": "Warning shown for protected accounts." },
+  "@accountProtectedWarning": {
+    "description": "Warning shown for protected accounts."
+  },
   "accountChildFundConfirmTitle": "Confirm Child Fund Creation",
-  "@accountChildFundConfirmTitle": { "description": "Confirmation dialog title for child fund." },
+  "@accountChildFundConfirmTitle": {
+    "description": "Confirmation dialog title for child fund."
+  },
   "accountChildFundConfirmBody": "Funds in this account will be protected and dedicated to the child. They cannot be used for ordinary spending.",
-  "@accountChildFundConfirmBody": { "description": "Confirmation dialog body for child fund." },
+  "@accountChildFundConfirmBody": {
+    "description": "Confirmation dialog body for child fund."
+  },
   "accountDetailTitle": "Account Details",
-  "@accountDetailTitle": { "description": "Title for the account detail screen." },
+  "@accountDetailTitle": {
+    "description": "Title for the account detail screen."
+  },
   "accountDetailBalance": "Current Balance",
-  "@accountDetailBalance": { "description": "Label for the current balance." },
+  "@accountDetailBalance": {
+    "description": "Label for the current balance."
+  },
   "accountDetailHistory": "Financial History",
-  "@accountDetailHistory": { "description": "Section heading for financial history." },
+  "@accountDetailHistory": {
+    "description": "Section heading for financial history."
+  },
   "accountDetailHistoryEmpty": "No financial activity yet.",
-  "@accountDetailHistoryEmpty": { "description": "Empty-state message for financial history." },
+  "@accountDetailHistoryEmpty": {
+    "description": "Empty-state message for financial history."
+  },
   "accountArchive": "Archive Account",
-  "@accountArchive": { "description": "Action label to archive an account." },
+  "@accountArchive": {
+    "description": "Action label to archive an account."
+  },
   "accountArchiveConfirm": "Are you sure you want to archive this account?",
-  "@accountArchiveConfirm": { "description": "Archive confirmation dialog message." },
+  "@accountArchiveConfirm": {
+    "description": "Archive confirmation dialog message."
+  },
   "accountArchiveError": "Cannot archive account with non-zero balance.",
-  "@accountArchiveError": { "description": "Error shown when archiving fails due to non-zero balance." },
+  "@accountArchiveError": {
+    "description": "Error shown when archiving fails due to non-zero balance."
+  },
   "membersTitle": "Family Members",
-  "@membersTitle": { "description": "Title for the household members screen." },
+  "@membersTitle": {
+    "description": "Title for the household members screen."
+  },
   "memberPrimaryUser": "Primary User",
-  "@memberPrimaryUser": { "description": "Role label for primary user." },
+  "@memberPrimaryUser": {
+    "description": "Role label for primary user."
+  },
   "memberSpouse": "Spouse",
-  "@memberSpouse": { "description": "Role label for spouse." },
+  "@memberSpouse": {
+    "description": "Role label for spouse."
+  },
   "memberChild": "Child",
-  "@memberChild": { "description": "Role label for child." },
+  "@memberChild": {
+    "description": "Role label for child."
+  },
   "memberAddSpouse": "Add Spouse",
-  "@memberAddSpouse": { "description": "Action to add a spouse member." },
+  "@memberAddSpouse": {
+    "description": "Action to add a spouse member."
+  },
   "memberAddChild": "Add Child",
-  "@memberAddChild": { "description": "Action to add a child member." },
+  "@memberAddChild": {
+    "description": "Action to add a child member."
+  },
   "memberName": "Name",
-  "@memberName": { "description": "Label for the member name field." },
+  "@memberName": {
+    "description": "Label for the member name field."
+  },
   "memberRename": "Rename",
-  "@memberRename": { "description": "Action to rename a member." },
+  "@memberRename": {
+    "description": "Action to rename a member."
+  },
   "memberArchive": "Archive Member",
-  "@memberArchive": { "description": "Action to archive a member." },
+  "@memberArchive": {
+    "description": "Action to archive a member."
+  },
   "memberSpouseLoginNote": "Note: Separate spouse login is not available in V1.",
-  "@memberSpouseLoginNote": { "description": "Note about spouse login not being supported in V1." },
+  "@memberSpouseLoginNote": {
+    "description": "Note about spouse login not being supported in V1."
+  },
   "settingsTitle": "Settings",
-  "@settingsTitle": { "description": "Title for the settings screen." },
+  "@settingsTitle": {
+    "description": "Title for the settings screen."
+  },
   "save": "Save",
-  "@save": { "description": "Generic save button label." },
+  "@save": {
+    "description": "Generic save button label."
+  },
   "cancel": "Cancel",
-  "@cancel": { "description": "Generic cancel button label." },
+  "@cancel": {
+    "description": "Generic cancel button label."
+  },
   "confirm": "Confirm",
-  "@confirm": { "description": "Generic confirm button label." },
+  "@confirm": {
+    "description": "Generic confirm button label."
+  },
   "protectedLabel": "Protected",
-  "@protectedLabel": { "description": "Badge label for protected accounts." },
+  "@protectedLabel": {
+    "description": "Badge label for protected accounts."
+  },
   "spendableLabel": "Spendable",
-  "@spendableLabel": { "description": "Badge label for spendable accounts." },
+  "@spendableLabel": {
+    "description": "Badge label for spendable accounts."
+  },
   "archivedLabel": "Archived",
-  "@archivedLabel": { "description": "Badge label for archived accounts." },
+  "@archivedLabel": {
+    "description": "Badge label for archived accounts."
+  },
   "loadingLabel": "Loading...",
-  "@loadingLabel": { "description": "Generic loading indicator label." },
+  "@loadingLabel": {
+    "description": "Generic loading indicator label."
+  },
   "balanceLabel": "Balance",
-  "@balanceLabel": { "description": "Generic balance label." },
+  "@balanceLabel": {
+    "description": "Generic balance label."
+  },
   "errorGeneric": "An error occurred. Please try again.",
-  "@errorGeneric": { "description": "Generic error message." },
+  "@errorGeneric": {
+    "description": "Generic error message."
+  },
   "errorAccountNameEmpty": "Account name is required.",
-  "@errorAccountNameEmpty": { "description": "Validation error when account name is empty." },
+  "@errorAccountNameEmpty": {
+    "description": "Validation error when account name is empty."
+  },
   "errorOpeningBalanceNegative": "Opening balance cannot be negative.",
-  "@errorOpeningBalanceNegative": { "description": "Validation error for negative opening balance." },
+  "@errorOpeningBalanceNegative": {
+    "description": "Validation error for negative opening balance."
+  },
   "errorAccountDuplicate": "An account with this ID already exists.",
-  "@errorAccountDuplicate": { "description": "Error when a duplicate account ID is used." },
+  "@errorAccountDuplicate": {
+    "description": "Error when a duplicate account ID is used."
+  },
   "errorArchiveNonzeroBalance": "Cannot archive account with non-zero balance.",
-  "@errorArchiveNonzeroBalance": { "description": "Error when archiving an account with non-zero balance." },
+  "@errorArchiveNonzeroBalance": {
+    "description": "Error when archiving an account with non-zero balance."
+  },
   "errorAccountAlreadyArchived": "Account is already archived.",
-  "@errorAccountAlreadyArchived": { "description": "Error when account is already archived." },
+  "@errorAccountAlreadyArchived": {
+    "description": "Error when account is already archived."
+  },
   "errorMemberNameEmpty": "Member name is required.",
-  "@errorMemberNameEmpty": { "description": "Validation error when member name is empty." },
+  "@errorMemberNameEmpty": {
+    "description": "Validation error when member name is empty."
+  },
   "errorSpouseDuplicate": "A spouse is already registered for this household.",
-  "@errorSpouseDuplicate": { "description": "Error when adding a second spouse." },
+  "@errorSpouseDuplicate": {
+    "description": "Error when adding a second spouse."
+  },
   "errorCannotArchivePrimaryUser": "Cannot archive the primary user.",
-  "@errorCannotArchivePrimaryUser": { "description": "Error when archiving the primary user." },
+  "@errorCannotArchivePrimaryUser": {
+    "description": "Error when archiving the primary user."
+  },
   "errorMemberAlreadyArchived": "Member is already archived.",
-  "@errorMemberAlreadyArchived": { "description": "Error when member is already archived." },
+  "@errorMemberAlreadyArchived": {
+    "description": "Error when member is already archived."
+  },
   "errorValidationGeneric": "Invalid input. Please check the form.",
-  "@errorValidationGeneric": { "description": "Generic validation failure message." },
+  "@errorValidationGeneric": {
+    "description": "Generic validation failure message."
+  },
   "errorMoneyInvalidFormat": "Invalid amount format.",
-  "@errorMoneyInvalidFormat": { "description": "Error when money input has invalid format." },
+  "@errorMoneyInvalidFormat": {
+    "description": "Error when money input has invalid format."
+  },
   "errorMoneyExcessDecimals": "Too many decimal places for this currency.",
-  "@errorMoneyExcessDecimals": { "description": "Error when money input has too many decimal places." },
+  "@errorMoneyExcessDecimals": {
+    "description": "Error when money input has too many decimal places."
+  },
   "errorMoneyOverflow": "Amount is too large.",
-  "@errorMoneyOverflow": { "description": "Error when money input overflows." },
-
+  "@errorMoneyOverflow": {
+    "description": "Error when money input overflows."
+  },
   "navTransactions": "Transactions",
-  "@navTransactions": { "description": "Bottom navigation label for transactions tab." },
+  "@navTransactions": {
+    "description": "Bottom navigation label for transactions tab."
+  },
   "transactionsTitle": "Transactions",
-  "@transactionsTitle": { "description": "Title for the transactions screen." },
+  "@transactionsTitle": {
+    "description": "Title for the transactions screen."
+  },
   "transactionsEmpty": "No transactions yet.",
-  "@transactionsEmpty": { "description": "Empty-state message on the transactions screen." },
+  "@transactionsEmpty": {
+    "description": "Empty-state message on the transactions screen."
+  },
   "transactionsFilterAll": "All",
-  "@transactionsFilterAll": { "description": "Filter option to show all transaction types." },
+  "@transactionsFilterAll": {
+    "description": "Filter option to show all transaction types."
+  },
   "transactionTypeIncome": "Income",
-  "@transactionTypeIncome": { "description": "Label for income operation type." },
+  "@transactionTypeIncome": {
+    "description": "Label for income operation type."
+  },
   "transactionTypeExpense": "Expense",
-  "@transactionTypeExpense": { "description": "Label for expense operation type." },
+  "@transactionTypeExpense": {
+    "description": "Label for expense operation type."
+  },
   "transactionTypeTransfer": "Transfer",
-  "@transactionTypeTransfer": { "description": "Label for transfer operation type." },
+  "@transactionTypeTransfer": {
+    "description": "Label for transfer operation type."
+  },
   "transactionTypeOpeningBalance": "Opening Balance",
-  "@transactionTypeOpeningBalance": { "description": "Label for opening balance operation type." },
+  "@transactionTypeOpeningBalance": {
+    "description": "Label for opening balance operation type."
+  },
   "transactionTypeAdjustment": "Adjustment",
-  "@transactionTypeAdjustment": { "description": "Label for adjustment operation type." },
+  "@transactionTypeAdjustment": {
+    "description": "Label for adjustment operation type."
+  },
   "transactionTypeReversal": "Reversal",
-  "@transactionTypeReversal": { "description": "Label for reversal operation type." },
+  "@transactionTypeReversal": {
+    "description": "Label for reversal operation type."
+  },
   "transactionReversed": "Reversed",
-  "@transactionReversed": { "description": "Badge shown on reversed transactions." },
+  "@transactionReversed": {
+    "description": "Badge shown on reversed transactions."
+  },
   "createTransactionTitle": "New Transaction",
-  "@createTransactionTitle": { "description": "Title for the create transaction screen." },
+  "@createTransactionTitle": {
+    "description": "Title for the create transaction screen."
+  },
   "createIncomeTitle": "Record Income",
-  "@createIncomeTitle": { "description": "Action to record income." },
+  "@createIncomeTitle": {
+    "description": "Action to record income."
+  },
   "createExpenseTitle": "Record Expense",
-  "@createExpenseTitle": { "description": "Action to record expense." },
+  "@createExpenseTitle": {
+    "description": "Action to record expense."
+  },
   "createTransferTitle": "Transfer Money",
-  "@createTransferTitle": { "description": "Action to transfer money." },
+  "@createTransferTitle": {
+    "description": "Action to transfer money."
+  },
   "incomeFormTitle": "Income Details",
-  "@incomeFormTitle": { "description": "Title for the income form screen." },
+  "@incomeFormTitle": {
+    "description": "Title for the income form screen."
+  },
   "expenseFormTitle": "Expense Details",
-  "@expenseFormTitle": { "description": "Title for the expense form screen." },
+  "@expenseFormTitle": {
+    "description": "Title for the expense form screen."
+  },
   "transferFormTitle": "Transfer Details",
-  "@transferFormTitle": { "description": "Title for the transfer form screen." },
+  "@transferFormTitle": {
+    "description": "Title for the transfer form screen."
+  },
   "reviewTitle": "Review & Confirm",
-  "@reviewTitle": { "description": "Title for review screens." },
+  "@reviewTitle": {
+    "description": "Title for review screens."
+  },
   "fieldDestinationAccount": "Destination Account",
-  "@fieldDestinationAccount": { "description": "Label for destination account field." },
+  "@fieldDestinationAccount": {
+    "description": "Label for destination account field."
+  },
   "fieldSourceAccount": "Source Account",
-  "@fieldSourceAccount": { "description": "Label for source account field." },
+  "@fieldSourceAccount": {
+    "description": "Label for source account field."
+  },
   "fieldPaymentAccount": "Payment Account",
-  "@fieldPaymentAccount": { "description": "Label for payment account field." },
+  "@fieldPaymentAccount": {
+    "description": "Label for payment account field."
+  },
   "fieldAmount": "Amount",
-  "@fieldAmount": { "description": "Label for amount field." },
+  "@fieldAmount": {
+    "description": "Label for amount field."
+  },
   "fieldCategory": "Category",
-  "@fieldCategory": { "description": "Label for category field." },
+  "@fieldCategory": {
+    "description": "Label for category field."
+  },
   "fieldSpender": "Spender",
-  "@fieldSpender": { "description": "Label for spender field." },
+  "@fieldSpender": {
+    "description": "Label for spender field."
+  },
   "fieldBeneficiary": "Beneficiary",
-  "@fieldBeneficiary": { "description": "Label for beneficiary field." },
+  "@fieldBeneficiary": {
+    "description": "Label for beneficiary field."
+  },
   "fieldScope": "Scope",
-  "@fieldScope": { "description": "Label for expense scope field." },
+  "@fieldScope": {
+    "description": "Label for expense scope field."
+  },
   "fieldEffectiveDate": "Date",
-  "@fieldEffectiveDate": { "description": "Label for effective date field." },
+  "@fieldEffectiveDate": {
+    "description": "Label for effective date field."
+  },
   "fieldNote": "Note (optional)",
-  "@fieldNote": { "description": "Label for optional note field." },
+  "@fieldNote": {
+    "description": "Label for optional note field."
+  },
   "fieldRecurring": "Recurring",
-  "@fieldRecurring": { "description": "Label for recurring toggle." },
+  "@fieldRecurring": {
+    "description": "Label for recurring toggle."
+  },
   "recurringOneTime": "One-time",
-  "@recurringOneTime": { "description": "Label for one-time (non-recurring) option." },
+  "@recurringOneTime": {
+    "description": "Label for one-time (non-recurring) option."
+  },
   "recurringYes": "Recurring (scheduling not yet active)",
-  "@recurringYes": { "description": "Label for recurring option with disclaimer." },
+  "@recurringYes": {
+    "description": "Label for recurring option with disclaimer."
+  },
   "scopePersonal": "Personal",
-  "@scopePersonal": { "description": "Expense scope: personal." },
+  "@scopePersonal": {
+    "description": "Expense scope: personal."
+  },
   "scopeSpouse": "Spouse",
-  "@scopeSpouse": { "description": "Expense scope: spouse." },
+  "@scopeSpouse": {
+    "description": "Expense scope: spouse."
+  },
   "scopeHousehold": "Household",
-  "@scopeHousehold": { "description": "Expense scope: household." },
+  "@scopeHousehold": {
+    "description": "Expense scope: household."
+  },
   "scopeChild": "Child",
-  "@scopeChild": { "description": "Expense scope: child." },
+  "@scopeChild": {
+    "description": "Expense scope: child."
+  },
   "catGroceries": "Groceries",
-  "@catGroceries": { "description": "Category label." },
+  "@catGroceries": {
+    "description": "Category label."
+  },
   "catHousing": "Housing",
-  "@catHousing": { "description": "Category label." },
+  "@catHousing": {
+    "description": "Category label."
+  },
   "catUtilities": "Utilities",
-  "@catUtilities": { "description": "Category label." },
+  "@catUtilities": {
+    "description": "Category label."
+  },
   "catTransportation": "Transportation",
-  "@catTransportation": { "description": "Category label." },
+  "@catTransportation": {
+    "description": "Category label."
+  },
   "catHealth": "Health",
-  "@catHealth": { "description": "Category label." },
+  "@catHealth": {
+    "description": "Category label."
+  },
   "catEducation": "Education",
-  "@catEducation": { "description": "Category label." },
+  "@catEducation": {
+    "description": "Category label."
+  },
   "catChildExpenses": "Child Expenses",
-  "@catChildExpenses": { "description": "Category label." },
+  "@catChildExpenses": {
+    "description": "Category label."
+  },
   "catPersonalSpending": "Personal Spending",
-  "@catPersonalSpending": { "description": "Category label." },
+  "@catPersonalSpending": {
+    "description": "Category label."
+  },
   "catSpouseSpending": "Spouse Spending",
-  "@catSpouseSpending": { "description": "Category label." },
+  "@catSpouseSpending": {
+    "description": "Category label."
+  },
   "catGiftsAndDonations": "Gifts & Donations",
-  "@catGiftsAndDonations": { "description": "Category label." },
+  "@catGiftsAndDonations": {
+    "description": "Category label."
+  },
   "catOtherExpense": "Other Expense",
-  "@catOtherExpense": { "description": "Category label." },
+  "@catOtherExpense": {
+    "description": "Category label."
+  },
   "catSalary": "Salary",
-  "@catSalary": { "description": "Category label." },
+  "@catSalary": {
+    "description": "Category label."
+  },
   "catBusinessIncome": "Business Income",
-  "@catBusinessIncome": { "description": "Category label." },
+  "@catBusinessIncome": {
+    "description": "Category label."
+  },
   "catGiftReceived": "Gift Received",
-  "@catGiftReceived": { "description": "Category label." },
+  "@catGiftReceived": {
+    "description": "Category label."
+  },
   "catInterestIncome": "Interest Income",
-  "@catInterestIncome": { "description": "Category label." },
+  "@catInterestIncome": {
+    "description": "Category label."
+  },
   "catOtherIncome": "Other Income",
-  "@catOtherIncome": { "description": "Category label." },
+  "@catOtherIncome": {
+    "description": "Category label."
+  },
   "protectedWithdrawalWarning": "Warning: This is a protected fund. Withdrawals require justification.",
-  "@protectedWithdrawalWarning": { "description": "Warning for protected-fund withdrawals." },
+  "@protectedWithdrawalWarning": {
+    "description": "Warning for protected-fund withdrawals."
+  },
   "fieldWithdrawalReason": "Reason for withdrawal",
-  "@fieldWithdrawalReason": { "description": "Label for withdrawal reason field." },
+  "@fieldWithdrawalReason": {
+    "description": "Label for withdrawal reason field."
+  },
   "fieldAcknowledgeWarning": "I understand this is a protected fund",
-  "@fieldAcknowledgeWarning": { "description": "Acknowledgement checkbox label." },
+  "@fieldAcknowledgeWarning": {
+    "description": "Acknowledgement checkbox label."
+  },
   "fieldConfirmWithdrawal": "I confirm this withdrawal is necessary",
-  "@fieldConfirmWithdrawal": { "description": "Confirmation checkbox label." },
+  "@fieldConfirmWithdrawal": {
+    "description": "Confirmation checkbox label."
+  },
   "errorCategoryRequired": "Please select a category.",
-  "@errorCategoryRequired": { "description": "Validation error for missing category." },
+  "@errorCategoryRequired": {
+    "description": "Validation error for missing category."
+  },
   "errorSpenderRequired": "Please select a spender.",
-  "@errorSpenderRequired": { "description": "Validation error for missing spender." },
+  "@errorSpenderRequired": {
+    "description": "Validation error for missing spender."
+  },
   "errorBeneficiaryRequired": "Please select a beneficiary.",
-  "@errorBeneficiaryRequired": { "description": "Validation error for missing beneficiary." },
+  "@errorBeneficiaryRequired": {
+    "description": "Validation error for missing beneficiary."
+  },
   "errorScopeRequired": "Please select a scope.",
-  "@errorScopeRequired": { "description": "Validation error for missing scope." },
+  "@errorScopeRequired": {
+    "description": "Validation error for missing scope."
+  },
   "errorInsufficientFunds": "Insufficient funds in the selected account.",
-  "@errorInsufficientFunds": { "description": "Error when account has insufficient funds." },
+  "@errorInsufficientFunds": {
+    "description": "Error when account has insufficient funds."
+  },
   "errorSameAccount": "Source and destination must be different accounts.",
-  "@errorSameAccount": { "description": "Error when source and destination are the same." },
+  "@errorSameAccount": {
+    "description": "Error when source and destination are the same."
+  },
   "errorCurrencyMismatch": "Accounts must use the same currency.",
-  "@errorCurrencyMismatch": { "description": "Error when accounts have different currencies." },
+  "@errorCurrencyMismatch": {
+    "description": "Error when accounts have different currencies."
+  },
   "errorAccountArchived": "This account is archived and cannot receive new transactions.",
-  "@errorAccountArchived": { "description": "Error when account is archived." },
+  "@errorAccountArchived": {
+    "description": "Error when account is archived."
+  },
   "errorWithdrawalReasonRequired": "A non-empty reason is required for protected fund withdrawals.",
-  "@errorWithdrawalReasonRequired": { "description": "Error when withdrawal reason is empty." },
+  "@errorWithdrawalReasonRequired": {
+    "description": "Error when withdrawal reason is empty."
+  },
   "errorWithdrawalAcknowledgmentRequired": "You must acknowledge the protected fund warning.",
-  "@errorWithdrawalAcknowledgmentRequired": { "description": "Error when warning not acknowledged." },
+  "@errorWithdrawalAcknowledgmentRequired": {
+    "description": "Error when warning not acknowledged."
+  },
   "errorWithdrawalConfirmationRequired": "You must confirm the withdrawal.",
-  "@errorWithdrawalConfirmationRequired": { "description": "Error when withdrawal not confirmed." },
+  "@errorWithdrawalConfirmationRequired": {
+    "description": "Error when withdrawal not confirmed."
+  },
   "spouseWalletSummaryTitle": "Spouse Wallet Summary",
-  "@spouseWalletSummaryTitle": { "description": "Title for spouse wallet summary section." },
+  "@spouseWalletSummaryTitle": {
+    "description": "Title for spouse wallet summary section."
+  },
   "spouseWalletFunded": "Total Funded",
-  "@spouseWalletFunded": { "description": "Label for total funded amount." },
+  "@spouseWalletFunded": {
+    "description": "Label for total funded amount."
+  },
   "spouseWalletSpent": "Total Spent",
-  "@spouseWalletSpent": { "description": "Label for total spent amount." },
+  "@spouseWalletSpent": {
+    "description": "Label for total spent amount."
+  },
   "spouseWalletReturned": "Total Returned",
-  "@spouseWalletReturned": { "description": "Label for total returned amount." },
+  "@spouseWalletReturned": {
+    "description": "Label for total returned amount."
+  },
   "spouseWalletDerivedBalance": "Derived Balance",
-  "@spouseWalletDerivedBalance": { "description": "Label for derived balance." },
+  "@spouseWalletDerivedBalance": {
+    "description": "Label for derived balance."
+  },
   "actionRecordIncome": "Record Income",
-  "@actionRecordIncome": { "description": "Action button to record income." },
+  "@actionRecordIncome": {
+    "description": "Action button to record income."
+  },
   "actionRecordExpense": "Record Expense",
-  "@actionRecordExpense": { "description": "Action button to record expense." },
+  "@actionRecordExpense": {
+    "description": "Action button to record expense."
+  },
   "actionTransfer": "Transfer Money",
-  "@actionTransfer": { "description": "Action button to transfer money." },
+  "@actionTransfer": {
+    "description": "Action button to transfer money."
+  },
   "transactionDetailTitle": "Transaction Detail",
-  "@transactionDetailTitle": { "description": "Title for the transaction detail screen." },
-
+  "@transactionDetailTitle": {
+    "description": "Title for the transaction detail screen."
+  },
   "navDashboard": "Dashboard",
-  "@navDashboard": { "description": "Bottom navigation label for dashboard tab." },
+  "@navDashboard": {
+    "description": "Bottom navigation label for dashboard tab."
+  },
   "dashboardTitle": "Dashboard",
-  "@dashboardTitle": { "description": "Title for the dashboard screen." },
+  "@dashboardTitle": {
+    "description": "Title for the dashboard screen."
+  },
   "dashboardSpendableBalances": "Spendable Balances",
-  "@dashboardSpendableBalances": { "description": "Section heading for spendable balances." },
+  "@dashboardSpendableBalances": {
+    "description": "Section heading for spendable balances."
+  },
   "dashboardProtectedBalances": "Protected Balances",
-  "@dashboardProtectedBalances": { "description": "Section heading for protected balances." },
+  "@dashboardProtectedBalances": {
+    "description": "Section heading for protected balances."
+  },
   "dashboardNoSpendable": "No spendable accounts yet.",
-  "@dashboardNoSpendable": { "description": "Empty state for spendable balances." },
+  "@dashboardNoSpendable": {
+    "description": "Empty state for spendable balances."
+  },
   "dashboardNoProtected": "No protected accounts.",
-  "@dashboardNoProtected": { "description": "Empty state for protected balances." },
+  "@dashboardNoProtected": {
+    "description": "Empty state for protected balances."
+  },
   "dashboardPeriodIncome": "Income",
-  "@dashboardPeriodIncome": { "description": "Label for income in period flow." },
+  "@dashboardPeriodIncome": {
+    "description": "Label for income in period flow."
+  },
   "dashboardPeriodExpenses": "Expenses",
-  "@dashboardPeriodExpenses": { "description": "Label for expenses in period flow." },
+  "@dashboardPeriodExpenses": {
+    "description": "Label for expenses in period flow."
+  },
   "dashboardPeriodNet": "Net",
-  "@dashboardPeriodNet": { "description": "Label for net amount in period flow." },
+  "@dashboardPeriodNet": {
+    "description": "Label for net amount in period flow."
+  },
   "dashboardPeriodNoActivity": "No income or expense activity in this period.",
-  "@dashboardPeriodNoActivity": { "description": "Empty state for period flow." },
+  "@dashboardPeriodNoActivity": {
+    "description": "Empty state for period flow."
+  },
   "dashboardScopePersonal": "Personal Spending",
-  "@dashboardScopePersonal": { "description": "Expense scope label: personal." },
+  "@dashboardScopePersonal": {
+    "description": "Expense scope label: personal."
+  },
   "dashboardScopeSpouse": "Spouse Spending",
-  "@dashboardScopeSpouse": { "description": "Expense scope label: spouse." },
+  "@dashboardScopeSpouse": {
+    "description": "Expense scope label: spouse."
+  },
   "dashboardScopeHousehold": "Household Spending",
-  "@dashboardScopeHousehold": { "description": "Expense scope label: household." },
+  "@dashboardScopeHousehold": {
+    "description": "Expense scope label: household."
+  },
   "dashboardScopeChild": "Child Spending",
-  "@dashboardScopeChild": { "description": "Expense scope label: child." },
+  "@dashboardScopeChild": {
+    "description": "Expense scope label: child."
+  },
   "dashboardScopeNoActivity": "No expense scope data for this period.",
-  "@dashboardScopeNoActivity": { "description": "Empty state for expense scopes." },
+  "@dashboardScopeNoActivity": {
+    "description": "Empty state for expense scopes."
+  },
   "dashboardSpouseWallet": "Spouse Wallet",
-  "@dashboardSpouseWallet": { "description": "Section heading for spouse wallet." },
+  "@dashboardSpouseWallet": {
+    "description": "Section heading for spouse wallet."
+  },
   "dashboardSpouseWalletFunded": "Funded",
-  "@dashboardSpouseWalletFunded": { "description": "Label for amount funded to spouse wallet." },
+  "@dashboardSpouseWalletFunded": {
+    "description": "Label for amount funded to spouse wallet."
+  },
   "dashboardSpouseWalletSpent": "Spent",
-  "@dashboardSpouseWalletSpent": { "description": "Label for amount spent from spouse wallet." },
+  "@dashboardSpouseWalletSpent": {
+    "description": "Label for amount spent from spouse wallet."
+  },
   "dashboardSpouseWalletReturned": "Returned",
-  "@dashboardSpouseWalletReturned": { "description": "Label for amount returned from spouse wallet." },
+  "@dashboardSpouseWalletReturned": {
+    "description": "Label for amount returned from spouse wallet."
+  },
   "dashboardSpouseWalletBalance": "Current Balance",
-  "@dashboardSpouseWalletBalance": { "description": "Label for current spouse wallet balance." },
+  "@dashboardSpouseWalletBalance": {
+    "description": "Label for current spouse wallet balance."
+  },
   "dashboardNoSpouseWallet": "No spouse wallet found.",
-  "@dashboardNoSpouseWallet": { "description": "Empty state for spouse wallet." },
+  "@dashboardNoSpouseWallet": {
+    "description": "Empty state for spouse wallet."
+  },
   "dashboardRecentActivity": "Recent Activity",
-  "@dashboardRecentActivity": { "description": "Section heading for recent activity." },
+  "@dashboardRecentActivity": {
+    "description": "Section heading for recent activity."
+  },
   "dashboardNoRecentActivity": "No recent transactions.",
-  "@dashboardNoRecentActivity": { "description": "Empty state for recent activity." },
+  "@dashboardNoRecentActivity": {
+    "description": "Empty state for recent activity."
+  },
   "dashboardViewAll": "View all",
-  "@dashboardViewAll": { "description": "Link to view all transactions." },
+  "@dashboardViewAll": {
+    "description": "Link to view all transactions."
+  },
   "dashboardPeriodCurrentMonth": "This Month",
-  "@dashboardPeriodCurrentMonth": { "description": "Period selector chip: current month." },
+  "@dashboardPeriodCurrentMonth": {
+    "description": "Period selector chip: current month."
+  },
   "dashboardPeriodPreviousMonth": "Last Month",
-  "@dashboardPeriodPreviousMonth": { "description": "Period selector chip: previous month." },
+  "@dashboardPeriodPreviousMonth": {
+    "description": "Period selector chip: previous month."
+  },
   "dashboardPeriodCurrentYear": "This Year",
-  "@dashboardPeriodCurrentYear": { "description": "Period selector chip: current year." },
+  "@dashboardPeriodCurrentYear": {
+    "description": "Period selector chip: current year."
+  },
   "dashboardPeriodCustom": "Custom",
-  "@dashboardPeriodCustom": { "description": "Period selector chip: custom range." },
+  "@dashboardPeriodCustom": {
+    "description": "Period selector chip: custom range."
+  },
   "dashboardNegativeBalanceWarning": "Negative balance — data integrity issue",
-  "@dashboardNegativeBalanceWarning": { "description": "Warning for negative balance." },
+  "@dashboardNegativeBalanceWarning": {
+    "description": "Warning for negative balance."
+  },
   "dashboardChildProtected": "Child (Protected)",
-  "@dashboardChildProtected": { "description": "Label for protected child fund balance row." },
+  "@dashboardChildProtected": {
+    "description": "Label for protected child fund balance row."
+  },
   "dashboardRefresh": "Refresh",
-  "@dashboardRefresh": { "description": "Tooltip and semantic label for the refresh button." },
+  "@dashboardRefresh": {
+    "description": "Tooltip and semantic label for the refresh button."
+  },
   "dashboardLoading": "Loading dashboard...",
-  "@dashboardLoading": { "description": "Loading state message for dashboard." },
+  "@dashboardLoading": {
+    "description": "Loading state message for dashboard."
+  },
   "dashboardError": "Unable to load financial summary.",
-  "@dashboardError": { "description": "Error state message for dashboard." },
+  "@dashboardError": {
+    "description": "Error state message for dashboard."
+  },
   "dashboardRetry": "Retry",
-  "@dashboardRetry": { "description": "Retry button label on dashboard error." },
+  "@dashboardRetry": {
+    "description": "Retry button label on dashboard error."
+  },
   "dashboardPeriodLabel": "Period",
-  "@dashboardPeriodLabel": { "description": "Label for the period selector section." },
-
+  "@dashboardPeriodLabel": {
+    "description": "Label for the period selector section."
+  },
   "reportsTitle": "Reports",
-  "@reportsTitle": { "description": "Title for the reports landing screen." },
+  "@reportsTitle": {
+    "description": "Title for the reports landing screen."
+  },
   "reportIncomeExpenseTitle": "Income & Expenses",
-  "@reportIncomeExpenseTitle": { "description": "Title for income/expense report screen." },
+  "@reportIncomeExpenseTitle": {
+    "description": "Title for income/expense report screen."
+  },
   "reportAttributionTitle": "Spending Attribution",
-  "@reportAttributionTitle": { "description": "Title for spending attribution report screen." },
+  "@reportAttributionTitle": {
+    "description": "Title for spending attribution report screen."
+  },
   "reportCategoriesTitle": "Categories",
-  "@reportCategoriesTitle": { "description": "Title for category report screen." },
+  "@reportCategoriesTitle": {
+    "description": "Title for category report screen."
+  },
   "reportAccountsTitle": "Account Flows",
-  "@reportAccountsTitle": { "description": "Title for account flow report screen." },
+  "@reportAccountsTitle": {
+    "description": "Title for account flow report screen."
+  },
   "reportHomeSavingsTitle": "Home Savings",
-  "@reportHomeSavingsTitle": { "description": "Title for home savings report screen." },
+  "@reportHomeSavingsTitle": {
+    "description": "Title for home savings report screen."
+  },
   "reportSpouseWalletTitle": "Spouse Wallet",
-  "@reportSpouseWalletTitle": { "description": "Title for spouse wallet report screen." },
+  "@reportSpouseWalletTitle": {
+    "description": "Title for spouse wallet report screen."
+  },
   "reportProtectedFundsTitle": "Protected Funds",
-  "@reportProtectedFundsTitle": { "description": "Title for protected funds report screen." },
+  "@reportProtectedFundsTitle": {
+    "description": "Title for protected funds report screen."
+  },
   "reportGrossIncome": "Gross Income",
-  "@reportGrossIncome": { "description": "Label for gross income amount." },
+  "@reportGrossIncome": {
+    "description": "Label for gross income amount."
+  },
   "reportGrossExpense": "Gross Expenses",
-  "@reportGrossExpense": { "description": "Label for gross expense amount." },
+  "@reportGrossExpense": {
+    "description": "Label for gross expense amount."
+  },
   "reportNetIncome": "Net Income",
-  "@reportNetIncome": { "description": "Label for net income amount." },
+  "@reportNetIncome": {
+    "description": "Label for net income amount."
+  },
   "reportNetExpense": "Net Expenses",
-  "@reportNetExpense": { "description": "Label for net expense amount." },
+  "@reportNetExpense": {
+    "description": "Label for net expense amount."
+  },
   "reportReversalEffect": "Reversal Effect",
-  "@reportReversalEffect": { "description": "Label for reversal effect amount." },
+  "@reportReversalEffect": {
+    "description": "Label for reversal effect amount."
+  },
   "reportNetCashFlow": "Net Cash Flow",
-  "@reportNetCashFlow": { "description": "Label for net cash flow amount." },
+  "@reportNetCashFlow": {
+    "description": "Label for net cash flow amount."
+  },
   "reportSpenderSection": "By Spender",
-  "@reportSpenderSection": { "description": "Section heading for spending by spender." },
+  "@reportSpenderSection": {
+    "description": "Section heading for spending by spender."
+  },
   "reportBeneficiarySection": "By Beneficiary",
-  "@reportBeneficiarySection": { "description": "Section heading for spending by beneficiary." },
+  "@reportBeneficiarySection": {
+    "description": "Section heading for spending by beneficiary."
+  },
   "reportScopeSection": "By Scope",
-  "@reportScopeSection": { "description": "Section heading for spending by scope." },
+  "@reportScopeSection": {
+    "description": "Section heading for spending by scope."
+  },
   "reportOpeningBalance": "Opening Balance",
-  "@reportOpeningBalance": { "description": "Label for opening balance." },
+  "@reportOpeningBalance": {
+    "description": "Label for opening balance."
+  },
   "reportClosingBalance": "Closing Balance",
-  "@reportClosingBalance": { "description": "Label for closing balance." },
+  "@reportClosingBalance": {
+    "description": "Label for closing balance."
+  },
   "reportCurrentBalance": "Current Balance",
-  "@reportCurrentBalance": { "description": "Label for current balance." },
+  "@reportCurrentBalance": {
+    "description": "Label for current balance."
+  },
   "reportFunded": "Funded",
-  "@reportFunded": { "description": "Label for funded amount in wallet report." },
+  "@reportFunded": {
+    "description": "Label for funded amount in wallet report."
+  },
   "reportSpent": "Spent",
-  "@reportSpent": { "description": "Label for spent amount in wallet report." },
+  "@reportSpent": {
+    "description": "Label for spent amount in wallet report."
+  },
   "reportReturned": "Returned",
-  "@reportReturned": { "description": "Label for returned amount in wallet report." },
+  "@reportReturned": {
+    "description": "Label for returned amount in wallet report."
+  },
   "reportWithdrawals": "Withdrawals",
-  "@reportWithdrawals": { "description": "Label for withdrawals section." },
+  "@reportWithdrawals": {
+    "description": "Label for withdrawals section."
+  },
   "reportWithdrawalReason": "Reason",
-  "@reportWithdrawalReason": { "description": "Label for withdrawal reason." },
+  "@reportWithdrawalReason": {
+    "description": "Label for withdrawal reason."
+  },
   "reportBeneficiary": "Beneficiary",
-  "@reportBeneficiary": { "description": "Label for beneficiary in protected fund." },
+  "@reportBeneficiary": {
+    "description": "Label for beneficiary in protected fund."
+  },
   "reportDrillDown": "View Transactions",
-  "@reportDrillDown": { "description": "Link to drill-down transaction list." },
+  "@reportDrillDown": {
+    "description": "Link to drill-down transaction list."
+  },
   "reportEmpty": "No data for this period.",
-  "@reportEmpty": { "description": "Empty-state message for reports." },
+  "@reportEmpty": {
+    "description": "Empty-state message for reports."
+  },
   "reportError": "Unable to load report.",
-  "@reportError": { "description": "Error message for report load failure." },
+  "@reportError": {
+    "description": "Error message for report load failure."
+  },
   "reportRefresh": "Refresh",
-  "@reportRefresh": { "description": "Refresh button label in reports." },
+  "@reportRefresh": {
+    "description": "Refresh button label in reports."
+  },
   "reportCurrencySeparate": "Totals shown per currency",
-  "@reportCurrencySeparate": { "description": "Note that totals are per currency." },
+  "@reportCurrencySeparate": {
+    "description": "Note that totals are per currency."
+  },
   "reportTransferNote": "Transfers are not included in income or expense totals.",
-  "@reportTransferNote": { "description": "Note about transfer exclusion." },
+  "@reportTransferNote": {
+    "description": "Note about transfer exclusion."
+  },
   "reportReversalNote": "Reversal effects are shown separately.",
-  "@reportReversalNote": { "description": "Note about reversal effect display." },
+  "@reportReversalNote": {
+    "description": "Note about reversal effect display."
+  },
   "reportPeriodClosingBalance": "Period Closing Balance",
-  "@reportPeriodClosingBalance": { "description": "Label for period closing balance." },
+  "@reportPeriodClosingBalance": {
+    "description": "Label for period closing balance."
+  },
   "reportAuditDrillDown": "View Audit",
-  "@reportAuditDrillDown": { "description": "Link to audit detail." },
+  "@reportAuditDrillDown": {
+    "description": "Link to audit detail."
+  },
   "reportTransactionCount": "{count} transactions",
   "@reportTransactionCount": {
     "description": "Count of transactions in a category.",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "reportViewReports": "View Reports",
-  "@reportViewReports": { "description": "Dashboard button to open reports." },
-
+  "@reportViewReports": {
+    "description": "Dashboard button to open reports."
+  },
   "onboardingSubtitle": "Welcome! Enter your name to get started.",
-  "@onboardingSubtitle": { "description": "Onboarding screen subtitle." },
+  "@onboardingSubtitle": {
+    "description": "Onboarding screen subtitle."
+  },
   "onboardingNameLabel": "Your name",
-  "@onboardingNameLabel": { "description": "Label for the name field on the onboarding screen." },
+  "@onboardingNameLabel": {
+    "description": "Label for the name field on the onboarding screen."
+  },
   "onboardingNameHint": "e.g. Ahmed",
-  "@onboardingNameHint": { "description": "Hint text for the name field on the onboarding screen." },
+  "@onboardingNameHint": {
+    "description": "Hint text for the name field on the onboarding screen."
+  },
   "onboardingStartButton": "Start",
-  "@onboardingStartButton": { "description": "Submit button on the onboarding screen." },
+  "@onboardingStartButton": {
+    "description": "Submit button on the onboarding screen."
+  },
   "onboardingGenericError": "An error occurred. Please try again.",
-  "@onboardingGenericError": { "description": "Generic error message on the onboarding screen." },
-
+  "@onboardingGenericError": {
+    "description": "Generic error message on the onboarding screen."
+  },
   "budgetsTitle": "Budgets",
-  "@budgetsTitle": { "description": "Title for the budgets section." },
+  "@budgetsTitle": {
+    "description": "Title for the budgets section."
+  },
   "budgetNew": "New Budget",
-  "@budgetNew": { "description": "Button/title for creating a new budget." },
+  "@budgetNew": {
+    "description": "Button/title for creating a new budget."
+  },
   "budgetName": "Budget name",
-  "@budgetName": { "description": "Label for the budget name field." },
+  "@budgetName": {
+    "description": "Label for the budget name field."
+  },
   "budgetCurrency": "Currency",
-  "@budgetCurrency": { "description": "Label for the budget currency field." },
+  "@budgetCurrency": {
+    "description": "Label for the budget currency field."
+  },
   "budgetLimit": "Monthly limit",
-  "@budgetLimit": { "description": "Label for the budget limit field (monthly budget)." },
+  "@budgetLimit": {
+    "description": "Label for the budget limit field (monthly budget)."
+  },
   "budgetLimitFixed": "Budget limit",
-  "@budgetLimitFixed": { "description": "Label for the budget limit field (fixed budget)." },
+  "@budgetLimitFixed": {
+    "description": "Label for the budget limit field (fixed budget)."
+  },
   "budgetPeriodMonthly": "Monthly (recurring)",
-  "@budgetPeriodMonthly": { "description": "Period type: monthly recurring budget." },
+  "@budgetPeriodMonthly": {
+    "description": "Period type: monthly recurring budget."
+  },
   "budgetPeriodFixed": "Fixed period",
-  "@budgetPeriodFixed": { "description": "Period type: fixed date range budget." },
+  "@budgetPeriodFixed": {
+    "description": "Period type: fixed date range budget."
+  },
   "budgetStartDate": "Start date",
-  "@budgetStartDate": { "description": "Label for the budget start date field." },
+  "@budgetStartDate": {
+    "description": "Label for the budget start date field."
+  },
   "budgetEndDate": "End date",
-  "@budgetEndDate": { "description": "Label for the budget end date field." },
+  "@budgetEndDate": {
+    "description": "Label for the budget end date field."
+  },
   "budgetCategoryFilter": "Category (optional)",
-  "@budgetCategoryFilter": { "description": "Label for optional category filter." },
+  "@budgetCategoryFilter": {
+    "description": "Label for optional category filter."
+  },
   "budgetScopeFilter": "Scope (optional)",
-  "@budgetScopeFilter": { "description": "Label for optional expense scope filter." },
+  "@budgetScopeFilter": {
+    "description": "Label for optional expense scope filter."
+  },
   "budgetSpenderFilter": "Spender (optional)",
-  "@budgetSpenderFilter": { "description": "Label for optional spender member filter." },
+  "@budgetSpenderFilter": {
+    "description": "Label for optional spender member filter."
+  },
   "budgetBeneficiaryFilter": "Beneficiary (optional)",
-  "@budgetBeneficiaryFilter": { "description": "Label for optional beneficiary member filter." },
+  "@budgetBeneficiaryFilter": {
+    "description": "Label for optional beneficiary member filter."
+  },
   "budgetAccountFilter": "Payment account (optional)",
-  "@budgetAccountFilter": { "description": "Label for optional payment account filter." },
+  "@budgetAccountFilter": {
+    "description": "Label for optional payment account filter."
+  },
   "budgetOverlapNote": "Budgets may overlap — each is monitored independently",
-  "@budgetOverlapNote": { "description": "Explanation that budgets can overlap." },
+  "@budgetOverlapNote": {
+    "description": "Explanation that budgets can overlap."
+  },
   "budgetStatusNoSpending": "No spending",
-  "@budgetStatusNoSpending": { "description": "Budget status: no spending yet." },
+  "@budgetStatusNoSpending": {
+    "description": "Budget status: no spending yet."
+  },
   "budgetStatusOnTrack": "On track",
-  "@budgetStatusOnTrack": { "description": "Budget status: on track." },
+  "@budgetStatusOnTrack": {
+    "description": "Budget status: on track."
+  },
   "budgetStatusNearLimit": "Near limit",
-  "@budgetStatusNearLimit": { "description": "Budget status: near the limit." },
+  "@budgetStatusNearLimit": {
+    "description": "Budget status: near the limit."
+  },
   "budgetStatusLimitReached": "Limit reached",
-  "@budgetStatusLimitReached": { "description": "Budget status: limit reached." },
+  "@budgetStatusLimitReached": {
+    "description": "Budget status: limit reached."
+  },
   "budgetStatusOverBudget": "Over budget",
-  "@budgetStatusOverBudget": { "description": "Budget status: over budget." },
+  "@budgetStatusOverBudget": {
+    "description": "Budget status: over budget."
+  },
   "budgetConsumed": "Spent",
-  "@budgetConsumed": { "description": "Label for consumed/spent amount." },
+  "@budgetConsumed": {
+    "description": "Label for consumed/spent amount."
+  },
   "budgetRemaining": "Remaining",
-  "@budgetRemaining": { "description": "Label for remaining amount." },
+  "@budgetRemaining": {
+    "description": "Label for remaining amount."
+  },
   "budgetPercent": "{percent}% used",
   "@budgetPercent": {
     "description": "Percentage of budget used.",
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "budgetReversalNote": "Fully reversed expenses count as zero toward this budget",
-  "@budgetReversalNote": { "description": "Note explaining reversal semantics for budgets." },
+  "@budgetReversalNote": {
+    "description": "Note explaining reversal semantics for budgets."
+  },
   "budgetEmpty": "No budgets yet. Create one to start planning.",
-  "@budgetEmpty": { "description": "Empty state message for budgets list." },
+  "@budgetEmpty": {
+    "description": "Empty state message for budgets list."
+  },
   "budgetArchived": "Archived",
-  "@budgetArchived": { "description": "Label indicating a budget is archived." },
+  "@budgetArchived": {
+    "description": "Label indicating a budget is archived."
+  },
   "budgetArchive": "Archive budget",
-  "@budgetArchive": { "description": "Button to archive a budget." },
+  "@budgetArchive": {
+    "description": "Button to archive a budget."
+  },
   "budgetRestore": "Restore budget",
-  "@budgetRestore": { "description": "Button to restore an archived budget." },
+  "@budgetRestore": {
+    "description": "Button to restore an archived budget."
+  },
   "budgetPreviousPeriods": "Previous periods",
-  "@budgetPreviousPeriods": { "description": "Section title for previous month history." },
+  "@budgetPreviousPeriods": {
+    "description": "Section title for previous month history."
+  },
   "budgetNoMatching": "No matching expenses in this period",
-  "@budgetNoMatching": { "description": "Empty state for drill-down when no matching expenses." },
+  "@budgetNoMatching": {
+    "description": "Empty state for drill-down when no matching expenses."
+  },
   "errorBudgetNameEmpty": "Budget name is required",
-  "@errorBudgetNameEmpty": { "description": "Validation error: budget name is empty." },
+  "@errorBudgetNameEmpty": {
+    "description": "Validation error: budget name is empty."
+  },
   "errorBudgetLimitZero": "Budget limit must be greater than zero",
-  "@errorBudgetLimitZero": { "description": "Validation error: budget limit is zero." },
+  "@errorBudgetLimitZero": {
+    "description": "Validation error: budget limit is zero."
+  },
   "errorBudgetEndBeforeStart": "End date must be after start date",
-  "@errorBudgetEndBeforeStart": { "description": "Validation error: end date is before start date." },
+  "@errorBudgetEndBeforeStart": {
+    "description": "Validation error: end date is before start date."
+  },
   "errorBudgetCurrencyRequired": "Currency is required",
-  "@errorBudgetCurrencyRequired": { "description": "Validation error: currency not selected." },
-
+  "@errorBudgetCurrencyRequired": {
+    "description": "Validation error: currency not selected."
+  },
   "goalsTitle": "Goals",
-  "@goalsTitle": { "description": "Title for the savings goals screen." },
+  "@goalsTitle": {
+    "description": "Title for the savings goals screen."
+  },
   "goalNew": "New Goal",
-  "@goalNew": { "description": "Button/title to create a new savings goal." },
+  "@goalNew": {
+    "description": "Button/title to create a new savings goal."
+  },
   "goalName": "Goal name",
-  "@goalName": { "description": "Label for the goal name field." },
+  "@goalName": {
+    "description": "Label for the goal name field."
+  },
   "goalPurpose": "Purpose",
-  "@goalPurpose": { "description": "Label for the goal purpose field." },
+  "@goalPurpose": {
+    "description": "Label for the goal purpose field."
+  },
   "goalCurrency": "Currency",
-  "@goalCurrency": { "description": "Label for the goal currency field." },
+  "@goalCurrency": {
+    "description": "Label for the goal currency field."
+  },
   "goalTarget": "Target amount",
-  "@goalTarget": { "description": "Label for the goal target amount field." },
+  "@goalTarget": {
+    "description": "Label for the goal target amount field."
+  },
   "goalTargetDate": "Target date (optional)",
-  "@goalTargetDate": { "description": "Label for the optional target date field." },
+  "@goalTargetDate": {
+    "description": "Label for the optional target date field."
+  },
   "goalBeneficiary": "Beneficiary (optional)",
-  "@goalBeneficiary": { "description": "Label for the optional beneficiary member field." },
+  "@goalBeneficiary": {
+    "description": "Label for the optional beneficiary member field."
+  },
   "goalInitialFunding": "Initial funding (optional)",
-  "@goalInitialFunding": { "description": "Section label for optional initial funding." },
+  "@goalInitialFunding": {
+    "description": "Section label for optional initial funding."
+  },
   "goalInitialFundingSource": "Source account",
-  "@goalInitialFundingSource": { "description": "Label for the initial funding source account." },
+  "@goalInitialFundingSource": {
+    "description": "Label for the initial funding source account."
+  },
   "goalInitialFundingAmount": "Initial amount",
-  "@goalInitialFundingAmount": { "description": "Label for the initial funding amount." },
+  "@goalInitialFundingAmount": {
+    "description": "Label for the initial funding amount."
+  },
   "goalStatusActive": "Active",
-  "@goalStatusActive": { "description": "Goal status: active." },
+  "@goalStatusActive": {
+    "description": "Goal status: active."
+  },
   "goalStatusTargetReached": "Target reached",
-  "@goalStatusTargetReached": { "description": "Goal status: target reached." },
+  "@goalStatusTargetReached": {
+    "description": "Goal status: target reached."
+  },
   "goalStatusCompleted": "Completed",
-  "@goalStatusCompleted": { "description": "Goal status: completed." },
+  "@goalStatusCompleted": {
+    "description": "Goal status: completed."
+  },
   "goalStatusArchived": "Archived",
-  "@goalStatusArchived": { "description": "Goal status: archived." },
+  "@goalStatusArchived": {
+    "description": "Goal status: archived."
+  },
   "goalProgressNotStarted": "Not started",
-  "@goalProgressNotStarted": { "description": "Progress state: no funds yet." },
+  "@goalProgressNotStarted": {
+    "description": "Progress state: no funds yet."
+  },
   "goalProgressInProgress": "In progress",
-  "@goalProgressInProgress": { "description": "Progress state: partially funded." },
+  "@goalProgressInProgress": {
+    "description": "Progress state: partially funded."
+  },
   "goalProgressTargetReached": "Target reached",
-  "@goalProgressTargetReached": { "description": "Progress state: at or above target." },
+  "@goalProgressTargetReached": {
+    "description": "Progress state: at or above target."
+  },
   "goalProgressOverfunded": "Overfunded",
-  "@goalProgressOverfunded": { "description": "Progress state: balance exceeds target." },
+  "@goalProgressOverfunded": {
+    "description": "Progress state: balance exceeds target."
+  },
   "goalReserveBalance": "Reserved",
-  "@goalReserveBalance": { "description": "Label for the goal reserve balance." },
+  "@goalReserveBalance": {
+    "description": "Label for the goal reserve balance."
+  },
   "goalRemaining": "Remaining",
-  "@goalRemaining": { "description": "Label for remaining amount to target." },
+  "@goalRemaining": {
+    "description": "Label for remaining amount to target."
+  },
   "goalOverfunded": "Overfunded by",
-  "@goalOverfunded": { "description": "Label prefix when goal is overfunded." },
+  "@goalOverfunded": {
+    "description": "Label prefix when goal is overfunded."
+  },
   "goalPercent": "{percent}% funded",
   "@goalPercent": {
     "description": "Progress percentage label.",
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "goalFundAction": "Add funds",
-  "@goalFundAction": { "description": "Button to fund a goal." },
+  "@goalFundAction": {
+    "description": "Button to fund a goal."
+  },
   "goalReleaseAction": "Release funds",
-  "@goalReleaseAction": { "description": "Button to release funds from a goal." },
+  "@goalReleaseAction": {
+    "description": "Button to release funds from a goal."
+  },
   "goalCompleteAction": "Mark as complete",
-  "@goalCompleteAction": { "description": "Button to mark a goal as complete." },
+  "@goalCompleteAction": {
+    "description": "Button to mark a goal as complete."
+  },
   "goalArchiveAction": "Archive",
-  "@goalArchiveAction": { "description": "Button to archive a goal." },
+  "@goalArchiveAction": {
+    "description": "Button to archive a goal."
+  },
   "goalRestoreAction": "Restore",
-  "@goalRestoreAction": { "description": "Button to restore an archived goal." },
+  "@goalRestoreAction": {
+    "description": "Button to restore an archived goal."
+  },
   "goalReleaseReason": "Release reason",
-  "@goalReleaseReason": { "description": "Label for the release reason field." },
+  "@goalReleaseReason": {
+    "description": "Label for the release reason field."
+  },
   "goalMovementFunding": "Funding",
-  "@goalMovementFunding": { "description": "Movement type: funding." },
+  "@goalMovementFunding": {
+    "description": "Movement type: funding."
+  },
   "goalMovementRelease": "Release",
-  "@goalMovementRelease": { "description": "Movement type: release." },
+  "@goalMovementRelease": {
+    "description": "Movement type: release."
+  },
   "goalRevisions": "History",
-  "@goalRevisions": { "description": "Section title for goal revision history." },
+  "@goalRevisions": {
+    "description": "Section title for goal revision history."
+  },
   "goalChildFundNote": "Goal funds are NOT child-protected money",
-  "@goalChildFundNote": { "description": "Clarification note shown in goal detail." },
+  "@goalChildFundNote": {
+    "description": "Clarification note shown in goal detail."
+  },
   "goalTransferNote": "This is an internal transfer — not an expense",
-  "@goalTransferNote": { "description": "Note shown on fund-goal confirmation." },
+  "@goalTransferNote": {
+    "description": "Note shown on fund-goal confirmation."
+  },
   "goalReleaseTransferNote": "This is an internal transfer — not income",
-  "@goalReleaseTransferNote": { "description": "Note shown on release-goal confirmation." },
+  "@goalReleaseTransferNote": {
+    "description": "Note shown on release-goal confirmation."
+  },
   "goalEmpty": "No goals yet. Create one to start saving.",
-  "@goalEmpty": { "description": "Empty state message for goals list." },
+  "@goalEmpty": {
+    "description": "Empty state message for goals list."
+  },
   "purposeEmergencyFund": "Emergency fund",
-  "@purposeEmergencyFund": { "description": "Goal purpose: emergency fund." },
+  "@purposeEmergencyFund": {
+    "description": "Goal purpose: emergency fund."
+  },
   "purposeHomePurchase": "Home purchase",
-  "@purposeHomePurchase": { "description": "Goal purpose: home purchase." },
+  "@purposeHomePurchase": {
+    "description": "Goal purpose: home purchase."
+  },
   "purposeEducation": "Education",
-  "@purposeEducation": { "description": "Goal purpose: education." },
+  "@purposeEducation": {
+    "description": "Goal purpose: education."
+  },
   "purposeTravel": "Travel",
-  "@purposeTravel": { "description": "Goal purpose: travel." },
+  "@purposeTravel": {
+    "description": "Goal purpose: travel."
+  },
   "purposeMajorPurchase": "Major purchase",
-  "@purposeMajorPurchase": { "description": "Goal purpose: major purchase." },
+  "@purposeMajorPurchase": {
+    "description": "Goal purpose: major purchase."
+  },
   "purposeFamilyEvent": "Family event",
-  "@purposeFamilyEvent": { "description": "Goal purpose: family event." },
+  "@purposeFamilyEvent": {
+    "description": "Goal purpose: family event."
+  },
   "purposeOther": "Other",
-  "@purposeOther": { "description": "Goal purpose: other." },
+  "@purposeOther": {
+    "description": "Goal purpose: other."
+  },
   "errorGoalNameEmpty": "Goal name is required",
-  "@errorGoalNameEmpty": { "description": "Validation error: goal name is empty." },
+  "@errorGoalNameEmpty": {
+    "description": "Validation error: goal name is empty."
+  },
   "errorGoalTargetZero": "Target amount must be greater than zero",
-  "@errorGoalTargetZero": { "description": "Validation error: goal target is zero." },
+  "@errorGoalTargetZero": {
+    "description": "Validation error: goal target is zero."
+  },
   "errorGoalCurrencyRequired": "Currency is required",
-  "@errorGoalCurrencyRequired": { "description": "Validation error: currency not selected." },
+  "@errorGoalCurrencyRequired": {
+    "description": "Validation error: currency not selected."
+  },
   "errorGoalReleaseReasonEmpty": "Release reason is required",
-  "@errorGoalReleaseReasonEmpty": { "description": "Validation error: release reason is empty." },
+  "@errorGoalReleaseReasonEmpty": {
+    "description": "Validation error: release reason is empty."
+  },
   "errorGoalInsufficientReserve": "Insufficient balance in goal reserve",
-  "@errorGoalInsufficientReserve": { "description": "Error when reserve has insufficient funds for release." },
+  "@errorGoalInsufficientReserve": {
+    "description": "Error when reserve has insufficient funds for release."
+  },
   "errorGoalArchiveNonzeroBalance": "Cannot archive a goal with remaining funds. Release all funds first.",
-  "@errorGoalArchiveNonzeroBalance": { "description": "Error when trying to archive a goal with non-zero reserve." },
+  "@errorGoalArchiveNonzeroBalance": {
+    "description": "Error when trying to archive a goal with non-zero reserve."
+  },
   "errorGoalSourceIsProtected": "Funding from a protected child account is not allowed",
-  "@errorGoalSourceIsProtected": { "description": "Error when source account is a protected child fund." },
+  "@errorGoalSourceIsProtected": {
+    "description": "Error when source account is a protected child fund."
+  },
   "errorGoalSourceIsReserve": "Cannot fund a goal from another goal reserve",
-  "@errorGoalSourceIsReserve": { "description": "Error when source account is a goalReserve account." },
+  "@errorGoalSourceIsReserve": {
+    "description": "Error when source account is a goalReserve account."
+  },
   "errorGoalSourceNotSpendable": "Goal funding requires a spendable account",
-  "@errorGoalSourceNotSpendable": { "description": "Error when funding source is non-spendable." },
+  "@errorGoalSourceNotSpendable": {
+    "description": "Error when funding source is non-spendable."
+  },
   "errorGoalDestinationNotSpendable": "Goal release requires a spendable destination account",
-  "@errorGoalDestinationNotSpendable": { "description": "Error when release destination is non-spendable." },
+  "@errorGoalDestinationNotSpendable": {
+    "description": "Error when release destination is non-spendable."
+  },
   "goalFundTitle": "Add Funds to Goal",
-  "@goalFundTitle": { "description": "Title for the fund-goal screen." },
+  "@goalFundTitle": {
+    "description": "Title for the fund-goal screen."
+  },
   "goalReleaseTitle": "Release Goal Funds",
-  "@goalReleaseTitle": { "description": "Title for the release-goal screen." },
+  "@goalReleaseTitle": {
+    "description": "Title for the release-goal screen."
+  },
   "goalSourceAccount": "Source account",
-  "@goalSourceAccount": { "description": "Label for source account in fund-goal screen." },
+  "@goalSourceAccount": {
+    "description": "Label for source account in fund-goal screen."
+  },
   "goalDestinationAccount": "Destination account",
-  "@goalDestinationAccount": { "description": "Label for destination account in release-goal screen." },
+  "@goalDestinationAccount": {
+    "description": "Label for destination account in release-goal screen."
+  },
   "goalAmount": "Amount",
-  "@goalAmount": { "description": "Label for amount field in goal fund/release screens." },
+  "@goalAmount": {
+    "description": "Label for amount field in goal fund/release screens."
+  },
   "goalProjectedBalance": "Projected balance",
-  "@goalProjectedBalance": { "description": "Label for projected balance section." },
+  "@goalProjectedBalance": {
+    "description": "Label for projected balance section."
+  },
   "goalReservedBalances": "Goal reserves",
-  "@goalReservedBalances": { "description": "Dashboard section showing goal-reserved amounts." },
-
+  "@goalReservedBalances": {
+    "description": "Dashboard section showing goal-reserved amounts."
+  },
   "certificatesTitle": "Certificates",
-  "@certificatesTitle": { "description": "Title for the savings certificates screen." },
+  "@certificatesTitle": {
+    "description": "Title for the savings certificates screen."
+  },
   "certificateNew": "New Certificate",
-  "@certificateNew": { "description": "Button/title to create a new savings certificate." },
+  "@certificateNew": {
+    "description": "Button/title to create a new savings certificate."
+  },
   "certificateEmpty": "No certificates yet. Add one to track your fixed-term deposits.",
-  "@certificateEmpty": { "description": "Empty state message for certificates list." },
+  "@certificateEmpty": {
+    "description": "Empty state message for certificates list."
+  },
   "certificateInstitution": "Institution",
-  "@certificateInstitution": { "description": "Label for the issuing institution." },
+  "@certificateInstitution": {
+    "description": "Label for the issuing institution."
+  },
   "certificatePrincipal": "Principal",
-  "@certificatePrincipal": { "description": "Label for the certificate principal amount." },
+  "@certificatePrincipal": {
+    "description": "Label for the certificate principal amount."
+  },
   "certificateProfit": "Profit",
-  "@certificateProfit": { "description": "Label for profit on a certificate." },
+  "@certificateProfit": {
+    "description": "Label for profit on a certificate."
+  },
   "certificateMaturityDate": "Maturity date",
-  "@certificateMaturityDate": { "description": "Label for the maturity date field." },
+  "@certificateMaturityDate": {
+    "description": "Label for the maturity date field."
+  },
   "certificateStartDate": "Start date",
-  "@certificateStartDate": { "description": "Label for the start date field." },
+  "@certificateStartDate": {
+    "description": "Label for the start date field."
+  },
   "certificateReference": "Reference / certificate number",
-  "@certificateReference": { "description": "Label for the optional bank reference." },
+  "@certificateReference": {
+    "description": "Label for the optional bank reference."
+  },
   "certificateAnnualRate": "Annual rate (basis points)",
-  "@certificateAnnualRate": { "description": "Label for annual interest rate in bps." },
+  "@certificateAnnualRate": {
+    "description": "Label for annual interest rate in bps."
+  },
   "certificateProfitFrequency": "Profit frequency",
-  "@certificateProfitFrequency": { "description": "Label for the profit payment frequency." },
+  "@certificateProfitFrequency": {
+    "description": "Label for the profit payment frequency."
+  },
   "certificateSourceAccount": "Funding source account",
-  "@certificateSourceAccount": { "description": "Label for the source account in certificate creation." },
+  "@certificateSourceAccount": {
+    "description": "Label for the source account in certificate creation."
+  },
   "certificateDestinationAccount": "Destination account",
-  "@certificateDestinationAccount": { "description": "Label for the destination account in profit/redemption." },
+  "@certificateDestinationAccount": {
+    "description": "Label for the destination account in profit/redemption."
+  },
   "certificateRedeem": "Redeem",
-  "@certificateRedeem": { "description": "Button/title for redeeming a certificate." },
+  "@certificateRedeem": {
+    "description": "Button/title for redeeming a certificate."
+  },
   "certificateRedeemTitle": "Redeem Certificate",
-  "@certificateRedeemTitle": { "description": "Title for the redeem certificate screen." },
+  "@certificateRedeemTitle": {
+    "description": "Title for the redeem certificate screen."
+  },
   "certificateProfitTitle": "Record Profit",
-  "@certificateProfitTitle": { "description": "Title for the record profit screen." },
+  "@certificateProfitTitle": {
+    "description": "Title for the record profit screen."
+  },
   "certificateRecordProfit": "Record Profit",
-  "@certificateRecordProfit": { "description": "Button to record certificate profit." },
+  "@certificateRecordProfit": {
+    "description": "Button to record certificate profit."
+  },
   "certificateLifecycleActive": "Active",
-  "@certificateLifecycleActive": { "description": "Lifecycle label: active." },
+  "@certificateLifecycleActive": {
+    "description": "Lifecycle label: active."
+  },
   "certificateLifecycleRedeemed": "Redeemed",
-  "@certificateLifecycleRedeemed": { "description": "Lifecycle label: redeemed." },
+  "@certificateLifecycleRedeemed": {
+    "description": "Lifecycle label: redeemed."
+  },
   "certificateLifecycleArchived": "Archived",
-  "@certificateLifecycleArchived": { "description": "Lifecycle label: archived." },
+  "@certificateLifecycleArchived": {
+    "description": "Lifecycle label: archived."
+  },
   "certificateTermNotStarted": "Not Started",
-  "@certificateTermNotStarted": { "description": "Term state label: not started." },
+  "@certificateTermNotStarted": {
+    "description": "Term state label: not started."
+  },
   "certificateTermActive": "Active Term",
-  "@certificateTermActive": { "description": "Term state label: active term." },
+  "@certificateTermActive": {
+    "description": "Term state label: active term."
+  },
   "certificateTermMatured": "Matured",
-  "@certificateTermMatured": { "description": "Term state label: matured." },
+  "@certificateTermMatured": {
+    "description": "Term state label: matured."
+  },
   "certificateTermOverdue": "Overdue Redemption",
-  "@certificateTermOverdue": { "description": "Term state label: overdue redemption." },
+  "@certificateTermOverdue": {
+    "description": "Term state label: overdue redemption."
+  },
   "certificateTermFullyRedeemed": "Fully Redeemed",
-  "@certificateTermFullyRedeemed": { "description": "Term state label: fully redeemed." },
+  "@certificateTermFullyRedeemed": {
+    "description": "Term state label: fully redeemed."
+  },
   "certificateProfitFreqMonthly": "Monthly",
-  "@certificateProfitFreqMonthly": { "description": "Frequency label." },
+  "@certificateProfitFreqMonthly": {
+    "description": "Frequency label."
+  },
   "certificateProfitFreqQuarterly": "Quarterly",
-  "@certificateProfitFreqQuarterly": { "description": "Frequency label." },
+  "@certificateProfitFreqQuarterly": {
+    "description": "Frequency label."
+  },
   "certificateProfitFreqSemiAnnual": "Semi-Annual",
-  "@certificateProfitFreqSemiAnnual": { "description": "Frequency label." },
+  "@certificateProfitFreqSemiAnnual": {
+    "description": "Frequency label."
+  },
   "certificateProfitFreqAnnual": "Annual",
-  "@certificateProfitFreqAnnual": { "description": "Frequency label." },
+  "@certificateProfitFreqAnnual": {
+    "description": "Frequency label."
+  },
   "certificateProfitFreqAtMaturity": "At Maturity",
-  "@certificateProfitFreqAtMaturity": { "description": "Frequency label." },
+  "@certificateProfitFreqAtMaturity": {
+    "description": "Frequency label."
+  },
   "certificateProfitFreqOther": "Other",
-  "@certificateProfitFreqOther": { "description": "Frequency label." },
+  "@certificateProfitFreqOther": {
+    "description": "Frequency label."
+  },
   "certificatePrincipalBalance": "Principal balance",
-  "@certificatePrincipalBalance": { "description": "Label for the current principal balance." },
+  "@certificatePrincipalBalance": {
+    "description": "Label for the current principal balance."
+  },
   "certificateOriginalPrincipal": "Original principal",
-  "@certificateOriginalPrincipal": { "description": "Label for the original principal amount." },
+  "@certificateOriginalPrincipal": {
+    "description": "Label for the original principal amount."
+  },
   "certificateNote": "Note",
-  "@certificateNote": { "description": "Label for the optional note field." },
+  "@certificateNote": {
+    "description": "Label for the optional note field."
+  },
   "certificateAmount": "Amount",
-  "@certificateAmount": { "description": "Label for amount field in profit/redemption screens." },
+  "@certificateAmount": {
+    "description": "Label for amount field in profit/redemption screens."
+  },
   "certificatePrincipalSection": "Principal",
-  "@certificatePrincipalSection": { "description": "Section header: principal." },
+  "@certificatePrincipalSection": {
+    "description": "Section header: principal."
+  },
   "certificateProfitSection": "Profit",
-  "@certificateProfitSection": { "description": "Section header: profit." },
+  "@certificateProfitSection": {
+    "description": "Section header: profit."
+  },
   "certificateRedeemPrincipalOnly": "Principal only",
-  "@certificateRedeemPrincipalOnly": { "description": "Redemption mode: principal only." },
+  "@certificateRedeemPrincipalOnly": {
+    "description": "Redemption mode: principal only."
+  },
   "certificateRedeemProfitOnly": "Profit only",
-  "@certificateRedeemProfitOnly": { "description": "Redemption mode: profit only." },
+  "@certificateRedeemProfitOnly": {
+    "description": "Redemption mode: profit only."
+  },
   "certificateRedeemCombined": "Principal + profit",
-  "@certificateRedeemCombined": { "description": "Redemption mode: principal and profit combined." },
+  "@certificateRedeemCombined": {
+    "description": "Redemption mode: principal and profit combined."
+  },
   "certificateReviewTitle": "Review Certificate",
-  "@certificateReviewTitle": { "description": "Title for the certificate review step." },
+  "@certificateReviewTitle": {
+    "description": "Title for the certificate review step."
+  },
   "catCertificateProfit": "Certificate Profit",
-  "@catCertificateProfit": { "description": "Category label for certificate profit income." },
+  "@catCertificateProfit": {
+    "description": "Category label for certificate profit income."
+  },
   "errorCertificateInstitutionRequired": "Institution name is required",
-  "@errorCertificateInstitutionRequired": { "description": "Validation error." },
+  "@errorCertificateInstitutionRequired": {
+    "description": "Validation error."
+  },
   "errorCertificatePrincipalZero": "Principal must be greater than zero",
-  "@errorCertificatePrincipalZero": { "description": "Validation error." },
+  "@errorCertificatePrincipalZero": {
+    "description": "Validation error."
+  },
   "errorCertificateCurrencyRequired": "Currency is required",
-  "@errorCertificateCurrencyRequired": { "description": "Validation error." },
+  "@errorCertificateCurrencyRequired": {
+    "description": "Validation error."
+  },
   "errorCertificateDatesRequired": "Start and maturity dates are required",
-  "@errorCertificateDatesRequired": { "description": "Validation error." },
+  "@errorCertificateDatesRequired": {
+    "description": "Validation error."
+  },
   "errorCertificateMaturityBeforeStart": "Maturity date must be after start date",
-  "@errorCertificateMaturityBeforeStart": { "description": "Validation error." },
+  "@errorCertificateMaturityBeforeStart": {
+    "description": "Validation error."
+  },
   "errorCertificateSourceRequired": "Funding source account is required",
-  "@errorCertificateSourceRequired": { "description": "Validation error." },
+  "@errorCertificateSourceRequired": {
+    "description": "Validation error."
+  },
   "errorCertificateSourceIsProtected": "Funding from a protected child account is not allowed",
-  "@errorCertificateSourceIsProtected": { "description": "Validation error." },
+  "@errorCertificateSourceIsProtected": {
+    "description": "Validation error."
+  },
   "errorCertificateAccountNotAllowedAsSource": "A certificate account cannot be used as a funding source",
-  "@errorCertificateAccountNotAllowedAsSource": { "description": "Validation error." },
+  "@errorCertificateAccountNotAllowedAsSource": {
+    "description": "Validation error."
+  },
   "errorCertificateAccountNotAllowedAsDestination": "A certificate account cannot be used as a destination",
-  "@errorCertificateAccountNotAllowedAsDestination": { "description": "Validation error." },
+  "@errorCertificateAccountNotAllowedAsDestination": {
+    "description": "Validation error."
+  },
   "errorCertificateAccountNotAllowedInOrdinaryTransaction": "Certificate accounts cannot be used in ordinary transactions",
-  "@errorCertificateAccountNotAllowedInOrdinaryTransaction": { "description": "Validation error." },
+  "@errorCertificateAccountNotAllowedInOrdinaryTransaction": {
+    "description": "Validation error."
+  },
   "errorCertificateArchived": "Certificate is archived",
-  "@errorCertificateArchived": { "description": "Validation error." },
+  "@errorCertificateArchived": {
+    "description": "Validation error."
+  },
   "errorCertificateNotActive": "Certificate is not active",
-  "@errorCertificateNotActive": { "description": "Validation error." },
+  "@errorCertificateNotActive": {
+    "description": "Validation error."
+  },
   "errorCertificateArchiveNonzeroBalance": "Cannot archive a certificate with remaining principal. Redeem first.",
-  "@errorCertificateArchiveNonzeroBalance": { "description": "Validation error." },
+  "@errorCertificateArchiveNonzeroBalance": {
+    "description": "Validation error."
+  },
   "errorCertificateRestoreRequiresArchived": "Certificate must be archived to restore",
-  "@errorCertificateRestoreRequiresArchived": { "description": "Validation error." },
+  "@errorCertificateRestoreRequiresArchived": {
+    "description": "Validation error."
+  },
   "errorCertificateIdempotencyConflict": "Duplicate certificate creation conflict",
-  "@errorCertificateIdempotencyConflict": { "description": "Idempotency conflict error." },
+  "@errorCertificateIdempotencyConflict": {
+    "description": "Idempotency conflict error."
+  },
   "errorCertificateReversalRequiresActive": "Certificate must be active to reverse purchase",
-  "@errorCertificateReversalRequiresActive": { "description": "Validation error." },
+  "@errorCertificateReversalRequiresActive": {
+    "description": "Validation error."
+  },
   "errorCertificateReversalNotAllowedAfterHistory": "Cannot reverse purchase after profit or redemption",
-  "@errorCertificateReversalNotAllowedAfterHistory": { "description": "Validation error." },
+  "@errorCertificateReversalNotAllowedAfterHistory": {
+    "description": "Validation error."
+  },
   "errorCertificateProfitReversalInvalidType": "Target operation is not a profit income operation",
-  "@errorCertificateProfitReversalInvalidType": { "description": "Validation error." },
+  "@errorCertificateProfitReversalInvalidType": {
+    "description": "Validation error."
+  },
   "errorCertificateRedemptionReversalNotSupported": "Redemption reversal is not supported",
-  "@errorCertificateRedemptionReversalNotSupported": { "description": "Validation error." },
+  "@errorCertificateRedemptionReversalNotSupported": {
+    "description": "Validation error."
+  },
   "errorCertificateNotMatured": "Certificate has not reached maturity",
-  "@errorCertificateNotMatured": { "description": "Validation error when redeeming early." },
+  "@errorCertificateNotMatured": {
+    "description": "Validation error when redeeming early."
+  },
   "errorCertificateNoPrincipal": "Certificate has no remaining principal to redeem",
-  "@errorCertificateNoPrincipal": { "description": "Validation error." },
+  "@errorCertificateNoPrincipal": {
+    "description": "Validation error."
+  },
   "errorCertificateFullRedemptionOnly": "Only full principal redemption is supported",
-  "@errorCertificateFullRedemptionOnly": { "description": "Validation error for partial redemption." },
-
+  "@errorCertificateFullRedemptionOnly": {
+    "description": "Validation error for partial redemption."
+  },
   "navHome": "Home",
-  "@navHome": { "description": "Bottom navigation label for home tab." },
+  "@navHome": {
+    "description": "Bottom navigation label for home tab."
+  },
   "navPlanning": "Planning",
-  "@navPlanning": { "description": "Bottom navigation label for planning tab." },
+  "@navPlanning": {
+    "description": "Bottom navigation label for planning tab."
+  },
   "navReports": "Reports",
-  "@navReports": { "description": "Bottom navigation label for reports tab." },
+  "@navReports": {
+    "description": "Bottom navigation label for reports tab."
+  },
   "navMore": "More",
-  "@navMore": { "description": "Bottom navigation label for more tab." },
+  "@navMore": {
+    "description": "Bottom navigation label for more tab."
+  },
   "planningTitle": "Planning",
-  "@planningTitle": { "description": "Title for the planning hub screen." },
+  "@planningTitle": {
+    "description": "Title for the planning hub screen."
+  },
   "planningSubtitle": "Budgets, goals, and certificates",
-  "@planningSubtitle": { "description": "Subtitle for the planning hub." },
+  "@planningSubtitle": {
+    "description": "Subtitle for the planning hub."
+  },
   "moreTitle": "More",
-  "@moreTitle": { "description": "Title for the more hub screen." },
+  "@moreTitle": {
+    "description": "Title for the more hub screen."
+  },
   "moreSubtitle": "Accounts, family, and settings",
-  "@moreSubtitle": { "description": "Subtitle for the more hub." },
+  "@moreSubtitle": {
+    "description": "Subtitle for the more hub."
+  },
   "dashboardQuickActions": "Quick actions",
-  "@dashboardQuickActions": { "description": "Section heading for quick transaction actions." },
+  "@dashboardQuickActions": {
+    "description": "Section heading for quick transaction actions."
+  },
   "dashboardNeedsAttention": "Needs attention",
-  "@dashboardNeedsAttention": { "description": "Section heading for budgets/goals needing attention." },
+  "@dashboardNeedsAttention": {
+    "description": "Section heading for budgets/goals needing attention."
+  },
   "dashboardHeldBalances": "Held balances",
-  "@dashboardHeldBalances": { "description": "Section for protected, goal, and certificate holdings." },
+  "@dashboardHeldBalances": {
+    "description": "Section for protected, goal, and certificate holdings."
+  },
   "dashboardCertificatePrincipal": "Certificate principal",
-  "@dashboardCertificatePrincipal": { "description": "Label for certificate principal on dashboard." },
+  "@dashboardCertificatePrincipal": {
+    "description": "Label for certificate principal on dashboard."
+  },
   "accountRestrictionCertificate": "Certificate principal — certificate workflows only",
-  "@accountRestrictionCertificate": { "description": "Restriction note for certificate accounts." },
+  "@accountRestrictionCertificate": {
+    "description": "Restriction note for certificate accounts."
+  },
   "accountRestrictionGoalReserve": "Goal reserve — manage through goals",
-  "@accountRestrictionGoalReserve": { "description": "Restriction note for goal reserve accounts." },
+  "@accountRestrictionGoalReserve": {
+    "description": "Restriction note for goal reserve accounts."
+  },
   "accountRestrictionProtected": "Protected — withdrawal restrictions apply",
-  "@accountRestrictionProtected": { "description": "Restriction note for protected accounts." },
-
+  "@accountRestrictionProtected": {
+    "description": "Restriction note for protected accounts."
+  },
   "formSectionAmount": "Amount",
-  "@formSectionAmount": { "description": "Form section title for amount entry." },
+  "@formSectionAmount": {
+    "description": "Form section title for amount entry."
+  },
   "formSectionAccount": "Account",
-  "@formSectionAccount": { "description": "Form section title for account selection." },
+  "@formSectionAccount": {
+    "description": "Form section title for account selection."
+  },
   "formSectionCategory": "Category",
-  "@formSectionCategory": { "description": "Form section title for category." },
+  "@formSectionCategory": {
+    "description": "Form section title for category."
+  },
   "formSectionAttribution": "Attribution",
-  "@formSectionAttribution": { "description": "Form section for spender/beneficiary/scope." },
+  "@formSectionAttribution": {
+    "description": "Form section for spender/beneficiary/scope."
+  },
   "formAdvancedDetails": "More details",
-  "@formAdvancedDetails": { "description": "Progressive disclosure for date and notes." },
+  "@formAdvancedDetails": {
+    "description": "Progressive disclosure for date and notes."
+  },
   "operationTypeIncome": "Income",
-  "@operationTypeIncome": { "description": "Review label for income operation type." },
+  "@operationTypeIncome": {
+    "description": "Review label for income operation type."
+  },
   "operationTypeExpense": "Expense",
-  "@operationTypeExpense": { "description": "Review label for expense operation type." },
+  "@operationTypeExpense": {
+    "description": "Review label for expense operation type."
+  },
   "operationTypeTransfer": "Transfer",
-  "@operationTypeTransfer": { "description": "Review label for transfer operation type." },
+  "@operationTypeTransfer": {
+    "description": "Review label for transfer operation type."
+  },
   "fieldOperationType": "Operation type",
-  "@fieldOperationType": { "description": "Review row label for operation type." },
+  "@fieldOperationType": {
+    "description": "Review row label for operation type."
+  },
   "transferInternalExplanation": "This is an internal transfer. The source balance decreases and the destination balance increases. It is not income and not an expense.",
-  "@transferInternalExplanation": { "description": "Transfer review explanation." },
+  "@transferInternalExplanation": {
+    "description": "Transfer review explanation."
+  },
   "incomeIncreasesBalance": "This income increases the destination account balance.",
-  "@incomeIncreasesBalance": { "description": "Income review explanation." },
+  "@incomeIncreasesBalance": {
+    "description": "Income review explanation."
+  },
   "expenseDecreasesBalance": "This expense decreases the payment account balance.",
-  "@expenseDecreasesBalance": { "description": "Expense review explanation." },
+  "@expenseDecreasesBalance": {
+    "description": "Expense review explanation."
+  },
   "protectedWithdrawalReviewNote": "Protected balance decreases. Reason and beneficiary are recorded and remain auditable.",
-  "@protectedWithdrawalReviewNote": { "description": "Protected withdrawal review notice." },
+  "@protectedWithdrawalReviewNote": {
+    "description": "Protected withdrawal review notice."
+  },
   "retryAction": "Retry",
-  "@retryAction": { "description": "Retry action label for error states." },
+  "@retryAction": {
+    "description": "Retry action label for error states."
+  },
   "budgetDoesNotHoldMoney": "Budgets monitor spending. They do not hold money and do not block expenses.",
-  "@budgetDoesNotHoldMoney": { "description": "Budget creation explanation." },
+  "@budgetDoesNotHoldMoney": {
+    "description": "Budget creation explanation."
+  },
   "budgetOverlapIndependent": "Overlapping budgets are monitored independently.",
-  "@budgetOverlapIndependent": { "description": "Budget overlap explanation." },
+  "@budgetOverlapIndependent": {
+    "description": "Budget overlap explanation."
+  },
   "budgetRestatedReversals": "Reversed expenses use the documented restated budget view.",
-  "@budgetRestatedReversals": { "description": "Budget reversal explanation." },
+  "@budgetRestatedReversals": {
+    "description": "Budget reversal explanation."
+  },
   "goalReserveDedicated": "A dedicated reserve account is created for this goal. Funding is an internal transfer — total assets do not increase.",
-  "@goalReserveDedicated": { "description": "Goal creation funding explanation." },
+  "@goalReserveDedicated": {
+    "description": "Goal creation funding explanation."
+  },
   "goalNotChildProtected": "Goal funds are not protected child funds.",
-  "@goalNotChildProtected": { "description": "Goal child-fund separation note." },
+  "@goalNotChildProtected": {
+    "description": "Goal child-fund separation note."
+  },
   "goalCurrencyImmutable": "Currency cannot change after creation.",
-  "@goalCurrencyImmutable": { "description": "Goal currency immutability note." },
+  "@goalCurrencyImmutable": {
+    "description": "Goal currency immutability note."
+  },
   "certificatePrincipalNotExpense": "Moving principal into a certificate is not an expense.",
-  "@certificatePrincipalNotExpense": { "description": "Certificate funding classification note." },
+  "@certificatePrincipalNotExpense": {
+    "description": "Certificate funding classification note."
+  },
   "certificatePrincipalReturnNotIncome": "Returning principal is not income.",
-  "@certificatePrincipalReturnNotIncome": { "description": "Certificate redemption classification note." },
+  "@certificatePrincipalReturnNotIncome": {
+    "description": "Certificate redemption classification note."
+  },
   "filterClearAll": "Clear all",
-  "@filterClearAll": { "description": "Clear all active filters." },
+  "@filterClearAll": {
+    "description": "Clear all active filters."
+  },
   "filterActiveCount": "{count} filters active",
   "@filterActiveCount": {
     "description": "Active filter count badge.",
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "lifecycleStatusLabel": "Lifecycle",
-  "@lifecycleStatusLabel": { "description": "Goal lifecycle status label." },
+  "@lifecycleStatusLabel": {
+    "description": "Goal lifecycle status label."
+  },
   "progressStatusLabel": "Progress",
-  "@progressStatusLabel": { "description": "Goal derived progress status label." }
+  "@progressStatusLabel": {
+    "description": "Goal derived progress status label."
+  },
+  "errorAccountRequired": "Account is required.",
+  "@errorAccountRequired": {
+    "description": "Validation error when an account field is empty."
+  },
+  "errorAmountMustBePositive": "Amount must be greater than zero.",
+  "@errorAmountMustBePositive": {
+    "description": "Validation error when amount is zero or negative."
+  },
+  "errorDateInvalid": "Please enter a valid date.",
+  "@errorDateInvalid": {
+    "description": "Validation error for invalid transaction or form dates."
+  },
+  "errorHouseholdAlreadyInitialized": "This household is already set up.",
+  "@errorHouseholdAlreadyInitialized": {
+    "description": "Onboarding error when household already exists."
+  },
+  "errorHouseholdIdEmpty": "Household ID is required.",
+  "@errorHouseholdIdEmpty": {
+    "description": "Validation error when household ID is missing."
+  },
+  "errorBudgetIdempotencyConflict": "Duplicate budget creation conflict.",
+  "@errorBudgetIdempotencyConflict": {
+    "description": "Idempotency conflict while creating a budget."
+  },
+  "errorBudgetDatesRequired": "Please select start and end dates.",
+  "@errorBudgetDatesRequired": {
+    "description": "Validation error when fixed budget dates are missing."
+  },
+  "errorBudgetDuplicate": "A budget with this configuration already exists.",
+  "@errorBudgetDuplicate": {
+    "description": "Duplicate budget configuration conflict."
+  },
+  "errorBudgetCreateFailed": "Failed to create budget.",
+  "@errorBudgetCreateFailed": {
+    "description": "Generic budget creation failure."
+  },
+  "budgetPeriodTypeLabel": "Period type",
+  "@budgetPeriodTypeLabel": {
+    "description": "Section label for budget period type selector."
+  },
+  "errorCertificateSourceInvalid": "Selected funding source is not allowed.",
+  "@errorCertificateSourceInvalid": {
+    "description": "Certificate creation error for invalid source account type."
+  },
+  "errorEarlyCompletionConfirmationRequired": "Early completion must be confirmed.",
+  "@errorEarlyCompletionConfirmationRequired": {
+    "description": "Goal lifecycle error when early completion is not confirmed."
+  },
+  "errorEarlyCompletionReasonRequired": "Early completion reason is required.",
+  "@errorEarlyCompletionReasonRequired": {
+    "description": "Goal lifecycle error when early completion reason is missing."
+  },
+  "errorGoalArchived": "This goal is archived.",
+  "@errorGoalArchived": {
+    "description": "Error when operating on an archived goal."
+  },
+  "errorGoalIdempotencyConflict": "Duplicate goal operation conflict.",
+  "@errorGoalIdempotencyConflict": {
+    "description": "Idempotency conflict during goal workflow."
+  },
+  "errorGoalLifecycleRequiresTypedWorkflow": "This lifecycle change requires the goal workflow screen.",
+  "@errorGoalLifecycleRequiresTypedWorkflow": {
+    "description": "Error when lifecycle transition is attempted outside workflow UI."
+  },
+  "errorGoalNormalCompletionRequiresTarget": "Goal must reach its target before normal completion.",
+  "@errorGoalNormalCompletionRequiresTarget": {
+    "description": "Goal lifecycle error when target not met for normal completion."
+  },
+  "errorGoalNotActive": "Goal is not active.",
+  "@errorGoalNotActive": {
+    "description": "Error when funding or releasing an inactive goal."
+  },
+  "errorGoalReserveNotAllowedInOrdinaryTransaction": "Goal reserve accounts cannot be used in ordinary transactions.",
+  "@errorGoalReserveNotAllowedInOrdinaryTransaction": {
+    "description": "Account eligibility error for goal reserve in ordinary tx."
+  },
+  "errorGoalRestoreRequiresArchived": "Goal must be archived to restore.",
+  "@errorGoalRestoreRequiresArchived": {
+    "description": "Error when restoring a non-archived goal."
+  },
+  "errorGoalReversalInvalidMovement": "This operation cannot be reversed for goals.",
+  "@errorGoalReversalInvalidMovement": {
+    "description": "Goal reversal error for invalid movement type."
+  },
+  "errorLifecycleEventConflict": "Lifecycle event conflict. Refresh and try again.",
+  "@errorLifecycleEventConflict": {
+    "description": "Concurrent lifecycle event conflict."
+  },
+  "errorOperationAlreadyReversed": "This operation has already been reversed.",
+  "@errorOperationAlreadyReversed": {
+    "description": "Error when attempting to reverse an already reversed operation."
+  },
+  "errorGoalSourceAccountRequired": "Please select a source account.",
+  "@errorGoalSourceAccountRequired": {
+    "description": "Fund-goal form validation when source account missing."
+  },
+  "errorGoalDestinationAccountRequired": "Please select a destination account.",
+  "@errorGoalDestinationAccountRequired": {
+    "description": "Release-goal form validation when destination account missing."
+  },
+  "goalNotFound": "Goal not found.",
+  "@goalNotFound": {
+    "description": "Empty/error state when goal record is missing."
+  },
+  "errorPageNotFound": "Page not found.",
+  "@errorPageNotFound": {
+    "description": "Router error screen when no route matches."
+  },
+  "goHome": "Go home",
+  "@goHome": {
+    "description": "Button on router error screen to return to dashboard."
+  },
+  "certificateCurrency": "Currency",
+  "@certificateCurrency": {
+    "description": "Label for certificate currency selector."
+  },
+  "errorUnexpected": "An unexpected error occurred.",
+  "@errorUnexpected": {
+    "description": "Fallback for unknown application failures."
+  },
+  "accountTypeGoalReserve": "Goal Reserve",
+  "@accountTypeGoalReserve": {
+    "description": "Account type label: goal reserve."
+  },
+  "accountTypeCertificate": "Certificate Account",
+  "@accountTypeCertificate": {
+    "description": "Account type label: certificate."
+  },
+  "accountTypeGoldHolding": "Gold Holding",
+  "@accountTypeGoldHolding": {
+    "description": "Account type label: gold holding."
+  },
+  "accountTypeInvestment": "Investment Account",
+  "@accountTypeInvestment": {
+    "description": "Account type label: investment."
+  },
+  "accountTypeOtherAsset": "Other Asset",
+  "@accountTypeOtherAsset": {
+    "description": "Account type label: other asset."
+  },
+  "transactionTypeAssetPurchase": "Asset Purchase",
+  "@transactionTypeAssetPurchase": {
+    "description": "Operation type label: asset purchase."
+  },
+  "transactionTypeAssetSale": "Asset Sale",
+  "@transactionTypeAssetSale": {
+    "description": "Operation type label: asset sale."
+  },
+  "transactionTypeLiabilityCreation": "Liability Created",
+  "@transactionTypeLiabilityCreation": {
+    "description": "Operation type label: liability creation."
+  },
+  "transactionTypeLiabilityRepayment": "Liability Repayment",
+  "@transactionTypeLiabilityRepayment": {
+    "description": "Operation type label: liability repayment."
+  },
+  "transactionTypeCertificateFunding": "Certificate Funding",
+  "@transactionTypeCertificateFunding": {
+    "description": "Operation type label: certificate funding."
+  },
+  "transactionTypeCertificateMaturity": "Certificate Maturity",
+  "@transactionTypeCertificateMaturity": {
+    "description": "Operation type label: certificate maturity."
+  },
+  "transactionTypeInterestIncome": "Interest Income",
+  "@transactionTypeInterestIncome": {
+    "description": "Operation type label: interest income."
+  },
+  "transactionTypeGoldPurchase": "Gold Purchase",
+  "@transactionTypeGoldPurchase": {
+    "description": "Operation type label: gold purchase."
+  },
+  "transactionTypeGoldSale": "Gold Sale",
+  "@transactionTypeGoldSale": {
+    "description": "Operation type label: gold sale."
+  },
+  "transactionTypeGoalFunding": "Goal Funding",
+  "@transactionTypeGoalFunding": {
+    "description": "Operation type label: goal funding."
+  },
+  "transactionTypeGoalWithdrawal": "Goal Withdrawal",
+  "@transactionTypeGoalWithdrawal": {
+    "description": "Operation type label: goal withdrawal."
+  },
+  "transactionTypeChildFundDeposit": "Child Fund Deposit",
+  "@transactionTypeChildFundDeposit": {
+    "description": "Operation type label: child fund deposit."
+  },
+  "transactionTypeChildFundWithdrawal": "Child Fund Withdrawal",
+  "@transactionTypeChildFundWithdrawal": {
+    "description": "Operation type label: child fund withdrawal."
+  },
+  "transactionTypeSadaqah": "Sadaqah",
+  "@transactionTypeSadaqah": {
+    "description": "Operation type label: sadaqah."
+  },
+  "transactionTypeZakat": "Zakat",
+  "@transactionTypeZakat": {
+    "description": "Operation type label: zakat."
+  },
+  "scopeShared": "Shared",
+  "@scopeShared": {
+    "description": "Expense scope: shared."
+  },
+  "dashboardScopeShared": "Shared Spending",
+  "@dashboardScopeShared": {
+    "description": "Dashboard expense scope: shared."
+  },
+  "certificateEventCreated": "Created",
+  "@certificateEventCreated": {
+    "description": "Certificate event: created."
+  },
+  "certificateEventPurchased": "Purchased",
+  "@certificateEventPurchased": {
+    "description": "Certificate event: purchased."
+  },
+  "certificateEventProfitReceived": "Profit Received",
+  "@certificateEventProfitReceived": {
+    "description": "Certificate event: profit received."
+  },
+  "certificateEventRedeemed": "Redeemed",
+  "@certificateEventRedeemed": {
+    "description": "Certificate event: redeemed."
+  },
+  "certificateEventArchived": "Archived",
+  "@certificateEventArchived": {
+    "description": "Certificate event: archived."
+  },
+  "certificateEventRestored": "Restored",
+  "@certificateEventRestored": {
+    "description": "Certificate event: restored."
+  },
+  "certificateEventDefinitionRevised": "Definition Revised",
+  "@certificateEventDefinitionRevised": {
+    "description": "Certificate event: definition revised."
+  },
+  "certificateEventPurchaseReversed": "Purchase Reversed",
+  "@certificateEventPurchaseReversed": {
+    "description": "Certificate event: purchase reversed."
+  },
+  "certificateEventProfitReversed": "Profit Reversed",
+  "@certificateEventProfitReversed": {
+    "description": "Certificate event: profit reversed."
+  },
+  "currencyEgp": "Egyptian Pound (EGP)",
+  "@currencyEgp": {
+    "description": "Currency label: Egyptian pound."
+  },
+  "currencyUsd": "US Dollar (USD)",
+  "@currencyUsd": {
+    "description": "Currency label: US dollar."
+  },
+  "currencyEur": "Euro (EUR)",
+  "@currencyEur": {
+    "description": "Currency label: euro."
+  },
+  "currencyGbp": "British Pound (GBP)",
+  "@currencyGbp": {
+    "description": "Currency label: British pound."
+  },
+  "currencySar": "Saudi Riyal (SAR)",
+  "@currencySar": {
+    "description": "Currency label: Saudi riyal."
+  },
+  "currencyAed": "UAE Dirham (AED)",
+  "@currencyAed": {
+    "description": "Currency label: UAE dirham."
+  },
+  "currencyJpy": "Japanese Yen (JPY)",
+  "@currencyJpy": {
+    "description": "Currency label: Japanese yen."
+  },
+  "currencyKwd": "Kuwaiti Dinar (KWD)",
+  "@currencyKwd": {
+    "description": "Currency label: Kuwaiti dinar."
+  },
+  "currencyBhd": "Bahraini Dinar (BHD)",
+  "@currencyBhd": {
+    "description": "Currency label: Bahraini dinar."
+  },
+  "currencyOmr": "Omani Rial (OMR)",
+  "@currencyOmr": {
+    "description": "Currency label: Omani rial."
+  }
 }

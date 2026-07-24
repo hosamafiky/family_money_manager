@@ -23,3 +23,12 @@ String categoryLabel(AppLocalizations l10n, TransactionCategory c) {
     TransactionCategory.otherIncome => l10n.catOtherIncome,
   };
 }
+
+/// Resolves a stored category [code] to a localized label.
+String categoryLabelFromCode(AppLocalizations l10n, String code) {
+  try {
+    return categoryLabel(l10n, TransactionCategory.fromCode(code));
+  } on ArgumentError {
+    return code;
+  }
+}

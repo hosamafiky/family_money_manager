@@ -2,6 +2,8 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/application/create_account_use_case.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -189,16 +191,8 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
     return result ?? false;
   }
 
-  String _resolveKey(String key, AppLocalizations l10n) => switch (key) {
-    'error_account_name_empty' => l10n.errorAccountNameEmpty,
-    'error_opening_balance_negative' => l10n.errorOpeningBalanceNegative,
-    'error_account_duplicate' => l10n.errorAccountDuplicate,
-    'error_validation_generic' => l10n.errorValidationGeneric,
-    'error_money_invalid_format' => l10n.errorMoneyInvalidFormat,
-    'error_money_excess_decimals' => l10n.errorMoneyExcessDecimals,
-    'error_money_overflow' => l10n.errorMoneyOverflow,
-    _ => l10n.errorGeneric,
-  };
+  String _resolveKey(String key, AppLocalizations l10n) =>
+      resolveMessageKey(l10n, key);
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +217,7 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
                   .map(
                     (t) => DropdownMenuItem(
                       value: t,
-                      child: Text(_typeLabel(t, l10n)),
+                      child: Text(accountTypeLabel(l10n, t)),
                     ),
                   )
                   .toList(),
@@ -258,7 +252,10 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
               ),
               items: Currency.values
                   .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
+                    (c) => DropdownMenuItem(
+                      value: c.code,
+                      child: Text(currencyLabel(l10n, c)),
+                    ),
                   )
                   .toList(),
               onChanged: (v) {
@@ -325,16 +322,4 @@ class _AccountCreationScreenState extends ConsumerState<AccountCreationScreen> {
       ),
     );
   }
-
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
-      switch (type) {
-        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-        _ => type.code,
-      };
 }

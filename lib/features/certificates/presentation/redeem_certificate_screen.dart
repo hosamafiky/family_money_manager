@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
@@ -340,8 +341,11 @@ class _RedeemCertificateScreenState
       setState(() {
         _errorMessage = switch (result) {
           AppInsufficientFunds() => l10n.errorGoalInsufficientReserve,
-          AppValidationFailure(:final messageKey) => messageKey,
-          _ => 'Error during redemption',
+          AppValidationFailure(:final messageKey) => resolveMessageKey(
+            l10n,
+            messageKey,
+          ),
+          _ => l10n.errorGeneric,
         };
       });
     }
@@ -377,10 +381,4 @@ class _ReviewRow extends StatelessWidget {
       ),
     );
   }
-}
-
-// Convenience accessors for form validation (English fallback strings).
-extension on AppLocalizations {
-  String get errorAmountMustBePositive => 'Amount must be positive';
-  String get errorAccountRequired => 'Account is required';
 }

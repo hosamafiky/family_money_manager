@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
@@ -181,7 +182,7 @@ class _AccountCard extends ConsumerWidget {
     final balanceAsync = ref.watch(
       accountBalanceProvider((account.id, account.householdId)),
     );
-    final typeLabel = _typeLabel(account.type, l10n);
+    final typeLabel = accountTypeLabel(l10n, account.type);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -235,17 +236,4 @@ class _AccountCard extends ConsumerWidget {
       ),
     );
   }
-
-  static String _typeLabel(FinancialAccountType type, AppLocalizations l10n) =>
-      switch (type) {
-        FinancialAccountType.personalCashWallet => l10n.accountTypePersonalCash,
-        FinancialAccountType.spouseCashWallet => l10n.accountTypeSpouseCash,
-        FinancialAccountType.householdCash => l10n.accountTypeHouseholdCash,
-        FinancialAccountType.homeSavingsCash => l10n.accountTypeHomeSavings,
-        FinancialAccountType.bankAccount => l10n.accountTypeBankAccount,
-        FinancialAccountType.mobileWallet => l10n.accountTypeMobileWallet,
-        FinancialAccountType.childProtectedFund => l10n.accountTypeChildFund,
-        FinancialAccountType.certificate => l10n.certificatesTitle,
-        _ => type.code,
-      };
 }

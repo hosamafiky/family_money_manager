@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -153,16 +154,6 @@ class TransferReviewScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  String _msg(AppLocalizations l10n, String key) => switch (key) {
-    'errorInsufficientFunds' => l10n.errorInsufficientFunds,
-    'errorAccountArchived' => l10n.errorAccountArchived,
-    'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
-    'errorSameAccount' => l10n.errorSameAccount,
-    'errorWithdrawalReasonRequired' => l10n.errorWithdrawalReasonRequired,
-    'errorWithdrawalAcknowledgmentRequired' =>
-      l10n.errorWithdrawalAcknowledgmentRequired,
-    'errorWithdrawalConfirmationRequired' =>
-      l10n.errorWithdrawalConfirmationRequired,
-    _ => l10n.errorGeneric,
-  };
+  String _msg(AppLocalizations l10n, String key) =>
+      resolveMessageKey(l10n, key);
 }

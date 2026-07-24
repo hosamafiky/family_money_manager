@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arb.json",
+  "title": "Application Resource Bundle",
+  "description": "Fixed Flutter ARB schema (non-overlapping patternProperties)",
+  "type": "object",
+  "patternProperties": {
+    "^@@x-.+$": {
+      "type": ["string", "number", "integer", "boolean"]
+    },
+    "^@[^@].+$": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "comment": { "type": "string" },
+        "context": { "type": "string" },
+        "type": { "type": "string" },
+        "placeholders": {
+          "type": "object",
+          "additionalProperties": { "type": "object" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "^[^@].+$": {
+      "type": "string"
+    }
+  },
+  "properties": {
+    "@@locale": { "type": "string" },
+    "@@context": { "type": "string" },
+    "@@last_modified": { "type": "string" },
+    "@@author": { "type": "string" },
+    "@@comment": { "type": "string" }
+  },
+  "required": ["@@locale"]
+}

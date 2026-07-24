@@ -27,7 +27,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('ar', 'EG'),
+    defaultLocale: Locale('en', 'US'),
     isProduction: true,
   );
 
@@ -36,7 +36,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة (تجريبي)',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('ar', 'EG'),
+    defaultLocale: Locale('en', 'US'),
     isProduction: false,
   );
 
@@ -45,7 +45,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة (تطوير)',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('ar', 'EG'),
+    defaultLocale: Locale('en', 'US'),
     isProduction: false,
   );
 

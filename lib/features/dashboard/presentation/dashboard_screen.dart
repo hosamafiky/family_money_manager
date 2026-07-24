@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/dashboard/domain/dashboard_summary.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
@@ -469,20 +470,8 @@ class _ExpenseScopesSection extends StatelessWidget {
   final List<ExpenseScopeSummary> scopes;
   final AppLocalizations l10n;
 
-  String _scopeLabel(ExpenseScope scope) {
-    switch (scope) {
-      case ExpenseScope.personal:
-        return l10n.dashboardScopePersonal;
-      case ExpenseScope.spouse:
-        return l10n.dashboardScopeSpouse;
-      case ExpenseScope.household:
-        return l10n.dashboardScopeHousehold;
-      case ExpenseScope.child:
-        return l10n.dashboardScopeChild;
-      case ExpenseScope.shared:
-        return l10n.dashboardScopeHousehold;
-    }
-  }
+  String _scopeLabel(ExpenseScope scope) =>
+      expenseScopeDashboardLabel(l10n, scope);
 
   @override
   Widget build(BuildContext context) {
@@ -621,7 +610,7 @@ class _ActivityRow extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              op.description ?? op.type.code,
+              op.description ?? operationTypeLabel(l10n, op.type),
               overflow: TextOverflow.ellipsis,
             ),
           ),

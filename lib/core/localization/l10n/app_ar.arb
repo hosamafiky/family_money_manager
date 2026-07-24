@@ -83,7 +83,6 @@
   "errorMoneyInvalidFormat": "صيغة المبلغ غير صحيحة.",
   "errorMoneyExcessDecimals": "عدد الخانات العشرية يتجاوز دقة العملة.",
   "errorMoneyOverflow": "المبلغ كبير جداً.",
-
   "navTransactions": "المعاملات",
   "transactionsTitle": "المعاملات",
   "transactionsEmpty": "لا توجد معاملات بعد.",
@@ -160,7 +159,6 @@
   "actionRecordExpense": "سجّل مصروفاً",
   "actionTransfer": "حوّل أموالاً",
   "transactionDetailTitle": "تفاصيل المعاملة",
-
   "navDashboard": "الرئيسية",
   "dashboardTitle": "الرئيسية",
   "dashboardSpendableBalances": "الأرصدة المتاحة",
@@ -196,7 +194,6 @@
   "dashboardError": "تعذّر تحميل الملخص المالي.",
   "dashboardRetry": "إعادة المحاولة",
   "dashboardPeriodLabel": "الفترة",
-
   "reportsTitle": "التقارير",
   "reportIncomeExpenseTitle": "الدخل والمصروفات",
   "reportAttributionTitle": "نسب الإنفاق",
@@ -234,18 +231,26 @@
   "reportAuditDrillDown": "عرض التدقيق",
   "reportTransactionCount": "{count} معاملات",
   "reportViewReports": "عرض التقارير",
-
   "onboardingSubtitle": "مرحباً! أدخل اسمك لبدء الإعداد.",
-  "@onboardingSubtitle": { "description": "Onboarding screen subtitle." },
+  "@onboardingSubtitle": {
+    "description": "Onboarding screen subtitle."
+  },
   "onboardingNameLabel": "اسمك",
-  "@onboardingNameLabel": { "description": "Label for the name field on the onboarding screen." },
+  "@onboardingNameLabel": {
+    "description": "Label for the name field on the onboarding screen."
+  },
   "onboardingNameHint": "مثال: أحمد",
-  "@onboardingNameHint": { "description": "Hint text for the name field on the onboarding screen." },
+  "@onboardingNameHint": {
+    "description": "Hint text for the name field on the onboarding screen."
+  },
   "onboardingStartButton": "ابدأ",
-  "@onboardingStartButton": { "description": "Submit button on the onboarding screen." },
+  "@onboardingStartButton": {
+    "description": "Submit button on the onboarding screen."
+  },
   "onboardingGenericError": "حدث خطأ. يرجى المحاولة مجدداً.",
-  "@onboardingGenericError": { "description": "Generic error message on the onboarding screen." },
-
+  "@onboardingGenericError": {
+    "description": "Generic error message on the onboarding screen."
+  },
   "budgetsTitle": "الميزانيات",
   "budgetNew": "ميزانية جديدة",
   "budgetName": "اسم الميزانية",
@@ -281,7 +286,6 @@
   "errorBudgetLimitZero": "يجب أن يكون حد الميزانية أكبر من صفر",
   "errorBudgetEndBeforeStart": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء",
   "errorBudgetCurrencyRequired": "العملة مطلوبة",
-
   "goalsTitle": "الأهداف",
   "goalNew": "هدف جديد",
   "goalName": "اسم الهدف",
@@ -342,7 +346,6 @@
   "goalAmount": "المبلغ",
   "goalProjectedBalance": "الرصيد المتوقع",
   "goalReservedBalances": "احتياطيات الأهداف",
-
   "certificatesTitle": "الشهادات",
   "certificateNew": "شهادة جديدة",
   "certificateEmpty": "لا توجد شهادات حتى الآن. أضف واحدة لتتبع ودائعك لأجل.",
@@ -407,7 +410,6 @@
   "errorCertificateNotMatured": "الشهادة لم تصل إلى تاريخ الاستحقاق",
   "errorCertificateNoPrincipal": "لا يوجد أصل متبقي لاسترداده",
   "errorCertificateFullRedemptionOnly": "يُسمح فقط بالاسترداد الكامل للأصل",
-
   "navHome": "الرئيسية",
   "navPlanning": "التخطيط",
   "navReports": "التقارير",
@@ -423,7 +425,6 @@
   "accountRestrictionCertificate": "أصل شهادة — عبر مسارات الشهادات فقط",
   "accountRestrictionGoalReserve": "احتياطي هدف — يُدار عبر الأهداف",
   "accountRestrictionProtected": "محمي — قيود على السحب",
-
   "formSectionAmount": "المبلغ",
   "formSectionAccount": "الحساب",
   "formSectionCategory": "التصنيف",
@@ -449,8 +450,83 @@
   "filterClearAll": "مسح الكل",
   "filterActiveCount": "{count} عوامل تصفية نشطة",
   "@filterActiveCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "lifecycleStatusLabel": "دورة الحياة",
-  "progressStatusLabel": "التقدّم"
+  "progressStatusLabel": "التقدّم",
+  "errorAccountRequired": "الحساب مطلوب.",
+  "errorAmountMustBePositive": "يجب أن يكون المبلغ أكبر من صفر.",
+  "errorDateInvalid": "يرجى إدخال تاريخ صالح.",
+  "errorHouseholdAlreadyInitialized": "هذه الأسرة مُعدّة مسبقاً.",
+  "errorHouseholdIdEmpty": "معرّف الأسرة مطلوب.",
+  "errorBudgetIdempotencyConflict": "تعارض في إنشاء الميزانية.",
+  "errorBudgetDatesRequired": "يرجى اختيار تاريخ البداية والنهاية.",
+  "errorBudgetDuplicate": "توجد ميزانية بهذا الإعداد مسبقاً.",
+  "errorBudgetCreateFailed": "تعذّر إنشاء الميزانية.",
+  "budgetPeriodTypeLabel": "نوع الفترة",
+  "errorCertificateSourceInvalid": "مصدر التمويل المحدد غير مسموح.",
+  "errorEarlyCompletionConfirmationRequired": "يجب تأكيد الإكمال المبكر.",
+  "errorEarlyCompletionReasonRequired": "سبب الإكمال المبكر مطلوب.",
+  "errorGoalArchived": "هذا الهدف مؤرشف.",
+  "errorGoalIdempotencyConflict": "تعارض في عملية الهدف.",
+  "errorGoalLifecycleRequiresTypedWorkflow": "يتطلب تغيير دورة الحياة شاشة سير عمل الهدف.",
+  "errorGoalNormalCompletionRequiresTarget": "يجب بلوغ الهدف قبل الإكمال العادي.",
+  "errorGoalNotActive": "الهدف غير نشط.",
+  "errorGoalReserveNotAllowedInOrdinaryTransaction": "لا يمكن استخدام حسابات احتياطي الهدف في المعاملات العادية.",
+  "errorGoalRestoreRequiresArchived": "يجب أن يكون الهدف مؤرشفاً لاستعادته.",
+  "errorGoalReversalInvalidMovement": "لا يمكن عكس هذه العملية للأهداف.",
+  "errorLifecycleEventConflict": "تعارض في حدث دورة الحياة. حدّث الصفحة وحاول مجدداً.",
+  "errorOperationAlreadyReversed": "تم عكس هذه العملية مسبقاً.",
+  "errorGoalSourceAccountRequired": "يرجى اختيار حساب المصدر.",
+  "errorGoalDestinationAccountRequired": "يرجى اختيار حساب الوجهة.",
+  "goalNotFound": "الهدف غير موجود.",
+  "errorPageNotFound": "الصفحة غير موجودة.",
+  "goHome": "العودة للرئيسية",
+  "certificateCurrency": "العملة",
+  "errorUnexpected": "حدث خطأ غير متوقع.",
+  "accountTypeGoalReserve": "احتياطي الهدف",
+  "accountTypeCertificate": "حساب الشهادة",
+  "accountTypeGoldHolding": "حيازة الذهب",
+  "accountTypeInvestment": "حساب استثمار",
+  "accountTypeOtherAsset": "أصل آخر",
+  "transactionTypeAssetPurchase": "شراء أصل",
+  "transactionTypeAssetSale": "بيع أصل",
+  "transactionTypeLiabilityCreation": "إنشاء التزام",
+  "transactionTypeLiabilityRepayment": "سداد التزام",
+  "transactionTypeCertificateFunding": "تمويل الشهادة",
+  "transactionTypeCertificateMaturity": "استحقاق الشهادة",
+  "transactionTypeInterestIncome": "دخل فائدة",
+  "transactionTypeGoldPurchase": "شراء ذهب",
+  "transactionTypeGoldSale": "بيع ذهب",
+  "transactionTypeGoalFunding": "تمويل الهدف",
+  "transactionTypeGoalWithdrawal": "سحب من الهدف",
+  "transactionTypeChildFundDeposit": "إيداع صندوق الطفل",
+  "transactionTypeChildFundWithdrawal": "سحب من صندوق الطفل",
+  "transactionTypeSadaqah": "صدقة",
+  "transactionTypeZakat": "زكاة",
+  "scopeShared": "مشترك",
+  "dashboardScopeShared": "إنفاق مشترك",
+  "certificateEventCreated": "تم الإنشاء",
+  "certificateEventPurchased": "تم الشراء",
+  "certificateEventProfitReceived": "تم استلام الربح",
+  "certificateEventRedeemed": "تم الاسترداد",
+  "certificateEventArchived": "تمت الأرشفة",
+  "certificateEventRestored": "تمت الاستعادة",
+  "certificateEventDefinitionRevised": "تم تعديل التعريف",
+  "certificateEventPurchaseReversed": "تم عكس الشراء",
+  "certificateEventProfitReversed": "تم عكس الربح",
+  "currencyEgp": "جنيه مصري (EGP)",
+  "currencyUsd": "دولار أمريكي (USD)",
+  "currencyEur": "يورو (EUR)",
+  "currencyGbp": "جنيه إسترليني (GBP)",
+  "currencySar": "ريال سعودي (SAR)",
+  "currencyAed": "درهم إماراتي (AED)",
+  "currencyJpy": "ين ياباني (JPY)",
+  "currencyKwd": "دينار كويتي (KWD)",
+  "currencyBhd": "دينار بحريني (BHD)",
+  "currencyOmr": "ريال عماني (OMR)"
 }

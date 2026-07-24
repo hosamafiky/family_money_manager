@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
@@ -223,6 +224,7 @@ class _RecordCertificateProfitScreenState
   }
 
   Future<void> _onSubmit() async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _loading = true;
       _errorMessage = null;
@@ -253,9 +255,12 @@ class _RecordCertificateProfitScreenState
       _idempotencyKey = const Uuid().v4();
       setState(() {
         _errorMessage = switch (result) {
-          AppValidationFailure(:final messageKey) => messageKey,
-          AppNotFound() => 'Not found',
-          _ => 'Error recording profit',
+          AppValidationFailure(:final messageKey) => resolveMessageKey(
+            l10n,
+            messageKey,
+          ),
+          AppNotFound() => l10n.errorGeneric,
+          _ => l10n.errorGeneric,
         };
       });
     }
@@ -286,10 +291,4 @@ class _ReviewRow extends StatelessWidget {
       ),
     );
   }
-}
-
-// Convenience accessors for form validation (English fallback strings).
-extension on AppLocalizations {
-  String get errorAmountMustBePositive => 'Amount must be positive';
-  String get errorAccountRequired => 'Account is required';
 }

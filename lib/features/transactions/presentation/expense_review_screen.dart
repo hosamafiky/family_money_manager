@@ -4,6 +4,8 @@ import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -60,13 +62,7 @@ class ExpenseReviewScreen extends ConsumerWidget {
       return '${MoneyInputFormatter.format(money)} $code';
     }
 
-    String scopeLabel(ExpenseScope scope) => switch (scope) {
-      ExpenseScope.personal => l10n.scopePersonal,
-      ExpenseScope.spouse => l10n.scopeSpouse,
-      ExpenseScope.household => l10n.scopeHousehold,
-      ExpenseScope.child => l10n.scopeChild,
-      ExpenseScope.shared => l10n.scopeHousehold,
-    };
+    String scopeLabel(ExpenseScope scope) => expenseScopeLabel(l10n, scope);
 
     return AppScreenScaffold(
       title: Text(l10n.reviewTitle),
@@ -191,15 +187,6 @@ class ExpenseReviewScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  String _msg(AppLocalizations l10n, String key) => switch (key) {
-    'errorInsufficientFunds' => l10n.errorInsufficientFunds,
-    'errorAccountArchived' => l10n.errorAccountArchived,
-    'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
-    'errorWithdrawalReasonRequired' => l10n.errorWithdrawalReasonRequired,
-    'errorWithdrawalAcknowledgmentRequired' =>
-      l10n.errorWithdrawalAcknowledgmentRequired,
-    'errorWithdrawalConfirmationRequired' =>
-      l10n.errorWithdrawalConfirmationRequired,
-    _ => l10n.errorGeneric,
-  };
+  String _msg(AppLocalizations l10n, String key) =>
+      resolveMessageKey(l10n, key);
 }

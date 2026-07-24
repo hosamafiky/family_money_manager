@@ -1368,4 +1368,224 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get progressStatusLabel => 'التقدّم';
+
+  @override
+  String get errorAccountRequired => 'الحساب مطلوب.';
+
+  @override
+  String get errorAmountMustBePositive => 'يجب أن يكون المبلغ أكبر من صفر.';
+
+  @override
+  String get errorDateInvalid => 'يرجى إدخال تاريخ صالح.';
+
+  @override
+  String get errorHouseholdAlreadyInitialized => 'هذه الأسرة مُعدّة مسبقاً.';
+
+  @override
+  String get errorHouseholdIdEmpty => 'معرّف الأسرة مطلوب.';
+
+  @override
+  String get errorBudgetIdempotencyConflict => 'تعارض في إنشاء الميزانية.';
+
+  @override
+  String get errorBudgetDatesRequired => 'يرجى اختيار تاريخ البداية والنهاية.';
+
+  @override
+  String get errorBudgetDuplicate => 'توجد ميزانية بهذا الإعداد مسبقاً.';
+
+  @override
+  String get errorBudgetCreateFailed => 'تعذّر إنشاء الميزانية.';
+
+  @override
+  String get budgetPeriodTypeLabel => 'نوع الفترة';
+
+  @override
+  String get errorCertificateSourceInvalid => 'مصدر التمويل المحدد غير مسموح.';
+
+  @override
+  String get errorEarlyCompletionConfirmationRequired =>
+      'يجب تأكيد الإكمال المبكر.';
+
+  @override
+  String get errorEarlyCompletionReasonRequired => 'سبب الإكمال المبكر مطلوب.';
+
+  @override
+  String get errorGoalArchived => 'هذا الهدف مؤرشف.';
+
+  @override
+  String get errorGoalIdempotencyConflict => 'تعارض في عملية الهدف.';
+
+  @override
+  String get errorGoalLifecycleRequiresTypedWorkflow =>
+      'يتطلب تغيير دورة الحياة شاشة سير عمل الهدف.';
+
+  @override
+  String get errorGoalNormalCompletionRequiresTarget =>
+      'يجب بلوغ الهدف قبل الإكمال العادي.';
+
+  @override
+  String get errorGoalNotActive => 'الهدف غير نشط.';
+
+  @override
+  String get errorGoalReserveNotAllowedInOrdinaryTransaction =>
+      'لا يمكن استخدام حسابات احتياطي الهدف في المعاملات العادية.';
+
+  @override
+  String get errorGoalRestoreRequiresArchived =>
+      'يجب أن يكون الهدف مؤرشفاً لاستعادته.';
+
+  @override
+  String get errorGoalReversalInvalidMovement =>
+      'لا يمكن عكس هذه العملية للأهداف.';
+
+  @override
+  String get errorLifecycleEventConflict =>
+      'تعارض في حدث دورة الحياة. حدّث الصفحة وحاول مجدداً.';
+
+  @override
+  String get errorOperationAlreadyReversed => 'تم عكس هذه العملية مسبقاً.';
+
+  @override
+  String get errorGoalSourceAccountRequired => 'يرجى اختيار حساب المصدر.';
+
+  @override
+  String get errorGoalDestinationAccountRequired => 'يرجى اختيار حساب الوجهة.';
+
+  @override
+  String get goalNotFound => 'الهدف غير موجود.';
+
+  @override
+  String get errorPageNotFound => 'الصفحة غير موجودة.';
+
+  @override
+  String get goHome => 'العودة للرئيسية';
+
+  @override
+  String get certificateCurrency => 'العملة';
+
+  @override
+  String get errorUnexpected => 'حدث خطأ غير متوقع.';
+
+  @override
+  String get accountTypeGoalReserve => 'احتياطي الهدف';
+
+  @override
+  String get accountTypeCertificate => 'حساب الشهادة';
+
+  @override
+  String get accountTypeGoldHolding => 'حيازة الذهب';
+
+  @override
+  String get accountTypeInvestment => 'حساب استثمار';
+
+  @override
+  String get accountTypeOtherAsset => 'أصل آخر';
+
+  @override
+  String get transactionTypeAssetPurchase => 'شراء أصل';
+
+  @override
+  String get transactionTypeAssetSale => 'بيع أصل';
+
+  @override
+  String get transactionTypeLiabilityCreation => 'إنشاء التزام';
+
+  @override
+  String get transactionTypeLiabilityRepayment => 'سداد التزام';
+
+  @override
+  String get transactionTypeCertificateFunding => 'تمويل الشهادة';
+
+  @override
+  String get transactionTypeCertificateMaturity => 'استحقاق الشهادة';
+
+  @override
+  String get transactionTypeInterestIncome => 'دخل فائدة';
+
+  @override
+  String get transactionTypeGoldPurchase => 'شراء ذهب';
+
+  @override
+  String get transactionTypeGoldSale => 'بيع ذهب';
+
+  @override
+  String get transactionTypeGoalFunding => 'تمويل الهدف';
+
+  @override
+  String get transactionTypeGoalWithdrawal => 'سحب من الهدف';
+
+  @override
+  String get transactionTypeChildFundDeposit => 'إيداع صندوق الطفل';
+
+  @override
+  String get transactionTypeChildFundWithdrawal => 'سحب من صندوق الطفل';
+
+  @override
+  String get transactionTypeSadaqah => 'صدقة';
+
+  @override
+  String get transactionTypeZakat => 'زكاة';
+
+  @override
+  String get scopeShared => 'مشترك';
+
+  @override
+  String get dashboardScopeShared => 'إنفاق مشترك';
+
+  @override
+  String get certificateEventCreated => 'تم الإنشاء';
+
+  @override
+  String get certificateEventPurchased => 'تم الشراء';
+
+  @override
+  String get certificateEventProfitReceived => 'تم استلام الربح';
+
+  @override
+  String get certificateEventRedeemed => 'تم الاسترداد';
+
+  @override
+  String get certificateEventArchived => 'تمت الأرشفة';
+
+  @override
+  String get certificateEventRestored => 'تمت الاستعادة';
+
+  @override
+  String get certificateEventDefinitionRevised => 'تم تعديل التعريف';
+
+  @override
+  String get certificateEventPurchaseReversed => 'تم عكس الشراء';
+
+  @override
+  String get certificateEventProfitReversed => 'تم عكس الربح';
+
+  @override
+  String get currencyEgp => 'جنيه مصري (EGP)';
+
+  @override
+  String get currencyUsd => 'دولار أمريكي (USD)';
+
+  @override
+  String get currencyEur => 'يورو (EUR)';
+
+  @override
+  String get currencyGbp => 'جنيه إسترليني (GBP)';
+
+  @override
+  String get currencySar => 'ريال سعودي (SAR)';
+
+  @override
+  String get currencyAed => 'درهم إماراتي (AED)';
+
+  @override
+  String get currencyJpy => 'ين ياباني (JPY)';
+
+  @override
+  String get currencyKwd => 'دينار كويتي (KWD)';
+
+  @override
+  String get currencyBhd => 'دينار بحريني (BHD)';
+
+  @override
+  String get currencyOmr => 'ريال عماني (OMR)';
 }

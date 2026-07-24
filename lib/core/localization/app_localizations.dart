@@ -2713,6 +2713,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Progress'**
   String get progressStatusLabel;
+
+  /// Validation error when an account field is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Account is required.'**
+  String get errorAccountRequired;
+
+  /// Validation error when amount is zero or negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than zero.'**
+  String get errorAmountMustBePositive;
+
+  /// Validation error for invalid transaction or form dates.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid date.'**
+  String get errorDateInvalid;
+
+  /// Onboarding error when household already exists.
+  ///
+  /// In en, this message translates to:
+  /// **'This household is already set up.'**
+  String get errorHouseholdAlreadyInitialized;
+
+  /// Validation error when household ID is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Household ID is required.'**
+  String get errorHouseholdIdEmpty;
+
+  /// Idempotency conflict while creating a budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate budget creation conflict.'**
+  String get errorBudgetIdempotencyConflict;
+
+  /// Validation error when fixed budget dates are missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select start and end dates.'**
+  String get errorBudgetDatesRequired;
+
+  /// Duplicate budget configuration conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'A budget with this configuration already exists.'**
+  String get errorBudgetDuplicate;
+
+  /// Generic budget creation failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create budget.'**
+  String get errorBudgetCreateFailed;
+
+  /// Section label for budget period type selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Period type'**
+  String get budgetPeriodTypeLabel;
+
+  /// Certificate creation error for invalid source account type.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected funding source is not allowed.'**
+  String get errorCertificateSourceInvalid;
+
+  /// Goal lifecycle error when early completion is not confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Early completion must be confirmed.'**
+  String get errorEarlyCompletionConfirmationRequired;
+
+  /// Goal lifecycle error when early completion reason is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Early completion reason is required.'**
+  String get errorEarlyCompletionReasonRequired;
+
+  /// Error when operating on an archived goal.
+  ///
+  /// In en, this message translates to:
+  /// **'This goal is archived.'**
+  String get errorGoalArchived;
+
+  /// Idempotency conflict during goal workflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate goal operation conflict.'**
+  String get errorGoalIdempotencyConflict;
+
+  /// Error when lifecycle transition is attempted outside workflow UI.
+  ///
+  /// In en, this message translates to:
+  /// **'This lifecycle change requires the goal workflow screen.'**
+  String get errorGoalLifecycleRequiresTypedWorkflow;
+
+  /// Goal lifecycle error when target not met for normal completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal must reach its target before normal completion.'**
+  String get errorGoalNormalCompletionRequiresTarget;
+
+  /// Error when funding or releasing an inactive goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal is not active.'**
+  String get errorGoalNotActive;
+
+  /// Account eligibility error for goal reserve in ordinary tx.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reserve accounts cannot be used in ordinary transactions.'**
+  String get errorGoalReserveNotAllowedInOrdinaryTransaction;
+
+  /// Error when restoring a non-archived goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal must be archived to restore.'**
+  String get errorGoalRestoreRequiresArchived;
+
+  /// Goal reversal error for invalid movement type.
+  ///
+  /// In en, this message translates to:
+  /// **'This operation cannot be reversed for goals.'**
+  String get errorGoalReversalInvalidMovement;
+
+  /// Concurrent lifecycle event conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifecycle event conflict. Refresh and try again.'**
+  String get errorLifecycleEventConflict;
+
+  /// Error when attempting to reverse an already reversed operation.
+  ///
+  /// In en, this message translates to:
+  /// **'This operation has already been reversed.'**
+  String get errorOperationAlreadyReversed;
+
+  /// Fund-goal form validation when source account missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a source account.'**
+  String get errorGoalSourceAccountRequired;
+
+  /// Release-goal form validation when destination account missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a destination account.'**
+  String get errorGoalDestinationAccountRequired;
+
+  /// Empty/error state when goal record is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal not found.'**
+  String get goalNotFound;
+
+  /// Router error screen when no route matches.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found.'**
+  String get errorPageNotFound;
+
+  /// Button on router error screen to return to dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Go home'**
+  String get goHome;
+
+  /// Label for certificate currency selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get certificateCurrency;
+
+  /// Fallback for unknown application failures.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get errorUnexpected;
+
+  /// Account type label: goal reserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Reserve'**
+  String get accountTypeGoalReserve;
+
+  /// Account type label: certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Account'**
+  String get accountTypeCertificate;
+
+  /// Account type label: gold holding.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Holding'**
+  String get accountTypeGoldHolding;
+
+  /// Account type label: investment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment Account'**
+  String get accountTypeInvestment;
+
+  /// Account type label: other asset.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Asset'**
+  String get accountTypeOtherAsset;
+
+  /// Operation type label: asset purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset Purchase'**
+  String get transactionTypeAssetPurchase;
+
+  /// Operation type label: asset sale.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset Sale'**
+  String get transactionTypeAssetSale;
+
+  /// Operation type label: liability creation.
+  ///
+  /// In en, this message translates to:
+  /// **'Liability Created'**
+  String get transactionTypeLiabilityCreation;
+
+  /// Operation type label: liability repayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Liability Repayment'**
+  String get transactionTypeLiabilityRepayment;
+
+  /// Operation type label: certificate funding.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Funding'**
+  String get transactionTypeCertificateFunding;
+
+  /// Operation type label: certificate maturity.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Maturity'**
+  String get transactionTypeCertificateMaturity;
+
+  /// Operation type label: interest income.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest Income'**
+  String get transactionTypeInterestIncome;
+
+  /// Operation type label: gold purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Purchase'**
+  String get transactionTypeGoldPurchase;
+
+  /// Operation type label: gold sale.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold Sale'**
+  String get transactionTypeGoldSale;
+
+  /// Operation type label: goal funding.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Funding'**
+  String get transactionTypeGoalFunding;
+
+  /// Operation type label: goal withdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Withdrawal'**
+  String get transactionTypeGoalWithdrawal;
+
+  /// Operation type label: child fund deposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Fund Deposit'**
+  String get transactionTypeChildFundDeposit;
+
+  /// Operation type label: child fund withdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Child Fund Withdrawal'**
+  String get transactionTypeChildFundWithdrawal;
+
+  /// Operation type label: sadaqah.
+  ///
+  /// In en, this message translates to:
+  /// **'Sadaqah'**
+  String get transactionTypeSadaqah;
+
+  /// Operation type label: zakat.
+  ///
+  /// In en, this message translates to:
+  /// **'Zakat'**
+  String get transactionTypeZakat;
+
+  /// Expense scope: shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get scopeShared;
+
+  /// Dashboard expense scope: shared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared Spending'**
+  String get dashboardScopeShared;
+
+  /// Certificate event: created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get certificateEventCreated;
+
+  /// Certificate event: purchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased'**
+  String get certificateEventPurchased;
+
+  /// Certificate event: profit received.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Received'**
+  String get certificateEventProfitReceived;
+
+  /// Certificate event: redeemed.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeemed'**
+  String get certificateEventRedeemed;
+
+  /// Certificate event: archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get certificateEventArchived;
+
+  /// Certificate event: restored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored'**
+  String get certificateEventRestored;
+
+  /// Certificate event: definition revised.
+  ///
+  /// In en, this message translates to:
+  /// **'Definition Revised'**
+  String get certificateEventDefinitionRevised;
+
+  /// Certificate event: purchase reversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Reversed'**
+  String get certificateEventPurchaseReversed;
+
+  /// Certificate event: profit reversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Profit Reversed'**
+  String get certificateEventProfitReversed;
+
+  /// Currency label: Egyptian pound.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian Pound (EGP)'**
+  String get currencyEgp;
+
+  /// Currency label: US dollar.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar (USD)'**
+  String get currencyUsd;
+
+  /// Currency label: euro.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro (EUR)'**
+  String get currencyEur;
+
+  /// Currency label: British pound.
+  ///
+  /// In en, this message translates to:
+  /// **'British Pound (GBP)'**
+  String get currencyGbp;
+
+  /// Currency label: Saudi riyal.
+  ///
+  /// In en, this message translates to:
+  /// **'Saudi Riyal (SAR)'**
+  String get currencySar;
+
+  /// Currency label: UAE dirham.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Dirham (AED)'**
+  String get currencyAed;
+
+  /// Currency label: Japanese yen.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Yen (JPY)'**
+  String get currencyJpy;
+
+  /// Currency label: Kuwaiti dinar.
+  ///
+  /// In en, this message translates to:
+  /// **'Kuwaiti Dinar (KWD)'**
+  String get currencyKwd;
+
+  /// Currency label: Bahraini dinar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bahraini Dinar (BHD)'**
+  String get currencyBhd;
+
+  /// Currency label: Omani rial.
+  ///
+  /// In en, this message translates to:
+  /// **'Omani Rial (OMR)'**
+  String get currencyOmr;
 }
 
 class _AppLocalizationsDelegate

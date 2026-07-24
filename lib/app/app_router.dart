@@ -1,4 +1,5 @@
 import 'package:family_money_manager/core/database/database_providers.dart';
+import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/navigation/routes.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_creation_screen.dart';
 import 'package:family_money_manager/features/accounts/presentation/account_detail_screen.dart';
@@ -48,34 +49,13 @@ import 'package:go_router/go_router.dart';
 
 /// Creates and owns the single [GoRouter] instance for the application.
 ///
-/// Phase 4A/4B routes:
-///   /dashboard             — DashboardScreen (tab 0)
-///   /accounts              — AccountsScreen (tab 1)
-///   /accounts/new          — AccountCreationScreen (push)
-///   /accounts/:accountId   — AccountDetailScreen (push)
-///   /transactions          — TransactionsScreen (tab 2)
-///   /transactions/new      — CreateTransactionScreen (push)
-///   /transactions/new/income          — IncomeFormScreen
-///   /transactions/new/income/review   — IncomeReviewScreen
-///   /transactions/new/expense         — ExpenseFormScreen
-///   /transactions/new/expense/review  — ExpenseReviewScreen
-///   /transactions/new/transfer        — TransferFormScreen
-///   /transactions/new/transfer/review — TransferReviewScreen
-///   /transactions/:operationId        — TransactionDetailScreen
-///   /members               — HouseholdMembersScreen (tab 3)
-///   /settings              — SettingsScreen (tab 4)
-///   /reports               — ReportsLandingScreen (push from dashboard)
-///   /reports/income-expense   — IncomeExpenseReportScreen
-///   /reports/attribution      — SpendingAttributionReportScreen
-///   /reports/categories       — CategoryReportScreen
-///   /reports/accounts         — AccountFlowReportScreen
-///   /reports/home-savings     — HomeSavingsReportScreen
-///   /reports/spouse-wallet    — SpouseWalletReportScreen
-///   /reports/protected-funds  — ProtectedFundsReportScreen
-///   /reports/transactions     — ReportTransactionListScreen (drill-down)
-///   /budgets               — BudgetsListScreen (Phase 5A)
-///   /budgets/new           — BudgetCreationScreen
-///   /budgets/:budgetId     — BudgetDetailScreen
+/// Phase 6B.2 shell tabs: Home · Transactions · Planning · Reports · More.
+///
+/// Budgets/goals/certificates live as sibling absolute routes on the Planning
+/// branch; accounts/members/settings on the More branch. That keeps public
+/// paths (`/budgets`, `/accounts`, …) while ensuring those destinations share
+/// the same [StatefulShellRoute] page identity — avoiding duplicate Navigator
+/// page keys when stacking shell destinations via `push`.
 abstract final class AppRouter {
   static GoRouter create(WidgetRef ref) {
     return GoRouter(
@@ -176,12 +156,92 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 2: Planning hub
+            // Tab 2: Planning hub + budgets / goals / certificates
             StatefulShellBranch(
               routes: [
                 GoRoute(
                   path: '/planning',
                   builder: (context, state) => const PlanningHubScreen(),
+                ),
+                GoRoute(
+                  path: '/budgets',
+                  builder: (context, state) => const BudgetsListScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) => const BudgetCreationScreen(),
+                    ),
+                    GoRoute(
+                      path: ':budgetId',
+                      builder: (context, state) => BudgetDetailScreen(
+                        budgetId: state.pathParameters['budgetId']!,
+                      ),
+                    ),
+                  ],
+                ),
+                GoRoute(
+                  path: '/goals',
+                  builder: (context, state) => const GoalsListScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) => const GoalCreationScreen(),
+                    ),
+                    GoRoute(
+                      path: ':goalId',
+                      builder: (context, state) => GoalDetailScreen(
+                        goalId: state.pathParameters['goalId']!,
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: 'fund',
+                          builder: (context, state) => FundGoalScreen(
+                            goalId: state.pathParameters['goalId']!,
+                          ),
+                        ),
+                        GoRoute(
+                          path: 'release',
+                          builder: (context, state) => ReleaseGoalScreen(
+                            goalId: state.pathParameters['goalId']!,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                GoRoute(
+                  path: '/certificates',
+                  builder: (context, state) => const CertificatesListScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) =>
+                          const CertificateCreationScreen(),
+                    ),
+                    GoRoute(
+                      path: ':certificateId',
+                      builder: (context, state) => CertificateDetailScreen(
+                        certificateId: state.pathParameters['certificateId']!,
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: 'profit',
+                          builder: (context, state) =>
+                              RecordCertificateProfitScreen(
+                                certificateId:
+                                    state.pathParameters['certificateId']!,
+                              ),
+                        ),
+                        GoRoute(
+                          path: 'redeem',
+                          builder: (context, state) => RedeemCertificateScreen(
+                            certificateId:
+                                state.pathParameters['certificateId']!,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -235,118 +295,37 @@ abstract final class AppRouter {
                 ),
               ],
             ),
-            // Tab 4: More hub
+            // Tab 4: More hub + accounts / members / settings
             StatefulShellBranch(
               routes: [
                 GoRoute(
                   path: '/more',
                   builder: (context, state) => const MoreHubScreen(),
                 ),
-              ],
-            ),
-          ],
-        ),
-
-        // ── Accounts / members / settings (paths preserved; opened from More) ─
-        GoRoute(
-          path: '/accounts',
-          builder: (context, state) => const AccountsScreen(),
-          routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const AccountCreationScreen(),
-            ),
-            GoRoute(
-              path: ':accountId',
-              builder: (context, state) => AccountDetailScreen(
-                accountId: state.pathParameters['accountId']!,
-              ),
-            ),
-          ],
-        ),
-        GoRoute(
-          path: '/members',
-          builder: (context, state) => const HouseholdMembersScreen(),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsScreen(),
-        ),
-
-        // ── Phase 5A budget routes ─────────────────────────────────────────
-        GoRoute(
-          path: '/budgets',
-          builder: (context, state) => const BudgetsListScreen(),
-          routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const BudgetCreationScreen(),
-            ),
-            GoRoute(
-              path: ':budgetId',
-              builder: (context, state) => BudgetDetailScreen(
-                budgetId: state.pathParameters['budgetId']!,
-              ),
-            ),
-          ],
-        ),
-
-        // ── Phase 5B goal routes ────────────────────────────────────────────
-        GoRoute(
-          path: '/goals',
-          builder: (context, state) => const GoalsListScreen(),
-          routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const GoalCreationScreen(),
-            ),
-            GoRoute(
-              path: ':goalId',
-              builder: (context, state) =>
-                  GoalDetailScreen(goalId: state.pathParameters['goalId']!),
-              routes: [
                 GoRoute(
-                  path: 'fund',
-                  builder: (context, state) =>
-                      FundGoalScreen(goalId: state.pathParameters['goalId']!),
+                  path: '/accounts',
+                  builder: (context, state) => const AccountsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (context, state) =>
+                          const AccountCreationScreen(),
+                    ),
+                    GoRoute(
+                      path: ':accountId',
+                      builder: (context, state) => AccountDetailScreen(
+                        accountId: state.pathParameters['accountId']!,
+                      ),
+                    ),
+                  ],
                 ),
                 GoRoute(
-                  path: 'release',
-                  builder: (context, state) => ReleaseGoalScreen(
-                    goalId: state.pathParameters['goalId']!,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-
-        // ── Phase 6A certificate routes ─────────────────────────────────────
-        GoRoute(
-          path: '/certificates',
-          builder: (context, state) => const CertificatesListScreen(),
-          routes: [
-            GoRoute(
-              path: 'new',
-              builder: (context, state) => const CertificateCreationScreen(),
-            ),
-            GoRoute(
-              path: ':certificateId',
-              builder: (context, state) => CertificateDetailScreen(
-                certificateId: state.pathParameters['certificateId']!,
-              ),
-              routes: [
-                GoRoute(
-                  path: 'profit',
-                  builder: (context, state) => RecordCertificateProfitScreen(
-                    certificateId: state.pathParameters['certificateId']!,
-                  ),
+                  path: '/members',
+                  builder: (context, state) => const HouseholdMembersScreen(),
                 ),
                 GoRoute(
-                  path: 'redeem',
-                  builder: (context, state) => RedeemCertificateScreen(
-                    certificateId: state.pathParameters['certificateId']!,
-                  ),
+                  path: '/settings',
+                  builder: (context, state) => const SettingsScreen(),
                 ),
               ],
             ),
@@ -367,6 +346,7 @@ class AppErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: Column(
@@ -374,11 +354,11 @@ class AppErrorScreen extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 48),
             const SizedBox(height: 16),
-            Text(error?.toString() ?? 'Page not found'),
+            Text(error?.toString() ?? l10n.errorPageNotFound),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => const SmokeRouteData().go(context),
-              child: const Text('Go home'),
+              onPressed: () => context.go('/dashboard'),
+              child: Text(l10n.goHome),
             ),
           ],
         ),

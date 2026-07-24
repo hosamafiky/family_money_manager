@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -149,11 +150,6 @@ class IncomeReviewScreen extends ConsumerWidget {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  String _resolveMessage(AppLocalizations l10n, String key) {
-    return switch (key) {
-      'errorAccountArchived' => l10n.errorAccountArchived,
-      'errorCurrencyMismatch' => l10n.errorCurrencyMismatch,
-      _ => l10n.errorGeneric,
-    };
-  }
+  String _resolveMessage(AppLocalizations l10n, String key) =>
+      resolveMessageKey(l10n, key);
 }

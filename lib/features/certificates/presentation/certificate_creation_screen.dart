@@ -1,6 +1,9 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
+import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -13,6 +16,15 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 const _householdId = 'household-v1';
+
+const _certificateCurrencies = [
+  Currency.egp,
+  Currency.usd,
+  Currency.eur,
+  Currency.sar,
+  Currency.aed,
+  Currency.kwd,
+];
 
 class CertificateCreationScreen extends ConsumerStatefulWidget {
   const CertificateCreationScreen({super.key});
@@ -137,17 +149,17 @@ class _CertificateCreationScreenState
             DropdownButtonFormField<String>(
               initialValue: _currencyCode,
               decoration: InputDecoration(
-                labelText: l10n.certificateCurrencyRequired,
+                labelText: l10n.certificateCurrency,
                 border: const OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(value: 'EGP', child: Text('EGP')),
-                DropdownMenuItem(value: 'USD', child: Text('USD')),
-                DropdownMenuItem(value: 'EUR', child: Text('EUR')),
-                DropdownMenuItem(value: 'SAR', child: Text('SAR')),
-                DropdownMenuItem(value: 'AED', child: Text('AED')),
-                DropdownMenuItem(value: 'KWD', child: Text('KWD')),
-              ],
+              items: _certificateCurrencies
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c.code,
+                      child: Text(currencyLabel(l10n, c)),
+                    ),
+                  )
+                  .toList(),
               onChanged: (v) => setState(() => _currencyCode = v ?? 'EGP'),
             ),
             const SizedBox(height: 12),
@@ -240,7 +252,7 @@ class _CertificateCreationScreenState
                 ...CertificateProfitFrequency.values.map(
                   (f) => DropdownMenuItem(
                     value: f,
-                    child: Text(_freqLabel(l10n, f)),
+                    child: Text(certificateProfitFrequencyLabel(l10n, f)),
                   ),
                 ),
               ],
@@ -311,7 +323,7 @@ class _CertificateCreationScreenState
           if (_profitFrequency != null)
             _ReviewRow(
               label: l10n.certificateProfitFrequency,
-              value: _freqLabel(l10n, _profitFrequency!),
+              value: certificateProfitFrequencyLabel(l10n, _profitFrequency!),
             ),
           if (_noteCtrl.text.trim().isNotEmpty)
             _ReviewRow(
@@ -391,26 +403,19 @@ class _CertificateCreationScreenState
       setState(() {
         _errorMessage = switch (result) {
           AppInsufficientFunds() => l10n.errorGoalInsufficientReserve,
-          AppValidationFailure(:final messageKey) => messageKey,
-          AppDuplicateConflict(:final messageKey) => messageKey,
-          _ => 'Unexpected error',
+          AppValidationFailure(:final messageKey) => resolveMessageKey(
+            l10n,
+            messageKey,
+          ),
+          AppDuplicateConflict(:final messageKey) => resolveMessageKey(
+            l10n,
+            messageKey,
+          ),
+          _ => l10n.errorUnexpected,
         };
       });
     }
   }
-
-  String _freqLabel(AppLocalizations l10n, CertificateProfitFrequency f) =>
-      switch (f) {
-        CertificateProfitFrequency.monthly => l10n.certificateProfitFreqMonthly,
-        CertificateProfitFrequency.quarterly =>
-          l10n.certificateProfitFreqQuarterly,
-        CertificateProfitFrequency.semiAnnual =>
-          l10n.certificateProfitFreqSemiAnnual,
-        CertificateProfitFrequency.annual => l10n.certificateProfitFreqAnnual,
-        CertificateProfitFrequency.atMaturity =>
-          l10n.certificateProfitFreqAtMaturity,
-        CertificateProfitFrequency.other => l10n.certificateProfitFreqOther,
-      };
 }
 
 class _ReviewRow extends StatelessWidget {
@@ -437,9 +442,4 @@ class _ReviewRow extends StatelessWidget {
       ),
     );
   }
-}
-
-// ignore: unused_element - accessed via getter for localization key string
-extension on AppLocalizations {
-  String get certificateCurrencyRequired => errorCertificateCurrencyRequired;
 }

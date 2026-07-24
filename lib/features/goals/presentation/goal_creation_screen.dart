@@ -1,6 +1,8 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
@@ -113,17 +115,17 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
       invalidateGoalMoneyProviders(ref, goalId: result.value.id);
       context.pop();
     } else if (result is AppValidationFailure<SavingsGoal>) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(result.messageKey)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(resolveMessageKey(l10n, result.messageKey))),
+      );
     } else if (result is AppInsufficientFunds) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.errorGoalInsufficientReserve)),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred. Please try again.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 
@@ -209,7 +211,10 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
               ),
               items: Currency.values
                   .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
+                    (c) => DropdownMenuItem(
+                      value: c.code,
+                      child: Text(currencyLabel(l10n, c)),
+                    ),
                   )
                   .toList(),
               onChanged: (v) => setState(() {

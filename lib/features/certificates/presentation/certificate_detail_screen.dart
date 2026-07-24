@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
 import 'package:family_money_manager/features/certificates/presentation/providers/certificate_providers.dart';
@@ -73,7 +74,7 @@ class CertificateDetailScreen extends ConsumerWidget {
           return _CertificateDetailBody(progress: progress);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(l10n.errorGeneric)),
       ),
       floatingActionButton: _CertificateDetailFab(
         certificateId: certificateId,
@@ -119,11 +120,11 @@ class _CertificateDetailBody extends StatelessWidget {
             _Row(label: l10n.certificateMaturityDate, value: cert.maturityDate),
             _Row(
               label: l10n.certificateLifecycleActive,
-              value: _lifecycleLabel(l10n, cert.lifecycle),
+              value: certificateLifecycleLabel(l10n, cert.lifecycle),
             ),
             _Row(
               label: l10n.certificateTermActive,
-              value: _termLabel(l10n, progress.termState),
+              value: certificateTermStateLabel(l10n, progress.termState),
             ),
             if (cert.annualRateBps != null)
               _Row(
@@ -133,7 +134,7 @@ class _CertificateDetailBody extends StatelessWidget {
             if (cert.profitFrequency != null)
               _Row(
                 label: l10n.certificateProfitFrequency,
-                value: _freqLabel(l10n, cert.profitFrequency!),
+                value: certificateProfitFrequencyLabel(l10n, cert.profitFrequency!),
               ),
             if (cert.note != null)
               _Row(label: l10n.certificateNote, value: cert.note!),
@@ -149,7 +150,7 @@ class _CertificateDetailBody extends StatelessWidget {
           (e) => Card(
             child: ListTile(
               leading: Icon(_eventIcon(e.eventType)),
-              title: Text(e.eventType.code),
+              title: Text(certificateEventTypeLabel(l10n, e.eventType)),
               subtitle: e.amountMinorUnits != null
                   ? Text(
                       '${CertificateMoneyFormatter.format(e.amountMinorUnits!, e.currencyCode ?? cert.currencyCode)} ${e.currencyCode ?? cert.currencyCode}',
@@ -162,35 +163,6 @@ class _CertificateDetailBody extends StatelessWidget {
       ],
     );
   }
-
-  String _lifecycleLabel(AppLocalizations l10n, CertificateLifecycle lc) =>
-      switch (lc) {
-        CertificateLifecycle.active => l10n.certificateLifecycleActive,
-        CertificateLifecycle.redeemed => l10n.certificateLifecycleRedeemed,
-        CertificateLifecycle.archived => l10n.certificateLifecycleArchived,
-      };
-
-  String _termLabel(AppLocalizations l10n, CertificateTermState s) =>
-      switch (s) {
-        CertificateTermState.notStarted => l10n.certificateTermNotStarted,
-        CertificateTermState.activeTerm => l10n.certificateTermActive,
-        CertificateTermState.matured => l10n.certificateTermMatured,
-        CertificateTermState.overdueRedemption => l10n.certificateTermOverdue,
-        CertificateTermState.fullyRedeemed => l10n.certificateTermFullyRedeemed,
-      };
-
-  String _freqLabel(AppLocalizations l10n, CertificateProfitFrequency f) =>
-      switch (f) {
-        CertificateProfitFrequency.monthly => l10n.certificateProfitFreqMonthly,
-        CertificateProfitFrequency.quarterly =>
-          l10n.certificateProfitFreqQuarterly,
-        CertificateProfitFrequency.semiAnnual =>
-          l10n.certificateProfitFreqSemiAnnual,
-        CertificateProfitFrequency.annual => l10n.certificateProfitFreqAnnual,
-        CertificateProfitFrequency.atMaturity =>
-          l10n.certificateProfitFreqAtMaturity,
-        CertificateProfitFrequency.other => l10n.certificateProfitFreqOther,
-      };
 
   IconData _eventIcon(CertificateEventType t) => switch (t) {
     CertificateEventType.created => Icons.star,

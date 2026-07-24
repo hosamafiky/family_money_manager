@@ -8,6 +8,7 @@ import 'package:family_money_manager/features/reports/domain/report_models.dart'
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_category.dart';
+import 'package:family_money_manager/features/transactions/presentation/category_label_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -120,7 +121,7 @@ class _CategoryRow extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.label_outline),
-      title: Text(item.categoryCode),
+      title: Text(categoryLabelFromCode(l10n, item.categoryCode)),
       subtitle: Text(l10n.reportTransactionCount(item.transactionCount)),
       trailing: ReportAmountText(
         minorUnits: item.totalMinorUnits,

@@ -4,6 +4,7 @@ library;
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/features/reports/application/get_spending_attribution_report_use_case.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -183,13 +184,8 @@ class _ScopeRow extends StatelessWidget {
   final int transactionCount;
   final AppLocalizations l10n;
 
-  String _scopeLabel(AppLocalizations l10n) => switch (scope) {
-    ExpenseScope.personal => l10n.dashboardScopePersonal,
-    ExpenseScope.spouse => l10n.dashboardScopeSpouse,
-    ExpenseScope.household => l10n.dashboardScopeHousehold,
-    ExpenseScope.child => l10n.dashboardScopeChild,
-    ExpenseScope.shared => l10n.dashboardScopeHousehold,
-  };
+  String _scopeLabel(AppLocalizations l10n) =>
+      expenseScopeDashboardLabel(l10n, scope);
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/features/accounts/domain/account_eligibility.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
@@ -53,9 +54,10 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
 
   Future<void> _submit(SavingsGoal goal) async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context);
     if (_selectedSourceAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a source account.')),
+        SnackBar(content: Text(l10n.errorGoalSourceAccountRequired)),
       );
       return;
     }
@@ -65,7 +67,6 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
     if (amount <= 0) return;
 
     setState(() => _isSubmitting = true);
-    final l10n = AppLocalizations.of(context);
     final useCase = ref.read(fundGoalUseCaseProvider);
 
     final result = await useCase.execute(
@@ -88,13 +89,13 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
         SnackBar(content: Text(l10n.errorGoalInsufficientReserve)),
       );
     } else if (result is AppValidationFailure<SavingsGoal>) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(resolveMessageKey(l10n, result.messageKey))),
+      );
+    } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(result.messageKey)));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred. Please try again.')),
-      );
+      ).showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 
@@ -111,7 +112,7 @@ class _FundGoalScreenState extends ConsumerState<FundGoalScreen> {
         error: (e, _) => Center(child: Text(e.toString())),
         data: (result) {
           if (result is! AppOk<SavingsGoal?> || result.value == null) {
-            return const Center(child: Text('Goal not found.'));
+            return Center(child: Text(l10n.goalNotFound));
           }
           final goal = result.value!;
 

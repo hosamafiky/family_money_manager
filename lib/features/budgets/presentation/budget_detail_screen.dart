@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
+import 'package:family_money_manager/features/transactions/presentation/category_label_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -219,7 +220,10 @@ class _DetailBody extends ConsumerWidget {
         const SizedBox(height: 16),
 
         // Drill-down transactions
-        Text('Transactions', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.transactionsTitle,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         if (progress.drillDown.isEmpty)
           Text(
@@ -243,7 +247,9 @@ class _DetailBody extends ConsumerWidget {
                 ),
               ),
               subtitle: Text(
-                '${row.effectiveDate}${row.categoryCode != null ? ' · ${row.categoryCode}' : ''}',
+                row.categoryCode != null
+                    ? '${row.effectiveDate} · ${categoryLabelFromCode(l10n, row.categoryCode!)}'
+                    : row.effectiveDate,
               ),
               trailing: row.note != null
                   ? Tooltip(

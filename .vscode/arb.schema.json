@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arb.json",
+  "title": "Application Resource Bundle",
+  "description": "Flutter/Dart ARB localization file schema",
+  "type": "object",
+  "patternProperties": {
+    "^@@x-.+$": {
+      "type": ["string", "number", "integer", "boolean"]
+    },
+    "^@[^@].+$": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["text", "image", "css"]
+        },
+        "context": {
+          "type": "string"
+        },
+        "placeholders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "example": { "type": "string" },
+              "description": { "type": "string" },
+              "format": { "type": "string" },
+              "optionalParameters": { "type": "object" },
+              "isCustomDateFormat": {
+                "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "^[^@].+$": {
+      "type": "string"
+    }
+  },
+  "properties": {
+    "@@locale": { "type": "string" },
+    "@@context": { "type": "string" },
+    "@@last_modified": { "type": "string" },
+    "@@author": { "type": "string" },
+    "@@comment": { "type": "string" }
+  },
+  "required": ["@@locale"]
+}

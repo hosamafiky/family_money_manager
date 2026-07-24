@@ -1393,4 +1393,233 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get progressStatusLabel => 'Progress';
+
+  @override
+  String get errorAccountRequired => 'Account is required.';
+
+  @override
+  String get errorAmountMustBePositive => 'Amount must be greater than zero.';
+
+  @override
+  String get errorDateInvalid => 'Please enter a valid date.';
+
+  @override
+  String get errorHouseholdAlreadyInitialized =>
+      'This household is already set up.';
+
+  @override
+  String get errorHouseholdIdEmpty => 'Household ID is required.';
+
+  @override
+  String get errorBudgetIdempotencyConflict =>
+      'Duplicate budget creation conflict.';
+
+  @override
+  String get errorBudgetDatesRequired => 'Please select start and end dates.';
+
+  @override
+  String get errorBudgetDuplicate =>
+      'A budget with this configuration already exists.';
+
+  @override
+  String get errorBudgetCreateFailed => 'Failed to create budget.';
+
+  @override
+  String get budgetPeriodTypeLabel => 'Period type';
+
+  @override
+  String get errorCertificateSourceInvalid =>
+      'Selected funding source is not allowed.';
+
+  @override
+  String get errorEarlyCompletionConfirmationRequired =>
+      'Early completion must be confirmed.';
+
+  @override
+  String get errorEarlyCompletionReasonRequired =>
+      'Early completion reason is required.';
+
+  @override
+  String get errorGoalArchived => 'This goal is archived.';
+
+  @override
+  String get errorGoalIdempotencyConflict =>
+      'Duplicate goal operation conflict.';
+
+  @override
+  String get errorGoalLifecycleRequiresTypedWorkflow =>
+      'This lifecycle change requires the goal workflow screen.';
+
+  @override
+  String get errorGoalNormalCompletionRequiresTarget =>
+      'Goal must reach its target before normal completion.';
+
+  @override
+  String get errorGoalNotActive => 'Goal is not active.';
+
+  @override
+  String get errorGoalReserveNotAllowedInOrdinaryTransaction =>
+      'Goal reserve accounts cannot be used in ordinary transactions.';
+
+  @override
+  String get errorGoalRestoreRequiresArchived =>
+      'Goal must be archived to restore.';
+
+  @override
+  String get errorGoalReversalInvalidMovement =>
+      'This operation cannot be reversed for goals.';
+
+  @override
+  String get errorLifecycleEventConflict =>
+      'Lifecycle event conflict. Refresh and try again.';
+
+  @override
+  String get errorOperationAlreadyReversed =>
+      'This operation has already been reversed.';
+
+  @override
+  String get errorGoalSourceAccountRequired =>
+      'Please select a source account.';
+
+  @override
+  String get errorGoalDestinationAccountRequired =>
+      'Please select a destination account.';
+
+  @override
+  String get goalNotFound => 'Goal not found.';
+
+  @override
+  String get errorPageNotFound => 'Page not found.';
+
+  @override
+  String get goHome => 'Go home';
+
+  @override
+  String get certificateCurrency => 'Currency';
+
+  @override
+  String get errorUnexpected => 'An unexpected error occurred.';
+
+  @override
+  String get accountTypeGoalReserve => 'Goal Reserve';
+
+  @override
+  String get accountTypeCertificate => 'Certificate Account';
+
+  @override
+  String get accountTypeGoldHolding => 'Gold Holding';
+
+  @override
+  String get accountTypeInvestment => 'Investment Account';
+
+  @override
+  String get accountTypeOtherAsset => 'Other Asset';
+
+  @override
+  String get transactionTypeAssetPurchase => 'Asset Purchase';
+
+  @override
+  String get transactionTypeAssetSale => 'Asset Sale';
+
+  @override
+  String get transactionTypeLiabilityCreation => 'Liability Created';
+
+  @override
+  String get transactionTypeLiabilityRepayment => 'Liability Repayment';
+
+  @override
+  String get transactionTypeCertificateFunding => 'Certificate Funding';
+
+  @override
+  String get transactionTypeCertificateMaturity => 'Certificate Maturity';
+
+  @override
+  String get transactionTypeInterestIncome => 'Interest Income';
+
+  @override
+  String get transactionTypeGoldPurchase => 'Gold Purchase';
+
+  @override
+  String get transactionTypeGoldSale => 'Gold Sale';
+
+  @override
+  String get transactionTypeGoalFunding => 'Goal Funding';
+
+  @override
+  String get transactionTypeGoalWithdrawal => 'Goal Withdrawal';
+
+  @override
+  String get transactionTypeChildFundDeposit => 'Child Fund Deposit';
+
+  @override
+  String get transactionTypeChildFundWithdrawal => 'Child Fund Withdrawal';
+
+  @override
+  String get transactionTypeSadaqah => 'Sadaqah';
+
+  @override
+  String get transactionTypeZakat => 'Zakat';
+
+  @override
+  String get scopeShared => 'Shared';
+
+  @override
+  String get dashboardScopeShared => 'Shared Spending';
+
+  @override
+  String get certificateEventCreated => 'Created';
+
+  @override
+  String get certificateEventPurchased => 'Purchased';
+
+  @override
+  String get certificateEventProfitReceived => 'Profit Received';
+
+  @override
+  String get certificateEventRedeemed => 'Redeemed';
+
+  @override
+  String get certificateEventArchived => 'Archived';
+
+  @override
+  String get certificateEventRestored => 'Restored';
+
+  @override
+  String get certificateEventDefinitionRevised => 'Definition Revised';
+
+  @override
+  String get certificateEventPurchaseReversed => 'Purchase Reversed';
+
+  @override
+  String get certificateEventProfitReversed => 'Profit Reversed';
+
+  @override
+  String get currencyEgp => 'Egyptian Pound (EGP)';
+
+  @override
+  String get currencyUsd => 'US Dollar (USD)';
+
+  @override
+  String get currencyEur => 'Euro (EUR)';
+
+  @override
+  String get currencyGbp => 'British Pound (GBP)';
+
+  @override
+  String get currencySar => 'Saudi Riyal (SAR)';
+
+  @override
+  String get currencyAed => 'UAE Dirham (AED)';
+
+  @override
+  String get currencyJpy => 'Japanese Yen (JPY)';
+
+  @override
+  String get currencyKwd => 'Kuwaiti Dinar (KWD)';
+
+  @override
+  String get currencyBhd => 'Bahraini Dinar (BHD)';
+
+  @override
+  String get currencyOmr => 'Omani Rial (OMR)';
 }

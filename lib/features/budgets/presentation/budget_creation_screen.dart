@@ -1,6 +1,8 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
@@ -65,16 +67,16 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context);
 
     if (_periodType == BudgetPeriodType.fixed) {
       if (_startDate == null || _endDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select start and end dates.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorBudgetDatesRequired)));
         return;
       }
       if (!_endDate!.isAfter(_startDate!)) {
-        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.errorBudgetEndBeforeStart)));
@@ -119,19 +121,17 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
         ref.invalidate(budgetsProvider(_householdId));
         context.go('/budgets/${value.id}');
       case AppValidationFailure(:final messageKey):
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(resolveMessageKey(l10n, messageKey))),
+        );
+      case AppDuplicateConflict():
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(messageKey)));
-      case AppDuplicateConflict():
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A budget with this configuration already exists.'),
-          ),
-        );
+        ).showSnackBar(SnackBar(content: Text(l10n.errorBudgetDuplicate)));
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create budget.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.errorBudgetCreateFailed)));
     }
   }
 
@@ -189,7 +189,10 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
               ),
               items: Currency.values
                   .map(
-                    (c) => DropdownMenuItem(value: c.code, child: Text(c.code)),
+                    (c) => DropdownMenuItem(
+                      value: c.code,
+                      child: Text(currencyLabel(l10n, c)),
+                    ),
                   )
                   .toList(),
               onChanged: (v) {
@@ -228,7 +231,10 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
             const SizedBox(height: 16),
 
             // Period type
-            Text('Period Type', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.budgetPeriodTypeLabel,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             SegmentedButton<BudgetPeriodType>(
               segments: [
                 ButtonSegment(

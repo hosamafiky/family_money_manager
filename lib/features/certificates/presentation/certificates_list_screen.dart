@@ -1,6 +1,7 @@
 import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
@@ -156,7 +157,7 @@ class _CertificateCard extends ConsumerWidget {
             ),
             if (termState != null)
               Text(
-                _termLabel(l10n, termState),
+                certificateTermStateLabel(l10n, termState),
                 style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
           ],
@@ -165,13 +166,4 @@ class _CertificateCard extends ConsumerWidget {
       ),
     );
   }
-
-  String _termLabel(AppLocalizations l10n, CertificateTermState state) =>
-      switch (state) {
-        CertificateTermState.notStarted => l10n.certificateTermNotStarted,
-        CertificateTermState.activeTerm => l10n.certificateTermActive,
-        CertificateTermState.matured => l10n.certificateTermMatured,
-        CertificateTermState.overdueRedemption => l10n.certificateTermOverdue,
-        CertificateTermState.fullyRedeemed => l10n.certificateTermFullyRedeemed,
-      };
 }
