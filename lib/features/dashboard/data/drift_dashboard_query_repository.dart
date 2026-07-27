@@ -67,7 +67,14 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
   @override
   Future<List<CurrencyAmountSummary>> protectedBalances({
     required String householdId,
+    required String todayLocal,
   }) async {
+    // Certificate principal is protected while the term has not ended. The
+    // boundary is evaluated against todayLocal on every read because
+    // financial_accounts.is_protected is immutable after creation and could
+    // not be flipped at maturity. Maturity day itself is NOT protected
+    // (todayLocal < maturity_date), matching CertificateTermState.derive,
+    // which returns `matured` on the maturity date.
     const sql = '''
       SELECT
         le.currency_code,
@@ -80,7 +87,17 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
       JOIN financial_accounts fa ON fa.id = le.account_id
       WHERE fa.household_id = ?
         AND fa.is_archived = 0
-        AND fa.is_protected = 1
+        AND (
+          fa.is_protected = 1
+          OR EXISTS (
+            SELECT 1
+            FROM savings_certificates sc
+            WHERE sc.certificate_account_id = fa.id
+              AND sc.household_id = fa.household_id
+              AND sc.lifecycle = 'active'
+              AND ? < sc.maturity_date
+          )
+        )
         AND le.household_id = ?
       GROUP BY le.currency_code
     ''';
@@ -90,6 +107,7 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
           sql,
           variables: [
             Variable.withString(householdId),
+            Variable.withString(todayLocal),
             Variable.withString(householdId),
           ],
         )

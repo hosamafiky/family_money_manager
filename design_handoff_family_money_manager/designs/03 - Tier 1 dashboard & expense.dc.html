@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.phl{direction:ltr;font-family:"Archivo",sans-serif}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;text-decoration:none;border:0}
+.oid-inv{background:rgba(255,255,255,.16);color:#f0edeb}
+@keyframes sk{0%{opacity:.4}50%{opacity:.9}100%{opacity:.4}}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 1 · turn 1 of 3</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Dashboard and expense entry,<br>built out</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:760px;margin:0;color:#575351">Direction <strong>1a</strong> with <strong>1b</strong>'s ink hero, pinned action bar and counted attention heading; expense <strong>1c</strong> with <strong>1d</strong>'s repeat tiles and sentence read-back. Ten artboards: dashboard in populated&nbsp;/&nbsp;loading&nbsp;/&nbsp;empty&nbsp;/&nbsp;error, light and dark, RTL primary with an LTR check (A1–A6); expense across pad&nbsp;→&nbsp;expanded&nbsp;→&nbsp;review&nbsp;→&nbsp;saved (B1–B4). Drawn against <code>heldByReason</code>. Artboards are 390&nbsp;dp wide at full scroll length.</p>
+</header>
+
+<!-- ═══ A. DASHBOARD ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">A</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Dashboard / Home</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:900px;margin:0 0 12px"><strong>What it solves.</strong> Audit problems 1, 2 and 5. One dominant region answers "how much can I spend right now", per currency, with no combined total. Held money sits in its own recessed region with a per-reason breakdown, so the 61,500&nbsp;EGP that today has no dashboard figure finally has one — named, subtotalled, and explicitly outside the hero. The app bar carries two actions instead of five.</p>
+  <p style="font-size:13px;color:#575351;max-width:900px;margin:0 0 26px"><strong>Priority order, top to bottom:</strong> available to spend → what needs attention → this period's flow → held money → spouse wallet → recent activity → net worth. Quick actions are not in the scroll at all; they live in the pinned bottom bar, which makes them reachable from every scroll position rather than only from the top.</p>
+
+  <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+    <!-- A1 populated light -->
+    <div style="flex:none">
+      <div class="cap">A1 · Populated · light · RTL</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span><span style="font-size:17px">◉</span><span style="font-size:17px">⋮</span></div>
+        <div style="background:#201e1d;color:#f0edeb;padding:16px 16px 20px">
+          <div style="font-size:12px;color:#a8a3a0;margin-bottom:5px">يمكنك صرف الآن</div>
+          <div class="tnum" style="font-size:44px;font-weight:700;line-height:1.05">32,486.75</div>
+          <div style="font-size:12px;color:#a8a3a0;margin-top:4px">جنيه مصري · من 4 حسابات</div>
+          <div style="display:flex;margin-top:14px;border-top:1px solid #4a4645;padding-top:10px">
+            <div style="flex:1;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0">دولار أمريكي</div><div class="tnum" style="font-size:20px;font-weight:700">320.00</div></div>
+            <div style="flex:1;padding-inline-start:12px"><div style="font-size:10.5px;color:#a8a3a0">ذهب 21 قيراط</div><div class="tnum" style="font-size:20px;font-weight:700">50.000 <span style="font-size:10px;font-weight:400">جرام</span></div></div>
+          </div>
+          <div style="height:2px;background:#8d8886;margin:12px 0 7px"></div>
+          <div style="font-size:10.5px;color:#a8a3a0;line-height:1.6">لا يوجد إجمالي موحّد — كل عملة مستقلة · محفظة هناء ومبلغ المحتجز غير محسوبين هنا</div>
+        </div>
+
+        <div style="background:#f8eeda;border-bottom:2px solid #201e1d">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;color:#8a5a00;border-bottom:1px solid #d8c396;display:flex;justify-content:space-between"><span>يحتاج انتباهك (2)</span><span style="font-weight:400;color:#575351">الكل ‹</span></div>
+          <div style="padding:11px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #d8c396"><span style="font-size:14px;color:#8a5a00">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">مواصلات: قرب الحد · <span class="tnum">94٪ مُستخدم</span> · المتبقي <span class="tnum">80.00</span></span><span style="font-size:13px;color:#575351">‹</span></div>
+          <div style="padding:11px 16px;display:flex;gap:10px;align-items:center"><span style="font-size:14px;color:#8a5a00">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">فاتورة كهرباء متكررة بعد 3 أيام — <span class="tnum">1,275.00</span></span><span style="font-size:13px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px"><span style="font-size:13px;font-weight:700">حركة يوليو 2026</span><span style="font-size:11px;color:#575351">شهري ▾</span></div>
+          <div style="display:flex;margin-bottom:10px">
+            <div style="flex:1;padding-inline-end:12px;border-inline-end:1px solid #c3bfbe"><div style="font-size:11px;color:#575351;margin-bottom:3px">دخل ↓</div><div class="tnum" style="font-size:20px;font-weight:700;color:#14555f">18,400.00</div></div>
+            <div style="flex:1;padding-inline-start:12px"><div style="font-size:11px;color:#575351;margin-bottom:3px">مصروف ↑</div><div class="tnum" style="font-size:20px;font-weight:700;color:#ae1800">9,684.25</div></div>
+          </div>
+          <div style="height:12px;display:flex;border:1px solid #c3bfbe"><span style="width:53%;background:#ae1800"></span><span style="flex:1;background:repeating-linear-gradient(45deg,#c3bfbe 0 2px,transparent 2px 5px)"></span></div>
+          <div style="font-size:11px;color:#575351;margin-top:5px;line-height:1.6">صُرف 53% من دخل الشهر · الصافي <span class="tnum" style="color:#14555f;font-weight:600">+ 8,715.75</span></div>
+          <div style="font-size:10.5px;color:#575351;margin-top:5px;line-height:1.6">التحويلات غير محسوبة — التحويل ليس دخلًا ولا مصروفًا</div>
+        </div>
+
+        <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">محتجز — غير قابل للصرف</span><span class="tnum" style="font-size:11px;color:#575351">3 خزائن</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#4a3e70 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">شهادة استثمار 12 شهرًا</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55"><span style="background:#ece9f4;color:#4a3e70;padding:1px 5px">أصل الشهادة</span> · تستحق 2027/03/14</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#4a3e70">47,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#2b5c8a 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">مصاريف مدرسة يوسف</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55"><span style="background:#e6eef6;color:#2b5c8a;padding:1px 5px">محتجز لهدف</span> · 68% · متأخر 12 يومًا</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#2b5c8a">13,600.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border:2px solid #6e4a1f;background:#f4ecdd"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">أموال يوسف المحمية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55"><span style="background:#6e4a1f;color:#f4ecdd;padding:1px 5px">محمي</span> · المستفيد: يوسف · السحب يتطلب تأكيدًا</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#6e4a1f">8,150.00</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px;border-top:2px solid #201e1d;background:#f3f2f2"><span style="font-size:12px;font-weight:600">إجمالي المحتجز — جنيه مصري</span><span class="tnum" style="font-size:20px;font-weight:700">69,650.00</span></div>
+          <div style="padding:0 16px 12px;background:#f3f2f2;font-size:10.5px;color:#575351;line-height:1.6">لا يُضاف إلى رصيدك المتاح — هذا مجموع داخل هذه المنطقة فقط</div>
+        </div>
+
+        <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><span style="font-size:13px;font-weight:700">محفظة الزوجة — هناء</span><span style="font-size:11px;color:#575351">‹</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #c3bfbe">
+            <div style="padding:9px 8px;border-inline-end:1px solid #c3bfbe"><div style="font-size:10.5px;color:#575351;margin-bottom:3px;line-height:1.5">أُعطي</div><div class="tnum" style="font-size:15px;font-weight:700">6,000</div></div>
+            <div style="padding:9px 8px;border-inline-end:1px solid #c3bfbe"><div style="font-size:10.5px;color:#575351;margin-bottom:3px;line-height:1.5">صُرف</div><div class="tnum" style="font-size:15px;font-weight:700;color:#ae1800">1,617</div></div>
+            <div style="padding:9px 8px;border-inline-end:1px solid #c3bfbe"><div style="font-size:10.5px;color:#575351;margin-bottom:3px;line-height:1.5">أُرجع</div><div class="tnum" style="font-size:15px;font-weight:700">0</div></div>
+            <div style="padding:9px 8px;background:#eae9e9"><div style="font-size:10.5px;color:#575351;margin-bottom:3px;line-height:1.5">المتبقّي</div><div class="tnum" style="font-size:15px;font-weight:700">4,382</div></div>
+          </div>
+          <div style="font-size:10.5px;color:#575351;margin-top:6px;line-height:1.6">مستبعدة من رصيدك المتاح · آخر تسليم 2026/07/02</div>
+        </div>
+
+        <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">آخر الحركات</span><span style="font-size:11px;color:#575351">الكل ‹</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">بقالة — سوبر ماركت الفتح</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">مصروف ↑ · المنفق هناء · نطاق الأسرة · 14:20</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#ae1800">− 382.50</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#605d5d 0 2px,transparent 2px 5px);flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">إلى شهادة استثمار 12 شهرًا</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">تحويل ⇄ · رسوم <span class="tnum">15.00</span> · لا يؤثر على الدخل أو المصروف</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#605d5d">⇄ 47,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#c3bfbe;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4;color:#575351">فاتورة كهرباء <span style="font-size:10.5px;background:#eae9e9;padding:1px 5px;font-weight:400">معكوسة ⤺</span></span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">عُكست 2026/07/12 — الأصل محفوظ</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#575351;text-decoration:line-through">− 1,275.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px"><span style="width:4px;align-self:stretch;background:#14555f;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">راتب شهر يوليو</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">دخل ↓ · بنك مصر · متكرر شهريًا ↻</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#14555f">+ 18,400.00</span></div>
+        </div>
+
+        <div style="background:#eae9e9;padding:12px 16px;border-bottom:2px solid #201e1d;display:flex;justify-content:space-between;align-items:baseline">
+          <span><span style="font-size:12px;color:#575351">إجمالي الأصول — جنيه مصري</span><span style="display:block;font-size:10px;color:#575351;margin-top:2px">الحسابات المحدَّدة فقط · بدون خصم ديون</span></span>
+          <span class="tnum" style="font-size:20px;font-weight:700;color:#575351">106,519.25</span>
+        </div>
+
+        <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px">
+          <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;text-align:start">↑ مصروف</span>
+          <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">↓ دخل</span>
+          <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">⇄</span>
+        </div>
+        <div style="display:flex;background:#fff;border-top:2px solid #201e1d">
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;border-top:3px solid #201e1d">الرئيسية</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">الحركات</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">التخطيط</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">التقارير</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">المزيد</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- A2 populated dark -->
+    <div style="flex:none">
+      <div class="cap">A2 · Populated · dark · RTL</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#221f1e;border-bottom:2px solid #8d8886"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span><span style="font-size:17px">◉</span><span style="font-size:17px">⋮</span></div>
+        <div style="background:#221f1e;padding:16px 16px 20px;border-bottom:2px solid #8d8886">
+          <div style="font-size:12px;color:#a8a3a0;margin-bottom:5px">يمكنك صرف الآن</div>
+          <div class="tnum" style="font-size:44px;font-weight:700;line-height:1.05">32,486.75</div>
+          <div style="font-size:12px;color:#a8a3a0;margin-top:4px">جنيه مصري · من 4 حسابات</div>
+          <div style="display:flex;margin-top:14px;border-top:1px solid #4a4645;padding-top:10px">
+            <div style="flex:1;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0">دولار أمريكي</div><div class="tnum" style="font-size:20px;font-weight:700">320.00</div></div>
+            <div style="flex:1;padding-inline-start:12px"><div style="font-size:10.5px;color:#a8a3a0">ذهب 21 قيراط</div><div class="tnum" style="font-size:20px;font-weight:700">50.000 <span style="font-size:10px;font-weight:400">جرام</span></div></div>
+          </div>
+          <div style="height:2px;background:#8d8886;margin:12px 0 7px"></div>
+          <div style="font-size:10.5px;color:#a8a3a0;line-height:1.6">لا يوجد إجمالي موحّد — كل عملة مستقلة</div>
+        </div>
+
+        <div style="background:#332711;border-bottom:2px solid #8d8886">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;color:#e0ae4a;border-bottom:1px solid #574526">يحتاج انتباهك (2)</div>
+          <div style="padding:11px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #574526"><span style="font-size:14px;color:#e0ae4a">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">مواصلات: قرب الحد · المتبقي <span class="tnum">80.00</span></span><span style="font-size:13px;color:#a8a3a0">‹</span></div>
+          <div style="padding:11px 16px;display:flex;gap:10px;align-items:center"><span style="font-size:14px;color:#e0ae4a">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">فاتورة كهرباء متكررة بعد 3 أيام</span><span style="font-size:13px;color:#a8a3a0">‹</span></div>
+        </div>
+
+        <div style="background:#221f1e;padding:14px 16px;border-bottom:2px solid #8d8886">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px"><span style="font-size:13px;font-weight:700">حركة يوليو 2026</span><span style="font-size:11px;color:#a8a3a0">شهري ▾</span></div>
+          <div style="display:flex;margin-bottom:10px">
+            <div style="flex:1;padding-inline-end:12px;border-inline-end:1px solid #4a4645"><div style="font-size:11px;color:#a8a3a0;margin-bottom:3px">دخل ↓</div><div class="tnum" style="font-size:20px;font-weight:700;color:#5fb8b0">18,400.00</div></div>
+            <div style="flex:1;padding-inline-start:12px"><div style="font-size:11px;color:#a8a3a0;margin-bottom:3px">مصروف ↑</div><div class="tnum" style="font-size:20px;font-weight:700;color:#ff9783">9,684.25</div></div>
+          </div>
+          <div style="height:12px;display:flex;border:1px solid #4a4645"><span style="width:53%;background:#ff9783"></span><span style="flex:1;background:repeating-linear-gradient(45deg,#4a4645 0 2px,transparent 2px 5px)"></span></div>
+          <div style="font-size:11px;color:#a8a3a0;margin-top:5px;line-height:1.6">صُرف 53% من دخل الشهر · الصافي <span class="tnum" style="color:#5fb8b0;font-weight:600">+ 8,715.75</span></div>
+        </div>
+
+        <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">محتجز — غير قابل للصرف</span><span class="tnum" style="font-size:11px;color:#a8a3a0">3 خزائن</span></div></div>
+        <div style="height:2px;background:#8d8886"></div>
+        <div style="background:#2c2928;border-bottom:2px solid #8d8886">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#a99bd6 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">شهادة استثمار 12 شهرًا</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55"><span style="background:#26223a;color:#a99bd6;padding:1px 5px">أصل الشهادة</span> · تستحق 2027/03/14</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#a99bd6">47,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#7fafdd 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">مصاريف مدرسة يوسف</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55"><span style="background:#1d2a36;color:#7fafdd;padding:1px 5px">محتجز لهدف</span> · 68% · متأخر</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#7fafdd">13,600.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border:2px solid #d6a85c;background:#332715"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#d6a85c 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">أموال يوسف المحمية</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55"><span style="background:#d6a85c;color:#332715;padding:1px 5px">محمي</span> · المستفيد: يوسف</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#d6a85c">8,150.00</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px;border-top:2px solid #8d8886;background:#181716"><span style="font-size:12px;font-weight:600">إجمالي المحتجز — جنيه مصري</span><span class="tnum" style="font-size:20px;font-weight:700">69,650.00</span></div>
+          <div style="padding:0 16px 12px;background:#181716;font-size:10.5px;color:#a8a3a0;line-height:1.6">لا يُضاف إلى رصيدك المتاح</div>
+        </div>
+
+        <div style="background:#221f1e;padding:14px 16px;border-bottom:2px solid #8d8886">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">محفظة الزوجة — هناء</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #4a4645">
+            <div style="padding:9px 8px;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:3px;line-height:1.5">أُعطي</div><div class="tnum" style="font-size:15px;font-weight:700">6,000</div></div>
+            <div style="padding:9px 8px;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:3px;line-height:1.5">صُرف</div><div class="tnum" style="font-size:15px;font-weight:700;color:#ff9783">1,617</div></div>
+            <div style="padding:9px 8px;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:3px;line-height:1.5">أُرجع</div><div class="tnum" style="font-size:15px;font-weight:700">0</div></div>
+            <div style="padding:9px 8px;background:#2c2928"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:3px;line-height:1.5">المتبقّي</div><div class="tnum" style="font-size:15px;font-weight:700">4,382</div></div>
+          </div>
+          <div style="font-size:10.5px;color:#a8a3a0;margin-top:6px;line-height:1.6">مستبعدة من رصيدك المتاح</div>
+        </div>
+
+        <div style="padding:14px 16px 8px"><span style="font-size:13px;font-weight:700">آخر الحركات</span></div>
+        <div style="height:2px;background:#8d8886"></div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645"><span style="width:4px;align-self:stretch;background:#ff9783;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">بقالة — سوبر ماركت الفتح</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55">مصروف ↑ · هناء · 14:20</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#ff9783">− 382.50</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#b0aba9 0 2px,transparent 2px 5px);flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">إلى شهادة استثمار</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55">تحويل ⇄ · رسوم <span class="tnum">15.00</span></span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#b0aba9">⇄ 47,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px"><span style="width:4px;align-self:stretch;background:#5fb8b0;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">راتب شهر يوليو</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.55">دخل ↓ · بنك مصر · متكرر ↻</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#5fb8b0">+ 18,400.00</span></div>
+        </div>
+        <div style="background:#2c2928;padding:12px 16px;border-bottom:2px solid #8d8886;display:flex;justify-content:space-between;align-items:baseline"><span><span style="font-size:12px;color:#a8a3a0">إجمالي الأصول — جنيه مصري</span><span style="display:block;font-size:10px;color:#a8a3a0;margin-top:2px">بدون خصم ديون</span></span><span class="tnum" style="font-size:20px;font-weight:700;color:#a8a3a0">106,519.25</span></div>
+        <div style="background:#f0edeb;padding:12px 16px;display:flex;gap:8px">
+          <span style="flex:1;background:#201e1d;color:#f0edeb;font-size:13px;font-weight:600;padding:13px;text-align:start">↑ مصروف</span>
+          <span style="flex:none;border:1px solid #201e1d;color:#201e1d;font-size:13px;font-weight:600;padding:13px">↓ دخل</span>
+          <span style="flex:none;border:1px solid #201e1d;color:#201e1d;font-size:13px;font-weight:600;padding:13px">⇄</span>
+        </div>
+        <div style="display:flex;background:#221f1e;border-top:2px solid #8d8886">
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;border-top:3px solid #f0edeb">الرئيسية</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#a8a3a0">الحركات</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#a8a3a0">التخطيط</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#a8a3a0">التقارير</span>
+          <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#a8a3a0">المزيد</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- A3 loading / A4 empty stacked -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:28px">
+      <div>
+        <div class="cap">A3 · Loading · skeleton geometry matches content</div>
+        <div class="ph">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span><span style="font-size:17px;opacity:.4">◉</span><span style="font-size:17px;opacity:.4">⋮</span></div>
+          <div style="background:#201e1d;padding:16px 16px 20px">
+            <div style="width:92px;height:12px;background:#3b3736;animation:sk 1.4s ease-in-out infinite;margin-bottom:9px"></div>
+            <div style="width:224px;height:44px;background:#3b3736;animation:sk 1.4s ease-in-out .1s infinite"></div>
+            <div style="width:140px;height:12px;background:#3b3736;animation:sk 1.4s ease-in-out .2s infinite;margin-top:8px"></div>
+            <div style="display:flex;margin-top:14px;border-top:1px solid #4a4645;padding-top:10px;gap:12px">
+              <div style="flex:1"><div style="width:56px;height:10px;background:#3b3736;animation:sk 1.4s ease-in-out .25s infinite;margin-bottom:6px"></div><div style="width:78px;height:20px;background:#3b3736;animation:sk 1.4s ease-in-out .3s infinite"></div></div>
+              <div style="flex:1"><div style="width:56px;height:10px;background:#3b3736;animation:sk 1.4s ease-in-out .3s infinite;margin-bottom:6px"></div><div style="width:78px;height:20px;background:#3b3736;animation:sk 1.4s ease-in-out .35s infinite"></div></div>
+            </div>
+          </div>
+          <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+            <div style="width:110px;height:13px;background:#dedbda;animation:sk 1.4s ease-in-out infinite;margin-bottom:12px"></div>
+            <div style="display:flex;gap:12px;margin-bottom:10px"><div style="flex:1"><div style="width:44px;height:11px;background:#dedbda;animation:sk 1.4s ease-in-out .1s infinite;margin-bottom:6px"></div><div style="width:104px;height:20px;background:#dedbda;animation:sk 1.4s ease-in-out .15s infinite"></div></div><div style="flex:1"><div style="width:52px;height:11px;background:#dedbda;animation:sk 1.4s ease-in-out .2s infinite;margin-bottom:6px"></div><div style="width:96px;height:20px;background:#dedbda;animation:sk 1.4s ease-in-out .25s infinite"></div></div></div>
+            <div style="height:12px;background:#dedbda;animation:sk 1.4s ease-in-out .3s infinite"></div>
+          </div>
+          <div style="padding:14px 16px 8px"><div style="width:150px;height:13px;background:#dedbda;animation:sk 1.4s ease-in-out infinite"></div></div>
+          <div style="height:2px;background:#201e1d"></div>
+          <div style="background:#dedbda">
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#c3bfbe;flex:none"></span><span style="flex:1"><span style="display:block;width:64%;height:14px;background:#c8c4c3;animation:sk 1.4s ease-in-out infinite"></span><span style="display:block;width:44%;height:11px;background:#c8c4c3;animation:sk 1.4s ease-in-out .15s infinite;margin-top:6px"></span></span><span style="width:78px;height:16px;background:#c8c4c3;animation:sk 1.4s ease-in-out .3s infinite"></span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#c3bfbe;flex:none"></span><span style="flex:1"><span style="display:block;width:52%;height:14px;background:#c8c4c3;animation:sk 1.4s ease-in-out .1s infinite"></span><span style="display:block;width:38%;height:11px;background:#c8c4c3;animation:sk 1.4s ease-in-out .25s infinite;margin-top:6px"></span></span><span style="width:72px;height:16px;background:#c8c4c3;animation:sk 1.4s ease-in-out .35s infinite"></span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px"><span style="width:4px;align-self:stretch;background:#c3bfbe;flex:none"></span><span style="flex:1"><span style="display:block;width:58%;height:14px;background:#c8c4c3;animation:sk 1.4s ease-in-out .15s infinite"></span><span style="display:block;width:42%;height:11px;background:#c8c4c3;animation:sk 1.4s ease-in-out .3s infinite;margin-top:6px"></span></span><span style="width:68px;height:16px;background:#c8c4c3;animation:sk 1.4s ease-in-out .4s infinite"></span></div>
+          </div>
+          <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px;border-top:2px solid #201e1d">
+            <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;text-align:start">↑ مصروف</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">↓ دخل</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">⇄</span>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0">Skeleton, not a spinner: the geometry is the real layout, so the 150&nbsp;ms cross-fade to content moves nothing. The action bar is live during load — you can start an expense before the dashboard finishes. Announced as <code>"جارٍ تحميل ملخّص الأسرة"</code> on a live region.</p>
+      </div>
+
+      <div>
+        <div class="cap">A4 · Empty · first run, zero accounts — the first impression</div>
+        <div class="ph">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span></div>
+          <div style="background:#201e1d;color:#f0edeb;padding:22px 16px 24px">
+            <div style="font-size:20px;font-weight:600;line-height:1.5;margin-bottom:10px">أهلًا بك. لسه مفيش حسابات.</div>
+            <div style="font-size:13px;color:#a8a3a0;line-height:1.85">هذا التطبيق سجل دائم لأموال أسرتك — كل مبلغ له مكان ومالك وسبب. نبدأ بأول حساب: فين فلوسك دلوقتي؟</div>
+          </div>
+          <div style="background:#fff;border-bottom:2px solid #201e1d">
+            <div style="padding:13px 16px;font-size:11px;font-weight:700;border-bottom:1px solid #c3bfbe">الأكثر شيوعًا للبداية</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▣</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة نقدية شخصية</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">الكاش اللي معاك في جيبك</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▤</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حساب بنكي</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">حساب الراتب أو التوفير</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:64px"><span style="font-size:19px">▥</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">مدخرات المنزل النقدية</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">الفلوس المتخزّنة في البيت</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          </div>
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:14px 16px;margin:16px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">مش لازم تظبط كل حاجة الآن</div>
+            <div style="font-size:12px;color:#575351;line-height:1.7">ابدأ بحساب واحد. الشهادات والأهداف والميزانيات تُضاف وقت ما تحتاجها.</div>
+          </div>
+          <div style="padding:0 16px 16px">
+            <div style="border:1px solid #c3bfbe;padding:13px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center;min-height:48px"><span>باقي الـ 12 نوع حساب</span><span style="color:#575351">‹</span></div>
+          </div>
+          <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px">
+            <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;text-align:start">أضف أول حساب</span>
+          </div>
+          <div style="display:flex;background:#fff;border-top:2px solid #201e1d">
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;border-top:3px solid #201e1d">الرئيسية</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#9b9797">الحركات</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#9b9797">التخطيط</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#9b9797">التقارير</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">المزيد</span>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0">No 0.00 hero — a zero balance is not the answer to "how much can I spend", it is the absence of a question. The hero region becomes the invitation instead, and the three most likely account types are offered directly rather than behind a 12-item type picker. Tabs with no possible content are dimmed but not hidden.</p>
+      </div>
+    </div>
+
+    <!-- A5 error / A6 LTR -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:28px">
+      <div>
+        <div class="cap">A5 · Error · partial failure, ledger intact</div>
+        <div class="ph">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span><span style="font-size:17px">◉</span><span style="font-size:17px">⋮</span></div>
+          <div style="background:#fff;border:2px solid #ae1800;margin:16px;padding:18px 16px">
+            <div style="font-size:15px;font-weight:600;color:#ae1800;margin-bottom:7px;line-height:1.5">⚠ تعذّر حساب أرصدة الحسابات</div>
+            <div style="font-size:12.5px;color:#575351;line-height:1.8;margin-bottom:8px">سجلك سليم ولم يتغيّر. لم تُحفظ أو تُحذف أي بيانات — المشكلة في القراءة فقط.</div>
+            <div style="font-size:11px;color:#575351;margin-bottom:14px" class="tnum">رمز الخطأ: DB-19-READ · 2026/07/25 11:52</div>
+            <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:13px;font-weight:600;padding:13px;display:flex;align-items:center;min-height:48px">إعادة المحاولة</span><span style="border:1px solid #201e1d;font-size:13px;font-weight:600;padding:13px;display:flex;align-items:center;min-height:48px">تفاصيل</span></div>
+          </div>
+          <div style="padding:0 16px 6px;font-size:11px;color:#575351;line-height:1.6">ما زال متاحًا بدون الأرصدة:</div>
+          <div style="height:2px;background:#201e1d;margin:0 16px"></div>
+          <div style="margin:0 16px;background:#fff;border:1px solid #c3bfbe;border-top:0">
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">بقالة — سوبر ماركت الفتح</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">مصروف ↑ · هناء · 14:20</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#ae1800">− 382.50</span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 14px"><span style="width:4px;align-self:stretch;background:#14555f;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">راتب شهر يوليو</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">دخل ↓ · بنك مصر</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#14555f">+ 18,400.00</span></div>
+          </div>
+          <div style="padding:16px;font-size:11px;color:#575351;line-height:1.65">تسجيل حركة جديدة يعمل بشكل طبيعي — الكتابة في السجل غير متأثرة.</div>
+          <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px;border-top:2px solid #201e1d">
+            <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;text-align:start">↑ مصروف</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">↓ دخل</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">⇄</span>
+          </div>
+          <div style="display:flex;background:#fff;border-top:2px solid #201e1d">
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;border-top:3px solid #201e1d">الرئيسية</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">الحركات</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">التخطيط</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">التقارير</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">المزيد</span>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>Partial, not total.</strong> A balance-query failure does not blank the screen: recent activity still renders, and entry still works, because writes and reads fail independently. The error answers "did it corrupt anything" in its second line, before the retry.</p>
+      </div>
+
+      <div>
+        <div class="cap">A6 · LTR check · English · privacy mode ON</div>
+        <div class="ph phl">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">Family money</span><span style="font-size:17px">◎</span><span style="font-size:17px">⋮</span></div>
+          <div style="background:#201e1d;color:#f0edeb;padding:16px 16px 20px">
+            <div style="font-size:12px;color:#a8a3a0;margin-bottom:7px">Available to spend</div>
+            <div style="display:flex;gap:6px;align-items:center"><span style="width:52px;height:30px;background:#f0edeb"></span><span style="width:40px;height:30px;background:#f0edeb"></span><span style="width:30px;height:30px;background:#f0edeb"></span></div>
+            <div style="font-size:12px;color:#a8a3a0;margin-top:7px">EGP · hidden · 4 accounts</div>
+            <div style="display:flex;margin-top:14px;border-top:1px solid #4a4645;padding-top:10px">
+              <div style="flex:1;border-inline-end:1px solid #4a4645"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:4px">US dollar</div><div style="display:flex;gap:4px"><span style="width:26px;height:15px;background:#f0edeb"></span><span style="width:18px;height:15px;background:#f0edeb"></span></div></div>
+              <div style="flex:1;padding-inline-start:12px"><div style="font-size:10.5px;color:#a8a3a0;margin-bottom:4px">Gold 21k</div><div style="display:flex;gap:4px;align-items:center"><span style="width:30px;height:15px;background:#f0edeb"></span><span style="font-size:10px;color:#a8a3a0">g</span></div></div>
+            </div>
+            <div style="height:2px;background:#8d8886;margin:12px 0 7px"></div>
+            <div style="font-size:10.5px;color:#a8a3a0;line-height:1.6">No combined total — each currency is independent</div>
+          </div>
+          <div style="background:#f8eeda;border-bottom:2px solid #201e1d">
+            <div style="padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8a5a00;border-bottom:1px solid #d8c396">Needs your attention (2)</div>
+            <div style="padding:11px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #d8c396"><span style="font-size:14px;color:#8a5a00">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">Transport: near limit · <span class="tnum">94%</span> used</span><span style="font-size:13px;color:#575351">›</span></div>
+            <div style="padding:11px 16px;display:flex;gap:10px;align-items:center"><span style="font-size:14px;color:#8a5a00">⚠</span><span style="flex:1;font-size:12.5px;line-height:1.55">Electricity bill due in 3 days</span><span style="font-size:13px;color:#575351">›</span></div>
+          </div>
+          <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Held — not spendable</span><span style="font-size:11px;color:#575351">3</span></div></div>
+          <div style="height:2px;background:#201e1d"></div>
+          <div style="background:#dedbda;border-bottom:2px solid #201e1d">
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#4a3e70 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:800;line-height:1.3">12-month certificate</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">Principal · matures 14 Mar 2027</span></span><span style="display:flex;gap:4px"><span style="width:28px;height:16px;background:#4a3e70"></span><span style="width:20px;height:16px;background:#4a3e70"></span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#2b5c8a 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:800;line-height:1.3">Yousuf's school fees</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">Reserved for goal · 68% · 12 days overdue</span></span><span style="display:flex;gap:4px"><span style="width:24px;height:16px;background:#2b5c8a"></span><span style="width:18px;height:16px;background:#2b5c8a"></span></span></div>
+            <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border:2px solid #6e4a1f;background:#f4ecdd"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:800;line-height:1.3">Yousuf's protected money</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">Protected · beneficiary Yousuf</span></span><span style="display:flex;gap:4px"><span style="width:22px;height:16px;background:#6e4a1f"></span><span style="width:16px;height:16px;background:#6e4a1f"></span></span></div>
+          </div>
+          <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px">
+            <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:800;padding:13px;text-align:left">↑ Expense</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:800;padding:13px">↓ Income</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:800;padding:13px">⇄</span>
+          </div>
+          <div style="display:flex;background:#fff;border-top:2px solid #201e1d">
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;border-top:3px solid #201e1d">Home</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Activity</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Planning</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Reports</span>
+            <span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">More</span>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>Two checks in one board.</strong> Mirroring: chevrons flip to <code>›</code>, the flush action label goes left, the section rule and leading edges swap side — but ↑/↓/⇄ do not flip, because they describe money leaving the household, not a screen direction. Privacy: bars keep each amount's exact layout width and its role colour, so the held region stays readable as held while every figure is gone. <code>sectionTitle</code> takes uppercase and tracking here and does not in Arabic.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ B. EXPENSE ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">B</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Expense entry — pad → expanded → review → saved</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:900px;margin:0 0 26px"><strong>What it solves.</strong> Audit problem 3. Replaces a 575-line equal-weight form. Three taps for the common case, no mode switch for the full one, and a natural-language read-back instead of a table of labelled rows.</p>
+
+  <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+    <!-- B1 pad -->
+    <div style="flex:none">
+      <div class="cap">B1 · Pad open · 2 of 3 taps done</div>
+      <div class="ph" style="background:#201e1d">
+        <div style="height:64px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:20px;font-weight:600">مصروف جديد</span><span style="font-size:16px;color:#575351">✕</span></div>
+          <div style="padding:14px 16px 0">
+            <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #201e1d;padding-bottom:7px"><span class="tnum" style="font-size:32px;font-weight:600">382.50<span style="opacity:.35;font-weight:400">|</span></span><span style="font-size:12px;color:#575351">ج.م</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">من <strong style="color:#201e1d">محفظة نقدية شخصية</strong> · اليوم 2026/07/25 · المنفق أحمد · نطاق الأسرة</div>
+          </div>
+          <div style="padding:14px 16px 0">
+            <div style="font-size:11px;color:#575351;margin-bottom:7px">تكرار سريع</div>
+            <div style="display:flex;gap:7px">
+              <span style="flex:none;border:1px solid #201e1d;background:#fff;font-size:12.5px;padding:9px 12px;line-height:1.4">بقالة · محفظتي</span>
+              <span style="flex:none;border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;line-height:1.4">مواصلات · محفظتي</span>
+              <span style="flex:none;border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;line-height:1.4">هناء · بنك مصر</span>
+            </div>
+          </div>
+          <div style="padding:14px 16px 0">
+            <div style="font-size:11px;color:#575351;margin-bottom:7px">الفئة</div>
+            <div style="display:flex;gap:7px">
+              <span style="flex:none;background:#201e1d;color:#f3f2f2;font-size:13px;padding:10px 13px;display:flex;align-items:center;gap:5px;min-height:44px">✓ بقالة</span>
+              <span style="flex:none;border:1px solid #c3bfbe;background:#fff;font-size:13px;padding:10px 13px;min-height:44px;display:flex;align-items:center">مواصلات</span>
+              <span style="flex:none;border:1px solid #c3bfbe;background:#fff;font-size:13px;padding:10px 13px;min-height:44px;display:flex;align-items:center">فواتير</span>
+              <span style="flex:none;border:1px solid #c3bfbe;background:#fff;font-size:13px;padding:10px 13px;min-height:44px;display:flex;align-items:center;color:#575351">صحة</span>
+            </div>
+          </div>
+          <div style="padding:14px 16px 0"><div style="border-top:1px solid #c3bfbe;padding-top:11px;display:flex;justify-content:space-between;align-items:center;min-height:48px"><span style="font-size:12.5px;color:#575351;line-height:1.6">تفاصيل أكثر — المنفق، المستفيد، النطاق، ملاحظات، إيصال، تكرار</span><span style="font-size:15px;color:#575351">⌃</span></div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#c3bfbe;margin:12px 8px 0">
+            <span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">1</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">2</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">3</span><span style="background:#eae9e9;padding:15px 0;text-align:center;font-size:16px;color:#575351">⌫</span>
+            <span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">4</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">5</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">6</span><span style="background:#eae9e9;padding:15px 0;text-align:center;font-size:16px;color:#575351">⌨</span>
+            <span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">7</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">8</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">9</span><span style="background:#eae9e9;padding:15px 0;text-align:center;color:#575351;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 10v1a7 7 0 0 0 14 0v-1"></path><path d="M12 19v3"></path></svg></span>
+            <span class="tnum" style="background:#eae9e9;padding:15px 0;text-align:center;font-size:20px;font-weight:600">00</span><span class="tnum" style="background:#fff;padding:15px 0;text-align:center;font-size:20px;font-weight:600">0</span><span class="tnum" style="background:#eae9e9;padding:15px 0;text-align:center;font-size:20px;font-weight:600">.</span><span style="background:#eae9e9;padding:15px 0;text-align:center;color:#575351;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13.5" r="3"></circle></svg></span>
+          </div>
+          <div style="padding:14px 16px 16px;margin-top:12px;border-top:2px solid #201e1d;background:#fff">
+            <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">حفظ المصروف</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">مراجعة</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.65;margin-top:7px">سيُسجَّل في السجل ولا يمكن حذفه — يمكن عكسه لاحقًا.</div>
+          </div>
+        </div>
+      </div>
+      <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>Every default is printed, not hidden.</strong> The meta line under the amount states account, date, spender and scope; tapping any word in it opens that one picker. The three utility keys down the trailing column are, top to bottom: system keyboard for users who prefer it, Arabic voice entry (Tier&nbsp;3), and receipt capture without leaving the pad.</p>
+    </div>
+
+    <!-- B2 expanded -->
+    <div style="flex:none">
+      <div class="cap">B2 · Dragged up · full field set · one field in error</div>
+      <div class="ph" style="background:#201e1d">
+        <div style="height:22px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:20px;font-weight:600">مصروف جديد</span><span style="font-size:16px;color:#575351">✕</span></div>
+          <div style="padding:14px 16px 14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #201e1d;padding-bottom:7px"><span class="tnum" style="font-size:32px;font-weight:600">382.50</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+          </div>
+          <div style="background:#fff;border-top:1px solid #c3bfbe">
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">من حساب</div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span style="font-size:14px;font-weight:600">محفظة نقدية شخصية <span class="tnum" style="font-size:11px;color:#575351;font-weight:400">· 1,845.00 ج.م</span></span><span style="color:#575351">▾</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">الفئة</div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span style="font-size:14px;font-weight:600">بقالة</span><span style="color:#575351">▾</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">التاريخ</div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span class="tnum" style="font-size:14px;font-weight:600">2026/07/25</span><span style="color:#575351">▾</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">المنفق</div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span style="font-size:14px;font-weight:600">هناء عبد الرحمن</span><span style="color:#575351">▾</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">المستفيد <span style="color:#9b9797">— اختياري</span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span style="font-size:14px;color:#9b9797">لا أحد بالتحديد</span><span style="color:#575351">▾</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:6px">النطاق</div><div style="display:flex;border:1px solid #201e1d;width:fit-content"><span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">الأسرة</span><span style="font-size:12.5px;padding:9px 12px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">شخصي</span><span style="font-size:12.5px;padding:9px 12px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">الزوجة</span><span style="font-size:12.5px;padding:9px 12px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">الطفل</span></div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe;background:#f8eeda"><div style="font-size:12px;color:#575351;margin-bottom:5px">ملاحظات</div><div style="border-bottom:2px solid #8a5a00;padding-bottom:5px;min-height:36px;font-size:14px;color:#9b9797">…</div><div style="font-size:12px;color:#8a5a00;line-height:1.6;margin-top:6px">المنفق هناء والحساب باسمك — ملاحظة قصيرة تسهّل المراجعة بعدين (اختياري)</div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">إيصال</div><div style="display:flex;gap:8px;align-items:center;min-height:36px"><span style="border:1px solid #c3bfbe;padding:8px 12px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13.5" r="3"></circle></svg>صورة</span><span style="font-size:11px;color:#575351">لا يوجد مرفق</span></div></div>
+            <div style="padding:11px 16px"><div style="font-size:12px;color:#575351;margin-bottom:5px">تكرار</div><div style="display:flex;justify-content:space-between;align-items:center;min-height:36px"><span style="font-size:14px;font-weight:600">لا يتكرر</span><span style="color:#575351">▾</span></div></div>
+          </div>
+          <div style="padding:14px 16px 16px;border-top:2px solid #201e1d;background:#fff">
+            <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">حفظ المصروف</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">مراجعة</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.65;margin-top:7px">سيُسجَّل في السجل ولا يمكن حذفه — يمكن عكسه لاحقًا.</div>
+          </div>
+        </div>
+      </div>
+      <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>The pad is gone, nothing else changed.</strong> Same sheet, same amount at the top, same save button — a drag, not a navigation.</p>
+      <div style="width:390px;margin-top:10px;background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:12px 14px">
+        <p style="font-size:12px;line-height:1.6;margin:0"><strong>Changed from turn 1.</strong> This board previously <em>blocked</em> save until a note was written whenever the spender wasn't the account owner. That rule was mine, not the product's, and it taxed Ahmad's single most common entry — Hana spending from a wallet in his name — which defeats the three-tap goal. It is now a <strong>non-blocking hint</strong> in <code>warning</code>: same nudge, no toll.</p>
+      </div>
+      <div style="width:390px;margin-top:10px;background:#fff;border:1px solid #c3bfbe;padding:12px 14px">
+        <div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:8px">Disabled-primary pattern, kept as spec</div>
+        <div dir="rtl" style="font-family:var(--ar);display:flex;gap:8px;margin-bottom:7px"><span style="flex:1;background:#dedbda;color:#9b9797;font-size:13px;font-weight:600;padding:12px;display:flex;align-items:center;min-height:48px">حفظ المصروف</span><span style="border:1px solid #201e1d;font-size:13px;font-weight:600;padding:12px;display:flex;align-items:center;min-height:48px">مراجعة</span></div>
+        <div dir="rtl" style="font-family:var(--ar);font-size:11px;color:#ae1800;line-height:1.6">أدخل مبلغًا أكبر من صفر</div>
+        <p style="font-size:11.5px;line-height:1.55;color:#575351;margin:9px 0 0">A disabled primary <strong>always</strong> carries a reason line — <code>disabled</code> is 2.6:1 and cannot mean anything on its own. The only genuine blockers in this flow are a zero amount and no selected account.</p>
+      </div>
+    </div>
+
+    <!-- B3 review + saved -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:28px">
+      <div>
+        <div class="cap">B3 · Review · optional, reached from "مراجعة"</div>
+        <div class="ph">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مراجعة المصروف</span></div>
+          <div style="background:#fff;padding:18px 16px;border-bottom:2px solid #201e1d">
+            <div style="font-size:17px;line-height:2;font-weight:400">صرفت <span class="tnum" style="font-weight:600">382.50</span> <span style="font-size:12px;color:#575351">ج.م</span> على <strong>بقالة</strong> من <strong>محفظة نقدية شخصية</strong> — أنفقتها <strong>هناء</strong> لحساب <strong>الأسرة</strong>.</div>
+          </div>
+          <div style="background:#fff;border-bottom:2px solid #201e1d">
+            <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#eae9e9;border-bottom:1px solid #c3bfbe">أثر هذه الحركة على السجل</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:44px"><span style="font-size:13px;color:#575351">مدين — مصروف بقالة</span><span class="tnum" style="font-size:16px;font-weight:600;color:#ae1800">↑ − 382.50</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:44px"><span style="font-size:13px;color:#575351">دائن — محفظة نقدية شخصية</span><span class="tnum" style="font-size:16px;font-weight:600">382.50</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:2px solid #201e1d;min-height:44px"><span style="font-size:13px;font-weight:700">رصيد المحفظة بعد الحفظ</span><span class="tnum" style="font-size:20px;font-weight:700">1,462.50</span></div>
+          </div>
+          <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:12px 16px;margin:16px 16px 0"><div style="font-size:12.5px;line-height:1.7">تُخصم من <strong>ميزانية بقالة</strong> — تصبح <span class="tnum">2,792.50</span> من <span class="tnum">3,500.00</span> · <span class="tnum">79٪ مُستخدم</span> · في المسار الصحيح.</div></div>
+          <div style="padding:16px">
+            <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">تأكيد وحفظ</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">تعديل</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.65;margin-top:8px">بعد الحفظ لا يمكن الحذف — التصحيح يكون بحركة عكسية تبقى في السجل.</div>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>The read-back is the check.</strong> One Arabic sentence catches "wrong account" and "wrong spender" faster than six labelled rows — that is the idea salvaged from direction 1d. The ledger entries appear <em>below</em> it, for the user who wants to see the double entry.</p>
+      </div>
+
+      <div>
+        <div class="cap">B4 · Saved · confirmation, with the one honest undo</div>
+        <div class="ph" style="background:#f3f2f2">
+          <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#201e1d;color:#f0edeb"><span style="flex:1;font-size:18px;font-weight:600">أموال الأسرة</span><span style="font-size:17px">◉</span><span style="font-size:17px">⋮</span></div>
+          <div style="background:#201e1d;color:#f0edeb;padding:16px 16px 20px">
+            <div style="font-size:12px;color:#a8a3a0;margin-bottom:5px">يمكنك صرف الآن</div>
+            <div class="tnum" style="font-size:44px;font-weight:700;line-height:1.05">32,104.25</div>
+            <div style="font-size:12px;color:#a8a3a0;margin-top:4px">جنيه مصري · من 4 حسابات</div>
+          </div>
+          <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+            <div style="display:flex;align-items:center;gap:11px"><span style="width:4px;align-self:stretch;background:#ae1800;flex:none;min-height:40px"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">بقالة — محفظة نقدية شخصية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.55">مصروف ↑ · هناء · الآن</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#ae1800">− 382.50</span></div>
+          </div>
+          <div style="background:#201e1d;color:#f0edeb;margin:0;padding:14px 16px;border-bottom:2px solid #201e1d">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:16px;color:#63bc94;flex:none">✓</span>
+              <div style="flex:1">
+                <div style="font-size:13.5px;line-height:1.7;margin-bottom:8px">تم الحفظ — صرفت <span class="tnum" style="font-weight:600">382.50</span> ج.م على بقالة من محفظتك.</div>
+                <div style="display:flex;gap:14px;align-items:center"><span style="font-size:12.5px;font-weight:600;border-bottom:1px solid #f0edeb;padding-bottom:1px">عرض الحركة</span><span style="font-size:12.5px;font-weight:600;border-bottom:1px solid #ff9783;color:#ff9783;padding-bottom:1px">أضف حركة عكسية</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:16px;font-size:11.5px;color:#575351;line-height:1.7;background:#eae9e9;border-bottom:2px solid #201e1d">لا يوجد "تراجع". الحركة مسجَّلة بشكل دائم — والتصحيح الصحيح هو حركة عكسية تبقى ظاهرة في السجل، ودي بالظبط اللي الزر بيعملها.</div>
+          <div style="background:#201e1d;padding:12px 16px;display:flex;gap:8px">
+            <span style="flex:1;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;text-align:start">↑ مصروف</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">↓ دخل</span>
+            <span style="flex:none;border:1px solid #6b6766;color:#f0edeb;font-size:13px;font-weight:600;padding:13px">⇄</span>
+          </div>
+        </div>
+        <p style="width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0"><strong>The snackbar tells the truth about undo.</strong> An append-only ledger cannot offer "undo" — so the affordance is labelled "add a reversing entry" from the first second, and the explanatory line stays. Medium haptic, 220&nbsp;ms stroke-drawn tick, no confetti. The hero updates without animating the number.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:34px 56px 48px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:48px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff">Next: the remaining Tier 1</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6">
+        <strong style="color:#ff9783">Turn 2</strong><span>Transaction list with filter + search, transaction detail showing its ledger entries and reversal lineage, and the reversal flow itself. Nine artboards.</span>
+        <strong style="color:#ff9783">Turn 3</strong><span>Transfer entry including spouse give / return and the optional fee, account detail across all six account classes, and the child-protected withdrawal in full.</span>
+        <strong style="color:#ff9783">Then</strong><span>Tier&nbsp;2 · Tier&nbsp;3 patterns · D4 route map for all 43 screens · D5 adaptive · D6 migration.</span>
+      </div>
+    </div>
+    <div>
+      <h6 style="color:#ff9783;margin-bottom:10px">Assumptions in these ten boards</h6>
+      <ol style="margin:0;padding-inline-start:20px;font-size:12.5px;line-height:1.7;color:#e8e4e2">
+        <li><strong>Resolved:</strong> the quiet strip is now labelled <strong>"إجمالي الأصول"</strong> (total assets) with "بدون خصم ديون" beneath it, not "net worth". Net worth is assets − liabilities and liabilities don't exist yet, so calling this net worth would have been the exact kind of number the ledger can't back. Renaming it costs nothing and makes it true today.</li>
+        <li>Repeat tiles are derived from recent transactions, not a new saved-template entity.</li>
+        <li><strong>Withdrawn.</strong> The "note required when the spender isn't the account owner" rule was mine, not the product's. It is now a non-blocking hint — see the amended B2 note.</li>
+        <li>Budget consumption is previewed on the review screen. That requires a budget lookup during entry — a provider read, not a write.</li>
+        <li>The gold row shows quantity only on the dashboard; its EGP estimate lives on the account detail, so no market price appears next to ledger figures.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

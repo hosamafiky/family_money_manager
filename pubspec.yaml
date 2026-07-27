@@ -4,7 +4,8 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.12.2 <4.0.0"
+  # sdk: ">=3.12.2 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
   drift: ^2.34.2
@@ -48,3 +49,6 @@ hooks:
   user_defines:
     sqlite3:
       source: sqlite3mc
+
+dependency_overrides:
+  meta: ^1.17.0

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.rw{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:44px;align-items:center}
+.fl{padding:12px 16px;border-bottom:1px solid #c3bfbe;background:#fff}
+.fll{font-size:12px;color:#575351;margin-bottom:5px}
+.fli{border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:15px;min-height:34px;display:flex;justify-content:space-between;align-items:baseline}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btnD{background:#c3bfbe;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.hcert{background:repeating-linear-gradient(45deg,#4a3e70 0 3px,transparent 3px 7px)}
+.hcertD{background:repeating-linear-gradient(45deg,#a99bd6 0 3px,transparent 3px 7px)}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 3 — certificates</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">The escape hatch you<br>already used up.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:860px;margin:0;color:#575351">Eleven boards — sections P to T. I read <code>certificate.dart</code>, all four presentation screens, <code>account_eligibility.dart</code> and every <code>certificate*</code> value in both ARB files before drawing anything. Six corrections, and one of them reaches back into <strong style="color:#201e1d">05 · Tier 1</strong>: the certificate board there offers «إلغاء الشراء», and for this fixture that operation is already impossible. Every Arabic string below is either a quoted ARB value or marked <strong style="color:#201e1d">◂ proposed</strong>.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Six corrections, two of them mine</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CORRECTION 1 · reaches back into 05 · F2</div>
+      <h4 style="margin:0 0 10px">«إلغاء الشراء» cannot be offered on this certificate. Profit has already been recorded.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>errorCertificateReversalNotAllowedAfterHistory</code> reads, verbatim: <em>«لا يمكن عكس الشراء بعد تسجيل عائد أو استرداد»</em>. Our fixture has <strong class="tnum">2,394.50</strong> of collected profit, so the purchase reversal is closed off — and 05 · F2 draws it as an available third action with an explanation beneath it.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">This matters beyond one button. §8.6 of the handoff calls purchase reversal <em>"the escape hatch"</em> for a certificate with no early redemption. The escape hatch <strong>expires on the first profit receipt</strong>. Between purchase and first profit the certificate can be undone; after it, the money is committed until maturity with no in-app exit at all. That is the honest shape of the feature, and the account board must say so rather than offering the action.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CORRECTION 2 · mine · affects the goals document</div>
+      <h4 style="margin:0 0 10px">I broke the one-fixture rule in the goals boards. Three invented goals where the fixture has one.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">07 · L2 establishes it: <strong>«مصاريف مدرسة يوسف»</strong>, reserve <strong class="tnum">13,600.00</strong> of <span class="tnum">13,000.00</span>, <span class="tnum">104٪</span>, overfunded by <span class="tnum">600.00</span>, target date <span class="tnum">2026/07/13</span> (12 days past), beneficiary <strong>يوسف أحمد</strong>, four movements, two fundings of <span class="tnum">3,400.00</span> from بنك مصر. Plus <strong>«تجديد المطبخ»</strong> at <span class="tnum">0.00</span> of <span class="tnum">40,000.00</span> in L3.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">My goals document split the same <span class="tnum">13,600.00</span> across two invented goals and added two more. It also asked whether «المستفيد» should be rendered — 07 · L2 <strong>already renders it</strong>, so that question was answered before I asked it. Both are fixed in the next turn, on these numbers.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">The goals findings from source stand unchanged: purpose is localised, creation takes optional initial funding, the orphaned status key, the percent format.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #c3bfbe;margin-top:4px">
+    <div style="padding:20px 24px 4px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CORRECTION 3 · third occurrence of one bug</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Certificate <em>creation</em> and certificate <em>redemption</em> both map <code>AppInsufficientFunds</code> to <code>errorGoalInsufficientReserve</code> — <em>«رصيد احتياطي الهدف غير كافٍ»</em>. A <strong>goal</strong> string, in the certificate flow, naming an account that is not involved.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Goal creation has the same line. Three sites, one cause: there is no per-feature insufficient-funds message. One new key, parameterised by account name, retires all three.</p>
+    </div>
+    <div style="padding:20px 24px 4px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CORRECTION 4 · state values used as field labels</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">The detail screen labels its lifecycle row with <code>certificateLifecycleActive</code> («نشطة») and its term row with <code>certificateTermActive</code> («ضمن المدة») — the <em>values</em> of those fields, used as their names. And the events list is headed <code>certificatesTitle</code> («الشهادات»).</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Three wrong keys on one screen, plus two hardcoded English strings — <code>'Certificate not found'</code> and <code>'Error'</code> — that never reach the ARB at all. R1 proposes the four labels it needs.</p>
+    </div>
+    <div style="padding:20px 0 4px 24px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">CORRECTIONS 5 &amp; 6 · deliberate, keep them</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><strong><code>certificateRedeemProfitOnly</code> is orphaned.</strong> <code>_RedeemMode</code> has only <code>principalOnly</code> and <code>combined</code>; profit-only receipts go to the profit screen, which the redemption screen even links to. Second orphan of the same shape as <code>goalStatusTargetReached</code> — delete both in the same ARB pass.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong><code>canRecordProfit</code> is <code>lifecycle != archived</code></strong> — so profit can be recorded against an already-<em>redeemed</em> certificate, and the detail screen offers it. That is correct: a bank can pay a final coupon after the principal has landed. S1 depicts it instead of hiding it.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:38px 56px;border-bottom:2px solid #201e1d;background:#e6eef6">
+  <h3 style="margin:0 0 8px;font-size:19px;letter-spacing:-.01em">The fixture, from 05 · F2 — one certificate, unchanged</h3>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid #201e1d;font-size:13px;line-height:1.7">
+    <div style="padding:14px 20px 14px 0;border-inline-end:1px solid #c3bfbe"><strong>شهادة استثمار 12 شهرًا</strong><br><span style="color:#575351">بنك مصر · الأصل <span class="tnum">47,900.00</span> ج.م</span></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe"><strong class="tnum">2026/03/14 → 2027/03/14</strong><br><span style="color:#575351">ضمن المدة · مرّ <span class="tnum">134</span> يومًا، باقي <span class="tnum">231</span></span></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe"><strong class="tnum">19.00%</strong> — بيانات فقط<br><span style="color:#575351">دورية شهرية · مفيش استحقاق تلقائي</span></div>
+    <div style="padding:14px 0 14px 20px"><strong class="tnum">2,394.50</strong> عائد محصّل<br><span style="color:#575351"><span class="tnum">798.50</span> + <span class="tnum">798.00</span> + <span class="tnum">798.00</span> — أبريل، مايو، يونيو</span></div>
+  </div>
+  <p style="font-size:12.5px;line-height:1.7;color:#575351;margin:14px 0 0;max-width:1000px"><strong style="color:#ae1800">One number in 05 is off by a day and is corrected here.</strong> F2 prints «باقي <span class="tnum">232</span> يومًا»; <span class="tnum">2026/03/14</span> to <span class="tnum">2027/03/14</span> is <span class="tnum">365</span> days, and as of <span class="tnum">2026/07/26</span> exactly <span class="tnum">134</span> have elapsed, so <span class="tnum">231</span> remain and the term is <span class="tnum">36٪</span> gone — truncated, like <code>percentageUsed</code> and <code>goalPercent</code>. Every board below uses <span class="tnum">231</span> and <span class="tnum">36٪</span>. Three receipts sum exactly to the total 05 prints, so the log is checkable rather than decorative. <strong style="color:#201e1d">S1 records the fourth</strong> — July's <span class="tnum">798.50</span>, paid late on <span class="tnum">2026/07/26</span> — which takes collected profit to <span class="tnum">3,193.00</span>. That <em>extends</em> 05 rather than contradicting it, and the board says so on its face. <strong style="color:#201e1d">T1 and T2 are dated <span class="tnum">2027/03/14</span></strong>: the same certificate at maturity, not a second one. No projected account balance is printed on them — a future balance would be an invention, and the whole point of this product is that balances are derived.</p>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">P</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Certificates list — five boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:860px;margin:0 0 26px">The shipped list is a <code>Card</code> + <code>ListTile</code> with a coloured <code>CircleAvatar</code>, a green/blue/grey lifecycle pill, and three unlabelled subtitle lines. It also carries <strong>both</strong> an app-bar «+» and an extended FAB for the same action. The redesign keeps the two vocabularies it got right — lifecycle and term state — and fixes what the audit flagged: principal is held money and the list never said so.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">P1 · Populated · light · RTL — one certificate, two vocabularies</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الشهادات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:7px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>الأصل · غير قابل للصرف ◂</span>
+          </div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.22">47,900.00 <span style="font-size:14px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:5px">نقل الأصل إلى شهادة ليس مصروفاً. الفلوس دي في إجمالي الأصول، مش في المتاح للصرف. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe">شهادة واحدة ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;line-height:1.45">شهادة استثمار 12 شهرًا</div>
+            <div style="font-size:11.5px;color:#575351;line-height:1.6">بنك مصر · المرجع <span class="tnum">CD-4471</span> ◂</div></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#eae9e9;font-size:11px;padding:4px 9px">الحالة: نشطة ◂</span>
+            <span style="background:#ece9f4;color:#4a3e70;font-size:11px;font-weight:600;padding:4px 9px">المدة: ضمن المدة ◂</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:36%;background:#201e1d"></span>
+            <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:36%;width:64%;background-color:#ece9f4"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#575351"><span>الأصل <span class="tnum">47,900.00</span> · رصيد الأصل <span class="tnum">47,900.00</span></span><span>مرّ <span class="tnum">36٪</span> من المدة ◂</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:3px">تاريخ الاستحقاق <span class="tnum">2027/03/14</span> · باقي <span class="tnum">231</span> يومًا ◂</div>
+          <div style="height:1px;background:#c3bfbe;margin:11px 0"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11.5px;color:#575351">العائد المحصّل — دخل ◂</span><span class="tnum" style="font-size:16px;font-weight:600;color:#14555f">+ 2,394.50</span></div>
+        </div>
+        <div style="padding:16px"><span class="btn">شهادة جديدة</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">زر واحد مثبّت — الشاشة الحالية فيها «+» في الشريط <em>و</em> FAB ممتد لنفس الفعل. ◂</div>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>Two vocabularies, labelled as such.</strong> <code>CertificateLifecycle</code> persists three values; <code>CertificateTermState</code> derives five and is <em>never</em> written to the row. The shipped list prints them as an unlabelled pill plus a 10&nbsp;px grey line, which reads as one status in two sizes. Prefixing «الحالة» and «المدة» costs two proposed keys and makes the pair legible — the same fix as the goal badges, so the two Tier 2 lists now behave identically. <strong>The term bar is elapsed time, not money</strong> — it fills with ink like every other meter, and the remainder is a <code>certificatePrincipal</code> hatch, because a certificate's progress is a calendar, not a balance.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">P2 · Empty · first day · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الشهادات</span></div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:20px 16px 22px">
+          <div style="font-size:15.5px;font-weight:600;line-height:1.6;margin-bottom:12px">لا توجد شهادات حتى الآن. أضف واحدة لتتبع ودائعك لأجل.</div>
+          <div style="height:1px;background:#c3bfbe;margin:14px 0"></div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">الشهادة بتنقل أصل من حساب متاح لحساب شهادة مخصص. ده تحويل داخلي — الأصل بيخرج من المتاح للصرف ويفضل في إجمالي الأصول. ◂</div>
+          <div style="height:1px;background:#c3bfbe;margin:14px 0"></div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">العائد بيتسجّل يدويًا وقت ما البنك يصرفه — التطبيق مش بيحسب فوائد ولا بيزوّد الرصيد لوحده. ◂</div>
+        </div>
+        <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">قبل ما تبدأ ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.8">مفيش استرداد مبكر. بعد أول عائد بتسجّله، مفيش إلغاء شراء كمان — الأصل بيفضل محبوس لحد تاريخ الاستحقاق. ◂</div>
+        </div>
+        <div style="padding:0 16px 16px"><span class="btn">شهادة جديدة</span></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>The empty state is where the commitment gets disclosed.</strong> <code>certificateEmpty</code> ships and is used verbatim as the first line, but on its own it sells a feature without naming its cost. Two sentences of Egyptian explanation and one amber notice carry what §8.6 and correction&nbsp;1 establish: no accrual, no early redemption, and <em>no purchase reversal after the first profit</em>. Saying it here is cheaper than saying it in a dialog eleven months later.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">P3 · Loading skeleton · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الشهادات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="width:170px;height:12px;background:rgba(0,0,0,.09);margin-bottom:12px"></div>
+          <div style="width:225px;height:38px;background:rgba(0,0,0,.09)"></div>
+          <div style="width:280px;height:11px;background:rgba(0,0,0,.07);margin-top:9px"></div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;border-bottom:1px solid #c3bfbe"><div style="width:92px;height:12px;background:rgba(0,0,0,.09)"></div></div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;opacity:.45"></span>
+          <div style="width:180px;height:16px;background:#eae9e9;margin-bottom:7px"></div>
+          <div style="width:120px;height:11px;background:#eae9e9;margin-bottom:12px"></div>
+          <div style="display:flex;gap:6px;margin-bottom:13px"><div style="width:74px;height:19px;background:#eae9e9"></div><div style="width:96px;height:19px;background:#eae9e9"></div></div>
+          <div style="height:8px;background:#eae9e9;margin-bottom:9px"></div>
+          <div style="width:250px;height:11px;background:#eae9e9;margin-bottom:6px"></div>
+          <div style="width:190px;height:11px;background:#eae9e9"></div>
+          <div style="height:1px;background:#c3bfbe;margin:11px 0"></div>
+          <div style="display:flex;justify-content:space-between"><div style="width:110px;height:11px;background:#eae9e9"></div><div style="width:78px;height:16px;background:#eae9e9"></div></div>
+        </div>
+        <div style="padding:14px 16px;font-size:12px;color:#575351;line-height:1.7">جارٍ التحميل...
+          <div style="font-family:'Archivo',sans-serif;direction:ltr;text-align:start;font-size:10.5px;color:#9b9797;margin-top:5px;line-height:1.55">aria-live=polite · the shipped screen shows a centred spinner; this geometry matches P1 row for row, so the 150&nbsp;ms cross-fade moves nothing</div>
+        </div>
+        <div style="padding:0 16px 16px"><span class="btnD">شهادة جديدة</span><div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">معطّل ◂: الإنشاء محتاج قائمة حسابات مقروءة عشان يفلتر مصادر التمويل.</div></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>Skeletons, not spinners</strong> — and the held region is skeletonised <em>as a region</em>: the recessed fill, the 2&nbsp;px rules and the hatched edge are painted before any number arrives, because they are layout facts, not data. A user who glances at a loading certificates screen still learns that whatever is coming is money they cannot spend.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">P4 · Error · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الشهادات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fdeae6;border-bottom:2px solid #ae1800;padding:16px">
+          <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:9px"><span style="color:#ae1800;font-size:14px">▲</span><span style="font-size:15.5px;font-weight:600;color:#ae1800">مش قادرين نقرا الشهادات ◂</span></div>
+          <div style="font-size:14px;line-height:1.9"><strong>مفيش حاجة اتغيرت في السجل.</strong> ده خطأ قراءة — الأصل والعائد المسجّل زي ما هما، وما فيش أي رصيد اتعدّل. ◂</div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:10px">الأصل مش معروض عشان مش مقروء دلوقتي — مش عشان بصفر. ◂</div>
+          <div style="display:flex;gap:9px;margin-top:14px"><span class="btn" style="flex:1">إعادة المحاولة</span><span class="btn2" style="flex:1">تفاصيل الخطأ ◂</span></div>
+        </div>
+        <div style="padding:15px 16px 16px"><span class="btnD">شهادة جديدة</span></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>«مفيش حاجة اتغيرت في السجل» comes first, every time.</strong> In a ledger the user's first question on an error is never <em>why</em> — it is <em>did this corrupt anything</em>. A certificate read failure is the sharpest case: the amount at stake is the household's largest single figure, so an unexplained blank where <span class="tnum">47,900.00</span> was is read as loss, not as a network timeout. The shipped screen shows <code>errorGeneric</code> alone; §4's rule — state what happened to the data <em>before</em> offering retry — makes this a new key rather than a rewording. The detail screen is worse: <code>'Certificate not found'</code> and <code>'Error'</code> are hardcoded English and never reach the ARB. <strong>Every line of commentary lives here, not in the frame:</strong> a designer note rendered inside a phone frame is neither source copy nor proposed copy, so it would sit outside the provenance rule.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">P5 · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Certificates</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:.02em;margin-bottom:9px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>PRINCIPAL · NOT SPENDABLE ◂</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px"><span style="display:inline-flex;gap:6px"><span style="display:inline-block;width:34px;height:26px;background:#201e1d"></span><span style="display:inline-block;width:48px;height:26px;background:#201e1d"></span><span style="display:inline-block;width:34px;height:26px;background:#201e1d"></span></span><span style="font-size:14px;font-weight:600;color:#575351">EGP</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.55;margin-top:8px">Masking removes the digits — not the region, the rule, the hatch or the label.</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">ONE CERTIFICATE ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;line-height:1.3;letter-spacing:-.01em">12-month investment certificate</div>
+            <div style="font-size:11px;color:#575351;line-height:1.5;margin-top:2px">Banque Misr · Ref. <span class="tnum">CD-4471</span> ◂</div></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#eae9e9;font-size:11px;font-weight:600;letter-spacing:.02em;padding:4px 9px">STATUS: ACTIVE ◂</span>
+            <span style="background:#ece9f4;color:#4a3e70;font-size:11px;font-weight:600;letter-spacing:.02em;padding:4px 9px">TERM: ACTIVE TERM ◂</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:36%;background:#201e1d"></span>
+            <span class="hcert" style="position:absolute;inset-block:0;inset-inline-start:36%;width:64%;background-color:#ece9f4"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351"><span>Principal <span style="display:inline-flex;gap:4px"><span style="display:inline-block;width:16px;height:9px;background:#575351"></span><span style="display:inline-block;width:23px;height:9px;background:#575351"></span><span style="display:inline-block;width:16px;height:9px;background:#575351"></span></span> · Principal balance <span style="display:inline-flex;gap:4px"><span style="display:inline-block;width:16px;height:9px;background:#575351"></span><span style="display:inline-block;width:23px;height:9px;background:#575351"></span><span style="display:inline-block;width:16px;height:9px;background:#575351"></span></span></span><span><span class="tnum">36%</span> of term elapsed ◂</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.55;margin-top:3px">Maturity date 14 Mar 2027 · <span class="tnum">231</span> days left ◂</div>
+          <div style="height:1px;background:#c3bfbe;margin:11px 0"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:11px;color:#575351">Profit collected — income ◂</span><span style="display:inline-flex;gap:6px;align-items:baseline"><span style="font-size:13px;font-weight:600;color:#14555f">+</span><span style="display:inline-block;width:40px;height:12px;background:#14555f"></span><span style="display:inline-block;width:26px;height:12px;background:#14555f"></span></span></div>
+        </div>
+        <div style="padding:14px 16px;font-size:11px;color:#575351;line-height:1.6">The term bar is <strong style="font-weight:600">not</strong> masked. It measures a calendar, not an amount — and dates are already printed in full above it, so hiding the bar would conceal nothing and lose the one signal that survives masking.</div>
+        <div style="padding:0 16px 16px"><span class="btn" style="font-family:'Archivo',sans-serif;font-weight:800">New Certificate</span>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:8px">Label flush to the leading edge — left here, right in RTL. The noun is source copy; see Q2.</div>
+        </div>
+        <div class="nav"><span>Home</span><span>Activity ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">Planning</span><span>Debts ◂</span><span>More</span></div>
+      </div>
+      <p class="note"><strong>The privacy contract, proved on the largest figure in the product.</strong> Every amount becomes an ink bar per digit group at 0.62&nbsp;em, keeping its currency code and its layout width; the held region keeps its recessed fill, its 2&nbsp;px rules, its hatched edge and «PRINCIPAL · NOT SPENDABLE». A masked certificates screen still answers <em>can I spend this</em> — which is the whole test. <strong>Digit groups are the point:</strong> <span class="tnum">47,900.00</span> is three groups and masks as three bars, so the reader keeps the magnitude the contract deliberately preserves and loses only the digits. One long bar would hide how many digits there are, which is more than the rule asks for. <strong>Two masking decisions worth stating:</strong> the collected-profit bars stay <code>income</code>-tinted and keep the <code>+</code>, because direction is not a secret and the sign and colour are the accessible half of the row; and the term progress bar is not masked at all, since it encodes elapsed days. <strong>The LTR check also catches the term prefixes</strong> — «الحالة» / «المدة» become STATUS / TERM in the same small-caps treatment 03 · A6 uses, so the two proposed keys need both locales, not just an Arabic string.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">Q</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Creation and review — two boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:860px;margin:0 0 26px">Nine fields and a mandatory funding source. This is the only place a certificate is ever funded — <code>CertificatePurchaseFunding</code> is documented as <em>"required principal purchase during certificate creation"</em>, and there is no top-up operation anywhere in the feature. So the form is not a form: it is a purchase, and the review step that already exists in source is the right place to say what the ledger will record.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">Q1 · Creation · funding source chosen · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">شهادة جديدة</span></div>
+        <div style="padding:14px 16px 0">
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 14px;font-size:13.5px;line-height:1.8">نقل الأصل إلى شهادة ليس مصروفاً.</div>
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 14px;font-size:13.5px;line-height:1.8;margin-top:8px">إعادة الأصل ليست دخلاً.</div>
+        </div>
+        <div style="height:2px;background:#201e1d;margin-top:14px"></div>
+        <div class="fl"><div class="fll">المؤسسة</div><div class="fli"><span>بنك مصر</span></div></div>
+        <div class="fl"><div class="fll">المرجع / رقم الشهادة</div><div class="fli"><span class="tnum">CD-4471</span></div></div>
+        <div class="fl"><div class="fll">الأصل</div><div class="fli"><span class="tnum" style="font-size:19px;font-weight:600">47,900.00</span><span style="font-size:12px;color:#575351">ج.م</span></div></div>
+        <div class="fl"><div class="fll">العملة</div><div class="fli"><span>الجنيه المصري ◂</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">بتتقفل بعد الإنشاء — وبتحدّد حسابات التمويل المؤهلة. <span class="tnum">6</span> عملات في القائمة. ◂</div></div>
+        <div class="fl"><div class="fll">تاريخ البدء</div><div class="fli"><span class="tnum">2026/03/14</span><span style="color:#575351">▤</span></div></div>
+        <div class="fl"><div class="fll">تاريخ الاستحقاق</div><div class="fli"><span class="tnum">2027/03/14</span><span style="color:#575351">▤</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">لازم بعد تاريخ البدء — وبعد ما تتحفظ، مفيش تعديل على الشروط المالية. ◂</div></div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">حساب التمويل</div><div class="fli"><span>حساب بنك مصر — الراتب</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#8a5a00;line-height:1.7;margin-top:6px">مطلوب — الشهادة بتتعمل بالشراء، مفيش شهادة فاضية تموّلها بعدين. ◂</div></div>
+        <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #c3bfbe">
+          <div style="font-size:12px;color:#575351;margin-bottom:9px">الحسابات المستبعدة من التمويل، وسببها ◂</div>
+          <div style="border-bottom:1px solid #c3bfbe;padding-bottom:7px"><div style="font-size:12.5px;font-weight:600">محفظة يوسف</div><div style="font-size:12.5px;color:#6e4a1f;line-height:1.7">لا يُسمح بالتمويل من حساب أطفال محمي</div></div>
+          <div style="border-bottom:1px solid #c3bfbe;padding:7px 0"><div style="font-size:12.5px;font-weight:600">شهادة استثمار 12 شهرًا</div><div style="font-size:12.5px;color:#4a3e70;line-height:1.7">لا يمكن استخدام حساب الشهادة مصدرًا للتمويل</div></div>
+          <div style="padding:7px 0 0"><div style="font-size:12.5px;font-weight:600">مصاريف مدرسة يوسف</div><div style="font-size:12.5px;color:#2b5c8a;line-height:1.7">حساب احتياطي هدف — مستبعد من التمويل ◂</div></div>
+        </div>
+        <div class="fl"><div class="fll">المعدل السنوي (نقطة أساس)</div><div class="fli"><span class="tnum">1900</span><span style="font-size:12px;color:#575351">= <span class="tnum">19.00%</span> ◂</span></div>
+          <div style="font-size:11px;color:#8a5a00;line-height:1.7;margin-top:6px">بيانات فقط — التطبيق مش بيحسب عائد ولا بيزوّد الرصيد. ◂</div></div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">تكرار العائد</div><div class="fli"><span>شهري</span><span style="color:#575351">▾</span></div></div>
+        <div style="padding:16px"><span class="btn">مراجعة الشهادة</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">الحفظ من شاشة المراجعة — العملية بتسجّل تحويل <span class="tnum">47,900.00</span> ومش بتتحذف. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>The rate field is the trap.</strong> Source stores basis points and the label says so — «المعدل السنوي (نقطة أساس)» — but a user typing <span class="tnum">1900</span> and reading it back as <span class="tnum">1900</span> has no way to know whether that is 19% or 1,900%. The board prints the percentage beside the raw value and states, in the same breath, that nothing accrues from it. That is one formatter and one proposed line, and it prevents the single most likely certificate misunderstanding: seeing 19% and expecting the balance to climb. <strong>The exclusion list is the same pattern as goal funding</strong>, with the certificate's own verbatim keys — and a goal reserve is excluded too, which source enforces via <code>isFeatureManagedType</code> but has no message for. One proposed key.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">Q2 · Review · what the ledger will record · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مراجعة الشهادة</span></div>
+        <div style="background:#fff;padding:17px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#575351;margin-bottom:4px">الأصل ◂</div>
+          <div class="tnum" style="font-size:34px;font-weight:700;line-height:1.25">47,900.00 <span style="font-size:13px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:12px;color:#575351;line-height:1.75;margin-top:6px">بنك مصر · شهادة استثمار 12 شهرًا · المرجع <span class="tnum">CD-4471</span> ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;font-weight:700;border-bottom:1px solid #c3bfbe">اللي هيتسجّل في السجل ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="rw"><span style="color:#575351;line-height:1.6">حساب بنك مصر — الراتب · قبل ◂</span><span class="tnum" style="font-weight:600">72,200.00</span></div>
+          <div class="rw"><span style="color:#575351;line-height:1.6">حساب بنك مصر — الراتب · بعد ◂</span><span class="tnum" style="font-weight:600">24,300.00</span></div>
+          <div class="rw"><span style="color:#575351;line-height:1.6">حساب الشهادة · بعد ◂</span><span class="tnum" style="font-weight:600">47,900.00</span></div>
+          <div class="rw" style="border-bottom:none"><span style="color:#575351;line-height:1.6">إجمالي الأصول ◂</span><span style="font-weight:600">لا يتغيّر ◂</span></div>
+        </div>
+        <div style="background:#e9e7e6;border-inline-start:4px solid #605d5d;padding:13px 16px;margin:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">ده تحويل، مش مصروف ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.8">نقل الأصل إلى شهادة ليس مصروفاً. مش بيتحسب في أي ميزانية، ومش بيظهر في تقرير المصروفات. ◂</div>
+        </div>
+        <div style="background:#f8eeda;border:2px solid #8a5a00;padding:13px 16px;margin:0 16px">
+          <div style="font-size:13px;font-weight:600;color:#8a5a00;margin-bottom:5px">اللي مش هينفع بعد كده ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.8">مفيش استرداد قبل <span class="tnum">2027/03/14</span>. الإلغاء متاح لحد أول عائد بتسجّله — بعد كده لا استرداد ولا إلغاء. ◂</div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+          <span class="btn">اشترِ الشهادة ◂</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">هتتسجّل حركة تحويل واحدة وحدث «تم الشراء». مش بتتحذف — والإلغاء حركة عكسية جديدة، لو لسه متاح. ◂</span>
+          <span class="btn2">رجوع للتعديل ◂</span>
+        </div>
+      </div>
+      <p class="note"><strong>The review earns its place by printing the two things the form cannot.</strong> First the arithmetic, in labelled before/after rows — <span class="tnum">72,200.00</span> becomes <span class="tnum">24,300.00</span> in the salary account, which is where every board up to the reconciliation in 17 · AI2 finds it. Second, the door closing: this is the last screen before the money is committed for a full <span class="tnum">365</span> days, so it is the only honest place for «اللي مش هينفع بعد كده». <strong>Source labels this button <code>certificateNew</code></strong> — «شهادة جديدة», the same noun as the screen title and the list's action. Third occurrence of the noun-as-action defect; «اشترِ الشهادة» is proposed.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">R · S</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Detail and recording a profit — two boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:860px;margin:0 0 26px">The detail screen is where the audit's two-vocabulary problem and three wrong keys live together. It is also the screen that has to hold the feature's hardest sentence: <strong>19% is printed on the certificate and nothing in this app will ever act on it.</strong></p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">R1 · Detail · dark · RTL — principal, profit, and the closed hatch</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">شهادة استثمار 12 شهرًا ◂</span><span style="font-size:15px">◉</span><span style="font-size:16px">⋮</span></div>
+        <div style="background:#221f1e;padding:17px 16px;border-bottom:2px solid #8d8886;position:relative">
+          <span class="hcertD" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px">
+            <span style="background:#2c2928;font-size:11px;padding:4px 9px">الحالة: نشطة ◂</span>
+            <span style="background:#2e2745;color:#a99bd6;font-size:11px;font-weight:600;padding:4px 9px">المدة: ضمن المدة ◂</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:#a8a3a0;margin-bottom:4px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>رصيد الأصل · غير قابل للصرف ◂</span>
+          </div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.2">47,900.00 <span style="font-size:14px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin-top:5px">محسوب من قيود حساب الشهادة — مش رقم مخزّن. الأصل الأصلي <span class="tnum">47,900.00</span>. ◂</div>
+          <div style="height:2px;background:#8d8886;margin:15px 0 13px"></div>
+          <div style="font-size:12px;color:#a8a3a0;margin-bottom:4px">العائد المحصّل — دخل ◂</div>
+          <div class="tnum" style="font-size:28px;font-weight:700;line-height:1.2;color:#5fb8b0">+ 2,394.50</div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin-top:5px">رقمين مستقلين — الأصل تحويل، والعائد دخل. مفيش إجمالي واحد بيجمعهم. ◂</div>
+        </div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#2c2928;border-bottom:1px solid #4a4645">شروط الشهادة ◂</div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المؤسسة</span><span style="font-weight:600">بنك مصر</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المرجع / رقم الشهادة</span><span class="tnum" style="font-weight:600">CD-4471</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">تاريخ البدء</span><span class="tnum" style="font-weight:600">2026/03/14</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">تاريخ الاستحقاق</span><span class="tnum" style="font-weight:600">2027/03/14 · باقي 231 يومًا ◂</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المعدل السنوي (نقطة أساس)</span><span style="font-weight:600"><span class="tnum">19.00%</span> — بيانات فقط ◂</span></div>
+          <div class="rw" style="border-bottom:none"><span style="color:#a8a3a0">تكرار العائد</span><span style="font-weight:600">شهري</span></div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">الـ 19% مكتوبة على الشهادة، مش محسوبة هنا ◂</div>
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.8">الرصيد مش هيزيد لوحده. كل مرة البنك يصرف عائد، تسجّله يدويًا وهو بيدخل كدخل في حساب تاني — الأصل بيفضل زي ما هو لحد الاستحقاق. ◂</div>
+        </div>
+        <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">سجل الشهادة ◂</span><span class="tnum" style="font-size:11px;color:#a8a3a0">4</span></div></div>
+        <div style="height:2px;background:#8d8886"></div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645;min-height:64px"><span style="width:4px;align-self:stretch;background:#5fb8b0;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">تم استلام الربح</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.6"><span class="tnum">2026/06/14</span> · لحساب بنك مصر — الراتب · دخل</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#5fb8b0">+ 798.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645;min-height:64px"><span style="width:4px;align-self:stretch;background:#5fb8b0;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">تم استلام الربح</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.6"><span class="tnum">2026/05/14</span> · لحساب بنك مصر — الراتب · دخل</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#5fb8b0">+ 798.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #4a4645;min-height:64px"><span style="width:4px;align-self:stretch;background:#5fb8b0;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">تم استلام الربح</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.6"><span class="tnum">2026/04/14</span> · لحساب بنك مصر — الراتب · دخل</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#5fb8b0">+ 798.50</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;min-height:64px"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#b0aba9 0 2px,transparent 2px 5px);flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">تم الشراء</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.6"><span class="tnum">2026/03/14</span> · من حساب بنك مصر — الراتب · تحويل داخلي</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#b0aba9">⇄ 47,900.00</span></div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+          <span class="btn" style="background:#f0edeb;color:#201e1d">تسجيل عائد</span>
+          <span style="background:#2c2928;color:#6b6766;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center">استرداد</span>
+          <span style="font-size:11px;color:#a8a3a0;line-height:1.75">متاح عند الاستحقاق — <span class="tnum">2027/03/14</span>. مفيش استرداد مبكر. ◂</span>
+          <div style="background:#33201c;border-inline-start:4px solid #ff9783;padding:11px 13px;margin-top:6px">
+            <div style="font-size:12px;font-weight:600;color:#ff9783;margin-bottom:3px">إلغاء الشراء مش متاح ◂</div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.8">لا يمكن عكس الشراء بعد تسجيل عائد أو استرداد. أول عائد اتسجّل <span class="tnum">2026/04/14</span> — من يومها الباب اتقفل. ◂</div>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>This board is correction 1 drawn.</strong> 05 · F2 offered «إلغاء الشراء» as a live third action; here it is a stated impossibility with the date it became one. The distinction matters because the alternative — leaving the button and failing on tap — teaches the user that the app is unreliable rather than that the operation is closed. <strong>Four wrong keys are replaced by four proposed labels:</strong> «الحالة» and «المدة» as prefixes rather than borrowing their own values, «شروط الشهادة» and «سجل الشهادة» as section headings rather than <code>certificatesTitle</code>. And the event log runs newest first with the purchase pinned at the bottom in transfer grey — the one non-income event in a list of income, distinguished by hatch and colour, never by position alone.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">S1 · Record profit · the fourth receipt · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">تسجيل عائد</span></div>
+        <div style="background:#fff;padding:14px 16px;border-bottom:1px solid #c3bfbe">
+          <div style="font-size:14px;font-weight:600;line-height:1.5">شهادة استثمار 12 شهرًا</div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:3px">بنك مصر · الجنيه المصري · دورية شهرية ◂</div>
+        </div>
+        <div style="background:#e3efef;border-inline-start:4px solid #14555f;padding:12px 16px;margin:14px 16px 0">
+          <div style="font-size:12.5px;line-height:1.8">العائد <strong>دخل</strong> — بيزيد المتاح للصرف. الأصل مش بيتغيّر. ◂</div>
+        </div>
+        <div style="height:2px;background:#201e1d;margin-top:14px"></div>
+        <div class="fl"><div class="fll">المبلغ</div>
+          <div class="fli"><span class="tnum" style="font-size:30px;font-weight:600;color:#14555f">+ 798.50</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">آخر تلات صرفيات: <span class="tnum">798.50</span> · <span class="tnum">798.00</span> · <span class="tnum">798.00</span>. ما فيش مبلغ مقترح — الرقم اللي البنك صرفه بس. ◂</div>
+        </div>
+        <div class="fl"><div class="fll">الحساب الوجهة</div><div class="fli"><span>حساب بنك مصر — الراتب</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">حسابات الشهادات والأهداف مستبعدة — لا يمكن استخدام حساب الشهادة وجهةً.</div></div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">ملاحظة</div><div class="fli" style="color:#9b9797"><span>اختياري ◂</span></div></div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;font-weight:700;border-bottom:1px solid #c3bfbe">الأثر ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="rw"><span style="color:#575351">العائد المحصّل · قبل ◂</span><span class="tnum" style="font-weight:600">2,394.50</span></div>
+          <div class="rw"><span style="color:#575351">العائد المحصّل · بعد ◂</span><span class="tnum" style="font-weight:600">3,193.00</span></div>
+          <div class="rw" style="border-bottom:none"><span style="color:#575351">رصيد الأصل ◂</span><span style="font-weight:600">لا يتغيّر ◂</span></div>
+        </div>
+        <div style="padding:16px"><span class="btn">مراجعة الشهادة</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">شاشة المراجعة موجودة في المصدر وبتستعمل نفس المفتاح «مراجعة الشهادة» — وهي دلوقتي بتعرض المبلغ والملاحظة بس، من غير الحساب الوجهة. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>Profit is the only money this feature creates, and it is created by hand.</strong> No accrual, no suggested amount, no "expected coupon" — the user types what the bank actually paid, because a pre-filled figure would be the app asserting a number it cannot know. The three previous receipts are printed for reference only. <strong>The impact block answers the question the shipped screen leaves open:</strong> does recording profit change the certificate? It does not — principal is untouched, and this is income landing in a spendable account. <code>canRecordProfit</code> is <code>lifecycle != archived</code>, so this same screen is reachable on a redeemed certificate; the header line would then read «مستردة» and the impact block's third row still says the principal is unchanged, because there is none left to change.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">T</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Maturity and redemption — two boards, dated 2027/03/14</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:860px;margin:0 0 26px">The handoff lists certificate maturity as one of two unbuilt special moments. It is a moment because two amounts arrive at once and they are <em>different kinds of money</em>: <code>CertificateRedemptionSummary</code> exposes <code>combinedCashMinorUnits</code> with the comment <em>"Never classify this total as all income."</em> The redemption screen locks the principal field (read-only, disabled, filled from the ledger) because <code>errorCertificateFullRedemptionOnly</code> — partial redemption does not exist.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">T1 · Redemption form · matured · light · RTL · dated 2027/03/14</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">استرداد الشهادة</span></div>
+        <div style="background:#ece9f4;border-bottom:2px solid #201e1d;padding:14px 16px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <span style="background:#fff;font-size:11px;padding:4px 9px">الحالة: نشطة ◂</span>
+            <span style="background:#4a3e70;color:#f3f2f2;font-size:11px;font-weight:600;padding:4px 9px">المدة: استحقت ◂</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;line-height:1.5">شهادة استثمار 12 شهرًا</div>
+          <div style="font-size:12px;color:#575351;line-height:1.75;margin-top:4px">استحقت اليوم <span class="tnum">2027/03/14</span>. الاسترداد بيتاح من النهاردة — ومن بكرة الحالة تبقى «متأخرة الاسترداد». ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;font-weight:700;border-bottom:1px solid #c3bfbe">الأصل + العائد</div>
+        <div class="fl">
+          <div class="fll">الأصل — مقفول ◂</div>
+          <div class="fli" style="border-bottom-color:#c3bfbe"><span class="tnum" style="font-size:19px;font-weight:600;color:#9b9797">47,900.00</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">رصيد الأصل — يُسمح فقط بالاسترداد الكامل للأصل، فالخانة مش قابلة للتعديل.</div>
+        </div>
+        <div class="fl" style="border-bottom:2px solid #201e1d">
+          <div class="fll">العائد</div>
+          <div class="fli"><span class="tnum" style="font-size:19px;font-weight:600;color:#14555f">+ 798.50</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">عائد الاستحقاق — لو البنك صرفه منفصل، سجّله من «تسجيل عائد» وسيب الخانة دي فاضية. ◂</div>
+        </div>
+        <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #c3bfbe">
+          <div class="fll">نوع الاسترداد ◂</div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:12.5px;font-weight:600;padding:11px;min-height:44px;display:flex;align-items:center">الأصل + العائد</span>
+            <span style="flex:1;border:1px solid #c3bfbe;font-size:12.5px;padding:11px;min-height:44px;display:flex;align-items:center">الأصل فقط</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">اختيارين بس. «العائد فقط» مفتاحه موجود في الـ ARB ومفيش حالة ليه — بيتسجّل من شاشة العائد. ◂</div>
+        </div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">الحساب الوجهة</div><div class="fli"><span>حساب بنك مصر — الراتب</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">لا يمكن استخدام حساب الشهادة وجهةً — وحسابات احتياطي الأهداف مستبعدة كمان.</div></div>
+        <div style="padding:16px"><span class="btn">مراجعة الشهادة</span></div>
+      </div>
+      <p class="note"><strong>A locked field with a stated reason, not a greyed-out mystery.</strong> Source disables the principal input and fills it from the ledger balance; the redesign keeps that and prints the rule beside it, because a disabled money field with no explanation reads as a bug in the one flow where the user is most anxious. <strong>The maturity window is named:</strong> «استحقت» today, «متأخرة الاسترداد» tomorrow — two of the five derived term states, one day apart, and neither is a failure. Nothing bad happens on day two, which is exactly why the label must not sound like it does.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">T2 · Redemption review and result · dark · RTL · dated 2027/03/14</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مراجعة الشهادة</span></div>
+        <div style="background:#221f1e;padding:16px;border-bottom:2px solid #8d8886">
+          <div style="font-size:11.5px;color:#a8a3a0;font-weight:700;margin-bottom:12px">مبلغين، مش إجمالي واحد ◂</div>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:3px"><span style="width:4px;height:26px;background:repeating-linear-gradient(45deg,#b0aba9 0 2px,transparent 2px 5px);flex:none"></span><span style="font-size:12px;color:#a8a3a0;flex:1">الأصل — تحويل ◂</span><span class="tnum" style="font-size:26px;font-weight:700;color:#b0aba9">47,900.00</span></div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin:0 0 14px 13px">إعادة الأصل ليست دخلاً.</div>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:3px"><span style="width:4px;height:26px;background:#5fb8b0;flex:none"></span><span style="font-size:12px;color:#a8a3a0;flex:1">العائد — دخل ◂</span><span class="tnum" style="font-size:26px;font-weight:700;color:#5fb8b0">+ 798.50</span></div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin:0 0 0 13px">ده اللي يتحسب في تقرير الدخل — الأصل لأ. ◂</div>
+          <div style="height:2px;background:#8d8886;margin:15px 0 12px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;color:#a8a3a0">اللي هيوصل الحساب ◂</span><span class="tnum" style="font-size:19px;font-weight:600">48,698.50</span></div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.75;margin-top:6px">رقم واحد بيوصل البنك، بس مش نوع واحد من الفلوس. التطبيق بيسجّلهم حركتين مختلفتين بنفس التاريخ. ◂</div>
+        </div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#2c2928;border-bottom:1px solid #4a4645">اللي هيتسجّل في السجل ◂</div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0;line-height:1.6">تحويل · من حساب الشهادة لحساب بنك مصر — الراتب</span><span class="tnum" style="font-weight:600;color:#b0aba9">⇄ 47,900.00</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0;line-height:1.6">دخل · عائد استحقاق</span><span class="tnum" style="font-weight:600;color:#5fb8b0">+ 798.50</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0;line-height:1.6">رصيد الأصل · بعد ◂</span><span class="tnum" style="font-weight:600">0.00</span></div>
+          <div class="rw" style="border-bottom:none"><span style="color:#a8a3a0;line-height:1.6">الحالة · بعد ◂</span><span style="font-weight:600">مستردة · مستردة بالكامل ◂</span></div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">عكس الاسترداد غير مدعوم</div>
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.8">دي العملية الوحيدة في الشهادات اللي مالهاش حركة عكسية. لو فيها غلط، بتتصلّح بحركة تسوية جديدة — مش بعكس. راجع الأرقام قبل ما تكمّل. ◂</div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+          <span class="btn" style="background:#f0edeb;color:#201e1d">استرداد</span>
+          <span style="font-size:11px;color:#a8a3a0;line-height:1.75">الشهادة بتبقى «مستردة» وسجلها بيفضل للقراءة. الأرشفة بتبقى متاحة بعد كده — لا يمكن أرشفة شهادة بها أصل متبقٍ. ◂</span>
+          <span class="btn2" style="border-color:#8d8886;color:#f0edeb">رجوع للتعديل ◂</span>
+        </div>
+      </div>
+      <p class="note"><strong>Two figures, then their sum, in that order — and the sum is labelled as a bank deposit, not as a total.</strong> The domain comment is unambiguous, and this is the one screen where the mistake is easy: <span class="tnum">48,698.50</span> lands in one account on one day, and a reasonable person would file it as income. Printing it third, after both parts have been classified, is what stops that. <strong>Redemption is irreversible</strong> — <code>errorCertificateRedemptionReversalNotSupported</code> — which makes review mandatory rather than a courtesy, and makes «راجع الأرقام قبل ما تكمّل» the only place in this document where the copy asks the user to slow down. It is also why this flow gets a review screen but <em>not</em> a <code>GuardedConfirmSheet</code>: there is no third party, no reason to justify, and nothing to acknowledge — only arithmetic to check.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 2 · 38 boards, and the «~35» estimate is retired</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Eleven boards: P1–P5, Q1–Q2, R1, S1, T1–T2.</strong> Tier 2 now stands at <strong style="color:#f0edeb">38</strong> — nine in 06, seven in 07, eleven in the goals document and eleven here. The original «~35» was an estimate of screens, not of boards, and the state matrix multiplies screens; quoting it as a denominator has produced a count error every time, so it stops here. What remains is named, not numbered: household members, the nine reports, bank reconciliation. That closes certificates — list, creation, detail, record-profit, redeem — and the <strong style="color:#f0edeb">certificate-maturity special moment</strong> along with them, since T1 and T2 <em>are</em> that moment rather than a separate pattern. Bank reconciliation is still unbuilt.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Owed next turn, and it is my debt:</strong> the goals boards rebuilt on «مصاريف مدرسة يوسف» <span class="tnum">13,600.00</span> of <span class="tnum">13,000.00</span> and «تجديد المطبخ» <span class="tnum">0.00</span> of <span class="tnum">40,000.00</span>, with «المستفيد: يوسف أحمد» rendered as 07 · L2 already does. The source findings in that document stand; only the fixture and that one open question were wrong.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Then:</strong> household members · the nine reports · bank reconciliation · the D2 gaps (chart primitives, date and category pickers, tabs, dialog and sheet anatomy, snackbar) · D5 adaptive last.</p>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">One ARB pass, three orphans and one missing key.</strong> Delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; add a currency-mismatch reason for <code>AccountIneligibilityReason.currencyMismatch</code>; replace all three <code>errorGoalInsufficientReserve</code> misuses with one parameterised message. None of these is presentation work, and all four were invisible until the screens were drawn against them.</p>
+      </div>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Every unmarked Arabic string: «الشهادات» «شهادة جديدة» «المؤسسة» «الأصل» «العائد» «المرجع / رقم الشهادة» «تاريخ البدء» «تاريخ الاستحقاق» «المعدل السنوي (نقطة أساس)» «تكرار العائد» «حساب التمويل» «الحساب الوجهة» «رصيد الأصل» «الأصل الأصلي» «المبلغ» «ملاحظة» «استرداد» «استرداد الشهادة» «تسجيل عائد» «مراجعة الشهادة» «الأصل + العائد» «الأصل فقط» «نشطة» «مستردة» «مؤرشفة» «لم تبدأ» «ضمن المدة» «استحقت» «متأخرة الاسترداد» «مستردة بالكامل» «شهري» «إعادة المحاولة» «جارٍ التحميل...» · the nine <code>certificateEvent*</code> labels · and the full sentences of <code>certificateEmpty</code>, <code>certificatePrincipalNotExpense</code>, <code>certificatePrincipalReturnNotIncome</code>, <code>errorCertificateSourceIsProtected</code>, <code>errorCertificateAccountNotAllowedAsSource</code>, <code>errorCertificateAccountNotAllowedAsDestination</code>, <code>errorCertificateFullRedemptionOnly</code>, <code>errorCertificateArchiveNonzeroBalance</code>, <code>errorCertificateReversalNotAllowedAfterHistory</code>, <code>errorCertificateRedemptionReversalNotSupported</code>.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every Arabic string in a frame that is not a verbatim ARB value carries ◂ — the «الحالة» / «المدة» prefixes, «غير قابل للصرف», every section heading, the before/after row labels, «اشترِ الشهادة», the percentage rendering of the rate, the goal-reserve exclusion line, «إلغاء الشراء مش متاح», and all explanatory Egyptian sentences. If a framed string has no ◂ and is not in the first bucket, that is a defect in this document, not a third category. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — institution and account names, «CD-4471», amounts, dates, percentages — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span>05 · F2 uses «أصل الشهادة» and «الأرباح المحصّلة» where the ARB says «الأصل» / «رصيد الأصل»; this document uses the source labels, so 05's variants are now the proposed ones and should follow these. Every board's bottom bar shows the D4 five: «الحركات» is the proposed rename of «المعاملات», «الديون» needs a new <code>navDebts</code>, and Reports has moved into «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked three times:</strong> are there golden or screenshot tests among the 1,594? If not, migration phases 1 and 2 ship together and typography is the only expensive phase.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

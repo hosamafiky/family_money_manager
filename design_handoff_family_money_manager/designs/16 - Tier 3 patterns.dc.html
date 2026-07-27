@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:40px}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 3 — patterns, not every pixel</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Six features the ledger<br>already knows the words for.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Six boards, one per pattern, sections AC to AH. <strong style="color:#201e1d">None of these features has a folder in <code>lib/features/</code></strong> — I enumerated all seventeen: accounts, balance, budgets, certificates, dashboard, foundation_detail, goals, household, ledger, more, onboarding, planning, reports, settings, shell, smoke_screen, transactions. No gold, no liabilities, no zakat, no lock. But <code>OperationType</code> ships nine labels for them — <strong style="color:#201e1d"><span style="unicode-bidi:isolate">«شراء ذهب»</span> <span style="unicode-bidi:isolate">«بيع ذهب»</span> <span style="unicode-bidi:isolate">«إنشاء التزام»</span> <span style="unicode-bidi:isolate">«سداد التزام»</span> <span style="unicode-bidi:isolate">«زكاة»</span> <span style="unicode-bidi:isolate">«صدقة»</span> <span style="unicode-bidi:isolate">«شراء أصل»</span> <span style="unicode-bidi:isolate">«بيع أصل»</span> <span style="unicode-bidi:isolate">«دخل فائدة»</span></strong> — all localised in both files. The vocabulary exists; the screens do not.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#e6eef6">
+  <h3 style="margin:0 0 8px;font-size:19px;letter-spacing:-.01em">One total the whole set has been building toward</h3>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:2px solid #201e1d;font-size:13px;line-height:1.75">
+    <div style="padding:14px 20px 14px 0;border-inline-end:1px solid #c3bfbe">قابل للصرف<br><span style="color:#575351">بنك مصر — الراتب <span class="tnum">24,300.00</span><br>مدخرات المنزل <span class="tnum">8,000.00</span><br>محفظة هناء <span class="tnum">250.00</span></span><br><strong class="tnum">32,550.00</strong></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe">محتجز · لا قابل للصرف ولا محمي<br><span style="color:#575351">احتياطي الأهداف <span class="tnum">13,600.00</span><br>أصل الشهادة <span class="tnum">47,900.00</span></span><br><strong class="tnum">61,500.00</strong></div>
+    <div style="padding:14px 0 14px 20px">محمي<br><span style="color:#575351">أموال يوسف <span class="tnum">6,950.00</span></span><br><strong class="tnum">6,950.00</strong><br><br><strong style="font-size:15px">إجمالي الأصول <span class="tnum">101,000.00</span></strong></div>
+  </div>
+  <p style="font-size:12.5px;line-height:1.7;color:#575351;margin:14px 0 0;max-width:1000px">Every figure is published in an earlier document and every one is ledger-derived. <strong style="color:#201e1d">The <span class="tnum">61,500.00</span> is the handoff's own number</strong> — the money that sits in no dashboard bucket today — and it is the sum of the goal and certificate columns, which is where this project started. <span class="tnum">101,000.00</span> is the first total the set has been able to state, and it is stateable only because nothing in it is an estimate. <strong style="color:#ae1800">Superseded by 17 · AI2:</strong> the bank reconciliation records a <span class="tnum">45.00</span> fee against the salary account, taking assets to <span class="tnum">100,955.00</span> and net worth to <span class="tnum">40,955.00</span> — here and in AE1 and AF1 below. That distinction is what AC and AE are about.</p>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AC · AD</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Gold, and debts</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Two features that break a rule the product has held since 01: gold is a quantity that is not money, and a liability is a negative that the app has never had to draw.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AC1 · Gold holdings · light · RTL — a quantity row, never a currency row</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الذهب ◂</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:17px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#575351;margin-bottom:4px">المملوك ◂</div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.2">50.000 <span style="font-size:15px;font-weight:600;color:#575351">جرام · عيار 21 ◂</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:6px">كمية، مش مبلغ. مش بتتجمع مع الجنيه ولا الدولار في أي إجمالي. ◂</div>
+        </div>
+        <div style="background:#f8eeda;border-block:2px solid #8a5a00;padding:14px 16px">
+          <div style="font-size:12px;color:#575351;margin-bottom:4px">تقدير بسعر أنت كتبته ◂</div>
+          <div class="tnum" style="font-size:26px;font-weight:700;line-height:1.25;color:#8a5a00">242,500.00 <span style="font-size:13px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.8;margin-top:7px"><span class="tnum">50.000</span> جرام × <span class="tnum">4,850.00</span> ج.م — سعر الجرام اللي دخّلته يوم <span class="tnum">2026/07/20</span>، من <span class="tnum">6</span> أيام. ◂</div>
+          <div style="font-size:11.5px;color:#8a5a00;line-height:1.8;margin-top:6px">الرقم ده <strong>مش في السجل</strong> ومش داخل في «إجمالي الأصول». التطبيق مابيجيبش أسعار من الإنترنت. ◂</div>
+        </div>
+        <div class="gh">الحركات ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#605d5d;flex:none"></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">شراء ذهب</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span class="tnum">2026/02/14</span> · <span class="tnum">20.000</span> جرام · من بنك مصر ◂</span></span>
+            <span class="tnum" style="font-size:15px;font-weight:600;color:#605d5d">⇄ 88,000.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;min-height:64px"><span style="width:4px;align-self:stretch;background:#605d5d;flex:none"></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">شراء ذهب</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span class="tnum">2025/09/03</span> · <span class="tnum">30.000</span> جرام · من مدخرات المنزل ◂</span></span>
+            <span class="tnum" style="font-size:15px;font-weight:600;color:#605d5d">⇄ 108,000.00</span></div>
+        </div>
+        <div style="padding:14px 16px;font-size:11.5px;color:#575351;line-height:1.8">اللي في السجل هو <strong>اللي دفعته</strong> — <span class="tnum">196,000.00</span> على مرتين، تحويل مش مصروف. اللي فوق تقدير لقيمته النهاردة. الرقمين مختلفين وده طبيعي. ◂</div>
+        <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2">حدّث سعر الجرام ◂</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">تحديث السعر مش حركة في السجل — بيغيّر التقدير بس، ومعاه تاريخه. ◂</span>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>Three numbers that must never be one number.</strong> The quantity (<span class="tnum">50.000</span> g) is what you own; the ledger cost (<span class="tnum">196,000.00</span>) is what you paid, and it <em>is</em> in the ledger as two <code>goldPurchase</code> transfers; the estimate (<span class="tnum">242,500.00</span>) is quantity × a price you typed, and it is in nothing. <strong>The entry date is the honesty.</strong> «من <span class="tnum">6</span> أيام» is printed beside the estimate because a stale price is the only way this figure lies, and the client's decision was manual pricing precisely so the app never implies a live market. <strong>Gold is a quantity row in the currency ledger</strong> (handoff §3): it sits below the currency rows with its unit, and no total spans it. <strong>What is not presentation work:</strong> a gold-holdings table with a gram price and its entry date. The two operation types are already localised.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AD1 · Debts · light · RTL — the fifth tab, and the first negative</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الديون ◂</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:#ae1800"></span>
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:7px">المتبقي عليك ◂</div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.22;color:#ae1800">60,000.00 <span style="font-size:14px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:6px">التزام واحد نشط · محسوب من قيود السداد، مش رقم مخزّن ◂</div>
+        </div>
+        <div class="gh">التزام نشط ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px">
+          <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:9px">
+            <span style="width:4px;align-self:stretch;background:#ae1800;flex:none;min-height:34px"></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">قرض شراء عربية ◂</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">بنك مصر · <span class="tnum">36</span> قسط · فاضل <span class="tnum">24</span> ◂</span></span>
+            <span class="tnum" style="font-size:17px;font-weight:600;color:#ae1800">60,000.00</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:33%;background:#201e1d"></span><span style="position:absolute;inset-block:0;inset-inline-start:33%;width:67%;background:repeating-linear-gradient(45deg,#ae1800 0 2px,transparent 2px 5px)"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#575351"><span>اتسدّ من الأصل <span class="tnum">30,000.00</span> من <span class="tnum">90,000.00</span> ◂</span><span class="tnum">33٪ ◂</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:3px"><span class="tnum">12</span> قسط × <span class="tnum">2,500.00</span> أصل. الفوائد والرسوم مش في الشريط ده — مش بتقلّل الدين. ◂</div>
+          <div style="font-size:11.5px;color:#8a5a00;line-height:1.75;margin-top:5px">القسط الجاي <span class="tnum">2,900.00</span> يوم <span class="tnum">2026/08/05</span> — منه <span class="tnum">2,500.00</span> أصل ◂</div>
+        </div>
+        <div class="gh">آخر سداد ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">أصل الدين ◂</span><span class="tnum" style="font-weight:600">2,500.00</span></div>
+          <div class="lr"><span style="color:#575351">فوائد ◂</span><span class="tnum" style="font-weight:600;color:#ae1800">350.00</span></div>
+          <div class="lr"><span style="color:#575351">رسوم ◂</span><span class="tnum" style="font-weight:600;color:#ae1800">50.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d;background:#eae9e9"><span style="font-weight:700">سداد التزام · <span class="tnum">2026/07/05</span></span><span class="tnum" style="font-weight:700">2,900.00</span></div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.85">القسط الواحد تلات حاجات مختلفة: <strong>الأصل</strong> بيقلّل الدين وهو تحويل، و<strong>الفوائد والرسوم</strong> مصروف حقيقي. لو اتحسبوا كلهم مصروف، مصروفاتك هتبان أكبر من الحقيقة بـ<span class="tnum">2,500.00</span> كل شهر — والدين هيبان إنه بيقلّ بـ<span class="tnum">2,900.00</span> وهو بيقلّ بـ<span class="tnum">2,500.00</span> بس. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn">سجّل سداد ◂</span>
+          <span class="btn2">التزام جديد ◂</span>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span style="color:#201e1d;border-top:3px solid #201e1d">الديون ◂</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>The tab that cost Reports its place</strong> (D4): debts have due dates, reports do not, and six labelled tabs truncate at 200% scale. <strong>The three-way split is the whole feature.</strong> <code>liabilityRepayment</code> is one operation and three different kinds of money — principal is a transfer that reduces what you owe, interest and fees are ordinary expenses. Collapsing them is the single most common error in household budgeting apps, and it inflates the expense total every month by the principal. <strong>The remaining balance is derived</strong>, like every balance in this product: «محسوب من قيود السداد، مش رقم مخزّن». <strong>And this is the precondition for «صافي الثروة»</strong> — until liabilities exist the dashboard strip stays «إجمالي الأصول», which is the rename this project made in turn one.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AE · AF</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Net worth over time, and zakat</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The first real chart in the product, and the first screen where a religious obligation meets a double-entry ledger. Both are about refusing to compute something the app cannot know.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AE1 · Net worth over time · dark · RTL — table first, then the line</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">صافي الثروة عبر الوقت ◂</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#3a3635;border-bottom:2px solid #8d8886;padding:15px 16px">
+          <div style="font-size:12px;color:#a8a3a0;margin-bottom:4px">صافي الثروة النهاردة ◂</div>
+          <div class="tnum" style="font-size:34px;font-weight:700;line-height:1.22">41,000.00 <span style="font-size:14px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+          <div style="font-size:11.5px;color:#a8a3a0;line-height:1.8;margin-top:6px">إجمالي الأصول <span class="tnum">101,000.00</span> − الالتزامات <span class="tnum">60,000.00</span>. الاسم بقى «صافي الثروة» دلوقتي بس لأن الالتزامات بقت موجودة. ◂</div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">الأرقام ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="display:grid;grid-template-columns:1fr 68px 68px 68px;border-bottom-color:#4a4645"><span style="color:#a8a3a0;font-size:11px">الشهر ◂</span><span style="color:#a8a3a0;font-size:11px;text-align:end">أصول ◂</span><span style="color:#a8a3a0;font-size:11px;text-align:end">التزامات ◂</span><span style="color:#a8a3a0;font-size:11px;text-align:end">صافي ◂</span></div>
+          <div class="lr" style="display:grid;grid-template-columns:1fr 68px 68px 68px;border-bottom-color:#4a4645"><span style="color:#a8a3a0">أبريل ◂</span><span class="tnum" style="text-align:end">92,400.00</span><span class="tnum" style="text-align:end">67,500.00</span><span class="tnum" style="font-weight:600;text-align:end">24,900.00</span></div>
+          <div class="lr" style="display:grid;grid-template-columns:1fr 68px 68px 68px;border-bottom-color:#4a4645"><span style="color:#a8a3a0">مايو ◂</span><span class="tnum" style="text-align:end">95,100.00</span><span class="tnum" style="text-align:end">65,000.00</span><span class="tnum" style="font-weight:600;text-align:end">30,100.00</span></div>
+          <div class="lr" style="display:grid;grid-template-columns:1fr 68px 68px 68px;border-bottom-color:#4a4645"><span style="color:#a8a3a0">يونيو ◂</span><span class="tnum" style="text-align:end">98,300.00</span><span class="tnum" style="text-align:end">62,500.00</span><span class="tnum" style="font-weight:600;text-align:end">35,800.00</span></div>
+          <div class="lr" style="display:grid;grid-template-columns:1fr 68px 68px 68px;border-bottom:none;background:#2c2928"><span style="font-weight:700">يوليو ◂</span><span class="tnum" style="font-weight:700;text-align:end">101,000.00</span><span class="tnum" style="font-weight:700;text-align:end">60,000.00</span><span class="tnum" style="font-weight:700;text-align:end">41,000.00</span></div>
+        </div>
+        <div style="background:#221f1e;padding:14px 16px;border-bottom:2px solid #8d8886">
+          <div style="height:78px;position:relative;border-inline-start:2px solid #4a4645;border-bottom:2px solid #4a4645">
+            <span style="position:absolute;bottom:24%;inset-inline-start:6%;width:8px;height:8px;background:#f0edeb"></span>
+            <span style="position:absolute;bottom:37%;inset-inline-start:33%;width:8px;height:8px;background:#f0edeb"></span>
+            <span style="position:absolute;bottom:51%;inset-inline-start:60%;width:8px;height:8px;background:#f0edeb"></span>
+            <span style="position:absolute;bottom:64%;inset-inline-start:87%;width:8px;height:8px;background:#f0edeb"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#a8a3a0;margin-top:6px"><span>أبريل ◂</span><span>يوليو ◂</span></div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.75;margin-top:8px">الرسم بعد الجدول دايمًا — الجدول هو البديل النصي، والرسم مايضيفش رقم مش موجود فوقه. ◂</div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">الذهب مش هنا ◂</div>
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.85">تقدير الذهب <span class="tnum">242,500.00</span> مش داخل في أي رقم في الشاشة دي. لو دخل، خط بيتغيّر بسعر السوق هيبقى تاريخ ثروة — وده مش صح. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>Four points, and the table above them.</strong> §4's rule is that every chart is preceded by the figure table it draws; here the table is also the accessibility alternative and the only place the three series are separable. The chart is four marks and two axes — no gradient fill, no curve smoothing, no animation on entry. <strong>«صافي الثروة» is finally legal on this screen</strong>, and nowhere else: the dashboard strip stays «إجمالي الأصول» until liabilities ship, which was the rename this project made in turn one and the reason AD1 has to exist first. <strong>Excluding gold is the hard call.</strong> A market-priced asset inside a net-worth line makes the line move when nothing happened, and a household reading its own history cannot tell a purchase from a price change. Gold keeps its own screen and its own date-stamped estimate.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AF1 · Zakat and sadaqah · light · RTL — the app refuses to calculate</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الزكاة والصدقة ◂</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#f8eeda;border-bottom:2px solid #8a5a00;padding:15px 16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:5px">التطبيق مابيحسبش الزكاة ◂</div>
+          <div style="font-size:12.5px;color:#575351;line-height:1.9">حساب الزكاة فيه اجتهاد: إيه اللي يتحسب، والنصاب، والحول، والدَّين. ده قرار شرعي مش قرار برمجي. اللي التطبيق بيعمله إنه <strong>يوريك الأرقام</strong> و<strong>يسجّل اللي دفعته</strong>. ◂</div>
+        </div>
+        <div class="gh">أرقام ممكن تفيدك ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">إجمالي الأصول النهاردة ◂</span><span class="tnum" style="font-weight:600">101,000.00</span></div>
+          <div class="lr"><span style="color:#575351">منها محتجز لأهداف وشهادة ◂</span><span class="tnum" style="font-weight:600">61,500.00</span></div>
+          <div class="lr"><span style="color:#575351">منها أموال طفل محمية ◂</span><span class="tnum" style="font-weight:600">6,950.00</span></div>
+          <div class="lr"><span style="color:#575351">التزامات عليك ◂</span><span class="tnum" style="font-weight:600">60,000.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d"><span style="color:#575351">ذهب — تقدير بسعرك ◂</span><span class="tnum" style="font-weight:600;color:#8a5a00">242,500.00</span></div>
+          <div style="padding:12px 16px;font-size:11.5px;color:#575351;line-height:1.85">الأرقام دي معروضة عشان تاخدها لحد يفتيك. مفيش سطر بيقول «زكاتك كذا» — ومفيش نصاب مكتوب في الكود. ◂</div>
+        </div>
+        <div class="gh">اللي اتدفع السنة دي ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">زكاة</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span class="tnum">2026/03/22</span> · من بنك مصر ◂</span></span>
+            <span class="tnum" style="font-size:15px;font-weight:600;color:#ae1800">− 2,400.00</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;min-height:64px"><span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">صدقة</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span class="tnum">2026/07/11</span> · من مدخرات المنزل ◂</span></span>
+            <span class="tnum" style="font-size:15px;font-weight:600;color:#ae1800">− 500.00</span></div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.85">الاتنين مصروف في السجل — «زكاة» و«صدقة» نوعين عمليات مستقلين، فبيتفلتروا لوحدهم من غير ما تعمل فئة. والصدقة بتقدر تسجّلها مجهولة من غير جهة. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn">سجّل زكاة ◂</span>
+          <span class="btn2">سجّل صدقة ◂</span>
+        </div>
+      </div>
+      <p class="note"><strong>The feature is a refusal with a table attached.</strong> Zakat depends on the nisab, the lunar year, what counts as zakatable and how debt is treated — all of which are matters of scholarly judgement that differ between people. An app that prints «زكاتك <span class="tnum">2,525.00</span>» has quietly issued a fatwa. So the screen shows the figures a person or their sheikh would ask for — assets, what is held, what is protected, what is owed, and the gold estimate flagged as an estimate — and stops. <strong>The two operation types already exist and are already localised</strong>, which means zakat and sadaqah are filterable and reportable from day one without a category. <strong>The protected line is there for a reason:</strong> a child's money is the classic case where the answer differs by school, and the app must surface it rather than silently include or exclude it.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AG · AH</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Voice entry, and the lock</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The two patterns where the product's rules are hardest to hold: a machine proposing a ledger write, and a screen that must hide money from someone standing next to you.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AG1 · Arabic voice entry · light · RTL — proposal, never a write</div>
+      <div class="ph">
+        <div style="height:104px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 14px;border-bottom:1px solid #c3bfbe">
+            <div style="font-size:20px;font-weight:600;line-height:1.4">اللي سمعناه ◂</div>
+            <div style="font-size:15px;line-height:1.95;color:#575351;margin-top:8px">«صرفت مية وتسعين جنيه بقالة من محفظة هناء النهاردة»</div>
+          </div>
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 16px">
+            <div style="font-size:12.5px;line-height:1.85">ده اقتراح — مفيش حاجة اتسجّلت لحد ما تأكّد. راجع كل سطر. ◂</div>
+          </div>
+          <div class="gh">الاقتراح ◂</div>
+          <div style="background:#fff;border-bottom:2px solid #201e1d">
+            <div class="lr"><span style="color:#575351">المبلغ</span><span class="tnum" style="font-weight:700;font-size:15px">190.00</span></div><!-- «المبلغ» is a carried ARB value (goalAmount / certificateAmount), listed in bucket 1 -->
+            <div class="lr"><span style="color:#575351">النوع ◂</span><span style="font-weight:600">مصروف</span></div>
+            <div class="lr"><span style="color:#575351">الفئة ◂</span><span style="font-weight:600">بقالة ◂ <span style="font-size:11px;color:#8a5a00">· ثقة متوسطة ◂</span></span></div>
+            <div class="lr"><span style="color:#575351">الحساب ◂</span><span style="font-weight:600">محفظة الزوجة — هناء</span></div>
+            <div class="lr"><span style="color:#575351">التاريخ ◂</span><span class="tnum" style="font-weight:600">2026/07/26</span></div>
+            <div class="lr" style="border-bottom:none;background:#f8eeda"><span style="color:#8a5a00">المنفق ◂</span><span style="font-weight:600;color:#8a5a00">مش متأكدين — اختار ◂</span></div>
+          </div>
+          <div style="padding:13px 16px;font-size:11.5px;color:#575351;line-height:1.85">اللي التطبيق مش متأكد منه بيبان أصفر ومحطوط عليه سؤال — مش متملّي بأقرب حاجة. ◂</div>
+          <div style="height:2px;background:#201e1d"></div>
+          <div style="padding:13px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn">راجع واحفظ ◂</span>
+            <span style="font-size:11px;color:#575351;line-height:1.75">بيوديك لشاشة المراجعة العادية — نفس الشاشة اللي بتيجي من الإدخال اليدوي، بنفس القواعد. الصوت مالوش طريق مختصر للسجل. ◂</span>
+            <span class="btn2">عدّل بنفسك ◂</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>One rule holds the whole pattern: the microphone fills a form, it does not write a row.</strong> The proposal lands in the same review screen the numpad produces, subject to the same validation, the same budget preview and the same «مش بيتحذف» consequence line — so there is exactly one path into the ledger and voice is a faster way to reach it, not a second one. <strong>Uncertainty is shown as uncertainty.</strong> A field the model guessed at low confidence is amber and asks; it is never silently filled with the most likely value, because a wrong spender on a household expense is invisible until the attribution report is wrong. <strong>Egyptian numerals spoken aloud</strong> — «مية وتسعين» — resolve to <span class="tnum">190.00</span> in Western digits, matching the numeral decision in §2. <strong>Not presentation work:</strong> speech-to-text, and a proposal model that returns per-field confidence rather than a single sentence.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AH1 · Lock and privacy mode · dark · RTL — two different secrets</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="flex:1;font-size:18px;font-weight:600">القفل والخصوصية ◂</span></div>
+        <div style="background:#221f1e;padding:16px;border-bottom:2px solid #8d8886">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">حاجتين مختلفتين، بيتخلطوا كتير ◂</div>
+          <div style="font-size:12.5px;color:#a8a3a0;line-height:1.9"><strong style="color:#f0edeb">القفل</strong> بيمنع حد يفتح التطبيق. <strong style="color:#f0edeb">وضع الخصوصية</strong> بيخفي المبالغ والتطبيق مفتوح — عشان حد واقف جنبك. ◂</div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">القفل ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="border-bottom-color:#4a4645"><span>بصمة أو وش ◂</span><span style="font-weight:600">مفعّل ◂</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span>رقم سري احتياطي ◂</span><span style="font-weight:600">متسجّل ◂</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span>يقفل بعد ◂</span><span style="font-weight:600"><span class="tnum">دقيقة</span> واحدة ◂</span></div>
+          <div style="padding:12px 16px;font-size:11.5px;color:#a8a3a0;line-height:1.85">القفل ده على التطبيق كله. سحب الأموال المحمية بيطلب تحقّق تاني حتى والتطبيق مفتوح — ده مش نفس القفل. ◂</div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">وضع الخصوصية ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:13px 16px;border-bottom:1px solid #4a4645">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px"><span style="font-size:12.5px;font-weight:600">شكله كده ◂</span><span style="font-size:12px;color:#a8a3a0">◎ في كل شاشة ◂</span></div>
+            <div style="background:#3a3635;padding:11px 12px;position:relative">
+              <span style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:repeating-linear-gradient(45deg,#7fafdd 0 3px,transparent 3px 7px)"></span>
+              <div style="padding-inline-start:8px">
+                <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#a8a3a0;margin-bottom:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg><span>احتياطيات الأهداف · غير قابل للصرف ◂</span></div>
+                <div style="display:flex;align-items:baseline;gap:7px"><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:20px;height:20px;background:#f0edeb"></span><span style="display:inline-block;width:28px;height:20px;background:#f0edeb"></span><span style="display:inline-block;width:20px;height:20px;background:#f0edeb"></span></span><span style="font-size:12px;color:#a8a3a0;font-weight:600">ج.م</span></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#a8a3a0;line-height:1.8;margin-top:8px">الأرقام بتختفي — والمنطقة والخط والهاتش والليبل بيفضلوا. يعني تفضل عارف إيه اللي ينفع يتصرف وإيه لأ من غير ما حد يشوف كام. ◂</div>
+          </div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span>يشتغل لوحده لما التطبيق يرجع ◂</span><span style="font-weight:600">لأ ◂</span></div>
+          <div class="lr" style="border-bottom:none"><span>يخفي في مبدّل التطبيقات ◂</span><span style="font-weight:600">أيوه ◂</span></div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.85">صورة مبدّل التطبيقات بتتغطّى بشاشة ساكنة — من غير حركة، عشان ما تلفتش نظر. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>Two mechanisms, one settings screen, and a sentence separating them.</strong> They get conflated because both are "hiding", but they answer different threats: the lock is about a phone in someone else's hands, privacy mode is about a phone in yours with someone reading over your shoulder. Different triggers, different durations, different affordances — and the guarded withdrawal's re-auth is a third thing again, which the board says so nobody merges them later. <strong>The masked specimen is the privacy contract, drawn once.</strong> Digits become an ink bar per group; region, rule, hatch, lock and label survive. Every masked board in this project — 10 · P5, 11 · M6, 12 · U6, 13 · X3, 14 · Y3, 15 · AB2, and later 17 · AI4, 18 · AJ4b and 19 · AK4b — is an instance of this one specimen. <strong>Privacy mode does not auto-arm on resume</strong>, because a mode that turns itself on trains the user to turn it off, and a habitually-dismissed mask protects nobody.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 3 · six patterns · 68 boards in the set</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Six boards: AC1, AD1, AE1, AF1, AG1, AH1.</strong> One per pattern, as the brief asked — enough to fix the rules, not enough to build from. Each names what is not presentation work.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Schema and query work these six imply:</strong> a gold-holdings table with quantity, karat, a manual gram price and its entry date; a liabilities feature with six debt types and a principal / interest / fee split per repayment; a month-end asset and liability snapshot for the net-worth series; a speech-to-text pipeline returning per-field confidence; and lock settings plus a privacy flag. <strong style="color:#f0edeb">No new operation types</strong> — all nine needed already exist and are localised in both files.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">What is left:</strong> bank reconciliation · the D2 gaps (chart primitives, date and category pickers, tabs, dialog and sheet anatomy, snackbar) · D5 adaptive last. Plus the two confirming reads: the three goal screens against 07 · L2–L3, and <code>categoryLabelFromCode</code> against 13 · X1.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Nine <code>OperationType</code> labels, verbatim and unmarked: <span style="unicode-bidi:isolate">«شراء ذهب»</span> <span style="unicode-bidi:isolate">«بيع ذهب»</span> <span style="unicode-bidi:isolate">«إنشاء التزام»</span> <span style="unicode-bidi:isolate">«سداد التزام»</span> <span style="unicode-bidi:isolate">«زكاة»</span> <span style="unicode-bidi:isolate">«صدقة»</span> <span style="unicode-bidi:isolate">«شراء أصل»</span> <span style="unicode-bidi:isolate">«بيع أصل»</span> <span style="unicode-bidi:isolate">«دخل فائدة»</span> — plus <span style="unicode-bidi:isolate">«تسوية»</span> and <span style="unicode-bidi:isolate">«رصيد افتتاحي»</span> quoted in prose. Also three of the four nav labels — «الرئيسية» «التخطيط» «المزيد» from <code>nav*</code> — «الديون» is <em>not</em> among them and carries ◂ on both boards, because <code>navDebts</code> does not exist yet — and «مصروف», «المبلغ» (<code>goalAmount</code> / <code>certificateAmount</code>), «احتياطيات الأهداف» and «محفظة الزوجة — هناء» carried from earlier documents. <strong style="color:#f0edeb">That is all.</strong> Every screen in this document is greenfield, so bucket 1 is nine words long and bucket 2 is nearly everything.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every screen title, every field label, every explanatory sentence, every state name, and the two settings screens in full. If a framed string has no ◂ and is not one of the nine operation labels, that is a defect in this document. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — account, member and product names, amounts, dates, quantities, <strong style="color:#f0edeb">and text the household typed or spoke, including AG1's transcript «صرفت مية وتسعين جنيه بقالة من محفظة هناء النهاردة»</strong> — and the English annotation outside the frames. Same clause as 14's «رسوم مدرسة»: what a person said is data, not copy. Per your call: MSA for labels, Egyptian for explanation. <strong style="color:#f0edeb">The ARB cost of Tier 3 is therefore large and not yet counted</strong>; it belongs in D6's key table, not in a status line.</span>
+        <strong style="color:#ff9783">In flight</strong><span><strong style="color:#f0edeb">«صافي الثروة» becomes legal</strong> the day liabilities ship — until then the dashboard strip stays «إجمالي الأصول», and AE1 is the only screen allowed to use the other name. Carried from 13–15: a period-vs-live key; four flow-row keys and two subset keys; <code>reportGrossExpense</code> / <code>reportGrossIncome</code> doing two jobs; delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>/<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>. Nav: «الحركات», <code>navDebts</code> — <strong style="color:#f0edeb">which AD1 is the screen for</strong> — and Reports in «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked nine times:</strong> are there golden or screenshot tests among the 1,594?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

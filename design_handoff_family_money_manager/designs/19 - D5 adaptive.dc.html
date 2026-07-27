@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:40px}
+.rt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+.rt th{text-align:start;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351;padding:9px 10px;border-bottom:2px solid #201e1d}
+.rt td{padding:9px 10px;border-bottom:1px solid #c3bfbe;vertical-align:top;line-height:1.55}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D5 — adaptive · the last deliverable</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Four widths,<br>one ledger.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Six boards, section AK. Phone is the design target and everything else is derivation — which is why this is last. <strong style="color:#201e1d">The two structural changes are the rail and the second pane;</strong> everything else is margin, measure and reflow. Grounded in what the set already fixed: content widths <span class="tnum">720</span> and <span class="tnum">960</span>, margins <span class="tnum">16</span>&nbsp;/&nbsp;<span class="tnum">20</span>&nbsp;/&nbsp;<span class="tnum">24</span>, and D6's <code>railBreakpoint</code> move from <span class="tnum">840</span> to <span class="tnum">905</span>.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#e6eef6">
+  <h3 style="margin:0 0 12px;font-size:19px;letter-spacing:-.01em">The ladder — four widths and what actually changes</h3>
+  <table class="rt" style="background:transparent">
+    <tr><th>الفئة</th><th>العرض</th><th>الهامش</th><th>التنقّل</th><th>البنية</th><th>ما لا يتغيّر</th></tr>
+    <tr><td><strong>Compact</strong><br><span style="color:#575351">360–429 dp</span></td><td class="tnum">360</td><td class="tnum">16</td><td>شريط سفلي · خمسة</td><td>عمود واحد</td><td rowspan="4" style="vertical-align:top;color:#575351">قواعد النقد كلها: المناطق المفصولة، الهاتش، القفل، التمويه لكل مجموعة أرقام، الجدول قبل الرسم، سطر النتيجة تحت الفعل الأساسي، و<span class="tnum">48</span> dp حد أدنى للمس.</td></tr>
+    <tr><td><strong>Large phone</strong><br><span style="color:#575351">430–904 dp</span></td><td class="tnum">430</td><td class="tnum">20</td><td>شريط سفلي · خمسة</td><td>عمود واحد، أوسع</td></tr>
+    <tr><td><strong>Tablet</strong><br><span style="color:#575351">905–1279 dp</span></td><td class="tnum">905</td><td class="tnum">24</td><td><strong>رِيل جانبي</strong></td><td><strong>لوحتان</strong> · قائمة + تفصيل</td></tr>
+    <tr><td><strong>Desktop</strong><br><span style="color:#575351">1280 dp فأكثر</span></td><td class="tnum">1280</td><td class="tnum">24</td><td>رِيل جانبي، ممتد</td><td>لوحتان بحد أقصى للعرض</td></tr>
+  </table>
+  <p style="font-size:12.5px;line-height:1.7;color:#575351;margin:14px 0 0;max-width:1000px"><strong style="color:#201e1d">The breakpoint moves from <span class="tnum">840</span> to <span class="tnum">905</span> for one reason:</strong> a <span class="tnum">840</span> dp threshold catches large phones in landscape, and a rail on a phone held sideways is a rail nobody can reach. <span class="tnum">905</span> is above every phone landscape width and below every tablet portrait width. <strong style="color:#201e1d">Two panes never become three.</strong> A third pane would need a screen this product does not have — every detail here is terminal, and the ledger's answer to "more depth" is a drill-down, not another column.</p>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AK</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Adaptive — six boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The dashboard carries the first three boards because it is the screen with the most regions to reflow, and the transaction list carries the two-pane case because it is the only place a detail view is opened repeatedly.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AK1 · Compact 360 → large phone 430 · light · RTL — margin, not layout</div>
+      <div class="ph" style="width:820px;direction:rtl">
+        <div style="display:flex">
+          <div style="width:376px;border-inline-end:2px solid #201e1d">
+            <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">COMPACT · <span class="tnum">360</span> dp · هامش <span class="tnum">16</span></div>
+            <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:14px 16px">
+              <div style="font-size:12px;color:#575351;margin-bottom:4px">المتاح للصرف ◂</div>
+              <div class="tnum" style="font-size:34px;font-weight:700;line-height:1.2">32,550.00</div>
+            </div>
+            <div class="gh">محتجز ◂</div>
+            <div style="background:#fff;border-bottom:2px solid #201e1d">
+              <div class="lr"><span style="color:#575351">احتياطي الأهداف ◂</span><span class="tnum" style="font-weight:600">13,600.00</span></div>
+              <div class="lr" style="border-bottom:none"><span style="color:#575351">أصل الشهادة ◂</span><span class="tnum" style="font-weight:600">47,900.00</span></div>
+            </div>
+            <div style="background:#fff;padding:12px 16px;border-bottom:2px solid #201e1d">
+              <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:12.5px;font-weight:600;padding:12px;min-height:48px;display:flex;align-items:center">مصروف ◂</span><span style="flex:1;border:1px solid #201e1d;font-size:12.5px;font-weight:600;padding:12px;min-height:48px;display:flex;align-items:center">دخل ◂</span></div>
+              <div style="font-size:10.5px;color:#575351;line-height:1.6;margin-top:7px">فعلين جنب بعض — التالت في «المزيد» ◂</div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">LARGE PHONE · <span class="tnum">430</span> dp · هامش <span class="tnum">20</span></div>
+            <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:16px 20px">
+              <div style="font-size:12px;color:#575351;margin-bottom:4px">المتاح للصرف ◂</div>
+              <div class="tnum" style="font-size:34px;font-weight:700;line-height:1.2">32,550.00</div>
+            </div>
+            <div class="gh" style="padding:9px 20px">محتجز ◂</div>
+            <div style="background:#fff;border-bottom:2px solid #201e1d">
+              <div class="lr" style="padding:9px 20px"><span style="color:#575351">احتياطي الأهداف ◂</span><span class="tnum" style="font-weight:600">13,600.00</span></div>
+              <div class="lr" style="padding:9px 20px;border-bottom:none"><span style="color:#575351">أصل الشهادة ◂</span><span class="tnum" style="font-weight:600">47,900.00</span></div>
+            </div>
+            <div style="background:#fff;padding:12px 20px;border-bottom:2px solid #201e1d">
+              <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:12.5px;font-weight:600;padding:12px;min-height:48px;display:flex;align-items:center">مصروف ◂</span><span style="flex:1;border:1px solid #201e1d;font-size:12.5px;font-weight:600;padding:12px;min-height:48px;display:flex;align-items:center">دخل ◂</span><span style="flex:1;border:1px solid #201e1d;font-size:12.5px;font-weight:600;padding:12px;min-height:48px;display:flex;align-items:center">تحويل ◂</span></div>
+              <div style="font-size:10.5px;color:#575351;line-height:1.6;margin-top:7px">التالت بيظهر — نفس الأزرار، مساحة أكتر ◂</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#f3f2f2;font-size:11.5px;color:#575351;line-height:1.85">الفرق الوحيد الحقيقي بين العرضين: الهامش <span class="tnum">16</span> ← <span class="tnum">20</span>، وفعل تالت بيلاقي مكانه. مفيش عمود بيتزوّد ومفيش منطقة بتتقسم. ◂</div>
+      </div>
+      <p class="note"><strong>Two widths that share a layout are one layout.</strong> The temptation at <span class="tnum">430</span> dp is to split the held region into two columns; the reason not to is §3's whole argument — spendable and held live in <em>physically separate stacked regions</em>, and side-by-side reads as a comparison rather than a separation. So the extra <span class="tnum">70</span> dp goes to margin and to surfacing the third action, which on compact lives behind «المزيد». <strong>Nothing rewraps at 200% text scale</strong> because nothing here depends on fitting three things across.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AK2 · Tablet 905 · light · RTL — rail replaces bar, list beside detail</div>
+      <div class="ph" style="width:820px">
+        <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">TABLET · <span class="tnum">905</span> dp · هامش <span class="tnum">24</span> · رِيل + لوحتان</div>
+        <div style="display:flex;min-height:430px">
+          <div style="width:96px;background:#fff;border-inline-start:2px solid #201e1d;flex:none;order:2">
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">الرئيسية</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;font-weight:600;background:#eae9e9;border-inline-end:3px solid #201e1d;border-bottom:1px solid #c3bfbe">الحركات ◂</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">التخطيط</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">الديون ◂</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351">المزيد</div>
+          </div>
+          <div style="width:300px;border-inline-start:2px solid #201e1d;flex:none;order:1;background:#f3f2f2">
+            <div style="padding:8px 14px;background:#dedbda;font-size:11px;font-weight:600;border-bottom:1px solid #c3bfbe">السبت <span class="tnum">2026/07/25</span> ◂</div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 14px;min-height:64px;display:flex;gap:10px;align-items:center;outline:2px solid #201e1d;outline-offset:-2px">
+              <span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600">بنك مصر — الراتب</span><span style="display:block;font-size:10.5px;color:#575351">بقالة · أحمد ◂</span></span>
+              <span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">− 260.00</span>
+            </div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 14px;min-height:64px;display:flex;gap:10px;align-items:center">
+              <span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600">محفظة الزوجة — هناء</span><span style="display:block;font-size:10.5px;color:#575351">بقالة · هناء ◂</span></span>
+              <span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">− 160.00</span>
+            </div>
+            <div style="background:#fff;padding:11px 14px;min-height:64px;display:flex;gap:10px;align-items:center">
+              <span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#605d5d 0 2px,transparent 2px 5px);flex:none"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600">تحويل لمدخرات المنزل ◂</span><span style="display:block;font-size:10.5px;color:#575351">تحويل داخلي ◂</span></span>
+              <span class="tnum" style="font-size:14px;font-weight:600;color:#605d5d">⇄ 6,000.00</span>
+            </div>
+          </div>
+          <div style="flex:1;order:0;background:#fff;border-inline-start:2px solid #201e1d">
+            <div style="padding:18px 24px;border-bottom:2px solid #201e1d">
+              <div style="display:flex;gap:7px;margin-bottom:11px"><span style="background:#fdeae6;color:#ae1800;font-size:11px;font-weight:600;padding:4px 9px">مصروف ↑</span></div>
+              <div class="tnum" style="font-size:34px;font-weight:700;line-height:1.2;color:#ae1800">− 260.00</div>
+              <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:5px">جنيه مصري · بقالة · <span class="tnum">2026/07/25</span> ◂</div>
+            </div>
+            <div style="border-bottom:2px solid #201e1d">
+              <div class="lr" style="padding:9px 24px"><span style="color:#575351">الحساب ◂</span><span style="font-weight:600">بنك مصر — الراتب</span></div>
+              <div class="lr" style="padding:9px 24px"><span style="color:#575351">المنفق ◂</span><span style="font-weight:600">أحمد</span></div>
+              <div class="lr" style="padding:9px 24px;border-bottom:none"><span style="color:#575351">النطاق ◂</span><span style="font-weight:600">المنزل</span></div>
+            </div>
+            <div style="padding:14px 24px;font-size:11.5px;color:#575351;line-height:1.85">اللوحة اليمين بتفضل مكانها والتفصيل بيتغيّر — مفيش دفع ولا رجوع. زر الرجوع في اللوحة دي مالوش لزوم، فمش موجود. ◂</div>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>The rail is the bottom bar rotated, not a new information architecture.</strong> Same five destinations, same order, same ink-and-rule selection — an <code>inline-end</code> 3 px rule instead of a top one. Reordering or adding on tablet would give one household two mental models of the same app. <strong>The list keeps its full row anatomy at <span class="tnum">300</span> dp</strong> — edge, direction glyph, amount, meta — because a narrower list that drops the direction edge would break the grammar §4 makes normative. <strong>Selection is an inset 2 px ink outline</strong>, not a fill: a filled row in a money list reads as a state of the money. <strong>And the detail pane has no back button</strong>, because nothing was pushed; on phone the same screen is a route, here it is a region.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AK3 · Desktop 1280 · light · RTL — measure, not more panes</div>
+      <div class="ph" style="width:820px">
+        <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">DESKTOP · <span class="tnum">1280</span> dp مصغّرة للعرض · لوحتان بحد أقصى ◂</div>
+        <div style="display:flex;min-height:300px">
+          <div style="width:78px;background:#fff;border-inline-start:2px solid #201e1d;flex:none;order:2">
+            <div style="padding:12px 5px;text-align:center;font-size:9.5px;color:#575351;border-bottom:1px solid #c3bfbe">الرئيسية</div>
+            <div style="padding:12px 5px;text-align:center;font-size:9.5px;color:#575351;border-bottom:1px solid #c3bfbe">الحركات ◂</div>
+            <div style="padding:12px 5px;text-align:center;font-size:9.5px;font-weight:600;background:#eae9e9;border-inline-end:3px solid #201e1d;border-bottom:1px solid #c3bfbe">التخطيط</div>
+            <div style="padding:12px 5px;text-align:center;font-size:9.5px;color:#575351;border-bottom:1px solid #c3bfbe">الديون ◂</div>
+            <div style="padding:12px 5px;text-align:center;font-size:9.5px;color:#575351">المزيد</div>
+          </div>
+          <div style="flex:1;order:1;background:#dedbda;display:flex;justify-content:center;padding:16px 0">
+            <div style="width:560px;background:#f3f2f2;border:2px solid #201e1d">
+              <div style="background:#fff;padding:14px 24px;border-bottom:2px solid #201e1d">
+                <div style="font-size:17px;font-weight:600">مصاريف مدرسة يوسف</div>
+                <div style="font-size:11.5px;color:#575351;margin-top:4px">تعليم · المستفيد يوسف أحمد ◂</div>
+              </div>
+              <div style="background:#fff;border-bottom:2px solid #201e1d">
+                <div class="lr" style="padding:9px 24px"><span style="color:#575351">المحجوز</span><span class="tnum" style="font-weight:600">13,600.00</span></div>
+                <div class="lr" style="padding:9px 24px;border-bottom:none"><span style="color:#575351">المبلغ المستهدف</span><span class="tnum" style="font-weight:600">13,000.00</span></div>
+              </div>
+              <div style="padding:12px 24px;font-size:11px;color:#575351;line-height:1.75">المحتوى محدود بـ<span class="tnum">720</span> dp للتفصيل و<span class="tnum">960</span> للقوايم — الباقي أرضية. ◂</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#f3f2f2;font-size:11.5px;color:#575351;line-height:1.85">على الديسكتوب مفيش لوحة تالتة ومفيش أعمدة جديدة — القياس بيتقفل والزيادة بتبقى أرضية. سطر بعرض <span class="tnum">1200</span> بكسل مش أسهل في القراية، هو أصعب. ◂</div>
+      </div>
+      <p class="note"><strong>The desktop board's content is deliberately the same as the tablet's.</strong> Content widths of <span class="tnum">720</span> for detail and <span class="tnum">960</span> for lists are already fixed in §2 and unchanged by this deliverable, so past <span class="tnum">1280</span> dp the only thing that grows is the ground. <strong>The rail narrows rather than expanding into labels-beside-icons:</strong> five destinations do not need <span class="tnum">200</span> dp, and a wide rail buys nothing but a longer travel to the content. <strong>No third pane, no master-detail-detail</strong> — the ledger's depth model is a drill-down that replaces the detail pane, and every detail in this product is terminal.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AK4 · iOS and Android · light · RTL — where the platforms diverge</div>
+      <div class="ph" style="width:820px">
+        <div style="display:flex">
+          <div style="flex:1;border-inline-end:2px solid #201e1d">
+            <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">iOS</div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">الرجوع بالسحب ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">في RTL السحب بيبدأ من الحافة <strong>اليمين</strong> والصفحة بتزحف لليسار. ده انعكاس كامل لسلوك LTR — ولو ما اتعكسش، الإيماءة بتشتغل من الحافة الغلط وتحسّ إن التطبيق مش عربي. ◂</div>
+            </div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">الشيتات ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">نفس التشريح، بس السحب لتحت بيقفل — فأي شيت فيه حقول متكتوبة بيسأل قبل ما يقفل، زي زرار الرجوع بالظبط. ◂</div>
+            </div>
+            <div style="background:#fff;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">الهابتكس ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">خفيف للكيباد والشيبس، متوسط للكتابة الناجحة، تقيل لحاجتين بس: السحب المحمي والعكس. ◂</div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">ANDROID</div>
+            <div style="background:#fdeae6;border-bottom:1px solid #c3bfbe;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px;color:#ae1800">الرجوع التنبّئي محتاج عيب D4 · 3 يتصلّح ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">الرجوع التنبّئي بيعرض الشاشة اللي وراك وإنت بتسحب. دلوقتي شاشات التفصيل بتتفتح جوه الفرع بدل ما تتدفع فوق الشِل، فاللي بيبان وراها الشِل بشريطه — مش الشاشة اللي جاي منها. ◂</div>
+            </div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">لقطة مبدّل التطبيقات ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">بتتغطّى بشاشة ساكنة — نفس قرار وضع الخصوصية في 16 · AH1، وده مش موجود في iOS بنفس الشكل. ◂</div>
+            </div>
+            <div style="background:#fff;padding:13px 16px">
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">اللي ما يختلفش ◂</div>
+              <div style="font-size:12px;color:#575351;line-height:1.85">الألوان، الخطوط، الحواف الصفر، القواعد <span class="tnum">2</span> بكسل، الحركة <span class="tnum">280</span> ms، وكل قواعد النقد. مفيش «نسخة أندرويد» من الشكل. ◂</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#f3f2f2;font-size:11.5px;color:#575351;line-height:1.85">الاختلاف كله في <strong>الإيماءات ولقطة النظام</strong>. أي اختلاف في الشكل نفسه بيبقى منتجين مش منتج واحد. ◂</div>
+      </div>
+      <p class="note"><strong>Platform divergence is scoped to gestures and system surfaces, and nothing else.</strong> Two behaviours differ: the iOS edge-swipe must mirror in RTL — starting from the right edge — and Android's predictive back reveals the destination behind the current screen, which only looks right once D4's defect 3 lands and detail screens push above the shell. <strong>The app-switcher cover is Android-specific in practice</strong> and is the same still-screen decision 16 · AH1 fixed for privacy mode. <strong>Everything visual stays identical.</strong> A "more Android" or "more iOS" treatment of the same ledger would produce two products, and the household that uses both would learn each twice.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AK4b · Tablet two-pane · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="width:820px;direction:ltr;font-family:'Archivo',sans-serif">
+        <div style="background:#201e1d;color:#f3f2f2;padding:7px 12px;font-size:10.5px;letter-spacing:.06em">TABLET · 905 dp · LTR — the rail moves to the leading edge</div>
+        <div style="display:flex;min-height:330px">
+          <div style="width:96px;background:#fff;border-inline-end:2px solid #201e1d;flex:none;order:2">
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">Home</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;font-weight:600;background:#eae9e9;border-inline-start:3px solid #201e1d;border-bottom:1px solid #c3bfbe">Activity ◂</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">Planning</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351;border-bottom:1px solid #c3bfbe">Debts ◂</div>
+            <div style="padding:14px 6px;text-align:center;font-size:10px;color:#575351">More</div>
+          </div>
+          <div style="width:300px;border-inline-end:2px solid #201e1d;flex:none;order:1;background:#f3f2f2">
+            <div style="padding:8px 14px;background:#dedbda;font-size:11px;font-weight:600;border-bottom:1px solid #c3bfbe">Sat 25 Jul 2026 ◂</div>
+            <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 14px;min-height:64px;display:flex;gap:10px;align-items:center;outline:2px solid #201e1d;outline-offset:-2px">
+              <span style="width:4px;align-self:stretch;background:#ae1800;flex:none"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:800">Banque Misr — Salary</span><span style="display:block;font-size:10.5px;color:#575351">Groceries · Ahmed ◂</span></span>
+              <span style="display:inline-flex;gap:4px;align-items:baseline"><span style="color:#ae1800;font-weight:600;font-size:12px">−</span><span style="display:inline-block;width:17px;height:10px;background:#ae1800"></span><span style="display:inline-block;width:22px;height:10px;background:#ae1800"></span></span>
+            </div>
+            <div style="background:#fff;padding:11px 14px;min-height:64px;display:flex;gap:10px;align-items:center">
+              <span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#605d5d 0 2px,transparent 2px 5px);flex:none"></span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:800">Transfer to home savings ◂</span><span style="display:block;font-size:10.5px;color:#575351">Internal transfer ◂</span></span>
+              <span style="display:inline-flex;gap:4px;align-items:baseline"><span style="color:#605d5d;font-weight:600;font-size:12px">⇄</span><span style="display:inline-block;width:20px;height:10px;background:#605d5d"></span><span style="display:inline-block;width:26px;height:10px;background:#605d5d"></span></span>
+            </div>
+          </div>
+          <div style="flex:1;order:0;background:#fff">
+            <div style="padding:18px 24px;border-bottom:2px solid #201e1d">
+              <div style="display:flex;gap:7px;margin-bottom:11px"><span style="background:#fdeae6;color:#ae1800;font-size:11px;font-weight:600;letter-spacing:.02em;padding:4px 9px">EXPENSE ↑</span></div>
+              <div style="display:flex;align-items:baseline;gap:8px"><span style="color:#ae1800;font-weight:800;font-size:26px">−</span><span style="display:inline-flex;gap:6px"><span style="display:inline-block;width:30px;height:24px;background:#ae1800"></span><span style="display:inline-block;width:40px;height:24px;background:#ae1800"></span></span></div>
+              <div style="font-size:11.5px;color:#575351;line-height:1.6;margin-top:7px">EGP · Groceries · 25 Jul 2026 ◂</div>
+            </div>
+            <div style="border-bottom:2px solid #201e1d">
+              <div class="lr" style="padding:9px 24px;font-family:'Archivo',sans-serif"><span style="color:#575351">Account ◂</span><span style="font-weight:600">Banque Misr — Salary</span></div>
+              <div class="lr" style="padding:9px 24px;font-family:'Archivo',sans-serif"><span style="color:#575351">Spender ◂</span><span style="font-weight:600">Ahmed</span></div>
+              <div class="lr" style="padding:9px 24px;border-bottom:none;font-family:'Archivo',sans-serif"><span style="color:#575351">Scope ◂</span><span style="font-weight:600">Household</span></div>
+            </div>
+            <div style="padding:14px 24px;font-size:11.5px;color:#575351;line-height:1.7">Names, dates, categories and the direction glyph stay legible; only amounts mask. A two-pane ledger under privacy mode still answers <em>what happened</em> — it withholds <em>how much</em>. ◂</div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#f3f2f2;font-size:11px;color:#575351;line-height:1.7">The rail sits at the leading edge in both directions — right in RTL, left here — because it is chrome, not content. The list stays adjacent to it and the detail pane takes the far side, so the reading order is rail → list → detail in whichever direction the language runs.</div>
+      </div>
+      <p class="note" style="margin-bottom:26px"><strong>The board AK2 was asserting without showing.</strong> The two-pane arrangement is built from <code>order</code> and <code>border-inline-*</code>, so it mirrors wholesale — and the thing worth checking is that the <em>sequence</em> survives: rail, then list, then detail, reading outward from the leading edge in both languages. Flipping only the panes while pinning the rail would put navigation in the middle of the screen. <strong>Masking behaves exactly as on phone</strong> — per digit group, sign and role tint kept — which is the point of testing it here: a wider layout is not a reason to show more money. <strong>This board joins the masked-board set indexed at 16 · AH1</strong>, alongside 10 · P5, 11 · M6, 12 · U6, 13 · X3, 14 · Y3, 15 · AB2, 17 · AI4 and 18 · AJ4b.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AK5 · What must not adapt · dark · RTL — the closed list</div>
+      <div class="ph" style="width:390px;background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">ثابت في كل العروض ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">فصل المتاح عن المحتجز ◂</span><span style="font-weight:600">منطقتان دايمًا</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الهاتش والقفل ◂</span><span style="font-weight:600">مايتشالوش</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الجدول قبل الرسم ◂</span><span style="font-weight:600">في كل عرض</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">سطر النتيجة ◂</span><span style="font-weight:600">تحت الفعل</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">حد اللمس ◂</span><span class="tnum" style="font-weight:600">48 dp</span></div>
+          <div class="lr" style="border-bottom:none"><span style="color:#a8a3a0">تكبير النص ◂</span><span class="tnum" style="font-weight:600">200٪ بلا قص</span></div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">اللي بيتغيّر — وبس ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الهامش ◂</span><span class="tnum" style="font-weight:600">16 · 20 · 24</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">التنقّل ◂</span><span style="font-weight:600">شريط ← رِيل</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">التفصيل ◂</span><span style="font-weight:600">مسار ← لوحة</span></div>
+          <div class="lr" style="border-bottom:none"><span style="color:#a8a3a0">الأفعال الظاهرة ◂</span><span class="tnum" style="font-weight:600">2 ← 3</span></div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.9">القايمة اليمين قصيرة بالقصد. كل صف فيها اتفتح عليه نقاش في وثيقة قبل كده، ولو أي واحد فيهم اتغيّر مع العرض، المستخدم بيتعلّم التطبيق مرتين. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;font-size:11.5px;color:#a8a3a0;line-height:1.85">التكيّف عند الحد ده: مسافة، وتنقّل، وعدد اللوحات. مفيش قاعدة نقدية بتتغيّر مع عرض الشاشة. ◂</div>
+      </div>
+      <p class="note"><strong>The board that makes the deliverable finishable.</strong> An adaptive spec without a closed list of invariants is an invitation to redesign each screen per width, which is how a product ends up with a tablet layout that quietly drops the held-money separation because "there was room to combine them". <strong>Six invariants, four variables.</strong> Everything in the left column was argued in an earlier document — the separated regions in 01 and 03, the hatch and lock in 04 and 05, table-before-chart in 13, the consequence line in 04, the touch target and text scale in 01 — and this board's only job is to state that none of them is negotiable at any width.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">D5 closed · 85 boards · every deliverable drawn</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Six boards: AK1–AK4, AK4b, AK5.</strong> D1 language · D2 components and the six gaps · D3 screens across Tier 1, Tier 2 and Tier 3 patterns · D4 IA and routes · D5 adaptive · D6 handoff and migration. <strong style="color:#f0edeb">Both special moments and all seven reports included.</strong></p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Two reads still owed, both confirmatory:</strong> <code>goal_detail_screen.dart</code>, <code>fund_goal_screen.dart</code> and <code>release_goal_screen.dart</code> against 07 · L2–L3 — the only boards in the set drawn from domain and ARB without their screen — and <code>categoryLabelFromCode</code>, which 13 · X1 and 18 · AJ3 both stand in for. Neither blocks a phase.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">D6's phase table is the last artefact to finalise</strong>, and it is waiting on one answer, not on more design.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>The nav labels «الرئيسية» «التخطيط» «المزيد» (<code>nav*</code>), «المحجوز» (<code>goalReserveBalance</code>), «المبلغ المستهدف» (<code>goalTarget</code>), and the account and member names carried as fixture. <strong style="color:#f0edeb">That is all</strong> — an adaptive spec introduces almost no copy, which is itself the point: if a width needed new words, the layout would be doing something the phone layout does not.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every breakpoint label, section heading, invariant row, platform note, «الحركات» and «الديون» for the reasons they always carry it, and every explanatory sentence. If a framed string has no ◂ and is not in bucket 1, that is a defect in this document. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — account, member and goal names, amounts, dates — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span><code>railBreakpoint</code> <span class="tnum">840</span> → <span class="tnum">905</span>, which D6 already schedules in phase 9 alongside the nav change. Carried and unchanged: a period-vs-live key; four flow-row keys and two subset keys; <code>reportGrossExpense</code>&nbsp;/&nbsp;<code>reportGrossIncome</code> doing two jobs; delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>&nbsp;/&nbsp;<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>; and the nav set — «الحركات», <code>navDebts</code>, Reports into «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Asked twelve times, and now it is the only thing outstanding:</strong> are there golden or screenshot tests among the 1,594? If not, migration phases 1 and 2 ship together and typography is the only expensive phase. With every deliverable drawn, this single answer is what stands between the set and a costed build plan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

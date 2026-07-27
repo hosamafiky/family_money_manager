@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.rt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+.rt th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351;padding:9px 10px;border-bottom:2px solid #201e1d;vertical-align:bottom}
+.rt td{padding:9px 10px;border-bottom:1px solid #c3bfbe;vertical-align:top;line-height:1.5}
+.rt code{font-size:11.5px}
+.sw{display:inline-block;width:16px;height:16px;vertical-align:-3px;margin-inline-end:5px;border:1px solid rgba(0,0,0,.15)}
+.t1{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#fdeae6;color:#ae1800}
+.t2{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#f8eeda;color:#8a5a00}
+.t3{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#e3efef;color:#0e5a44}
+.t4{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#eae9e9;color:#575351}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D6 · Implementation handoff and migration</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Every token, every phase,<br>and what actually breaks.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:800px;margin:0;color:#575351">Written against <code>app_theme.dart</code> and <code>app_theme_extensions.dart</code> read in full — not the brief's summary of them. Three facts in those files change the plan materially, and they're the first thing below. A prep phase plus nine, each shippable. Every existing role name preserved.</p>
+</header>
+
+<!-- ═══ 1. WHAT THE THEME ACTUALLY IS ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">01</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Three facts the brief didn't mention, and they matter</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:900px;margin:0 0 26px">The brief listed the token role names and their current values. It did not say <em>how</em> those values are produced, and that turns out to be the whole shape of the migration.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 28px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">FACT 1</div>
+      <h4 style="margin:0 0 10px">Eight of the sixteen colour roles are <em>derived</em>, not literal.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The brief quoted seven hex values and implied the rest were the same kind of thing. They aren't. <code>primaryAction</code>, <code>neutralInfo</code>, <code>mainSurface</code>, <code>secondarySurface</code>, <code>divider</code>, <code>primaryText</code>, <code>secondaryText</code> and <code>disabled</code> all read off <code>ColorScheme.fromSeed(0xFF1A6B3C)</code> — <code>scheme.primary</code>, <code>scheme.surface</code>, <code>scheme.outlineVariant</code> and so on. <code>disabled</code> isn't even a colour, it's <code>onSurface.withValues(alpha: 0.38)</code>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Consequence:</strong> you cannot drop the new palette in as values. Either the seed changes (and every derived tone moves with it, including the eight roles above <em>and</em> every stock M3 widget), or those eight roles stop deriving and take literals. <strong>I recommend literals</strong>: the Modernist ground is a warm near-grey that M3's tonal algorithm will not produce from any seed, and leaving surfaces derived means the design is at the mercy of Material's palette generator. Phase 1 makes all sixteen literal; the <code>ColorScheme</code> stays for stock widgets and gets a neutral seed.</p>
+    </div>
+    <div style="padding:22px 28px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">FACT 2</div>
+      <h4 style="margin:0 0 10px">The type scale is nothing like what the redesign needs, and two roles move violently.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Current <code>sectionTitle</code> is <strong class="tnum">18&nbsp;px / w600</strong>. The redesign's is <strong class="tnum">13&nbsp;px / w800 / uppercase</strong> — because Modernist's section heading is a small tracked label above a 2&nbsp;px rule, not a heading. That's a <strong>28% shrink</strong>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">In the other direction, <code>reportValue</code> is currently <strong class="tnum">15&nbsp;px / w500</strong> and becomes <strong class="tnum">20&nbsp;px / w800</strong> — a <strong>33% growth</strong>, because it carries the secondary-currency rows in the balance hero.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Also: <code>AppTextRoles.fromScheme</code> sets <strong>no font family at all</strong>. Adding Archivo and IBM Plex Sans Arabic isn't a value change, it's a <em>signature</em> change — the factory has to know the locale. See §04.</p>
+    </div>
+    <div style="padding:22px 0 22px 28px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">FACT 3</div>
+      <h4 style="margin:0 0 10px">There is no "ground" role — the scaffold uses <code>mainSurface</code>.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>scaffoldBackgroundColor: financial.mainSurface</code>. So today the page background and a card are the <em>same</em> colour, and card separation comes from a 12&nbsp;px radius plus a 50%-alpha outline. The redesign needs three distinct surfaces — ground, main, recessed — because the held-money region <em>is</em> the recessed one.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>Three new fields are unavoidable:</strong> <code>ground</code>, <code>recessedSurface</code> and <code>focusRing</code>. Those are the only additions to <code>AppFinancialColors</code> in the whole redesign — all 16 existing names stay, nothing is renamed, and adding is additive so no call site breaks.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Also worth knowing: <code>space2 = 2.0</code> and <code>space48 = 48.0</code> exist, marked deprecated. They're off the 4/8/12/16/20/24/32/40 scale. Phase 2 deletes them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2. COLOUR TOKENS ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">02</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Colour token table — <code style="font-size:22px">AppFinancialColors</code></h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:960px;margin:0 0 22px">All 16 names unchanged. "Current" is verbatim from <code>app_theme_extensions.dart</code>. Three rows at the end are additions — 19 roles total.</p>
+
+  <table class="rt">
+    <thead><tr><th style="width:150px">Role</th><th style="width:150px">Current light</th><th style="width:145px">New light</th><th style="width:145px">New dark</th><th style="width:230px">Usage rule</th><th>Migration note</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>primaryAction</code></td>
+        <td><code>scheme.primary</code><div style="color:#575351;font-size:11px">derived from seed</div></td>
+        <td><span class="sw" style="background:#201e1d"></span><span class="tnum">#201E1D</span><div style="color:#575351;font-size:11px">14.9:1</div></td>
+        <td><span class="sw" style="background:#f0edeb"></span><span class="tnum">#F0EDEB</span><div style="color:#575351;font-size:11px">15.3:1</div></td>
+        <td style="color:#575351">Solid fill on primary buttons, selected segments, focused input borders. Never on an amount.</td>
+        <td style="color:#575351"><strong>Stops deriving.</strong> Also unhooks it from <code>inputDecorationTheme.focusedBorder</code>, which currently draws a 1.5&nbsp;px border in <code>primaryAction</code> — an ink focus border is invisible against ink text. Focus moves to the ring in the row below (phase 1, §04).</td>
+      </tr>
+      <tr>
+        <td><code>income</code></td>
+        <td><span class="sw" style="background:#2e7d4f"></span><span class="tnum">#2E7D4F</span></td>
+        <td><span class="sw" style="background:#14555f"></span><span class="tnum">#14555F</span><div style="color:#575351;font-size:11px">7.5:1</div></td>
+        <td><span class="sw" style="background:#5fb8b0"></span><span class="tnum">#5FB8B0</span><div style="color:#575351;font-size:11px">7.6:1</div></td>
+        <td style="color:#575351">Inflow amounts, income marks, positive series. Always with <strong>↓&nbsp;in</strong> and a <strong>+</strong>.</td>
+        <td style="color:#575351">Green&nbsp;→&nbsp;teal. The single most important value change in the redesign: it moves the direction axis off the green–red pair both common dichromacies collapse.</td>
+      </tr>
+      <tr>
+        <td><code>expense</code></td>
+        <td><span class="sw" style="background:#b54a3f"></span><span class="tnum">#B54A3F</span></td>
+        <td><span class="sw" style="background:#ae1800"></span><span class="tnum">#AE1800</span><div style="color:#575351;font-size:11px">6.4:1</div></td>
+        <td><span class="sw" style="background:#ff9783"></span><span class="tnum">#FF9783</span><div style="color:#575351;font-size:11px">8.5:1</div></td>
+        <td style="color:#575351">Outflow amounts and destructive confirmation <em>only</em>.</td>
+        <td style="color:#575351">Modernist accent-700. Becomes the only red in the product — which is what makes it readable.</td>
+      </tr>
+      <tr>
+        <td><code>transfer</code></td>
+        <td><span class="sw" style="background:#4a6670"></span><span class="tnum">#4A6670</span></td>
+        <td><span class="sw" style="background:#605d5d"></span><span class="tnum">#605D5D</span><div style="color:#575351;font-size:11px">5.8:1</div></td>
+        <td><span class="sw" style="background:#b0aba9"></span><span class="tnum">#B0ABA9</span><div style="color:#575351;font-size:11px">7.9:1</div></td>
+        <td style="color:#575351">Internal movement. Only a transfer <em>fee</em> is tinted <code>expense</code>.</td>
+        <td style="color:#575351">Loses its blue cast and becomes fully achromatic — a transfer changes no total, so it earns no hue.</td>
+      </tr>
+      <tr>
+        <td><code>protectedMoney</code></td>
+        <td><span class="sw" style="background:#6b5b3e"></span><span class="tnum">#6B5B3E</span></td>
+        <td><span class="sw" style="background:#6e4a1f"></span><span class="tnum">#6E4A1F</span><div style="color:#575351;font-size:11px">7.1:1</div></td>
+        <td><span class="sw" style="background:#d6a85c"></span><span class="tnum">#D6A85C</span><div style="color:#575351;font-size:11px">8.2:1</div></td>
+        <td style="color:#575351">Child-protected funds. Always with the lock, the hatch and a beneficiary name.</td>
+        <td style="color:#575351">Dark value is a real fix: current dark is <code class="tnum">#D7CCC8</code>, a near-grey that reads as disabled rather than protected.</td>
+      </tr>
+      <tr>
+        <td><code>goalReserved</code></td>
+        <td><span class="sw" style="background:#3d6b8a"></span><span class="tnum">#3D6B8A</span></td>
+        <td><span class="sw" style="background:#2b5c8a"></span><span class="tnum">#2B5C8A</span><div style="color:#575351;font-size:11px">6.3:1</div></td>
+        <td><span class="sw" style="background:#7fafdd"></span><span class="tnum">#7FAFDD</span><div style="color:#575351;font-size:11px">7.7:1</div></td>
+        <td style="color:#575351">Goal reserves and goal meters. Held region only.</td>
+        <td style="color:#575351">Barely moves in light. Dark changes from <code class="tnum">#80CBC4</code> (a teal) — which currently collides with the new <code>income</code> teal.</td>
+      </tr>
+      <tr>
+        <td><code>certificatePrincipal</code></td>
+        <td><span class="sw" style="background:#5a4e7c"></span><span class="tnum">#5A4E7C</span></td>
+        <td><span class="sw" style="background:#4a3e70"></span><span class="tnum">#4A3E70</span><div style="color:#575351;font-size:11px">8.5:1</div></td>
+        <td><span class="sw" style="background:#a99bd6"></span><span class="tnum">#A99BD6</span><div style="color:#575351;font-size:11px">7.1:1</div></td>
+        <td style="color:#575351">Principal only. Certificate <em>interest</em> is <code>income</code>.</td>
+        <td style="color:#575351">Small darkening for AA on white.</td>
+      </tr>
+      <tr>
+        <td><code>warning</code></td>
+        <td><span class="sw" style="background:#b8831a"></span><span class="tnum">#B8831A</span></td>
+        <td><span class="sw" style="background:#8a5a00"></span><span class="tnum">#8A5A00</span><div style="color:#575351;font-size:11px">5.3:1</div></td>
+        <td><span class="sw" style="background:#e0ae4a"></span><span class="tnum">#E0AE4A</span><div style="color:#575351;font-size:11px">8.8:1</div></td>
+        <td style="color:#575351">Thresholds, maturity, drift. Never on an amount — on the notice around it.</td>
+        <td style="color:#575351">Current <code class="tnum">#B8831A</code> is <span class="tnum">3.3:1</span> on white and <span class="tnum">3.0:1</span> on the ground — <strong>below AA for text</strong>. This is a compliance fix, not a taste change.</td>
+      </tr>
+      <tr style="background:#f8eeda">
+        <td><code>success</code></td>
+        <td><span class="sw" style="background:#2e7d4f"></span><span class="tnum">#2E7D4F</span><div style="color:#8a5a00;font-size:11px"><strong>identical to income</strong></div></td>
+        <td><span class="sw" style="background:#0e5a44"></span><span class="tnum">#0E5A44</span><div style="color:#575351;font-size:11px">7.3:1</div></td>
+        <td><span class="sw" style="background:#63bc94"></span><span class="tnum">#63BC94</span><div style="color:#575351;font-size:11px">7.8:1</div></td>
+        <td style="color:#575351">"Saved", "reconciled", "goal complete". Confirmation of a <em>write</em>, never of a value.</td>
+        <td style="color:#575351"><strong>Today <code>success</code> and <code>income</code> are the same colour in both themes.</strong> That means a "saved" tick is indistinguishable from an income amount. They separate here.</td>
+      </tr>
+      <tr>
+        <td><code>neutralInfo</code></td>
+        <td><code>scheme.onSurfaceVariant</code><div style="color:#575351;font-size:11px">derived — same as <code>secondaryText</code></div></td>
+        <td><span class="sw" style="background:#3d4a52"></span><span class="tnum">#3D4A52</span><div style="color:#575351;font-size:11px">8.2:1</div></td>
+        <td><span class="sw" style="background:#9db2be"></span><span class="tnum">#9DB2BE</span><div style="color:#575351;font-size:11px">8.1:1</div></td>
+        <td style="color:#575351">Explanatory notices, ledger-teaching copy, the append-only explainer.</td>
+        <td style="color:#575351">Currently <em>identical</em> to <code>secondaryText</code>, so an informational notice has no visual identity at all. Gains one.</td>
+      </tr>
+      <tr>
+        <td><code>mainSurface</code></td>
+        <td><code>scheme.surface</code></td>
+        <td><span class="sw" style="background:#ffffff"></span><span class="tnum">#FFFFFF</span></td>
+        <td><span class="sw" style="background:#221f1e"></span><span class="tnum">#221F1E</span></td>
+        <td style="color:#575351">Content surfaces: cards, list backgrounds, sheets.</td>
+        <td style="color:#575351">Stops deriving. Also stops being the scaffold background — see the new <code>ground</code> row.</td>
+      </tr>
+      <tr>
+        <td><code>secondarySurface</code></td>
+        <td><code>surfaceContainerLow</code></td>
+        <td><span class="sw" style="background:#eae9e9"></span><span class="tnum">#EAE9E9</span></td>
+        <td><span class="sw" style="background:#2c2928"></span><span class="tnum">#2C2928</span></td>
+        <td style="color:#575351">Form-row fills, chips, group headers, input backgrounds.</td>
+        <td style="color:#575351">Stops deriving. Note dark currently uses <code>surfaceContainerHigh</code> while light uses <code>…Low</code> — an asymmetry that disappears.</td>
+      </tr>
+      <tr>
+        <td><code>divider</code></td>
+        <td><code>scheme.outlineVariant</code></td>
+        <td><span class="sw" style="background:#c3bfbe"></span><span class="tnum">#C3BFBE</span><div style="color:#575351;font-size:11px">1&nbsp;px hairline</div></td>
+        <td><span class="sw" style="background:#4a4645"></span><span class="tnum">#4A4645</span></td>
+        <td style="color:#575351">Separates rows <em>within</em> a group.</td>
+        <td style="color:#575351"><strong>The 2&nbsp;px region rule is a separate concern.</strong> It uses <code>primaryText</code> in light / a lighter ink in dark, not <code>divider</code>. Don't add a second divider token — a region boundary is ink, and that is the point.</td>
+      </tr>
+      <tr>
+        <td><code>primaryText</code></td>
+        <td><code>scheme.onSurface</code></td>
+        <td><span class="sw" style="background:#201e1d"></span><span class="tnum">#201E1D</span><div style="color:#575351;font-size:11px">14.9:1</div></td>
+        <td><span class="sw" style="background:#f0edeb"></span><span class="tnum">#F0EDEB</span><div style="color:#575351;font-size:11px">15.3:1</div></td>
+        <td style="color:#575351">All primary copy, all amounts that aren't role-tinted, the lock glyph.</td>
+        <td style="color:#575351">Stops deriving.</td>
+      </tr>
+      <tr>
+        <td><code>secondaryText</code></td>
+        <td><code>onSurfaceVariant</code></td>
+        <td><span class="sw" style="background:#575351"></span><span class="tnum">#575351</span><div style="color:#575351;font-size:11px">6.8:1</div></td>
+        <td><span class="sw" style="background:#a8a3a0"></span><span class="tnum">#A8A3A0</span><div style="color:#575351;font-size:11px">7.1:1</div></td>
+        <td style="color:#575351">Meta lines, labels, secondary figures. <strong>No third text tint exists</strong> — meta gets smaller, never lighter.</td>
+        <td style="color:#575351">Stops deriving.</td>
+      </tr>
+      <tr>
+        <td><code>disabled</code></td>
+        <td><code>onSurface @ α 0.38</code></td>
+        <td><span class="sw" style="background:#9b9797"></span><span class="tnum">#9B9797</span><div style="color:#575351;font-size:11px">2.6:1 non-text</div></td>
+        <td><span class="sw" style="background:#6b6766"></span><span class="tnum">#6B6766</span><div style="color:#575351;font-size:11px">2.6:1 non-text</div></td>
+        <td style="color:#575351">Below AA by design — so a disabled control <strong>always</strong> carries a reason line in <code>secondaryText</code>.</td>
+        <td style="color:#575351">Becomes opaque. Alpha over a patterned or tinted ground (the hatched held region) produced unpredictable contrast.</td>
+      </tr>
+      <tr style="background:#e3efef">
+        <td><code>focusRing</code> <span class="t3">NEW</span></td>
+        <td style="color:#575351">— <em>did not exist</em><div style="font-size:11px">focus was <code>primaryAction</code> @ 1.5&nbsp;px border</div></td>
+        <td><span class="sw" style="background:#ec3013"></span><span class="tnum">#EC3013</span><div style="color:#575351;font-size:11px">3.9:1 vs ground · non-text</div></td>
+        <td><span class="sw" style="background:#ff563c"></span><span class="tnum">#FF563C</span><div style="color:#575351;font-size:11px">5.2:1 vs dark ground</div></td>
+        <td style="color:#575351"><strong>Keyboard focus only.</strong> A 2&nbsp;px ring at 2&nbsp;px offset — <em>outside</em> the control, never replacing its border. The one place raw Modernist accent appears outside the <code>expense</code> role, because a focus ring is chrome, not money.</td>
+        <td style="color:#575351">Modernist's <code>--color-accent</code>. <strong>Geometry change, not just a value:</strong> <code>focusedBorder</code> currently draws a 1.5&nbsp;px border <em>on</em> the field, which the redesign replaces with an offset ring plus a 2&nbsp;px ink bottom rule on the field itself. Non-text contrast only — AA requires 3:1 for focus indicators and both values clear it.</td>
+      </tr>
+      <tr style="background:#e3efef">
+        <td><code>ground</code> <span class="t3">NEW</span></td>
+        <td style="color:#575351">— <em>did not exist</em></td>
+        <td><span class="sw" style="background:#f3f2f2"></span><span class="tnum">#F3F2F2</span></td>
+        <td><span class="sw" style="background:#181716"></span><span class="tnum">#181716</span></td>
+        <td style="color:#575351"><code>scaffoldBackgroundColor</code>. The page itself. Nothing else uses it.</td>
+        <td style="color:#575351">Without it, a card and the page are the same colour and card separation has to come back from radius and shadow — which the design has removed.</td>
+      </tr>
+      <tr style="background:#e3efef">
+        <td><code>recessedSurface</code> <span class="t3">NEW</span></td>
+        <td style="color:#575351">— <em>did not exist</em></td>
+        <td><span class="sw" style="background:#dedbda"></span><span class="tnum">#DEDBDA</span></td>
+        <td><span class="sw" style="background:#3a3635"></span><span class="tnum">#3A3635</span></td>
+        <td style="color:#575351">The held-money region, and only that. One surface, one meaning.</td>
+        <td style="color:#575351">This token <em>is</em> the answer to audit problem 2. Locked money is on a different surface, not a different-coloured row.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ 3. TYPE TOKENS ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">03</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Type token table — <code style="font-size:22px">AppTextRoles</code></h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:960px;margin:0 0 22px">All 11 names unchanged. "Current" is verbatim from <code>AppTextRoles.fromScheme</code>. Weights are Flutter <code>FontWeight</code>. The two rows marked <span class="t1">HIGH RISK</span> are where widget tests with explicit surface sizes will fail.</p>
+
+  <table class="rt">
+    <thead><tr><th style="width:145px">Role</th><th style="width:150px">Current</th><th style="width:165px">New · Latin (Archivo)</th><th style="width:175px">New · Arabic (Plex Arabic)</th><th>Why it changes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>displayBalance</code></td>
+        <td class="tnum" style="color:#575351">36 / w600 / 1.25<br>ls −0.5</td>
+        <td class="tnum">40 / w800 / 1.05<br>ls −0.02em · tnum</td>
+        <td class="tnum">38 / w700 / 1.25<br>ls 0 · tnum</td>
+        <td style="color:#575351">Grows and tightens: it is now the only dominant element on the screen and sits on an ink field, so it can carry more weight. Arabic 2&nbsp;px smaller and looser for descending ligatures. <strong>Add <code>tabularFigures</code></strong> — currently missing here, though present on <code>financialAmount</code>.</td>
+      </tr>
+      <tr>
+        <td><code>screenTitle</code></td>
+        <td class="tnum" style="color:#575351">22 / w600 / 1.35</td>
+        <td class="tnum">25 / w800 / 1.15<br>ls −0.015em</td>
+        <td class="tnum">24 / w700 / 1.40</td>
+        <td style="color:#575351">Used in <code>appBarTheme.titleTextStyle</code> today. In the redesign the bar title is a separate smaller style (18/600) and <code>screenTitle</code> moves into the body, flush to the leading margin.</td>
+      </tr>
+      <tr style="background:#fdeae6">
+        <td><code>sectionTitle</code> <span class="t1">HIGH RISK</span></td>
+        <td class="tnum" style="color:#575351">18 / w600 / 1.40</td>
+        <td class="tnum">13 / w800 / 1.20<br>ls +0.08em · UPPER</td>
+        <td class="tnum">13 / w700 / 1.45<br>ls 0 · no case</td>
+        <td style="color:#575351"><strong>18&nbsp;→&nbsp;13, a 28% shrink.</strong> Modernist's section heading is a small tracked label above a 2&nbsp;px rule; the rule carries the hierarchy, not the type size. <strong>Script-divergent by necessity:</strong> Arabic has no uppercase and letter-spacing breaks its joins, so the Arabic variant takes neither. Expect every test asserting a section header's height or a scroll offset to shift.</td>
+      </tr>
+      <tr>
+        <td><code>cardTitle</code></td>
+        <td class="tnum" style="color:#575351">16 / w600 / 1.35</td>
+        <td class="tnum">17 / w800 / 1.20<br>ls −0.01em</td>
+        <td class="tnum">16 / w600 / 1.45</td>
+        <td style="color:#575351">Latin gains a point and real weight; <strong>Arabic stays w600</strong> because Plex Arabic's 700 is optically heavier than Archivo's 800 at the same size.</td>
+      </tr>
+      <tr>
+        <td><code>body</code></td>
+        <td class="tnum" style="color:#575351">16 / w400 / 1.50</td>
+        <td class="tnum">15 / w400 / 1.55</td>
+        <td class="tnum">15 / w400 / <strong>1.85</strong></td>
+        <td style="color:#575351">Arabic line height is <strong>+0.30 across every text role</strong> — diacritics and descending joins need the air. Not optional, and it is the single change that most improves Arabic reading. Note <code>bodyMedium</code> in <code>_buildTextTheme</code> derives a 14&nbsp;px variant; keep that relationship.</td>
+      </tr>
+      <tr>
+        <td><code>financialAmount</code></td>
+        <td class="tnum" style="color:#575351">16 / w600 / 1.30<br>tabular ✓</td>
+        <td class="tnum">17 / w600 / 1.20<br>tnum + lnum</td>
+        <td class="tnum">17 / w600 / 1.30<br>tnum + lnum</td>
+        <td style="color:#575351">Already tabular — good. Adds <code>lnum</code> and, critically, <strong>bidi isolation</strong>: the numeric run needs <code>Directionality</code>/first-strong isolation or the minus sign reorders to the wrong side in RTL. That is a widget change, not a token change.</td>
+      </tr>
+      <tr>
+        <td><code>supportingMeta</code></td>
+        <td class="tnum" style="color:#575351">13 / w400 / 1.40</td>
+        <td class="tnum">11 / w400 / 1.35<br>ls +0.02em</td>
+        <td class="tnum"><strong>12</strong> / w400 / 1.60</td>
+        <td style="color:#575351">The only role where <strong>Arabic is larger than Latin</strong> — 11&nbsp;px Arabic loses tooth detail. Both shrink from 13 because meta lines now carry more content (spender, scope, account, time).</td>
+      </tr>
+      <tr>
+        <td><code>formLabel</code></td>
+        <td class="tnum" style="color:#575351">14 / w500 / 1.35</td>
+        <td class="tnum">12 / w400 / 1.30</td>
+        <td class="tnum">12 / w400 / 1.55</td>
+        <td style="color:#575351">Loses weight and size: a label above a field should not compete with the value in it. Always above its field — never a placeholder, never floating.</td>
+      </tr>
+      <tr>
+        <td><code>buttonLabel</code></td>
+        <td class="tnum" style="color:#575351">15 / w600 / 1.25</td>
+        <td class="tnum">14 / w800 / 1.20</td>
+        <td class="tnum">14 / w600 / 1.30</td>
+        <td style="color:#575351">Modernist's flush label: a full-width button starts its label at the <em>leading</em> padding edge — flush right in RTL. That is a <code>ButtonStyle.alignment</code> change in the four button themes, not a text-style change.</td>
+      </tr>
+      <tr>
+        <td><code>statusLabel</code></td>
+        <td class="tnum" style="color:#575351">12 / w600 / 1.25</td>
+        <td class="tnum">11 / w600 / 1.20<br>ls +0.02em</td>
+        <td class="tnum">11 / w600 / 1.45</td>
+        <td style="color:#575351">Minor. Every badge using it must also carry a glyph — a badge is never colour-plus-nothing.</td>
+      </tr>
+      <tr style="background:#fdeae6">
+        <td><code>reportValue</code> <span class="t1">HIGH RISK</span></td>
+        <td class="tnum" style="color:#575351">15 / w500 / 1.30<br>tabular ✓</td>
+        <td class="tnum">20 / w800 / 1.15<br>ls −0.01em · tnum</td>
+        <td class="tnum">20 / w700 / 1.30<br>tnum</td>
+        <td style="color:#575351"><strong>15&nbsp;→&nbsp;20, a 33% growth.</strong> It now carries the secondary-currency rows inside the balance hero and every <code>FinancialMetric</code> value — the second-largest number allowed on a screen. Every report table row gets taller; any test asserting a report's rendered height or row count in a fixed surface will fail.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:26px">
+    <div style="background:#fff;border:2px solid #201e1d;padding:18px 20px">
+      <h5 style="margin:0 0 10px">The signature change nobody can avoid</h5>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>AppTextRoles.fromScheme(ColorScheme)</code> has no locale parameter and sets no <code>fontFamily</code>. Two families with <em>different metrics per role</em> cannot be expressed through it.</p>
+      <div style="background:#eae9e9;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.75;margin-bottom:11px">factory AppTextRoles.forLocale(<br>&nbsp;&nbsp;ColorScheme scheme,<br>&nbsp;&nbsp;Locale locale,<br>)</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>fromScheme</code> stays as a deprecated delegate that assumes <code>en</code>, so no call site breaks on day one. <code>AppTheme.light()</code> / <code>.dark()</code> gain a locale argument, which means <strong><code>MaterialApp</code> must rebuild its theme on locale change</strong> — a real behavioural change worth testing deliberately.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Fonts must be bundled, not fetched.</strong> This is an offline-first app; <code>google_fonts</code> at runtime would make typography depend on connectivity. Add both families to <code>pubspec.yaml</code> as assets — Archivo 400/600/800 and IBM Plex Sans Arabic 400/600/700, six files.</p>
+    </div>
+    <div>
+      <h5 style="margin:0 0 10px">Shape, motion, spacing, widths — the deltas</h5>
+      <table class="rt">
+        <thead><tr><th style="width:150px">Constant</th><th style="width:70px">Now</th><th style="width:70px">New</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>radiusBadge</code></td><td class="tnum">4</td><td class="tnum">0</td><td style="color:#575351">—</td></tr>
+          <tr><td><code>radiusChip</code></td><td class="tnum">8</td><td class="tnum">0</td><td style="color:#575351">—</td></tr>
+          <tr><td><code>radiusInput</code></td><td class="tnum">10</td><td class="tnum">0</td><td style="color:#575351">—</td></tr>
+          <tr><td><code>radiusButton</code></td><td class="tnum">10</td><td class="tnum">0</td><td style="color:#575351">—</td></tr>
+          <tr><td><code>radiusCard</code></td><td class="tnum">12</td><td class="tnum">0</td><td style="color:#575351">Card also drops the 0.5-alpha outline for a solid 1&nbsp;px <code>divider</code>, and its fill moves <code>secondarySurface</code>&nbsp;→&nbsp;<code>mainSurface</code>.</td></tr>
+          <tr><td><code>radiusDialog</code></td><td class="tnum">16</td><td class="tnum">0</td><td style="color:#575351">—</td></tr>
+          <tr><td><code>radiusSheet</code></td><td class="tnum">20</td><td class="tnum">2</td><td style="color:#575351">The <em>only</em> non-zero radius. A perfectly square sheet edge over a square scaffold reads as a broken layout rather than a layer.</td></tr>
+          <tr><td>Legacy aliases</td><td class="tnum" colspan="2" style="color:#575351">→ 0</td><td style="color:#575351"><code>radiusSmall/Medium/Large/XLarge</code> all resolve to 0. Keep the names; they're referenced.</td></tr>
+          <tr><td><code>motionFast</code></td><td class="tnum">150</td><td class="tnum">150</td><td style="color:#575351">Unchanged. Loading→content cross-fade, privacy toggle (120 via a local override).</td></tr>
+          <tr><td><code>motionStandard</code></td><td class="tnum">220</td><td class="tnum">220</td><td style="color:#575351">Unchanged. Confirmation tick, expand/collapse (200 rounds to this), list insert.</td></tr>
+          <tr><td><code>motionEmphasized</code></td><td class="tnum">320</td><td class="tnum">280</td><td style="color:#575351">Route push/pop. 320 is noticeably slow on the app's most repeated transition.</td></tr>
+          <tr style="background:#fdeae6"><td><code>space2</code></td><td class="tnum">2</td><td colspan="2" style="color:#ae1800"><strong>DELETE</strong> — off-scale, already deprecated.</td></tr>
+          <tr style="background:#fdeae6"><td><code>space48</code></td><td class="tnum">48</td><td colspan="2" style="color:#ae1800"><strong>DELETE</strong> — off-scale. Note <code>minTouchTarget</code> is also 48 and <strong>stays</strong>; it is a target, not a spacing step.</td></tr>
+          <tr><td><code>formContentMaxWidth</code></td><td class="tnum">720</td><td class="tnum">720</td><td style="color:#575351">Matches the spec. Keep.</td></tr>
+          <tr><td><code>listContentMaxWidth</code></td><td class="tnum">960</td><td class="tnum">960</td><td style="color:#575351">Keep.</td></tr>
+          <tr style="background:#f8eeda"><td><code>railBreakpoint</code></td><td class="tnum">840</td><td class="tnum">905</td><td style="color:#575351">Conflict resolved in favour of M3's expanded window class (≥905). <strong>Changes when the rail appears</strong>, so every wide-surface widget test between 840 and 905 flips behaviour. Small change, loud test consequences — do it in the nav phase, not earlier.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4. MIGRATION ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">04</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Migration — phase 0 plus nine, each one shippable</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:960px;margin:0 0 22px">Ordered so that the riskiest thing in each phase is the <em>only</em> risky thing in it. Phase 0 ships byte-identical output; phases 1–3 are token-only; 4 onwards is screens. <strong>Typography is deliberately alone in phase 3</strong> — it is the one change that moves layout metrics everywhere, and mixing it with anything else makes a failing test impossible to diagnose.</p>
+
+  <table class="rt">
+    <thead><tr><th style="width:52px">#</th><th style="width:190px">Phase</th><th style="width:290px">Files</th><th style="width:300px">What ships</th><th>Test forecast</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="tnum" style="font-weight:800">0</td>
+        <td><strong>Structural prep</strong><div style="color:#575351;font-size:11px">no visual change at all</div></td>
+        <td style="color:#575351"><code>app_theme_extensions.dart</code>, <code>app_theme.dart</code>, <code>pubspec.yaml</code></td>
+        <td style="color:#575351">Add <code>ground</code>, <code>recessedSurface</code> and <code>focusRing</code> (initialised to today's <code>mainSurface</code> / <code>secondarySurface</code> / <code>primaryAction</code>, so they're invisible). Add <code>AppTextRoles.forLocale</code> returning today's exact metrics. Bundle both font families as assets without applying them.</td>
+        <td style="color:#0e5a44"><strong>Zero failures.</strong> Output is pixel-identical. This phase exists so phases 1 and 3 are pure value changes.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">1</td>
+        <td><strong>Colour values</strong></td>
+        <td style="color:#575351"><code>app_theme_extensions.dart</code> (both factories), <code>app_theme.dart</code> (seed + scaffold)</td>
+        <td style="color:#575351">All 19 roles become literals. Scaffold moves to <code>ground</code>. <code>ColorScheme</code> keeps a neutral seed for stock widgets. <code>focusedBorder</code>'s 1.5&nbsp;px <code>primaryAction</code> border becomes a 2&nbsp;px ink bottom rule on the field plus a 2&nbsp;px <code>focusRing</code> at 2&nbsp;px offset.</td>
+        <td style="color:#8a5a00">Golden/screenshot tests all fail (expected — regenerate). Any test asserting a specific <code>Color</code> fails. <strong>Layout tests pass</strong> — no metric moves.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">2</td>
+        <td><strong>Shape and elevation</strong></td>
+        <td style="color:#575351"><code>app_theme.dart</code> only</td>
+        <td style="color:#575351">All radii → 0 (sheet 2). Card: <code>mainSurface</code> fill + solid 1&nbsp;px hairline, no alpha. Remove card/button elevation. Delete <code>space2</code>, <code>space48</code>. Sticky bars reveal a 2&nbsp;px rule on scroll instead of gaining elevation.</td>
+        <td style="color:#0e5a44">Low risk. Radius doesn't affect layout size. Only the two deleted spacing constants can break compilation — grep first; both are marked deprecated so call sites should be few.</td>
+      </tr>
+      <tr style="background:#fdeae6">
+        <td class="tnum" style="font-weight:800">3</td>
+        <td><strong>Typography</strong> <span class="t1">THE DANGEROUS ONE</span></td>
+        <td style="color:#575351"><code>app_theme_extensions.dart</code>, <code>app_theme.dart</code>, <code>main.dart</code> (locale→theme wiring)</td>
+        <td style="color:#575351">All 11 roles take new metrics and real font families per script. <code>MaterialApp</code> rebuilds its theme on locale change. <code>motionEmphasized</code> 320→280 rides along (harmless).</td>
+        <td style="color:#ae1800"><strong>Expect the largest batch of failures in the project.</strong> Every widget test with an explicit surface size and an overflow or height assertion is at risk, concentrated where <code>sectionTitle</code> (−28%) and <code>reportValue</code> (+33%) appear: dashboard sections, report tables, review screens. Budget real time here and fix by re-measuring, not by loosening assertions.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">4</td>
+        <td><strong>Money primitives</strong></td>
+        <td style="color:#575351"><code>core/presentation/components/financial_amount_text.dart</code>, <code>currency_amount_row</code>, <code>financial_summary</code>, <code>financial_metric</code>, <code>amount_entry_field</code>; <strong>new</strong> <code>balance_hero.dart</code>, <code>progress_meter.dart</code>, <code>privacy_scope.dart</code></td>
+        <td style="color:#575351">Direction grammar (sign + glyph + word + edge shape). Bidi isolation on every numeric run. Privacy masking implemented <strong>only</strong> in <code>FinancialAmountText</code> via an inherited scope. Non-colour progress meter.</td>
+        <td style="color:#8a5a00">New tests needed rather than broken ones: masked rendering, RTL sign placement, screen-reader labels including currency and direction. <code>FinancialAmountTone.protected</code> already exists in the enum — extend rather than replace.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">5</td>
+        <td><strong>List tiles + state components</strong></td>
+        <td style="color:#575351"><code>account_list_tile.dart</code>, <code>transaction_list_tile.dart</code>, <code>app_empty_state</code>, <code>app_error_state</code>, <code>app_loading_state</code>, <code>app_inline_notice</code>, <code>status_badge</code>, <code>financial_type_badge</code></td>
+        <td style="color:#575351">Six account visual classes with hatched leading edges. Skeleton loading replacing spinners, geometry matched to real rows. Errors that state what happened to the data before offering retry.</td>
+        <td style="color:#8a5a00">Tile height changes from fixed to intrinsic-with-64-minimum — any test asserting an exact tile height fails and should be rewritten to assert a minimum.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">6</td>
+        <td><strong>Dashboard</strong><div style="color:#ae1800;font-size:11px">blocked on query work</div></td>
+        <td style="color:#575351"><code>features/dashboard/presentation/dashboard_screen.dart</code> (~905 lines), <code>domain/dashboard_summary.dart</code>, <code>data/drift_dashboard_query_repository.dart</code>, <code>providers/dashboard_providers.dart</code></td>
+        <td style="color:#575351">A1–A6. Ink hero, counted attention region, held region with per-reason breakdown, spouse band, pinned action bar. App-bar actions 4–5 → 2.</td>
+        <td style="color:#ae1800">Cannot start until <code>heldByReason</code> + <code>excludedFromAvailable</code> land in the query. Dashboard tests largely rewritten — this is a new screen, not a restyled one.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">7</td>
+        <td><strong>Entry flows</strong></td>
+        <td style="color:#575351"><code>expense_form_screen.dart</code> (22.5&nbsp;KB), <code>expense_review_screen.dart</code>, <code>income_form/review</code>, <code>transfer_form/review</code>, <code>create_transaction_screen.dart</code></td>
+        <td style="color:#575351">B1–B4, E1–E4. Numpad-first sheet, drag-to-expand, sentence read-back, protected-source guard, transfer destination exclusions, cash-rejects / bank-warns.</td>
+        <td style="color:#8a5a00"><code>record_expense_use_case</code> untouched — idempotency and validation survive. Tests navigating through <code>/transactions/new</code> need one line each (chooser retired).</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">8</td>
+        <td><strong>List, detail, reversal</strong></td>
+        <td style="color:#575351"><code>transactions_screen.dart</code>, <code>transaction_detail_screen.dart</code>, <code>accounts_screen.dart</code>, <code>account_detail_screen.dart</code>, certificate + goal + budget screens; <code>app_router.dart</code></td>
+        <td style="color:#575351">C1–C6, D1–D3, F1–F3, G1–G2. Adds <code>/transactions/:operationId/reverse</code>. Root pushes for account + transaction detail.</td>
+        <td style="color:#8a5a00">Tests asserting a bottom nav bar on those two detail screens fail — correctly. Reversal needs new tests for the reason requirement and re-auth.</td>
+      </tr>
+      <tr>
+        <td class="tnum" style="font-weight:800">9</td>
+        <td><strong>Reports, then navigation</strong><div style="color:#575351;font-size:11px">nav last, on purpose</div></td>
+        <td style="color:#575351">All nine <code>features/reports/presentation/*</code>, <strong>delete</strong> <code>report_widgets.dart</code>; then <code>app_shell.dart</code>, <code>app_router.dart</code>, <code>app_ar.arb</code>/<code>app_en.arb</code></td>
+        <td style="color:#575351">Reports rebuilt on the shared primitives — no report kit. Then: Debts tab in, Reports into More, <code>navTransactions</code> relabelled, <code>railBreakpoint</code> 840→905.</td>
+        <td style="color:#ae1800">Shell and rail tests all touched. <strong>Nav is last because it invalidates navigation assumptions in every other test file</strong> — doing it first would mean debugging nav failures while also changing screens.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ 5. NOT PRESENTATION ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">05</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Everything the design needs that is <em>not</em> presentation work</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:960px;margin:0 0 22px">Consolidated from every deliverable. The ledger, balance math and financial classification stay outside the presentation layer — so each of these has to be built where it belongs, and no component may compensate for a missing one.</p>
+
+  <table class="rt">
+    <thead><tr><th style="width:230px">What</th><th style="width:110px">Layer</th><th style="width:100px">Blocks</th><th>Why the UI can't fake it</th></tr></thead>
+    <tbody>
+      <tr><td><code>heldByReason</code> + <code>excludedFromAvailable</code> on the dashboard summary</td><td><span class="t2">QUERY</span></td><td style="color:#ae1800">Phase 6</td><td style="color:#575351">Certificate principal and goal reserves are non-spendable <em>and</em> non-protected, so they're in neither existing bucket — 61,500&nbsp;EGP with no dashboard figure. A widget subtracting them would be doing authoritative balance math. No schema change: the three states already exist.</td></tr>
+      <tr><td><code>reversal_reason</code> on the reversal operation</td><td><span class="t1">SCHEMA</span></td><td style="color:#8a5a00">Phase 8</td><td style="color:#575351">Everything else the reversal needs already exists (<code>isReversed</code>, <code>reversedBy</code>, <code>isReversal</code>, <code>reversalOfEntryId</code>, <code>createdBy</code>). Only the reason is missing. It goes on the <em>reversal</em> row — a new row — so <code>operations</code>' rule that only <code>isReversed</code> and <code>reversedBy</code> are mutable is untouched.</td></tr>
+      <tr><td>Windowed running balance in the account-ledger query</td><td><span class="t2">QUERY</span></td><td style="color:#8a5a00">Phase 8</td><td style="color:#575351">F1/F3 print "الرصيد بعدها" on every history row — the strongest demonstration that balances are derived. A per-row lookup would be N+1; it needs a cumulative sum over the window.</td></tr>
+      <tr><td>Statement-balance record for reconciliation</td><td><span class="t1">SCHEMA</span></td><td style="color:#8a5a00">Phase 8</td><td style="color:#575351">To say "فرق 240.00" the app must store the externally observed bank balance and its date. One minimal table — account, balance, observed date, optional note. It is <strong>not</strong> a ledger entry; the adjustment it produces already has a type, <code>OperationType.adjustment</code> («تسوية»), so this record is the only new data.</td></tr>
+      <tr><td>Member and account <em>name</em> joins on the transaction list model</td><td><span class="t2">QUERY</span></td><td style="color:#8a5a00">Phase 8</td><td style="color:#575351"><code>TransactionSummary</code> carries <code>spenderMemberId</code> and the operation's <code>sourceAccountId</code> — ids, not names. "هناء · محفظة نقدية" needs maps joined into the provider, and a tile must never fetch.</td></tr>
+      <tr><td>Budget lookup during review</td><td><span class="t3">PROVIDER</span></td><td style="color:#575351">Phase 7</td><td style="color:#575351">A read, not a write. Deliberately <em>not</em> on the transaction detail — a past transaction's budget period may be over, so showing today's consumption beside it misleads.</td></tr>
+      <tr style="background:#e3efef"><td>Ledger vocabulary for Tier 3 — <strong>already exists</strong></td><td><span class="t4">NONE</span></td><td style="color:#575351">—</td><td style="color:#575351"><code>OperationType</code> has <strong>21</strong> values, already localised: <code>liabilityCreation</code>, <code>liabilityRepayment</code>, <code>zakat</code>, <code>sadaqah</code>, <code>goldPurchase</code>, <code>goldSale</code>, <code>assetPurchase</code>, <code>assetSale</code>, <code>interestIncome</code>, <code>openingBalance</code>, <code>adjustment</code> and more. Debts, zakat and gold are <em>not</em> greenfield at the ledger layer — which cuts the Tier 3 estimate and means the reconciliation adjustment is <code>OperationType.adjustment</code> («تسوية»), not a new type.</td></tr>
+      <tr><td>Manual gold gram price + its entry date</td><td><span class="t1">SCHEMA</span></td><td style="color:#575351">Tier 3</td><td style="color:#575351">Keeps offline-first intact and keeps a market estimate visibly separate from ledger facts. The date is part of the honesty, not metadata.</td></tr>
+      <tr><td>Liabilities feature — 6 debt types, principal/interest/fee split on repayment</td><td><span class="t1">SCHEMA</span></td><td style="color:#575351">Tier 3</td><td style="color:#575351">A whole feature. Also the precondition for ever labelling anything «صافي الثروة» — until it exists the dashboard strip must stay «إجمالي الأصول».</td></tr>
+      <tr><td>Narrow <code>CurrencyAmountSummary</code>'s negative-balance rule to cash accounts</td><td><span class="t3">DOMAIN</span></td><td style="color:#575351">Phase 7</td><td style="color:#575351">Its comment calls any negative balance "a data integrity anomaly". With cash-rejects / bank-warns, a legitimately overdrawn bank account would be flagged as corrupt data.</td></tr>
+      <tr><td>ARB additions and renames</td><td><span class="t3">L10N</span></td><td style="color:#575351">Phases 7–9</td><td style="color:#575351">Reversal-reason presets, protected-withdrawal reason presets, the <code>navDebts</code> label, and the <code>navTransactions</code> rename («المعاملات»→«الحركات», "Transactions"→"Activity").</td></tr>
+      <tr style="background:#f8eeda"><td><code>FundPurpose</code> and <code>AccountOwnerType</code> localization</td><td><span class="t3">L10N</span></td><td style="color:#575351">Phase 5</td><td style="color:#575351"><strong>Neither enum has any localization.</strong> <code>enum_label_helpers.dart</code> covers nine enums and includes no <code>fundPurposeLabel</code> or <code>accountOwnerTypeLabel</code>; searching <code>lib/core/localization</code> for <code>fundPurpose</code> / <code>ownerType</code> returns zero matches. Same for <code>GoalPurpose</code> (7 values). Account and goal creation cannot ship without them: <strong>11 + 5 + 7 = 23 new keys × 2 locales, plus three helper functions.</strong> Also delete the orphaned <code>goalStatusTargetReached</code> key — <code>GoalStatus</code> has no such member since Phase 5B.8. Larger than it sounds because <code>FundPurpose</code> values like <code>goalReserve</code> and <code>childProtected</code> need copy that explains a restriction, not a noun.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section style="padding:34px 56px 48px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:48px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff">What's left</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6">
+        <strong style="color:#ff9783">Done</strong><span>D1 language · D2 components · two directions each · Tier 1 in full (29 artboards) · D4 IA &amp; route map · D6 handoff.</span>
+        <strong style="color:#ff9783">Next</strong><span><strong>Tier 2</strong> — ~35 screens at nine a turn: income, accounts list + creation, planning hub, budgets, goals, certificates, the nine reports, members, More, settings, onboarding.</span>
+        <strong style="color:#ff9783">Then</strong><span>Tier 3 patterns (gold, debts, zakat, voice, lock) · the remaining D2 gaps (charts, pickers, tabs, dialog, snackbar) · the two special moments still unbuilt (reconciliation, certificate maturity) · <strong>D5 adaptive</strong>, last, because phone is the design target.</span>
+      </div>
+    </div>
+    <div>
+      <h6 style="color:#ff9783;margin-bottom:10px">Two things I'd want confirmed before phase 1</h6>
+      <ol style="margin:0;padding-inline-start:20px;font-size:12.5px;line-height:1.7;color:#e8e4e2">
+        <li><strong>Literals over a new seed.</strong> I recommend the eight derived roles take fixed values and <code>ColorScheme</code> keeps a neutral seed purely for stock M3 widgets. The alternative — reseeding and letting Material generate the surfaces — is less code but gives up control of the exact ground the whole design is calibrated against.</li>
+        <li><strong>Are there golden/screenshot tests?</strong> I've assumed yes and that phase 1 regenerates them. If the 1,594 tests are all widget-and-unit with no goldens, phase 1 is nearly free and phase 3 is the only expensive one — which would let 1 and 2 ship together.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

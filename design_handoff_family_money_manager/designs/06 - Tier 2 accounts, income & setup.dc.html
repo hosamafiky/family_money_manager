@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+@keyframes sk{0%{opacity:.4}50%{opacity:.9}100%{opacity:.4}}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 1 — accounts, income, first run</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Twelve account types,<br>and only ten of them are yours to make.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:820px;margin:0;color:#575351">Nine boards: the accounts list, the type-selection problem solved, account creation, income entry and review, first-run onboarding, the More hub with Reports folded in, and Settings. Enum identifiers are verbatim from <code>account_enums.dart</code> and every account-type, nav, report and settings <em>title</em> from <code>app_ar.arb</code>. Everything else is proposed copy — the footer states exactly which is which.</p>
+</header>
+
+<!-- ═══ H. ACCOUNTS ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">H</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Accounts — list and creation</h2>
+  </div>
+  <div style="background:#fdeae6;border:2px solid #ae1800;padding:16px 20px;margin:0 0 24px;max-width:1180px">
+    <div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#ae1800;margin-bottom:8px">The type-selection problem, solved by deleting two options</div>
+    <p style="font-size:13.5px;line-height:1.7;margin:0 0 9px"><code>FinancialAccountType</code> has 12 values. <strong>Two of them must not appear in this picker.</strong> <code>certificate</code> accounts are created by <code>CreateCertificateUseCase</code> and locked by <code>no_modify_certificate_protected</code>; <code>goalReserve</code> accounts are created by the goal-funding flow and locked by the reserve immutability triggers. A user who hand-made either would get an account the domain can't use — no certificate row behind it, no goal behind it.</p>
+    <p style="font-size:13.5px;line-height:1.7;margin:0">So the picker offers <strong>ten</strong>, and the two absences are <em>explained</em> rather than hidden — because a user who has a certificate and can't find "شهادة" in the list will assume the app is broken. Same principle as the transfer destination exclusion in E1: never let someone reach a validation error the design could have prevented.</p>
+  </div>
+
+  <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+    <!-- H1 -->
+    <div style="flex:none">
+      <div class="cap">H1 · Accounts list · 10 active, 3 currencies, 2 archived</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:1px solid #c3bfbe"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الحسابات</span><span style="font-size:16px">◉</span><span style="font-size:16px">⋮</span></div>
+        <div style="padding:16px 16px 8px;background:#f3f2f2"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">قابل للصرف</span><span style="font-size:11px;color:#575351">5</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#fff">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▣</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة نقدية شخصية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">نقد · أحمد · إنفاق شخصي</span></span><span class="tnum" style="font-size:16px;font-weight:600">1,845.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▤</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حساب بنك مصر — الراتب</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">حساب بنكي · أحمد · متاح</span></span><span class="tnum" style="font-size:16px;font-weight:600">26,259.25</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▥</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">مدخرات المنزل</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">نقد · الأسرة · مدخرات طويلة المدى</span></span><span class="tnum" style="font-size:16px;font-weight:600">3,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▧</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">مصروف البيت اليومي</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">نقدية المنزل · الأسرة · إنفاق منزلي</span></span><span class="tnum" style="font-size:16px;font-weight:600">482.50</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▣</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة هناء</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">محفظة الزوج/ة · هناء · <span style="background:#eae9e9;padding:1px 5px">مستبعد من المتاح</span></span></span><span class="tnum" style="font-size:16px;font-weight:600">4,382.50</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px;border-top:2px solid #201e1d;background:#eae9e9"><span style="font-size:12px;font-weight:600">مجموع القابل للصرف — جنيه</span><span class="tnum" style="font-size:18px;font-weight:700">32,486.75</span></div>
+          <div style="padding:0 14px 11px;background:#eae9e9;font-size:10.5px;color:#575351;line-height:1.7">من 4 حسابات — محفظة هناء مش داخلة في المجموع</div>
+        </div>
+
+        <div style="padding:20px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">بعملات أخرى</span><span style="font-size:11px;color:#575351">2</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#fff">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▤</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حساب العمل الحر — بنك القاهرة</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">حساب بنكي · أحمد · <span class="tnum">USD</span></span></span><span class="tnum" style="font-size:16px;font-weight:600">320.00 <span style="font-size:10px;color:#575351">$</span></span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">◈</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">ذهب — سبائك 21 قيراط</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">ذهب · الأسرة · كمية بالجرام</span></span><span class="tnum" style="font-size:16px;font-weight:600">50.000 <span style="font-size:10px;color:#575351">جم</span></span></div>
+          <div style="padding:11px 14px;border-top:2px solid #201e1d;background:#eae9e9;font-size:11px;color:#575351;line-height:1.7">مفيش مجموع — الدولار والذهب والجنيه مايتجمعوش</div>
+        </div>
+
+        <div style="padding:20px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">محتجز — غير قابل للصرف</span><span style="font-size:11px;color:#575351">3</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#dedbda">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#4a3e70 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">شهادة استثمار 12 شهرًا</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span style="background:#ece9f4;color:#4a3e70;padding:1px 5px">أصل الشهادة</span> · أُنشئ من شاشة الشهادات</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#4a3e70">47,900.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#2b5c8a 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">مصاريف مدرسة يوسف</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span style="background:#e6eef6;color:#2b5c8a;padding:1px 5px">محتجز لهدف</span> · أُنشئ من شاشة الأهداف</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#2b5c8a">13,600.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px;border:2px solid #6e4a1f;background:#f4ecdd"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px);flex:none"></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">أموال يوسف المحمية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6"><span style="background:#6e4a1f;color:#f4ecdd;padding:1px 5px">محمي</span> · المستفيد يوسف</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#6e4a1f">8,150.00</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px;border-top:2px solid #201e1d;background:#f3f2f2"><span style="font-size:12px;font-weight:600">مجموع المحتجز — جنيه</span><span class="tnum" style="font-size:18px;font-weight:700">69,650.00</span></div>
+        </div>
+
+        <div style="padding:20px 16px 16px">
+          <div style="border:1px solid #c3bfbe;background:#f3f2f2;display:flex;align-items:center;gap:11px;padding:12px 14px;min-height:48px"><span style="font-size:15px;color:#575351">◫</span><span style="flex:1;font-size:13px;color:#575351;line-height:1.5">مؤرشف (2) — السجل محفوظ، للقراءة فقط</span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+        <div style="background:#201e1d;padding:12px 16px"><span style="display:flex;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;min-height:48px;align-items:center">أضف حسابًا</span></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>Three regions, three subtotals, no grand total.</strong> Each region sums only within itself and within one currency, and the non-EGP region prints the refusal instead of a figure. The two derived held accounts say <em>where they came from</em> — "أُنشئ من شاشة الشهادات" — which is how the list explains why you can't create them here. Note the tab bar: five tabs with «الديون» in and Reports moved into More, per your call.</p>
+    </div>
+
+    <!-- H2 -->
+    <div style="flex:none">
+      <div class="cap">H2 · Account creation · type selection, 10 of 12</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">حساب جديد</span></div>
+        <div style="background:#fff;padding:16px;border-bottom:1px solid #c3bfbe"><div style="font-size:20px;font-weight:600;line-height:1.4;margin-bottom:6px">فين الفلوس دي؟</div><div style="font-size:12.5px;color:#575351;line-height:1.75">النوع بيحدد سلوك الحساب، ومش بيتغيّر بعد الإنشاء.</div></div>
+
+        <div style="padding:14px 16px 8px;font-size:11px;font-weight:700;color:#575351">نقد</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▣</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة نقدية شخصية</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">الكاش اللي معاك</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▣</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة الزوج/ة</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">كاش بتسلّمه لها — يُستبعد من رصيدك المتاح</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▧</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">نقدية المنزل</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">مصروف البيت اليومي</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:64px"><span style="font-size:19px">▥</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">مدخرات المنزل</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">فلوس متخزّنة في البيت</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="padding:16px 16px 8px;font-size:11px;font-weight:700;color:#575351">حسابات ومحافظ</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">▤</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حساب بنكي</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">راتب أو توفير — بيقبل التسوية مع كشف البنك</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:64px"><span style="font-size:19px">▦</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة موبايل</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">فودافون كاش، إنستاباي وغيرهم</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="padding:16px 16px 8px;font-size:11px;font-weight:700;color:#575351">أصول وحماية</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px;background:#f4ecdd"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6e4a1f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">صندوق حماية الطفل</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">السحب منه يتطلب سببًا ومستفيدًا وتأكيدًا — دائمًا</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">◈</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حيازة الذهب</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">بالجرام والقيراط — مش بعملة</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:64px"><span style="font-size:19px">◇</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">حساب استثمار</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">أسهم، صناديق، حصة في مشروع</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:64px"><span style="font-size:19px">○</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">أصل آخر</span><span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">أي حاجة تانية ليها قيمة</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:14px 16px;margin:18px 16px 16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:5px">الشهادات وحسابات الأهداف مش هنا — وده مقصود</div>
+          <div style="font-size:12px;color:#575351;line-height:1.8">الشهادة بتتعمل من <span style="border-bottom:1px solid #3d4a52">شاشة الشهادات</span> مع أول تمويل ليها، والحساب المحتجز للهدف بيتعمل لوحده من <span style="border-bottom:1px solid #3d4a52">شاشة الأهداف</span>. لو عملتهم من هنا، هيبقى عندك حساب مالوش شهادة ولا هدف وراه.</div>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>Ten types, three groups, one honest absence.</strong> Twelve flat rows is a wall; three groups of 4/2/4 is a decision. Each row's second line is the <em>consequence</em> of picking it, not a definition — "يُستبعد من رصيدك المتاح", "بيقبل التسوية", "السحب يتطلب سببًا". The protected fund is pre-tinted in the picker so its weight is visible before you choose it. And the missing two are explained with links to where they <em>are</em> made.</p>
+    </div>
+
+    <!-- H3 -->
+    <div style="flex:none">
+      <div class="cap">H3 · Account creation · details, bank account chosen</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">حساب بنكي جديد</span></div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe">
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">اسم الحساب</div><div style="border-bottom:2px solid #201e1d;padding-bottom:5px;min-height:36px;font-size:15px;display:flex;align-items:center">حساب بنك مصر — الراتب</div></div>
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:6px">المالك <span style="font-size:9px;color:#ae1800">◂ تسميات مقترحة</span></div><div style="display:flex;flex-wrap:wrap;gap:7px"><span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">أحمد</span><span style="border:1px solid #c3bfbe;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">هناء</span><span style="border:1px solid #c3bfbe;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">الأسرة</span><span style="border:1px solid #c3bfbe;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">يوسف</span><span style="border:1px solid #c3bfbe;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">مشترك</span></div><div style="font-size:10.5px;color:#575351;line-height:1.7;margin-top:6px">أحمد وهناء ويوسف أسماء أفراد حقيقية؛ «الأسرة» و«مشترك» تسميتان لـ<code>AccountOwnerType</code> ومالهمش نص في المشروع لسه</div></div>
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">العملة <span style="color:#9b9797">— مش بتتغيّر بعد الإنشاء</span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:40px"><span style="font-size:15px;font-weight:600">جنيه مصري <span class="tnum" style="font-size:11px;color:#575351;font-weight:400">EGP</span></span><span style="color:#575351">▾</span></div></div>
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:5px">الغرض <span style="font-size:9px;color:#ae1800">◂ تسمية مقترحة</span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:40px"><span style="font-size:15px;font-weight:600">متاح للصرف</span><span style="color:#575351">▾</span></div><div style="font-size:10.5px;color:#575351;line-height:1.7;margin-top:5px">من <code>FundPurpose</code> — ١١ قيمة، تلاتة محجوزة للشهادات والأهداف وصناديق الأطفال، فتمانية معروضة هنا</div></div>
+        </div>
+
+        <div style="padding:16px 16px 8px;font-size:11px;font-weight:700;color:#575351">أعلام الحساب</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">قابل للصرف</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">يدخل في «يمكنك صرف الآن»</span></span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">محمي</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">السحب يتطلب سببًا ومستفيدًا</span></span><span style="width:44px;height:26px;background:#dedbda;display:flex;align-items:center;padding:3px;flex:none;justify-content:flex-end"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">يُحسب في إجمالي الأصول</span></span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">يدخل في وعاء الزكاة</span></span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+        </div>
+
+        <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:16px">
+          <div style="font-size:12.5px;line-height:1.8"><strong>«قابل للصرف» و«محمي» بيتقفلوا بعد أول حركة.</strong> ده لحماية السجل — لو غيّرتهم بعدين، كل رصيد تاريخي حسبناه يبقى غلط.</div>
+        </div>
+        <div style="background:#fff;padding:14px 16px 18px;border-top:2px solid #201e1d">
+          <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">أنشئ الحساب</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">إلغاء</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">الرصيد يبدأ من <span class="tnum">0.00</span> — سجّل حركة إيداع لتحديد الرصيد الحالي. مفيش «رصيد افتتاحي» يُكتب مباشرة.</div>
+        </div>
+      </div>
+      <p class="note"><strong>The last line is the whole philosophy in one sentence.</strong> There is no opening-balance field anywhere, because a balance is derived — so a new account starts at zero and you record a deposit. The flag rows state what each flag <em>does</em> ("يدخل في «يمكنك صرف الآن»"), not what it's called, and the notice explains the immutability triggers in <code>app_database_core_schema.dart</code> in a sentence a person can act on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ I. INCOME ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">I</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Income — the same sheet, three differences</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:920px;margin:0 0 26px">Income reuses the expense sheet wholesale. Only three things differ, and each has a reason: the direction is teal and <strong>↓&nbsp;in</strong>; the category row is replaced by an 8-category list plus a <strong>source label</strong> (a text field, because "من مين" is the useful question for income); and recurrence is far more common, so it's promoted out of the collapsed section.</p>
+
+  <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+    <!-- I1 -->
+    <div style="flex:none">
+      <div class="cap">I1 · Income sheet · recurring salary</div>
+      <div class="ph" style="background:#201e1d">
+        <div style="height:52px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:20px;font-weight:600">دخل جديد</span><span style="font-size:16px;color:#575351">✕</span></div>
+          <div style="padding:14px 16px 0">
+            <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #201e1d;padding-bottom:7px"><span class="tnum" style="font-size:32px;font-weight:600;color:#14555f">↓ + 18,400.00</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">إلى <strong style="color:#201e1d">حساب بنك مصر — الراتب</strong> · اليوم 2026/07/25</div>
+          </div>
+          <div style="padding:14px 16px 0">
+            <div style="font-size:11px;color:#575351;margin-bottom:7px">المصدر</div>
+            <div style="border-bottom:1px solid #201e1d;padding-bottom:6px;min-height:36px;font-size:14.5px;display:flex;align-items:center">شركة النيل للبرمجيات</div>
+            <div style="font-size:10.5px;color:#575351;line-height:1.7;margin-top:6px">نص حر — بيظهر في تقرير الدخل مجمّعًا بالمصدر</div>
+          </div>
+          <div style="padding:14px 16px 0">
+            <div style="font-size:11px;color:#575351;margin-bottom:7px">الفئة</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px">
+              <span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center;gap:5px">✓ راتب</span>
+              <span style="border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">عمل حر</span>
+              <span style="border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">أرباح شهادة</span>
+              <span style="border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">إيجار</span>
+              <span style="border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">هدية</span>
+              <span style="border:1px solid #c3bfbe;background:#fff;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center;color:#575351">+ 3 أخرى</span>
+            </div>
+          </div>
+          <div style="background:#fff;margin:14px 16px 0;border:1px solid #c3bfbe">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #c3bfbe;min-height:48px"><span style="flex:1;font-size:13.5px;line-height:1.5">يتكرر شهريًا ↻</span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+            <div style="padding:11px 14px;font-size:11.5px;color:#575351;line-height:1.75">هنفكّرك يوم <span class="tnum">1</span> من كل شهر. <strong>مش هنسجّلها لوحدنا</strong> — إنت اللي بتأكد.</div>
+          </div>
+          <div style="padding:14px 16px 0"><div style="border-top:1px solid #c3bfbe;padding-top:11px;display:flex;justify-content:space-between;align-items:center;min-height:48px"><span style="font-size:12.5px;color:#575351;line-height:1.6">تفاصيل أكثر — النطاق، ملاحظات، إيصال</span><span style="font-size:15px;color:#575351">⌃</span></div></div>
+          <div style="padding:14px 16px 18px;margin-top:6px;border-top:2px solid #201e1d;background:#fff">
+            <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">حفظ الدخل</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">مراجعة</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">سيُسجَّل في السجل ولا يمكن حذفه — يمكن عكسه لاحقًا.</div>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>"مش هنسجّلها لوحدنا — إنت اللي بتأكد"</strong> is load-bearing copy. The repo excludes automatic recurring execution, so a recurrence toggle that looks like automation would be a lie. It's a reminder, and the sheet says so at the moment you enable it rather than in a help page.</p>
+    </div>
+
+    <!-- I2 -->
+    <div style="flex:none">
+      <div class="cap">I2 · Income review · certificate profit variant</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مراجعة الدخل</span></div>
+        <div style="background:#fff;padding:18px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><span style="background:#e3efef;color:#14555f;font-size:11px;font-weight:600;padding:4px 9px">دخل ↓</span><span style="background:#ece9f4;color:#4a3e70;font-size:11px;font-weight:600;padding:4px 9px">من شهادة</span></div>
+          <div style="font-size:15px;line-height:2">استلمت <span class="tnum" style="font-weight:600">758.25</span> ج.م أرباح <strong>شهادة استثمار 12 شهرًا</strong> في <strong>حساب بنك مصر</strong>.</div>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#eae9e9;border-bottom:1px solid #c3bfbe">قيود السجل</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:44px"><span style="font-size:12.5px;color:#575351;line-height:1.5">مدين · حساب بنك مصر</span><span class="tnum" style="font-size:16px;font-weight:600;color:#14555f">758.25</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;min-height:44px"><span style="font-size:12.5px;color:#575351;line-height:1.5">دائن · دخل — أرباح شهادة</span><span class="tnum" style="font-size:16px;font-weight:600">758.25</span></div>
+        </div>
+        <div style="background:#ece9f4;border-inline-start:4px solid #4a3e70;padding:14px 16px;margin:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:5px">أصل الشهادة مش بيتغيّر</div>
+          <div style="font-size:12px;color:#575351;line-height:1.8">الـ<span class="tnum">47,900.00</span> بتاعت الشهادة زي ما هي. اللي دخل حسابك هو <strong>الربح</strong> بس — والاتنين مش نفس النوع من الفلوس.</div>
+        </div>
+        <div style="background:#fff;border-block:2px solid #201e1d">
+          <div style="display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:44px;align-items:center"><span style="color:#575351">أصل الشهادة بعد الحركة</span><span class="tnum" style="font-weight:600;color:#4a3e70">47,900.00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:44px;align-items:center"><span style="color:#575351">دخل يوليو بعد الحركة</span><span class="tnum" style="font-weight:600;color:#14555f">19,158.25</span></div>
+          <div style="display:flex;justify-content:space-between;padding:11px 16px;font-size:12.5px;min-height:44px;align-items:center"><span style="color:#575351">رصيدك المتاح</span><span class="tnum" style="font-weight:600">+ 758.25</span></div>
+        </div>
+        <div style="padding:16px">
+          <div style="display:flex;gap:8px"><span style="flex:1;background:#201e1d;color:#f3f2f2;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">تأكيد وحفظ</span><span style="border:1px solid #201e1d;font-size:14px;font-weight:600;padding:14px;display:flex;align-items:center;min-height:48px">تعديل</span></div>
+        </div>
+      </div>
+      <p class="note"><strong>The hardest thing about certificate profit is that it isn't the certificate.</strong> This review shows both figures side by side with the principal explicitly unchanged — the one place the app has to teach "principal ≠ profit" at the moment money moves. The indigo notice uses <code>certificatePrincipal</code>; the amount uses <code>income</code>. Two roles, one screen, no ambiguity.</p>
+    </div>
+
+    <!-- I3 -->
+    <div style="flex:none">
+      <div class="cap">I3 · Onboarding · first run, no household</div>
+      <div class="ph">
+        <div style="background:#201e1d;color:#f0edeb;padding:34px 20px 28px">
+          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a8a3a0;margin-bottom:16px">الخطوة 1 من 3</div>
+          <div style="font-size:26px;font-weight:600;line-height:1.5;margin-bottom:12px">مدير مالية الأسرة</div>
+          <div style="font-size:13.5px;color:#a8a3a0;line-height:1.9">سجل دائم لفلوس بيتك. كل مبلغ له مكان ومالك وسبب — ومفيش رقم بيتغيّر في الخفاء.</div>
+        </div>
+        <div style="background:#fff;border-block:2px solid #201e1d;padding:16px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px">تلات حاجات تفرق</div>
+          <div style="display:flex;gap:12px;align-items:flex-start;padding-bottom:13px;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none;min-height:34px"></span><div><div style="font-size:13.5px;font-weight:600;line-height:1.5;margin-bottom:3px">مفيش تعديل للأرصدة</div><div style="font-size:11.5px;color:#575351;line-height:1.75">الرصيد بيتحسب من الحركات. عايز تغيّره؟ سجّل حركة.</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #c3bfbe"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none;min-height:34px"></span><div><div style="font-size:13.5px;font-weight:600;line-height:1.5;margin-bottom:3px">مفيش حذف</div><div style="font-size:11.5px;color:#575351;line-height:1.75">الغلط بيتصحّح بحركة عكسية تفضل ظاهرة — زي الدفاتر بالظبط.</div></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;padding-top:13px"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px);flex:none;min-height:34px"></span><div><div style="font-size:13.5px;font-weight:600;line-height:1.5;margin-bottom:3px">فلوس محتجزة مش فلوس متاحة</div><div style="font-size:11.5px;color:#575351;line-height:1.75">الشهادات وفلوس العيال بتبقى في منطقة لوحدها، وما تتجمعش مع رصيدك.</div></div></div>
+        </div>
+        <div style="background:#fff;padding:16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#575351;margin-bottom:5px">اسم البيت</div>
+          <div style="border-bottom:2px solid #201e1d;padding-bottom:5px;min-height:36px;font-size:15px;display:flex;align-items:center;margin-bottom:16px">بيت عفيفي</div>
+          <div style="font-size:12px;color:#575351;margin-bottom:6px">العملة الأساسية</div>
+          <div style="display:flex;gap:7px;margin-bottom:6px"><span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">جنيه مصري</span><span style="border:1px solid #c3bfbe;font-size:12.5px;padding:9px 12px;min-height:40px;display:flex;align-items:center">أخرى</span></div>
+          <div style="font-size:10.5px;color:#575351;line-height:1.7">تقدر تضيف حسابات بعملات تانية بعدين — بس مش هنجمعها مع بعض أبدًا.</div>
+        </div>
+        <div style="background:#f3f2f2;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;gap:6px;margin-bottom:12px"><span style="flex:1;height:4px;background:#201e1d"></span><span style="flex:1;height:4px;background:#dedbda"></span><span style="flex:1;height:4px;background:#dedbda"></span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7">بعدها: أفراد البيت، وأول حساب.</div>
+        </div>
+        <div style="background:#201e1d;padding:12px 16px"><span style="display:flex;background:#f0edeb;color:#201e1d;font-size:14px;font-weight:600;padding:14px;min-height:48px;align-items:center">يلا نبدأ</span></div>
+      </div>
+      <p class="note"><strong>First run teaches the three laws, not the features.</strong> Every other onboarding in this category lists what the app can do; this one states what it <em>won't</em> do — no balance editing, no deleting, no mixing held with available — because those three surprises are what make users distrust a ledger later. Three steps, a real progress rule, and the currency note pre-empts the question the dashboard will otherwise raise.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ J. MORE + SETTINGS + EMPTY ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">J</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">More, Settings, and the empty list</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:920px;margin:0 0 26px">The More hub now carries Reports, per your call. Settings absorbs the numeral preference, the notes-search switch and the security block. And the accounts list gets the state it will spend its first day in.</p>
+
+  <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+    <!-- J1 -->
+    <div style="flex:none">
+      <div class="cap">J1 · More hub · Reports folded in</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="flex:1;font-size:18px;font-weight:600">المزيد</span><span style="font-size:16px">◉</span></div>
+        <div style="padding:16px 16px 8px;font-size:11px;font-weight:700;color:#575351">التقارير</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">الدخل والمصروفات</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">يوليو · صُرف 53% من الدخل</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">نسب الإنفاق</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">مين صرف إيه، ولحساب مين</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">محفظة الزوج/ة</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">أُعطي وصُرف وأُرجع على الزمن</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px;background:#f4ecdd"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;display:block" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">الأموال المحمية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">سجل تدقيق كل سحب من فلوس يوسف</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:56px"><span style="flex:1;font-size:13.5px;color:#575351">التقارير — كلها (9)</span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="padding:18px 16px 8px;font-size:11px;font-weight:700;color:#575351">إعداد البيت</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">الحسابات</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">10 نشِطة · 2 مؤرشفة</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">أفراد البيت</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">أحمد · هناء · يوسف</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:56px"><span style="flex:1"><span style="display:block;font-size:14.5px;font-weight:600;line-height:1.45">الإعدادات</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">اللغة، المظهر، الخصوصية، الأمان</span></span><span style="font-size:14px;color:#575351">‹</span></div>
+        </div>
+
+        <div style="padding:18px 16px 8px;font-size:11px;font-weight:700;color:#575351">قريبًا</div>
+        <div style="background:#f3f2f2;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #c3bfbe;min-height:52px;color:#575351"><span style="flex:1;font-size:13.5px">الزكاة والصدقة</span><span style="font-size:11px">قريبًا</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;min-height:52px;color:#575351"><span style="flex:1;font-size:13.5px">تصدير ونسخة احتياطية</span><span style="font-size:11px">قريبًا</span></div>
+        </div>
+        <div style="padding:16px;font-size:11px;color:#575351;line-height:1.7">الإصدار 1.0 · قاعدة بيانات 19 · كل البيانات على تليفونك</div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>A hub earns its place by carrying status, not links.</strong> Each report row shows its own headline figure and each setup row its count, so the hub answers questions instead of only routing. Reports sit first because they're the reason you'd open this tab daily; household setup second. The "قريبًا" group is honest rather than hidden — and the last line states the offline-first promise where a user goes looking for it.</p>
+    </div>
+
+    <!-- J2 -->
+    <div style="flex:none">
+      <div class="cap">J2 · Settings · with the decisions from this project</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الإعدادات</span></div>
+        <div style="padding:16px 16px 8px;font-size:11px;font-weight:700;color:#575351">اللغة والأرقام</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:6px">اللغة</div><div style="display:flex;border:1px solid #201e1d;width:fit-content"><span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 14px;min-height:40px;display:flex;align-items:center">العربية</span><span style="font-size:12.5px;padding:9px 14px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">English</span></div></div>
+          <div style="padding:12px 16px"><div style="font-size:12px;color:#575351;margin-bottom:6px">شكل الأرقام</div><div style="display:flex;border:1px solid #201e1d;width:fit-content;margin-bottom:7px"><span class="tnum" style="background:#201e1d;color:#f3f2f2;font-size:13px;padding:9px 14px;min-height:40px;display:flex;align-items:center">1,275.00</span><span style="font-size:13px;padding:9px 14px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center;font-feature-settings:'tnum' 1">١,٢٧٥.٠٠</span></div><div style="font-size:10.5px;color:#575351;line-height:1.7">الأرقام الغربية هي الافتراضي — زي كشوف البنوك والفواتير في مصر</div></div>
+        </div>
+
+        <div style="padding:18px 16px 8px;font-size:11px;font-weight:700;color:#575351">المظهر والخصوصية</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="padding:12px 16px;border-bottom:1px solid #c3bfbe"><div style="font-size:12px;color:#575351;margin-bottom:6px">المظهر</div><div style="display:flex;border:1px solid #201e1d;width:fit-content"><span style="background:#201e1d;color:#f3f2f2;font-size:12.5px;padding:9px 14px;min-height:40px;display:flex;align-items:center">النظام</span><span style="font-size:12.5px;padding:9px 14px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">فاتح</span><span style="font-size:12.5px;padding:9px 14px;border-inline-start:1px solid #201e1d;min-height:40px;display:flex;align-items:center">غامق</span></div></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">ابدأ بالمبالغ مخفية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">كل مبلغ يظهر كشريط لحد ما تضغط ◉</span></span><span style="width:44px;height:26px;background:#dedbda;display:flex;align-items:center;padding:3px;flex:none;justify-content:flex-end"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">أخفِ المبالغ في مبدّل التطبيقات</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">لما تخرج من التطبيق، الصورة المصغّرة تبقى بدون أرقام</span></span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+        </div>
+
+        <div style="padding:18px 16px 8px;font-size:11px;font-weight:700;color:#575351">البحث</div>
+        <div style="background:#fff;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:48px"><span style="flex:1"><span style="display:block;font-size:13.5px;line-height:1.5">ابحث جوّه الملاحظات</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">الملاحظة هي الحقل الحر الوحيد — اقفله لو فيه حاجة خاصة</span></span><span style="width:44px;height:26px;background:#201e1d;display:flex;align-items:center;padding:3px;flex:none"><span style="width:20px;height:20px;background:#f3f2f2"></span></span></div>
+        </div>
+
+        <div style="padding:18px 16px 8px;font-size:11px;font-weight:700;color:#575351">الأمان <span style="font-weight:400;color:#9b9797">— قريبًا</span></div>
+        <div style="background:#f3f2f2;border-block:1px solid #c3bfbe">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px;color:#575351"><span style="flex:1;font-size:13.5px">رمز PIN</span><span style="font-size:11px">قريبًا</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #c3bfbe;min-height:48px;color:#575351"><span style="flex:1;font-size:13.5px">بصمة أو وجه</span><span style="font-size:11px">قريبًا</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:48px;color:#575351"><span style="flex:1;font-size:13.5px">قفل تلقائي بعد دقيقة</span><span style="font-size:11px">قريبًا</span></div>
+        </div>
+        <div style="padding:16px;font-size:11px;color:#575351;line-height:1.75">مفيش زر يمسح بياناتك من الإعدادات. الحسابات تتأرشف، والحركات تتعكس — ومفيش حاجة تتشال.</div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>Every toggle explains its consequence in the second line.</strong> "ابدأ بالمبالغ مخفية" is off by default and app-switcher masking is on — that asymmetry is deliberate: the second costs nothing, the first taxes every launch. Security is grouped and marked "قريبًا" rather than omitted, so the absence is visible. And the last line closes the loop the whole product has been making.</p>
+    </div>
+
+    <!-- J3 -->
+    <div style="flex:none">
+      <div class="cap">J3 · Accounts list · first day, one account</div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:1px solid #c3bfbe"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الحسابات</span><span style="font-size:16px">◉</span></div>
+        <div style="padding:16px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">قابل للصرف</span><span style="font-size:11px;color:#575351">1</span></div></div>
+        <div style="height:2px;background:#201e1d"></div>
+        <div style="background:#fff">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px"><span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span><span style="font-size:19px;flex:none">▣</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.45">محفظة نقدية شخصية</span><span style="display:block;font-size:11px;color:#575351;line-height:1.6">نقد · أحمد · لسه مفيش حركات</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#9b9797">0.00</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px;border-top:2px solid #201e1d;background:#eae9e9"><span style="font-size:12px;font-weight:600">مجموع القابل للصرف — جنيه</span><span class="tnum" style="font-size:18px;font-weight:700;color:#9b9797">0.00</span></div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:16px;margin:18px 16px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:6px">الرصيد صفر لأن مفيش حركات — مش لأن الحساب فاضي</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">لو في محفظتك <span class="tnum">1,845</span> جنيه دلوقتي، سجّل <strong>رصيد افتتاحي</strong> بالمبلغ ده. حركة بنوعها الخاص — مش دخل، فمش هتظهر في تقارير الدخل.</div>
+          <div style="margin-top:13px"><span style="background:#201e1d;color:#f3f2f2;font-size:13px;font-weight:600;padding:12px 15px;min-height:48px;display:inline-flex;align-items:center">سجّل رصيد افتتاحي</span></div>
+        </div>
+        <div style="padding:0 16px 8px"><div style="font-size:11px;color:#575351;line-height:1.7">مناطق تظهر لما تحتاجها:</div></div>
+        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+          <div style="border:1px dashed #c3bfbe;padding:12px 14px;font-size:12.5px;color:#575351;line-height:1.6">بعملات أخرى — أول ما تضيف حسابًا بالدولار أو ذهب</div>
+          <div style="border:1px dashed #c3bfbe;padding:12px 14px;font-size:12.5px;color:#575351;line-height:1.6">محتجز — أول شهادة أو هدف أو صندوق طفل</div>
+          <div style="border:1px dashed #c3bfbe;padding:12px 14px;font-size:12.5px;color:#575351;line-height:1.6">مؤرشف — لما تأرشف أول حساب</div>
+        </div>
+        <div style="background:#201e1d;padding:12px 16px"><span style="display:flex;background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:13px;min-height:48px;align-items:center">أضف حسابًا</span></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>The zero is explained, and the fix is offered.</strong> "لو في محفظتك 1,845 جنيه دلوقتي، سجّل رصيد افتتاحي" — the single most important onboarding sentence in the product, because "there's no opening-balance field" is otherwise the moment a new user gives up. The dashed placeholders name the three regions that don't exist yet, so the list's structure is learnable before it's populated rather than appearing to change shape later.</p>
+      <div style="width:390px;margin-top:10px;background:#e3efef;border-inline-start:4px solid #0e5a44;padding:12px 14px">
+        <div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#0e5a44;margin-bottom:7px">Corrected — and the source is better than my design</div>
+        <p style="font-size:12px;line-height:1.65;margin:0">I drew this as an ordinary income entry and flagged "the category will pollute income reports" as the cost. <strong>It doesn't have to.</strong> <code>OperationType.openingBalance</code> already exists — «رصيد افتتاحي» — as one of <strong>21</strong> operation types in <code>enum_label_helpers.dart</code>. So an opening balance is its own kind of entry, stays out of income reporting, and needs no new concept. The open question I raised in the footer is answered by the code.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:34px 56px 48px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:48px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff">Tier 2 · 9 of ~35 done</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6">
+        <strong style="color:#ff9783">Next</strong><span>Planning group — hub, budgets (list / create / detail), goals (list / create / detail / fund / release). Nine boards.</span>
+        <strong style="color:#ff9783">Then</strong><span>Certificates (5) + the nine reports. Then Tier 3 patterns, the D2 gaps, reconciliation and certificate maturity, and D5 adaptive last.</span>
+      </div>
+    </div>
+    <div>
+      <div style="background:#fdeae6;padding:13px 15px;margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#ae1800;margin-bottom:7px">String provenance — closed rule, not a caveat list</div>
+        <p style="font-size:12.5px;line-height:1.7;margin:0 0 8px;color:#201e1d">I kept disclosing only the unverified strings I happened to remember, which meant the disclosure was never complete. So here is the rule instead, and it covers every Arabic word in all nine boards.</p>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 13px;font-size:12px;line-height:1.65;color:#201e1d">
+          <strong>From source</strong><span>All 12 account-type labels · all 5 <code>nav*</code> · all 8 <code>report*Title</code> · <code>settingsTitle</code> · the 12 type / 5 owner / 11 purpose enum identifiers · and <strong>5 of the 21</strong> <code>transactionType*</code> keys — <code>Income</code> «دخل», <code>Expense</code> «مصروف», <code>Transfer</code> «تحويل», <code>OpeningBalance</code> «رصيد افتتاحي», <code>Adjustment</code> «تسوية». The other 16 exist and are localised but I have not read their values, so no board prints one.</span>
+          <strong>Mine — proposed</strong><span>Everything else: all row subtitles and consequence lines, J2's section groupings («اللغة والأرقام», «المظهر والخصوصية», «البحث») and its toggle labels, J1's report subtitles, the onboarding copy, the empty-state copy, «محفظة هناء» as an account <em>name</em>, I1's income category chips, and the two enum families with no localization at all.</span>
+          <strong>Rename in flight</strong><span><span style="color:#ae1800">◂</span> The bottom-bar «الحركات» in every board is D4's proposed rename of the current «المعاملات». «الديون» is a new tab and needs a new <code>navDebts</code> key.</span>
+        </div>
+        <p style="font-size:12px;line-height:1.7;margin:8px 0 0;color:#575351">Proposed copy is the <em>point</em> of a redesign — the problem was never that I wrote it, only that I implied it was already in the app.</p>
+      </div>
+      <h6 style="color:#ff9783;margin-bottom:10px">Findings — and the biggest one is good news</h6>
+      <div style="background:rgba(255,255,255,.07);padding:13px 15px;margin-bottom:13px">
+        <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#63bc94;margin-bottom:7px">The ledger already speaks Tier 3</div>
+        <p style="font-size:12.5px;line-height:1.7;margin:0 0 8px"><code>OperationType</code> has <strong>21</strong> values, and they include <code>liabilityCreation</code>, <code>liabilityRepayment</code>, <code>zakat</code>, <code>sadaqah</code>, <code>goldPurchase</code>, <code>goldSale</code>, <code>assetPurchase</code>, <code>assetSale</code>, <code>interestIncome</code>, <code>certificateFunding</code>, <code>certificateMaturity</code>, <code>goalFunding</code>, <code>goalWithdrawal</code>, <code>childFundDeposit</code>, <code>childFundWithdrawal</code>, <code>openingBalance</code> and <code>adjustment</code> — all with Arabic labels already in the ARB.</p>
+        <p style="font-size:12.5px;line-height:1.7;margin:0">Debts, zakat, gold and the reconciliation adjustment are <strong>not greenfield</strong>: the ledger vocabulary and its localisation exist. That materially reduces the Tier 3 estimate, and it means the adjustment entry in D6's reconciliation row is <code>OperationType.adjustment</code> («تسوية») rather than something new — only the <em>statement-balance record</em> is genuinely new data.</p>
+      </div>
+      <ol style="margin:0;padding-inline-start:20px;font-size:12.5px;line-height:1.7;color:#e8e4e2">
+        <li><strong>Labels corrected against the ARB.</strong> Five of the ten type labels I first drew were wrong: «نقد الأسرة»→«نقدية المنزل», «مدخرات المنزل النقدية»→«مدخرات المنزل», «صندوق طفل محمي»→«صندوق حماية الطفل», «ذهب»→«حيازة الذهب», «استثمار»→«حساب استثمار». All boards now use the source strings.</li>
+        <li><strong>One label I'd propose changing:</strong> <code>accountTypeSpouseCash</code> is «محفظة الزوج/ة». The slash form is correct for a gender-neutral key but reads awkwardly in a list. Since the household knows its own members, the tile should show the <em>account's own name</em> («محفظة هناء») with the type as meta — which is what H1 now does.</li>
+        <li><strong>Finding:</strong> the type picker offers <strong>ten</strong> of twelve. <code>certificate</code> and <code>goalReserve</code> accounts are created by their own use cases and locked by triggers.</li>
+        <li><strong>Finding:</strong> <code>FundPurpose</code> has <strong>11</strong> values, not the brief's 10 — <code>custom</code> is the eleventh. Three are effectively reserved, so a manual account's purpose picker shows eight.</li>
+        <li>The spouse wallet is now in H1's spendable region with a «مستبعد من المتاح» chip and is <em>not</em> in the subtotal — it was missing, which contradicted the product's own "one location per amount" thesis.</li>
+        <li><strong>Finding — two enums have no localization at all.</strong> <code>enum_label_helpers.dart</code> defines label functions for nine enums; there is <strong>no <code>fundPurposeLabel</code> and no <code>accountOwnerTypeLabel</code></strong>, and a search across <code>lib/core/localization</code> for <code>fundPurpose</code> / <code>ownerType</code> returns <strong>zero</strong> matches. So «متاح للصرف», «الأسرة» and «مشترك» in H3 are <em>my strings</em>, marked <span style="color:#ff9783">◂</span> in the board. This is real localization work — <strong>11 + 5 new ARB keys and two new helper functions</strong> — and it is now added to D6&nbsp;§05.</li>
+        <li><strong>Report titles corrected to source:</strong> «الدخل والمصروف»→«الدخل والمصروفات», «أين يذهب المصروف»→«نسب الإنفاق», and J1's spouse row now uses <code>reportSpouseWalletTitle</code> «محفظة الزوج/ة». <code>settingsTitle</code> «الإعدادات» and <code>reportProtectedFundsTitle</code> «الأموال المحمية» already matched.</li>
+        <li>Still unread and therefore proposed: the default income category set (<code>TransactionCategory.code</code>) behind I1's chips.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

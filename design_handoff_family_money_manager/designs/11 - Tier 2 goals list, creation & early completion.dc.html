@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.rw{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:44px;align-items:center}
+.fl{padding:12px 16px;border-bottom:1px solid #c3bfbe;background:#fff}
+.fll{font-size:12px;color:#575351;margin-bottom:5px}
+.fli{border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:15px;min-height:34px;display:flex;justify-content:space-between;align-items:baseline}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btnD{background:#c3bfbe;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.hg{background:repeating-linear-gradient(45deg,#2b5c8a 0 3px,transparent 3px 7px)}
+.hgD{background:repeating-linear-gradient(45deg,#7fafdd 0 3px,transparent 3px 7px)}
+.hd{background:repeating-linear-gradient(45deg,#c3bfbe 0 3px,transparent 3px 7px)}
+.chip{font-size:12.5px;font-weight:600;padding:10px 12px;min-height:40px;display:flex;align-items:center;border:1px solid #c3bfbe;background:#eae9e9}
+.lock{display:block;flex:none}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 4 — goals, rebuilt</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">One goal. I drew three.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Twelve boards, sections M to O — the two screens owed since turn two, plus the guarded flow. These letters sit before 10's P–T because these boards were drawn first; the numbers on them were not. This version is rebuilt on <strong style="color:#201e1d">07 · L2's fixture</strong> and on the goals source read in turn three: <code>goal_creation_screen.dart</code>, <code>goals_list_screen.dart</code>, <code>complete_goal_params.dart</code>, <code>account_eligibility.dart</code>, every <code>goal*</code> / <code>purpose*</code> value in both ARB files, and — for the correction panel below — <code>goal_detail_screen.dart</code> and <code>release_goal_screen.dart</code>. <code>goal_use_cases.dart</code> has <em>not</em> been opened; its creation parameters were read through the screen's call site.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">What this version fixes, and what it keeps</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">THE ERROR · mine</div>
+      <h4 style="margin:0 0 10px">I invented three goals and split the established reserve across them.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">07 · L2 fixes it precisely: <strong>«مصاريف مدرسة يوسف»</strong>, reserve <strong class="tnum">13,600.00</strong> of <span class="tnum">13,000.00</span>, <span class="tnum">104٪</span>, overfunded by <span class="tnum">600.00</span>, target date <span class="tnum">2026/07/13</span> — thirteen days past as of <span class="tnum">2026/07/26</span>, where 07 printed twelve on the 25th — beneficiary <strong>يوسف أحمد</strong>, four movements, fundings of <span class="tnum">3,400.00</span> from بنك مصر. Four of those at <span class="tnum">3,400.00</span> is exactly <span class="tnum">13,600.00</span>, so N2 and N3 draw the first one and the arithmetic closes without a new figure.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The second goal is <strong>«تجديد المطبخ»</strong> at <span class="tnum">0.00</span> of <span class="tnum">40,000.00</span>, from 07 · L3's funding sheet. Two goals, one holding money — which is why the held region and the goals total are the same number.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">I also asked whether «المستفيد» should be rendered or deleted. <strong>07 · L2 already renders it.</strong> The question was answered before I asked it; N1 renders the field.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">WHAT STANDS · read from source, unchanged</div>
+      <h4 style="margin:0 0 10px">Four findings survive the rebuild. Two of them contradict the handoff.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong><code>GoalPurpose</code> is fully localised</strong> — seven <code>purpose*</code> keys in both locales. Handoff §9 says it has "no localization at all", which drops the new-key count from 23 to <strong>16</strong>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>Creation takes optional initial funding</strong> — <code>initialFundingSourceAccountId</code> and <code>initialFundingMinorUnits</code>, source filtered by <code>AccountEligibility.isGoalFundingSource</code>. My first version claimed creation never moves money. It can, and N2 draws it.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong><code>goalPercent</code> is «{percent}٪ ممول»</strong> — Arabic percent sign, an <code>int</code> parameter, and <code>percentageFunded</code> is nullable. 07 already used <span class="tnum">104٪</span>; every board here matches.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong><code>goalStatusTargetReached</code> is orphaned</strong> and value-identical to <code>goalProgressTargetReached</code> («تم بلوغ الهدف»). Delete it with <code>certificateRedeemProfitOnly</code> in one ARB pass.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #c3bfbe;margin-top:4px">
+    <div style="padding:20px 30px 4px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">THE GUARD, CORRECTED BY THE FIXTURE</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">My first version put early completion on a goal with money in it. On this fixture that is impossible: «مصاريف مدرسة يوسف» is <em>over</em> its target, so completing it is the <strong>normal</strong> path — <code>errorGoalNormalCompletionRequiresTarget</code> is already satisfied and no guard applies. The only goal that can complete early is «تجديد المطبخ», which holds <span class="tnum">0.00</span>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">That turns out to be the more useful pair. <strong>O1 guards a goal with nothing to release</strong> — so the arithmetic block disappears and the consequence is the whole shortfall — and <strong>O2 completes a goal normally</strong>, with no reason and no acknowledgement. Side by side they show what the guard is <em>for</em>, which one board could not.</p>
+    </div>
+    <div style="padding:20px 0 4px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">STILL OWED BY L10N · three sites, one cause</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Goal creation maps <code>AppInsufficientFunds</code> to <code>errorGoalInsufficientReserve</code> — «رصيد احتياطي الهدف غير كافٍ» — although at creation the reserve is empty by definition and the shortfall is in the source account. Certificate creation and redemption do the same. <strong>One parameterised message retires all three.</strong></p>
+      <p style="font-size:13px;line-height:1.7;margin:0">And the submit button reuses <code>goalNew</code> — «هدف جديد», the screen's own title — so the primary action is a noun. Same defect as the certificate's «شهادة جديدة». Both need a verb key.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">ADDED AFTER READING THE GOAL DETAIL AND RELEASE SCREENS</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">The guarded flow is bypassed in source — and its reason ships in English</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">THE FINDING · it validates section O rather than changing it</div>
+      <h4 style="margin:0 0 10px">«تعيين كمكتمل» on the detail screen writes an early completion with no sheet, no reason and no acknowledgement from the user.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The button's handler calls the use case directly with <code>earlyCompletion: true</code>, <code>earlyCompletionConfirmed: true</code> and <code>earlyCompletionReason: 'Completed from goal detail screen'</code> — a <strong>hardcoded English string</strong> that lands in an Arabic-first ledger as the household's stated reason for closing a goal short.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The two fields <code>CompleteGoalParams</code> documents as user obligations — "required and non-empty", "enforces explicit acknowledgment" — are satisfied by the caller on the user's behalf. The domain's guard is intact; the UI walks around it.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>O1–O3 need no revision.</strong> They are what this button must become, and this is the evidence that the sheet is a fix rather than a flourish.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">FOUR MORE, ONE OF WHICH CONFIRMS O2</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><strong>1 · Every completion is recorded as early.</strong> The flag is <code>true</code> unconditionally, so a goal that has reached its target — «مصاريف مدرسة يوسف» — closes as an <em>early</em> completion with that English reason attached. O2's unguarded normal path does not exist in source at all.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><strong>2 · A completed goal can still release.</strong> <code>canRelease = status != archived</code>, and archive requires <code>reserveBalance == 0</code>. <strong style="color:#201e1d">O2's amber notice was right</strong> — completion does not free the money, and source agrees.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><strong>3 · Goals have revisions.</strong> <code>progress.revisions</code> carries name, target and a <code>revisionReason</code> per change — an append-only history of the goal's <em>definition</em> that no board in this set draws. 07 · L2 shows movements only.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>4 · Two more wrong keys.</strong> The movements section is headed <code>goalMovementFunding</code> («تمويل»), and the percentage row uses <code>goalPercent</code> as a <em>label</em> with the progress state as its value — «<span class="tnum">104٪</span> ممول : ممول بزيادة». The error state renders <code>e.toString()</code> straight to the user.</p>
+      <p style="font-size:13px;line-height:1.7;margin:8px 0 0"><strong>5 · <code>release_goal_screen.dart</code>, read too — three English validators.</strong> The destination and amount fields validate with the literal strings <code>'Required'</code>, <code>'Required'</code> and <code>'Must be &gt; 0'</code>, rendered under the field to an Arabic-first user. Third site of the hardcoded-English class, after this screen's completion reason and the certificate detail's <code>'Certificate not found'</code>. The release <em>reason</em> is properly validated against <code>errorGoalReleaseReasonEmpty</code>, and the destination list correctly excludes the goal's own reserve — <strong>and this is the one screen where <code>errorGoalInsufficientReserve</code> is the right key</strong>, which is what makes its three uses elsewhere misuses rather than a naming quibble.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">M</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Goals list — six boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The shipped list is a <code>Card</code> per goal with a <code>LinearProgressIndicator</code> and three unlabelled figures in a <code>spaceBetween</code> row — reserve, percent, target. Nothing says the money is not spendable, and the bar clamps at <code>1.0</code>, so the overfunding that defines this fixture is invisible. The redesign moves reserves into a recessed region behind a 2&nbsp;px ink rule and keeps the two badge vocabularies source already got right.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">M1 · Populated · light · RTL — two goals, one holds money</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الأهداف</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:7px">
+            <svg class="lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>احتياطيات الأهداف · غير قابل للصرف ◂</span>
+          </div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.22">13,600.00 <span style="font-size:14px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:5px">التمويل تحويل داخلي — إجمالي الأصول لا يزيد. الفلوس دي مش في المتاح للصرف. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe">هدفان نشطان ◂</div>
+
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;line-height:1.45">مصاريف مدرسة يوسف</div>
+            <div style="font-size:11.5px;color:#575351;line-height:1.6">تعليم · المستفيد يوسف أحمد ◂</div></div>
+            <div class="tnum" style="font-size:17px;font-weight:600">13,600.00</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#eae9e9;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+            <span style="background:#e6eef6;color:#2b5c8a;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: ممول بزيادة ◂</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:96%;background:#201e1d"></span>
+            <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:96%;width:4%;background-color:#e6eef6"></span>
+            <span style="position:absolute;inset-block:-3px;inset-inline-start:96%;width:2px;background:#201e1d"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#575351"><span>المبلغ المستهدف <span class="tnum">13,000.00</span> · المتبقي <span class="tnum">0.00</span></span><span class="tnum">104٪ ممول</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#575351;margin-top:2px"><span style="color:#2b5c8a">زيادة التمويل <span class="tnum">600.00</span></span><span style="color:#8a5a00">▤ <span class="tnum">2026/07/13</span> · فات بـ<span class="tnum">13</span> يومًا ◂</span></div>
+        </div>
+
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hd" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="color:#9b9797"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;line-height:1.45">تجديد المطبخ</div>
+            <div style="font-size:11.5px;color:#575351;line-height:1.6">شراء كبير</div></div>
+            <div class="tnum" style="font-size:17px;font-weight:600;color:#575351">0.00</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#eae9e9;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+            <span style="background:#eae9e9;color:#575351;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: لم يبدأ ◂</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px"><span class="hd" style="position:absolute;inset:0"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#575351"><span>المبلغ المستهدف <span class="tnum">40,000.00</span></span><span class="tnum">0٪ ممول</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.7;margin-top:2px">مفيش تمويل لسه — «إضافة أموال» بتسجّل تحويل داخلي من حساب متاح. ◂</div>
+        </div>
+
+        <div style="padding:16px"><span class="btn">هدف جديد</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">زر مثبّت بدل الـ FAB العايم — وسطر النتيجة تحته. ◂</div>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون ◂</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>Two goals, one number.</strong> The held region and the goals total are the same <span class="tnum">13,600.00</span> because only one goal holds money — and that is the fixture, not a simplification. <strong>Status and progress print as a labelled pair</strong>, «الحالة» then «التقدّم», in that order, exactly as 07 · L2 established: <code>GoalStatus</code> persists three values, <code>GoalProgressState</code> derives four, and progress is never written to the row, so «ممول بزيادة» cannot move the goal out of «نشط». <strong><code>remainingMinorUnits</code> is clamped</strong>, so the overfunded goal reads «المتبقي <span class="tnum">0.00</span>» with «زيادة التمويل <span class="tnum">600.00</span>» stated separately — the opposite of a budget, whose remaining goes negative. And the passed target date is amber, not red: nothing failed, the money is still there, and <code>goals</code> has no notion of a deadline at all. <strong>07 · L2 prints «فات بـ<span class="tnum">12</span> يومًا» and these boards print <span class="tnum">13</span></strong> — 07 was drawn on <span class="tnum">2026/07/25</span>, this set is dated <span class="tnum">2026/07/26</span>, and <span class="tnum">2026/07/13</span> to today is thirteen days. Same correction as 10's <span class="tnum">232</span>&nbsp;→&nbsp;<span class="tnum">231</span>: a derived day count is recomputed against one stated today, never carried forward.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">M2 · Loading skeleton · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الأهداف</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="width:180px;height:12px;background:rgba(0,0,0,.09);margin-bottom:12px"></div>
+          <div style="width:225px;height:38px;background:rgba(0,0,0,.09)"></div>
+          <div style="width:285px;height:11px;background:rgba(0,0,0,.07);margin-top:9px"></div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;border-bottom:1px solid #c3bfbe"><div style="width:88px;height:12px;background:rgba(0,0,0,.09)"></div></div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;opacity:.45"></span>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px"><div style="width:165px;height:16px;background:#eae9e9"></div><div style="width:84px;height:17px;background:#eae9e9"></div></div>
+          <div style="width:135px;height:11px;background:#eae9e9;margin-bottom:12px"></div>
+          <div style="display:flex;gap:6px;margin-bottom:13px"><div style="width:70px;height:19px;background:#eae9e9"></div><div style="width:104px;height:19px;background:#eae9e9"></div></div>
+          <div style="height:8px;background:#eae9e9;margin-bottom:9px"></div>
+          <div style="width:245px;height:11px;background:#eae9e9;margin-bottom:6px"></div>
+          <div style="width:180px;height:11px;background:#eae9e9"></div>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hd" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px"><div style="width:120px;height:16px;background:#eae9e9"></div><div style="width:58px;height:17px;background:#eae9e9"></div></div>
+          <div style="width:74px;height:11px;background:#eae9e9;margin-bottom:12px"></div>
+          <div style="display:flex;gap:6px;margin-bottom:13px"><div style="width:70px;height:19px;background:#eae9e9"></div><div style="width:88px;height:19px;background:#eae9e9"></div></div>
+          <div style="height:8px;background:#eae9e9;margin-bottom:9px"></div>
+          <div style="width:190px;height:11px;background:#eae9e9"></div>
+        </div>
+        <div style="padding:14px 16px;font-size:12px;color:#575351;line-height:1.7">جارٍ التحميل...
+          <div style="font-family:'Archivo',sans-serif;direction:ltr;text-align:start;font-size:10.5px;color:#9b9797;margin-top:5px;line-height:1.55">aria-live=polite · the shipped card shows a bare <code>LinearProgressIndicator</code> inside each row while its progress provider resolves — two loading indicators per screen, at two nesting levels</div>
+        </div>
+        <div style="padding:0 16px 16px"><span class="btnD">هدف جديد</span><div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">معطّل ◂: الإنشاء محتاج قائمة حسابات مقروءة عشان يفلتر مصادر التمويل.</div></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون ◂</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>One skeleton, not two spinners.</strong> Source watches <code>goalsProvider</code> for the list and a separate <code>goalProgressProvider</code> per row, each with its own loading widget — so a cold open shows a spinner, then rows, then a bar inside each row. The redesign resolves both before painting and gives the region its recessed fill, rules and hatched edge up front, because those are layout facts rather than data: a user glancing at a loading goals screen still learns that whatever is coming cannot be spent.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">M3 · Empty · first day · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الأهداف</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:20px 16px 22px">
+          <div style="font-size:15.5px;font-weight:600;line-height:1.6;margin-bottom:12px">لا توجد أهداف بعد. أنشئ هدفاً للبدء في الادخار.</div>
+          <div style="height:1px;background:#c3bfbe;margin:14px 0"></div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">يُنشأ حساب احتياطي مخصص لهذا الهدف. التمويل تحويل داخلي — إجمالي الأصول لا يزيد.</div>
+          <div style="height:1px;background:#c3bfbe;margin:14px 0"></div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">مفيش هنا رصيد <span class="tnum">0.00</span> معروض، لأن صفر مش إجابة على سؤال «أوفّر لإيه» — ده غياب السؤال نفسه. ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:16px">
+          <div style="font-size:12.5px;line-height:1.8">أموال الهدف ليست صناديق أطفال محمية. الاحتجاز اختيارك، وتقدر تحرّره في أي وقت — بحركة مسجّلة. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe">أغراض شائعة (3) ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;min-height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px;font-weight:600"><span style="color:#575351">◫</span>صندوق الطوارئ<span style="margin-inline-start:auto;color:#575351">›</span></div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;min-height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px;font-weight:600"><span style="color:#575351">◫</span>تعليم<span style="margin-inline-start:auto;color:#575351">›</span></div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;min-height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;font-size:15px;font-weight:600"><span style="color:#575351">◫</span>شراء كبير<span style="margin-inline-start:auto;color:#575351">›</span></div>
+        <div style="padding:16px"><span class="btn">هدف جديد</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">التلاتة دول قيم <code>GoalPurpose</code> حقيقية — بيفتحوا نفس الشاشة والغرض متظبّط، مش أسماء أهداف جاهزة. ◂</div>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون ◂</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong><code>goalEmpty</code> ships and is used verbatim</strong>, then two sentences do what it cannot: state that a reserve account gets created and that funding creates no wealth. <code>goalReserveDedicated</code> already says both, in the product's own words, so the empty state borrows the creation screen's notice rather than inventing copy. <strong>The three shortcuts are purposes, not templates</strong> — real enum values, so they cost no key and cannot drift from the picker.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">M4 · Error · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الأهداف</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fdeae6;border-bottom:2px solid #ae1800;padding:16px">
+          <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:9px"><span style="color:#ae1800;font-size:14px">▲</span><span style="font-size:15.5px;font-weight:600;color:#ae1800">مش قادرين نقرا الأهداف ◂</span></div>
+          <div style="font-size:14px;line-height:1.9"><strong>مفيش حاجة اتغيرت في السجل.</strong> ده خطأ قراءة — الاحتياطيات وكل الحركات زي ما هي، وما فيش أي رصيد اتعدّل. ◂</div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:10px">الاحتياطي مش معروض عشان مش مقروء دلوقتي — مش عشان بصفر. ◂</div>
+          <div style="display:flex;gap:9px;margin-top:14px"><span class="btn" style="flex:1">إعادة المحاولة</span><span class="btn2" style="flex:1">تفاصيل الخطأ ◂</span></div>
+        </div>
+        <div style="padding:15px 16px 16px"><span class="btnD">هدف جديد</span></div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">التخطيط</span><span>الديون ◂</span><span>المزيد</span></div>
+      </div>
+      <p class="note"><strong>«مفيش حاجة اتغيرت في السجل» comes first, every time.</strong> In a ledger the first question on an error is never <em>why</em> — it is <em>did this corrupt anything</em>. Goals make that sharper than most screens: the money is real, it is sitting in a reserve account, and a blank where <span class="tnum">13,600.00</span> was reads as a release nobody authorised. The shipped screen shows <code>errorGeneric</code> alone and gives "no data" and "read failed" the same sentence; §4's rule — state what happened to the data <em>before</em> offering retry — makes this a new key rather than a rewording. <strong>Every line of commentary lives here, not in the frame:</strong> a designer note rendered inside a phone frame is neither source copy nor proposed copy, so it would sit outside the provenance rule.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">M5 · Populated · dark · RTL</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الأهداف</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#3a3635;border-bottom:2px solid #8d8886;padding:15px 16px;position:relative">
+          <span class="hgD" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:7px">
+            <svg class="lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>احتياطيات الأهداف · غير قابل للصرف ◂</span>
+          </div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.22">13,600.00 <span style="font-size:14px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+          <div style="font-size:11.5px;color:#a8a3a0;line-height:1.7;margin-top:5px">التمويل تحويل داخلي — إجمالي الأصول لا يزيد. ◂</div>
+        </div>
+        <div style="background:#2c2928;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #4a4645">هدفان نشطان ◂</div>
+        <div style="background:#221f1e;border-bottom:1px solid #4a4645;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hgD" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;line-height:1.45">مصاريف مدرسة يوسف</div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.6">تعليم · المستفيد يوسف أحمد ◂</div></div>
+            <div class="tnum" style="font-size:17px;font-weight:600">13,600.00</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#2c2928;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+            <span style="background:#1e2a36;color:#7fafdd;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: ممول بزيادة ◂</span>
+          </div>
+          <div style="height:8px;background:#2c2928;position:relative;margin-bottom:7px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:96%;background:#f0edeb"></span>
+            <span class="hgD" style="position:absolute;inset-block:0;inset-inline-start:96%;width:4%;background-color:#1e2a36"></span>
+            <span style="position:absolute;inset-block:-3px;inset-inline-start:96%;width:2px;background:#f0edeb"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#a8a3a0"><span>المبلغ المستهدف <span class="tnum">13,000.00</span> · المتبقي <span class="tnum">0.00</span></span><span class="tnum">104٪ ممول</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-top:2px"><span style="color:#7fafdd">زيادة التمويل <span class="tnum">600.00</span></span><span style="color:#e0ae4a">▤ <span class="tnum">2026/07/13</span> · فات بـ<span class="tnum">13</span> يومًا ◂</span></div>
+        </div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:repeating-linear-gradient(45deg,#4a4645 0 3px,transparent 3px 7px)"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="color:#6b6766"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600;line-height:1.45">تجديد المطبخ</div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.6">شراء كبير</div></div>
+            <div class="tnum" style="font-size:17px;font-weight:600;color:#a8a3a0">0.00</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#2c2928;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+            <span style="background:#2c2928;color:#a8a3a0;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: لم يبدأ ◂</span>
+          </div>
+          <div style="height:8px;background:#2c2928;position:relative"><span style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#4a4645 0 3px,transparent 3px 7px)"></span></div>
+        </div>
+        <div style="padding:14px 16px 18px;font-size:11.5px;color:#a8a3a0;line-height:1.75">في الدارك الهاتش بيفضل مقروء لأنه بيعتمد على الشكل مش على التشبّع — والاحتجاز الفاضي بياخد هاتش رمادي، لأنه مش محتجز فلوس، هو بس مخصّص. ◂</div>
+      </div>
+      <p class="note"><strong>Two hatches, two meanings.</strong> The funded goal's edge hatches in <code>goalReserved</code>; the empty one hatches in <code>divider</code>, because a goal with <span class="tnum">0.00</span> holds no money and colouring its edge would claim otherwise. Same rule the certificates list follows for a redeemed certificate. The 100% mark stays visible on the overfunded bar in both themes — it is the only way the <span class="tnum">600.00</span> surplus is legible as a surplus rather than as a slightly longer bar, and it is what the shipped <code>value.clamp(0.0, 1.0)</code> makes impossible.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">M6 · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Goals</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="background:#dedbda;border-bottom:2px solid #201e1d;padding:15px 16px;position:relative">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:.02em;margin-bottom:9px">
+            <svg class="lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>GOAL RESERVES · NOT SPENDABLE ◂</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px"><span style="display:inline-flex;gap:6px"><span style="display:inline-block;width:34px;height:26px;background:#201e1d"></span><span style="display:inline-block;width:48px;height:26px;background:#201e1d"></span><span style="display:inline-block;width:34px;height:26px;background:#201e1d"></span></span><span style="font-size:14px;font-weight:600;color:#575351">EGP</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.55;margin-top:8px">Three groups, three bars — <span class="tnum">13,600.00</span> keeps its digit count and loses its digits.</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">TWO ACTIVE GOALS ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;line-height:1.3;letter-spacing:-.01em">Yousef's school fees</div>
+            <div style="font-size:11px;color:#575351;line-height:1.5;margin-top:2px">Education · Beneficiary Yousef Ahmed</div></div>
+            <span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:22px;height:12px;background:#201e1d"></span><span style="display:inline-block;width:31px;height:12px;background:#201e1d"></span><span style="display:inline-block;width:22px;height:12px;background:#201e1d"></span></span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px">
+            <span style="background:#eae9e9;font-size:11px;font-weight:600;letter-spacing:.02em;padding:4px 9px">STATUS: ACTIVE ◂</span>
+            <span style="background:#e6eef6;color:#2b5c8a;font-size:11px;font-weight:600;letter-spacing:.02em;padding:4px 9px">PROGRESS: OVERFUNDED ◂</span>
+          </div>
+          <div style="height:8px;background:#eae9e9;position:relative;margin-bottom:7px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:96%;background:#201e1d"></span>
+            <span class="hg" style="position:absolute;inset-block:0;inset-inline-start:96%;width:4%;background-color:#e6eef6"></span>
+            <span style="position:absolute;inset-block:-3px;inset-inline-start:96%;width:2px;background:#201e1d"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351"><span>Target <span style="display:inline-flex;gap:4px"><span style="display:inline-block;width:16px;height:9px;background:#575351"></span><span style="display:inline-block;width:23px;height:9px;background:#575351"></span><span style="display:inline-block;width:16px;height:9px;background:#575351"></span></span> · Remaining <span style="display:inline-flex;gap:4px"><span style="display:inline-block;width:16px;height:9px;background:#575351"></span><span style="display:inline-block;width:16px;height:9px;background:#575351"></span></span></span><span style="color:#9b9797">— % funded ◂</span></div>
+          <div style="font-size:11px;color:#8a5a00;line-height:1.55;margin-top:3px">Target date 13 Jul 2026 · 12 days past ◂</div>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px 14px;position:relative;padding-inline-start:20px">
+          <span class="hd" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="color:#9b9797"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:800;line-height:1.3">Kitchen renovation</div>
+            <div style="font-size:11px;color:#575351;line-height:1.5;margin-top:2px">Major purchase</div></div>
+            <span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:22px;height:12px;background:#9b9797"></span><span style="display:inline-block;width:22px;height:12px;background:#9b9797"></span></span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.55;margin-top:10px">Even an empty goal masks. <span class="tnum">0.00</span> looks harmless, but if it is the one row that prints, the mask has just told you which goal is empty.</div>
+        </div>
+        <div style="padding:14px 16px;font-size:11px;color:#575351;line-height:1.6">The percentage is withheld, not barred: <span class="tnum">104%</span> of a hidden target still says the goal is over its target, and a bar in its place would imply a hidden digit string where there are only two or three characters.</div>
+        <div style="padding:0 16px 16px"><span class="btn" style="font-family:'Archivo',sans-serif;font-weight:800">New Goal</span>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:8px">Label flush to the leading edge — left here, right in RTL. The noun is source copy.</div>
+        </div>
+        <div class="nav"><span>Home</span><span>Activity ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">Planning</span><span>Debts ◂</span><span>More</span></div>
+      </div>
+      <p class="note"><strong>Masking has one behaviour and three shapes.</strong> Amounts become one ink bar per digit group, keeping the currency code and the layout width. Derived figures mask too — a printed «Remaining <span class="tnum">0.00</span>» beside a hidden target announces that the reserve has passed it. But the <em>percentage</em> is withheld rather than barred, because a two-character value replaced by a bar reads as a hidden number of unknown length, which leaks more than it hides. <strong>The LTR pass is also what proves the badge prefixes need two locales:</strong> «الحالة» / «التقدّم» become STATUS / PROGRESS, so those two proposed keys are four strings, not two.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">N</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Creation — three boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Nine fields, two notices, and an optional funding block whose source list is filtered by <code>AccountEligibility.isGoalFundingSource</code>. So one tap can create a goal <em>and</em> post an internal transfer — which is exactly why the consequence gets printed rather than implied. N2 draws the creation of «مصاريف مدرسة يوسف» with its first <span class="tnum">3,400.00</span>; three more of the same amount bring it to the <span class="tnum">13,600.00</span> every other document shows.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">N1 · Empty form · no initial funding · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">هدف جديد</span></div>
+        <div style="padding:14px 16px 0">
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 14px;font-size:13.5px;line-height:1.8">يُنشأ حساب احتياطي مخصص لهذا الهدف. التمويل تحويل داخلي — إجمالي الأصول لا يزيد.</div>
+          <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 14px;font-size:13.5px;line-height:1.8;margin-top:8px">أموال الهدف ليست صناديق أطفال محمية. لا يمكن تغيير العملة بعد الإنشاء.</div>
+        </div>
+        <div style="height:2px;background:#201e1d;margin-top:14px"></div>
+        <div class="fl"><div class="fll">اسم الهدف</div><div class="fli" style="color:#9b9797"><span>اكتب اسم واضح ◂</span></div></div>
+        <div class="fl"><div class="fll">الغرض</div><div class="fli"><span>صندوق الطوارئ</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">القيمة الافتراضية في المصدر — <span class="tnum">7</span> أغراض، كلها مترجمة. ◂</div></div>
+        <div class="fl"><div class="fll">العملة</div><div class="fli"><span>الجنيه المصري ◂</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">بتتقفل بعد الإنشاء — وبتحدّد الحسابات المؤهلة للتمويل. ◂</div></div>
+        <div class="fl"><div class="fll">المبلغ المستهدف</div><div class="fli"><span class="tnum" style="font-size:19px;font-weight:600;color:#9b9797">0.00</span><span style="font-size:12px;color:#575351">ج.م</span></div></div>
+        <div class="fl"><div class="fll">تاريخ الهدف (اختياري)</div><div class="fli" style="color:#9b9797"><span class="tnum">yyyy/mm/dd</span><span>▤</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">ما بيقفلش الهدف ولا بيبعت تنبيه — بيظهر في القائمة، ولو فات بيتلوّن كهربي. ◂</div></div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">المستفيد (اختياري)</div><div class="fli"><span>يوسف أحمد</span><span style="color:#575351">▾</span></div>
+          <div style="font-size:11px;color:#8a5a00;line-height:1.7;margin-top:6px">المفتاح موجود والقيمة بتتمرر للـ use case — بس مفيش widget بيحدّدها في المصدر. الحقل ده بيقفل الفرق. ◂</div></div>
+        <div style="background:#fff;padding:13px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">تمويل أولي (اختياري)</div>
+          <div class="fll">الحساب المصدر</div>
+          <div class="fli" style="border-bottom-color:#c3bfbe;color:#575351"><span>— بدون — ◂</span><span>▾</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">لو اخترت حساب، هتظهر «المبلغ الأولي» وتحتها الأثر على المتاح للصرف. من غير حساب، الهدف يبدأ بـ <span class="tnum">0.00</span> وتموّله بعدين من «إضافة أموال» — زي «تجديد المطبخ». ◂</div>
+        </div>
+        <div style="padding:16px"><span class="btnD">أنشئ الهدف ◂</span>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:8px">معطّل ◂: «اسم الهدف مطلوب» و«يجب أن يكون المبلغ المستهدف أكبر من صفر».</div>
+        </div>
+      </div>
+      <p class="note"><strong>The beneficiary field is the correction made visible.</strong> Source holds <code>_selectedBeneficiaryMemberId</code> in state and passes it to the use case, but no widget ever sets it — a permanently-null argument. 07 · L2 renders «المستفيد: يوسف أحمد» on the detail screen, so the redesign had already assumed the field exists; this board is where it gets set. <strong>The default purpose is <code>emergencyFund</code></strong>, from source, not «أخرى» — worth keeping, since a goal with no stated purpose is the one case where the list's meta line goes blank.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">N2 · Initial funding chosen · light · RTL — the first 3,400.00</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">هدف جديد</span></div>
+        <div class="fl" style="border-top:2px solid #201e1d"><div class="fll">اسم الهدف</div><div class="fli"><span>مصاريف مدرسة يوسف</span></div></div>
+        <div class="fl"><div class="fll">الغرض</div><div class="fli"><span>تعليم</span><span style="color:#575351">▾</span></div></div>
+        <div class="fl"><div class="fll">المبلغ المستهدف</div><div class="fli"><span class="tnum" style="font-size:19px;font-weight:600">13,000.00</span><span style="font-size:12px;color:#575351">ج.م</span></div></div>
+        <div class="fl"><div class="fll">تاريخ الهدف (اختياري)</div><div class="fli"><span class="tnum">2026/07/13</span><span style="color:#575351">▤</span></div></div>
+        <div class="fl" style="border-bottom:2px solid #201e1d"><div class="fll">المستفيد (اختياري)</div><div class="fli"><span>يوسف أحمد</span><span style="color:#575351">▾</span></div></div>
+
+        <div style="background:#fff;padding:13px 16px;border-bottom:1px solid #c3bfbe">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">تمويل أولي (اختياري)</div>
+          <div class="fll">الحساب المصدر</div>
+          <div class="fli" style="outline:2px solid #ec3013;outline-offset:2px"><span>حساب بنك مصر — الراتب</span><span style="color:#575351">▾</span></div>
+          <div class="fll" style="margin-top:14px">المبلغ الأولي</div>
+          <div class="fli"><span class="tnum" style="font-size:19px;font-weight:600">3,400.00</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+        </div>
+
+        <div style="background:#dedbda;border-block:2px solid #201e1d;padding:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:10px">هذا تحويل داخلي — وليس مصروفاً</div>
+          <div class="rw" style="padding:0 0 8px"><span style="color:#575351">حساب بنك مصر — الراتب · قبل ◂</span><span class="tnum" style="font-weight:600">27,700.00</span></div>
+          <div class="rw" style="padding:8px 0"><span style="color:#575351">حساب بنك مصر — الراتب · بعد ◂</span><span class="tnum" style="font-weight:600">24,300.00</span></div>
+          <div class="rw" style="padding:8px 0"><span style="color:#575351">المحجوز · بعد ◂</span><span class="tnum" style="font-weight:600">3,400.00</span></div>
+          <div class="rw" style="padding:8px 0 0;border-bottom:none"><span style="color:#575351">إجمالي الأصول ◂</span><span style="font-weight:600">لا يتغيّر ◂</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:9px">صفوف مسمّاة «قبل» و«بعد» — مفيش أسهم في لوحة حساب، شوف نوت O. ◂</div>
+        </div>
+
+        <div style="background:#fff;padding:12px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#575351;margin-bottom:9px">الحسابات المستبعدة من التمويل، وسببها ◂</div>
+          <div style="border-bottom:1px solid #c3bfbe;padding-bottom:7px"><div style="font-size:12.5px;font-weight:600">محفظة يوسف</div><div style="font-size:12.5px;color:#6e4a1f;line-height:1.7">لا يُسمح بالتمويل من حساب أطفال محمي</div></div>
+          <div style="border-bottom:1px solid #c3bfbe;padding:7px 0"><div style="font-size:12.5px;font-weight:600">احتياطي «تجديد المطبخ»</div><div style="font-size:12.5px;color:#2b5c8a;line-height:1.7">لا يمكن تمويل هدف من احتياطي هدف آخر</div></div>
+          <div style="border-bottom:1px solid #c3bfbe;padding:7px 0"><div style="font-size:12.5px;font-weight:600">شهادة استثمار 12 شهرًا</div><div style="font-size:12.5px;color:#4a3e70;line-height:1.7">تمويل الهدف يتطلب حسابًا قابلًا للإنفاق</div></div>
+          <div style="padding:7px 0 0"><div style="font-size:12.5px;font-weight:600">حساب الدولار</div><div style="font-size:12.5px;color:#8a5a00;line-height:1.7">الحساب بعملة تانية — الهدف بالجنيه ◂</div></div>
+        </div>
+
+        <div style="padding:16px"><span class="btn">أنشئ الهدف وحوّل <span class="tnum">3,400.00</span> ◂</span>
+        </div>
+      </div>
+      <p class="note"><strong>The arithmetic makes the fixture close on itself.</strong> The salary account stood at <span class="tnum">24,300.00</span> from this entry until the reconciliation in 17 · AI2 took it to <span class="tnum">24,255.00</span>, so funding <span class="tnum">3,400.00</span> means it held <span class="tnum">27,700.00</span> before — and four transfers of that size are the <span class="tnum">13,600.00</span> reserve, which is how 07 · L2's four movements add up. No new figure was invented to make this board work; that is the test a fixture has to pass. <strong>The first three exclusion reasons are verbatim</strong> from <code>errorGoalSourceIsProtected</code>, <code>errorGoalSourceIsReserve</code> and <code>errorGoalSourceNotSpendable</code>; the fourth has no key at all — <code>AccountIneligibilityReason.currencyMismatch</code> exists in the code with no string behind it. <strong>The primary label states both operations</strong>, because one tap doing two writes must say so — and if the source account is short, the message must name <em>it</em>, not «رصيد احتياطي الهدف غير كافٍ» as source does today. <strong>Every line of commentary lives here, not in the frame</strong>: the rule M4's note states, now applied to N2 as well. <strong>Naming the excluded accounts is the substantive change</strong>: source filters them silently, and a picker missing the account you are looking for reads as a bug rather than a rule.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">N3 · Created and funded · dark · RTL</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مصاريف مدرسة يوسف</span><span style="font-size:15px">◉</span><span style="font-size:16px">⋮</span></div>
+        <div style="background:#221f1e;border-bottom:1px solid #4a4645;padding:13px 16px;display:flex;gap:10px;align-items:baseline">
+          <span style="color:#63bc94;font-size:15px">✓</span>
+          <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#63bc94">الهدف اتعمل واتموّل ◂</div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.7;margin-top:3px">حركتين اتسجّلوا: إنشاء الهدف، وتحويل داخلي بـ<span class="tnum">3,400.00</span>. مش بيتحذفوا. ◂</div></div>
+        </div>
+        <div style="background:#3a3635;border-bottom:2px solid #8d8886;padding:16px;position:relative">
+          <span class="hgD" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+            <span style="background:#2c2928;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+            <span style="background:#2c2928;color:#a8a3a0;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: جارٍ ◂</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:#a8a3a0;margin-bottom:4px">
+            <svg class="lock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <span>المحجوز · غير قابل للصرف ◂</span>
+          </div>
+          <div class="tnum" style="font-size:38px;font-weight:700;line-height:1.22">3,400.00 <span style="font-size:14px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+          <div style="height:8px;background:#2c2928;position:relative;margin-top:14px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:26%;background:#f0edeb"></span>
+            <span class="hgD" style="position:absolute;inset-block:0;inset-inline-start:26%;width:74%;background-color:#1e2a36"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#a8a3a0;margin-top:7px"><span>المبلغ المستهدف <span class="tnum">13,000.00</span></span><span class="tnum">26٪ ممول</span></div>
+        </div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المتبقي</span><span class="tnum" style="font-weight:600">9,600.00</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الغرض · المستفيد ◂</span><span style="font-weight:600">تعليم · يوسف أحمد</span></div>
+          <div class="rw" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">تاريخ الهدف ◂</span><span class="tnum" style="font-weight:600">2026/07/13</span></div>
+          <div class="rw" style="border-bottom:none"><span style="color:#a8a3a0">حساب الاحتياطي ◂</span><span style="font-weight:600">مصاريف مدرسة يوسف ‹</span></div>
+        </div>
+        <div style="padding:14px 16px 8px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">حركات الهدف ◂</span><span class="tnum" style="font-size:11px;color:#a8a3a0">1</span></div></div>
+        <div style="height:2px;background:#8d8886"></div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 16px;min-height:64px"><span style="width:4px;align-self:stretch;background:repeating-linear-gradient(45deg,#b0aba9 0 2px,transparent 2px 5px);flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:600;line-height:1.4">تمويل</span><span style="display:block;font-size:11px;color:#a8a3a0;line-height:1.6"><span class="tnum">2026/04/01</span> · من حساب بنك مصر — الراتب · تحويل داخلي ◂</span></span><span class="tnum" style="font-size:16px;font-weight:600;color:#b0aba9">⇄ 3,400.00</span></div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+          <span class="btn" style="background:#f0edeb;color:#201e1d">إضافة أموال</span>
+          <span class="btn2" style="border-color:#8d8886;color:#f0edeb">تحرير الأموال</span>
+          <span style="background:#2c2928;color:#6b6766;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center">أرشفة</span>
+          <span style="font-size:11px;color:#a8a3a0;line-height:1.75">الأرشفة مقفولة ◂: لا يمكن أرشفة هدف يحتوي على أموال. حرِّر جميع الأموال أولاً.</span>
+          <span class="btn2" style="border-color:#8d8886;color:#f0edeb;margin-top:6px">تعيين كمكتمل</span>
+          <span style="font-size:11px;color:#a8a3a0;line-height:1.75">لسه تحت المستهدف، فده بيفتح شيت الإكمال المبكر ◂ — يجب بلوغ الهدف قبل الإكمال العادي.</span>
+        </div>
+      </div>
+      <p class="note"><strong>Two operations, one screen, both named.</strong> The confirmation says «الهدف اتعمل واتموّل» and counts the ledger writes, because a single tap that creates a goal and posts a transfer must account for both. <strong>The two disabled-or-guarded actions each print their own rule</strong>, quoted from source: archive is blocked while money is held, and normal completion is blocked below target. Between them they explain the entire goal lifecycle without a help screen — and they are why «تعيين كمكتمل» opens a sheet rather than doing something.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">O</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Completion — three boards, and why only one is guarded</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px"><code>CompleteGoalParams</code> is explicit: <code>earlyCompletionConfirmed</code> "must be true when <code>earlyCompletion</code> is true", <code>earlyCompletionReason</code> is "required and non-empty", and <code>idempotencyKey</code> defaults to the goal id — so a double tap is absorbed while a second attempt with a different reason returns <code>AppDuplicateConflict</code>. Normal completion carries none of that. On this fixture the overfunded goal completes normally and the empty one can only complete early, which puts the two paths side by side.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">O1 · Early completion · guarded · nothing to release · light · RTL</div>
+      <div class="ph">
+        <div style="height:110px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <svg class="lock" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="margin-top:2px"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">إكمال مبكر للهدف ◂</div>
+            <div style="font-size:13px;color:#575351;line-height:1.7;margin-top:2px">تجديد المطبخ</div></div>
+            <span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="height:1px;background:#c3bfbe;margin-top:14px"></div>
+          <div style="background:#eae9e9;padding:14px 16px">
+            <div style="font-size:12px;color:#575351;margin-bottom:4px">الهدف بيتقفل ناقص ◂</div>
+            <div class="tnum" style="font-size:26px;font-weight:700;line-height:1.25;color:#8a5a00">40,000.00 <span style="font-size:13px;font-weight:600;color:#575351">ج.م</span></div>
+            <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:6px">المحجوز <span class="tnum">0.00</span> من <span class="tnum">40,000.00</span> — <span class="tnum">0٪ ممول</span>. الهدف ده مبدأ أصلاً. ◂</div>
+            <div style="height:8px;background:#f3f2f2;position:relative;margin-top:11px"><span style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ae1800 0 3px,transparent 3px 7px)"></span></div>
+            <div style="height:2px;background:#201e1d;margin:13px 0 11px"></div>
+            <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">مفيش فلوس بترجع ◂</div>
+            <div style="font-size:11.5px;color:#575351;line-height:1.8">الاحتياطي فاضي، فمفيش تحويل ولا رصيد بيتغيّر. اللوحة دي مالهاش جدول حساب لأنه هيكون كله أصفار — والصفر المتكرر بيخفي إن مفيش حركة أصلاً. ◂</div>
+          </div>
+          <div style="background:#fff;padding:14px 16px;border-top:1px solid #c3bfbe">
+            <div style="font-size:12px;color:#575351;margin-bottom:9px">سبب الإكمال المبكر — مطلوب ◂</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+              <span class="chip" style="background:#201e1d;color:#f3f2f2;border-color:#201e1d">مش هنجدّد المطبخ ◂</span>
+              <span class="chip">غيّرنا الخطة ◂</span>
+              <span class="chip">محتاجين الفلوس لحاجة أهم ◂</span>
+              <span class="chip">اتعمل من مصدر تاني ◂</span>
+            </div>
+            <div style="background:#eae9e9;border-bottom:2px solid #201e1d;min-height:56px;padding:11px 12px;font-size:14.5px;line-height:1.8">مش هنجدّد المطبخ ◂</div>
+            <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">بيتخزّن في <code>earlyCompletionReason</code>. الاقتراحات موجودة لأن خانة سبب فاضية بتنتج «خطأ» في كل مرة — و«سبب التحرير» عنده نفس المشكلة. ◂</div>
+          </div>
+          <div style="background:#fff;padding:0 16px 14px;display:flex;gap:10px;align-items:flex-start">
+            <span style="width:22px;height:22px;background:#201e1d;color:#f3f2f2;display:grid;place-items:center;font-size:13px;margin-top:2px;flex:none">✓</span>
+            <span style="flex:1;font-size:14px;line-height:1.85">فاهم إن «تجديد المطبخ» هيتقفل عند <span class="tnum">0.00</span> من <span class="tnum">40,000.00</span>، وإن ده بيتسجّل في السجل بالسبب. ◂</span>
+          </div>
+          <div style="height:2px;background:#201e1d"></div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn">تعيين كمكتمل</span>
+            <span style="font-size:11px;color:#575351;line-height:1.75">تكرار الضغط بياخد نفس النتيجة — المفتاح هو رقم الهدف. سبب مختلف بيرجع «تعارض في عملية الهدف». ◂</span>
+            <span class="btn2">سيبه نشط ◂</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>A guarded sheet with no arithmetic is the interesting case.</strong> Everything the protected-withdrawal pattern relies on — before, amount, after — would print as zeros here, and a column of <span class="tnum">0.00</span> reads as a broken screen rather than as "no money moves". So the arithmetic block is replaced by one labelled statement, and the largest figure on the sheet becomes the <em>shortfall</em>: <span class="tnum">40,000.00</span>, the whole target, because that is the entire consequence. <strong>The guard still applies</strong> — reason and acknowledgement are domain requirements, not proportional to the amount. <strong>What it deliberately does not have:</strong> the tinted header, the coloured frame, biometric re-auth and the heavy haptic, all of which stay exclusive to the protected withdrawal and the reversal. Nothing else in the app has a coloured frame, and if a second flow borrows it the frame stops meaning "someone else's money".</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">O2 · Normal completion · not guarded · light · RTL</div>
+      <div class="ph">
+        <div style="height:110px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">تعيين كمكتمل</div>
+            <div style="font-size:13px;color:#575351;line-height:1.7;margin-top:2px">مصاريف مدرسة يوسف</div></div>
+            <span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="height:1px;background:#c3bfbe;margin-top:14px"></div>
+          <div style="background:#e6eef6;padding:14px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px">
+              <span style="background:#fff;font-size:11px;padding:4px 9px">الحالة: نشط ◂</span>
+              <span style="background:#2b5c8a;color:#f3f2f2;font-size:11px;font-weight:600;padding:4px 9px">التقدّم: ممول بزيادة ◂</span>
+            </div>
+            <div style="font-size:12.5px;line-height:1.85">وصل <span class="tnum" style="font-weight:600">13,600.00</span> من <span class="tnum">13,000.00</span> — <span class="tnum">104٪ ممول</span>. المستهدف اتحقّق، فالإكمال هنا عادي: مفيش سبب مطلوب ومفيش موافقة. ◂</div>
+          </div>
+          <div style="background:#fff;border-bottom:2px solid #201e1d">
+            <div class="rw"><span style="color:#575351">المحجوز</span><span class="tnum" style="font-weight:600">13,600.00</span></div>
+            <div class="rw"><span style="color:#575351">الحالة · بعد ◂</span><span style="font-weight:600">مكتمل</span></div>
+            <div class="rw" style="border-bottom:none"><span style="color:#575351">المحجوز · بعد ◂</span><span class="tnum" style="font-weight:600">13,600.00</span></div>
+          </div>
+          <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:16px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">الإكمال مش بيحرّر الفلوس ◂</div>
+            <div style="font-size:12px;color:#575351;line-height:1.8">الاحتياطي بيفضل <span class="tnum">13,600.00</span> بعد الإكمال. لو عايز الفلوس ترجع للمتاح للصرف، دي حركة تانية: «تحرير الأموال» — وبعدها تقدر تأرشف. ◂</div>
+          </div>
+          <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn">تعيين كمكتمل</span>
+            <span class="btn2">تحرير الأموال أول ◂</span>
+            <span style="font-size:11px;color:#575351;line-height:1.75">الحالة بتتغيّر بحدث في السجل — مش بتحصل لوحدها لما الرقم يعدّي المستهدف. ◂</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>This board exists to make the guard legible by contrast.</strong> Same action, same label, same component — and none of the guard: no required reason, no acknowledgement, no idempotency warning, because the domain asks for none of them once the target is met. Put beside O1 it answers the question a single guarded board cannot: <em>what is the guard protecting?</em> Not the amount, and not the user's feelings — the <strong>record</strong>, in the one case where the ledger will show a goal closed short and nobody would otherwise know why. <strong>The amber notice fixes a real trap:</strong> completion and release are separate operations, so a completed goal still holds its money. Source enforces it — archive is refused while a balance remains — but nothing in the UI says so before the user goes looking for the money.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">O3 · Blocked · no reason, no acknowledgement · dark · RTL</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div style="height:110px;background:#0d0c0c;opacity:.72"></div>
+        <div style="background:#181716;border-top:2px solid #8d8886;box-shadow:0 -8px 24px rgba(0,0,0,.5)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#4a4645"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <svg class="lock" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="margin-top:2px"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">إكمال مبكر للهدف ◂</div>
+            <div style="font-size:13px;color:#a8a3a0;line-height:1.7;margin-top:2px">تجديد المطبخ</div></div>
+            <span style="font-size:16px;color:#a8a3a0">✕</span>
+          </div>
+          <div style="height:1px;background:#4a4645;margin-top:14px"></div>
+          <div style="background:#2c2928;padding:14px 16px">
+            <div style="font-size:12px;color:#a8a3a0;margin-bottom:4px">الهدف بيتقفل ناقص ◂</div>
+            <div class="tnum" style="font-size:26px;font-weight:700;line-height:1.25;color:#e0ae4a">40,000.00 <span style="font-size:13px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.75;margin-top:6px">يجب بلوغ الهدف قبل الإكمال العادي.</div>
+            <div style="height:8px;background:#181716;position:relative;margin-top:11px"><span style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ff9783 0 3px,transparent 3px 7px)"></span></div>
+          </div>
+          <div style="background:#33201c;padding:14px 16px;border-top:1px solid #4a4645">
+            <div style="font-size:12px;color:#a8a3a0;margin-bottom:9px">سبب الإكمال المبكر — مطلوب ◂</div>
+            <div style="background:#221f1e;border-bottom:2px solid #ff9783;min-height:56px;padding:11px 12px;font-size:14.5px;color:#6b6766;line-height:1.8">اختر سبب أو اكتبه ◂</div>
+            <div style="display:flex;gap:6px;align-items:baseline;font-size:11.5px;color:#ff9783;line-height:1.7;margin-top:7px"><span>▲</span><span>سبب الإكمال المبكر مطلوب — بيتسجّل مع الحركة ◂</span></div>
+          </div>
+          <div style="padding:14px 16px;display:flex;gap:10px;align-items:flex-start">
+            <span style="width:22px;height:22px;border:2px solid #ff9783;margin-top:2px;flex:none"></span>
+            <div style="flex:1"><div style="font-size:14px;line-height:1.85">فاهم إن «تجديد المطبخ» هيتقفل عند <span class="tnum">0.00</span> من <span class="tnum">40,000.00</span>. ◂</div>
+            <div style="font-size:11.5px;color:#ff9783;line-height:1.7;margin-top:4px">▲ لازم توافق قبل الإكمال ◂</div></div>
+          </div>
+          <div style="height:2px;background:#8d8886"></div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span style="background:#3a3635;color:#6b6766;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center">تعيين كمكتمل</span>
+            <span style="font-size:11px;color:#a8a3a0;line-height:1.75">معطّل ◂: ناقص السبب والموافقة — الاتنين شرط في <code>CompleteGoalParams</code>. الزر المعطّل بيقول السبب دايمًا؛ نسبته <span class="tnum">2.6</span>:1 تحت AA بشكل مقصود.</span>
+            <span class="btn2" style="border-color:#8d8886;color:#f0edeb">سيبه نشط ◂</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>Two required fields, two inline errors, one disabled button that says why.</strong> The disabled state is the whole point of the board: <code>disabled</code> is <span class="tnum">2.6</span>:1 and below AA on purpose, which is only defensible because a disabled control in this system always carries a reason line. <strong>The shortfall hatch turns <code>expense</code> here</strong> — in O1 it is a realised shortfall the user is choosing, in M1 the remainder is a neutral <code>divider</code> hatch because nothing has been decided yet. Same meter, same ink fill, and the hatch carries the role. That is <code>ProgressMeter</code>'s single rule holding across four boards in this document and the certificate term bar in 10.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 2 · 62 boards at completion · 85 in the set</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Twelve boards: M1–M6, N1–N3, O1–O3.</strong> The per-document run is kept in 15's closing panel, where Tier 2 finished — repeating it here is a second tally that drifts the moment another document ships. This replaces the earlier goals file, which had the same eleven boards on invented numbers — one document per screen set, so a wrong fixture gets corrected rather than archived beside the right one.</p>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Written when this was the newest document; brought up to date as of 19.</strong> Tier 2 closed with household members (12) and the reports (13–15) — <strong style="color:#f0edeb">seven reports, not nine</strong>, a count 13 corrected from source and which reaches back into 08 · D4 and the handoff. Tier 3 patterns, bank reconciliation, the D2 gaps and D5 adaptive have all shipped since.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">One goal screen is still unread:</strong> <code>fund_goal_screen.dart</code>. <code>goal_detail_screen.dart</code> and <code>release_goal_screen.dart</code> <em>have</em> now been read — the correction panel above records what they produced, including the bypassed guard and the three English validators — so 07 · L2 is checked against source, L3's release half with it, and only L3's fund half remains unverified. An open item, no longer a precondition for anything.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Everything that stood here is drawn:</strong> household members (12), the <strong style="color:#f0edeb">seven</strong> reports (13–15), Tier 3 patterns (16), bank reconciliation (17), the D2 gaps (18) and D5 adaptive (19). The only work left in the project is the two unread goal screens named above.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Every unmarked Arabic string: «الأهداف» «هدف جديد» «اسم الهدف» «الغرض» «العملة» «المبلغ المستهدف» «تاريخ الهدف (اختياري)» «المستفيد (اختياري)» «تمويل أولي (اختياري)» «الحساب المصدر» «المبلغ الأولي» «المحجوز» «المتبقي» «زيادة التمويل» «{percent}٪ ممول» «نشط» «مكتمل» «مؤرشف» «لم يبدأ» «جارٍ» «ممول بزيادة» «إضافة أموال» «تحرير الأموال» «تعيين كمكتمل» «أرشفة» «تمويل» «جارٍ التحميل...» «إعادة المحاولة» · three of the four nav labels «الرئيسية» «التخطيط» «المزيد» from <code>nav*</code> — «الحركات» is the proposed rename and «الديون» has no key, so both carry ◂ in every bottom bar · the seven <code>purpose*</code> values · and the full sentences of <code>goalEmpty</code>, <code>goalReserveDedicated</code>, <code>goalNotChildProtected</code>, <code>goalCurrencyImmutable</code>, <code>goalTransferNote</code>, <code>errorGoalNameEmpty</code>, <code>errorGoalTargetZero</code>, <code>errorGoalArchiveNonzeroBalance</code>, <code>errorGoalNormalCompletionRequiresTarget</code>, <code>errorGoalIdempotencyConflict</code>, <code>errorGoalSourceIsProtected</code>, <code>errorGoalSourceIsReserve</code>, <code>errorGoalSourceNotSpendable</code>.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every Arabic string in a frame that is not a verbatim ARB value carries ◂ — the «الحالة» / «التقدّم» prefixes, «غير قابل للصرف», every section and group heading, the before/after row labels, «أنشئ الهدف», «إكمال مبكر للهدف», the four reason presets and the filled reason, the acknowledgement lines, «معطّل», «سيبه نشط», the currency-mismatch reason, and all explanatory Egyptian sentences. If a framed string has no ◂ and is not in the first bucket, that is a defect in this document, not a third category. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — goal, account and member names, amounts, dates, percentages — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span><strong style="color:#f0edeb">Delete</strong> <code>goalStatusTargetReached</code>, with <code>certificateRedeemProfitOnly</code>, in one pass. <strong style="color:#f0edeb">Re-point</strong> the submit button off <code>goalNew</code> to a verb key, and creation's insufficient-funds path off <code>errorGoalInsufficientReserve</code> to one parameterised message shared with both certificate flows. <strong style="color:#f0edeb">Add</strong> a reason string for <code>AccountIneligibilityReason.currencyMismatch</code>. 07 · L2 uses «المحتجز للهدف» where the ARB says «المحجوز»; this document uses the source label, so 07's variant is now the proposed one. Nav: «الحركات» renames «المعاملات», «الديون» needs <code>navDebts</code>, Reports moves into «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked four times:</strong> are there golden or screenshot tests among the 1,594? If not, migration phases 1 and 2 ship together and typography is the only expensive phase.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

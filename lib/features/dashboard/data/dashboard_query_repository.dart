@@ -16,9 +16,18 @@ abstract interface class DashboardQueryRepository {
 
   /// Protected account balances by currency.
   ///
-  /// Excludes: archived protected accounts.
+  /// Includes accounts flagged `is_protected`, plus certificate principal whose
+  /// term has not ended — certificate principal is protected money only while
+  /// `todayLocal < maturityDate`. That boundary is derived on every read
+  /// because the stored protection flag is immutable after account creation.
+  ///
+  /// Excludes: archived accounts, matured/overdue certificates (the principal
+  /// is claimable and surfaces as awaiting redemption), redeemed certificates.
+  ///
+  /// [todayLocal] — `yyyy-MM-dd` device-local calendar date.
   Future<List<CurrencyAmountSummary>> protectedBalances({
     required String householdId,
+    required String todayLocal,
   });
 
   /// Period income and expense totals by currency.

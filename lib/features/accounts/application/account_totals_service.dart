@@ -33,9 +33,16 @@ abstract final class AccountTotalsService {
   ///
   /// [accounts] — non-archived or archived accounts (archived are filtered).
   /// [balancesByAccountId] — map of accountId → current balance in minor units.
+  /// [derivedProtectedAccountIds] — accounts that are protected by a
+  /// time-dependent policy rather than by the stored `isProtected` flag. The
+  /// canonical case is certificate principal, which is protected only while the
+  /// term has not ended (see `CertificatePrincipalProtection`). The flag is
+  /// immutable after account creation, so such protection cannot be stored and
+  /// must be supplied by the caller on each read.
   static List<CurrencyTotal> compute({
     required List<FinancialAccount> accounts,
     required Map<String, int> balancesByAccountId,
+    Set<String> derivedProtectedAccountIds = const {},
   }) {
     final Map<String, ({int spendable, int protected_})> byCurrency = {};
 
@@ -46,7 +53,8 @@ abstract final class AccountTotalsService {
         account.currencyCode,
         () => (spendable: 0, protected_: 0),
       );
-      if (account.isProtected) {
+      if (account.isProtected ||
+          derivedProtectedAccountIds.contains(account.id)) {
         byCurrency[account.currencyCode] = (
           spendable: entry.spendable,
           protected_: entry.protected_ + balance,

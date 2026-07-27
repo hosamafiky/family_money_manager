@@ -15,6 +15,7 @@ import 'package:family_money_manager/features/certificates/application/certifica
 import 'package:family_money_manager/features/certificates/data/drift_certificate_repository.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/dashboard/data/drift_dashboard_query_repository.dart';
+import 'package:family_money_manager/features/dashboard/domain/dashboard_summary.dart';
 import 'package:family_money_manager/features/ledger/data/drift_ledger_repository.dart';
 import 'package:family_money_manager/features/ledger/domain/operation.dart';
 import 'package:family_money_manager/features/reports/data/drift_report_query_repository.dart';
@@ -274,7 +275,7 @@ void main() {
   );
 
   test(
-    'CLS-5. Certificate principal excluded from spendable/protected',
+    'CLS-5. Certificate principal excluded from spendable; protected only while the term is unfinished',
     () async {
       await createAcct('src');
       await credit('src', 200000);
@@ -292,15 +293,36 @@ void main() {
                   as AppOk<SavingsCertificate>)
               .value;
       final spendable = await dashboard.spendableBalances(householdId: _hh);
-      final protected = await dashboard.protectedBalances(householdId: _hh);
       final spendableEgp = spendable
           .where((b) => b.currencyCode == 'EGP')
           .fold<int>(0, (a, b) => a + b.totalMinorUnits);
       expect(spendableEgp, 125000); // 200k - 75k moved to non-spendable cert
-      expect(
-        protected.every((b) => b.totalMinorUnits == 0) || protected.isEmpty,
-        isTrue,
+
+      // Principal is never spendable, but it IS protected money for as long as
+      // the term runs. Term here: 2025-01-01 → 2026-01-01.
+      int protectedEgpOn(List<CurrencyAmountSummary> rows) => rows
+          .where((b) => b.currencyCode == 'EGP')
+          .fold<int>(0, (a, b) => a + b.totalMinorUnits);
+
+      final duringTerm = await dashboard.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2025-06-15',
       );
+      expect(protectedEgpOn(duringTerm), 75000);
+
+      // On the maturity date the term has ended: the principal is claimable
+      // and must leave the protected bucket rather than stay hidden in it.
+      final atMaturity = await dashboard.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2026-01-01',
+      );
+      expect(protectedEgpOn(atMaturity), 0);
+
+      final afterMaturity = await dashboard.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2026-05-01',
+      );
+      expect(protectedEgpOn(afterMaturity), 0);
       // Certificate account itself is non-spendable.
       final acct = await accounts.findById(
         id: cert.certificateAccountId,

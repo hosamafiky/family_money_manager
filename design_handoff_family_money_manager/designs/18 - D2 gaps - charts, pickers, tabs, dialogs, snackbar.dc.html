@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:40px}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.bar{height:10px;background:#eae9e9;position:relative;overflow:hidden}
+.cell{min-height:44px;display:flex;align-items:center;justify-content:center;font-size:13px}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D2 — the six gaps</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Six components the<br>screens kept assuming.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Seven boards, section AJ. Every screen document so far has leaned on one of these and drawn it inline: a share bar, a date field, a chip row, a sheet. This closes them as components. <strong style="color:#201e1d">Three are genuinely new</strong> (the chart primitives). <strong style="color:#201e1d">Three already exist as Material defaults</strong> — <code>showDatePicker</code>, <code>AlertDialog</code>, <code>SnackBar</code> — which is worse than missing, because a default is a decision nobody made.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">What the source actually uses today</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 24px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CHARTS · none exist</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">All seven report screens are read and <strong>not one draws a chart</strong>. The only graphical element in the feature is <code>LinearProgressIndicator</code>, used in the goals list and in a per-row loading state.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">So the three primitives are additive, and they arrive into a product whose rule is already written: <strong>every chart is preceded by the table it draws</strong>. Nothing has to be un-taught.</p>
+    </div>
+    <div style="padding:22px 24px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DATES · stock Material, three call sites</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><code>showDatePicker</code> in goal creation and twice in certificate creation; <code>showDateRangePicker</code> in the report period selector. Every one is the framework's rounded, elevated, centred dialog — <strong>radius, elevation and centred text all contradict §2</strong>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Its month and weekday names come from Flutter's own localisation, not from the ARB — so they are outside the string-provenance rule this project has enforced on every other word.</p>
+    </div>
+    <div style="padding:22px 0 22px 24px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DIALOGS &amp; SNACKBARS · errors that vanish</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Household uses three <code>AlertDialog</code>s; the archive confirmation's entire body is the member's name. Goal creation, certificate creation and household all report <strong>failures</strong> through <code>ScaffoldMessenger.showSnackBar</code>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">A snackbar auto-dismisses. «يوجد زوج/ة مسجل مسبقاً» and «رصيد احتياطي الهدف غير كافٍ» are both delivered by something designed to be missed.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AJ</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">The six — seven boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Anatomy, not screens: each board is the component in the states the product actually produces, with the rule that governs it. Figures are borrowed from the boards that already used them, so nothing here introduces a number.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AJ1 · Chart primitives · light · RTL — three, and no more</div>
+      <div class="ph">
+        <div class="gh">ShareBar ◂ — جزء من كل</div>
+        <div style="background:#fff;padding:13px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px"><span style="font-weight:600">سكن</span><span class="tnum" style="font-weight:600">3,000.00</span></div>
+          <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:27%;background:#201e1d"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> معاملات</span><span class="tnum">27٪ ◂</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:9px">حبر دايمًا. الشريط مالوش لون دور — نسبة مش حكم. والباقي فاضي مش ملوّن. ◂</div>
+        </div>
+        <div class="gh">BarSeries ◂ — مقارنة فئات</div>
+        <div style="background:#fff;padding:13px 16px;border-bottom:2px solid #201e1d">
+          <div style="display:flex;align-items:flex-end;gap:10px;height:70px;border-bottom:2px solid #201e1d;padding-bottom:0">
+            <span style="flex:1;height:100%;background:#201e1d"></span>
+            <span style="flex:1;height:80%;background:#201e1d"></span>
+            <span style="flex:1;height:53%;background:#201e1d"></span>
+            <span style="flex:1;height:46%;background:repeating-linear-gradient(45deg,#8a5a00 0 3px,transparent 3px 6px);border:1px solid #8a5a00"></span>
+            <span style="flex:1;height:44%;background:#201e1d"></span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:10px;color:#575351;margin-top:5px"><span style="flex:1;text-align:center">سكن</span><span style="flex:1;text-align:center">بقالة</span><span style="flex:1;text-align:center">صحة</span><span style="flex:1;text-align:center">خدمات منزلية</span><span style="flex:1;text-align:center">تعليم</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:9px">أعمدة حبر على خط أساس واحد. العمود المهاتش هو اللي فيه حركة معكوسة — نفس قاعدة 13 · X1: الهاتش بيحمل الاستثناء. ◂</div>
+        </div>
+        <div class="gh">LineSeries ◂ — قيمة عبر الوقت</div>
+        <div style="background:#fff;padding:13px 16px;border-bottom:2px solid #201e1d">
+          <div style="height:64px;position:relative;border-inline-start:2px solid #c3bfbe;border-bottom:2px solid #c3bfbe">
+            <span style="position:absolute;bottom:24%;inset-inline-start:6%;width:7px;height:7px;background:#201e1d"></span>
+            <span style="position:absolute;bottom:37%;inset-inline-start:33%;width:7px;height:7px;background:#201e1d"></span>
+            <span style="position:absolute;bottom:51%;inset-inline-start:60%;width:7px;height:7px;background:#201e1d"></span>
+            <span style="position:absolute;bottom:64%;inset-inline-start:87%;width:7px;height:7px;background:#201e1d"></span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:9px">نقط، والوصل بينها خط رفيع. مفيش تنعيم ولا تدرّج ولا أنيميشن دخول — النقطة قيمة مقاسة، والمنحنى بيخترع قيم مابين النقط. ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.9"><strong>القاعدة الواحدة للتلاتة:</strong> الرسم بييجي بعد جدول أرقامه، ومابيعرضش رقم مش في الجدول. لو الجدول اتشال، الرسم بيتشال معاه. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;font-size:11.5px;color:#575351;line-height:1.8">تلاتة وبس. مفيش pie — القطاعات مش قابلة للمقارنة، وShareBar بتعمل نفس الشغل على خط أساس. ◂</div>
+      </div>
+      <p class="note"><strong>Three primitives, all ink, all consuming the same tokens.</strong> Colour enters a chart only as a hatch carrying an exception — a reversed category, an overshoot band — which is <code>ProgressMeter</code>'s rule extended to charts and keeps every one of them legible in greyscale and under dichromacy. <strong>No pie, ever:</strong> wedges cannot be compared by eye, and <code>ShareBar</code> answers the same question on a common baseline. <strong>Line charts get points, not curves:</strong> a smoothed line asserts values between measurements, and in a ledger every value between two月-end snapshots is a fiction. <strong>These three are additive</strong> — no report draws a chart today, so nothing has to be replaced.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ2 · Date picker · light · RTL — replacing the Material dialog</div>
+      <div class="ph">
+        <div style="height:96px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 14px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #201e1d">
+            <span style="font-size:19px;font-weight:600">اختر تاريخ ◂</span><span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="background:#fff;padding:12px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12.5px;font-weight:600;background:#201e1d;color:#f3f2f2;padding:9px 12px;min-height:40px;display:flex;align-items:center">النهاردة ◂</span>
+            <span style="font-size:12.5px;border:1px solid #c3bfbe;background:#eae9e9;padding:9px 12px;min-height:40px;display:flex;align-items:center">إمبارح ◂</span>
+            <span style="font-size:12.5px;border:1px solid #c3bfbe;background:#eae9e9;padding:9px 12px;min-height:40px;display:flex;align-items:center">أول الشهر ◂</span>
+          </div>
+          <div style="background:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #c3bfbe"><span style="font-size:16px">›</span><span style="font-size:14px;font-weight:600">يوليو <span class="tnum">2026</span> ◂</span><span style="font-size:16px">‹</span></div>
+          <div style="background:#fff;padding:0 10px 10px;border-bottom:2px solid #201e1d">
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);font-size:10.5px;color:#575351;padding:8px 0;border-bottom:1px solid #c3bfbe"><span class="cell" style="min-height:0">س ◂</span><span class="cell" style="min-height:0">ح ◂</span><span class="cell" style="min-height:0">ن ◂</span><span class="cell" style="min-height:0">ث ◂</span><span class="cell" style="min-height:0">ر ◂</span><span class="cell" style="min-height:0">خ ◂</span><span class="cell" style="min-height:0">ج ◂</span></div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+              <span class="cell tnum">18</span><span class="cell tnum">19</span><span class="cell tnum">20</span><span class="cell tnum">21</span><span class="cell tnum">22</span><span class="cell tnum">23</span><span class="cell tnum">24</span>
+              <span class="cell tnum">25</span><span class="cell tnum" style="background:#201e1d;color:#f3f2f2;font-weight:700">26</span><span class="cell tnum" style="color:#9b9797">27</span><span class="cell tnum" style="color:#9b9797">28</span><span class="cell tnum" style="color:#9b9797">29</span><span class="cell tnum" style="color:#9b9797">30</span><span class="cell tnum" style="color:#9b9797">31</span>
+            </div>
+            <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px;padding:0 6px">الأيام الجاية رمادية في شاشة حركة — مفيش حركة بتتسجّل في المستقبل. في «تاريخ الهدف» بتبقى متاحة. ◂</div>
+          </div>
+          <div style="padding:13px 16px 18px"><span class="btn">اختار ◂</span>
+            <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">شيت من تحت زي كل الاختيارات في التطبيق — مش دايلوج في النص بحواف مدوّرة. ◂</div>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>The three shortcuts are the feature.</strong> Almost every date this app asks for is today, yesterday or the start of the month; a calendar grid is the fallback, not the primary. <strong>Zero radius, no elevation beyond the sheet, weekday initials in Arabic from the ARB — proposed, since no weekday key has been read</strong> — the stock picker fails all three, and its month names come from Flutter's own bundle, outside the provenance rule every other string in this project obeys. <strong>Future dates grey out contextually:</strong> disabled for a ledger entry, enabled for a goal's target date. Source passes <code>firstDate: DateTime(2000)</code> and <code>lastDate: DateTime(2100)</code> with no such distinction, so today it is possible to record an expense in 2087.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ3 · Category picker · light · RTL — recents first, search always</div>
+      <div class="ph">
+        <div style="height:96px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 14px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #c3bfbe">
+            <span style="font-size:19px;font-weight:600">اختر فئة ◂</span><span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="background:#fff;padding:12px 16px;border-bottom:2px solid #201e1d">
+            <div style="border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:15px;color:#9b9797;display:flex;justify-content:space-between"><span>دوّر ◂</span><span>◌</span></div>
+          </div>
+          <div class="gh">آخر اللي استعملته ◂</div>
+          <div style="background:#fff;padding:12px 16px;border-bottom:2px solid #201e1d;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:600;background:#201e1d;color:#f3f2f2;padding:10px 12px;min-height:40px;display:flex;align-items:center">بقالة</span>
+            <span style="font-size:13px;border:1px solid #c3bfbe;background:#eae9e9;padding:10px 12px;min-height:40px;display:flex;align-items:center">مواصلات</span>
+            <span style="font-size:13px;border:1px solid #c3bfbe;background:#eae9e9;padding:10px 12px;min-height:40px;display:flex;align-items:center">خدمات منزلية</span>
+            <span style="font-size:13px;border:1px solid #c3bfbe;background:#eae9e9;padding:10px 12px;min-height:40px;display:flex;align-items:center">صحة</span>
+          </div>
+          <div class="gh">كل الفئات ◂</div>
+          <div style="background:#fff;border-bottom:2px solid #201e1d">
+            <div class="lr" style="min-height:48px"><span>سكن</span><span style="color:#575351">‹</span></div>
+            <div class="lr" style="min-height:48px"><span>تعليم</span><span style="color:#575351">‹</span></div>
+            <div class="lr" style="min-height:48px;border-bottom:none"><span>مصروف آخر</span><span style="color:#575351">‹</span></div>
+          </div>
+          <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:14px 16px">
+            <div style="font-size:12px;color:#575351;line-height:1.9">الأسماء دي منقولة حرفيًا — <code>categoryLabelFromCode</code> اتقرا: <span class="tnum">17</span> فئة، <span class="tnum">11</span> مصروف و<span class="tnum">6</span> دخل. القايمة مقفولة، وعشان كده مفيش «فئة جديدة» هنا.</div>
+          </div>
+          <div style="padding:0 16px 18px;font-size:11.5px;color:#575351;line-height:1.8">مفيش «فئة جديدة» هنا — إنشاء الفئات مكانه الإعدادات، عشان حد بيسجّل مصروف ما يقعدش يخترع تصنيف وهو واقف في السوبرماركت. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>Four recents cover most entries, and they are the top row for that reason.</strong> The expense flow's whole promise is three taps (§3), which only holds if the second tap lands on a category without scrolling. <strong>Search is present from the first frame</strong>, not behind an icon: a household with thirty categories needs it, and one with six loses nothing. <strong>No inline "create category".</strong> Creating taxonomy mid-transaction is how category lists rot; it belongs in settings, where the consequence of adding one is visible. <strong>The labels carry the mark</strong> because <code>categoryLabelFromCode</code> has still not been read — the same open item 13 · X1 declares.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ4 · Tabs and segments · light · RTL — three controls, three jobs</div>
+      <div class="ph">
+        <div class="gh">شريط التنقّل السفلي ◂ — خمسة، مالهاش بديل</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="display:flex"><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">الرئيسية</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">الحركات ◂</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#201e1d;border-top:3px solid #201e1d;font-weight:600">التخطيط</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">الديون ◂</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">المزيد</span></div>
+          <div style="padding:11px 16px;font-size:11px;color:#575351;line-height:1.75">المختار بخط علوي <span class="tnum">3</span> بكسل وحبر — مش لون. خمسة الحد الأقصى: ستة بتتقطع على <span class="tnum">200٪</span> تكبير في <span class="tnum">360</span> dp. ◂</div>
+        </div>
+        <div class="gh">الشرايح ◂ — تبديل عرض، الحالة بتفضل</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px">
+          <div style="display:flex;border:2px solid #201e1d">
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;background:#201e1d;color:#f3f2f2;min-height:44px;display:flex;align-items:center;justify-content:center">الكل ◂</span>
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;min-height:44px;display:flex;align-items:center;justify-content:center;border-inline-start:2px solid #201e1d">دخل ◂</span>
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;min-height:44px;display:flex;align-items:center;justify-content:center;border-inline-start:2px solid #201e1d">مصروف ◂</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:9px">تلاتة أو أربعة بحد أقصى، وكلهم ظاهرين مع بعض. لو مش هيبانوا كلهم، يبقى ده مش شرايح — ده شيبس. ◂</div>
+        </div>
+        <div class="gh">الشيبس ◂ — فلتر، ممكن يتزحلق</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px">
+          <div style="display:flex;gap:8px;overflow:hidden">
+            <span style="font-size:12.5px;font-weight:600;background:#201e1d;color:#f3f2f2;border:1px solid #201e1d;padding:9px 12px;min-height:40px;display:flex;align-items:center;flex:none">هذا الشهر</span>
+            <span style="font-size:12.5px;border:1px solid #c3bfbe;background:#fff;padding:9px 12px;min-height:40px;display:flex;align-items:center;flex:none">الشهر الماضي</span>
+            <span style="font-size:12.5px;border:1px solid #c3bfbe;background:#fff;padding:9px 12px;min-height:40px;display:flex;align-items:center;flex:none">هذا العام</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:9px">الفرق الحاسم: الشيبس ممكن تتزحلق وتختفي عن الشاشة، فماينفعش تشيل تنقّل. الشرايح ماتتزحلقش. ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.9">مفيش <code>TabBar</code> أفقي في أي شاشة قريتها. لو اتزرع واحد، هيبقى رابع طريقة للتبديل — والتلاتة دول كفاية. ◂</div>
+        </div>
+      </div>
+      <p class="note" style="margin-bottom:26px"><strong>Three switching controls, distinguished by what happens when they overflow.</strong> The bottom bar cannot scroll, so five labelled tabs is a hard ceiling and the sixth is what pushed Reports into «المزيد» (D4). A segmented control cannot scroll either — if the options do not fit, it is the wrong control. Chips scroll, which is exactly why they may filter but never navigate: an off-screen destination is an invisible one. <strong>Selection is ink and a 3 px rule, never a tint</strong>, so the state survives greyscale and privacy mode. <strong>No horizontal <code>TabBar</code> appears in any screen read</strong>, and this board proposes that none is introduced.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ4b · LTR check · English · privacy mode ON — the direction-dependent three</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">BOTTOM BAR ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="display:flex"><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Home</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Activity ◂</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#201e1d;border-top:3px solid #201e1d;font-weight:600">Planning</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">Debts ◂</span><span style="flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351">More</span></div>
+          <div style="padding:11px 16px;font-size:11px;color:#575351;line-height:1.6">Tab order does not mirror — it is a fixed sequence of destinations, not a reading order. Only the selected rule and the labels change.</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">SEGMENTED ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px">
+          <div style="display:flex;border:2px solid #201e1d">
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;background:#201e1d;color:#f3f2f2;min-height:44px;display:flex;align-items:center;justify-content:center">All ◂</span>
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;min-height:44px;display:flex;align-items:center;justify-content:center;border-inline-start:2px solid #201e1d">Income ◂</span>
+            <span style="flex:1;padding:11px;text-align:center;font-size:13px;min-height:44px;display:flex;align-items:center;justify-content:center;border-inline-start:2px solid #201e1d">Expense ◂</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:9px">Segments <strong style="font-weight:600">do</strong> mirror — «الكل» sits at the right in RTL and "All" at the left here, because the set reads as a sentence. <code>border-inline-start</code> flips with it.</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">DATE FIELD · MASKED CONTEXT ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:13px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:14px"><span class="tnum">26 Jul 2026</span><span>▤</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;font-size:12.5px"><span style="color:#575351">Amount ◂</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:26px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span></span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:9px"><strong style="font-weight:600">Dates never mask.</strong> A date is not an amount and nothing can be reconstructed from it — and the calendar itself is a chooser, so masking it would make the control unusable while protecting nothing. The trailing glyph stays put; only the amount beside it goes.</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">SNACKBAR ◂</div>
+        <div style="background:#fff;padding:13px 16px">
+          <div style="background:#201e1d;color:#f3f2f2;padding:13px 14px;display:flex;gap:11px;align-items:center">
+            <span style="color:#63bc94;font-size:14px">✓</span>
+            <span style="flex:1;font-size:13px;line-height:1.5">Recorded ◂</span>
+            <span style="font-size:12.5px;font-weight:600;border-bottom:1px solid #f3f2f2">Add a reversing entry ◂</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:9px">The action sits at the trailing edge in both directions — right here, left in RTL — so it never collides with the tick.</div>
+        </div>
+      </div>
+      <p class="note" style="margin-bottom:26px"><strong>Three controls, three different mirroring answers, which is why they needed one board.</strong> The bottom bar does <em>not</em> mirror: its five destinations are a fixed sequence, and flipping them would move Home under the user's other thumb between locales. Segments <em>do</em>: three options read as one sentence, so «الكل» leads in RTL and "All" leads in LTR. The calendar grid mirrors as a block while weekday initials stay in their own reading order. <strong>And one masking rule this document had to settle: dates never mask.</strong> Nothing is reconstructable from a date, and a masked calendar is an unusable chooser protecting nothing — the same reasoning that keeps 13 · X3's shares visible and 17 · AI4's difference hidden.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ5 · Dialog and sheet anatomy · dark · RTL — when each is allowed</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">الدايلوج ◂ — سؤال واحد، إجابتين</div>
+        <div style="background:#221f1e;padding:16px;border-bottom:2px solid #8d8886">
+          <div style="background:#181716;border:2px solid #8d8886;padding:15px 16px">
+            <div style="font-size:16px;font-weight:600;line-height:1.5;margin-bottom:8px">تمسح المسودة؟ ◂</div>
+            <div style="font-size:13px;color:#a8a3a0;line-height:1.85;margin-bottom:14px">كتبت <span class="tnum">190.00</span> ولسه ما حفظتش. لو خرجت، الرقم بيروح — ومفيش حاجة بتتسجّل في السجل. ◂</div>
+            <div style="display:flex;gap:9px"><span class="btn2" style="flex:1;border-color:#8d8886;color:#f0edeb;justify-content:center">ارجع ◂</span><span style="flex:1;background:#ff9783;color:#201e1d;font-size:13.5px;font-weight:600;padding:13px;min-height:48px;display:flex;align-items:center;justify-content:center">امسح ◂</span></div>
+          </div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.8;margin-top:10px">الدايلوج مسموح <strong>بس</strong> لسؤال إجابته أيوه/لأ ومالوش حقول. أي حاجة فيها حقل أو نتيجة محتاجة تتشرح → شيت. ◂</div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">الشيت ◂ — تشريح ثابت</div>
+        <div style="background:#221f1e;padding:14px 16px;border-bottom:2px solid #8d8886">
+          <div style="background:#181716;border-top:2px solid #f0edeb">
+            <div style="padding:8px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#4a4645"></span></div>
+            <div style="padding:11px 14px 12px;border-bottom:1px solid #4a4645;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:600">العنوان ◂</span><span style="color:#a8a3a0">✕</span></div>
+            <div style="padding:12px 14px;font-size:12px;color:#a8a3a0;line-height:1.85;border-bottom:1px solid #4a4645">المحتوى — حقول أو أرقام أو الاتنين ◂</div>
+            <div style="height:2px;background:#f0edeb"></div>
+            <div style="padding:12px 14px"><span style="background:#f0edeb;color:#201e1d;font-size:13px;font-weight:600;padding:11px 12px;min-height:44px;display:flex;align-items:center">الفعل الأساسي ◂</span>
+            <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin-top:7px">سطر النتيجة تحت الزرار دايمًا ◂</div></div>
+          </div>
+          <div style="font-size:11px;color:#a8a3a0;line-height:1.8;margin-top:10px">مقبض، عنوان مع ✕، محتوى، خط <span class="tnum">2</span> بكسل، فعل أساسي، سطر نتيجة. الترتيب ده مايتغيّرش — وGuardedConfirmSheet هو نفس التشريح زايد إطار ملوّن وحقول مطلوبة. ◂</div>
+        </div>
+        <div style="background:#33201c;border-inline-start:4px solid #ff9783;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.9">في المصدر: تلات <code>AlertDialog</code> في أفراد الأسرة — واحد منهم محتواه كله اسم العضو، من غير أي جملة عن اللي هيحصل. الأرشفة قرار له نتيجة، فمكانها شيت. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>One test decides which: can the answer be yes or no with nothing to read and nothing to fill?</strong> If yes, a dialog; otherwise a sheet. That puts discard-draft in a dialog and everything else in the product — reversal, guarded withdrawal, early completion, funding, reconciliation, pickers — in a sheet. <strong>The sheet's anatomy is fixed in one order</strong> so that <code>GuardedConfirmSheet</code> is recognisably the same object with a frame and required fields added, rather than a different component. <strong>Source's archive dialog is the counter-example</strong>: its body is the member's name, so the user confirms an action whose consequence — and, per 12 · U4, whose <em>refusal</em> — is never stated.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AJ6 · Snackbar · light · RTL — and the errors that must not use it</div>
+      <div class="ph">
+        <div class="gh">مسموح ◂ — تأكيد كتابة نجحت</div>
+        <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div style="background:#201e1d;color:#f3f2f2;padding:13px 14px;display:flex;gap:11px;align-items:center">
+            <span style="color:#63bc94;font-size:14px">✓</span>
+            <span style="flex:1;font-size:13px;line-height:1.6">اتسجّلت ◂</span>
+            <span style="font-size:12.5px;font-weight:600;border-bottom:1px solid #f3f2f2">أضف حركة عكسية ◂</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.8;margin-top:9px">حرف واحد مربع، مفيش حواف مدوّرة ولا عوم. الفعل بيقول اللي هيحصل فعلًا — <strong>مفيش «تراجع»</strong> في التطبيق ده، والعكس حركة جديدة. ◂</div>
+        </div>
+        <div class="gh">ممنوع ◂ — الأخطاء</div>
+        <div style="background:#fdeae6;padding:14px 16px;border-bottom:2px solid #ae1800">
+          <div style="background:#201e1d;color:#f3f2f2;padding:13px 14px;display:flex;gap:11px;align-items:center;opacity:.45">
+            <span style="flex:1;font-size:13px;line-height:1.6">يوجد زوج/ة مسجل مسبقاً في هذه الأسرة.</span>
+          </div>
+          <div style="font-size:12px;color:#575351;line-height:1.9;margin-top:10px">دي رسالة المصدر الحقيقية، في سناكبار — بتختفي لوحدها بعد تانيتين. نفس الحال مع «رصيد احتياطي الهدف غير كافٍ» و«تعذّر تحميل التقرير.» ◂</div>
+          <div style="font-size:12.5px;color:#ae1800;line-height:1.9;margin-top:8px;font-weight:600">الخطأ بيقعد جنب سببه ◂</div>
+        </div>
+        <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#575351;margin-bottom:5px">الاسم</div>
+          <div style="background:#eae9e9;border-bottom:2px solid #ae1800;padding:10px 12px;font-size:14.5px;min-height:44px;display:flex;align-items:center">هناء</div>
+          <div style="display:flex;gap:6px;align-items:baseline;font-size:12px;color:#ae1800;line-height:1.7;margin-top:6px"><span>▲</span><span>يوجد زوج/ة مسجل مسبقاً في هذه الأسرة.</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.8;margin-top:9px">نفس الجملة بالحرف، بس تحت الحقل اللي سبّبها وبتفضل لحد ما تتصلّح. ◂</div>
+        </div>
+        <div style="padding:14px 16px 18px;font-size:11.5px;color:#575351;line-height:1.85">القاعدة: السناكبار لتأكيد كتابة نجحت وبس. أي فشل بيتعرض في مكانه — تحت الحقل، أو في اللوحة اللي طلبت العملية. ◂</div>
+      </div>
+      <p class="note"><strong>Three features report failures through a component designed to be missed.</strong> Goal creation, certificate creation and household all call <code>ScaffoldMessenger.showSnackBar</code> for validation and conflict errors; a snackbar auto-dismisses, cannot be re-read, and on a slow save may appear after the user has looked away. <strong>So the rule is one line: snackbars confirm successful writes, nothing else.</strong> Failures render at their cause — beneath the field, or in the panel that requested the operation — and persist until resolved. <strong>The one permitted action is «أضف حركة عكسية»</strong>, which the handoff fixes as the post-save affordance precisely because it is not an undo: there is no undo, and a snackbar that offered one would be the app's largest lie.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">D2 closed · 79 boards in the set</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Seven boards: AJ1–AJ4, AJ4b, AJ5–AJ6.</strong> Chart primitives, date picker, category picker, tabs and segments, the LTR and masking check on the three direction-dependent controls, dialog and sheet anatomy, snackbar. <strong style="color:#f0edeb">D5 adaptive is the only deliverable left.</strong></p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Three replacements, not three additions.</strong> <code>showDatePicker</code> / <code>showDateRangePicker</code> (four call sites), three <code>AlertDialog</code>s in household, and every <code>showSnackBar</code> that carries a failure. Each is a Material default that contradicts §2 on radius, elevation or persistence — and the date picker additionally sources its month and weekday names from Flutter rather than the ARB, putting them outside this project's string-provenance rule.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Read and closed:</strong> <code>categoryLabelFromCode</code> — seventeen values, eleven expense and six income. Three labels this set had guessed were wrong («إيجار» → «سكن», «كهرباء» → «خدمات منزلية», «أخرى» → «مصروف آخر»), corrected here and in 13 · X1. <strong style="color:#f0edeb">Still owed:</strong> the three goal screens against 07 · L2–L3.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>The three nav labels «الرئيسية» «التخطيط» «المزيد»; the period chips «هذا الشهر» «الشهر الماضي» «هذا العام»; «الاسم» (<code>memberName</code>); the category labels «بقالة» «سكن» «خدمات منزلية» «مواصلات» «صحة» «تعليم» «مصروف آخر» from <code>categoryLabelFromCode</code>, now read; and two error sentences quoted verbatim as evidence — «يوجد زوج/ة مسجل مسبقاً في هذه الأسرة.» (<code>errorSpouseDuplicate</code>), shown twice on AJ6, once in the component that must not carry it and once in the one that must. <strong style="color:#f0edeb">That is all.</strong></span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every component name, specimen heading, state label, chip, weekday initial, and explanatory sentence. «الحركات» and «الديون» carry the mark on AJ4 for the reasons they always have — a proposed rename and a key that does not exist — and so does <strong style="color:#f0edeb">«أضف حركة عكسية»</strong>: the handoff states it in the redesign's own voice (§6), no reversal or snackbar ARB key has been read, and an unverified string on a specimen board is exactly how a proposal becomes mistaken for shipped copy. If a framed string has no ◂ and is not in bucket 1, that is a defect in this document. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> amounts, dates and «هناء» as fixture. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span>Everything AJ proposes is a new key or a new component. Carried: a period-vs-live key; four flow-row keys and two subset keys; <code>reportGrossExpense</code>&nbsp;/&nbsp;<code>reportGrossIncome</code> doing two jobs; delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>&nbsp;/&nbsp;<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>; and the nav set — «الحركات», <code>navDebts</code>, Reports into «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked eleven times:</strong> are there golden or screenshot tests among the 1,594?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

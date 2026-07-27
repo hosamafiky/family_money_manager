@@ -23,9 +23,18 @@ final class GetDashboardSummaryUseCase {
     required DashboardPeriod period,
   }) async {
     try {
+      final now = _clock.now;
+      final todayLocal =
+          '${now.year.toString().padLeft(4, '0')}-'
+          '${now.month.toString().padLeft(2, '0')}-'
+          '${now.day.toString().padLeft(2, '0')}';
+
       final results = await Future.wait([
         _repo.spendableBalances(householdId: householdId),
-        _repo.protectedBalances(householdId: householdId),
+        _repo.protectedBalances(
+          householdId: householdId,
+          todayLocal: todayLocal,
+        ),
         _repo.periodFlow(householdId: householdId, period: period),
         _repo.expensesByScope(householdId: householdId, period: period),
         _repo.spouseWalletSummaries(householdId: householdId, period: period),
@@ -43,7 +52,7 @@ final class GetDashboardSummaryUseCase {
           spouseWallets: (results[4] as List)
               .cast<SpouseWalletDashboardSummary>(),
           recentActivity: (results[5] as List).cast<TransactionSummary>(),
-          generatedAt: _clock.now,
+          generatedAt: now,
         ),
       );
     } catch (_) {

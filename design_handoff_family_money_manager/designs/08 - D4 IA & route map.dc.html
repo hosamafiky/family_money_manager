@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.rt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+.rt th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351;padding:9px 10px;border-bottom:2px solid #201e1d;vertical-align:bottom}
+.rt td{padding:9px 10px;border-bottom:1px solid #c3bfbe;vertical-align:top;line-height:1.5}
+.rt tr:hover td{background:#f8f7f7}
+.rt code{font-size:11.5px}
+.tb{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#eae9e9;color:#575351}
+.new{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#fdeae6;color:#ae1800}
+.keep{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#e3efef;color:#0e5a44}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D4 · Information architecture and route map</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Five tabs — but not<br>the same five.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:800px;margin:0;color:#575351">Read from <code>lib/app/app_router.dart</code> in full. The tree holds <strong>42 declared routes</strong> plus <code>AppErrorScreen</code> — the brief's "43 screens". Every one is accounted for below with its tab, its entry points and its back behaviour. The bar stays at five destinations, but Revision&nbsp;2 changes <em>which</em> five: Debts joins, Reports moves into More. Beyond that, what needs work is reachability, <strong>one missing route</strong>, and one screen the redesign makes redundant.</p>
+</header>
+
+<!-- ═══ REVISION 2 ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">REVISION 2</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">You asked for a Debts tab. Something has to leave.</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:920px;margin:0 0 24px">Everything below §01 was written for five branches. Adding a sixth is not a small change — so here is the constraint, honestly, and the structure I recommend.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 28px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <h5 style="margin:0 0 10px">Why six doesn't fit</h5>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Material 3's <code>NavigationBar</code> takes 3–5 destinations. Six is not merely against guidance — it fails measurably here. On a 360&nbsp;dp compact phone, six cells give <strong>60&nbsp;dp each</strong>, and the Arabic labels would be «الرئيسية · المعاملات · التخطيط · الالتزامات · التقارير · المزيد» (labels verbatim from <code>app_ar.arb</code>; see §01). «الالتزامات» is 11 characters and «المعاملات» 9; at the 10&nbsp;dp label size «الالتزامات» already needs ~62&nbsp;dp, and the brief requires <strong>full layout integrity at 200% text scale</strong> with no truncation.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">At 200% every label truncates or the bar wraps. Truncated Arabic is not "shortened" — it is unreadable, because the letters join. So a sixth tab breaks an explicit acceptance criterion, not a style preference.</p>
+    </div>
+    <div style="padding:22px 28px;border-inline-end:1px solid #c3bfbe">
+      <h5 style="margin:0 0 10px">Recommended: Reports moves into More</h5>
+      <div style="background:#fff;border:1px solid #c3bfbe;margin-bottom:12px">
+        <div style="display:flex;font-size:11px;text-align:center" dir="rtl">
+          <span style="flex:1;padding:10px 3px;border-top:3px solid #201e1d;border-inline-end:1px solid #c3bfbe">الرئيسية</span>
+          <span style="flex:1;padding:10px 3px;color:#575351;border-inline-end:1px solid #c3bfbe">الحركات <span style="font-size:8px;color:#ae1800">◂</span></span>
+          <span style="flex:1;padding:10px 3px;color:#575351;border-inline-end:1px solid #c3bfbe">التخطيط</span>
+          <span style="flex:1;padding:10px 3px;color:#ae1800;font-weight:700;border-inline-end:1px solid #c3bfbe">الديون</span>
+          <span style="flex:1;padding:10px 3px;color:#575351">المزيد</span>
+        </div>
+      </div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>«الديون» not «الالتزامات»</strong> — six characters against eleven, fits at 200%, and it is the word a family actually uses.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Between "nine report screens two taps deep" and "six tabs that truncate", the reports lose. And the trade is smaller than it looks: reports are a <em>browse occasionally</em> destination, while debts have <strong>due dates</strong> — a recurring obligation earns a permanent slot far more than a chart does.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Reports keep every path, keep a hub row in More, and keep their direct deep links from the dashboard's period-flow block and spouse band — which is how they were actually reached anyway.</p>
+    </div>
+    <div style="padding:22px 0 22px 28px">
+      <h5 style="margin:0 0 10px">The alternative, if you'd rather keep Reports</h5>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Give debts a <strong>dashboard region</strong> instead of a tab. This is arguably <em>more</em> prominent than a tab, not less: it appears without any tap.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">It also fixes something your other answer opened. You renamed the quiet strip to «إجمالي الأصول» — total assets — which is now honest but visibly half a sentence. A debts region directly beneath it completes it:</p>
+      <div style="background:#fff;border:1px solid #c3bfbe;padding:13px 14px;margin-bottom:11px" dir="rtl">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:9px;border-bottom:1px solid #c3bfbe"><span style="font-size:12px;color:#575351">إجمالي الأصول</span><span class="tnum" style="font-size:18px;font-weight:700">106,519.25</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:2px solid #201e1d"><span style="font-size:12px;color:#575351">إجمالي الديون</span><span class="tnum" style="font-size:18px;font-weight:700;color:#ae1800">− 18,400.00</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:9px"><span style="font-size:12px;font-weight:600">صافي الثروة</span><span class="tnum" style="font-size:22px;font-weight:700">88,119.25</span></div>
+      </div>
+      <p style="font-size:13px;line-height:1.7;margin:0">And <em>that</em> is when «صافي الثروة» becomes a legitimate label — assets minus liabilities, both derived, nothing invented. <strong>Say the word and I'll draw this instead of the sixth tab.</strong> My recommendation is the tab move; this option is genuinely close.</p>
+    </div>
+  </div>
+
+  <div style="border-top:2px solid #ae1800;margin-top:28px;padding-top:22px">
+    <h5 style="margin:0 0 14px">Your other answers, applied — and the four you left to me</h5>
+    <table class="rt">
+      <thead><tr><th style="width:210px">Decision</th><th style="width:130px">Outcome</th><th>What changed, and why</th></tr></thead>
+      <tbody>
+        <tr><td>Detail screens as root pushes</td><td><span class="keep">SCOPED</span></td><td><code>/accounts/:accountId</code> and <code>/transactions/:operationId</code> only. Correct instinct — those two are the cross-linked ones. <code>/budgets/:budgetId</code>, <code>/goals/:goalId</code> and <code>/certificates/:certificateId</code> are reached almost entirely from within Planning, so the tab switch is expected there. <strong>Cost:</strong> only tests asserting a bottom bar on those two screens break.</td></tr>
+        <tr><td>Running balance per row</td><td><span class="new">IN</span></td><td>Kept on F1 and F3. Needs a windowed cumulative sum in the account-ledger query — a real cost, and the strongest thing on the page.</td></tr>
+        <tr><td>Net worth</td><td><span class="new">RENAMED</span></td><td>Now «إجمالي الأصول» + "بدون خصم ديون" in A1 and A2. Becomes real net worth once debts exist.</td></tr>
+        <tr><td>Insufficient balance</td><td><span class="new">SPLIT</span></td><td>Cash rejects, banks warn. E1 redrawn as the warning case with the blocking variant shown beside it. <strong>Side effect:</strong> <code>CurrencyAmountSummary</code>'s "negative = data integrity anomaly" comment must narrow to cash, or an overdrawn bank account gets flagged as corrupt.</td></tr>
+        <tr><td><code>extra</code> → query param</td><td><span class="keep">DEFERRED</span></td><td>Left as-is per your answer. Noted as debt: the unchecked <code>as String?</code> cast stays a latent crash, and voice entry (Tier 3) will want a linkable pre-filled form.</td></tr>
+        <tr><td>Gold price</td><td><span class="new">MANUAL</span></td><td>User-entered gram price with its entry date shown next to the valuation — keeps offline-first intact and keeps a market estimate visibly separate from ledger facts.</td></tr>
+        <tr><td style="background:#eae9e9"><strong>Reconciliation data</strong></td><td style="background:#eae9e9"><span class="new">MY CALL: BUILD IT</span></td><td style="background:#eae9e9">One minimal record — account, observed balance, observed date, optional source note. Without it the drift banner cannot exist, and reconciliation is a listed v1 feature. It is <em>not</em> a ledger entry and must not live in the ledger; the adjustment it produces is. Smallest possible new table.</td></tr>
+        <tr><td style="background:#eae9e9"><strong>Type chooser</strong></td><td style="background:#eae9e9"><span class="new">MY CALL: RETIRE</span></td><td style="background:#eae9e9">Route stays and redirects to <code>/transactions/new/expense</code>; no UI routes through it. Removes a tap and a screen transition from the app's most frequent action, and dissolves the <code>new</code> vs <code>:operationId</code> ambiguity. Tests that navigate through it need one line changed each.</td></tr>
+        <tr><td style="background:#eae9e9"><strong>Budget preview</strong></td><td style="background:#eae9e9"><span class="new">MY CALL: REVIEW ONLY</span></td><td style="background:#eae9e9">Shown on the review screen, <strong>removed from the transaction detail</strong>. Review is a decision moment and worth the extra read. A detail screen is a read of history, where "بقالة 2,792.50 / 3,500" is actively misleading — that budget's period may be long over, so the number shown is today's, attached to last month's transaction.</td></tr>
+        <tr><td style="background:#eae9e9"><strong>Search inside notes</strong></td><td style="background:#eae9e9"><span class="new">MY CALL: YES, TOGGLEABLE</span></td><td style="background:#eae9e9">On by default — notes hold the most searchable terms (merchant names, "بدل 400"). But a note is the one free-text field in a household ledger, so Settings gets a switch. Default on, reversible, never silent.</td></tr>
+        <tr><td style="background:#eae9e9"><strong>Tab 1 label, both scripts</strong></td><td style="background:#eae9e9"><span class="new">MY CALL: CHANGE BOTH</span></td><td style="background:#eae9e9"><code>navTransactions</code>: «المعاملات»&nbsp;→&nbsp;«الحركات» and "Transactions"&nbsp;→&nbsp;"Activity". Both are real ARB edits — see the corrected block in §01. The <span style="color:#ae1800">◂</span> mark on the tab bar above flags the one proposed label; the other four are verbatim from source.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ VERDICT ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">01</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Verdict on the five branches</h2>
+  </div>
+  <p style="font-size:12.5px;color:#575351;max-width:860px;margin:0 0 22px;background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:11px 13px">Written before Revision&nbsp;2. The reasoning for keeping five branches stands; the sixth-tab request supersedes the conclusion. Read the two together — Revision&nbsp;2 is what to build.</p>
+
+  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:44px">
+    <div>
+      <h5 style="margin:0 0 12px">Keep them. Here's the actual argument.</h5>
+      <p style="font-size:13.5px;line-height:1.7;margin:0 0 12px">The five branches map cleanly onto five different <em>questions</em>, which is the only test a tab bar has to pass: <strong>Home</strong> — what can I spend? <strong>Transactions</strong> — what happened? <strong>Planning</strong> — what have I committed money to? <strong>Reports</strong> — what does the pattern look like? <strong>More</strong> — set things up. No two tabs answer the same question, and no question Ahmad asks daily is missing.</p>
+      <p style="font-size:13.5px;line-height:1.7;margin:0 0 12px">The strongest case for change is that <strong>Accounts sits in More</strong>, two taps deep, despite being the second-most-visited destination in a ledger app. I considered promoting it to a tab and folding Reports into Planning. <strong>I'm not recommending it</strong> — Reports is nine screens with its own period and currency state, and burying a nine-screen branch inside a hub is worse than a two-tap Accounts. The real problem isn't which tab Accounts lives in; it's that you currently <em>cannot</em> open an account from Home without losing your place. That is problem&nbsp;3 below, and fixing it makes the tab question moot.</p>
+      <p style="font-size:13.5px;line-height:1.7;margin:0">Also decisive: ~1,594 tests and the shell's page-identity workaround (the sibling-absolute-route trick documented in the router's own comment) both encode this structure. Re-cutting the tabs would spend a large migration budget on a change that doesn't answer a user question better.</p>
+    </div>
+    <div>
+      <div style="display:grid;grid-template-columns:auto 1fr auto;gap:0;border-top:2px solid #201e1d;font-size:13px;background:#fff">
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351">Tab</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351">The question it answers</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#575351">Routes</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe"><strong>0 · Home</strong><div style="font-size:11px;color:#575351" dir="rtl">الرئيسية</div></div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;line-height:1.6">How much can I spend right now?</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;text-align:center" class="tnum">1</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe"><strong>1 · Activity <span style="font-size:9px;color:#ae1800">◂</span></strong><div style="font-size:11px;color:#575351" dir="rtl">الحركات <span style="font-size:9px;color:#ae1800">◂</span></div><div style="font-size:10px;color:#575351;margin-top:2px">current: Transactions / <span dir="rtl">المعاملات</span></div></div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;line-height:1.6">What happened, and let me record something.</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;text-align:center" class="tnum">9</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe"><strong>2 · Planning</strong><div style="font-size:11px;color:#575351" dir="rtl">التخطيط</div></div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;line-height:1.6">What have I committed money to? (budgets, goals, certificates)</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;text-align:center" class="tnum">14</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe"><strong>3 · Reports</strong><div style="font-size:11px;color:#575351" dir="rtl">التقارير</div></div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;line-height:1.6">What does the pattern look like over time?</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;text-align:center" class="tnum">9</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe"><strong>4 · More</strong><div style="font-size:11px;color:#575351" dir="rtl">المزيد</div></div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;line-height:1.6">Set up accounts, members, preferences.</div>
+        <div style="padding:11px 12px;border-bottom:1px solid #c3bfbe;text-align:center" class="tnum">6</div>
+        <div style="padding:11px 12px;border-bottom:2px solid #201e1d;color:#575351">Outside shell</div>
+        <div style="padding:11px 12px;border-bottom:2px solid #201e1d;line-height:1.6;color:#575351">Onboarding · legacy smoke routes · error</div>
+        <div style="padding:11px 12px;border-bottom:2px solid #201e1d;text-align:center;color:#575351" class="tnum">4</div>
+      </div>
+      <div style="background:#fdeae6;border:2px solid #ae1800;padding:14px 16px;margin-top:16px">
+        <div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#ae1800;margin-bottom:8px">Corrected — I had asserted this without reading the ARB</div>
+        <p style="font-size:12.5px;line-height:1.7;margin:0 0 9px">I wrote that tab&nbsp;1 already reads «الحركات» and needs no Arabic change. <strong>It doesn't.</strong> The five labels are, verbatim from <code>app_ar.arb</code> lines 86 and 413–416 / <code>app_en.arb</code>:</p>
+        <div style="background:#fff;border:1px solid #c3bfbe;margin-bottom:10px">
+          <div style="display:grid;grid-template-columns:130px 1fr 1fr;font-size:12px">
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351">Key</div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351">ar (current)</div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351">en (current)</div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe"><code>navHome</code></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe" dir="rtl">الرئيسية <span style="color:#0e5a44">✓</span></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe">Home <span style="color:#0e5a44">✓</span></div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;background:#fdeae6"><code>navTransactions</code></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;background:#fdeae6" dir="rtl"><strong>المعاملات</strong></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe;background:#fdeae6"><strong>Transactions</strong></div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe"><code>navPlanning</code></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe" dir="rtl">التخطيط <span style="color:#0e5a44">✓</span></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe">Planning <span style="color:#0e5a44">✓</span></div>
+            <div style="padding:7px 10px;border-bottom:1px solid #c3bfbe"><code>navReports</code></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe" dir="rtl">التقارير <span style="color:#0e5a44">✓</span></div><div style="padding:7px 10px;border-bottom:1px solid #c3bfbe">Reports <span style="color:#0e5a44">✓</span></div>
+            <div style="padding:7px 10px"><code>navMore</code></div><div style="padding:7px 10px" dir="rtl">المزيد <span style="color:#0e5a44">✓</span></div><div style="padding:7px 10px">More <span style="color:#0e5a44">✓</span></div>
+          </div>
+        </div>
+        <p style="font-size:12.5px;line-height:1.7;margin:0 0 9px">Four of five match what I drew. <strong>Tab&nbsp;1 does not</strong> — so every artboard in this project showing «الحركات» is showing a <em>proposed</em> label, not the current one. I'm keeping the proposal and stating it as one:</p>
+        <p style="font-size:12.5px;line-height:1.7;margin:0"><strong>Recommend <code>navTransactions</code>: «المعاملات» → «الحركات», "Transactions" → "Activity".</strong> «المعاملات» means <em>dealings / transactions</em> in a commercial sense; «حركات الحساب» is the phrase printed on Egyptian bank statements for exactly this list, and it comfortably covers transfers and reversals — which are not «معاملات» colloquially. It is also one character shorter, which the six-tab fitting problem needs. Same argument in English: "Activity" covers a reversal, "Transactions" doesn't. <strong>Both are ARB changes, not confirmations</strong> — two string edits plus any test asserting the old labels.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROBLEMS ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">02</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Six problems in the router as written</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:860px;margin:0 0 26px">Ordered by how much they cost the design. The first three block screens I have already drawn.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #201e1d">
+
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe;border-bottom:1px solid #c3bfbe">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#ae1800;font-weight:800">01</span><span class="new">BLOCKS A DRAWN SCREEN</span></div>
+      <h4 style="margin:0 0 10px">There is no route for the reversal.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>/transactions/:operationId</code> exists; nothing under it. The whole append-only correction flow — the product's most important teaching moment, drawn as D3 — has nowhere to live.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>Recommendation:</strong> add <code>/transactions/:operationId/reverse</code> as a real route, not a bare modal. Three reasons: the sheet has required fields and a re-auth step, so it must survive process death; it needs its own back-stack entry so Android back cancels the reversal rather than leaving the detail screen; and it is the one flow where a support conversation ("send me the link") has real value.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Presented</strong> as a bottom sheet over the detail screen, so the original stays visible behind the scrim — the design depends on that adjacency.</p>
+    </div>
+
+    <div style="padding:22px 0 22px 30px;border-bottom:1px solid #c3bfbe">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#ae1800;font-weight:800">02</span><span class="new">BLOCKS A DRAWN SCREEN</span></div>
+      <h4 style="margin:0 0 10px">The guarded withdrawal has no home, and shouldn't get its own route.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Withdrawing from Yousuf's fund is an ordinary expense or transfer whose <em>source</em> happens to be a <code>childProtectedFund</code>. <code>FinancialAccountType.requiresProtectedWithdrawalAudit</code> is a property of the account, not of a separate operation.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>Recommendation:</strong> no new route. <code>/transactions/new/expense</code> and <code>.../transfer</code> detect a protected source and insert the guard <strong>between form and review</strong>, so the review screen receives an already-justified operation. A separate <code>/withdraw-protected</code> route would let a user deep-link past the form's account validation and would duplicate the expense form.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Consequence for the design:</strong> G1's sheet is a step in an existing flow, not a screen. Its back button returns to the form with the amount intact.</p>
+    </div>
+
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe;border-bottom:1px solid #c3bfbe">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#ae1800;font-weight:800">03</span><span class="new">BLOCKS A DRAWN SCREEN</span></div>
+      <h4 style="margin:0 0 10px">You cannot open an account from Home without losing Home.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>/accounts/:accountId</code> lives on branch&nbsp;4. The dashboard's held region, the spouse-wallet band and every transaction detail all want to link to it. With <code>StatefulShellRoute.indexedStack</code>, navigating there switches the selected tab to More and discards the Home scroll position — and the bottom bar visibly jumps to a tab the user didn't choose.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><strong>Recommendation:</strong> give <code>/accounts/:accountId</code>, <code>/transactions/:operationId</code>, <code>/budgets/:budgetId</code>, <code>/goals/:goalId</code> and <code>/certificates/:certificateId</code> a <code>parentNavigatorKey: rootNavigatorKey</code> so <strong>detail screens push above the shell</strong>. The tab bar disappears (correctly — a detail page is not a destination), back returns to exactly where you were, and the current tab never changes.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">This is the single highest-value router change, and it removes the argument for promoting Accounts to a tab.</p>
+    </div>
+
+    <div style="padding:22px 0 22px 30px;border-bottom:1px solid #c3bfbe">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#8a5a00;font-weight:800">04</span><span style="display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#f8eeda;color:#8a5a00">FRAGILE</span></div>
+      <h4 style="margin:0 0 10px"><code>state.extra</code> carries the preselected account, so half the entry points aren't deep-linkable.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Four screens take <code>preselectedAccountId: state.extra as String?</code>. <code>extra</code> is not part of the URL, does not survive a cold start from a link, and is an unchecked cast — a wrong <code>extra</code> type is a runtime crash rather than a 404.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Recommendation:</strong> move it to a query parameter — <code>/transactions/new/expense?account=&lt;id&gt;</code>. Keeps every entry point linkable, keeps typed routes honest, and lets the dashboard's account rows open a pre-filled expense directly. Note that <code>routes.dart</code> currently only declares the two legacy typed routes, so the feature tree isn't typed at all yet — worth closing at the same time.</p>
+    </div>
+
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#8a5a00;font-weight:800">05</span><span style="display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#f8eeda;color:#8a5a00">FRAGILE</span></div>
+      <h4 style="margin:0 0 10px"><code>/transactions/new</code> and <code>/transactions/:operationId</code> both match "new".</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">They are siblings, and only declaration order stops <code>:operationId</code> from swallowing <code>new</code>. It works today. It breaks silently the day someone reorders the list or adds a sibling above it, and the failure is "opening the create screen shows a transaction-not-found error".</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Recommendation:</strong> either move creation to <code>/transactions/create</code>… or, better, see problem&nbsp;6 — the redesign removes the need for the chooser screen entirely, and with it this ambiguity.</p>
+    </div>
+
+    <div style="padding:22px 0 22px 30px">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px"><span style="font-size:11px;color:#575351;font-weight:800">06</span><span style="display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;background:#e3efef;color:#0e5a44">THE REDESIGN DELETES A SCREEN</span></div>
+      <h4 style="margin:0 0 10px"><code>/transactions/new</code> — the type chooser — is now dead weight.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">It exists to ask "income, expense or transfer?". The pinned bottom action bar from the dashboard direction answers that question <em>before</em> navigation: three labelled buttons that go straight to the right form. Keeping the chooser costs the highest-frequency flow in the app one full tap and one full screen transition.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Recommendation:</strong> <span class="keep">KEEP THE ROUTE</span>, retire the destination. <code>/transactions/new</code> stays valid so existing links, the FAB and the widget tests that target it keep working — but nothing in the new design routes a user through it. It becomes a redirect to <code>/transactions/new/expense</code> once the tests are updated. Deleting the route outright would break tests for no user benefit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ROUTE MAP ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">03</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Complete route map — all 42 routes plus the error screen</h2>
+  </div>
+  <p style="font-size:13.5px;color:#575351;max-width:900px;margin:0 0 8px">Paths are verbatim from <code>app_router.dart</code>. <span class="keep">KEEP</span> = path unchanged, screen redesigned. <span class="new">CHANGE</span> = routing behaviour changes. Nothing is renamed and nothing becomes unreachable.</p>
+  <p style="font-size:13px;color:#575351;max-width:900px;margin:0 0 22px"><strong>Back-stack rule, stated once:</strong> tab switches use <code>goBranch</code> and never stack. Hub&nbsp;→&nbsp;list uses <code>push</code> inside the branch. List&nbsp;→&nbsp;detail pushes to the <strong>root</strong> navigator (problem&nbsp;3), so a detail is never a tab. Detail&nbsp;→&nbsp;action (fund / release / profit / redeem / reverse) pushes above the detail. Review screens push above their form and pop back to it on edit. Saving pops the whole entry stack to the origin, not to the chooser.</p>
+
+  <table class="rt">
+    <thead><tr><th style="width:230px">Path</th><th style="width:200px">Screen</th><th style="width:60px">Tab</th><th style="width:270px">Entered from</th><th style="width:190px">Back goes to</th><th>Redesign action</th></tr></thead>
+    <tbody>
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Outside the shell</td></tr>
+      <tr><td><code>/onboarding</code></td><td>OnboardingScreen</td><td class="tnum">—</td><td>Global <code>redirect</code> when <code>household-v1</code> is absent</td><td>Nothing — it is the root</td><td><span class="keep">KEEP</span> Redesigned as the first-run household setup; Tier&nbsp;2.</td></tr>
+      <tr><td><code>/</code></td><td>SmokeScreen <span style="color:#575351">(legacy)</span></td><td class="tnum">—</td><td>Widget tests only</td><td>—</td><td><span class="keep">KEEP</span> Not in the IA. Never linked from product UI.</td></tr>
+      <tr><td><code>/detail/:probeId</code></td><td>FoundationDetailScreen <span style="color:#575351">(legacy)</span></td><td class="tnum">—</td><td>Typed-route generation proof; tests only</td><td><code>/</code></td><td><span class="keep">KEEP</span> Not in the IA.</td></tr>
+      <tr><td><em>no path</em></td><td>AppErrorScreen</td><td class="tnum">—</td><td><code>errorBuilder</code> on any unmatched location</td><td>"Go home" → <code>/dashboard</code></td><td><span class="new">CHANGE</span> Restyle to <code>AppErrorState</code>; keep the single home action.</td></tr>
+
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Tab 0 · Home</td></tr>
+      <tr><td><code>/dashboard</code></td><td>DashboardScreen</td><td class="tnum">0</td><td><code>initialLocation</code>; tab 0; "go home" from error</td><td>Exits the app</td><td><span class="new">CHANGE</span> Rebuilt as A1–A6. App-bar actions drop from 4–5 to two (privacy + overflow); planning/report pushes move into tabs.</td></tr>
+
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Tab 1 · Transactions <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#575351">— English label becomes "Activity"</span></td></tr>
+      <tr><td><code>/transactions</code></td><td>TransactionsScreen</td><td class="tnum">1</td><td>Tab 1; "الكل ‹" on the dashboard's recent list</td><td>Exits the app</td><td><span class="new">CHANGE</span> Rebuilt as C1–C6. Filter and search become sheets, not routes — they are view state and must survive a tab switch.</td></tr>
+      <tr><td><code>/transactions/new</code></td><td>CreateTransactionScreen</td><td class="tnum">1</td><td>Currently the FAB</td><td><code>/transactions</code></td><td><span class="new">CHANGE</span> <strong>Retired as a destination</strong>, route kept for links and tests. See problem 6.</td></tr>
+      <tr><td><code>/transactions/new/expense</code></td><td>ExpenseFormScreen</td><td class="tnum">1</td><td>Bottom action bar (any tab); account detail; "تكرار" on a transaction detail</td><td>Origin, not the chooser</td><td><span class="new">CHANGE</span> Rebuilt as B1–B2, numpad-first sheet. Gains the protected-source guard (problem 2). <code>extra</code>&nbsp;→&nbsp;<code>?account=</code>.</td></tr>
+      <tr><td><code>/transactions/new/expense/review</code></td><td>ExpenseReviewScreen</td><td class="tnum">1</td><td>"مراجعة" on the expense sheet — now <em>optional</em></td><td>The form, values intact</td><td><span class="new">CHANGE</span> B3. No longer mandatory; the sentence read-back is the primary check.</td></tr>
+      <tr><td><code>/transactions/new/income</code></td><td>IncomeFormScreen</td><td class="tnum">1</td><td>Bottom action bar; account detail</td><td>Origin</td><td><span class="keep">KEEP</span> Tier 2. Same sheet pattern as expense, no category-recency row.</td></tr>
+      <tr><td><code>/transactions/new/income/review</code></td><td>IncomeReviewScreen</td><td class="tnum">1</td><td>"مراجعة" on the income sheet</td><td>The form</td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/transactions/new/transfer</code></td><td>TransferFormScreen</td><td class="tnum">1</td><td>Bottom action bar; spouse-wallet band on the dashboard; account detail</td><td>Origin</td><td><span class="new">CHANGE</span> E1. Destination picker must exclude <code>certificate</code> and <code>goalReserve</code>. Needs a <code>?variant=give|return</code> for E2/E3.</td></tr>
+      <tr><td><code>/transactions/new/transfer/review</code></td><td>TransferReviewScreen</td><td class="tnum">1</td><td>"مراجعة التحويل"</td><td>The form</td><td><span class="new">CHANGE</span> E4 — four ledger entries, fee tinted, effects spelled out.</td></tr>
+      <tr><td><code>/transactions/:operationId</code></td><td>TransactionDetailScreen</td><td class="tnum">1</td><td>Any transaction row: list, dashboard recent, report transaction list, account history</td><td>Wherever you came from — <strong>root push</strong></td><td><span class="new">CHANGE</span> D1–D2. Pushes above the shell (problem 3) so it can be opened from Home or Reports without changing tab.</td></tr>
+      <tr><td style="background:#fdeae6"><code>/transactions/:operationId/reverse</code></td><td style="background:#fdeae6">— <em>does not exist</em></td><td class="tnum" style="background:#fdeae6">1</td><td style="background:#fdeae6">"أضف حركة عكسية" on a transaction detail</td><td style="background:#fdeae6">The detail, unchanged</td><td style="background:#fdeae6"><span class="new">ADD</span> D3. Sheet over the detail. Route rather than bare modal: required fields + re-auth must survive process death.</td></tr>
+
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Tab 2 · Planning</td></tr>
+      <tr><td><code>/planning</code></td><td>PlanningHubScreen</td><td class="tnum">2</td><td>Tab 2</td><td>Exits the app</td><td><span class="new">CHANGE</span> Tier 2. Must earn its place: not three link rows but three <em>status</em> rows — nearest budget threshold, nearest goal deadline, nearest maturity.</td></tr>
+      <tr><td><code>/budgets</code></td><td>BudgetsListScreen</td><td class="tnum">2</td><td>Planning hub; dashboard attention strip</td><td><code>/planning</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/budgets/new</code></td><td>BudgetCreationScreen</td><td class="tnum">2</td><td>Budgets list</td><td><code>/budgets</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/budgets/:budgetId</code></td><td>BudgetDetailScreen</td><td class="tnum">2</td><td>Budgets list; <strong>dashboard attention row</strong>; category report</td><td>Origin — root push</td><td><span class="new">CHANGE</span> Root push (problem 3). Non-colour progress meter from D2.</td></tr>
+      <tr><td><code>/goals</code></td><td>GoalsListScreen</td><td class="tnum">2</td><td>Planning hub</td><td><code>/planning</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/goals/new</code></td><td>GoalCreationScreen</td><td class="tnum">2</td><td>Goals list</td><td><code>/goals</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/goals/:goalId</code></td><td>GoalDetailScreen</td><td class="tnum">2</td><td>Goals list; <strong>dashboard held region</strong> (goal-reserve row)</td><td>Origin — root push</td><td><span class="new">CHANGE</span> Root push. Lifecycle and derived progress must read as two different things.</td></tr>
+      <tr><td><code>/goals/:goalId/fund</code></td><td>FundGoalScreen</td><td class="tnum">2</td><td>Goal detail</td><td>The goal detail</td><td><span class="keep">KEEP</span> Tier 2. <strong>The only legal way money enters a goal reserve</strong> — which is why the generic transfer excludes those accounts.</td></tr>
+      <tr><td><code>/goals/:goalId/release</code></td><td>ReleaseGoalScreen</td><td class="tnum">2</td><td>Goal detail</td><td>The goal detail</td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/certificates</code></td><td>CertificatesListScreen</td><td class="tnum">2</td><td>Planning hub</td><td><code>/planning</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/certificates/new</code></td><td>CertificateCreationScreen</td><td class="tnum">2</td><td>Certificates list</td><td><code>/certificates</code></td><td><span class="new">CHANGE</span> Tier 2, and <strong>more important than it looks</strong>: this screen carries the <em>only</em> principal-funding step in the product (<code>CertificatePurchaseFunding</code>). It is a creation form <em>and</em> a transfer.</td></tr>
+      <tr><td><code>/certificates/:certificateId</code></td><td>CertificateDetailScreen</td><td class="tnum">2</td><td>Certificates list; <strong>dashboard held region</strong> (principal row)</td><td>Origin — root push</td><td><span class="new">CHANGE</span> F2. Principal and profit as two roles; redeem disabled until maturity with its date.</td></tr>
+      <tr><td><code>/certificates/:certificateId/profit</code></td><td>RecordCertificateProfitScreen</td><td class="tnum">2</td><td>Certificate detail</td><td>The certificate detail</td><td><span class="keep">KEEP</span> Tier 2. Profit is income; no automatic accrual anywhere in the UI.</td></tr>
+      <tr><td><code>/certificates/:certificateId/redeem</code></td><td>RedeemCertificateScreen</td><td class="tnum">2</td><td>Certificate detail, <strong>only when matured</strong> (<code>canRedeem</code>)</td><td>The certificate detail</td><td><span class="new">CHANGE</span> Tier 2. Principal returns as a transfer, final profit as income — two amounts, never one total.</td></tr>
+
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Tab 3 · Reports</td></tr>
+      <tr><td><code>/reports</code></td><td>ReportsLandingScreen</td><td class="tnum">3</td><td>Tab 3</td><td>Exits the app</td><td><span class="new">CHANGE</span> Tier 2. Shared period + currency selector lives here and persists across drill-downs.</td></tr>
+      <tr><td><code>/reports/income-expense</code></td><td>IncomeExpenseReportScreen</td><td class="tnum">3</td><td>Reports landing; dashboard period-flow block</td><td><code>/reports</code></td><td><span class="new">CHANGE</span> Built from shared primitives — no report widget kit. Transfers appear in none of it.</td></tr>
+      <tr><td><code>/reports/attribution</code></td><td>SpendingAttributionReportScreen</td><td class="tnum">3</td><td>Reports landing</td><td><code>/reports</code></td><td><span class="new">CHANGE</span> Who spent what, by member and scope.</td></tr>
+      <tr><td><code>/reports/categories</code></td><td>CategoryReportScreen</td><td class="tnum">3</td><td>Reports landing</td><td><code>/reports</code></td><td><span class="new">CHANGE</span> Share bars, figure table above every chart.</td></tr>
+      <tr><td><code>/reports/accounts</code></td><td>AccountFlowReportScreen</td><td class="tnum">3</td><td>Reports landing</td><td><code>/reports</code></td><td><span class="new">CHANGE</span> Per-account in/out; per currency, never combined.</td></tr>
+      <tr><td><code>/reports/home-savings</code></td><td>HomeSavingsReportScreen</td><td class="tnum">3</td><td>Reports landing</td><td><code>/reports</code></td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/reports/spouse-wallet</code></td><td>SpouseWalletReportScreen</td><td class="tnum">3</td><td>Reports landing; <strong>dashboard spouse band</strong></td><td>Origin</td><td><span class="new">CHANGE</span> The given/spent/returned/remaining band, over time.</td></tr>
+      <tr><td><code>/reports/protected-funds</code></td><td>ProtectedFundsReportScreen</td><td class="tnum">3</td><td>Reports landing; <strong>Yousuf's fund detail</strong> ("عرض سجل التدقيق")</td><td>Origin</td><td><span class="new">CHANGE</span> This <em>is</em> the audit trail from G2. One screen, two entry points — do not build it twice.</td></tr>
+      <tr><td><code>/reports/transactions</code></td><td>ReportTransactionListScreen</td><td class="tnum">3</td><td>Any report figure, drilled into</td><td>The report</td><td><span class="new">CHANGE</span> Must be the <em>same</em> <code>TransactionListTile</code> as C1. Currently a separate implementation — that is audit problem&nbsp;6 in one screen.</td></tr>
+
+      <tr><td colspan="6" style="background:#dedbda;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px">Tab 4 · More</td></tr>
+      <tr><td><code>/more</code></td><td>MoreHubScreen</td><td class="tnum">4</td><td>Tab 4</td><td>Exits the app</td><td><span class="new">CHANGE</span> Tier 2. Gains the Tier 3 destinations (gold, liabilities, zakat) as they land.</td></tr>
+      <tr><td><code>/accounts</code></td><td>AccountsScreen</td><td class="tnum">4</td><td>More hub; dashboard region headers</td><td><code>/more</code></td><td><span class="new">CHANGE</span> Tier 2. Two ruled regions — spendable, held — plus a collapsed archived group. No mixed-currency total.</td></tr>
+      <tr><td><code>/accounts/new</code></td><td>AccountCreationScreen</td><td class="tnum">4</td><td>Accounts list; <strong>first-run empty dashboard</strong> (A4)</td><td>Origin</td><td><span class="new">CHANGE</span> Tier 2. The 12-type problem: A4 offers the three likeliest types directly and puts the rest behind one row.</td></tr>
+      <tr><td><code>/accounts/:accountId</code></td><td>AccountDetailScreen</td><td class="tnum">4</td><td><strong>Everywhere</strong> — dashboard held rows, spouse band, account list, transaction detail, account-flow report</td><td>Origin — root push</td><td><span class="new">CHANGE</span> F1–F3. The most cross-linked screen in the product, and the clearest case for problem 3.</td></tr>
+      <tr><td><code>/members</code></td><td>HouseholdMembersScreen</td><td class="tnum">4</td><td>More hub; spender/beneficiary pickers ("إضافة فرد")</td><td>Origin</td><td><span class="keep">KEEP</span> Tier 2.</td></tr>
+      <tr><td><code>/settings</code></td><td>SettingsScreen</td><td class="tnum">4</td><td>More hub; privacy control overflow</td><td><code>/more</code></td><td><span class="new">CHANGE</span> Tier 2. Gains numeral system, privacy defaults, and the security block (PIN, biometric, auto-lock) from Tier 3.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ NEW ROUTES / TIER 3 ═══ -->
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#eae9e9">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">04</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Where the unbuilt features go</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:44px">
+    <div>
+      <table class="rt">
+        <thead><tr><th style="width:230px">Proposed path</th><th style="width:70px">Tab</th><th>Why there</th></tr></thead>
+        <tbody>
+          <tr><td><code>/accounts/:accountId</code></td><td class="tnum">4</td><td><strong>Gold holdings</strong> need no new route. <code>goldHolding</code> is an account type; its detail page is F-class with a quantity hero and a separately-labelled EGP estimate.</td></tr>
+          <tr><td><code>/liabilities</code><br><code>/liabilities/new</code><br><code>/liabilities/:liabilityId</code></td><td class="tnum">2</td><td>Debts are commitments, not assets — same question as budgets and goals. Planning, as siblings of <code>/budgets</code>, matching the existing pattern exactly.</td></tr>
+          <tr><td><code>/reports/net-worth</code></td><td class="tnum">3</td><td>Net worth over time is a report, and it needs liabilities to exist first. Assets − liabilities, from flagged accounts only.</td></tr>
+          <tr><td><code>/zakat</code><br><code>/zakat/history</code><br><code>/sadaqah</code></td><td class="tnum">4</td><td>Not a report — it is a recurring obligation with its own nisab and hawl state. More, alongside the household setup it depends on. Carries a scholarly disclaimer.</td></tr>
+          <tr><td><code>/transactions/new/voice</code></td><td class="tnum">1</td><td>Voice entry is an <em>input method</em> for an existing operation, so it belongs inside the create subtree and hands off to the same forms. The AI proposal lands in the expense sheet pre-filled and unsaved — human confirmation is the existing review step, not a new one.</td></tr>
+          <tr><td><code>/lock</code></td><td class="tnum">—</td><td>Outside the shell, above everything, no back. A second global <code>redirect</code> alongside the household check. Privacy mode is not a route at all — it is app-wide state read by <code>FinancialAmountText</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h5 style="margin:0 0 12px">Orphans and dead ends — the audit</h5>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 16px;font-size:13px;line-height:1.65;border-top:2px solid #201e1d;padding-top:14px">
+        <strong style="color:#0e5a44">None unreachable</strong><span>Every one of the 42 routes has at least one entry point in the redesign. Two are test-only by design (<code>/</code>, <code>/detail/:probeId</code>) and stay that way.</span>
+        <strong style="color:#8a5a00">One retired</strong><span><code>/transactions/new</code> keeps its path but loses its traffic. It is the only destination the redesign removes.</span>
+        <strong style="color:#8a5a00">One duplicate</strong><span><code>/reports/protected-funds</code> and the audit trail on Yousuf's account detail are the same screen. Build once, link twice.</span>
+        <strong style="color:#8a5a00">One near-duplicate</strong><span><code>/reports/transactions</code> vs <code>/transactions</code>. Different filters, same list component. Do not fork the tile.</span>
+        <strong style="color:#ae1800">One missing</strong><span><code>/transactions/:operationId/reverse</code>.</span>
+        <strong style="color:#575351">Zero renames</strong><span>No public path changes. Nothing a user or a test has bookmarked moves.</span>
+      </div>
+      <div style="background:#fff;border:2px solid #201e1d;padding:16px 18px;margin-top:20px">
+        <h6 style="margin-bottom:10px">Platform back behaviour</h6>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:12.5px;line-height:1.6">
+          <strong>Android</strong><span>System back pops the root stack first, then the branch stack, then exits from any tab's root — it does <em>not</em> walk back through previously visited tabs. Predictive back needs the detail-as-root-push change to animate correctly.</span>
+          <strong>iOS</strong><span>Edge swipe mirrors in RTL: the swipe starts from the <strong>right</strong> edge and the page slides left-to-right. A sheet dismisses by dragging down in both locales.</span>
+          <strong>Both</strong><span>An entry form with a non-empty amount intercepts back with a discard confirmation. A review screen does not — popping it is a legitimate "edit".</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:34px 56px 48px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:48px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff">Next: D6 — tokens, file mapping, migration phases</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px">Per your ordering. I'll read <code>app_theme_extensions.dart</code> and <code>app_theme.dart</code> before writing the token table, and the shared components before writing the per-file plan — no more depicting from the brief.</p>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0">Then Tier 2 (~35 screens), Tier 3 patterns, D5 adaptive.</p>
+    </div>
+    <div>
+      <h6 style="color:#ff9783;margin-bottom:10px">Decisions this document needs from you</h6>
+      <ol style="margin:0;padding-inline-start:20px;font-size:12.5px;line-height:1.7;color:#e8e4e2">
+        <li><strong>Detail screens as root pushes</strong> (problem 3). Highest-value change here, and it will break every widget test that asserts a bottom nav bar is present on a detail screen. Worth it — confirm.</li>
+        <li><strong><code>extra</code> → query parameter</strong> for <code>preselectedAccountId</code> (problem 4). Touches four routes and their tests.</li>
+        <li><strong>Retiring <code>/transactions/new</code></strong> as a destination while keeping the route (problem 6). Removes a tap from the most frequent flow; needs the FAB and any test that navigates through it updated.</li>
+        <li>English label "Transactions" → "Activity". Arabic unchanged.</li>
+        <li><code>/liabilities</code> under Planning rather than More — my call, argue if you disagree.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

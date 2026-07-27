@@ -321,7 +321,10 @@ void main() {
         ),
       );
 
-      final balances = await dashRepo.protectedBalances(householdId: _hh);
+      final balances = await dashRepo.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2025-06-01',
+      );
       expect(balances.length, 1);
       expect(balances.first.totalMinorUnits, 50000);
     });
@@ -351,7 +354,10 @@ void main() {
         updatedAt: DateTime.now().toUtc().toIso8601String(),
       );
 
-      final balances = await dashRepo.protectedBalances(householdId: _hh);
+      final balances = await dashRepo.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2025-06-01',
+      );
       expect(balances.isEmpty, isTrue);
     });
 
@@ -374,7 +380,10 @@ void main() {
         ),
       );
 
-      final balances = await dashRepo.protectedBalances(householdId: _hh);
+      final balances = await dashRepo.protectedBalances(
+        householdId: _hh,
+        todayLocal: '2025-06-01',
+      );
       expect(balances.any((b) => b.totalMinorUnits == 30000), isTrue);
     });
   });

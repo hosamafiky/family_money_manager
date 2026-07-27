@@ -40,10 +40,16 @@ final class FakeDashboardQueryRepository implements DashboardQueryRepository {
   @override
   Future<List<CurrencyAmountSummary>> protectedBalances({
     required String householdId,
+    required String todayLocal,
   }) async {
     if (_throwOnCall) throw Exception('Fake error');
+    lastProtectedBalancesTodayLocal = todayLocal;
     return _protected;
   }
+
+  /// Last `todayLocal` passed to [protectedBalances] — lets tests assert that
+  /// the certificate term boundary is evaluated against the injected clock.
+  String? lastProtectedBalancesTodayLocal;
 
   @override
   Future<List<PeriodFlowSummary>> periodFlow({

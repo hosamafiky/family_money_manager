@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:40px}
+.fll{font-size:12px;color:#575351;margin-bottom:5px}
+.fli{border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:15px;min-height:34px;display:flex;justify-content:space-between;align-items:baseline}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.chip{font-size:12.5px;font-weight:600;padding:10px 12px;min-height:40px;display:flex;align-items:center;border:1px solid #c3bfbe;background:#eae9e9}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · special moment — bank reconciliation</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">The bank is not<br>the authority here.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Four boards, section AI. The last of the two special moments — certificate maturity was drawn as 10 · T1–T2. <strong style="color:#201e1d">Everything this flow writes already exists:</strong> <code>OperationType.adjustment</code> ships as «تسوية» in both locales. The only new data is a statement-balance record — account, observed balance, observed date, optional note — which is <em>not</em> a ledger entry.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">The one screen where a user will expect to edit a balance</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">THE PRESSURE</div>
+      <h4 style="margin:0 0 10px">Every other reconciliation app answers this by letting you overwrite the number.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">A user opens their banking app, sees <span class="tnum">24,255.00</span>, opens this one and sees <span class="tnum">24,300.00</span>. The instinct — trained by every spreadsheet and most finance apps — is to correct the app to match the bank.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">This product cannot allow that. Balances are derived from entries (§8.1); there is no balance field to write. So the flow has to convert an instinct to <em>edit</em> into an instinct to <em>record</em>, in the same number of taps, without ever showing a writable balance.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>The reframe is one sentence:</strong> the difference is not an error in your ledger, it is a transaction you have not recorded yet. Usually a fee.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">WHAT IS ACTUALLY NEEDED</div>
+      <h4 style="margin:0 0 10px">One table, one existing operation type, and no schema change to <code>operations</code>.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">A <strong>statement-balance record</strong> is a household's observation of what the bank said on a date. It is evidence, not money: nothing in the ledger derives from it, and deleting every one of them would change no balance.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">When it disagrees with the derived balance, the fix is an ordinary <code>adjustment</code> operation with a reason — a normal entry, appended, reversible, and visible in the transaction list like everything else. The reconciliation screen is a <em>route</em> to that entry, not a special write.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>So this "special moment" needs no guarded sheet.</strong> No third party, no history rewritten, no irreversible step — just an entry the user must not mistake for an edit.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AI</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Reconciliation — four boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Entered from account detail. The salary account's derived balance is <span class="tnum">24,300.00</span> everywhere up to this board; the bank says <span class="tnum">24,255.00</span>, and the <span class="tnum">45.00</span> is a fee nobody recorded.</p>
+  <div style="border:2px solid #8a5a00;background:#f8eeda;padding:16px 18px;margin:0 0 26px;max-width:1000px">
+    <div style="font-size:11px;color:#8a5a00;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">This board extends the fixture — it does not contradict it</div>
+    <p style="font-size:13px;line-height:1.75;margin:0;color:#3d4a52">AI2 writes an adjustment dated <span class="tnum">2026/07/26</span>, which falls inside the period <strong style="color:#201e1d">14 · Y1</strong> reports. That card currently prints «تسويات <span class="tnum">0.00</span>» and a closing balance of <span class="tnum">24,300.00</span> — correct as of its snapshot, taken before this reconciliation. <strong style="color:#201e1d">Every consequence, in full — the list is the tally, so there is no separate count to drift.</strong> <strong style="color:#201e1d">14 · Y1</strong>: adjustments row <span class="tnum">0.00</span> → <span class="tnum">45.00</span>, closing <span class="tnum">24,300.00</span> → <span class="tnum">24,255.00</span>. <strong style="color:#201e1d">16 · AE1</strong>: July assets <span class="tnum">101,000.00</span> → <span class="tnum">100,955.00</span> and net worth <span class="tnum">41,000.00</span> → <span class="tnum">40,955.00</span>. <strong style="color:#201e1d">16 · AF1</strong>: the zakat table's «إجمالي الأصول النهاردة» follows to <span class="tnum">100,955.00</span>. <strong style="color:#201e1d">11 · N2</strong> has already been amended in place — its note said the account "stands at <span class="tnum">24,300.00</span> across this whole document set" and now says it stood there until this reconciliation; its own «قبل <span class="tnum">27,700.00</span> / بعد <span class="tnum">24,300.00</span>» pair is <em>unchanged</em>, being the before and after of the <span class="tnum">2026/04/01</span> goal funding, which a July entry cannot move. Same treatment as 10's July coupon, which extends 05 rather than contradicting it: the later document states the change on its face instead of two documents quietly asserting different balances. Every board <em>before</em> AI2 in the flow still shows <span class="tnum">24,300.00</span>, because at that point the entry does not exist.</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AI1 · Enter what the bank says · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">✕</span><span style="flex:1;font-size:18px;font-weight:600">مطابقة كشف الحساب ◂</span></div>
+        <div style="background:#fff;padding:15px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:15px;font-weight:600;line-height:1.45">حساب بنك مصر — الراتب</div>
+          <div style="font-size:12px;color:#575351;margin-top:6px">الرصيد عندنا ◂</div>
+          <div class="tnum" style="font-size:30px;font-weight:700;line-height:1.25">24,300.00 <span style="font-size:13px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:11.5px;color:#575351;line-height:1.75;margin-top:5px">محسوب من القيود — مش رقم مخزّن، ومافيش خانة تعدّله. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:14px 16px;border-bottom:1px solid #c3bfbe">
+          <div class="fll">الرصيد في كشف البنك ◂</div>
+          <div class="fli" style="background:#fff;padding:10px 12px;outline:2px solid #ec3013;outline-offset:2px"><span class="tnum" style="font-size:19px;font-weight:600">24,255.00</span><span style="font-size:12px;color:#575351">ج.م</span></div>
+        </div>
+        <div style="background:#eae9e9;padding:14px 16px;border-bottom:2px solid #201e1d">
+          <div class="fll">تاريخ الكشف ◂</div>
+          <div class="fli" style="background:#fff;padding:10px 12px"><span class="tnum">2026/07/26</span><span>▤</span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:7px">التاريخ مهم: الرصيد المشتق بيتقارن بنفس اليوم، مش بالنهاردة. ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">اللي بتعمله هنا ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.9">بتسجّل <strong>ملاحظة</strong>: البنك قال كذا في اليوم ده. الملاحظة دي مش حركة ومش بتغيّر رصيد — بتتقارن بس. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px"><span class="btn">قارن ◂</span></div>
+      </div>
+      <p class="note"><strong>The derived balance is shown first, read-only, with the reason it is read-only.</strong> Putting the bank's figure in the only editable field on the screen settles the question of what can be typed before the user tries. <strong>The date is a real field, not a convenience.</strong> A statement from the 20th compared against today's derived balance manufactures a difference out of six days of ordinary spending — which would send the user hunting for a fee that does not exist. <strong>«ملاحظة» not «تسوية»:</strong> the word for what is being saved here is deliberately not the word for the entry it might produce, because they are different objects with different consequences.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AI2 · A difference, explained as a missing entry · light · RTL</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">فرق <span class="tnum">45.00</span> ◂</span></div>
+        <div style="background:#f8eeda;border-bottom:2px solid #8a5a00;padding:15px 16px">
+          <div style="font-size:12px;color:#575351;margin-bottom:4px">الفرق ◂</div>
+          <div class="tnum" style="font-size:30px;font-weight:700;line-height:1.25;color:#8a5a00">45.00 <span style="font-size:13px;font-weight:600;color:#575351">ج.م</span></div>
+          <div style="font-size:12.5px;color:#575351;line-height:1.9;margin-top:7px">البنك أقل من عندنا بـ<span class="tnum">45.00</span>. يعني فيه فلوس خرجت من الحساب واحنا ما سجّلناهاش — <strong>مش يعني رصيدنا غلط</strong>. ◂</div>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">الرصيد عندنا ◂</span><span class="tnum" style="font-weight:600">24,300.00</span></div>
+          <div class="lr"><span style="color:#575351">كشف البنك · <span class="tnum">2026/07/26</span> ◂</span><span class="tnum" style="font-weight:600">24,255.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d;background:#eae9e9"><span style="font-weight:700">الفرق ◂</span><span class="tnum" style="font-weight:700;color:#8a5a00">45.00</span></div>
+        </div>
+        <div style="padding:14px 16px;background:#fff;border-bottom:2px solid #201e1d">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:9px">إيه اللي بيسبّب ده عادةً؟ ◂</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="chip" style="background:#201e1d;color:#f3f2f2;border-color:#201e1d">رسوم بنكية ◂</span>
+            <span class="chip">ضريبة أو دمغة ◂</span>
+            <span class="chip">سحب من ماكينة ◂</span>
+            <span class="chip">حاجة تانية ◂</span>
+          </div>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:10px">الاختيار ده بيتحوّل لسبب مكتوب على الحركة — مش تصنيف داخلي. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;font-weight:700;border-bottom:1px solid #c3bfbe">اللي هيتسجّل ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">نوع الحركة ◂</span><span style="font-weight:600">تسوية</span></div>
+          <div class="lr"><span style="color:#575351">المبلغ</span><span class="tnum" style="font-weight:600;color:#ae1800">− 45.00</span></div>
+          <div class="lr"><span style="color:#575351">السبب ◂</span><span style="font-weight:600">رسوم بنكية ◂</span></div>
+          <div class="lr"><span style="color:#575351">التاريخ ◂</span><span class="tnum" style="font-weight:600">2026/07/26</span></div>
+          <div class="lr" style="border-bottom:none"><span style="color:#575351">الرصيد بعدها ◂</span><span class="tnum" style="font-weight:700">24,255.00</span></div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12px;color:#575351;line-height:1.9">دي حركة عادية في السجل زي أي حركة: هتظهر في قايمة الحركات، وهتتحسب في المصروفات، وممكن تتعكس لو طلعت غلط. مفيش رصيد بيتكتب فوق رصيد. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn">سجّل التسوية ◂</span>
+          <span class="btn2">سيبها من غير تسوية ◂</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">لو سيبتها، الملاحظة بتتحفظ والفرق يفضل مكتوب — عشان لو لقيت السبب بعدين. ◂</span>
+        </div>
+      </div>
+      <p class="note"><strong>The difference is stated as a missing transaction, in the first sentence, before any number is offered.</strong> «مش يعني رصيدنا غلط» is doing the whole job of this screen: it converts "the app is wrong" into "I have something to record", which is the only framing compatible with a derived-balance ledger. <strong>The four causes are taps-to-fill, not a category picker</strong> — the same pattern as the reversal reasons, for the same reason: a required free-text field produces «فرق» on every entry. <strong>«سيبها من غير تسوية» must exist.</strong> A user who does not know the cause should not be pushed into inventing one; the observation is kept, the difference stays visible, and the entry waits.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AI3 · Matched · dark · RTL — and the history of checks</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مطابقة كشف الحساب ◂</span></div>
+        <div style="background:#1b3230;border-bottom:2px solid #8d8886;padding:16px">
+          <div style="display:flex;gap:9px;align-items:baseline;margin-bottom:6px"><span style="color:#63bc94;font-size:16px">✓</span><span style="font-size:15.5px;font-weight:600;color:#63bc94">مطابق ◂</span></div>
+          <div class="tnum" style="font-size:26px;font-weight:700;line-height:1.25">24,255.00 <span style="font-size:13px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+          <div style="font-size:11.5px;color:#a8a3a0;line-height:1.85;margin-top:6px">بعد تسوية الرسوم، الرصيد عندنا بقى زي كشف البنك بالظبط يوم <span class="tnum">2026/07/26</span>. ◂</div>
+        </div>
+        <div class="gh" style="background:#2c2928;border-bottom-color:#4a4645">سجل المطابقات ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:12px 16px;border-bottom:1px solid #4a4645">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><span style="font-size:13.5px;font-weight:600"><span class="tnum">2026/07/26</span></span><span style="font-size:11.5px;color:#63bc94">مطابق ✓ ◂</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.75">كشف <span class="tnum">24,255.00</span> · اتسجّلت تسوية <span class="tnum">45.00</span> — رسوم بنكية ◂</div>
+          </div>
+          <div style="padding:12px 16px;border-bottom:1px solid #4a4645">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><span style="font-size:13.5px;font-weight:600"><span class="tnum">2026/06/28</span></span><span style="font-size:11.5px;color:#63bc94">مطابق ✓ ◂</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.75">كشف <span class="tnum">19,940.00</span> · بدون فرق ◂</div>
+          </div>
+          <div style="padding:12px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><span style="font-size:13.5px;font-weight:600"><span class="tnum">2026/05/30</span></span><span style="font-size:11.5px;color:#e0ae4a">فرق مفتوح <span class="tnum">30.00</span> ◂</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.75">كشف <span class="tnum">16,470.00</span> · اتساب من غير تسوية ◂</div>
+          </div>
+        </div>
+        <div style="background:#2e2415;border-inline-start:4px solid #e0ae4a;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">فرق مفتوح من مايو ◂</div>
+          <div style="font-size:12px;color:#a8a3a0;line-height:1.9">الـ<span class="tnum">30.00</span> دي لسه من غير سبب. مش لازم تتحل — بس بتفضل مكتوبة، عشان اللي يبص على الحساب يعرف إن فيه حاجة ما اتفسرتش. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn" style="background:#f0edeb;color:#201e1d">مطابقة جديدة ◂</span>
+          <span style="font-size:11px;color:#a8a3a0;line-height:1.75">الملاحظات دي مش حركات — لو مسحتها كلها، مفيش رصيد هيتغيّر. ◂</span>
+        </div>
+      </div>
+      <p class="note" style="margin-bottom:26px"><strong>Reconciliation is a habit, so the record of it is the feature.</strong> A single check answers "does it match today"; a list answers "when did this account last agree, and what has been unexplained since" — which is the question that matters when something is actually wrong. <strong>«فرق مفتوح» is a first-class state.</strong> AI2 lets the user walk away without inventing a cause; this screen is where that decision persists instead of evaporating, and the amber note makes clear it is a note, not a debt. <strong>The closing line restates the object model</strong> — deleting every observation changes no balance — because the history looks enough like a ledger that someone will eventually ask.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AI4 · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Reconcile Statement ◂</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="background:#f8eeda;border-bottom:2px solid #8a5a00;padding:15px 16px">
+          <div style="font-size:12px;color:#575351;margin-bottom:5px">Difference ◂</div>
+          <div style="display:flex;align-items:baseline;gap:8px"><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:20px;height:22px;background:#8a5a00"></span><span style="display:inline-block;width:27px;height:22px;background:#8a5a00"></span></span><span style="font-size:13px;font-weight:600;color:#575351">EGP</span></div>
+          <div style="font-size:12.5px;color:#575351;line-height:1.85;margin-top:8px">The bank is lower than us. Money left the account that has not been recorded — <strong style="font-weight:600">it does not mean our balance is wrong</strong>. ◂</div>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Our balance ◂</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:26px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Bank statement · 26 Jul 2026 ◂</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:26px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif;border-bottom:2px solid #201e1d;background:#eae9e9"><span style="font-weight:800">Difference ◂</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:20px;height:12px;background:#8a5a00"></span><span style="display:inline-block;width:27px;height:12px;background:#8a5a00"></span></span></div>
+          <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:12.5px;font-weight:800">Status ◂</span><span style="font-size:12.5px;font-weight:800;color:#8a5a00">Not matched ◂</span>
+          </div>
+        </div>
+        <div style="padding:14px 16px;font-size:11px;color:#575351;line-height:1.6"><strong style="font-weight:600">The verdict is not an amount, so it does not mask.</strong> Whether the ledger agrees with the bank is the answer this screen exists to give; hiding it would leave a screen of bars that says nothing. The three figures mask per digit group — including the difference, from which the other two could be reconstructed if either were visible.</div>
+        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2" style="font-family:'Archivo',sans-serif;font-weight:800">Record adjustment ◂</span>
+          <span style="font-size:11px;color:#575351;line-height:1.6">Label flush to the leading edge — left here, right in RTL. Cause chips stay legible: «Bank fees» is a reason, not a figure.</span>
+        </div>
+      </div>
+      <p class="note"><strong>One masking decision this board had to make: does the difference mask?</strong> It is the figure a user most wants at a glance and the one most likely to be small and harmless — but it is arithmetic on two masked numbers, so leaving it visible hands back the gap between them, and with either statement in hand the whole balance. So it masks, and what stays is the <em>verdict</em>: matched or not matched, in words. <strong>That is the same rule 13 · X3 arrived at from the other side</strong> — shares stay because a ratio discloses nothing; a difference goes because a difference is an amount. <strong>The cause chips also stay legible</strong>: «Bank fees» describes why money moved, not how much.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Both special moments now drawn · 72 boards in the set</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Four boards: AI1–AI4.</strong> Certificate maturity was 10 · T1–T2; this closes the pair the handoff listed as unbuilt.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Not presentation work:</strong> one <code>statement_balances</code> table — account id, observed balance in minor units, observed date, optional note, and an optional link to the adjustment operation it produced. No change to <code>operations</code>; <code>adjustment</code> already exists and is already localised. The comparison is a query against the derived balance <em>as of the observed date</em>, which the account-flow report already computes.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">What is left:</strong> the D2 gaps — chart primitives, date and category pickers, tabs, dialog and bottom-sheet anatomy, snackbar — and D5 adaptive last. Plus the two confirming reads: the three goal screens against 07 · L2–L3, and <code>categoryLabelFromCode</code> against 13 · X1.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Two values only: <span style="unicode-bidi:isolate">«تسوية»</span> (<code>transactionTypeAdjustment</code>) and <span style="unicode-bidi:isolate">«المبلغ»</span> (<code>goalAmount</code> / <code>certificateAmount</code>), plus «حساب بنك مصر — الراتب» carried as fixture. <strong style="color:#f0edeb">That is all</strong> — this screen does not exist in source, so there is nothing else to quote.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every screen title, field label, state name, cause chip and explanatory sentence. If a framed string has no ◂ and is not one of the two values above, that is a defect in this document. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — account names, amounts, dates — «ج.م», the set-wide currency abbreviation, and the English annotation outside the frames (AI4 is an LTR check, so its proposed strings carry the mark in English too). Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span>Everything on these boards is a new key. Carried from earlier documents: a period-vs-live key; four flow-row keys and two subset keys; <code>reportGrossExpense</code>&nbsp;/&nbsp;<code>reportGrossIncome</code> doing two jobs; delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>&nbsp;/&nbsp;<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>; and the nav set — «الحركات», <code>navDebts</code>, Reports into «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked ten times:</strong> are there golden or screenshot tests among the 1,594?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

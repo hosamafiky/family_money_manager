@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.rw{display:flex;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:44px;align-items:center}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.mt{background:#fff;border-bottom:1px solid #c3bfbe;padding:13px 16px;min-height:64px;display:flex;align-items:center;gap:11px}
+.fll{font-size:12px;color:#575351;margin-bottom:5px}
+.fli{border-bottom:2px solid #201e1d;padding-bottom:7px;font-size:15px;min-height:34px;display:flex;justify-content:space-between;align-items:baseline}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btnD{background:#c3bfbe;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.hp{background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px)}
+.hpD{background:repeating-linear-gradient(45deg,#d6a85c 0 3px,transparent 3px 7px)}
+.chip{font-size:12.5px;font-weight:600;padding:10px 12px;min-height:40px;display:flex;align-items:center;border:1px solid #c3bfbe;background:#eae9e9}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 5 — household members</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Archive a child,<br>keep his money.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Six boards, section U. Read in full before drawing: <code>household_member.dart</code>, <code>household_use_cases.dart</code>, <code>drift_household_repository.dart</code>, <code>household_members_screen.dart</code> and every <code>member*</code> value in both ARB files. This is the smallest feature in Tier 2 and it produced the sharpest defect so far — <strong style="color:#201e1d">archiving a member is not balance-guarded</strong>, while goals and certificates both refuse. Every Arabic string below is either a quoted ARB value or marked <strong style="color:#201e1d">◂ proposed</strong>.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Four defects, and one of them is a disagreement between the UI and the database</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DEFECT 1 · the money outlives the member</div>
+      <h4 style="margin:0 0 10px">Archiving يوسف is allowed while <span class="tnum">6,950.00</span> sits in his protected fund.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>archiveMember</code> checks exactly three things: the member exists, the member is not the primary user, and the member is not already archived. <strong>It never looks at owned or beneficiary accounts.</strong> So the child-protected fund — the one balance in this product that exists to protect somebody who cannot advocate for themselves — is left pointing at an archived beneficiary.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Both comparable features refuse. <code>errorGoalArchiveNonzeroBalance</code>: <em>«لا يمكن أرشفة هدف يحتوي على أموال. حرِّر جميع الأموال أولاً.»</em> <code>errorCertificateArchiveNonzeroBalance</code>: <em>«لا يمكن أرشفة شهادة بها أصل متبقٍ. استردها أولاً.»</em> Members have no equivalent, and a guarded withdrawal's acknowledgement checkbox <em>names the child</em> — so the name has to keep resolving.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>This is domain work, not presentation.</strong> U4 draws the guard the redesign needs: a refusal with the balance stated and a route to empty the fund first. One new use-case check, one new key.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DEFECT 2 · the UI and the DB disagree about the spouse</div>
+      <h4 style="margin:0 0 10px">Archive the spouse and «إضافة زوج/ة» never comes back — but the database would allow it.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The repository's uniqueness check counts <strong>active</strong> spouses only: <code>role == spouse &amp; isArchived == false</code>. The screen computes <code>hasSpouse</code> from <code>members.where(role == spouse)</code> — <strong>archived included</strong> — and hides the add button whenever the list is non-empty.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">So after an archive, the only affordance for adding a spouse is gone from a household the domain considers spouse-less. Nothing errors; the feature just quietly stops existing. One filter fixes it, and U5 draws the state that exposes it.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>Related, same board:</strong> archiving is <strong>one-way</strong>. Goals have <code>goalRestoreAction</code> «استعادة», certificates have a restore use case — members have neither a use case nor a key. An archived member is archived forever.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #c3bfbe;margin-top:4px">
+    <div style="padding:20px 24px 4px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#8a5a00;font-weight:800;margin-bottom:9px">DEFECT 3 · «مؤرشف» has one gender</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><code>archivedLabel</code> is a single masculine string, and it is rendered under هناء exactly as it is rendered under يوسف. In an Arabic-first product that is not a nitpick — it is the label reading as ungrammatical about a named family member on her own row.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Same shape as <code>memberChild</code> «طفل», a singular used as the heading of a list that can hold several. Both need gender/number-aware forms; ARB supports <code>select</code> and <code>plural</code>, and neither is used here.</p>
+    </div>
+    <div style="padding:20px 24px 4px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#8a5a00;font-weight:800;margin-bottom:9px">DEFECT 4 · rename is retroactive and silent</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><code>renameMember</code> overwrites <code>displayName</code> in place — the only in-place mutation of user-visible data anywhere in this product. Because the transaction list joins member names rather than storing them, a rename <strong>changes how every past entry reads</strong>, including the audit trail on protected withdrawals.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">That is the right behaviour — people's names change and the ledger should not fossilise a typo — but in an app whose first law is «مفيش تعديل», it has to be said out loud. U3 says it.</p>
+    </div>
+    <div style="padding:20px 0 4px 24px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">WHAT SOURCE GETS RIGHT</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Three roles, two lifecycles, and <strong>no delete</strong> — consistent with the ledger. The primary user cannot be archived and cannot be added twice; household initialisation is idempotent on fixed ids. <code>memberSpouseLoginNote</code> already tells the truth about V1 rather than hiding it.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">And there is deliberately <strong>no age, no date of birth, no relationship field</strong>. The redesign adds none: a protected fund's rules do not change on a birthday in V1, so a birthday would be a promise the product cannot keep.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:38px 56px;border-bottom:2px solid #201e1d;background:#e6eef6">
+  <h3 style="margin:0 0 8px;font-size:19px;letter-spacing:-.01em">The household, from 05 — three members, unchanged</h3>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:2px solid #201e1d;font-size:13px;line-height:1.7">
+    <div style="padding:14px 20px 14px 0;border-inline-end:1px solid #c3bfbe"><strong>أحمد</strong> — المستخدم الأساسي<br><span style="color:#575351">the actor on every «بواسطة أحمد» line in 05 · G2</span></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe"><strong>هناء</strong> — الزوج/ة<br><span style="color:#575351">«محفظة الزوجة — هناء» · مستبعدة من رصيدك المتاح</span></div>
+    <div style="padding:14px 0 14px 20px"><strong>يوسف أحمد</strong> — طفل<br><span style="color:#575351">protected fund <span class="tnum">6,950.00</span> ج.م, derived from <span class="tnum">14</span> entries · beneficiary on the guarded withdrawal</span></div>
+  </div>
+  <p style="font-size:12.5px;line-height:1.7;color:#575351;margin:14px 0 0;max-width:1000px">No new member is invented for these boards, and no new balance. <strong style="color:#201e1d">Every figure here already appears in 05</strong> — which is the point: this screen's whole job is to make the people behind those numbers addressable, and the numbers stay where the ledger put them. U4's refusal quotes <span class="tnum">6,950.00</span> from the protected account, not from a member field, because a member has no balance of its own.</p>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">U</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Household members — six boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The shipped screen is three <code>_SectionHeader</code>s in a <code>ListView</code>, a <code>Card</code> per member, a <code>PopupMenuButton</code> for rename and archive, and three <code>AlertDialog</code>s. It has no empty state (the primary user always exists), no skeleton, and no link between a member and the money attached to them — which is the gap that matters: يوسف has <span class="tnum">6,950.00</span> in this app and his row does not know it.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">U1 · Populated · light · RTL — people, and the money attached to them</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">أفراد الأسرة</span></div>
+        <div style="padding:18px 16px 14px;background:#fff;border-bottom:2px solid #201e1d">
+          <div style="font-size:24px;font-weight:700;line-height:1.4">أفراد الأسرة</div>
+          <div style="font-size:12.5px;color:#575351;line-height:1.8;margin-top:6px">الأسماء دي بتظهر على كل حركة في السجل — مين صرف، ومين المستفيد. ◂</div>
+        </div>
+
+        <div class="gh">المستخدم الأساسي</div>
+        <div class="mt" style="border-bottom:2px solid #201e1d">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">أحمد</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">صاحب الأسرة · مش قابل للأرشفة ◂</span></span>
+          <span style="font-size:11px;color:#575351;background:#eae9e9;padding:4px 9px">أنت ◂</span>
+        </div>
+
+        <div class="gh">الزوج/ة</div>
+        <div class="mt">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">هناء</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">محفظة الزوجة — هناء · مستبعدة من رصيدك المتاح</span></span>
+          <span style="font-size:16px;color:#575351">⋮</span>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 16px;margin:0 16px 14px;border-bottom:none">
+          <div style="font-size:12px;color:#3d4a52;line-height:1.8">ملاحظة: تسجيل دخول منفصل للزوج/ة غير متاح في الإصدار الأول.</div>
+        </div>
+
+        <div class="gh">الأطفال (1) ◂</div>
+        <div class="mt" style="position:relative;padding-inline-start:20px">
+          <span class="hp" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">يوسف أحمد</span>
+          <span style="display:block;font-size:11.5px;color:#6e4a1f;line-height:1.6">أموال محمية <span class="tnum" style="font-weight:600">6,950.00</span> ج.م · محسوب من <span class="tnum">14</span> قيدًا ◂</span></span>
+          <span style="font-size:16px;color:#575351">⋮</span>
+        </div>
+        <div style="background:#f4ecdd;padding:11px 16px;border-bottom:2px solid #201e1d;display:flex;justify-content:space-between;align-items:center;min-height:44px">
+          <span style="font-size:12.5px;color:#6e4a1f">أموال يوسف المحمية · السجل ◂</span><span style="font-size:14px;color:#6e4a1f">‹</span>
+        </div>
+
+        <div style="padding:16px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2">إضافة طفل</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">«إضافة زوج/ة» مش ظاهر — فيه زوج/ة نشط بالفعل، وواحد بس مسموح في الإصدار الأول. ◂</span>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>A member row now carries the money attached to it.</strong> The shipped tile is a name and a menu; يوسف's <span class="tnum">6,950.00</span> lives two screens away in an account list, so nothing connects the person to the balance that exists for their benefit. Here the protected total sits on the row in <code>protectedMoney</code>, behind the same hatch and lock the accounts list uses, with the audit trail one tap below — and that link is what makes U4's refusal comprehensible rather than arbitrary. <strong>«الأطفال (1)» is a proposed plural</strong>: source uses <code>memberChild</code> «طفل», singular, as the heading of a repeatable section. <strong>The absent spouse button states its reason</strong> instead of just not being there — see U5 for why that reason has to be computed from <em>active</em> spouses.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">U2 · Add child · sheet, not dialog · light · RTL</div>
+      <div class="ph">
+        <div style="height:150px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">إضافة طفل</div></div>
+            <span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="height:1px;background:#c3bfbe;margin-top:14px"></div>
+          <div style="background:#fff;padding:14px 16px;border-bottom:1px solid #c3bfbe">
+            <div class="fll">الاسم</div>
+            <div class="fli" style="outline:2px solid #ec3013;outline-offset:2px"><span>مريم أحمد ◂</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:7px">الاسم ده هيظهر على كل حركة بتخصّه. تقدر تغيّره بعدين — والتغيير بيسري على السجل كله. ◂</div>
+          </div>
+          <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #201e1d">
+            <div class="fll">اللي بيتعمل مع الطفل ◂</div>
+            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:9px"><span style="color:#575351;font-size:13px">—</span><span style="flex:1;font-size:12.5px;line-height:1.8">العضو بيتضاف بس. <strong>مفيش حساب بيتعمل تلقائيًا</strong> — لو عايز له أموال محمية، تعملها من «حساب جديد» وتختاره مستفيد. ◂</span></div>
+            <div style="display:flex;gap:8px;align-items:flex-start"><span style="color:#575351;font-size:13px">—</span><span style="flex:1;font-size:12.5px;line-height:1.8">مفيش سن ولا تاريخ ميلاد. قواعد الأموال المحمية مش بتتغيّر بالسن في الإصدار الأول، فالتطبيق ما يسألش عن حاجة مش هيستعملها. ◂</span></div>
+          </div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn">حفظ</span>
+            <span style="font-size:11px;color:#575351;line-height:1.75">لو الاسم فاضي ◂: «اسم العضو مطلوب.»</span>
+            <span class="btn2">إلغاء</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>A sheet rather than an <code>AlertDialog</code>, for one reason: the dialog has no room to say what adding a member does <em>not</em> do.</strong> Source shows a title, a text field and two buttons — so a user reasonably expects that adding a child creates somewhere to put the child's money. It does not: <code>AddMemberUseCase</code> writes one row. The account, the fund purpose and the beneficiary link are three separate decisions on a different screen. <strong>Two absences are stated as absences</strong> — no automatic account, no age — because in this product the things it refuses to guess are load-bearing. Both notices are proposed copy; source has no equivalent.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">U3 · Rename · the retroactive warning · light · RTL</div>
+      <div class="ph">
+        <div style="height:150px;background:#201e1d;opacity:.62"></div>
+        <div style="background:#f3f2f2;border-top:2px solid #201e1d;box-shadow:0 -8px 24px rgba(0,0,0,.18)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#c3bfbe"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">تغيير الاسم</div>
+            <div style="font-size:13px;color:#575351;line-height:1.7;margin-top:2px">يوسف أحمد</div></div>
+            <span style="font-size:16px;color:#575351">✕</span>
+          </div>
+          <div style="height:1px;background:#c3bfbe;margin-top:14px"></div>
+          <div style="background:#fff;padding:14px 16px;border-bottom:1px solid #c3bfbe">
+            <div class="fll">الاسم</div>
+            <div class="fli"><span>يوسف أحمد محمود ◂</span></div>
+          </div>
+          <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:16px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:5px">التغيير بيسري على السجل كله ◂</div>
+            <div style="font-size:12px;color:#575351;line-height:1.85">الاسم مش مخزّن جوه الحركات — بيتقرا من هنا. يعني بعد الحفظ، كل حركة قديمة هتقرا بالاسم الجديد، بما فيها سجل الأموال المحمية. ده تصحيح اسم، مش تعديل حركة. ◂</div>
+          </div>
+          <div style="background:#fff;border-block:1px solid #c3bfbe">
+            <div style="padding:10px 16px;font-size:11.5px;font-weight:700;background:#eae9e9;border-bottom:1px solid #c3bfbe">هيتغيّر في ◂</div>
+            <div class="rw"><span style="color:#575351">سجل الأموال المحمية ◂</span><span class="tnum" style="font-weight:600">14 قيدًا ◂</span></div>
+            <div class="rw"><span style="color:#575351">المستفيد في السحب المحمي ◂</span><span style="font-weight:600">كل السحوبات ◂</span></div>
+            <div class="rw" style="border-bottom:none"><span style="color:#575351">اسم حساب الأموال المحمية ◂</span><span style="font-weight:600">مش بيتغيّر ◂</span></div>
+          </div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn">حفظ</span>
+            <span style="font-size:11px;color:#575351;line-height:1.75">الحساب اسمه مستقل — لو محتاج يتغيّر، غيّره من شاشة الحساب. ◂</span>
+            <span class="btn2">إلغاء</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>This is the only in-place edit in the product, so it is the only sheet that has to explain what an edit means here.</strong> «مفيش تعديل ومفيش حذف» is the first law the onboarding teaches; a rename does not break it — the ledger entries are untouched — but it does change what they say, and a user who has been told nothing can be edited deserves to know which. The impact list is exhaustive rather than reassuring: three rows, and the third is a <em>no</em>. <strong>The account name is deliberately not renamed with the member</strong> — «أموال يوسف المحمية» is an account label, editable on its own screen, and silently rewriting it would be an edit nobody asked for.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">U4 · Archive refused · dark · RTL — the guard that does not exist yet</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div style="height:150px;background:#0d0c0c;opacity:.72"></div>
+        <div style="background:#181716;border-top:2px solid #8d8886;box-shadow:0 -8px 24px rgba(0,0,0,.5)">
+          <div style="padding:9px 0 0;display:flex;justify-content:center"><span style="width:36px;height:3px;background:#4a4645"></span></div>
+          <div style="padding:12px 16px 0;display:flex;gap:10px;align-items:baseline">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#d6a85c" stroke-width="1.75" style="display:block;flex:none;margin-top:2px"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+            <div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.4">أرشفة العضو</div>
+            <div style="font-size:13px;color:#a8a3a0;line-height:1.7;margin-top:2px">يوسف أحمد</div></div>
+            <span style="font-size:16px;color:#a8a3a0">✕</span>
+          </div>
+          <div style="height:1px;background:#4a4645;margin-top:14px"></div>
+          <div style="background:#2e2415;padding:15px 16px;border-bottom:2px solid #8d8886;position:relative">
+            <span class="hpD" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+            <div style="font-size:13px;font-weight:600;color:#d6a85c;margin-bottom:8px">مش هينفع — فيه أموال محمية باسمه ◂</div>
+            <div style="font-size:12px;color:#a8a3a0;margin-bottom:4px">الرصيد المحمي ◂</div>
+            <div class="tnum" style="font-size:26px;font-weight:700;line-height:1.25;color:#d6a85c">6,950.00 <span style="font-size:13px;font-weight:600;color:#a8a3a0">ج.م</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.8;margin-top:7px">لا يمكن أرشفة عضو له أموال محمية. اصرف أو حوّل الرصيد أولاً. ◂</div>
+          </div>
+          <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+            <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#2c2928;border-bottom:1px solid #4a4645">نفس القاعدة في باقي التطبيق ◂</div>
+            <div style="padding:11px 16px;border-bottom:1px solid #4a4645"><div style="font-size:12px;color:#a8a3a0;line-height:1.6;margin-bottom:3px">الأهداف</div><div style="font-size:12px;font-weight:600;line-height:1.75">لا يمكن أرشفة هدف يحتوي على أموال. حرِّر جميع الأموال أولاً.</div></div>
+            <div style="padding:11px 16px;border-bottom:1px solid #4a4645"><div style="font-size:12px;color:#a8a3a0;line-height:1.6;margin-bottom:3px">الشهادات</div><div style="font-size:12px;font-weight:600;line-height:1.75">لا يمكن أرشفة شهادة بها أصل متبقٍ. استردها أولاً.</div></div>
+            <div style="padding:11px 16px"><div style="font-size:12px;color:#a8a3a0;line-height:1.6;margin-bottom:3px">الأعضاء ◂</div><div style="font-size:12px;font-weight:600;line-height:1.75;color:#ff9783">مفيش قاعدة — دي اللي مضافة ◂</div></div>
+          </div>
+          <div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:9px">
+            <span class="btn" style="background:#f0edeb;color:#201e1d">افتح أموال يوسف المحمية ◂</span>
+            <span style="font-size:11px;color:#a8a3a0;line-height:1.75">السحب من الرصيد ده محروس — سبب مطلوب، وموافقة باسم يوسف، وتحقّق ببصمتك. ◂</span>
+            <span style="background:#3a3635;color:#6b6766;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center;margin-top:6px">أرشفة العضو</span>
+            <span style="font-size:11px;color:#a8a3a0;line-height:1.75">معطّل ◂: الأرشفة بتتاح لما الرصيد المحمي يبقى <span class="tnum">0.00</span>.</span>
+          </div>
+        </div>
+      </div>
+      <p class="note"><strong>This board draws a rule that is not in the code, and says so on its face.</strong> Today archiving يوسف succeeds — the use case checks the role and the lifecycle and nothing else — leaving <span class="tnum">6,950.00</span> of protected money pointing at an archived beneficiary, on an account whose withdrawal flow requires an acknowledgement that <em>names him</em>. The comparison table is the argument: two features already refuse in exactly this situation and both have a shipped sentence for it. <strong>The refusal routes forward instead of dead-ending</strong> — the only legitimate path is to empty the fund through the guarded withdrawal, which is one tap away and still asks for a reason. <strong>No coloured frame and no heavy haptic:</strong> this is a refusal, not a consequential write, and the frame stays exclusive to the guarded withdrawal itself.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">U5 · Archived spouse · light · RTL — the state that exposes defect 2</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">أفراد الأسرة</span></div>
+        <div class="gh">المستخدم الأساسي</div>
+        <div class="mt" style="border-bottom:2px solid #201e1d">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">أحمد</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">صاحب الأسرة · مش قابل للأرشفة ◂</span></span>
+          <span style="font-size:11px;color:#575351;background:#eae9e9;padding:4px 9px">أنت ◂</span>
+        </div>
+
+        <div class="gh">الزوج/ة</div>
+        <div class="mt" style="background:#f3f2f2">
+          <span style="width:4px;align-self:stretch;border:1px solid #9b9797;background:#fff;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45;color:#575351">هناء</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.6">مؤرشفة ◂ · الحركات القديمة باسمها زي ما هي ◂</span></span>
+          <span style="font-size:11px;color:#575351;border:1px solid #c3bfbe;padding:4px 9px">للقراءة ◂</span>
+        </div>
+        <div style="background:#fdeae6;border-inline-start:4px solid #ae1800;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;color:#ae1800;margin-bottom:5px">في المصدر: الزر هنا كان بيختفي للأبد ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">الشاشة الحالية بتحسب «فيه زوج/ة؟» من كل الأعضاء بالدور ده — المؤرشفين معاهم — فبعد الأرشفة زر «إضافة زوج/ة» مايرجعش. الداتابيز بتحسبها من النشطين بس، يعني كانت هتقبل زوج/ة جديد عادي. ◂</div>
+        </div>
+        <div style="padding:0 16px 14px"><span class="btn2">إضافة زوج/ة</span>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">الزر ظاهر لأن مفيش زوج/ة <strong>نشط</strong> — نفس شرط الداتابيز بالحرف. ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 16px;margin:0 16px 14px">
+          <div style="font-size:12px;color:#3d4a52;line-height:1.8">ملاحظة: تسجيل دخول منفصل للزوج/ة غير متاح في الإصدار الأول.</div>
+        </div>
+        <div class="gh">الأطفال (1) ◂</div>
+        <div class="mt" style="border-bottom:2px solid #201e1d;position:relative;padding-inline-start:20px">
+          <span class="hp" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:600;line-height:1.45">يوسف أحمد</span>
+          <span style="display:block;font-size:11.5px;color:#6e4a1f;line-height:1.6">أموال محمية <span class="tnum" style="font-weight:600">6,950.00</span> ج.م ◂</span></span>
+          <span style="font-size:16px;color:#575351">⋮</span>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2">إضافة طفل</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">مفيش «استعادة» في المصدر — لا use case ولا مفتاح. الأرشفة في الأعضاء طريق واحد، بعكس الأهداف والشهادات. ◂</span>
+        </div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات</span><span>التخطيط</span><span>الديون</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>An archived member is history, not an absence.</strong> هناء's row stays, outlined rather than filled — the same treatment the accounts list gives an archived account — with «للقراءة» and one sentence confirming her past entries still read her name. Deleting the row would orphan every transaction that references her. <strong>«مؤرشفة» is the grammatical form <code>archivedLabel</code> cannot produce</strong> and is marked as proposed for that reason alone; the ARB needs a <code>select</code> on gender, or the label reads wrong about half the household. <strong>The red notice is unusual for this set</strong> — commentary normally lives in the note below the frame — but this one is depicting the *difference* between two behaviours in the same place, and the board is the only place both can be seen at once.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">U6 · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Family Members</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="padding:18px 16px 14px;background:#fff;border-bottom:2px solid #201e1d">
+          <div style="font-size:25px;font-weight:800;line-height:1.15;letter-spacing:-.015em">Family Members</div>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:6px">These names appear on every ledger entry — who spent, and who benefits. ◂</div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">PRIMARY USER</div>
+        <div class="mt" style="border-bottom:2px solid #201e1d">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:800;line-height:1.3">Ahmed</span>
+          <span style="display:block;font-size:11px;color:#575351;line-height:1.5;margin-top:2px">Household owner · cannot be archived ◂</span></span>
+          <span style="font-size:11px;color:#575351;background:#eae9e9;padding:4px 9px;letter-spacing:.02em">YOU ◂</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">SPOUSE</div>
+        <div class="mt">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:800;line-height:1.3">Hanaa</span>
+          <span style="display:block;font-size:11px;color:#575351;line-height:1.5;margin-top:2px">Spouse wallet — Hanaa · excluded from your available balance</span></span>
+          <span style="font-size:16px;color:#575351">⋮</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">CHILDREN (1) ◂</div>
+        <div class="mt" style="border-bottom:2px solid #201e1d;position:relative;padding-inline-start:20px">
+          <span class="hp" style="position:absolute;inset-block:0;inset-inline-start:0;width:4px"></span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:800;line-height:1.3">Yousef Ahmed</span>
+          <span style="display:flex;align-items:baseline;gap:5px;font-size:11px;color:#6e4a1f;line-height:1.5;margin-top:3px">Protected funds <span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:20px;height:10px;background:#6e4a1f"></span><span style="display:inline-block;width:27px;height:10px;background:#6e4a1f"></span><span style="display:inline-block;width:20px;height:10px;background:#6e4a1f"></span></span> EGP ◂</span></span>
+          <span style="font-size:16px;color:#575351">⋮</span>
+        </div>
+        <div style="padding:14px 16px;font-size:11px;color:#575351;line-height:1.6">A name is not an amount, so names never mask. The protected balance does — three groups, three bars — and it keeps its <code>protectedMoney</code> tint, its hatch and its label, because privacy mode hides what a child has, not that a child is protected.</div>
+        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2" style="font-family:'Archivo',sans-serif;font-weight:800">Add Child</span>
+          <span style="font-size:11px;color:#575351;line-height:1.6">Label flush to the leading edge — left here, right in RTL. Section headings small-caps, matching 03 · A6.</span>
+        </div>
+        <div class="nav"><span>Home</span><span>Activity ◂</span><span>Planning</span><span>Debts ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">More</span></div>
+      </div>
+      <p class="note"><strong>The one screen where masking has to distinguish a name from an amount.</strong> Names stay legible under privacy mode — they are not financial data, and blanking them would make the screen useless for the thing it is for. The protected balance masks per digit group and keeps every other channel: tint, hatch, lock, label. <strong>The LTR pass also confirms the two plural bugs are structural, not Arabic-only:</strong> CHILDREN (1) is as wrong in English from <code>memberChild</code> "Child" as «الأطفال» is from «طفل», so the fix is a <code>plural</code> in the ARB rather than a translator's note.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 2 · 45 boards · complete except reports</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Six boards: U1–U6.</strong> Nine in 06, seven in 07, eleven in 10, twelve in 11 and six here. <strong style="color:#f0edeb">The only Tier 2 screens left are the nine reports</strong> — accounts, income, setup, planning, budgets, goals, certificates and members are all drawn.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Not presentation work — four items from this turn.</strong> A balance guard on <code>ArchiveMemberUseCase</code> plus its message; the <code>hasSpouse</code> filter corrected to active spouses; a restore use case and key, or an explicit decision that member archiving is permanent; and gender/number-aware forms for <code>archivedLabel</code> and <code>memberChild</code>. Only the last is a pure l10n change.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Then:</strong> the nine reports — the largest remaining block, and none of <code>reports/presentation/*</code> has been opened. Then bank reconciliation, Tier 3 patterns, the D2 gaps, and D5 adaptive last. Also still owed: <code>goal_detail_screen.dart</code>, <code>fund_goal_screen.dart</code> and <code>release_goal_screen.dart</code>, against which 07 · L2 and L3 have never been checked.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Every unmarked Arabic string: «أفراد الأسرة» «المستخدم الأساسي» «الزوج/ة» «إضافة زوج/ة» «إضافة طفل» «الاسم» «تغيير الاسم» «أرشفة العضو» «حفظ» «إلغاء» · the full sentences of <code>memberSpouseLoginNote</code>, <code>errorMemberNameEmpty</code>, <code>errorGoalArchiveNonzeroBalance</code> and <code>errorCertificateArchiveNonzeroBalance</code> (quoted in U4's comparison table) · and «محفظة الزوجة — هناء · مستبعدة من رصيدك المتاح», which is 05's account label carried forward unchanged.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every Arabic string in a frame that is not a verbatim ARB value carries ◂ — «الأطفال (1)» and «مؤرشفة» (the two grammatical forms source cannot produce), «أنت», «للقراءة», «صاحب الأسرة · مش قابل للأرشفة», the whole of U4's refusal copy, U3's retroactive warning and impact rows, U2's two absence notices, and the red notice in U5. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — member and account names, the <span class="tnum">6,950.00</span> and <span class="tnum">14</span> entries carried from 05 — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span><strong style="color:#f0edeb">Add</strong> a member-archive refusal message, a member restore key, and <code>plural</code>/<code>select</code> forms for <code>memberChild</code> and <code>archivedLabel</code>. Carried from earlier turns: delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message replacing three misuses of <code>errorGoalInsufficientReserve</code>; a reason string for <code>AccountIneligibilityReason.currencyMismatch</code>; verb keys for the goal and certificate submit buttons. Nav: «الحركات» renames «المعاملات», «الديون» needs <code>navDebts</code>, Reports moves into «المزيد» — which is where this screen lives.</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked five times:</strong> are there golden or screenshot tests among the 1,594? If not, migration phases 1 and 2 ship together and typography is the only expensive phase. This is the last question blocking the D6 phase table from being final.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 16px;border-bottom:1px solid #c3bfbe;font-size:12.5px;min-height:40px}
+.sub{padding-inline-start:30px;position:relative}
+.chip{font-size:12.5px;padding:8px 12px;min-height:40px;display:flex;align-items:center;border:1px solid #c3bfbe;background:#fff;flex:none}
+.chipOn{background:#201e1d;color:#f3f2f2;border-color:#201e1d;font-weight:600}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 8 — reports, part three · reports complete</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">A subset printed<br>without its parent.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Four boards, sections AA and AB — home savings and the spouse wallet, the last two of the seven reports. Read before drawing: <code>home_savings_report_screen.dart</code>, <code>spouse_wallet_report_screen.dart</code>, and <code>HomeSavingsFlowSummary</code> / <code>SpouseWalletReport</code>. <strong style="color:#201e1d">With this, all seven report screens and the drill-down are drawn.</strong></p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">A column that cannot close, and a note that explains the wrong thing</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DEFECT 1 · home savings · arithmetic</div>
+      <h4 style="margin:0 0 10px">The card prints two subsets of transfers and omits the transfers themselves.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The model is explicit: <code>spouseWalletFunding</code> is <em>"Subset of transfersOut to spouse wallets"</em> and <code>spouseWalletReturn</code> is <em>"Subset of transfersIn from spouse wallet returns"</em>. <code>HomeSavingsFlowSummary</code> also carries <code>transfersIn</code> and <code>transfersOut</code> in full — and <strong>the card renders neither</strong>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">So the visible column is opening, income, expense, the two spouse subsets, adjustments, reversal, closing — and it is off by <strong>transfers in minus transfers out</strong> whenever either exists. There is no lucky case: even a month where the wallet is the <em>only</em> counterparty is wrong, because the money that arrived has no row either.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">In our July fixture the gap is <strong class="tnum">6,000.00</strong> — the transfer in from the salary account, which the card cannot show. AA2 stacks source's rendering against the redesign's on one month.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DEFECT 2 · spouse wallet · the wrong explanation, at the worst moment</div>
+      <h4 style="margin:0 0 10px">When the two totals differ, the card explains it as reversals.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">The wallet card ends with <code>if (periodClosingBalance != currentBalance) ReportInfoNote(text: l10n.reportReversalNote)</code> — «آثار العكس معروضة بشكل منفصل.»</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">But the two figures differ because one is bounded by the period and the other is live. Pick last month and they differ by <em>every transaction since</em>, with no reversal anywhere. The condition fires exactly when the user is most confused and then hands them an unrelated sentence.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>The fix is one new key</strong> that says what the difference is. The same two totals appear on the home-savings and protected-funds cards with no note at all — so one key serves three reports.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #c3bfbe;margin-top:4px">
+    <div style="padding:20px 24px 4px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">TWO NOUNS GLUED IN CODE</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Home savings builds its subset labels as <code>'${reportSpouseWalletTitle} (${reportFunded})'</code> — two translated ARB values joined with a parenthesis at runtime, producing «محفظة الزوج/ة (موّل)».</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Worse than 14's <code>(+)</code>: that glued a symbol, this glues two nouns and assumes Arabic takes a parenthetical the way English does. Two proposed keys retire it.</p>
+    </div>
+    <div style="padding:20px 24px 4px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">FUNDING A WALLET IS NOT INCOME</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">The wallet card draws <code>reportFunded</code> in <code>Colors.green</code> with a <code>south_west</code> arrow — the same green it uses for income everywhere else. Funding a wallet is a transfer between two household accounts.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">And <code>reportReturned</code> is <code>Colors.blue</code>, so on one card the two halves of the same transfer pair get different colours. The redesign makes both achromatic <code>#605D5D</code>.</p>
+    </div>
+    <div style="padding:20px 0 4px 24px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">WHAT SOURCE GETS RIGHT</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">The spouse-wallet model documents its own identity — <code>opening + funded − spent − returned + reversal = periodClosing</code> — and the card's rows are in exactly that order, so this one <em>can</em> be added up. It is the only report card in the app where that is true.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">It also puts <code>reportTransferNote</code> at the top of both screens, which is the right instinct: neither funding nor returning is income or expense, and both screens say so before showing a number.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AA</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Home savings — two boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The cash in the house, and the one flow the household argues about: what went to هناء's wallet and what came back. The redesign nests the two subsets <em>under</em> their parent transfer rows, indented, so the column closes and the subset is still legible as a subset.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AA1 · Populated · light · RTL — subsets nested under their parents</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مدخرات المنزل</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip">مخصص</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;color:#575351;border-bottom:2px solid #201e1d;line-height:1.7">التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.</div>
+        <div class="gh">مدخرات المنزل · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">الرصيد الافتتاحي</span><span class="tnum" style="font-weight:600">4,000.00</span></div>
+          <div class="lr"><span style="color:#575351">دخل مباشر ◂</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div class="lr"><span style="color:#575351">مصروف مباشر ◂</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div class="lr"><span style="color:#575351">تحويلات داخلة ◂</span><span class="tnum" style="font-weight:600;color:#605d5d">+ 6,000.00</span></div>
+          <div class="lr sub" style="background:#f3f2f2"><span style="position:absolute;inset-block:0;inset-inline-start:16px;width:2px;background:#c3bfbe"></span><span style="color:#575351;font-size:12px">منها رجوع من محفظة الزوج/ة ◂</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div class="lr"><span style="color:#575351">تحويلات خارجة ◂</span><span class="tnum" style="font-weight:600;color:#605d5d">− 2,000.00</span></div>
+          <div class="lr sub" style="background:#f3f2f2"><span style="position:absolute;inset-block:0;inset-inline-start:16px;width:2px;background:#c3bfbe"></span><span style="color:#575351;font-size:12px">منها تمويل محفظة الزوج/ة ◂</span><span class="tnum" style="font-weight:600;color:#605d5d">− 2,000.00</span></div>
+          <div class="lr"><span style="color:#575351">تسويات ◂</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d"><span style="color:#575351">أثر العكس</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div style="padding:12px 16px;background:#e3efef;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">الرصيد الختامي للفترة</span><span class="tnum" style="font-size:18px;font-weight:700">8,000.00</span></div>
+            <div style="display:flex;gap:7px;align-items:baseline;font-size:11px;color:#0e5a44;line-height:1.7;margin-top:6px"><span>✓</span><span><span class="tnum">4,000.00</span> + <span class="tnum">6,000.00</span> − <span class="tnum">2,000.00</span> = <span class="tnum">8,000.00</span> · الصفوف المتفرّعة مش بتتحسب تاني ◂</span></div>
+          </div>
+          <div style="padding:12px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">الرصيد الحالي</span><span class="tnum" style="font-size:15px;font-weight:700">8,000.00</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:5px">الفترة هي الشهر الحالي، فالرقمين واحد. لو اخترت فترة قديمة، الختامي بيقف عند آخرها والحالي بيفضل النهاردة. ◂</div>
+          </div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;line-height:1.85">الـ<span class="tnum">6,000.00</span> الداخلة جايّة من حساب بنك مصر — الراتب، والـ<span class="tnum">2,000.00</span> الخارجة راحت لمحفظة هناء. الاتنين تحويلات: مجموع أصول الأسرة ما اتغيّرش بجنيه. ◂</div>
+        </div>
+        <div style="padding:0 16px 18px"><span class="btn2">عرض المعاملات</span></div>
+      </div>
+      <p class="note"><strong>The two subsets are indented under their parents, and the check says they are not counted twice.</strong> Source prints the subsets and drops the parents, which makes the column unaddable; printing both without hierarchy would make it double-count by eye. A 2 px rule and «منها» solve it: the parent carries the arithmetic, the child carries the story. <strong>Zeros stay drawn</strong>, as in 14 · Y1 — «دخل مباشر <span class="tnum">0.00</span>» is a fact about a cash box that received no salary. <strong>Every figure here was published in 14's account table</strong>; this card is the same account seen through the report that exists to explain the spouse flow, and the blue notice names both counterparties because a transfer with an unnamed other end is half a fact. <strong>Source cannot draw this month either:</strong> with both parent rows missing it shows <span class="tnum">4,000.00</span> and <span class="tnum">−2,000.00</span> against a closing of <span class="tnum">8,000.00</span> — the <span class="tnum">6,000.00</span> that arrived has no row. AA2 stacks the two renderings.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AA2 · Source vs. redesign · dark · RTL — both parent rows missing</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">مدخرات المنزل</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#2c2928;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #4a4645">حالة تشخيصية — نفس الشهر مع تحويل تاني ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:11px 16px;font-size:11.5px;color:#a8a3a0;line-height:1.8;border-bottom:1px solid #4a4645">نفس شهر يوليو، وزيادة <span class="tnum">1,000.00</span> خارجة لحساب تاني. ده كل اللي المصدر بيرسمه — صفّين: ◂</div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الرصيد الافتتاحي</span><span class="tnum" style="font-weight:600">4,000.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">محفظة الزوج/ة (موّل) ◂</span><span class="tnum" style="font-weight:600;color:#7fafdd">− 2,000.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المتوقع من الصفوف المعروضة ◂</span><span class="tnum" style="font-weight:600">2,000.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الرصيد الختامي للفترة</span><span class="tnum" style="font-weight:600">7,000.00</span></div>
+          <div style="padding:13px 16px;background:#33201c;border-inline-start:4px solid #ff9783">
+            <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:5px"><span style="color:#ff9783;font-size:13px">▲</span><span style="font-size:12.5px;font-weight:600;color:#ff9783">فرق <span class="tnum">5,000.00</span> مالوش صف ◂</span></div>
+            <div style="font-size:11.5px;color:#a8a3a0;line-height:1.85">الكارت مش بيرسم <code>transfersIn</code> ولا <code>transfersOut</code> — بيرسم جزء محفظة الزوج/ة بس. فالـ<span class="tnum">6,000.00</span> الداخلة والـ<span class="tnum">1,000.00</span> الخارجة التانية، الاتنين مالهمش مكان: <span class="tnum">6,000.00</span> − <span class="tnum">1,000.00</span> = <span class="tnum">5,000.00</span>. ◂</div>
+          </div>
+        </div>
+        <div style="background:#2c2928;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #4a4645">وده اللي التصميم بيرسمه ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الرصيد الافتتاحي</span><span class="tnum" style="font-weight:600">4,000.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">تحويلات داخلة ◂</span><span class="tnum" style="font-weight:600;color:#b0aba9">+ 6,000.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">تحويلات خارجة ◂</span><span class="tnum" style="font-weight:600;color:#b0aba9">− 3,000.00</span></div>
+          <div class="lr sub" style="border-bottom-color:#4a4645;background:#2c2928"><span style="position:absolute;inset-block:0;inset-inline-start:16px;width:2px;background:#4a4645"></span><span style="color:#a8a3a0;font-size:12px">منها تمويل محفظة الزوج/ة ◂</span><span class="tnum" style="font-weight:600;color:#b0aba9">− 2,000.00</span></div>
+          <div class="lr sub" style="border-bottom-color:#4a4645;background:#2c2928"><span style="position:absolute;inset-block:0;inset-inline-start:16px;width:2px;background:#4a4645"></span><span style="color:#a8a3a0;font-size:12px">منها تحويلات تانية ◂</span><span class="tnum" style="font-weight:600;color:#b0aba9">− 1,000.00</span></div>
+          <div style="padding:12px 16px;background:#1b3230">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">الرصيد الختامي للفترة</span><span class="tnum" style="font-size:18px;font-weight:700">7,000.00</span></div>
+            <div style="display:flex;gap:7px;align-items:baseline;font-size:11px;color:#63bc94;line-height:1.7;margin-top:6px"><span>✓</span><span><span class="tnum">4,000.00</span> + <span class="tnum">6,000.00</span> − <span class="tnum">3,000.00</span> = <span class="tnum">7,000.00</span> ◂</span></div>
+          </div>
+        </div>
+        <div style="padding:13px 16px 18px;font-size:11.5px;color:#a8a3a0;line-height:1.8">الحل مش صف جديد لكل وجهة — الحل إن الأب موجود دايمًا، والمعروف منه يتفرّع تحته، والباقي يبقى «تحويلات تانية». ◂</div>
+      </div>
+      <p class="note"><strong>Two renderings of one month, stacked, so the gap is visible rather than argued.</strong> The upper block is all source can draw — two rows — leaving a <span class="tnum">5,000.00</span> hole: the <span class="tnum">6,000.00</span> that arrived and the <span class="tnum">1,000.00</span> that left for somewhere other than the wallet, neither of which has a row that could hold it. The lower block is the fix — parent rows always present, the known subset nested, the remainder named «منها تحويلات تانية» rather than enumerated, because a report should not grow a row per destination. <strong>This is a diagnostic board</strong>, like 14 · Y2: the extra <span class="tnum">1,000.00</span> is hypothetical and its figures appear nowhere else in the set, which the section heading says outright. <strong>And it is the board that justifies AA1's indentation</strong> — without a case where subset ≠ parent, nesting looks like decoration.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">AB</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Spouse wallet — two boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">The one report whose column already closes, on the one account that is deliberately excluded from «المتاح للصرف». Handoff §8.11: هناء's wallet is an ordinary spendable account in the schema, so it is currently counted twice — this report is where that becomes visible, because it is the only screen that shows the wallet as a period rather than a balance.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">AB1 · Populated · light · RTL — funded, spent, returned</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">محفظة الزوج/ة</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip">مخصص</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;color:#575351;border-bottom:2px solid #201e1d;line-height:1.7">التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.</div>
+        <div class="gh">محفظة الزوجة — هناء · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">الرصيد الافتتاحي</span><span class="tnum" style="font-weight:600">900.00</span></div>
+          <div class="lr"><span style="color:#575351">موّل</span><span class="tnum" style="font-weight:600;color:#605d5d">+ 2,000.00</span></div>
+          <div class="lr"><span style="color:#575351">أُنفق</span><span class="tnum" style="font-weight:600;color:#ae1800">− 2,650.00</span></div>
+          <div class="lr"><span style="color:#575351">أُعيد</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d"><span style="color:#575351">أثر العكس</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div style="padding:12px 16px;background:#e3efef;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">الرصيد الختامي للفترة</span><span class="tnum" style="font-size:18px;font-weight:700">250.00</span></div>
+            <div style="display:flex;gap:7px;align-items:baseline;font-size:11px;color:#0e5a44;line-height:1.7;margin-top:6px"><span>✓</span><span><span class="tnum">900.00</span> + <span class="tnum">2,000.00</span> − <span class="tnum">2,650.00</span> = <span class="tnum">250.00</span> ◂</span></div>
+          </div>
+          <div style="padding:12px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">الرصيد الحالي</span><span class="tnum" style="font-size:15px;font-weight:700">250.00</span></div>
+          </div>
+        </div>
+        <div style="background:#e9e7e6;border-inline-start:4px solid #605d5d;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">«موّل» تحويل، مش دخل ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">الـ<span class="tnum">2,000.00</span> جايّة من مدخرات المنزل — مالهاش لون دخل ومش داخلة في أي إجمالي دخل. المصدر برسمها بالأخضر، ودي أكتر نقطة بتخلط. ◂</div>
+        </div>
+        <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:0 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">المحفظة مستبعدة من «المتاح للصرف» ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">في قايمة الحسابات ليها شيب «مستبعدة من رصيدك المتاح» — لكن في السكيما هي حساب قابل للصرف عادي، فحاليًا بتتحسب مرتين. الرقم هنا صح؛ اللي محتاج إصلاح هو استعلام «المتاح». ◂</div>
+        </div>
+        <div style="padding:14px 16px 18px"><span class="btn2">عرض المعاملات</span>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">الـ<span class="tnum">2,650.00</span> دي نفس رقم «هناء» في تقرير نسب الإنفاق — نفس المصروفات من زاويتين. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>The only card in the reports feature whose rows already add up in source order.</strong> The model documents <code>opening + funded − spent − returned + reversal = periodClosing</code> and the widget follows it, so the redesign only had to print the check and fix the colours. <strong>«موّل» is achromatic, not green.</strong> In source it is <code>Colors.green</code> with a downward arrow, identical to income — and funding a wallet is the household moving its own money, which is why the whole product keeps transfers colourless. <strong>The amber notice is §8.11 made visible:</strong> this wallet is excluded from available in the UI and spendable in the schema, so it is double-counted today. The report is not where that gets fixed, but it is where the two facts sit next to each other. <strong>And <span class="tnum">2,650.00</span> ties to 13 · X2's هناء row</strong> — the same expenses, once by spender and once by account.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">AB2 · LTR check · English · privacy mode ON · period ≠ live</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Spouse Wallet</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip" style="font-family:'Archivo',sans-serif">This Month</span><span class="chip chipOn" style="font-family:'Archivo',sans-serif">Last Month</span><span class="chip" style="font-family:'Archivo',sans-serif">This Year</span><span class="chip" style="font-family:'Archivo',sans-serif">Custom</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">SPOUSE WALLET — HANAA · EGP ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Opening Balance</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#201e1d"></span><span style="display:inline-block;width:26px;height:11px;background:#201e1d"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Funded</span><span style="display:inline-flex;gap:5px;align-items:baseline"><span style="color:#605d5d;font-weight:600;font-size:12px">+</span><span style="display:inline-block;width:19px;height:11px;background:#605d5d"></span><span style="display:inline-block;width:26px;height:11px;background:#605d5d"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Spent</span><span style="display:inline-flex;gap:5px;align-items:baseline"><span style="color:#ae1800;font-weight:600;font-size:12px">−</span><span style="display:inline-block;width:19px;height:11px;background:#ae1800"></span><span style="display:inline-block;width:26px;height:11px;background:#ae1800"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif"><span style="color:#575351">Returned</span><span style="display:inline-flex;gap:5px;align-items:baseline"><span style="color:#605d5d;font-weight:600;font-size:12px">−</span><span style="display:inline-block;width:19px;height:11px;background:#605d5d"></span><span style="display:inline-block;width:26px;height:11px;background:#605d5d"></span></span></div>
+          <div class="lr" style="font-family:'Archivo',sans-serif;border-bottom:2px solid #201e1d"><span style="color:#575351">Reversal Effect</span><span class="tnum" style="font-weight:600;color:#9b9797">0.00</span></div>
+          <div style="padding:12px 16px;background:#e3efef;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:800">Period Closing Balance</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:21px;height:14px;background:#201e1d"></span><span style="display:inline-block;width:29px;height:14px;background:#201e1d"></span></span></div>
+            <div style="display:flex;gap:7px;align-items:baseline;font-size:11px;color:#0e5a44;line-height:1.6;margin-top:6px"><span>✓</span><span>The rows close · 30 Jun 2026 ◂</span></div>
+          </div>
+          <div style="padding:12px 16px;background:#f8eeda">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:800">Current Balance</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:21px;height:14px;background:#201e1d"></span><span style="display:inline-block;width:29px;height:14px;background:#201e1d"></span></span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:6px">Different from the period figure because it is live: it includes everything since 30 Jun 2026. Not a reversal — source explains this difference with the reversal note. ◂</div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;font-size:11px;color:#575351;line-height:1.6"><strong style="font-weight:600">Two masked totals that differ are still useful.</strong> The bars have different widths, so the reader learns that the balance moved without learning by how much — and the sentence says which direction of time explains it. Masking hides amounts, not the shape of the account.</div>
+        <div style="padding:0 16px 16px"><span class="btn2" style="font-family:'Archivo',sans-serif;font-weight:800">View Transactions</span>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:8px">Section heading small-caps, matching 03 · A6. Label flush to the leading edge.</div>
+        </div>
+      </div>
+      <p class="note"><strong>The board picks «الشهر الماضي» on purpose — it is the only way to see the two totals disagree.</strong> On the current month they are equal and the difference is invisible; on any past period they differ by everything since, which is when source fires its reversal note. The replacement sentence names time as the cause and explicitly denies the reversal reading, because a user who has seen «آثار العكس» once will keep looking for a reversal that is not there. <strong>Masked bars of different widths are load-bearing:</strong> unequal widths tell the reader the account moved, which is exactly as much as privacy mode should give away. <strong>The check degrades to a <code>✓</code> plus a date</strong>, as in 14 · Y3 — the working would hand back the figures.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 2 · 62 boards · complete</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Four boards: AA1–AA2, AB1–AB2.</strong> All seven reports and the drill-down are drawn: landing, income &amp; expenses, categories, attribution, account flows, protected funds, home savings, spouse wallet. <strong style="color:#f0edeb">Tier 2 is finished</strong> — 9 in 06, 7 in 07, 11 in 10, 12 in 11, 6 in 12, 7 in 13, 6 in 14 and 4 here.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Not presentation work, accumulated across the three report documents:</strong> render <code>transfersIn</code>&nbsp;/&nbsp;<code>transfersOut</code> on the home-savings card so its column closes; one new key for the period-vs-live difference, serving three cards; four flow-row keys and two subset keys to retire the code-assembled labels; call <code>reconciles</code>; join the beneficiary <em>name</em> and <code>createdBy</code> into <code>WithdrawalAuditSummary</code>; read <code>isProtectedWithdrawal</code> in the drill-down; wire <code>ReportFilter</code> to the breakdown rows; add reversal awareness to the category and member breakdowns or label them gross everywhere; and fix <code>ReportAmountText</code>.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">What is left in the whole project:</strong> bank reconciliation · Tier 3 patterns (gold, liabilities, net worth over time, zakat, voice entry, PIN and privacy mode) · the D2 gaps (chart primitives, date and category pickers, tabs, dialog and sheet anatomy, snackbar) · D5 adaptive last. Plus two source reads that would confirm existing boards: <code>goal_detail_screen.dart</code> / <code>fund_goal_screen.dart</code> / <code>release_goal_screen.dart</code> against 07 · L2–L3, and <code>categoryLabelFromCode</code> against 13 · X1.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Every unmarked Arabic string: «مدخرات المنزل» «محفظة الزوج/ة» «الرصيد الافتتاحي» «الرصيد الختامي للفترة» «الرصيد الحالي» «موّل» «أُنفق» «أُعيد» «أثر العكس» «عرض المعاملات» · the period chips «هذا الشهر» «الشهر الماضي» «هذا العام» «مخصص» · and «التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.» from <code>reportTransferNote</code>.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every Arabic string in a frame that is not a verbatim ARB value carries ◂ — «دخل مباشر» / «مصروف مباشر» / «تحويلات داخلة» / «تحويلات خارجة» / «تسويات», the two «منها …» subset labels and «منها تحويلات تانية», «المتوقع من الصفوف المعروضة», «حالة تشخيصية», «محفظة الزوج/ة (موّل)» where it is quoted as the source's assembled string, the currency sub-headings, the reconciliation lines, and all explanatory Egyptian sentences. If a framed string has no ◂ and is not in the first bucket, that is a defect in this document. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — account and member names, amounts, dates — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span><strong style="color:#f0edeb">Add</strong> a period-vs-live key (replacing the misfiring <code>reportReversalNote</code> on the wallet card, and filling the silence on the home-savings and protected-funds cards), plus «منها تمويل محفظة الزوج/ة» and «منها رجوع من محفظة الزوج/ة» to retire <code>'${reportSpouseWalletTitle} (${reportFunded})'</code>. Carried from 13 and 14: four flow-row keys; <code>reportGrossExpense</code>&nbsp;/&nbsp;<code>reportGrossIncome</code> serving as both row labels and section headings; delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>&nbsp;/&nbsp;<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>. Nav: «الحركات» renames «المعاملات», «الديون» needs <code>navDebts</code>, Reports lives in «المزيد».</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked eight times:</strong> are there golden or screenshot tests among the 1,594? Tier 2 is now complete, so D6's phase table is the last thing standing between this and a buildable plan — and this is the only input it is missing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>

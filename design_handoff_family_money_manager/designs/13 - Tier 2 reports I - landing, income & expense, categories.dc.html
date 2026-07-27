@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/styles.css">
+<script src="_ds/modernist-02c88f9e-3e68-44aa-b157-91f49489b6ad/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ar:"IBM Plex Sans Arabic","Archivo",sans-serif}
+body{margin:0;background:#e7e5e2;font-family:"Archivo",system-ui,sans-serif;color:#201e1d;-webkit-font-smoothing:antialiased}
+a{color:#ae1800;text-decoration:none;border-bottom:1px solid rgba(174,24,0,.35)}
+a:hover{color:#ec3013;border-bottom-color:#ec3013}
+.tnum{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;unicode-bidi:plaintext}
+.ph{width:390px;background:#f3f2f2;border:2px solid #201e1d;font-family:var(--ar);direction:rtl;overflow:hidden}
+.cap{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#575351;margin-bottom:7px}
+.note{width:390px;font-size:11.5px;color:#575351;line-height:1.55;margin:8px 0 0}
+.nav{display:flex;background:#fff;border-top:2px solid #201e1d}
+.nav span{flex:1;padding:9px 4px;text-align:center;font-size:10px;color:#575351}
+.tb{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:#fff;border-bottom:2px solid #201e1d}
+.gh{background:#eae9e9;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #c3bfbe}
+.lr{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px;border-bottom:1px solid #c3bfbe;font-size:13px;min-height:44px}
+.chip{font-size:12.5px;padding:8px 12px;min-height:40px;display:flex;align-items:center;border:1px solid #c3bfbe;background:#fff;flex:none}
+.chipOn{background:#201e1d;color:#f3f2f2;border-color:#201e1d;font-weight:600}
+.btn{background:#201e1d;color:#f3f2f2;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.btn2{border:1px solid #201e1d;font-size:13.5px;font-weight:600;padding:13px 14px;min-height:48px;display:flex;align-items:center}
+.bar{height:10px;background:#eae9e9;position:relative;overflow:hidden}
+</style>
+</helmet>
+
+<div style="width:1740px;margin:0 auto;background:#f3f2f2">
+
+<header style="padding:48px 56px 34px;border-bottom:2px solid #201e1d">
+  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:16px">Family Money Manager · D3 · Tier 2 · turn 6 — reports, part one of two</div>
+  <h1 style="font-size:52px;line-height:1;letter-spacing:-.03em;margin:0 0 16px">Seven reports.<br>I have been writing nine.</h1>
+  <p style="font-size:15px;line-height:1.6;max-width:880px;margin:0;color:#575351">Seven boards, sections V to X — the reports landing, income &amp; expenses, and the two breakdown reports. Read before drawing: <code>report_models.dart</code>, <code>report_filter.dart</code>, <code>reports_landing_screen.dart</code>, <code>report_widgets.dart</code>, and the income-expense, category and attribution screens, plus every <code>report*</code> value in both ARB files. <strong style="color:#201e1d">Part two</strong> takes account flows, home savings, spouse wallet, protected funds and the drill-down list.</p>
+</header>
+
+<section style="padding:40px 56px;border-bottom:2px solid #201e1d;background:#fdeae6">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px">
+    <span style="font-size:11px;letter-spacing:.1em;color:#ae1800">READ FIRST</span>
+    <h2 style="margin:0;font-size:30px;letter-spacing:-.02em">A count I got wrong, and a filter nobody can reach</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #ae1800">
+    <div style="padding:22px 30px 22px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">CORRECTION 1 · mine · reaches into 08 · D4 and the handoff</div>
+      <h4 style="margin:0 0 10px">There are <strong>seven</strong> report screens, not nine.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px"><code>reports_landing_screen.dart</code> builds exactly seven entries: <em>الدخل والمصروفات · نسب الإنفاق · الفئات · تدفقات الحسابات · مدخرات المنزل · محفظة الزوج/ة · الأموال المحمية</em>. There are seven matching use cases, seven screens, and an eighth screen that is not a report — <code>report_transaction_list_screen.dart</code>, the shared drill-down.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">"The nine reports" appears in the handoff §11, in the migration plan's phase 9, and in every status line I have written since. It was never counted from source. <strong>Seven reports + one drill-down = eight screens</strong>, which is also what D4's route table should say.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Consequence for D6: phase 9 is smaller than costed, and it is the phase that also carries the nav change.</p>
+    </div>
+    <div style="padding:22px 0 22px 30px">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">DEFECT · the whole filter is unreachable</div>
+      <h4 style="margin:0 0 10px"><code>ReportFilter</code> has eight dimensions. No screen offers a single control for any of them.</h4>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">Accounts, owner types, spenders, beneficiaries, scopes, categories, operation types, currencies — plus <code>includeReversed</code> and <code>protectedOnly</code>. The queries honour all of it. <code>ReportPeriodSelector</code> is the only control that exists, and it sets the <em>period</em>, never the filter.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 10px">So every report answers one question — "this month, everything" — and the by-spender, by-category and by-scope sections are the only way to slice anything. <code>includeReversed</code> defaults to <code>true</code> and cannot be turned off, which is why gross figures are the ones on screen.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>The redesign does not add eight pickers.</strong> Each breakdown row becomes the filter — tap a category, get that category's transactions — because the filter the domain already supports is exactly the drill-down the UI is missing.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #c3bfbe;margin-top:4px">
+    <div style="padding:20px 24px 4px 0;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">§4's BIDI BUG, WITH AN ADDRESS</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><code>ReportAmountText.formatMinorUnits</code> returns <code>'$currencyCode $sign$major.$minor'</code> — the currency code <strong>leads</strong>, the sign is an ASCII hyphen, and there are no tabular figures and no isolation. In an RTL paragraph that renders as <code>EGP 382.50-</code>.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Its <code>Semantics</code> label is <code>'$text $currencyCode'</code>, so a screen reader hears the currency twice. Every report amount in the app goes through this one method, which makes it the highest-leverage fix in phase 4.</p>
+    </div>
+    <div style="padding:20px 24px 4px;border-inline-end:1px solid #c3bfbe">
+      <div style="font-size:11px;color:#ae1800;font-weight:800;margin-bottom:9px">HARDCODED COLOUR, ON THE WRONG AXIS</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px"><code>Colors.green</code>, <code>Colors.red</code>, <code>Colors.orange</code> and <code>Colors.grey</code> appear literally in <code>report_widgets.dart</code> and in all three screens read here. <code>AppFinancialColors</code> is never consulted.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0">Green-versus-red is precisely the axis §2 moved away from, and here it is the <em>only</em> thing separating income from expense: both are positive numbers, and the category rows carry no sign at all.</p>
+    </div>
+    <div style="padding:20px 0 4px 24px">
+      <div style="font-size:11px;color:#0e5a44;font-weight:800;margin-bottom:9px">DELETING <code>report_widgets.dart</code> — CONFIRMED, WITH ONE CARVE-OUT</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 8px">Six of its seven widgets are re-implementations of things that must be shared: amount text, labelled amount row, section header, loading, error, empty. The handoff's instruction holds.</p>
+      <p style="font-size:13px;line-height:1.7;margin:0"><strong>The seventh is not report-specific either.</strong> <code>ReportPeriodSelector</code> drives <code>DashboardPeriod</code> and duplicates the dashboard's own period chips. It moves to a shared component rather than being deleted — otherwise the dashboard and the reports drift apart on the one control they must agree on.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:38px 56px;border-bottom:2px solid #201e1d;background:#e6eef6">
+  <h3 style="margin:0 0 8px;font-size:19px;letter-spacing:-.01em">July 2026, and why the dashboard and this report agree</h3>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:2px solid #201e1d;font-size:13px;line-height:1.7">
+    <div style="padding:14px 20px 14px 0;border-inline-end:1px solid #c3bfbe">الدخل الإجمالي<br><strong class="tnum" style="font-size:17px">18,400.00</strong><br><span style="color:#575351">راتب واحد · مفيش عكس دخل</span></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe">المصروفات الإجمالية<br><strong class="tnum" style="font-size:17px">10,959.25</strong><br><span style="color:#575351">بتشمل فاتورة الكهرباء المعكوسة</span></div>
+    <div style="padding:14px 20px;border-inline-end:1px solid #c3bfbe">أثر العكس<br><strong class="tnum" style="font-size:17px">+ 1,275.00</strong><br><span style="color:#575351">04 · D3 — كهرباء <span class="tnum">2026/07/09</span></span></div>
+    <div style="padding:14px 0 14px 20px">صافي المصروفات<br><strong class="tnum" style="font-size:17px">9,684.25</strong><br><span style="color:#575351">= رقم لوحة الرئيسية بالحرف</span></div>
+  </div>
+  <p style="font-size:12.5px;line-height:1.7;color:#575351;margin:14px 0 0;max-width:1000px"><strong style="color:#201e1d">03 · A1 prints «مصروف ↑ <span class="tnum">9,684.25</span>» and «الصافي + <span class="tnum">8,715.75</span>».</strong> Reading the models resolves what those figures are: the dashboard shows the <em>net</em>, because <span class="tnum">18,400.00</span> − <span class="tnum">9,684.25</span> = <span class="tnum">8,715.75</span> exactly. This report shows gross, the reversal effect, and net — three rows where the dashboard has one — and the last row is the dashboard's. <strong style="color:#201e1d">The reversed <span class="tnum">1,275.00</span> is 04 · D3's electricity bill</strong>, so the whole set now hangs on one reversal rather than an invented one. Nothing in the fixture is new except the category split, which sums to the gross total.</p>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">V</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Reports landing — one board</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Seven <code>ListTile</code>s with an icon and a chevron. The redesign keeps the list — a hub of seven equal things is the right shape — and adds the one thing the source list withholds: <strong>what each report can and cannot tell you</strong>. Reports moved into «المزيد» in D4, so this screen is now reached deliberately rather than from a tab.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">V1 · Landing · light · RTL — seven reports, each with its unit</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">التقارير</span></div>
+        <div style="padding:18px 16px 14px;background:#fff;border-bottom:2px solid #201e1d">
+          <div style="font-size:24px;font-weight:700;line-height:1.4">التقارير</div>
+          <div style="font-size:12.5px;color:#575351;line-height:1.8;margin-top:6px">الإجماليات مفصّلة بالعملة · التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.</div>
+        </div>
+        <div class="gh">سبعة تقارير ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">الدخل والمصروفات</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">إجمالي وصافي، وأثر العكس لو موجود ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">نسب الإنفاق</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">مين صرف · لمين · على أي نطاق ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">الفئات</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">مصروفات ودخل حسب الفئة — بالإجمالي ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">تدفقات الحسابات</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">افتتاحي ← ختامي، والمعادلة بتقفل ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">مدخرات المنزل</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">الكاش في البيت، ومنه لمحفظة الزوج/ة ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px">
+          <span style="width:4px;align-self:stretch;background:#201e1d;flex:none"></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">محفظة الزوج/ة</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">موّل · أُنفق · أُعيد ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:12px 16px;display:flex;gap:11px;align-items:baseline;min-height:64px;position:relative;padding-inline-start:20px">
+          <span style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px)"></span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="display:block;flex:none;margin-top:3px"><rect x="4.5" y="10.5" width="15" height="10.5"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:15.5px;font-weight:600;line-height:1.45">الأموال المحمية</span>
+          <span style="display:block;font-size:11.5px;color:#575351;line-height:1.65">كل سحب بسببه والمستفيد — سجل تدقيق ◂</span></span>
+          <span style="color:#575351">‹</span>
+        </div>
+        <div style="padding:15px 16px;font-size:11.5px;color:#575351;line-height:1.8">مفيش تقرير هنا بيجمع عملتين، ومفيش رسم بياني قبل جدول أرقامه. ◂</div>
+        <div class="nav"><span>الرئيسية</span><span>الحركات ◂</span><span>التخطيط</span><span>الديون ◂</span><span style="color:#201e1d;border-top:3px solid #201e1d">المزيد</span></div>
+      </div>
+      <p class="note"><strong>Each row states its unit of analysis, because «الفئات» alone does not tell you whether it is gross or net, or whether transfers count.</strong> The seven names are verbatim; the second lines are proposed and each one is a promise the report has to keep — «بالإجمالي» on categories is there because <code>CategoryBreakdown</code> has no reversal fields at all, so that report <em>cannot</em> be netted. <strong>The protected-funds row carries the hatch and lock</strong>, the only decorated row in the list, because it is the only report about money that is not yours to spend. <strong>The closing line is the design thesis in one sentence</strong> — no mixed-currency totals, and every chart preceded by its table. Both are already true of source; the redesign is not allowed to break them.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">W</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Income &amp; expenses — three boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Source gets the hardest part right: gross, reversal effect and net are three separate rows, and the net rows only appear when a reversal exists. The redesign keeps that logic exactly and changes what carries it — a ruled figure table instead of a <code>Card</code> of coloured rows, with the share bar underneath rather than in place of it.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">W1 · Populated · this month · light · RTL — with a reversal</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الدخل والمصروفات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip">مخصص</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;color:#575351;border-bottom:2px solid #201e1d;line-height:1.7">الفترة <span class="tnum">2026/07/01 — 2026/07/31</span> ◂ · الإجماليات مفصّلة بالعملة</div>
+
+        <div class="gh">جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div class="lr"><span style="color:#575351">الدخل الإجمالي</span><span class="tnum" style="font-weight:600;color:#14555f">+ 18,400.00</span></div>
+          <div class="lr"><span style="color:#575351">المصروفات الإجمالية</span><span class="tnum" style="font-weight:600;color:#ae1800">− 10,959.25</span></div>
+          <div class="lr" style="background:#f8eeda"><span style="color:#8a5a00">أثر العكس · مصروفات ◂</span><span class="tnum" style="font-weight:600;color:#8a5a00">+ 1,275.00</span></div>
+          <div class="lr"><span style="color:#575351">صافي الدخل</span><span class="tnum" style="font-weight:600">18,400.00</span></div>
+          <div class="lr" style="border-bottom:2px solid #201e1d"><span style="font-weight:600">صافي المصروفات</span><span class="tnum" style="font-weight:700;font-size:15px">9,684.25</span></div>
+          <div style="padding:13px 16px;background:#e3efef">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">صافي التدفق النقدي</span><span class="tnum" style="font-size:20px;font-weight:700;color:#14555f">+ 8,715.75</span></div>
+            <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:5px">نفس رقم «الصافي» في لوحة الرئيسية — اللوحة بتعرض الصافي، والتقرير بيعرض إزاي وصل له. ◂</div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#fff;border-bottom:2px solid #201e1d">
+          <div style="font-size:11.5px;color:#575351;margin-bottom:7px">صُرف <span class="tnum">53٪</span> من دخل الشهر ◂</div>
+          <div class="bar"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:53%;background:#201e1d"></span><span style="position:absolute;inset-block:0;inset-inline-start:53%;width:47%;background:repeating-linear-gradient(45deg,#c3bfbe 0 2px,transparent 2px 5px)"></span></div>
+          <div style="font-size:11px;color:#575351;line-height:1.7;margin-top:6px">الشريط بعد الجدول، مش بدله — والجدول هو البديل النصي للرسم. ◂</div>
+        </div>
+        <div style="background:#f8eeda;border-inline-start:4px solid #8a5a00;padding:13px 16px;margin:14px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">آثار العكس معروضة بشكل منفصل.</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">حركة واحدة اتعكست الشهر ده — فاتورة كهرباء <span class="tnum">1,275.00</span> يوم <span class="tnum">2026/07/09</span>. الأصل والعكس الاتنين في السجل، والصافي بيحسبهم. ◂</div>
+        </div>
+        <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:9px">
+          <span class="btn2">عرض المعاملات</span>
+          <span style="font-size:11px;color:#575351;line-height:1.75">التحويلات غير مضمّنة في إجماليات الدخل أو المصروفات.</span>
+        </div>
+      </div>
+      <p class="note"><strong>Five rows and a rule, in the order the arithmetic happens.</strong> Source renders gross → reversal → net for income, then the same for expenses, then net cash flow — the redesign keeps that sequence and gives the reversal row the only tinted background on the table, because it is the only row that is neither income nor expense. <strong>The reversal row's sign is deliberately <code>+</code></strong>: an expense reversal <em>restores</em> money, and printing <code>−1,275.00</code> there — as source does, negating the value before display — reads as a second expense. <strong>The bar comes after the table</strong>, which is §4's rule for every chart in the product: the table is the accessible alternative and it is placed first, so nobody has to choose between them.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">W2 · Populated · last month · dark · RTL — no reversal, three rows fewer</div>
+      <div class="ph" style="background:#181716;border-color:#8d8886;color:#f0edeb">
+        <div class="tb" style="background:#221f1e;border-bottom-color:#8d8886"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الدخل والمصروفات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#221f1e;padding:11px 16px;border-bottom:1px solid #4a4645;display:flex;gap:8px;overflow:hidden">
+          <span class="chip" style="background:#2c2928;border-color:#4a4645;color:#f0edeb">هذا الشهر</span><span class="chip" style="background:#f0edeb;border-color:#f0edeb;color:#201e1d;font-weight:600">الشهر الماضي</span><span class="chip" style="background:#2c2928;border-color:#4a4645;color:#f0edeb">هذا العام</span><span class="chip" style="background:#2c2928;border-color:#4a4645;color:#f0edeb">مخصص</span>
+        </div>
+        <div style="background:#2c2928;padding:9px 16px;font-size:11.5px;color:#a8a3a0;border-bottom:2px solid #8d8886;line-height:1.7">الفترة <span class="tnum">2026/06/01 — 2026/06/30</span> ◂ · الإجماليات مفصّلة بالعملة</div>
+        <div style="background:#2c2928;padding:9px 16px;font-size:12.5px;font-weight:700;border-bottom:1px solid #4a4645">جنيه مصري ◂</div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">الدخل الإجمالي</span><span class="tnum" style="font-weight:600;color:#5fb8b0">+ 19,198.00</span></div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">المصروفات الإجمالية</span><span class="tnum" style="font-weight:600;color:#ff9783">− 8,900.00</span></div>
+          <div style="padding:13px 16px;background:#1b3230">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:600">صافي التدفق النقدي</span><span class="tnum" style="font-size:20px;font-weight:700;color:#5fb8b0">+ 10,298.00</span></div>
+            <div style="font-size:11px;color:#a8a3a0;line-height:1.7;margin-top:5px">مفيش عكس في الفترة دي، فالإجمالي هو الصافي — وصفوف «الصافي» و«أثر العكس» مش معروضة أصلاً. ◂</div>
+          </div>
+        </div>
+        <div style="padding:13px 16px;background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="font-size:11.5px;color:#a8a3a0;margin-bottom:7px">صُرف <span class="tnum">46٪</span> من دخل الشهر ◂</div>
+          <div class="bar" style="background:#2c2928"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:46%;background:#f0edeb"></span><span style="position:absolute;inset-block:0;inset-inline-start:46%;width:54%;background:repeating-linear-gradient(45deg,#4a4645 0 2px,transparent 2px 5px)"></span></div>
+        </div>
+        <div style="background:#221f1e;border-bottom:2px solid #8d8886">
+          <div style="padding:10px 16px;font-size:11px;font-weight:700;background:#2c2928;border-bottom:1px solid #4a4645">من إيه جا الدخل ◂</div>
+          <div class="lr" style="border-bottom-color:#4a4645"><span style="color:#a8a3a0">راتب</span><span class="tnum" style="font-weight:600">18,400.00</span></div>
+          <div class="lr" style="border-bottom:none"><span style="color:#a8a3a0">عائد شهادة — يونيو ◂</span><span class="tnum" style="font-weight:600">798.00</span></div>
+        </div>
+        <div style="padding:14px 16px 18px;font-size:11.5px;color:#a8a3a0;line-height:1.8">العائد بيدخل هنا كدخل عادي — الأصل لأ، لأنه تحويل. ده اللي بيخلي إجمالي يونيو أعلى من الراتب بـ<span class="tnum">798.00</span> بالظبط. ◂</div>
+      </div>
+      <p class="note"><strong>The same report with three rows fewer is the point of the board.</strong> Source hides «صافي الدخل», «صافي المصروفات» and «أثر العكس» when <code>hasReversalEffect</code> is false — a good decision the redesign keeps, because a net row identical to its gross row teaches the user that the two words mean nothing. So the table shrinks from six rows to three, and nothing needs a placeholder. <strong>June ties the certificate to the ledger:</strong> <span class="tnum">19,198.00</span> is the salary plus that month's <span class="tnum">798.00</span> coupon from 10 · R1's event log — income, while the <span class="tnum">47,900.00</span> principal is a transfer and appears in no income total anywhere.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">W3 · Empty and error · light · RTL — two states, one frame</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الدخل والمصروفات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip chipOn">مخصص</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;color:#575351;border-bottom:2px solid #201e1d;line-height:1.7">الفترة <span class="tnum">2026/02/01 — 2026/02/28</span> ◂</div>
+        <div style="background:#fff;padding:20px 16px 22px;border-bottom:2px solid #201e1d">
+          <div style="font-size:15.5px;font-weight:600;line-height:1.6;margin-bottom:10px">لا توجد بيانات لهذه الفترة.</div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">مافيش دخل ولا مصروف اتسجّل بين <span class="tnum">2026/02/01</span> و<span class="tnum">2026/02/28</span>. التحويلات لو موجودة مش بتظهر هنا — التحويل لا دخل ولا مصروف. ◂</div>
+          <div style="height:1px;background:#c3bfbe;margin:15px 0"></div>
+          <div style="font-size:14px;color:#575351;line-height:1.9">الفرق بين «مافيش حركة» و«الحركة مفلترة» مهم — ومفيش فلتر مفعّل هنا غير الفترة. ◂</div>
+          <div style="margin-top:15px"><span class="btn2">جرّب هذا الشهر ◂</span></div>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:11.5px;font-weight:700;border-bottom:1px solid #c3bfbe;color:#575351">الحالة التانية — خطأ قراءة ◂</div>
+        <div style="background:#fdeae6;border-bottom:2px solid #ae1800;padding:16px">
+          <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:9px"><span style="color:#ae1800;font-size:14px">▲</span><span style="font-size:15.5px;font-weight:600;color:#ae1800">تعذّر تحميل التقرير.</span></div>
+          <div style="font-size:14px;line-height:1.9"><strong>مفيش حاجة اتغيرت في السجل.</strong> التقرير قراءة بس — كل الحركات زي ما هي. ◂</div>
+          <div style="display:flex;gap:9px;margin-top:14px"><span class="btn" style="flex:1">تحديث</span><span class="btn2" style="flex:1">تفاصيل الخطأ ◂</span></div>
+        </div>
+      </div>
+      <p class="note"><strong>Both shipped states are a centred sentence, and neither answers its own question.</strong> «لا توجد بيانات لهذه الفترة.» is true but incomplete: with eight filter dimensions in the domain, "empty" could mean no activity or everything filtered out, and the user cannot tell which — so the board says which, and names the only active filter. The error state adds §4's mandatory clause: <strong>a report is a read</strong>, so the first thing to say is that nothing was written. <strong>Two states share this frame</strong> because they are the same layout with different content, and drawing them apart invites them to drift. Commentary on the divergence lives here, in the note, not inside the frame.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;border-bottom:2px solid #201e1d">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px"><span style="font-size:11px;letter-spacing:.1em;color:#ae1800">X</span><h2 style="margin:0;font-size:30px;letter-spacing:-.02em">Categories and attribution — three boards</h2></div>
+  <p style="font-size:14px;line-height:1.65;color:#575351;max-width:880px;margin:0 0 26px">Two reports, one shape: a labelled total with a transaction count. Both are gross-only — neither <code>CategoryBreakdown</code> nor <code>MemberSpendingBreakdown</code> carries a reversal field — so the reversed <span class="tnum">1,275.00</span> is still inside its category here while the income-expense report nets it out. <strong>Two reports, two different answers to "what did we spend", and nothing on either screen explains the gap.</strong> That is the problem these boards solve.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:34px">
+
+    <div style="flex:none">
+      <div class="cap">X1 · Categories · light · RTL — gross, with the reversal named</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">الفئات</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip">مخصص</span>
+        </div>
+        <div style="background:#f8eeda;border-bottom:2px solid #8a5a00;padding:12px 16px">
+          <div style="font-size:12.5px;font-weight:600;margin-bottom:4px">الأرقام هنا إجمالية ◂</div>
+          <div style="font-size:12px;color:#575351;line-height:1.85">الفئات مالهاش «صافي» — الحركة المعكوسة بتفضل محسوبة في فئتها. الإجمالي <span class="tnum">10,959.25</span>، والصافي في تقرير الدخل والمصروفات <span class="tnum">9,684.25</span>. الفرق هو الحركة المعكوسة في «خدمات منزلية». ◂</div>
+        </div>
+        <div class="gh">المصروفات الإجمالية · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">سكن</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">3,000.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:27%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> معاملات</span><span class="tnum">27٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">بقالة</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">2,410.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:22%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">9</span> معاملات</span><span class="tnum">21٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">صحة</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">1,450.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:13%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">2</span> معاملات</span><span class="tnum">13٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe;background:#f8eeda">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">خدمات منزلية <span style="font-size:11px;font-weight:400;color:#8a5a00">· فيها معكوسة ◂</span></span><span class="tnum" style="font-size:14px;font-weight:600;color:#8a5a00">1,275.00</span></div>
+            <div class="bar" style="height:6px;background:#fff"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:12%;background:repeating-linear-gradient(45deg,#8a5a00 0 2px,transparent 2px 5px)"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> معاملات · كلها معكوسة ◂</span><span class="tnum">11٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">تعليم</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">1,200.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:11%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> معاملات · من أموال محمية ◂</span><span class="tnum">10٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">مواصلات</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">980.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:9%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">6</span> معاملات</span><span class="tnum">8٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">مصروف آخر</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">644.25</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:6%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">4</span> معاملات</span><span class="tnum">5٪ ◂</span></div>
+          </div>
+        </div>
+        <div style="background:#eae9e9;padding:11px 16px;border-bottom:2px solid #201e1d;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:12.5px;font-weight:700">الإجمالي · <span class="tnum">24</span> معاملات ◂</span><span class="tnum" style="font-size:15px;font-weight:700">10,959.25</span>
+        </div>
+        <div class="gh">الدخل الإجمالي · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d;padding:11px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13.5px;font-weight:600">راتب</span><span class="tnum" style="font-size:14px;font-weight:600;color:#14555f">18,400.00</span></div>
+          <div style="font-size:11px;color:#575351;margin-top:4px"><span class="tnum">1</span> معاملات · <span class="tnum">100٪</span> من الدخل ◂</div>
+        </div>
+        <div style="padding:14px 16px 18px"><span class="btn2">عرض المعاملات</span>
+          <div style="font-size:11px;color:#575351;line-height:1.75;margin-top:8px">أو دوس على أي فئة — الفلتر موجود في الدومين، وده اللي بيوصّلك له. ◂</div>
+        </div>
+      </div>
+      <p class="note"><strong>The rows add up, and the total is printed so you can check.</strong> Seven categories sum to <span class="tnum">10,959.25</span>, the gross expense from W1 — and the amber row is where the two reports diverge, labelled «فيها معكوسة» with its count reading «كلها معكوسة». Naming the discrepancy costs two proposed strings and removes the only way a careful user could conclude the app cannot add. <strong>Every percentage in this document truncates</strong>, like <code>percentageUsed</code> and <code>goalPercent</code> and like 10 · P1's <span class="tnum">36٪</span> — so the seven category shares read 27 · 21 · 13 · 11 · 10 · 8 · 5 and sum to <span class="tnum">95</span>, not 100. A share set that adds to exactly 100 is a rounded set, and rounding here would put <span class="tnum">11٪</span> on «مدرسة» in one report and <span class="tnum">10٪</span> on «طفل» in the next for the same <span class="tnum">1,200.00</span>. The bars stay proportional to the untruncated share; only the printed figure truncates. <strong>A per-row share bar in ink</strong>, not a pie: shares of one total on a common baseline are comparable, wedges are not, and ink means the bar carries no judgement about the category. <strong>Every row is a filter.</strong> <code>ReportFilter.categoryCodes</code> exists and the drill-down screen exists; source wires neither, so the tiles have no <code>onTap</code> and the drill-down is unreachable from here. <strong>The category labels are verbatim.</strong> <code>categoryLabelFromCode</code> has now been read: seventeen values, of which these eight appear here. Three of my earlier guesses were wrong — «إيجار» is «سكن», «كهرباء» is «خدمات منزلية», «أخرى» is «مصروف آخر» — which is why they carried the mark until the file was opened.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">X2 · Attribution · light · RTL — three sections, one of which cannot total</div>
+      <div class="ph">
+        <div class="tb"><span style="font-size:17px">›</span><span style="flex:1;font-size:18px;font-weight:600">نسب الإنفاق</span><span style="font-size:15px">◉</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:2px solid #201e1d;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn">هذا الشهر</span><span class="chip">الشهر الماضي</span><span class="chip">هذا العام</span><span class="chip">مخصص</span>
+        </div>
+        <div class="gh">حسب المنفق · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe">
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">أحمد</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">8,309.25</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:76%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">18</span> معاملات</span><span class="tnum">75٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">هناء</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">2,650.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:24%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">6</span> معاملات</span><span class="tnum">24٪ ◂</span></div>
+          </div>
+        </div>
+        <div style="background:#eae9e9;padding:10px 16px;border-bottom:2px solid #201e1d;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:12px;font-weight:700">مجموع القسم ◂</span><span class="tnum" style="font-size:13.5px;font-weight:700">10,959.25</span>
+        </div>
+
+        <div class="gh">حسب المستفيد · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">يوسف أحمد</span><span class="tnum" style="font-size:14px;font-weight:600;color:#6e4a1f">1,200.00</span></div>
+          <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:11%;background:repeating-linear-gradient(45deg,#6e4a1f 0 2px,transparent 2px 5px)"></span></div>
+          <div style="font-size:11px;color:#575351;margin-top:4px"><span class="tnum">1</span> معاملات · سحب من أموال محمية ◂</div>
+        </div>
+        <div style="background:#e6eef6;border-inline-start:4px solid #3d4a52;padding:12px 16px;border-bottom:2px solid #201e1d">
+          <div style="font-size:12px;color:#3d4a52;line-height:1.85">القسم ده مش بيجمع لإجمالي المصروفات — المصروف العام مالوش مستفيد محدّد، فمش بيظهر هنا. <span class="tnum">9,759.25</span> من مصروفات الشهر مش منسوبة لفرد. ◂</div>
+        </div>
+
+        <div class="gh">حسب النطاق · جنيه مصري ◂</div>
+        <div style="background:#fff;border-bottom:2px solid #201e1d">
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">المنزل</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">6,685.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:60%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">11</span> معاملات</span><span class="tnum">60٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">زوج/ة</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">1,750.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:15%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">4</span> معاملات</span><span class="tnum">15٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;border-bottom:1px solid #c3bfbe">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">شخصي</span><span class="tnum" style="font-size:14px;font-weight:600;color:#ae1800">1,324.25</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:12%;background:#201e1d"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">8</span> معاملات</span><span class="tnum">12٪ ◂</span></div>
+          </div>
+          <div style="padding:11px 16px;position:relative;padding-inline-start:20px">
+            <span style="position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:repeating-linear-gradient(45deg,#6e4a1f 0 3px,transparent 3px 7px)"></span>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:600">طفل</span><span class="tnum" style="font-size:14px;font-weight:600;color:#6e4a1f">1,200.00</span></div>
+            <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:10%;background:repeating-linear-gradient(45deg,#6e4a1f 0 2px,transparent 2px 5px)"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> معاملات · نفس رقم قسم المستفيد ◂</span><span class="tnum">10٪ ◂</span></div>
+          </div>
+        </div>
+        <div style="background:#eae9e9;padding:10px 16px;border-bottom:2px solid #201e1d;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:12px;font-weight:700">مجموع القسم ◂</span><span class="tnum" style="font-size:13.5px;font-weight:700">10,959.25</span>
+        </div>
+        <div style="padding:12px 16px;background:#fff;border-bottom:2px solid #201e1d;font-size:11px;color:#575351;line-height:1.75"><code>ExpenseScope</code> فيه خمس قيم — والخامسة «مشترك» مش ظاهرة لأن مفيش مصروف عليها الشهر ده. الأقسام الفاضية مش بتترسم. ◂</div>
+        <div style="padding:14px 16px 18px"><span class="btn2">عرض المعاملات</span></div>
+      </div>
+      <p class="note"><strong>The middle section cannot add up, and saying so is the whole board.</strong> <code>byBeneficiary</code> only contains rows that <em>have</em> a beneficiary, so a household expense — rent, groceries, electricity — appears in «حسب المنفق» and in the category report but nowhere here. Source renders all three sections identically, which invites the reader to compare three totals of which only two are the same number. The blue notice states the missing <span class="tnum">9,759.25</span> explicitly. <strong>The third section is now filled from source.</strong> <code>ExpenseScope</code>'s five labels come from <code>expenseScopeDashboardLabel</code> at <code>enum_label_helpers.dart:64</code> and read «شخصي» «زوج/ة» «المنزل» «طفل» «مشترك» — all verbatim, so they carry no mark. «مشترك» is absent because nothing was spent on it this month, and empty sections are not drawn. <strong>The child scope and the beneficiary section print the same <span class="tnum">1,200.00</span></strong>, from two different columns of the same operation — which is the one cross-check this screen offers, so the row says so.</p>
+    </div>
+
+    <div style="flex:none">
+      <div class="cap">X3 · Categories · LTR check · English · privacy mode ON</div>
+      <div class="ph" style="direction:ltr;font-family:'Archivo',sans-serif">
+        <div class="tb"><span style="font-size:17px">‹</span><span style="flex:1;font-size:18px;font-weight:600">Categories</span><span style="font-size:15px" title="privacy on — ink, never accent">◎</span></div>
+        <div style="background:#fff;padding:11px 16px;border-bottom:1px solid #c3bfbe;display:flex;gap:8px;overflow:hidden">
+          <span class="chip chipOn" style="font-family:'Archivo',sans-serif">This Month</span><span class="chip" style="font-family:'Archivo',sans-serif">Last Month</span><span class="chip" style="font-family:'Archivo',sans-serif">This Year</span><span class="chip" style="font-family:'Archivo',sans-serif">Custom</span>
+        </div>
+        <div style="background:#eae9e9;padding:9px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;border-bottom:1px solid #c3bfbe">GROSS EXPENSES · EGP ◂</div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:800">Housing</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#ae1800"></span><span style="display:inline-block;width:26px;height:11px;background:#ae1800"></span><span style="display:inline-block;width:19px;height:11px;background:#ae1800"></span></span></div>
+          <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:27%;background:#201e1d"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> transactions</span><span class="tnum">27% ◂</span></div>
+        </div>
+        <div style="background:#fff;border-bottom:1px solid #c3bfbe;padding:11px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:800">Groceries</span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#ae1800"></span><span style="display:inline-block;width:26px;height:11px;background:#ae1800"></span><span style="display:inline-block;width:19px;height:11px;background:#ae1800"></span></span></div>
+          <div class="bar" style="height:6px"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:22%;background:#201e1d"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">9</span> transactions</span><span class="tnum">21% ◂</span></div>
+        </div>
+        <div style="background:#f8eeda;border-bottom:2px solid #201e1d;padding:11px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:13.5px;font-weight:800">Utilities <span style="font-size:11px;font-weight:400;color:#8a5a00">· contains a reversal ◂</span></span><span style="display:inline-flex;gap:5px"><span style="display:inline-block;width:19px;height:11px;background:#8a5a00"></span><span style="display:inline-block;width:26px;height:11px;background:#8a5a00"></span><span style="display:inline-block;width:19px;height:11px;background:#8a5a00"></span></span></div>
+          <div class="bar" style="height:6px;background:#fff"><span style="position:absolute;inset-block:0;inset-inline-start:0;width:12%;background:repeating-linear-gradient(45deg,#8a5a00 0 2px,transparent 2px 5px)"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#575351;margin-top:4px"><span><span class="tnum">1</span> transactions · all reversed ◂</span><span class="tnum">11% ◂</span></div>
+        </div>
+        <div style="padding:14px 16px;font-size:11px;color:#575351;line-height:1.6"><strong style="font-weight:600">Shares survive masking; amounts do not.</strong> The bar and the percentage are ratios, and a ratio discloses nothing about how much money exists — so they stay legible while every figure masks per digit group.</div>
+        <div style="padding:0 16px 16px"><span class="btn2" style="font-family:'Archivo',sans-serif;font-weight:800">View Transactions</span>
+          <div style="font-size:11px;color:#575351;line-height:1.6;margin-top:8px">Section heading small-caps, matching 03 · A6. Label flush to the leading edge.</div>
+        </div>
+      </div>
+      <p class="note"><strong>The board that settles a masking question the earlier documents left open.</strong> 11 · M6 withheld a percentage because <span class="tnum">104%</span> of a hidden target reveals that a goal is over its target. Here the opposite holds: a category's share of an unknown total says nothing about the total, so shares and bars stay visible. <strong>The rule that covers both:</strong> mask anything from which an amount can be reconstructed, keep anything that is a pure ratio between masked things. <strong>The LTR pass also confirms the wrong-key defect</strong> — source uses <code>reportGrossExpense</code> "Gross Expenses" as the <em>heading</em> of the category list, the same key it uses as a row label in the income-expense report. Two jobs, one key.</p>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding:44px 56px;background:#201e1d;color:#f0edeb">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">Tier 2 · 52 boards · reports, four screens of eight</h4>
+      <p style="font-size:13.5px;line-height:1.65;margin:0 0 10px;color:#a8a3a0"><strong style="color:#f0edeb">Seven boards: V1, W1–W3, X1–X3.</strong> Covering the landing, income &amp; expenses, categories and attribution — four of the eight report screens. <strong style="color:#f0edeb">Part two</strong> takes account flows (with the reconciliation identity printed), home savings, spouse wallet, protected funds and the shared drill-down list.</p>
+      <div style="background:rgba(255,255,255,.07);padding:11px 13px;margin-bottom:12px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Read and closed after the first pass:</strong> <code>ExpenseScope</code>'s five labels, now filling X2's third section verbatim. <strong style="color:#f0edeb">Still owed:</strong> <code>categoryLabelFromCode</code>, which X1's category names are standing in for, plus <code>get_report_transactions_use_case.dart</code> and <code>report_transaction_list_screen.dart</code> for part two.</p>
+      </div>
+      <p style="font-size:13.5px;line-height:1.65;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Not presentation work, from this turn:</strong> wire <code>ReportFilter</code> to the breakdown rows so a tap becomes a filtered drill-down; add reversal awareness to <code>CategoryBreakdown</code> and <code>MemberSpendingBreakdown</code>, or accept gross-only and label it everywhere; and fix <code>ReportAmountText</code> — leading currency code, ASCII sign, no tabular figures, no bidi isolation, duplicated semantics label.</p>
+    </div>
+    <div>
+      <h4 style="margin:0 0 12px;color:#fff;font-size:19px">String provenance — closed rule</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 18px;font-size:13.5px;line-height:1.6;color:#a8a3a0">
+        <strong style="color:#63bc94">From ARB</strong><span>Every unmarked Arabic string: the seven report titles «الدخل والمصروفات» «نسب الإنفاق» «الفئات» «تدفقات الحسابات» «مدخرات المنزل» «محفظة الزوج/ة» «الأموال المحمية» · «التقارير» «الدخل الإجمالي» «المصروفات الإجمالية» «صافي الدخل» «صافي المصروفات» «أثر العكس» «صافي التدفق النقدي» «حسب المنفق» «حسب المستفيد» «حسب النطاق» «عرض المعاملات» «تحديث» · three of the four nav labels «الرئيسية» «التخطيط» «المزيد» from <code>nav*</code> — «الحركات» is the proposed rename and «الديون» has no key, so both carry ◂ in V1's bottom bar · the period chips «هذا الشهر» «الشهر الماضي» «هذا العام» «مخصص» · the five <code>ExpenseScope</code> labels «شخصي» «زوج/ة» «المنزل» «طفل» «مشترك» from <code>expenseScopeDashboardLabel</code> · the category labels «بقالة» «سكن» «خدمات منزلية» «مواصلات» «صحة» «تعليم» «مصروف آخر» «راتب» from <code>categoryLabelFromCode</code> (17 values, now read) · «{count} معاملات» · and the full sentences of <code>reportEmpty</code>, <code>reportError</code>, <code>reportCurrencySeparate</code>, <code>reportTransferNote</code>, <code>reportReversalNote</code>.</span>
+        <strong style="color:#e0ae4a">Mine · marked ◂</strong><span><strong style="color:#f0edeb">The mark is exhaustive.</strong> Every Arabic string in a frame that is not a verbatim ARB value carries ◂ — the landing's seven second lines, «سبعة تقارير», the currency sub-headings, every percentage, «مجموع القسم», «فيها معكوسة», «كلها معكوسة», «من أموال محمية», the two <code>ExpenseScope</code> placeholders, and all explanatory Egyptian sentences. If a framed string has no ◂ and is not in the first bucket, that is a defect in this document, not a third category. <strong style="color:#f0edeb">Not copy, so unmarked:</strong> fixture data — member names, amounts, dates, counts — and the English annotation outside the frames. Per your call: MSA for labels, Egyptian for explanation.</span>
+        <strong style="color:#ff9783">In flight</strong><span><strong style="color:#f0edeb">Re-point</strong> <code>reportGrossExpense</code> / <code>reportGrossIncome</code>: they are row labels in one report and section headings in another, and the category report needs its own two keys. Carried: delete <code>goalStatusTargetReached</code> and <code>certificateRedeemProfitOnly</code>; one parameterised insufficient-funds message for three misuses of <code>errorGoalInsufficientReserve</code>; a <code>currencyMismatch</code> reason; verb keys for the goal and certificate submit buttons; a member-archive refusal; <code>plural</code>/<code>select</code> for <code>memberChild</code> and <code>archivedLabel</code>. Nav: «الحركات» renames «المعاملات», «الديون» needs <code>navDebts</code>, and Reports now lives in «المزيد» — which is what V1's bottom bar shows.</span>
+      </div>
+      <div style="background:rgba(255,255,255,.07);padding:12px 14px;margin-top:13px">
+        <p style="font-size:12.5px;line-height:1.7;margin:0;color:#a8a3a0"><strong style="color:#f0edeb">Still unanswered, asked six times:</strong> are there golden or screenshot tests among the 1,594? Phase 9 just got smaller — seven reports, not nine — so the answer now changes the shape of two phases, not one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+</x-dc>
+</body>
+</html>
