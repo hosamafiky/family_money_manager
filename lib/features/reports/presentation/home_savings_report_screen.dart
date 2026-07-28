@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -89,6 +90,7 @@ class _HomeSavingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -111,7 +113,7 @@ class _HomeSavingsCard extends StatelessWidget {
                 label: l10n.dashboardPeriodIncome,
                 minorUnits: account.directIncomeMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.green,
+                color: colors.income,
                 icon: Icons.arrow_downward,
               ),
             if (account.directExpenseMinorUnits != 0)
@@ -119,7 +121,7 @@ class _HomeSavingsCard extends StatelessWidget {
                 label: l10n.dashboardPeriodExpenses,
                 minorUnits: -account.directExpenseMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.red,
+                color: colors.expense,
                 icon: Icons.arrow_upward,
               ),
             if (account.spouseWalletFundingMinorUnits != 0)
@@ -127,7 +129,7 @@ class _HomeSavingsCard extends StatelessWidget {
                 label: '${l10n.reportSpouseWalletTitle} (${l10n.reportFunded})',
                 minorUnits: -account.spouseWalletFundingMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.blue,
+                color: colors.transfer,
                 icon: Icons.north_east,
               ),
             if (account.spouseWalletReturnMinorUnits != 0)
@@ -136,7 +138,7 @@ class _HomeSavingsCard extends StatelessWidget {
                     '${l10n.reportSpouseWalletTitle} (${l10n.reportReturned})',
                 minorUnits: account.spouseWalletReturnMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.blue,
+                color: colors.transfer,
                 icon: Icons.south_west,
               ),
             if (account.adjustmentsMinorUnits != 0)
@@ -151,7 +153,7 @@ class _HomeSavingsCard extends StatelessWidget {
                 label: l10n.reportReversalEffect,
                 minorUnits: account.reversalEffectMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.orange,
+                color: colors.secondaryText,
                 icon: Icons.undo,
               ),
             const Divider(height: 12),

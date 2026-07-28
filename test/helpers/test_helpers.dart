@@ -47,6 +47,9 @@ Widget buildTestApp({
       dashboardSummaryProvider.overrideWith(
         (ref, householdId) async => AppOk(
           DashboardSummary(
+            availableToSpend: const [],
+            excludedFromAvailable: const [],
+            heldByReason: const [],
             householdId: householdId,
             period: DashboardPeriod.custom(
               startDate: '2025-01-01',

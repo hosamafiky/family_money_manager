@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -91,6 +92,7 @@ class _FlowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     final hasReversals = flow.hasReversalEffect;
 
     return Card(
@@ -105,7 +107,7 @@ class _FlowCard extends StatelessWidget {
               label: l10n.reportGrossIncome,
               minorUnits: flow.grossIncomeMinorUnits,
               currencyCode: flow.currencyCode,
-              color: Colors.green,
+              color: colors.income,
               icon: Icons.arrow_downward,
             ),
             if (flow.incomeReversalMinorUnits != 0)
@@ -113,7 +115,7 @@ class _FlowCard extends StatelessWidget {
                 label: l10n.reportReversalEffect,
                 minorUnits: -flow.incomeReversalMinorUnits,
                 currencyCode: flow.currencyCode,
-                color: Colors.orange,
+                color: colors.secondaryText,
                 icon: Icons.undo,
               ),
             if (hasReversals)
@@ -121,7 +123,7 @@ class _FlowCard extends StatelessWidget {
                 label: l10n.reportNetIncome,
                 minorUnits: flow.netIncomeMinorUnits,
                 currencyCode: flow.currencyCode,
-                color: Colors.green,
+                color: colors.income,
                 icon: Icons.arrow_downward,
                 bold: true,
               ),
@@ -131,7 +133,7 @@ class _FlowCard extends StatelessWidget {
               label: l10n.reportGrossExpense,
               minorUnits: flow.grossExpenseMinorUnits,
               currencyCode: flow.currencyCode,
-              color: Colors.red,
+              color: colors.expense,
               icon: Icons.arrow_upward,
             ),
             if (flow.expenseReversalMinorUnits != 0)
@@ -139,7 +141,7 @@ class _FlowCard extends StatelessWidget {
                 label: l10n.reportReversalEffect,
                 minorUnits: -flow.expenseReversalMinorUnits,
                 currencyCode: flow.currencyCode,
-                color: Colors.orange,
+                color: colors.secondaryText,
                 icon: Icons.undo,
               ),
             if (hasReversals)
@@ -147,7 +149,7 @@ class _FlowCard extends StatelessWidget {
                 label: l10n.reportNetExpense,
                 minorUnits: flow.netExpenseMinorUnits,
                 currencyCode: flow.currencyCode,
-                color: Colors.red,
+                color: colors.expense,
                 icon: Icons.arrow_upward,
                 bold: true,
               ),
@@ -158,8 +160,8 @@ class _FlowCard extends StatelessWidget {
               minorUnits: flow.netCashFlowMinorUnits,
               currencyCode: flow.currencyCode,
               color: flow.netCashFlowMinorUnits >= 0
-                  ? Colors.green
-                  : Colors.red,
+                  ? colors.income
+                  : colors.expense,
               bold: true,
             ),
             if (hasReversals) ...[

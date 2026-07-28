@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
 import 'package:family_money_manager/features/certificates/presentation/providers/certificate_providers.dart';
@@ -85,6 +86,7 @@ class _CertificateCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final colors = context.financialColors;
     final progressAsync = ref.watch(certificateProgressProvider(cert.id));
 
     final termState = progressAsync.when(
@@ -104,15 +106,15 @@ class _CertificateCard extends ConsumerWidget {
     final (lifecycleLabel, lifecycleColor) = switch (cert.lifecycle) {
       CertificateLifecycle.active => (
         l10n.certificateLifecycleActive,
-        Colors.green,
+        colors.certificatePrincipal,
       ),
       CertificateLifecycle.redeemed => (
         l10n.certificateLifecycleRedeemed,
-        Colors.blue,
+        colors.neutralInfo,
       ),
       CertificateLifecycle.archived => (
         l10n.certificateLifecycleArchived,
-        Colors.grey,
+        colors.disabled,
       ),
     };
 
@@ -158,7 +160,7 @@ class _CertificateCard extends ConsumerWidget {
             if (termState != null)
               Text(
                 certificateTermStateLabel(l10n, termState),
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                style: TextStyle(fontSize: 10, color: colors.secondaryText),
               ),
           ],
         ),

@@ -10,26 +10,34 @@ import '../../helpers/test_helpers.dart';
 
 void main() {
   group('App widget — startup smoke test', () {
-    testWidgets('renders without error with development config', (tester) async {
+    testWidgets('renders without error with development config', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('redirects to onboarding when no household exists (Arabic locale)', (tester) async {
-      await tester.pumpWidget(buildTestApp(locale: const Locale('ar', 'EG')));
-      await tester.pumpAndSettle();
-      // With an empty in-memory database the router redirects to /onboarding.
-      // The app title appears in the onboarding form.
-      expect(find.byType(Scaffold), findsWidgets);
-    });
+    testWidgets(
+      'redirects to onboarding when no household exists (Arabic locale)',
+      (tester) async {
+        await tester.pumpWidget(buildTestApp(locale: const Locale('ar', 'EG')));
+        await tester.pumpAndSettle();
+        // With an empty in-memory database the router redirects to /onboarding.
+        // The app title appears in the onboarding form.
+        expect(find.byType(Scaffold), findsWidgets);
+      },
+    );
 
-    testWidgets('redirects to onboarding when no household exists (English locale)', (tester) async {
-      await tester.pumpWidget(buildTestApp(locale: const Locale('en', 'US')));
-      await tester.pumpAndSettle();
-      // With an empty in-memory database the router redirects to /onboarding.
-      expect(find.byType(Scaffold), findsWidgets);
-    });
+    testWidgets(
+      'redirects to onboarding when no household exists (English locale)',
+      (tester) async {
+        await tester.pumpWidget(buildTestApp(locale: const Locale('en', 'US')));
+        await tester.pumpAndSettle();
+        // With an empty in-memory database the router redirects to /onboarding.
+        expect(find.byType(Scaffold), findsWidgets);
+      },
+    );
   });
 
   group('App widget — locale and directionality', () {
@@ -37,7 +45,9 @@ void main() {
       await tester.pumpWidget(buildTestApp(locale: const Locale('ar', 'EG')));
       await tester.pumpAndSettle();
 
-      final direction = tester.widget<Directionality>(find.byType(Directionality).first);
+      final direction = tester.widget<Directionality>(
+        find.byType(Directionality).first,
+      );
       expect(direction.textDirection, TextDirection.rtl);
     });
 
@@ -45,7 +55,9 @@ void main() {
       await tester.pumpWidget(buildTestApp(locale: const Locale('en', 'US')));
       await tester.pumpAndSettle();
 
-      final direction = tester.widget<Directionality>(find.byType(Directionality).first);
+      final direction = tester.widget<Directionality>(
+        find.byType(Directionality).first,
+      );
       expect(direction.textDirection, TextDirection.ltr);
     });
   });
@@ -91,10 +103,14 @@ void main() {
   });
 
   group('App widget — unknown route (AppErrorScreen)', () {
-    testWidgets('renders error icon and back button when error is null', (tester) async {
+    testWidgets('renders error icon and back button when error is null', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [appConfigProvider.overrideWithValue(AppConfig.development)],
+          overrides: [
+            appConfigProvider.overrideWithValue(AppConfig.development),
+          ],
           child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
@@ -112,11 +128,15 @@ void main() {
       expect(find.text(l10n.errorPageNotFound), findsOneWidget);
     });
 
-    testWidgets('displays error message when exception provided', (tester) async {
+    testWidgets('displays error message when exception provided', (
+      tester,
+    ) async {
       final error = Exception('not-found');
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [appConfigProvider.overrideWithValue(AppConfig.development)],
+          overrides: [
+            appConfigProvider.overrideWithValue(AppConfig.development),
+          ],
           child: MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,

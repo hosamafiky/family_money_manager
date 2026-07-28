@@ -11,6 +11,9 @@ final class DashboardSummary {
     required this.period,
     required this.spendableBalances,
     required this.protectedBalances,
+    required this.availableToSpend,
+    required this.excludedFromAvailable,
+    required this.heldByReason,
     required this.periodFlow,
     required this.expensesByScope,
     required this.spouseWallets,
@@ -26,6 +29,28 @@ final class DashboardSummary {
 
   /// Protected account balances, grouped by currency.
   final List<CurrencyAmountSummary> protectedBalances;
+
+  /// The headline figure: money the household can spend right now.
+  ///
+  /// [spendableBalances] minus everything in [excludedFromAvailable]. Computed
+  /// in the query rather than by subtracting in a widget, because that
+  /// subtraction is balance arithmetic and belongs where the ledger is.
+  final List<CurrencyAmountSummary> availableToSpend;
+
+  /// Spendable money deliberately left out of [availableToSpend], with the
+  /// reason it was excluded.
+  ///
+  /// The exclusion is stated rather than silent: a household reading a total
+  /// needs to know what is not in it.
+  final List<ExcludedAmountSummary> excludedFromAvailable;
+
+  /// Money that exists, is not archived, and cannot be spent — grouped by why.
+  ///
+  /// This is the third state of money. Certificate principal and goal reserves
+  /// are neither spendable nor protected, so before this existed they appeared
+  /// in no dashboard figure at all. A widget cannot derive it: deciding what is
+  /// held, and why, is ledger classification.
+  final List<HeldAmountSummary> heldByReason;
 
   /// Income and expense flow for the period, grouped by currency.
   final List<PeriodFlowSummary> periodFlow;
@@ -48,9 +73,86 @@ final class DashboardSummary {
   bool get hasProtectedBalance =>
       protectedBalances.any((b) => b.totalMinorUnits != 0);
 
+  bool get hasHeldBalance => heldByReason.any((h) => h.totalMinorUnits != 0);
+
+  bool get hasExcludedBalance =>
+      excludedFromAvailable.any((e) => e.totalMinorUnits != 0);
+
   bool get hasPeriodActivity => periodFlow.any(
     (f) => f.grossIncomeMinorUnits != 0 || f.grossExpenseMinorUnits != 0,
   );
+}
+
+/// Why money is held and cannot be spent.
+///
+/// Ordered from most to least restricted, which is also the order the held
+/// region prints them in.
+enum HeldReason {
+  /// A child's protected fund. Withdrawal requires a named acknowledgement.
+  childProtected,
+
+  /// Reserved against a savings goal.
+  goalReserve,
+
+  /// Certificate principal, locked for the term.
+  certificatePrincipal,
+
+  /// Non-spendable for a reason the dashboard has no specific vocabulary for.
+  /// Rendered with a generic label rather than being silently dropped.
+  other;
+
+  String get code => name;
+
+  static HeldReason fromCode(String code) {
+    for (final r in HeldReason.values) {
+      if (r.name == code) return r;
+    }
+    return HeldReason.other;
+  }
+}
+
+/// Why spendable money is nonetheless left out of the headline figure.
+enum ExclusionReason {
+  /// A spouse's wallet. Spendable by them, but telling one member's money from
+  /// another's is the point of the row — so it is not in "available to spend".
+  spouseWallet;
+
+  String get code => name;
+
+  static ExclusionReason fromCode(String code) {
+    for (final r in ExclusionReason.values) {
+      if (r.name == code) return r;
+    }
+    return ExclusionReason.spouseWallet;
+  }
+}
+
+/// Held money for one reason, in one currency. Never summed across either.
+@immutable
+final class HeldAmountSummary {
+  const HeldAmountSummary({
+    required this.reason,
+    required this.currencyCode,
+    required this.totalMinorUnits,
+  });
+
+  final HeldReason reason;
+  final String currencyCode;
+  final int totalMinorUnits;
+}
+
+/// Excluded money for one reason, in one currency.
+@immutable
+final class ExcludedAmountSummary {
+  const ExcludedAmountSummary({
+    required this.reason,
+    required this.currencyCode,
+    required this.totalMinorUnits,
+  });
+
+  final ExclusionReason reason;
+  final String currencyCode;
+  final int totalMinorUnits;
 }
 
 /// Total ledger-derived balance for one currency.

@@ -44,8 +44,11 @@ class _AppState extends ConsumerState<App> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      // The theme is locale-dependent from phase 3 onward: Latin and Arabic
+      // take different metrics per text role, so changing language has to
+      // rebuild the theme, not just re-resolve strings.
+      theme: AppTheme.light(locale: locale),
+      darkTheme: AppTheme.dark(locale: locale),
       themeMode: themeMode,
     );
   }

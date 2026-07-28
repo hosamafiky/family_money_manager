@@ -3695,6 +3695,17 @@ class $OperationsTable extends Operations
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reversalReasonMeta = const VerificationMeta(
+    'reversalReason',
+  );
+  @override
+  late final GeneratedColumn<String> reversalReason = GeneratedColumn<String>(
+    'reversal_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdByMeta = const VerificationMeta(
     'createdBy',
   );
@@ -3763,6 +3774,7 @@ class $OperationsTable extends Operations
     receiptPath,
     isReversed,
     reversedBy,
+    reversalReason,
     createdBy,
     createdAt,
     updatedAt,
@@ -3957,6 +3969,15 @@ class $OperationsTable extends Operations
         reversedBy.isAcceptableOrUnknown(data['reversed_by']!, _reversedByMeta),
       );
     }
+    if (data.containsKey('reversal_reason')) {
+      context.handle(
+        _reversalReasonMeta,
+        reversalReason.isAcceptableOrUnknown(
+          data['reversal_reason']!,
+          _reversalReasonMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_by')) {
       context.handle(
         _createdByMeta,
@@ -4080,6 +4101,10 @@ class $OperationsTable extends Operations
         DriftSqlType.string,
         data['${effectivePrefix}reversed_by'],
       ),
+      reversalReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reversal_reason'],
+      ),
       createdBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_by'],
@@ -4165,6 +4190,15 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
 
   /// The [id] of the reversal operation that cancelled this one.
   final String? reversedBy;
+
+  /// Why this reversal was made. Set only on reversal operations.
+  ///
+  /// It lives on the reversal row rather than on the row being reversed, which
+  /// is what lets it exist at all: the original is append-only and its
+  /// mutability rule stays exactly as it was. Written once at INSERT and
+  /// guarded against later edits — a reason that could be rewritten after the
+  /// fact would make the audit trail a draft.
+  final String? reversalReason;
   final String createdBy;
   final String createdAt;
 
@@ -4195,6 +4229,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     this.receiptPath,
     required this.isReversed,
     this.reversedBy,
+    this.reversalReason,
     required this.createdBy,
     required this.createdAt,
     required this.updatedAt,
@@ -4248,6 +4283,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     if (!nullToAbsent || reversedBy != null) {
       map['reversed_by'] = Variable<String>(reversedBy);
     }
+    if (!nullToAbsent || reversalReason != null) {
+      map['reversal_reason'] = Variable<String>(reversalReason);
+    }
     map['created_by'] = Variable<String>(createdBy);
     map['created_at'] = Variable<String>(createdAt);
     map['updated_at'] = Variable<String>(updatedAt);
@@ -4300,6 +4338,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
       reversedBy: reversedBy == null && nullToAbsent
           ? const Value.absent()
           : Value(reversedBy),
+      reversalReason: reversalReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reversalReason),
       createdBy: Value(createdBy),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -4338,6 +4379,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
       receiptPath: serializer.fromJson<String?>(json['receiptPath']),
       isReversed: serializer.fromJson<bool>(json['isReversed']),
       reversedBy: serializer.fromJson<String?>(json['reversedBy']),
+      reversalReason: serializer.fromJson<String?>(json['reversalReason']),
       createdBy: serializer.fromJson<String>(json['createdBy']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       updatedAt: serializer.fromJson<String>(json['updatedAt']),
@@ -4369,6 +4411,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
       'receiptPath': serializer.toJson<String?>(receiptPath),
       'isReversed': serializer.toJson<bool>(isReversed),
       'reversedBy': serializer.toJson<String?>(reversedBy),
+      'reversalReason': serializer.toJson<String?>(reversalReason),
       'createdBy': serializer.toJson<String>(createdBy),
       'createdAt': serializer.toJson<String>(createdAt),
       'updatedAt': serializer.toJson<String>(updatedAt),
@@ -4398,6 +4441,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     Value<String?> receiptPath = const Value.absent(),
     bool? isReversed,
     Value<String?> reversedBy = const Value.absent(),
+    Value<String?> reversalReason = const Value.absent(),
     String? createdBy,
     String? createdAt,
     String? updatedAt,
@@ -4434,6 +4478,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     receiptPath: receiptPath.present ? receiptPath.value : this.receiptPath,
     isReversed: isReversed ?? this.isReversed,
     reversedBy: reversedBy.present ? reversedBy.value : this.reversedBy,
+    reversalReason: reversalReason.present
+        ? reversalReason.value
+        : this.reversalReason,
     createdBy: createdBy ?? this.createdBy,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -4496,6 +4543,9 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
       reversedBy: data.reversedBy.present
           ? data.reversedBy.value
           : this.reversedBy,
+      reversalReason: data.reversalReason.present
+          ? data.reversalReason.value
+          : this.reversalReason,
       createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -4529,6 +4579,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
           ..write('receiptPath: $receiptPath, ')
           ..write('isReversed: $isReversed, ')
           ..write('reversedBy: $reversedBy, ')
+          ..write('reversalReason: $reversalReason, ')
           ..write('createdBy: $createdBy, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4560,6 +4611,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
     receiptPath,
     isReversed,
     reversedBy,
+    reversalReason,
     createdBy,
     createdAt,
     updatedAt,
@@ -4590,6 +4642,7 @@ class DbOperation extends DataClass implements Insertable<DbOperation> {
           other.receiptPath == this.receiptPath &&
           other.isReversed == this.isReversed &&
           other.reversedBy == this.reversedBy &&
+          other.reversalReason == this.reversalReason &&
           other.createdBy == this.createdBy &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -4618,6 +4671,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
   final Value<String?> receiptPath;
   final Value<bool> isReversed;
   final Value<String?> reversedBy;
+  final Value<String?> reversalReason;
   final Value<String> createdBy;
   final Value<String> createdAt;
   final Value<String> updatedAt;
@@ -4645,6 +4699,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     this.receiptPath = const Value.absent(),
     this.isReversed = const Value.absent(),
     this.reversedBy = const Value.absent(),
+    this.reversalReason = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4673,6 +4728,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     this.receiptPath = const Value.absent(),
     this.isReversed = const Value.absent(),
     this.reversedBy = const Value.absent(),
+    this.reversalReason = const Value.absent(),
     required String createdBy,
     required String createdAt,
     required String updatedAt,
@@ -4709,6 +4765,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     Expression<String>? receiptPath,
     Expression<bool>? isReversed,
     Expression<String>? reversedBy,
+    Expression<String>? reversalReason,
     Expression<String>? createdBy,
     Expression<String>? createdAt,
     Expression<String>? updatedAt,
@@ -4739,6 +4796,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
       if (receiptPath != null) 'receipt_path': receiptPath,
       if (isReversed != null) 'is_reversed': isReversed,
       if (reversedBy != null) 'reversed_by': reversedBy,
+      if (reversalReason != null) 'reversal_reason': reversalReason,
       if (createdBy != null) 'created_by': createdBy,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -4769,6 +4827,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     Value<String?>? receiptPath,
     Value<bool>? isReversed,
     Value<String?>? reversedBy,
+    Value<String?>? reversalReason,
     Value<String>? createdBy,
     Value<String>? createdAt,
     Value<String>? updatedAt,
@@ -4798,6 +4857,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
       receiptPath: receiptPath ?? this.receiptPath,
       isReversed: isReversed ?? this.isReversed,
       reversedBy: reversedBy ?? this.reversedBy,
+      reversalReason: reversalReason ?? this.reversalReason,
       createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -4876,6 +4936,9 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
     if (reversedBy.present) {
       map['reversed_by'] = Variable<String>(reversedBy.value);
     }
+    if (reversalReason.present) {
+      map['reversal_reason'] = Variable<String>(reversalReason.value);
+    }
     if (createdBy.present) {
       map['created_by'] = Variable<String>(createdBy.value);
     }
@@ -4918,6 +4981,7 @@ class OperationsCompanion extends UpdateCompanion<DbOperation> {
           ..write('receiptPath: $receiptPath, ')
           ..write('isReversed: $isReversed, ')
           ..write('reversedBy: $reversedBy, ')
+          ..write('reversalReason: $reversalReason, ')
           ..write('createdBy: $createdBy, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -16287,6 +16351,7 @@ typedef $$OperationsTableCreateCompanionBuilder =
       Value<String?> receiptPath,
       Value<bool> isReversed,
       Value<String?> reversedBy,
+      Value<String?> reversalReason,
       required String createdBy,
       required String createdAt,
       required String updatedAt,
@@ -16316,6 +16381,7 @@ typedef $$OperationsTableUpdateCompanionBuilder =
       Value<String?> receiptPath,
       Value<bool> isReversed,
       Value<String?> reversedBy,
+      Value<String?> reversalReason,
       Value<String> createdBy,
       Value<String> createdAt,
       Value<String> updatedAt,
@@ -16505,6 +16571,11 @@ class $$OperationsTableFilterComposer
 
   ColumnFilters<String> get reversedBy => $composableBuilder(
     column: $table.reversedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16723,6 +16794,11 @@ class $$OperationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdBy => $composableBuilder(
     column: $table.createdBy,
     builder: (column) => ColumnOrderings(column),
@@ -16904,6 +16980,11 @@ class $$OperationsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get createdBy =>
       $composableBuilder(column: $table.createdBy, builder: (column) => column);
 
@@ -17070,6 +17151,7 @@ class $$OperationsTableTableManager
                 Value<String?> receiptPath = const Value.absent(),
                 Value<bool> isReversed = const Value.absent(),
                 Value<String?> reversedBy = const Value.absent(),
+                Value<String?> reversalReason = const Value.absent(),
                 Value<String> createdBy = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> updatedAt = const Value.absent(),
@@ -17097,6 +17179,7 @@ class $$OperationsTableTableManager
                 receiptPath: receiptPath,
                 isReversed: isReversed,
                 reversedBy: reversedBy,
+                reversalReason: reversalReason,
                 createdBy: createdBy,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -17126,6 +17209,7 @@ class $$OperationsTableTableManager
                 Value<String?> receiptPath = const Value.absent(),
                 Value<bool> isReversed = const Value.absent(),
                 Value<String?> reversedBy = const Value.absent(),
+                Value<String?> reversalReason = const Value.absent(),
                 required String createdBy,
                 required String createdAt,
                 required String updatedAt,
@@ -17153,6 +17237,7 @@ class $$OperationsTableTableManager
                 receiptPath: receiptPath,
                 isReversed: isReversed,
                 reversedBy: reversedBy,
+                reversalReason: reversalReason,
                 createdBy: createdBy,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

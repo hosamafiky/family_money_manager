@@ -6,6 +6,7 @@ import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_context.dart';
@@ -18,11 +19,23 @@ import 'package:go_router/go_router.dart';
 const _householdId = 'household-v1';
 
 /// Read-only review screen for an income transaction.
-class IncomeReviewScreen extends ConsumerWidget {
+class IncomeReviewScreen extends ConsumerStatefulWidget {
   const IncomeReviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IncomeReviewScreen> createState() => _IncomeReviewScreenState();
+}
+
+class _IncomeReviewScreenState extends ConsumerState<IncomeReviewScreen> {
+  /// The last write failure, kept on screen until the user acts on it.
+  ///
+  /// A failed ledger write is a question the user has to answer, not a
+  /// passing notification — and a snackbar takes the question away before it
+  /// can be read.
+  String? _failure;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final ctx = ref.watch(stagedIncomeContextProvider);
     final submitting = ref.watch(submittingProvider);
@@ -54,6 +67,7 @@ class IncomeReviewScreen extends ConsumerWidget {
       title: Text(l10n.reviewTitle),
       resizeToAvoidBottomInset: true,
       bottomBar: AppBottomActionBar(
+        consequenceLabel: l10n.reviewAppendOnlyConsequence,
         child: PrimaryActionButton(
           label: l10n.confirm,
           isLoading: submitting,
@@ -67,11 +81,29 @@ class IncomeReviewScreen extends ConsumerWidget {
             bottom: AppTheme.space32,
           ),
           children: [
+            if (_failure case final String failure) ...[
+              AppInlineNotice(message: failure, tone: AppNoticeTone.error),
+              const SizedBox(height: AppTheme.space12),
+            ],
             AppInlineNotice(
               message: l10n.incomeIncreasesBalance,
               tone: AppNoticeTone.info,
             ),
             const SizedBox(height: AppTheme.space16),
+            // The read-back is the check: one sentence, read the way the user
+            // would say it, catches a wrong account faster than a table.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+              child: Text(
+                l10n.incomeReadBack(
+                  formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+                  categoryLabel(l10n, ctx.category),
+                  accountName(ctx.destinationAccountId),
+                ),
+                style: context.textRoles.body,
+              ),
+            ),
+            const SizedBox(height: AppTheme.space24),
             AppReviewSection(
               title: l10n.reviewTitle,
               rows: [
@@ -129,13 +161,13 @@ class IncomeReviewScreen extends ConsumerWidget {
             context.go('/transactions');
           }
         case AppInsufficientFunds():
-          _showSnackBar(context, l10n.errorInsufficientFunds);
+          _fail(l10n.errorInsufficientFunds);
         case AppValidationFailure(:final messageKey):
-          _showSnackBar(context, _resolveMessage(l10n, messageKey));
+          _fail(_resolveMessage(l10n, messageKey));
         case AppDuplicateConflict():
-          _showSnackBar(context, l10n.errorAccountDuplicate);
+          _fail(l10n.errorAccountDuplicate);
         default:
-          _showSnackBar(context, l10n.errorGeneric);
+          _fail(l10n.errorGeneric);
       }
     } finally {
       if (context.mounted) {
@@ -144,10 +176,8 @@ class IncomeReviewScreen extends ConsumerWidget {
     }
   }
 
-  void _showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _fail(String message) {
+    if (mounted) setState(() => _failure = message);
   }
 
   String _resolveMessage(AppLocalizations l10n, String key) =>

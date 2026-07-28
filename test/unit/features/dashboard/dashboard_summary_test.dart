@@ -25,6 +25,9 @@ void main() {
     List<PeriodFlowSummary> flow = const [],
   }) {
     return DashboardSummary(
+      availableToSpend: const [],
+      excludedFromAvailable: const [],
+      heldByReason: const [],
       householdId: 'hh-test',
       period: period,
       spendableBalances: spendable,

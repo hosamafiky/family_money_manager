@@ -39,6 +39,9 @@ final class GetDashboardSummaryUseCase {
         _repo.expensesByScope(householdId: householdId, period: period),
         _repo.spouseWalletSummaries(householdId: householdId, period: period),
         _repo.recentActivity(householdId: householdId),
+        _repo.availableToSpend(householdId: householdId),
+        _repo.excludedFromAvailable(householdId: householdId),
+        _repo.heldByReason(householdId: householdId),
       ]);
 
       return AppOk(
@@ -52,6 +55,10 @@ final class GetDashboardSummaryUseCase {
           spouseWallets: (results[4] as List)
               .cast<SpouseWalletDashboardSummary>(),
           recentActivity: (results[5] as List).cast<TransactionSummary>(),
+          availableToSpend: (results[6] as List).cast<CurrencyAmountSummary>(),
+          excludedFromAvailable: (results[7] as List)
+              .cast<ExcludedAmountSummary>(),
+          heldByReason: (results[8] as List).cast<HeldAmountSummary>(),
           generatedAt: now,
         ),
       );

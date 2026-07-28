@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -88,6 +89,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -110,7 +112,7 @@ class _AccountCard extends StatelessWidget {
                 label: l10n.dashboardPeriodIncome,
                 minorUnits: account.incomeMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.green,
+                color: colors.income,
                 icon: Icons.arrow_downward,
               ),
             if (account.expenseMinorUnits != 0)
@@ -118,7 +120,7 @@ class _AccountCard extends StatelessWidget {
                 label: l10n.dashboardPeriodExpenses,
                 minorUnits: -account.expenseMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.red,
+                color: colors.expense,
                 icon: Icons.arrow_upward,
               ),
             if (account.transfersInMinorUnits != 0)
@@ -126,7 +128,7 @@ class _AccountCard extends StatelessWidget {
                 label: '${l10n.transactionTypeTransfer} (+)',
                 minorUnits: account.transfersInMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.blue,
+                color: colors.transfer,
                 icon: Icons.south_west,
               ),
             if (account.transfersOutMinorUnits != 0)
@@ -134,7 +136,7 @@ class _AccountCard extends StatelessWidget {
                 label: '${l10n.transactionTypeTransfer} (-)',
                 minorUnits: -account.transfersOutMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.blue,
+                color: colors.transfer,
                 icon: Icons.north_east,
               ),
             if (account.adjustmentsMinorUnits != 0)
@@ -149,7 +151,7 @@ class _AccountCard extends StatelessWidget {
                 label: l10n.reportReversalEffect,
                 minorUnits: account.reversalEffectMinorUnits,
                 currencyCode: account.currencyCode,
-                color: Colors.orange,
+                color: colors.secondaryText,
                 icon: Icons.undo,
               ),
             const Divider(height: 12),

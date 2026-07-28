@@ -4,6 +4,7 @@ import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,18 +72,18 @@ class AccountDetailScreen extends ConsumerWidget {
                           if (account.isProtected)
                             _Chip(
                               label: l10n.protectedLabel,
-                              color: Colors.orange,
+                              color: context.financialColors.protectedMoney,
                             )
                           else if (account.isSpendable)
                             _Chip(
                               label: l10n.spendableLabel,
-                              color: Colors.green,
+                              color: context.financialColors.primaryText,
                             ),
                           if (account.isArchived) ...[
                             const SizedBox(width: 8),
                             _Chip(
                               label: l10n.archivedLabel,
-                              color: Colors.grey,
+                              color: context.financialColors.disabled,
                             ),
                           ],
                         ],
@@ -127,7 +128,7 @@ class AccountDetailScreen extends ConsumerWidget {
               if (account.isProtected) ...[
                 const SizedBox(height: 12),
                 Card(
-                  color: Colors.orange.withAlpha(30),
+                  color: context.financialColors.recessedSurface,
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(l10n.accountProtectedWarning),
@@ -173,9 +174,6 @@ class AccountDetailScreen extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.arrow_upward),
                   label: Text(l10n.actionRecordExpense),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red.shade700,
-                  ),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.icon(
@@ -185,9 +183,6 @@ class AccountDetailScreen extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.swap_horiz),
                   label: Text(l10n.actionTransfer),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                  ),
                 ),
                 const SizedBox(height: 8),
               ],

@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/application/get_category_report_use_case.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
@@ -117,6 +118,7 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     final isExpense = item.categoryType == CategoryType.expense;
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -126,7 +128,7 @@ class _CategoryRow extends StatelessWidget {
       trailing: ReportAmountText(
         minorUnits: item.totalMinorUnits,
         currencyCode: item.currencyCode,
-        color: isExpense ? Colors.red : Colors.green,
+        color: isExpense ? colors.expense : colors.income,
       ),
     );
   }

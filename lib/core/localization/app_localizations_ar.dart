@@ -1588,4 +1588,158 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get currencyOmr => 'ريال عماني (OMR)';
+
+  @override
+  String get amountHidden => 'مبلغ مخفي';
+
+  @override
+  String get amountNotSpendable => 'غير قابل للصرف';
+
+  @override
+  String get amountHeld => 'محتجز';
+
+  @override
+  String progressUsedPercent(int percent) {
+    return '$percent٪ مُستخدم';
+  }
+
+  @override
+  String get actionRetry => 'إعادة المحاولة';
+
+  @override
+  String get errorLedgerUnchanged =>
+      'لم تُحفظ أي بيانات. سجلك سليم ولم يتغيّر.';
+
+  @override
+  String errorCodeLabel(String code) {
+    return 'رمز الخطأ: $code';
+  }
+
+  @override
+  String get accountRegionSpendable => 'قابل للصرف';
+
+  @override
+  String get accountRegionHeld => 'محتجز — غير قابل للصرف';
+
+  @override
+  String get dashboardAvailableToSpend => 'يمكنك صرف الآن';
+
+  @override
+  String get dashboardNoCombinedTotal =>
+      'لا يوجد إجمالي موحّد — كل عملة مستقلة';
+
+  @override
+  String dashboardHeldSubtotal(String currency) {
+    return 'إجمالي المحتجز — $currency';
+  }
+
+  @override
+  String get dashboardHeldNotAdded =>
+      'لا يُضاف إلى رصيدك المتاح — هذا مجموع داخل هذه المنطقة فقط';
+
+  @override
+  String get dashboardExcludedFromAvailable => 'غير محسوبة هنا';
+
+  @override
+  String get heldReasonCertificatePrincipal => 'أصل الشهادة';
+
+  @override
+  String get heldReasonGoalReserve => 'محتجز لهدف';
+
+  @override
+  String get heldReasonChildProtected => 'محمي';
+
+  @override
+  String get heldReasonOther => 'غير قابل للصرف';
+
+  @override
+  String dashboardFromAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'من $count حساب',
+      many: 'من $count حسابًا',
+      few: 'من $count حسابات',
+      two: 'من حسابين',
+      one: 'من حساب واحد',
+      zero: 'لا توجد حسابات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardHeldVaults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count خزنة',
+      many: '$count خزنة',
+      few: '$count خزائن',
+      two: 'خزنتان',
+      one: 'خزنة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseReadBack(
+    String amount,
+    String category,
+    String account,
+    String spender,
+    String scope,
+  ) {
+    return 'صرفت $amount على $category من $account — أنفقتها $spender لحساب $scope.';
+  }
+
+  @override
+  String get reviewLedgerEffect => 'أثر هذه الحركة على السجل';
+
+  @override
+  String reviewDebitLabel(String description) {
+    return 'مدين — $description';
+  }
+
+  @override
+  String reviewCreditLabel(String description) {
+    return 'دائن — $description';
+  }
+
+  @override
+  String reviewBalanceAfterSave(String account) {
+    return 'رصيد $account بعد الحفظ';
+  }
+
+  @override
+  String get reviewAppendOnlyConsequence =>
+      'بعد الحفظ لا يمكن الحذف — التصحيح يكون بحركة عكسية تبقى في السجل.';
+
+  @override
+  String expenseDefaultsLine(
+    String account,
+    String date,
+    String spender,
+    String scope,
+  ) {
+    return 'من $account · $date · المنفق $spender · $scope';
+  }
+
+  @override
+  String get expenseMoreDetails =>
+      'تفاصيل أكثر — المنفق، المستفيد، النطاق، ملاحظات، تكرار';
+
+  @override
+  String expenseSpenderNotOwnerHint(String spender) {
+    return 'المنفق $spender والحساب باسم شخص آخر — ملاحظة قصيرة تسهّل المراجعة بعدين.';
+  }
+
+  @override
+  String incomeReadBack(String amount, String category, String account) {
+    return 'استلمت $amount من $category في $account.';
+  }
+
+  @override
+  String transferReadBack(String amount, String source, String destination) {
+    return 'حوّلت $amount من $source إلى $destination.';
+  }
 }

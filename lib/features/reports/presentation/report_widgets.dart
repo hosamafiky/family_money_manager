@@ -4,6 +4,7 @@ library;
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
@@ -30,43 +31,44 @@ class _ReportPeriodSelectorState extends ConsumerState<ReportPeriodSelector> {
     final req = ref.watch(reportRequestProvider);
     final current = req.period;
 
-    return Padding(
+    // The margin belongs to the scroll view, not to a wrapper: an outer
+    // Padding shrinks the viewport, so the chip row stops short of the screen
+    // edge instead of running under it.
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _Chip(
-              label: l10n.dashboardPeriodCurrentMonth,
-              selected: current.label == DashboardPeriodLabel.currentMonth,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.currentMonth(ref.read(clockProvider)),
-              ),
+      child: Row(
+        children: [
+          _Chip(
+            label: l10n.dashboardPeriodCurrentMonth,
+            selected: current.label == DashboardPeriodLabel.currentMonth,
+            onSelected: (_) => _setPeriod(
+              DashboardPeriod.currentMonth(ref.read(clockProvider)),
             ),
-            const SizedBox(width: 8),
-            _Chip(
-              label: l10n.dashboardPeriodPreviousMonth,
-              selected: current.label == DashboardPeriodLabel.previousMonth,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.previousMonth(ref.read(clockProvider)),
-              ),
+          ),
+          const SizedBox(width: 8),
+          _Chip(
+            label: l10n.dashboardPeriodPreviousMonth,
+            selected: current.label == DashboardPeriodLabel.previousMonth,
+            onSelected: (_) => _setPeriod(
+              DashboardPeriod.previousMonth(ref.read(clockProvider)),
             ),
-            const SizedBox(width: 8),
-            _Chip(
-              label: l10n.dashboardPeriodCurrentYear,
-              selected: current.label == DashboardPeriodLabel.currentYear,
-              onSelected: (_) => _setPeriod(
-                DashboardPeriod.currentYear(ref.read(clockProvider)),
-              ),
+          ),
+          const SizedBox(width: 8),
+          _Chip(
+            label: l10n.dashboardPeriodCurrentYear,
+            selected: current.label == DashboardPeriodLabel.currentYear,
+            onSelected: (_) => _setPeriod(
+              DashboardPeriod.currentYear(ref.read(clockProvider)),
             ),
-            const SizedBox(width: 8),
-            _Chip(
-              label: l10n.dashboardPeriodCustom,
-              selected: current.label == DashboardPeriodLabel.custom,
-              onSelected: (_) => _showDateRangePicker(context),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          _Chip(
+            label: l10n.dashboardPeriodCustom,
+            selected: current.label == DashboardPeriodLabel.custom,
+            onSelected: (_) => _showDateRangePicker(context),
+          ),
+        ],
       ),
     );
   }
@@ -329,14 +331,18 @@ class ReportInfoNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline, size: 14, color: Colors.grey),
+          Icon(
+            Icons.info_outline,
+            size: 14,
+            color: context.financialColors.neutralInfo,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.financialColors.neutralInfo,
+              ),
             ),
           ),
         ],

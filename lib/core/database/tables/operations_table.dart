@@ -89,6 +89,15 @@ class Operations extends Table {
   /// The [id] of the reversal operation that cancelled this one.
   TextColumn get reversedBy => text().nullable()();
 
+  /// Why this reversal was made. Set only on reversal operations.
+  ///
+  /// It lives on the reversal row rather than on the row being reversed, which
+  /// is what lets it exist at all: the original is append-only and its
+  /// mutability rule stays exactly as it was. Written once at INSERT and
+  /// guarded against later edits — a reason that could be rewritten after the
+  /// fact would make the audit trail a draft.
+  TextColumn get reversalReason => text().nullable()();
+
   TextColumn get createdBy => text()();
   TextColumn get createdAt => text()();
 

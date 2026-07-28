@@ -123,6 +123,159 @@ final class DriftDashboardQueryRepository implements DashboardQueryRepository {
         .toList();
   }
 
+  // ── availableToSpend / excludedFromAvailable / heldByReason ────────────────
+  //
+  // These three partition every non-archived account exactly once:
+  //
+  //   availableToSpend  = spendable and not excluded
+  //   excludedFromAvailable = spendable but excluded (spouse wallets)
+  //   heldByReason      = everything else, by reason
+  //
+  // Written as one predicate reused three ways so the partition cannot drift
+  // apart: money that fell out of every bucket would simply vanish from the
+  // dashboard, which is the failure mode this replaces.
+
+  /// Accounts that count as spendable at all — the same test
+  /// [spendableBalances] applies.
+  static const String _spendablePredicate =
+      "fa.is_archived = 0 AND fa.is_spendable = 1 AND fa.is_protected = 0";
+
+  /// Spendable, but deliberately outside the headline figure.
+  static const String _excludedPredicate = "fa.type = 'spouseCashWallet'";
+
+  static const String _balanceExpression = """
+    SUM(
+      CASE WHEN le.direction = 'credit'
+           THEN le.amount_minor_units
+           ELSE -le.amount_minor_units END
+    ) AS total
+  """;
+
+  @override
+  Future<List<CurrencyAmountSummary>> availableToSpend({
+    required String householdId,
+  }) async {
+    const sql =
+        """
+      SELECT le.currency_code, $_balanceExpression
+      FROM ledger_entries le
+      JOIN financial_accounts fa ON fa.id = le.account_id
+      WHERE fa.household_id = ?
+        AND $_spendablePredicate
+        AND NOT ($_excludedPredicate)
+        AND le.household_id = ?
+      GROUP BY le.currency_code
+    """;
+
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+
+    return rows
+        .map(
+          (r) => CurrencyAmountSummary(
+            currencyCode: r.read<String>('currency_code'),
+            totalMinorUnits: r.read<int>('total'),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<ExcludedAmountSummary>> excludedFromAvailable({
+    required String householdId,
+  }) async {
+    const sql =
+        """
+      SELECT
+        'spouseWallet' AS reason,
+        le.currency_code,
+        $_balanceExpression
+      FROM ledger_entries le
+      JOIN financial_accounts fa ON fa.id = le.account_id
+      WHERE fa.household_id = ?
+        AND $_spendablePredicate
+        AND $_excludedPredicate
+        AND le.household_id = ?
+      GROUP BY reason, le.currency_code
+    """;
+
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+
+    return rows
+        .map(
+          (r) => ExcludedAmountSummary(
+            reason: ExclusionReason.fromCode(r.read<String>('reason')),
+            currencyCode: r.read<String>('currency_code'),
+            totalMinorUnits: r.read<int>('total'),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<List<HeldAmountSummary>> heldByReason({
+    required String householdId,
+  }) async {
+    // The reason is derived from the account type, which is the only place
+    // that distinction is authoritative. `other` is deliberate: an account
+    // that is non-spendable for a reason with no vocabulary yet still gets a
+    // figure rather than disappearing.
+    const sql =
+        """
+      SELECT
+        CASE fa.type
+          WHEN 'childProtectedFund' THEN 'childProtected'
+          WHEN 'goalReserve'        THEN 'goalReserve'
+          WHEN 'certificate'        THEN 'certificatePrincipal'
+          ELSE 'other'
+        END AS reason,
+        le.currency_code,
+        $_balanceExpression
+      FROM ledger_entries le
+      JOIN financial_accounts fa ON fa.id = le.account_id
+      WHERE fa.household_id = ?
+        AND fa.is_archived = 0
+        AND NOT ($_spendablePredicate)
+        AND le.household_id = ?
+      GROUP BY reason, le.currency_code
+    """;
+
+    final rows = await _db
+        .customSelect(
+          sql,
+          variables: [
+            Variable.withString(householdId),
+            Variable.withString(householdId),
+          ],
+        )
+        .get();
+
+    return rows
+        .map(
+          (r) => HeldAmountSummary(
+            reason: HeldReason.fromCode(r.read<String>('reason')),
+            currencyCode: r.read<String>('currency_code'),
+            totalMinorUnits: r.read<int>('total'),
+          ),
+        )
+        .toList();
+  }
+
   // ── periodFlow ─────────────────────────────────────────────────────────────
   //
   // PERIOD-ACTIVITY MODEL (Phase 4B):

@@ -29,6 +29,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/dashboard/domain/dashboard_summary.dart';
 import 'package:family_money_manager/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
@@ -46,6 +47,9 @@ final _defaultPeriod = DashboardPeriod.custom(
 );
 
 DashboardSummary _emptySummary() => DashboardSummary(
+  availableToSpend: const [],
+  excludedFromAvailable: const [],
+  heldByReason: const [],
   householdId: _householdId,
   period: _defaultPeriod,
   spendableBalances: const [],
@@ -60,11 +64,30 @@ DashboardSummary _emptySummary() => DashboardSummary(
 DashboardSummary _summaryWithData({
   List<CurrencyAmountSummary>? spendable,
   List<CurrencyAmountSummary>? protected,
+  List<CurrencyAmountSummary>? available,
+  List<ExcludedAmountSummary>? excluded,
+  List<HeldAmountSummary>? held,
   List<PeriodFlowSummary>? flow,
   List<ExpenseScopeSummary>? scopes,
   List<SpouseWalletDashboardSummary>? wallets,
   List<TransactionSummary>? recent,
 }) => DashboardSummary(
+  // The screen reads availableToSpend and heldByReason; the older
+  // spendable/protected params describe the same money, so they seed both.
+  // Tests that need the two to differ — a spouse wallet excluded from the
+  // headline — set the new fields directly.
+  availableToSpend: available ?? spendable ?? const [],
+  excludedFromAvailable: excluded ?? const [],
+  heldByReason:
+      held ??
+      [
+        for (final p in protected ?? const <CurrencyAmountSummary>[])
+          HeldAmountSummary(
+            reason: HeldReason.childProtected,
+            currencyCode: p.currencyCode,
+            totalMinorUnits: p.totalMinorUnits,
+          ),
+      ],
   householdId: _householdId,
   period: _defaultPeriod,
   spendableBalances: spendable ?? const [],
@@ -191,7 +214,9 @@ void main() {
       expect(find.text('USD'), findsWidgets);
     });
 
-    testWidgets('5. Protected balances shown separately', (tester) async {
+    testWidgets('5. Held money is a separate region, never in the hero', (
+      tester,
+    ) async {
       final summary = _summaryWithData(
         spendable: const [
           CurrencyAmountSummary(currencyCode: 'EGP', totalMinorUnits: 100000),
@@ -202,24 +227,19 @@ void main() {
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
-      // Both sections present
+
+      // The hero answers "what can I spend"; the held region answers "what do
+      // I own that I cannot". They are separate regions with separate
+      // headings, and the held subtotal is never added to the hero.
+      expect(find.byType(BalanceHero), findsOneWidget);
+      expect(find.byType(HeldMoneyRegion), findsOneWidget);
+      // Default locale for these tests is Arabic.
+      expect(find.text('يمكنك صرف الآن'), findsOneWidget);
+      expect(find.text('محتجز — غير قابل للصرف'), findsOneWidget);
+      // The refusal is printed where a grand total would sit.
       expect(
-        find.byWidgetPredicate(
-          (w) =>
-              w is Text &&
-              (w.data?.contains('الأرصدة المتاحة') == true ||
-                  w.data?.contains('Spendable') == true),
-        ),
-        findsWidgets,
-      );
-      expect(
-        find.byWidgetPredicate(
-          (w) =>
-              w is Text &&
-              (w.data?.contains('الأرصدة المحمية') == true ||
-                  w.data?.contains('Protected') == true),
-        ),
-        findsWidgets,
+        find.text('لا يوجد إجمالي موحّد — كل عملة مستقلة'),
+        findsOneWidget,
       );
     });
 
@@ -404,16 +424,11 @@ void main() {
       );
       await tester.pumpWidget(_buildScreen(result: AppOk(summary)));
       await tester.pumpAndSettle();
-      // Protected section has lock icon or text indicator
-      expect(
-        find.byWidgetPredicate(
-          (w) =>
-              w is Text &&
-              (w.data?.contains('الأرصدة المحمية') == true ||
-                  w.data?.contains('Protected') == true),
-        ),
-        findsWidgets,
-      );
+      // A protected fund is held money: it lands in the held region, named by
+      // its reason, and carries the lock. Colour is not one of the signals.
+      expect(find.byType(HeldMoneyRegion), findsOneWidget);
+      expect(find.text('محمي'), findsWidgets);
+      expect(find.byIcon(Icons.lock_outline), findsWidgets);
     });
 
     testWidgets('17. Negative balance shown with warning icon', (tester) async {

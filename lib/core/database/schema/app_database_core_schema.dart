@@ -55,6 +55,7 @@ mixin _AppDatabaseCoreSchema on _$AppDatabase {
       '  OR NEW.total_amount_minor_units != OLD.total_amount_minor_units '
       '  OR NEW.currency_code != OLD.currency_code '
       '  OR NEW.created_by != OLD.created_by OR NEW.created_at != OLD.created_at '
+      '  OR NEW.reversal_reason IS NOT OLD.reversal_reason '
       'BEGIN '
       "  SELECT RAISE(ABORT, 'Operations are append-only: only is_reversed, reversed_by, and updated_at may change'); "
       'END',

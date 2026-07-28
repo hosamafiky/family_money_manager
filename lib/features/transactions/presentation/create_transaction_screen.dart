@@ -1,4 +1,5 @@
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,7 +28,7 @@ class CreateTransactionScreen extends StatelessWidget {
         children: [
           _TypeCard(
             icon: Icons.arrow_downward,
-            color: Colors.green,
+            color: context.financialColors.income,
             title: l10n.createIncomeTitle,
             subtitle: l10n.transactionTypeIncome,
             onTap: () => context.push(
@@ -38,7 +39,7 @@ class CreateTransactionScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _TypeCard(
             icon: Icons.arrow_upward,
-            color: Colors.red,
+            color: context.financialColors.expense,
             title: l10n.createExpenseTitle,
             subtitle: l10n.transactionTypeExpense,
             onTap: () => context.push(
@@ -49,7 +50,7 @@ class CreateTransactionScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _TypeCard(
             icon: Icons.swap_horiz,
-            color: Colors.blue,
+            color: context.financialColors.transfer,
             title: l10n.createTransferTitle,
             subtitle: l10n.transactionTypeTransfer,
             onTap: () => context.push(

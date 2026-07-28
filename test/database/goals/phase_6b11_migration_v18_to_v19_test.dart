@@ -63,7 +63,9 @@ void main() {
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 19);
+      // The upgrade path now continues to 20; this test's subject is the
+      // 18→19 step, which still runs on the way there.
+      expect(version.first.read<int>('user_version'), 20);
 
       expect(
         (await db

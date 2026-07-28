@@ -41,6 +41,28 @@ flutter:
   uses-material-design: true
   generate: true
 
+  # Bundled, never fetched at runtime — this is an offline-first app, so
+  # typography must not depend on connectivity. Declared here in phase 0 but
+  # not yet applied by any text role; phase 3 wires them into
+  # AppTextRoles.forLocale. See assets/fonts/OFL.txt for licensing.
+  fonts:
+    - family: Archivo
+      fonts:
+        - asset: assets/fonts/Archivo-400.ttf
+          weight: 400
+        - asset: assets/fonts/Archivo-600.ttf
+          weight: 600
+        - asset: assets/fonts/Archivo-800.ttf
+          weight: 800
+    - family: IBM Plex Sans Arabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-400.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSansArabic-600.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansArabic-700.ttf
+          weight: 700
+
 # sqlite3mc hook: build the sqlite3 native library with SQLite3MultipleCiphers
 # encryption support. Accepted in DECISION-004 / PO-2.
 # The database key injection is deferred to the security hardening phase.

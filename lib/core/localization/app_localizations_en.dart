@@ -1622,4 +1622,152 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currencyOmr => 'Omani Rial (OMR)';
+
+  @override
+  String get amountHidden => 'Hidden amount';
+
+  @override
+  String get amountNotSpendable => 'not spendable';
+
+  @override
+  String get amountHeld => 'held';
+
+  @override
+  String progressUsedPercent(int percent) {
+    return '$percent% used';
+  }
+
+  @override
+  String get actionRetry => 'Retry';
+
+  @override
+  String get errorLedgerUnchanged =>
+      'Nothing was saved. Your ledger is unchanged.';
+
+  @override
+  String errorCodeLabel(String code) {
+    return 'Error code: $code';
+  }
+
+  @override
+  String get accountRegionSpendable => 'Available to spend';
+
+  @override
+  String get accountRegionHeld => 'Held — not spendable';
+
+  @override
+  String get dashboardAvailableToSpend => 'Available to spend';
+
+  @override
+  String get dashboardNoCombinedTotal =>
+      'No combined total — each currency is independent';
+
+  @override
+  String dashboardHeldSubtotal(String currency) {
+    return 'Total held — $currency';
+  }
+
+  @override
+  String get dashboardHeldNotAdded =>
+      'Not added to your available balance — this total applies inside this region only.';
+
+  @override
+  String get dashboardExcludedFromAvailable => 'Not counted here';
+
+  @override
+  String get heldReasonCertificatePrincipal => 'Certificate principal';
+
+  @override
+  String get heldReasonGoalReserve => 'Reserved for a goal';
+
+  @override
+  String get heldReasonChildProtected => 'Protected';
+
+  @override
+  String get heldReasonOther => 'Not spendable';
+
+  @override
+  String dashboardFromAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'from $count accounts',
+      one: 'from 1 account',
+      zero: 'no accounts',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardHeldVaults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count holdings',
+      one: '1 holding',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseReadBack(
+    String amount,
+    String category,
+    String account,
+    String spender,
+    String scope,
+  ) {
+    return 'You spent $amount on $category from $account — $spender spent it for $scope.';
+  }
+
+  @override
+  String get reviewLedgerEffect => 'How this entry lands in the ledger';
+
+  @override
+  String reviewDebitLabel(String description) {
+    return 'Debit — $description';
+  }
+
+  @override
+  String reviewCreditLabel(String description) {
+    return 'Credit — $description';
+  }
+
+  @override
+  String reviewBalanceAfterSave(String account) {
+    return '$account balance after saving';
+  }
+
+  @override
+  String get reviewAppendOnlyConsequence =>
+      'Once saved this cannot be deleted — a correction is a reversing entry that stays in the ledger.';
+
+  @override
+  String expenseDefaultsLine(
+    String account,
+    String date,
+    String spender,
+    String scope,
+  ) {
+    return 'From $account · $date · spender $spender · $scope';
+  }
+
+  @override
+  String get expenseMoreDetails =>
+      'More detail — spender, beneficiary, scope, notes, recurrence';
+
+  @override
+  String expenseSpenderNotOwnerHint(String spender) {
+    return '$spender is spending from an account in someone else\'s name — a short note makes this easier to review later.';
+  }
+
+  @override
+  String incomeReadBack(String amount, String category, String account) {
+    return 'You received $amount as $category into $account.';
+  }
+
+  @override
+  String transferReadBack(String amount, String source, String destination) {
+    return 'You moved $amount from $source to $destination.';
+  }
 }

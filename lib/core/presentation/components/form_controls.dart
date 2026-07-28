@@ -3,6 +3,11 @@ import 'package:family_money_manager/core/presentation/theme/app_theme_extension
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// The first thing the user sees in every entry flow.
+///
+/// A ruled row, not a boxed field: 56 dp tall, the currency code pinned at the
+/// trailing edge, and a 2 px bottom rule that goes ink on focus and expense on
+/// error. There is no spinner and no stepper — money is typed.
 class AmountEntryField extends StatelessWidget {
   const AmountEntryField({
     required this.controller,
@@ -10,41 +15,146 @@ class AmountEntryField extends StatelessWidget {
     super.key,
     this.currencyCode,
     this.errorText,
+    this.helperText,
     this.onChanged,
     this.inputFormatters,
     this.focusNode,
     this.enabled = true,
     this.autofocus = false,
+    this.readOnly = false,
   });
 
   final TextEditingController controller;
+
+  /// Sits above the field, never inside it: a label that doubles as a
+  /// placeholder disappears exactly when the user needs it.
   final String label;
+
   final String? currencyCode;
+
+  /// Persistent. A validation failure stays on screen at its cause until the
+  /// cause is fixed — it is never a snackbar.
   final String? errorText;
+
+  /// Shown when there is no error — a reason the field is disabled, typically.
+  final String? helperText;
+
   final ValueChanged<String>? onChanged;
   final List<TextInputFormatter>? inputFormatters;
   final FocusNode? focusNode;
   final bool enabled;
   final bool autofocus;
 
+  /// True when an [AmountKeypad] drives the value instead of the system
+  /// keyboard. The field still shows a cursor and still takes focus.
+  final bool readOnly;
+
+  static const double fieldHeight = 56;
+
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
-      enabled: enabled,
-      autofocus: autofocus,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: inputFormatters,
-      style: context.textRoles.displayBalance.copyWith(fontSize: 28),
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: context.textRoles.formLabel,
-        errorText: errorText,
-        suffixText: currencyCode,
-        suffixStyle: context.textRoles.supportingMeta,
-      ),
+    final colors = context.financialColors;
+    final roles = context.textRoles;
+    final hasError = errorText != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: roles.formLabel.copyWith(
+            color: enabled ? colors.secondaryText : colors.disabled,
+          ),
+        ),
+        const SizedBox(height: AppTheme.space4),
+        SizedBox(
+          height: fieldHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  enabled: enabled,
+                  autofocus: autofocus,
+                  readOnly: readOnly,
+                  // The pad supplies digits; showing the system keyboard as
+                  // well would put two number rows on screen at once.
+                  showCursor: true,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: inputFormatters,
+                  style: roles.displayBalance.copyWith(
+                    fontSize: 32,
+                    color: enabled ? colors.primaryText : colors.disabled,
+                  ),
+                  onChanged: onChanged,
+                  decoration: const InputDecoration(
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                  ),
+                ),
+              ),
+              if (currencyCode case final String code) ...[
+                const SizedBox(width: AppTheme.space8),
+                // Fixed at the trailing edge — it never scrolls with the
+                // digits, so a long amount cannot push it off the row.
+                Text(
+                  code,
+                  style: roles.supportingMeta.copyWith(
+                    color: colors.secondaryText,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        // The rule is the field. Ink at rest, expense on error.
+        Container(
+          height: AppTheme.regionRuleWidth,
+          color: hasError
+              ? colors.expense
+              : (enabled ? colors.primaryText : colors.disabled),
+        ),
+        if (errorText case final String error) ...[
+          const SizedBox(height: AppTheme.space4),
+          // liveRegion so a screen reader announces the failure without the
+          // user having to go looking for it.
+          Semantics(
+            liveRegion: true,
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, size: 14, color: colors.expense),
+                const SizedBox(width: AppTheme.space4),
+                Flexible(
+                  child: Text(
+                    error,
+                    style: roles.supportingMeta.copyWith(color: colors.expense),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (helperText case final String helper) ...[
+          const SizedBox(height: AppTheme.space4),
+          // A disabled control always carries a reason: `disabled` is 2.6:1
+          // and cannot convey its own state.
+          Text(
+            helper,
+            style: roles.supportingMeta.copyWith(color: colors.secondaryText),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -97,6 +207,7 @@ class PeriodSelector<T> extends StatelessWidget {
     required this.selected,
     required this.labelOf,
     required this.onSelected,
+    this.horizontalPadding = AppTheme.space16,
     super.key,
   });
 
@@ -105,11 +216,19 @@ class PeriodSelector<T> extends StatelessWidget {
   final String Function(T) labelOf;
   final ValueChanged<T> onSelected;
 
+  /// Applied inside the scroll view so the row stays full-bleed.
+  final double horizontalPadding;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(vertical: AppTheme.space4),
+      // The margin lives here, never on a wrapping Padding: an outer Padding
+      // shrinks the viewport so the chips stop short of the screen edge.
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: AppTheme.space4,
+      ),
       child: Row(
         children: [
           for (final option in options) ...[

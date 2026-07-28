@@ -1,6 +1,7 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
 import 'package:family_money_manager/features/certificates/presentation/certificate_money_formatter.dart';
 import 'package:family_money_manager/features/certificates/presentation/providers/certificate_providers.dart';
@@ -134,7 +135,10 @@ class _CertificateDetailBody extends StatelessWidget {
             if (cert.profitFrequency != null)
               _Row(
                 label: l10n.certificateProfitFrequency,
-                value: certificateProfitFrequencyLabel(l10n, cert.profitFrequency!),
+                value: certificateProfitFrequencyLabel(
+                  l10n,
+                  cert.profitFrequency!,
+                ),
               ),
             if (cert.note != null)
               _Row(label: l10n.certificateNote, value: cert.note!),
@@ -262,9 +266,9 @@ class _Row extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey,
+                color: context.financialColors.secondaryText,
               ),
             ),
           ),

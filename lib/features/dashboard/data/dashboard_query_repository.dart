@@ -30,6 +30,32 @@ abstract interface class DashboardQueryRepository {
     required String todayLocal,
   });
 
+  /// Money the household can actually spend, by currency.
+  ///
+  /// [spendableBalances] less every account reported by
+  /// [excludedFromAvailable]. Kept in the query because subtracting one
+  /// balance from another is ledger arithmetic.
+  Future<List<CurrencyAmountSummary>> availableToSpend({
+    required String householdId,
+  });
+
+  /// Spendable money that is deliberately not in [availableToSpend].
+  ///
+  /// Currently spouse wallets. Reported rather than silently netted off, so
+  /// the dashboard can state what its headline figure leaves out.
+  Future<List<ExcludedAmountSummary>> excludedFromAvailable({
+    required String householdId,
+  });
+
+  /// Non-archived money that cannot be spent, grouped by why.
+  ///
+  /// This is the exact complement of [spendableBalances] over non-archived
+  /// accounts: every account is in one bucket or the other, so the two can
+  /// never double-count and can never leave money unreported. Certificate
+  /// principal and goal reserves live here — they are neither spendable nor
+  /// protected, and had no dashboard figure at all before this existed.
+  Future<List<HeldAmountSummary>> heldByReason({required String householdId});
+
   /// Period income and expense totals by currency.
   ///
   /// Excludes: transfers, opening balances, adjustments.

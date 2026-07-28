@@ -113,6 +113,48 @@ void main() {
     expect(violations, isEmpty, reason: violations.join('\n'));
   });
 
+  test('no feature paints a raw Material palette colour', () {
+    // Financial state is carried by semantic roles on AppFinancialColors, and
+    // a raw hue bypasses every guarantee those roles make: the income/expense
+    // axis stays off the green–red pair both common dichromacies collapse,
+    // dark mode gets a value that actually clears AA, and there is exactly one
+    // red in the product. Colors.transparent is not a hue and is allowed.
+    final violations = <String>[];
+    final pattern = RegExp(
+      r'\bColors\.(red|green|orange|blue|grey|gray|amber|purple|teal|yellow'
+      r'|pink|cyan|indigo|brown|lime|deepOrange|deepPurple|lightBlue'
+      r'|lightGreen|blueGrey)\b',
+    );
+    for (final file in [
+      ...dartFilesUnder('features'),
+      ...dartFilesUnder('core/presentation'),
+    ]) {
+      final src = file.readAsStringSync();
+      for (final line in src.split('\n')) {
+        final trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
+        if (pattern.hasMatch(line)) violations.add('${file.path}: $trimmed');
+      }
+    }
+    expect(violations, isEmpty, reason: violations.join('\n'));
+  });
+
+  test('features do not build their own ThemeData or ColorScheme', () {
+    // Both belong to AppTheme. A feature-local theme would fork the token
+    // system, which is the failure the shared kit exists to prevent.
+    final violations = <String>[];
+    final pattern = RegExp(r'\b(ThemeData\(|ColorScheme\.fromSeed\()');
+    for (final file in dartFilesUnder('features')) {
+      final src = file.readAsStringSync();
+      for (final line in src.split('\n')) {
+        final trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
+        if (pattern.hasMatch(line)) violations.add('${file.path}: $trimmed');
+      }
+    }
+    expect(violations, isEmpty, reason: violations.join('\n'));
+  });
+
   test('authoritative debit writers use contention retry helper', () {
     for (final path in [
       'lib/features/ledger/data/drift_ledger_repository.dart',
@@ -128,9 +170,13 @@ void main() {
     }
   });
 
-  test('schemaVersion remains 19', () {
+  test('schemaVersion remains 20', () {
+    // A deliberate tripwire: bumping the version without adding an onUpgrade
+    // step is how a released database silently fails to migrate. Change this
+    // only alongside a migration and its test.
     final src = File('lib/core/database/app_database.dart').readAsStringSync();
-    expect(src.contains('schemaVersion => 19'), isTrue);
+    expect(src.contains('schemaVersion => 20'), isTrue);
+    expect(src.contains('if (from <= 19)'), isTrue);
   });
 
   test(

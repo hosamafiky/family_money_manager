@@ -53,7 +53,7 @@ void main() {
       addTearDown(db.close);
 
       final version = await db.customSelect('PRAGMA user_version').get();
-      expect(version.first.read<int>('user_version'), 19);
+      expect(version.first.read<int>('user_version'), 20);
 
       expect(
         (await db

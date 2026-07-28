@@ -528,5 +528,227 @@
   "currencyJpy": "ين ياباني (JPY)",
   "currencyKwd": "دينار كويتي (KWD)",
   "currencyBhd": "دينار بحريني (BHD)",
-  "currencyOmr": "ريال عماني (OMR)"
+  "currencyOmr": "ريال عماني (OMR)",
+  "amountHidden": "مبلغ مخفي",
+  "@amountHidden": {
+    "description": "Screen-reader label for an amount concealed by privacy mode. Never reveals the value."
+  },
+  "amountNotSpendable": "غير قابل للصرف",
+  "@amountNotSpendable": {
+    "description": "Marks money that is held and cannot be spent — certificate principal, goal reserves, protected funds."
+  },
+  "amountHeld": "محتجز",
+  "@amountHeld": {
+    "description": "Screen-reader lead for a held amount, spoken before its reason."
+  },
+  "progressUsedPercent": "{percent}٪ مُستخدم",
+  "@progressUsedPercent": {
+    "description": "Consumption of a budget or goal. The percentage is truncated, never rounded.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "actionRetry": "إعادة المحاولة",
+  "@actionRetry": {
+    "description": "Generic retry action on an error state."
+  },
+  "errorLedgerUnchanged": "لم تُحفظ أي بيانات. سجلك سليم ولم يتغيّر.",
+  "@errorLedgerUnchanged": {
+    "description": "Default reassurance on a read failure. After an error a household's first question is never why — it is whether anything was corrupted."
+  },
+  "errorCodeLabel": "رمز الخطأ: {code}",
+  "@errorCodeLabel": {
+    "description": "Technical code shown under an error message, for support conversations.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "accountRegionSpendable": "قابل للصرف",
+  "@accountRegionSpendable": {
+    "description": "Heading of the region holding money that can be spent."
+  },
+  "accountRegionHeld": "محتجز — غير قابل للصرف",
+  "@accountRegionHeld": {
+    "description": "Heading of the region holding certificate principal, goal reserves and protected funds. Never summed with the spendable region."
+  },
+  "dashboardAvailableToSpend": "يمكنك صرف الآن",
+  "@dashboardAvailableToSpend": {
+    "description": "Heading of the dominant dashboard region. Answers 'how much can I spend right now', per currency."
+  },
+  "dashboardNoCombinedTotal": "لا يوجد إجمالي موحّد — كل عملة مستقلة",
+  "@dashboardNoCombinedTotal": {
+    "description": "Printed where a grand total would sit. Users read a missing total as a bug; a stated refusal teaches the invariant instead."
+  },
+  "dashboardHeldSubtotal": "إجمالي المحتجز — {currency}",
+  "@dashboardHeldSubtotal": {
+    "description": "Subtotal of the held region, for one currency only.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHeldNotAdded": "لا يُضاف إلى رصيدك المتاح — هذا مجموع داخل هذه المنطقة فقط",
+  "@dashboardHeldNotAdded": {
+    "description": "Why the held subtotal is not part of the headline figure."
+  },
+  "dashboardExcludedFromAvailable": "غير محسوبة هنا",
+  "@dashboardExcludedFromAvailable": {
+    "description": "Marks money deliberately outside the available-to-spend figure."
+  },
+  "heldReasonCertificatePrincipal": "أصل الشهادة",
+  "@heldReasonCertificatePrincipal": {
+    "description": "Held-money reason: principal locked for a certificate term."
+  },
+  "heldReasonGoalReserve": "محتجز لهدف",
+  "@heldReasonGoalReserve": {
+    "description": "Held-money reason: reserved against a savings goal."
+  },
+  "heldReasonChildProtected": "محمي",
+  "@heldReasonChildProtected": {
+    "description": "Held-money reason: a child's protected fund."
+  },
+  "heldReasonOther": "غير قابل للصرف",
+  "@heldReasonOther": {
+    "description": "Held-money reason with no more specific vocabulary. Never omitted — the money still gets a figure."
+  },
+  "dashboardFromAccounts": "{count, plural, zero{لا توجد حسابات} one{من حساب واحد} two{من حسابين} few{من {count} حسابات} many{من {count} حسابًا} other{من {count} حساب}}",
+  "@dashboardFromAccounts": {
+    "description": "How many accounts make up a currency's available balance.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHeldVaults": "{count, plural, one{خزنة واحدة} two{خزنتان} few{{count} خزائن} many{{count} خزنة} other{{count} خزنة}}",
+  "@dashboardHeldVaults": {
+    "description": "Count of held-money holdings, shown beside the held region heading.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseReadBack": "صرفت {amount} على {category} من {account} — أنفقتها {spender} لحساب {scope}.",
+  "@expenseReadBack": {
+    "description": "One-sentence read-back of a staged expense. Catches a wrong account or a wrong spender faster than a table of labelled rows. Assembled as a whole sentence, never by concatenating fragments.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      },
+      "spender": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewLedgerEffect": "أثر هذه الحركة على السجل",
+  "@reviewLedgerEffect": {
+    "description": "Heading above the double-entry rows on a review screen."
+  },
+  "reviewDebitLabel": "مدين — {description}",
+  "@reviewDebitLabel": {
+    "description": "Debit side of a double entry.",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewCreditLabel": "دائن — {description}",
+  "@reviewCreditLabel": {
+    "description": "Credit side of a double entry.",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewBalanceAfterSave": "رصيد {account} بعد الحفظ",
+  "@reviewBalanceAfterSave": {
+    "description": "The account's derived balance once this entry is written.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewAppendOnlyConsequence": "بعد الحفظ لا يمكن الحذف — التصحيح يكون بحركة عكسية تبقى في السجل.",
+  "@reviewAppendOnlyConsequence": {
+    "description": "Permanent consequence line under the confirm action. Not conditional — it is how the app teaches append-only before the user learns it the hard way."
+  },
+  "expenseDefaultsLine": "من {account} · {date} · المنفق {spender} · {scope}",
+  "@expenseDefaultsLine": {
+    "description": "The meta line under the amount. Every default the entry flow applied is printed rather than hidden — the fast path is pre-answered, not silent.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "spender": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseMoreDetails": "تفاصيل أكثر — المنفق، المستفيد، النطاق، ملاحظات، تكرار",
+  "@expenseMoreDetails": {
+    "description": "Expands the entry sheet to the full field set. Same sheet, same amount, same save button — a disclosure, not a navigation."
+  },
+  "expenseSpenderNotOwnerHint": "المنفق {spender} والحساب باسم شخص آخر — ملاحظة قصيرة تسهّل المراجعة بعدين.",
+  "@expenseSpenderNotOwnerHint": {
+    "description": "Non-blocking nudge, never a validation error. Requiring a note here would tax the household's single most common entry.",
+    "placeholders": {
+      "spender": {
+        "type": "String"
+      }
+    }
+  },
+  "incomeReadBack": "استلمت {amount} من {category} في {account}.",
+  "@incomeReadBack": {
+    "description": "One-sentence read-back of a staged income entry.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReadBack": "حوّلت {amount} من {source} إلى {destination}.",
+  "@transferReadBack": {
+    "description": "One-sentence read-back of a staged transfer. States no direction sign: a transfer changes no total, so it is neither positive nor negative.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  }
 }

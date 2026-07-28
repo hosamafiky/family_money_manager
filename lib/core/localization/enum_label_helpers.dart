@@ -18,14 +18,16 @@ String operationTypeLabel(AppLocalizations l10n, OperationType type) {
     OperationType.liabilityCreation => l10n.transactionTypeLiabilityCreation,
     OperationType.liabilityRepayment => l10n.transactionTypeLiabilityRepayment,
     OperationType.certificateFunding => l10n.transactionTypeCertificateFunding,
-    OperationType.certificateMaturity => l10n.transactionTypeCertificateMaturity,
+    OperationType.certificateMaturity =>
+      l10n.transactionTypeCertificateMaturity,
     OperationType.interestIncome => l10n.transactionTypeInterestIncome,
     OperationType.goldPurchase => l10n.transactionTypeGoldPurchase,
     OperationType.goldSale => l10n.transactionTypeGoldSale,
     OperationType.goalFunding => l10n.transactionTypeGoalFunding,
     OperationType.goalWithdrawal => l10n.transactionTypeGoalWithdrawal,
     OperationType.childFundDeposit => l10n.transactionTypeChildFundDeposit,
-    OperationType.childFundWithdrawal => l10n.transactionTypeChildFundWithdrawal,
+    OperationType.childFundWithdrawal =>
+      l10n.transactionTypeChildFundWithdrawal,
     OperationType.sadaqah => l10n.transactionTypeSadaqah,
     OperationType.zakat => l10n.transactionTypeZakat,
   };
@@ -125,9 +127,11 @@ String certificateProfitFrequencyLabel(
   return switch (frequency) {
     CertificateProfitFrequency.monthly => l10n.certificateProfitFreqMonthly,
     CertificateProfitFrequency.quarterly => l10n.certificateProfitFreqQuarterly,
-    CertificateProfitFrequency.semiAnnual => l10n.certificateProfitFreqSemiAnnual,
+    CertificateProfitFrequency.semiAnnual =>
+      l10n.certificateProfitFreqSemiAnnual,
     CertificateProfitFrequency.annual => l10n.certificateProfitFreqAnnual,
-    CertificateProfitFrequency.atMaturity => l10n.certificateProfitFreqAtMaturity,
+    CertificateProfitFrequency.atMaturity =>
+      l10n.certificateProfitFreqAtMaturity,
     CertificateProfitFrequency.other => l10n.certificateProfitFreqOther,
   };
 }

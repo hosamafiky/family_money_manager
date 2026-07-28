@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -89,6 +90,7 @@ class _FundCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -111,7 +113,7 @@ class _FundCard extends StatelessWidget {
                 label: l10n.reportFunded,
                 minorUnits: fund.fundingMinorUnits,
                 currencyCode: fund.currencyCode,
-                color: Colors.green,
+                color: colors.income,
                 icon: Icons.arrow_downward,
               ),
             if (fund.withdrawalMinorUnits != 0)
@@ -119,7 +121,7 @@ class _FundCard extends StatelessWidget {
                 label: l10n.reportWithdrawals,
                 minorUnits: -fund.withdrawalMinorUnits,
                 currencyCode: fund.currencyCode,
-                color: Colors.red,
+                color: colors.expense,
                 icon: Icons.arrow_upward,
               ),
             if (fund.reversalEffectMinorUnits != 0)
@@ -127,7 +129,7 @@ class _FundCard extends StatelessWidget {
                 label: l10n.reportReversalEffect,
                 minorUnits: fund.reversalEffectMinorUnits,
                 currencyCode: fund.currencyCode,
-                color: Colors.orange,
+                color: colors.secondaryText,
                 icon: Icons.undo,
               ),
             const Divider(height: 12),
@@ -168,12 +170,13 @@ class _AuditRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
       leading: Icon(
         audit.isReversed ? Icons.undo : Icons.arrow_upward,
-        color: audit.isReversed ? Colors.orange : Colors.red,
+        color: audit.isReversed ? colors.secondaryText : colors.expense,
         size: 18,
       ),
       title: Text(audit.reason, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -183,7 +186,7 @@ class _AuditRow extends StatelessWidget {
       trailing: ReportAmountText(
         minorUnits: audit.amountMinorUnits,
         currencyCode: audit.currencyCode,
-        color: audit.isReversed ? Colors.orange : Colors.red,
+        color: audit.isReversed ? colors.secondaryText : colors.expense,
       ),
     );
   }

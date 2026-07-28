@@ -64,10 +64,7 @@ void main() {
         ),
       );
 
-      expect(
-        resolveMessageKey(l10n, 'totally_unknown_key'),
-        l10n.errorGeneric,
-      );
+      expect(resolveMessageKey(l10n, 'totally_unknown_key'), l10n.errorGeneric);
     });
   });
 }

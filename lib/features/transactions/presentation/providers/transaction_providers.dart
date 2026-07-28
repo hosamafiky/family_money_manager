@@ -187,6 +187,13 @@ final submittingProvider =
     );
 
 // ── Staged context providers ──────────────────────────────────────────────────
+//
+// These are intentionally NOT autoDispose. The form screen stages a context and
+// immediately pushes the review route; with autoDispose the provider has no
+// listener during that gap and is disposed before the review screen watches it,
+// so review reads null and pops straight back — the button appears dead.
+// Each review screen clears its staged context (`set(null)`) after a successful
+// submit, so nothing leaks between operations.
 
 class StagedIncomeContextNotifier extends Notifier<IncomeContext?> {
   @override
@@ -196,7 +203,7 @@ class StagedIncomeContextNotifier extends Notifier<IncomeContext?> {
 }
 
 final stagedIncomeContextProvider =
-    NotifierProvider.autoDispose<StagedIncomeContextNotifier, IncomeContext?>(
+    NotifierProvider<StagedIncomeContextNotifier, IncomeContext?>(
       StagedIncomeContextNotifier.new,
     );
 
@@ -208,7 +215,7 @@ class StagedExpenseContextNotifier extends Notifier<ExpenseContext?> {
 }
 
 final stagedExpenseContextProvider =
-    NotifierProvider.autoDispose<StagedExpenseContextNotifier, ExpenseContext?>(
+    NotifierProvider<StagedExpenseContextNotifier, ExpenseContext?>(
       StagedExpenseContextNotifier.new,
     );
 
@@ -220,7 +227,6 @@ class StagedTransferContextNotifier extends Notifier<TransferContext?> {
 }
 
 final stagedTransferContextProvider =
-    NotifierProvider.autoDispose<
-      StagedTransferContextNotifier,
-      TransferContext?
-    >(StagedTransferContextNotifier.new);
+    NotifierProvider<StagedTransferContextNotifier, TransferContext?>(
+      StagedTransferContextNotifier.new,
+    );

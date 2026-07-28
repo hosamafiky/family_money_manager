@@ -27,7 +27,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('en', 'US'),
+    defaultLocale: Locale('ar', 'EG'),
     isProduction: true,
   );
 
@@ -36,7 +36,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة (تجريبي)',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('en', 'US'),
+    defaultLocale: Locale('ar', 'EG'),
     isProduction: false,
   );
 
@@ -45,7 +45,7 @@ final class AppConfig {
     appNameAr: 'مدير مالية الأسرة (تطوير)',
     packageName: 'com.familymoney.manager',
     currencyCode: 'EGP',
-    defaultLocale: Locale('en', 'US'),
+    defaultLocale: Locale('ar', 'EG'),
     isProduction: false,
   );
 
@@ -59,6 +59,11 @@ final class AppConfig {
   final String currencyCode;
 
   /// The locale used on first launch before the user changes it.
+  ///
+  /// `ar_EG` in every configuration, including development: Arabic is the
+  /// primary locale and RTL the primary direction, so a developer running the
+  /// app must see what the household sees. Defaulting to English here is how
+  /// RTL layout defects reach production unnoticed.
   final Locale defaultLocale;
 
   final bool isProduction;

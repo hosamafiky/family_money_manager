@@ -88,55 +88,6 @@ class StatusBadge extends StatelessWidget {
   }
 }
 
-class AccountListTile extends StatelessWidget {
-  const AccountListTile({
-    required this.name,
-    required this.formattedBalance,
-    required this.subtitle,
-    super.key,
-    this.trailingBadge,
-    this.onTap,
-    this.isSecondary = false,
-  });
-
-  final String name;
-  final String formattedBalance;
-  final String subtitle;
-  final Widget? trailingBadge;
-  final VoidCallback? onTap;
-  final bool isSecondary;
-
-  @override
-  Widget build(BuildContext context) {
-    final roles = context.textRoles;
-    final opacity = isSecondary ? 0.72 : 1.0;
-    return Opacity(
-      opacity: opacity,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.space16,
-          vertical: AppTheme.space4,
-        ),
-        title: Text(name, style: roles.cardTitle),
-        subtitle: Text(subtitle, style: roles.supportingMeta),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(formattedBalance, style: roles.financialAmount),
-            if (trailingBadge != null) ...[
-              const SizedBox(height: AppTheme.space4),
-              trailingBadge!,
-            ],
-          ],
-        ),
-        onTap: onTap,
-        minVerticalPadding: AppTheme.space8,
-      ),
-    );
-  }
-}
-
 class TransactionListTile extends StatelessWidget {
   const TransactionListTile({
     required this.typeLabel,
@@ -144,7 +95,8 @@ class TransactionListTile extends StatelessWidget {
     required this.primaryDescription,
     required this.accountOrDirection,
     required this.effectiveDate,
-    required this.formattedAmount,
+    required this.minorUnits,
+    required this.currencyCode,
     super.key,
     this.memberOrCategory,
     this.isReversed = false,
@@ -158,16 +110,28 @@ class TransactionListTile extends StatelessWidget {
   final String primaryDescription;
   final String accountOrDirection;
   final String effectiveDate;
-  final String formattedAmount;
+  final int minorUnits;
+  final String currencyCode;
   final String? memberOrCategory;
   final bool isReversed;
   final String? reversedLabel;
   final String? associationLabel;
   final VoidCallback? onTap;
 
+  /// Minimum, never fixed: a long Arabic description wraps and the tile grows.
+  static const double minHeight = 64;
+
   @override
   Widget build(BuildContext context) {
     final roles = context.textRoles;
+    final direction = switch (typeKind) {
+      FinancialTypeKind.income => FinancialAmountDirection.inflow,
+      FinancialTypeKind.expense => FinancialAmountDirection.outflow,
+      FinancialTypeKind.transfer => FinancialAmountDirection.internal,
+      FinancialTypeKind.goal ||
+      FinancialTypeKind.certificate => FinancialAmountDirection.held,
+      _ => FinancialAmountDirection.none,
+    };
     final tone = switch (typeKind) {
       FinancialTypeKind.income => FinancialAmountTone.income,
       FinancialTypeKind.expense => FinancialAmountTone.expense,
@@ -176,56 +140,89 @@ class TransactionListTile extends StatelessWidget {
       FinancialTypeKind.certificate => FinancialAmountTone.certificate,
       _ => FinancialAmountTone.neutral,
     };
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.space16,
-        vertical: AppTheme.space8,
-      ),
-      isThreeLine: true,
-      title: Row(
-        children: [
-          Flexible(
-            child: FinancialTypeBadge(label: typeLabel, kind: typeKind),
+    final colors = context.financialColors;
+
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        // A tonal press, never a ripple: an expanding circle contradicts a
+        // square system and reads as something happening to the money.
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: colors.secondarySurface,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: minHeight),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: colors.divider)),
           ),
-          if (isReversed && reversedLabel != null) ...[
-            const SizedBox(width: AppTheme.space8),
-            StatusBadge(
-              label: reversedLabel!,
-              foreground: context.financialColors.warning,
-              icon: Icons.undo,
-            ),
-          ],
-        ],
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: AppTheme.space4),
-          Text(
-            primaryDescription,
-            style: roles.body,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.space16,
+            vertical: AppTheme.space12,
           ),
-          const SizedBox(height: AppTheme.space4),
-          Text(
-            [
-              accountOrDirection,
-              effectiveDate,
-              ?memberOrCategory,
-              ?associationLabel,
-            ].join(' · '),
-            style: roles.supportingMeta,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: FinancialTypeBadge(
+                            label: typeLabel,
+                            kind: typeKind,
+                          ),
+                        ),
+                        if (isReversed && reversedLabel != null) ...[
+                          const SizedBox(width: AppTheme.space8),
+                          StatusBadge(
+                            // A correction, not a threshold — grey ink with
+                            // the undo glyph, never the warning role.
+                            label: reversedLabel!,
+                            foreground: colors.secondaryText,
+                            icon: Icons.undo,
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: AppTheme.space4),
+                    Text(primaryDescription, style: roles.body, maxLines: 3),
+                    const SizedBox(height: AppTheme.space4),
+                    Text(
+                      [
+                        accountOrDirection,
+                        effectiveDate,
+                        ?memberOrCategory,
+                        ?associationLabel,
+                      ].join(' · '),
+                      style: roles.supportingMeta,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppTheme.space12),
+              // See AccountListTile: a non-flexible child in a Row is measured
+              // against unbounded width and would starve the description.
+              Flexible(
+                child: FinancialAmountText(
+                  minorUnits: minorUnits,
+                  currencyCode: currencyCode,
+                  // A reversed entry keeps its amount in place, struck through
+                  // and quietened — the original is never removed.
+                  tone: isReversed ? FinancialAmountTone.muted : tone,
+                  direction: isReversed
+                      ? FinancialAmountDirection.none
+                      : direction,
+                  isStruckThrough: isReversed,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      trailing: FinancialAmountText(
-        formattedAmount: formattedAmount,
-        tone: isReversed ? FinancialAmountTone.neutral : tone,
-      ),
-      onTap: onTap,
     );
   }
 }

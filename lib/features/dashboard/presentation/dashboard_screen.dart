@@ -1,3 +1,4 @@
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/currency.dart';
@@ -5,6 +6,7 @@ import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/dashboard/domain/dashboard_summary.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
@@ -84,37 +86,46 @@ class _DashboardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The two money regions are full-bleed: a region is defined by its surface
+    // and the 2 px rule at its edge, and inset margins would break both. Every
+    // other section keeps the screen margin.
+    Widget inset(Widget child) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+      child: child,
+    );
+
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.only(bottom: AppTheme.space24),
       children: [
-        // 1. Spendable balances (primary)
-        _SpendableBalancesSection(
-          balances: summary.spendableBalances,
-          l10n: l10n,
-        ),
+        // 1. Available to spend — the one dominant region on the screen.
+        _AvailableToSpendHero(summary: summary, l10n: l10n),
         const SizedBox(height: 12),
         // 2. Quick transaction actions
-        _QuickActionsSection(l10n: l10n),
+        inset(_QuickActionsSection(l10n: l10n)),
         const SizedBox(height: 16),
         // 3. Period + income/expense
         _PeriodSelector(l10n: l10n),
         const SizedBox(height: 12),
-        _PeriodFlowSection(flows: summary.periodFlow, l10n: l10n),
+        inset(_PeriodFlowSection(flows: summary.periodFlow, l10n: l10n)),
         const SizedBox(height: 12),
-        // 4–5. Held balances (protected — quieter; goals/certs via Planning)
-        _ProtectedBalancesSection(
-          balances: summary.protectedBalances,
-          l10n: l10n,
+        // 4. Held money — its own recessed region, never summed with the hero.
+        _HeldMoneySection(summary: summary, l10n: l10n),
+        const SizedBox(height: 12),
+        inset(
+          _ExpenseScopesSection(scopes: summary.expensesByScope, l10n: l10n),
         ),
         const SizedBox(height: 12),
-        _HeldBalancesHint(l10n: l10n),
-        const SizedBox(height: 12),
-        _ExpenseScopesSection(scopes: summary.expensesByScope, l10n: l10n),
-        const SizedBox(height: 12),
-        _SpouseWalletsSection(wallets: summary.spouseWallets, l10n: l10n),
+        inset(
+          _SpouseWalletsSection(wallets: summary.spouseWallets, l10n: l10n),
+        ),
         const SizedBox(height: 12),
         // 6. Recent activity
-        _RecentActivitySection(activities: summary.recentActivity, l10n: l10n),
+        inset(
+          _RecentActivitySection(
+            activities: summary.recentActivity,
+            l10n: l10n,
+          ),
+        ),
         const SizedBox(height: 24),
       ],
     );
@@ -168,20 +179,6 @@ class _QuickActionsSection extends StatelessWidget {
 
 /// Quiet pointer to Planning for goal reserves and certificate principal
 /// without inventing new dashboard aggregates (behavior-preserving).
-class _HeldBalancesHint extends StatelessWidget {
-  const _HeldBalancesHint({required this.l10n});
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppInlineNotice(
-      message: '${l10n.dashboardHeldBalances}: ${l10n.planningSubtitle}',
-      tone: AppNoticeTone.info,
-      icon: Icons.event_note_outlined,
-    );
-  }
-}
-
 // ── Period selector ───────────────────────────────────────────────────────────
 
 class _PeriodSelector extends ConsumerStatefulWidget {
@@ -204,13 +201,19 @@ class _PeriodSelectorState extends ConsumerState<_PeriodSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.dashboardPeriodLabel,
-            style: Theme.of(context).textTheme.titleSmall,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+            child: Text(
+              l10n.dashboardPeriodLabel,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
           const SizedBox(height: 8),
+          // Full-bleed: the margin is on the scroll view so the chips run to
+          // the screen edge instead of stopping at an inset viewport.
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
             child: Row(
               children: [
                 _PeriodChip(
@@ -305,78 +308,107 @@ class _PeriodChip extends StatelessWidget {
 
 // ── Spendable balances section ────────────────────────────────────────────────
 
-class _SpendableBalancesSection extends StatelessWidget {
-  const _SpendableBalancesSection({required this.balances, required this.l10n});
-  final List<CurrencyAmountSummary> balances;
+// ── Protected balances section ────────────────────────────────────────────────
+
+/// The currency's own name. Falls back to the ISO code rather than rendering
+/// nothing for a currency the enum does not know.
+String _currencyName(AppLocalizations l10n, String code) {
+  try {
+    return currencyLabel(l10n, Currency.fromCode(code));
+  } catch (_) {
+    return code;
+  }
+}
+
+// ── Available-to-spend hero ───────────────────────────────────────────────────
+
+class _AvailableToSpendHero extends StatelessWidget {
+  const _AvailableToSpendHero({required this.summary, required this.l10n});
+
+  final DashboardSummary summary;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: l10n.dashboardSpendableBalances,
-      child: _SectionCard(
-        title: l10n.dashboardSpendableBalances,
-        icon: Icons.account_balance_wallet_outlined,
-        child: balances.isEmpty
-            ? _EmptyState(message: l10n.dashboardNoSpendable)
-            : Column(
-                children: balances
-                    .map(
-                      (b) => _BalanceRow(
-                        balance: b,
-                        negativeWarningLabel:
-                            l10n.dashboardNegativeBalanceWarning,
-                      ),
-                    )
-                    .toList(),
-              ),
-      ),
+    // The hero shows availableToSpend, not spendableBalances: the difference
+    // is money the household holds but that is not theirs to spend from here,
+    // and the query has already done that subtraction.
+    final currencies = [
+      for (final balance in summary.availableToSpend)
+        BalanceHeroCurrency(
+          currencyCode: balance.currencyCode,
+          currencyLabel: _currencyName(l10n, balance.currencyCode),
+          minorUnits: balance.totalMinorUnits,
+          // A negative available balance is worth flagging. The notice
+          // carries the warning role; the amount never does.
+          warningLabel: balance.isNegative
+              ? l10n.dashboardNegativeBalanceWarning
+              : null,
+        ),
+    ];
+
+    return BalanceHero(
+      label: l10n.dashboardAvailableToSpend,
+      currencies: currencies,
+      // Stated, never implied: a headline figure that quietly omits money is
+      // worse than one that explains what it left out.
+      exclusionNote: summary.hasExcludedBalance || summary.hasHeldBalance
+          ? l10n.dashboardExcludedFromAvailable
+          : null,
     );
   }
 }
 
-// ── Protected balances section ────────────────────────────────────────────────
+// ── Held money ────────────────────────────────────────────────────────────────
 
-class _ProtectedBalancesSection extends StatelessWidget {
-  const _ProtectedBalancesSection({required this.balances, required this.l10n});
-  final List<CurrencyAmountSummary> balances;
+class _HeldMoneySection extends StatelessWidget {
+  const _HeldMoneySection({required this.summary, required this.l10n});
+
+  final DashboardSummary summary;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: l10n.dashboardProtectedBalances,
-      child: _SectionCard(
-        title: l10n.dashboardProtectedBalances,
-        icon: Icons.lock_outline,
-        child: balances.isEmpty
-            ? _EmptyState(message: l10n.dashboardNoProtected)
-            : Column(
-                children: balances.map((b) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.lock, size: 16),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            l10n.dashboardChildProtected,
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ),
-                        _AmountText(
-                          minorUnits: b.totalMinorUnits,
-                          currencyCode: b.currencyCode,
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-      ),
-    );
+    final entries = [
+      for (final held in summary.heldByReason)
+        if (held.totalMinorUnits != 0)
+          HeldMoneyEntry(
+            name: _reasonLabel(held.reason),
+            reasonLabel: l10n.amountNotSpendable,
+            minorUnits: held.totalMinorUnits,
+            currencyCode: held.currencyCode,
+            tone: _reasonTone(held.reason),
+          ),
+    ];
+
+    // One subtotal per currency. Currencies are never combined, so a
+    // household holding both EGP and USD sees two lines, not one sum.
+    final subtotals = <String, int>{};
+    for (final held in summary.heldByReason) {
+      subtotals.update(
+        held.currencyCode,
+        (existing) => existing + held.totalMinorUnits,
+        ifAbsent: () => held.totalMinorUnits,
+      );
+    }
+    subtotals.removeWhere((_, total) => total == 0);
+
+    return HeldMoneyRegion(entries: entries, subtotalsByCurrency: subtotals);
   }
+
+  String _reasonLabel(HeldReason reason) => switch (reason) {
+    HeldReason.certificatePrincipal => l10n.heldReasonCertificatePrincipal,
+    HeldReason.goalReserve => l10n.heldReasonGoalReserve,
+    HeldReason.childProtected => l10n.heldReasonChildProtected,
+    HeldReason.other => l10n.heldReasonOther,
+  };
+
+  static FinancialAmountTone _reasonTone(HeldReason reason) => switch (reason) {
+    HeldReason.certificatePrincipal => FinancialAmountTone.certificate,
+    HeldReason.goalReserve => FinancialAmountTone.goal,
+    HeldReason.childProtected => FinancialAmountTone.protected,
+    HeldReason.other => FinancialAmountTone.neutral,
+  };
 }
 
 // ── Period flow section ───────────────────────────────────────────────────────
@@ -421,7 +453,7 @@ class _FlowRow extends StatelessWidget {
             label: l10n.dashboardPeriodIncome,
             minorUnits: flow.grossIncomeMinorUnits,
             currencyCode: flow.currencyCode,
-            color: Colors.green,
+            color: context.financialColors.income,
             icon: Icons.arrow_downward,
           ),
           if (hasIncomeReversal) ...[
@@ -429,7 +461,7 @@ class _FlowRow extends StatelessWidget {
               label: l10n.reportReversalEffect,
               minorUnits: -flow.incomeReversalMinorUnits,
               currencyCode: flow.currencyCode,
-              color: Colors.orange,
+              color: context.financialColors.secondaryText,
               icon: Icons.undo,
             ),
           ],
@@ -437,7 +469,7 @@ class _FlowRow extends StatelessWidget {
             label: l10n.dashboardPeriodExpenses,
             minorUnits: flow.netExpenseMinorUnits,
             currencyCode: flow.currencyCode,
-            color: Colors.red,
+            color: context.financialColors.expense,
             icon: Icons.arrow_upward,
           ),
           if (hasExpenseReversal) ...[
@@ -445,7 +477,7 @@ class _FlowRow extends StatelessWidget {
               label: l10n.reportReversalEffect,
               minorUnits: -flow.expenseReversalMinorUnits,
               currencyCode: flow.currencyCode,
-              color: Colors.orange,
+              color: context.financialColors.secondaryText,
               icon: Icons.undo,
             ),
           ],
@@ -453,7 +485,9 @@ class _FlowRow extends StatelessWidget {
             label: l10n.dashboardPeriodNet,
             minorUnits: net,
             currencyCode: flow.currencyCode,
-            color: net >= 0 ? Colors.green : Colors.red,
+            color: net >= 0
+                ? context.financialColors.income
+                : context.financialColors.expense,
             icon: Icons.calculate_outlined,
           ),
           const Divider(height: 8),
@@ -536,14 +570,14 @@ class _WalletSubSection extends StatelessWidget {
           label: l10n.dashboardSpouseWalletFunded,
           minorUnits: wallet.periodFundedMinorUnits,
           currencyCode: wallet.currencyCode,
-          color: Colors.green,
+          color: context.financialColors.income,
           icon: Icons.add_circle_outline,
         ),
         _LabelledAmount(
           label: l10n.dashboardSpouseWalletSpent,
           minorUnits: wallet.periodSpentMinorUnits,
           currencyCode: wallet.currencyCode,
-          color: Colors.red,
+          color: context.financialColors.expense,
           icon: Icons.remove_circle_outline,
         ),
         _LabelledAmount(
@@ -619,14 +653,14 @@ class _ActivityRow extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: context.financialColors.secondarySurface,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 l10n.transactionReversed,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.orange.shade800),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: context.financialColors.secondaryText,
+                ),
               ),
             ),
           ],
@@ -647,28 +681,29 @@ class _OperationTypeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     IconData icon;
     Color color;
     switch (typeCode) {
       case 'income':
         icon = Icons.arrow_downward;
-        color = Colors.green;
+        color = colors.income;
       case 'expense':
       case 'childFundWithdrawal':
         icon = Icons.arrow_upward;
-        color = Colors.red;
+        color = colors.expense;
       case 'transfer':
         icon = Icons.swap_horiz;
-        color = Colors.blue;
+        color = colors.transfer;
       case 'reversal':
         icon = Icons.undo;
-        color = Colors.orange;
+        color = colors.secondaryText;
       case 'openingBalance':
         icon = Icons.flag_outlined;
-        color = Colors.grey;
+        color = colors.secondaryText;
       default:
         icon = Icons.receipt_outlined;
-        color = Colors.grey;
+        color = colors.secondaryText;
     }
     return Icon(icon, color: color, size: 20);
   }
@@ -728,55 +763,6 @@ class _EmptyState extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(message, style: Theme.of(context).textTheme.bodySmall),
-    );
-  }
-}
-
-class _BalanceRow extends StatelessWidget {
-  const _BalanceRow({
-    required this.balance,
-    required this.negativeWarningLabel,
-  });
-  final CurrencyAmountSummary balance;
-  final String negativeWarningLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          if (balance.isNegative) ...[
-            Semantics(
-              label: negativeWarningLabel,
-              child: const Icon(
-                Icons.warning_amber_outlined,
-                size: 16,
-                color: Colors.red,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                negativeWarningLabel,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.red),
-              ),
-            ),
-          ] else ...[
-            Text(
-              balance.currencyCode,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-          const Spacer(),
-          _AmountText(
-            minorUnits: balance.totalMinorUnits,
-            currencyCode: balance.currencyCode,
-          ),
-        ],
-      ),
     );
   }
 }

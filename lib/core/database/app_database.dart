@@ -146,7 +146,7 @@ class AppDatabase extends _$AppDatabase
   AppDatabase.forFile(String path) : super(NativeDatabase(File(path)));
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -312,6 +312,20 @@ class AppDatabase extends _$AppDatabase
       if (from <= 18) {
         // v18 → v19: Phase 6B.1.1 — goal funding/release endpoint eligibility.
         await _applyPhase6B11GoalEndpointEligibilityTriggers();
+      }
+      if (from <= 19) {
+        // v19 → v20: a required reason on every reversal.
+        //
+        // Additive and nullable, so existing reversals keep their rows and
+        // read back exactly as before — there is no reason to invent for
+        // history that was recorded without one. The append-only trigger is
+        // rebuilt to guard the new column, otherwise a recorded reason could
+        // be edited afterwards and the audit trail would be a draft.
+        await m.addColumn(operations, operations.reversalReason);
+        await customStatement(
+          'DROP TRIGGER IF EXISTS restrict_operations_update',
+        );
+        await _applyAppendOnlyTriggers();
       }
     },
     beforeOpen: (details) async {

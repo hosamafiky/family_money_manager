@@ -3,6 +3,7 @@ import 'package:family_money_manager/core/database/app_database.dart';
 import 'package:family_money_manager/core/database/database_providers.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_category.dart';
@@ -179,5 +180,43 @@ void main() {
       expect(find.text('50.00 EGP'), findsOneWidget);
       expect(find.text('Test note'), findsNothing);
     });
+  });
+  testWidgets('the read-back is one sentence', (tester) async {
+    await tester.pumpWidget(_buildApp(_fakeCtx));
+    await tester.pumpAndSettle();
+
+    final sentence = tester
+        .widgetList<Text>(find.byType(Text))
+        .map((t) => t.data ?? '')
+        .firstWhere((t) => t.contains('استلمت'), orElse: () => '');
+    expect(sentence, isNotEmpty, reason: 'the read-back sentence is missing');
+    expect(sentence, contains('محفظتي'));
+  });
+
+  testWidgets('the append-only consequence is always shown', (tester) async {
+    await tester.pumpWidget(_buildApp(_fakeCtx));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'بعد الحفظ لا يمكن الحذف — التصحيح يكون بحركة عكسية تبقى في السجل.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a write failure persists on screen, not in a snackbar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(_fakeCtx));
+    await tester.pumpAndSettle();
+
+    // The staged context references an account that is not in the test
+    // database, so the write fails.
+    await tester.tap(find.byType(PrimaryActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.byType(AppInlineNotice), findsWidgets);
+    expect(find.byType(IncomeReviewScreen), findsOneWidget);
   });
 }

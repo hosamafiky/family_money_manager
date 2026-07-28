@@ -5,6 +5,10 @@ import 'package:family_money_manager/features/transactions/domain/transaction_su
 
 /// Configurable fake implementation of [DashboardQueryRepository] for tests.
 final class FakeDashboardQueryRepository implements DashboardQueryRepository {
+  List<CurrencyAmountSummary> availableToSpendResult = const [];
+  List<ExcludedAmountSummary> excludedFromAvailableResult = const [];
+  List<HeldAmountSummary> heldByReasonResult = const [];
+
   FakeDashboardQueryRepository({
     List<CurrencyAmountSummary>? spendable,
     List<CurrencyAmountSummary>? protected,
@@ -50,6 +54,21 @@ final class FakeDashboardQueryRepository implements DashboardQueryRepository {
   /// Last `todayLocal` passed to [protectedBalances] — lets tests assert that
   /// the certificate term boundary is evaluated against the injected clock.
   String? lastProtectedBalancesTodayLocal;
+
+  @override
+  Future<List<CurrencyAmountSummary>> availableToSpend({
+    required String householdId,
+  }) async => availableToSpendResult;
+
+  @override
+  Future<List<ExcludedAmountSummary>> excludedFromAvailable({
+    required String householdId,
+  }) async => excludedFromAvailableResult;
+
+  @override
+  Future<List<HeldAmountSummary>> heldByReason({
+    required String householdId,
+  }) async => heldByReasonResult;
 
   @override
   Future<List<PeriodFlowSummary>> periodFlow({

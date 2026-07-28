@@ -2,6 +2,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/resolve_message_key.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/certificates/domain/certificate.dart';
@@ -230,7 +231,10 @@ class _RedeemCertificateScreenState
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 12),
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: context.financialColors.expense),
+              ),
             ],
             const SizedBox(height: 24),
             FilledButton(
@@ -277,7 +281,10 @@ class _RedeemCertificateScreenState
             ),
           if (_errorMessage != null) ...[
             const SizedBox(height: 12),
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _errorMessage!,
+              style: TextStyle(color: context.financialColors.expense),
+            ),
           ],
           const SizedBox(height: 24),
           FilledButton(

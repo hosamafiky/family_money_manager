@@ -14,14 +14,17 @@ import 'package:family_money_manager/features/certificates/domain/certificate.da
 import 'package:family_money_manager/features/certificates/domain/certificate_principal_protection.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-bool _protectedOn(String today, {CertificateLifecycle lifecycle = CertificateLifecycle.active, int principal = 100000}) =>
-    CertificatePrincipalProtection.isProtectedOn(
-      lifecycle: lifecycle,
-      startDate: '2026-01-01',
-      maturityDate: '2027-01-01',
-      todayLocal: today,
-      principalBalanceMinorUnits: principal,
-    );
+bool _protectedOn(
+  String today, {
+  CertificateLifecycle lifecycle = CertificateLifecycle.active,
+  int principal = 100000,
+}) => CertificatePrincipalProtection.isProtectedOn(
+  lifecycle: lifecycle,
+  startDate: '2026-01-01',
+  maturityDate: '2027-01-01',
+  todayLocal: today,
+  principalBalanceMinorUnits: principal,
+);
 
 FinancialAccount _certificateAccount(String id) => FinancialAccount(
   id: id,
@@ -73,11 +76,25 @@ void main() {
     });
 
     test('NOT protected once redeemed, even inside the original term', () {
-      expect(_protectedOn('2026-07-01', lifecycle: CertificateLifecycle.redeemed, principal: 0), isFalse);
+      expect(
+        _protectedOn(
+          '2026-07-01',
+          lifecycle: CertificateLifecycle.redeemed,
+          principal: 0,
+        ),
+        isFalse,
+      );
     });
 
     test('NOT protected when archived with zero principal', () {
-      expect(_protectedOn('2026-07-01', lifecycle: CertificateLifecycle.archived, principal: 0), isFalse);
+      expect(
+        _protectedOn(
+          '2026-07-01',
+          lifecycle: CertificateLifecycle.archived,
+          principal: 0,
+        ),
+        isFalse,
+      );
     });
   });
 
@@ -93,24 +110,31 @@ void main() {
       // Fails if a new term state is added without deciding its protection.
       expect(expected.keys.toSet(), CertificateTermState.values.toSet());
       for (final entry in expected.entries) {
-        expect(CertificatePrincipalProtection.isProtectedInTermState(entry.key), entry.value, reason: 'term state ${entry.key.name}');
+        expect(
+          CertificatePrincipalProtection.isProtectedInTermState(entry.key),
+          entry.value,
+          reason: 'term state ${entry.key.name}',
+        );
       }
     });
   });
 
   group('AccountTotalsService with derived certificate protection', () {
-    test('in-term certificate principal counts as protected, not spendable', () {
-      final totals = AccountTotalsService.compute(
-        accounts: [_certificateAccount('cert-1')],
-        balancesByAccountId: {'cert-1': 500000},
-        derivedProtectedAccountIds: {'cert-1'},
-      );
+    test(
+      'in-term certificate principal counts as protected, not spendable',
+      () {
+        final totals = AccountTotalsService.compute(
+          accounts: [_certificateAccount('cert-1')],
+          balancesByAccountId: {'cert-1': 500000},
+          derivedProtectedAccountIds: {'cert-1'},
+        );
 
-      expect(totals, hasLength(1));
-      expect(totals.single.currency, Currency.egp);
-      expect(totals.single.protectedMinorUnits, 500000);
-      expect(totals.single.spendableMinorUnits, 0);
-    });
+        expect(totals, hasLength(1));
+        expect(totals.single.currency, Currency.egp);
+        expect(totals.single.protectedMinorUnits, 500000);
+        expect(totals.single.spendableMinorUnits, 0);
+      },
+    );
 
     test('matured certificate contributes to neither total', () {
       // Not protected any more, and still not spendable — the account is
@@ -157,7 +181,11 @@ void main() {
 
     test('archived certificate is excluded from totals entirely (INV-015)', () {
       final archived = _certificateAccount('cert-1').copyWith(isArchived: true);
-      final totals = AccountTotalsService.compute(accounts: [archived], balancesByAccountId: {'cert-1': 500000}, derivedProtectedAccountIds: {'cert-1'});
+      final totals = AccountTotalsService.compute(
+        accounts: [archived],
+        balancesByAccountId: {'cert-1': 500000},
+        derivedProtectedAccountIds: {'cert-1'},
+      );
 
       expect(totals.single.protectedMinorUnits, 0);
       expect(totals.single.spendableMinorUnits, 0);

@@ -5,6 +5,7 @@ import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/application/get_spending_attribution_report_use_case.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -156,6 +157,7 @@ class _MemberRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(memberName),
@@ -163,7 +165,7 @@ class _MemberRow extends StatelessWidget {
       trailing: ReportAmountText(
         minorUnits: totalMinorUnits,
         currencyCode: currencyCode,
-        color: Colors.red,
+        color: colors.expense,
       ),
     );
   }
@@ -189,6 +191,7 @@ class _ScopeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(_scopeLabel(l10n)),
@@ -196,7 +199,7 @@ class _ScopeRow extends StatelessWidget {
       trailing: ReportAmountText(
         minorUnits: totalMinorUnits,
         currencyCode: currencyCode,
-        color: Colors.red,
+        color: colors.expense,
       ),
     );
   }

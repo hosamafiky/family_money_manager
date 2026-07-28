@@ -3139,6 +3139,203 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Omani Rial (OMR)'**
   String get currencyOmr;
+
+  /// Screen-reader label for an amount concealed by privacy mode. Never reveals the value.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden amount'**
+  String get amountHidden;
+
+  /// Marks money that is held and cannot be spent — certificate principal, goal reserves, protected funds.
+  ///
+  /// In en, this message translates to:
+  /// **'not spendable'**
+  String get amountNotSpendable;
+
+  /// Screen-reader lead for a held amount, spoken before its reason.
+  ///
+  /// In en, this message translates to:
+  /// **'held'**
+  String get amountHeld;
+
+  /// Consumption of a budget or goal. The percentage is truncated, never rounded.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String progressUsedPercent(int percent);
+
+  /// Generic retry action on an error state.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get actionRetry;
+
+  /// Default reassurance on a read failure. After an error a household's first question is never why — it is whether anything was corrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was saved. Your ledger is unchanged.'**
+  String get errorLedgerUnchanged;
+
+  /// Technical code shown under an error message, for support conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Error code: {code}'**
+  String errorCodeLabel(String code);
+
+  /// Heading of the region holding money that can be spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to spend'**
+  String get accountRegionSpendable;
+
+  /// Heading of the region holding certificate principal, goal reserves and protected funds. Never summed with the spendable region.
+  ///
+  /// In en, this message translates to:
+  /// **'Held — not spendable'**
+  String get accountRegionHeld;
+
+  /// Heading of the dominant dashboard region. Answers 'how much can I spend right now', per currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to spend'**
+  String get dashboardAvailableToSpend;
+
+  /// Printed where a grand total would sit. Users read a missing total as a bug; a stated refusal teaches the invariant instead.
+  ///
+  /// In en, this message translates to:
+  /// **'No combined total — each currency is independent'**
+  String get dashboardNoCombinedTotal;
+
+  /// Subtotal of the held region, for one currency only.
+  ///
+  /// In en, this message translates to:
+  /// **'Total held — {currency}'**
+  String dashboardHeldSubtotal(String currency);
+
+  /// Why the held subtotal is not part of the headline figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not added to your available balance — this total applies inside this region only.'**
+  String get dashboardHeldNotAdded;
+
+  /// Marks money deliberately outside the available-to-spend figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not counted here'**
+  String get dashboardExcludedFromAvailable;
+
+  /// Held-money reason: principal locked for a certificate term.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate principal'**
+  String get heldReasonCertificatePrincipal;
+
+  /// Held-money reason: reserved against a savings goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved for a goal'**
+  String get heldReasonGoalReserve;
+
+  /// Held-money reason: a child's protected fund.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected'**
+  String get heldReasonChildProtected;
+
+  /// Held-money reason with no more specific vocabulary. Never omitted — the money still gets a figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not spendable'**
+  String get heldReasonOther;
+
+  /// How many accounts make up a currency's available balance.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no accounts} =1{from 1 account} other{from {count} accounts}}'**
+  String dashboardFromAccounts(int count);
+
+  /// Count of held-money holdings, shown beside the held region heading.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 holding} other{{count} holdings}}'**
+  String dashboardHeldVaults(int count);
+
+  /// One-sentence read-back of a staged expense. Catches a wrong account or a wrong spender faster than a table of labelled rows. Assembled as a whole sentence, never by concatenating fragments.
+  ///
+  /// In en, this message translates to:
+  /// **'You spent {amount} on {category} from {account} — {spender} spent it for {scope}.'**
+  String expenseReadBack(
+    String amount,
+    String category,
+    String account,
+    String spender,
+    String scope,
+  );
+
+  /// Heading above the double-entry rows on a review screen.
+  ///
+  /// In en, this message translates to:
+  /// **'How this entry lands in the ledger'**
+  String get reviewLedgerEffect;
+
+  /// Debit side of a double entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit — {description}'**
+  String reviewDebitLabel(String description);
+
+  /// Credit side of a double entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit — {description}'**
+  String reviewCreditLabel(String description);
+
+  /// The account's derived balance once this entry is written.
+  ///
+  /// In en, this message translates to:
+  /// **'{account} balance after saving'**
+  String reviewBalanceAfterSave(String account);
+
+  /// Permanent consequence line under the confirm action. Not conditional — it is how the app teaches append-only before the user learns it the hard way.
+  ///
+  /// In en, this message translates to:
+  /// **'Once saved this cannot be deleted — a correction is a reversing entry that stays in the ledger.'**
+  String get reviewAppendOnlyConsequence;
+
+  /// The meta line under the amount. Every default the entry flow applied is printed rather than hidden — the fast path is pre-answered, not silent.
+  ///
+  /// In en, this message translates to:
+  /// **'From {account} · {date} · spender {spender} · {scope}'**
+  String expenseDefaultsLine(
+    String account,
+    String date,
+    String spender,
+    String scope,
+  );
+
+  /// Expands the entry sheet to the full field set. Same sheet, same amount, same save button — a disclosure, not a navigation.
+  ///
+  /// In en, this message translates to:
+  /// **'More detail — spender, beneficiary, scope, notes, recurrence'**
+  String get expenseMoreDetails;
+
+  /// Non-blocking nudge, never a validation error. Requiring a note here would tax the household's single most common entry.
+  ///
+  /// In en, this message translates to:
+  /// **'{spender} is spending from an account in someone else\'s name — a short note makes this easier to review later.'**
+  String expenseSpenderNotOwnerHint(String spender);
+
+  /// One-sentence read-back of a staged income entry.
+  ///
+  /// In en, this message translates to:
+  /// **'You received {amount} as {category} into {account}.'**
+  String incomeReadBack(String amount, String category, String account);
+
+  /// One-sentence read-back of a staged transfer. States no direction sign: a transfer changes no total, so it is neither positive nor negative.
+  ///
+  /// In en, this message translates to:
+  /// **'You moved {amount} from {source} to {destination}.'**
+  String transferReadBack(String amount, String source, String destination);
 }
 
 class _AppLocalizationsDelegate

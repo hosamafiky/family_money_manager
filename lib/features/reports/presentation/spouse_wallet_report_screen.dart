@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -89,6 +90,7 @@ class _WalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.financialColors;
     return Semantics(
       label: wallet.accountName,
       child: Card(
@@ -113,7 +115,7 @@ class _WalletCard extends StatelessWidget {
                   label: l10n.reportFunded,
                   minorUnits: wallet.periodFundedMinorUnits,
                   currencyCode: wallet.currencyCode,
-                  color: Colors.green,
+                  color: colors.income,
                   icon: Icons.south_west,
                 ),
               if (wallet.periodSpentMinorUnits != 0)
@@ -121,7 +123,7 @@ class _WalletCard extends StatelessWidget {
                   label: l10n.reportSpent,
                   minorUnits: -wallet.periodSpentMinorUnits,
                   currencyCode: wallet.currencyCode,
-                  color: Colors.red,
+                  color: colors.expense,
                   icon: Icons.arrow_upward,
                 ),
               if (wallet.periodReturnedMinorUnits != 0)
@@ -129,7 +131,7 @@ class _WalletCard extends StatelessWidget {
                   label: l10n.reportReturned,
                   minorUnits: -wallet.periodReturnedMinorUnits,
                   currencyCode: wallet.currencyCode,
-                  color: Colors.blue,
+                  color: colors.transfer,
                   icon: Icons.north_east,
                 ),
               if (wallet.periodReversalEffectMinorUnits != 0)
@@ -137,7 +139,7 @@ class _WalletCard extends StatelessWidget {
                   label: l10n.reportReversalEffect,
                   minorUnits: wallet.periodReversalEffectMinorUnits,
                   currencyCode: wallet.currencyCode,
-                  color: Colors.orange,
+                  color: colors.secondaryText,
                   icon: Icons.undo,
                 ),
               const Divider(height: 12),

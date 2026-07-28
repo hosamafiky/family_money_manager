@@ -1,0 +1,29 @@
+Bundled font assets — licensing
+================================
+
+Both families below are used under the SIL Open Font License, Version 1.1.
+They are bundled as local assets deliberately: this is an offline-first
+application, so typography must not depend on network availability. Do not
+replace these with `google_fonts` runtime fetching.
+
+Archivo
+  Copyright (c) Omnibus-Type (https://github.com/Omnibus-Type/Archivo)
+  License: SIL Open Font License 1.1
+  Upstream: https://fonts.google.com/specimen/Archivo
+  Bundled weights: 400 (Regular), 600 (SemiBold), 800 (ExtraBold)
+  Role: Latin script.
+
+IBM Plex Sans Arabic
+  Copyright (c) IBM Corp. (https://github.com/IBM/plex)
+  License: SIL Open Font License 1.1
+  Upstream: https://fonts.google.com/specimen/IBM+Plex+Sans+Arabic
+  Bundled weights: 400 (Regular), 600 (SemiBold), 700 (Bold)
+  Role: Arabic script.
+
+Full licence text: https://scripts.sil.org/OFL
+
+Why these two, per the design handoff (D1 §05): IBM Plex Sans Arabic is a
+naskh-grotesque with genuine lining tabular numerals in both Western and
+Arabic-Indic sets, and it shares an x-height with Archivo — so a mixed
+Arabic-with-Latin-numerals run, this application's most common string, does
+not visibly change font mid-line.

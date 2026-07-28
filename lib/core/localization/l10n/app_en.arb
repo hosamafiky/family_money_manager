@@ -2053,5 +2053,227 @@
   "currencyOmr": "Omani Rial (OMR)",
   "@currencyOmr": {
     "description": "Currency label: Omani rial."
+  },
+  "amountHidden": "Hidden amount",
+  "@amountHidden": {
+    "description": "Screen-reader label for an amount concealed by privacy mode. Never reveals the value."
+  },
+  "amountNotSpendable": "not spendable",
+  "@amountNotSpendable": {
+    "description": "Marks money that is held and cannot be spent — certificate principal, goal reserves, protected funds."
+  },
+  "amountHeld": "held",
+  "@amountHeld": {
+    "description": "Screen-reader lead for a held amount, spoken before its reason."
+  },
+  "progressUsedPercent": "{percent}% used",
+  "@progressUsedPercent": {
+    "description": "Consumption of a budget or goal. The percentage is truncated, never rounded.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "actionRetry": "Retry",
+  "@actionRetry": {
+    "description": "Generic retry action on an error state."
+  },
+  "errorLedgerUnchanged": "Nothing was saved. Your ledger is unchanged.",
+  "@errorLedgerUnchanged": {
+    "description": "Default reassurance on a read failure. After an error a household's first question is never why — it is whether anything was corrupted."
+  },
+  "errorCodeLabel": "Error code: {code}",
+  "@errorCodeLabel": {
+    "description": "Technical code shown under an error message, for support conversations.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "accountRegionSpendable": "Available to spend",
+  "@accountRegionSpendable": {
+    "description": "Heading of the region holding money that can be spent."
+  },
+  "accountRegionHeld": "Held — not spendable",
+  "@accountRegionHeld": {
+    "description": "Heading of the region holding certificate principal, goal reserves and protected funds. Never summed with the spendable region."
+  },
+  "dashboardAvailableToSpend": "Available to spend",
+  "@dashboardAvailableToSpend": {
+    "description": "Heading of the dominant dashboard region. Answers 'how much can I spend right now', per currency."
+  },
+  "dashboardNoCombinedTotal": "No combined total — each currency is independent",
+  "@dashboardNoCombinedTotal": {
+    "description": "Printed where a grand total would sit. Users read a missing total as a bug; a stated refusal teaches the invariant instead."
+  },
+  "dashboardHeldSubtotal": "Total held — {currency}",
+  "@dashboardHeldSubtotal": {
+    "description": "Subtotal of the held region, for one currency only.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHeldNotAdded": "Not added to your available balance — this total applies inside this region only.",
+  "@dashboardHeldNotAdded": {
+    "description": "Why the held subtotal is not part of the headline figure."
+  },
+  "dashboardExcludedFromAvailable": "Not counted here",
+  "@dashboardExcludedFromAvailable": {
+    "description": "Marks money deliberately outside the available-to-spend figure."
+  },
+  "heldReasonCertificatePrincipal": "Certificate principal",
+  "@heldReasonCertificatePrincipal": {
+    "description": "Held-money reason: principal locked for a certificate term."
+  },
+  "heldReasonGoalReserve": "Reserved for a goal",
+  "@heldReasonGoalReserve": {
+    "description": "Held-money reason: reserved against a savings goal."
+  },
+  "heldReasonChildProtected": "Protected",
+  "@heldReasonChildProtected": {
+    "description": "Held-money reason: a child's protected fund."
+  },
+  "heldReasonOther": "Not spendable",
+  "@heldReasonOther": {
+    "description": "Held-money reason with no more specific vocabulary. Never omitted — the money still gets a figure."
+  },
+  "dashboardFromAccounts": "{count, plural, =0{no accounts} =1{from 1 account} other{from {count} accounts}}",
+  "@dashboardFromAccounts": {
+    "description": "How many accounts make up a currency's available balance.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardHeldVaults": "{count, plural, =1{1 holding} other{{count} holdings}}",
+  "@dashboardHeldVaults": {
+    "description": "Count of held-money holdings, shown beside the held region heading.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseReadBack": "You spent {amount} on {category} from {account} — {spender} spent it for {scope}.",
+  "@expenseReadBack": {
+    "description": "One-sentence read-back of a staged expense. Catches a wrong account or a wrong spender faster than a table of labelled rows. Assembled as a whole sentence, never by concatenating fragments.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      },
+      "spender": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewLedgerEffect": "How this entry lands in the ledger",
+  "@reviewLedgerEffect": {
+    "description": "Heading above the double-entry rows on a review screen."
+  },
+  "reviewDebitLabel": "Debit — {description}",
+  "@reviewDebitLabel": {
+    "description": "Debit side of a double entry.",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewCreditLabel": "Credit — {description}",
+  "@reviewCreditLabel": {
+    "description": "Credit side of a double entry.",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewBalanceAfterSave": "{account} balance after saving",
+  "@reviewBalanceAfterSave": {
+    "description": "The account's derived balance once this entry is written.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewAppendOnlyConsequence": "Once saved this cannot be deleted — a correction is a reversing entry that stays in the ledger.",
+  "@reviewAppendOnlyConsequence": {
+    "description": "Permanent consequence line under the confirm action. Not conditional — it is how the app teaches append-only before the user learns it the hard way."
+  },
+  "expenseDefaultsLine": "From {account} · {date} · spender {spender} · {scope}",
+  "@expenseDefaultsLine": {
+    "description": "The meta line under the amount. Every default the entry flow applied is printed rather than hidden — the fast path is pre-answered, not silent.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "spender": {
+        "type": "String"
+      },
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseMoreDetails": "More detail — spender, beneficiary, scope, notes, recurrence",
+  "@expenseMoreDetails": {
+    "description": "Expands the entry sheet to the full field set. Same sheet, same amount, same save button — a disclosure, not a navigation."
+  },
+  "expenseSpenderNotOwnerHint": "{spender} is spending from an account in someone else's name — a short note makes this easier to review later.",
+  "@expenseSpenderNotOwnerHint": {
+    "description": "Non-blocking nudge, never a validation error. Requiring a note here would tax the household's single most common entry.",
+    "placeholders": {
+      "spender": {
+        "type": "String"
+      }
+    }
+  },
+  "incomeReadBack": "You received {amount} as {category} into {account}.",
+  "@incomeReadBack": {
+    "description": "One-sentence read-back of a staged income entry.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "transferReadBack": "You moved {amount} from {source} to {destination}.",
+  "@transferReadBack": {
+    "description": "One-sentence read-back of a staged transfer. States no direction sign: a transfer changes no total, so it is neither positive nor negative.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
   }
 }

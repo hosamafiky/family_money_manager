@@ -1,5 +1,6 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
 import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
@@ -175,7 +176,7 @@ class _DetailBody extends ConsumerWidget {
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 color: progress.remainingMinorUnits < 0
-                                    ? Colors.red
+                                    ? context.financialColors.expense
                                     : null,
                               ),
                         ),

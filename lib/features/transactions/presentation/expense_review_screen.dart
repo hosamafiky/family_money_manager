@@ -5,15 +5,16 @@ import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
-import 'package:family_money_manager/core/localization/resolve_message_key.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
+import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/accounts/domain/financial_account.dart';
 import 'package:family_money_manager/features/accounts/presentation/providers/account_providers.dart';
 import 'package:family_money_manager/features/household/domain/household_member.dart';
 import 'package:family_money_manager/features/household/presentation/providers/household_providers.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_context.dart';
 import 'package:family_money_manager/features/transactions/presentation/category_label_helper.dart';
+import 'package:family_money_manager/features/transactions/presentation/expense_submission.dart';
 import 'package:family_money_manager/features/transactions/presentation/providers/transaction_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,11 +23,24 @@ import 'package:go_router/go_router.dart';
 const _householdId = 'household-v1';
 
 /// Read-only review screen for an expense transaction.
-class ExpenseReviewScreen extends ConsumerWidget {
+class ExpenseReviewScreen extends ConsumerStatefulWidget {
   const ExpenseReviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExpenseReviewScreen> createState() =>
+      _ExpenseReviewScreenState();
+}
+
+class _ExpenseReviewScreenState extends ConsumerState<ExpenseReviewScreen> {
+  /// The last write failure, kept on screen until the user acts on it.
+  ///
+  /// A failed ledger write is not a passing notification: it is a question the
+  /// user has to answer, and a snackbar that dismisses itself takes the
+  /// question away before they can read it.
+  String? _failure;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final ctx = ref.watch(stagedExpenseContextProvider);
     final submitting = ref.watch(submittingProvider);
@@ -67,6 +81,9 @@ class ExpenseReviewScreen extends ConsumerWidget {
     return AppScreenScaffold(
       title: Text(l10n.reviewTitle),
       bottomBar: AppBottomActionBar(
+        // Permanent, not conditional: it is how the app teaches append-only
+        // before the user discovers it by trying to delete something.
+        consequenceLabel: l10n.reviewAppendOnlyConsequence,
         child: PrimaryActionButton(
           label: l10n.confirm,
           isLoading: submitting,
@@ -80,6 +97,18 @@ class ExpenseReviewScreen extends ConsumerWidget {
             bottom: AppTheme.space32,
           ),
           children: [
+            if (_failure case final String failure) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.space16,
+                ),
+                child: AppInlineNotice(
+                  message: failure,
+                  tone: AppNoticeTone.error,
+                ),
+              ),
+              const SizedBox(height: AppTheme.space12),
+            ],
             AppInlineNotice(
               message: l10n.expenseDecreasesBalance,
               tone: AppNoticeTone.info,
@@ -92,36 +121,57 @@ class ExpenseReviewScreen extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: AppTheme.space16),
+            // The read-back is the check. One sentence catches "wrong account"
+            // and "wrong spender" faster than six labelled rows, because it is
+            // read the way the user would say it.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+              child: Text(
+                l10n.expenseReadBack(
+                  formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
+                  categoryLabel(l10n, ctx.category),
+                  accountName(ctx.paymentAccountId),
+                  memberName(ctx.spenderMemberId),
+                  scopeLabel(ctx.scope),
+                ),
+                style: context.textRoles.body,
+              ),
+            ),
+            const SizedBox(height: AppTheme.space24),
+            // The double entry, for the user who wants to see it. Debit and
+            // credit are stated as such rather than implied by a sign.
+            SectionHeader(title: l10n.reviewLedgerEffect),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+              child: Column(
+                children: [
+                  CurrencyAmountRow(
+                    label: l10n.reviewDebitLabel(
+                      categoryLabel(l10n, ctx.category),
+                    ),
+                    minorUnits: ctx.amountMinorUnits,
+                    currencyCode: ctx.currencyCode,
+                    tone: FinancialAmountTone.expense,
+                    direction: FinancialAmountDirection.outflow,
+                  ),
+                  CurrencyAmountRow(
+                    label: l10n.reviewCreditLabel(
+                      accountName(ctx.paymentAccountId),
+                    ),
+                    minorUnits: ctx.amountMinorUnits,
+                    currencyCode: ctx.currencyCode,
+                    showDivider: false,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppTheme.space24),
             AppReviewSection(
               title: l10n.reviewTitle,
               rows: [
                 AppReviewRowData(
-                  label: l10n.fieldOperationType,
-                  value: l10n.operationTypeExpense,
-                ),
-                AppReviewRowData(
-                  label: l10n.fieldAmount,
-                  value: formatAmount(ctx.amountMinorUnits, ctx.currencyCode),
-                ),
-                AppReviewRowData(
-                  label: l10n.fieldPaymentAccount,
-                  value: accountName(ctx.paymentAccountId),
-                ),
-                AppReviewRowData(
-                  label: l10n.fieldCategory,
-                  value: categoryLabel(l10n, ctx.category),
-                ),
-                AppReviewRowData(
-                  label: l10n.fieldSpender,
-                  value: memberName(ctx.spenderMemberId),
-                ),
-                AppReviewRowData(
                   label: l10n.fieldBeneficiary,
                   value: memberName(ctx.beneficiaryMemberId),
-                ),
-                AppReviewRowData(
-                  label: l10n.fieldScope,
-                  value: scopeLabel(ctx.scope),
                 ),
                 AppReviewRowData(
                   label: l10n.fieldRecurring,
@@ -154,27 +204,16 @@ class ExpenseReviewScreen extends ConsumerWidget {
     AppLocalizations l10n,
     ExpenseContext ctx,
   ) async {
+    setState(() => _failure = null);
     ref.read(submittingProvider.notifier).setSubmitting(true);
     try {
-      final useCase = ref.read(recordExpenseUseCaseProvider);
-      final result = await useCase.execute(ctx);
-
+      final outcome = await submitExpense(ref: ref, l10n: l10n, ctx: ctx);
       if (!context.mounted) return;
-
-      switch (result) {
-        case AppOk():
-          ref.read(expenseFormKeyProvider.notifier).regenerateKey();
-          ref.read(stagedExpenseContextProvider.notifier).set(null);
-          invalidateTransactionMoneyProviders(ref);
+      switch (outcome) {
+        case ExpenseSaved():
           context.go('/transactions');
-        case AppInsufficientFunds():
-          _snack(context, l10n.errorInsufficientFunds);
-        case AppValidationFailure(:final messageKey):
-          _snack(context, _msg(l10n, messageKey));
-        case AppDuplicateConflict():
-          _snack(context, l10n.errorAccountDuplicate);
-        default:
-          _snack(context, l10n.errorGeneric);
+        case ExpenseRejected(:final message):
+          _fail(message);
       }
     } finally {
       if (context.mounted) {
@@ -183,10 +222,7 @@ class ExpenseReviewScreen extends ConsumerWidget {
     }
   }
 
-  void _snack(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _fail(String message) {
+    if (mounted) setState(() => _failure = message);
   }
-
-  String _msg(AppLocalizations l10n, String key) =>
-      resolveMessageKey(l10n, key);
 }
