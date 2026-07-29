@@ -3336,6 +3336,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You moved {amount} from {source} to {destination}.'**
   String transferReadBack(String amount, String source, String destination);
+
+  /// Validation: a reversal was submitted with an empty reason.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required to reverse a transaction.'**
+  String get errorReversalReasonRequired;
+
+  /// Validation: the reversal reason exceeds the 280-character limit.
+  ///
+  /// In en, this message translates to:
+  /// **'The reason is too long — 280 characters maximum.'**
+  String get errorReversalReasonTooLong;
+
+  /// A reversal id collided with a different existing operation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicting reversal request. Refresh and try again.'**
+  String get errorReversalConflict;
+
+  /// The reversal would debit a protected account and needs the protected-withdrawal flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversing this would withdraw from protected money — use the protected-withdrawal flow.'**
+  String get errorReversalRequiresProtectedAudit;
+
+  /// Title of the reversal sheet. Names what the action is not, because users arrive looking for delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse a transaction — not delete'**
+  String get reversalSheetTitle;
+
+  /// Explains the append-only correction before the user commits to it.
+  ///
+  /// In en, this message translates to:
+  /// **'The original transaction stays in the ledger exactly as it is. We add an opposing entry that refers to it, so the history stays complete and auditable.'**
+  String get reversalSheetIntro;
+
+  /// Heading over the two-row before/after preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Before and after'**
+  String get reversalBeforeAfterTitle;
+
+  /// What happens to the original row: it stays and is marked.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays — marked as reversed'**
+  String get reversalOriginalStaysLabel;
+
+  /// Label for the entry that will be added.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversing entry · today'**
+  String get reversalCounterEntryLabel;
+
+  /// Meta line under the counter-entry naming what it points at.
+  ///
+  /// In en, this message translates to:
+  /// **'Refers to the transaction above'**
+  String get reversalCounterEntryReference;
+
+  /// Label of the required free-text reason field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for reversal — required'**
+  String get reversalReasonLabel;
+
+  /// Tells the user the reason is permanent and public before they type it.
+  ///
+  /// In en, this message translates to:
+  /// **'The reason is recorded permanently on the reversing entry and is shown to anyone who opens it.'**
+  String get reversalReasonPermanenceNote;
+
+  /// Suggested reversal reason: the transaction was entered twice.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered twice'**
+  String get reversalReasonPresetDuplicate;
+
+  /// Suggested reversal reason: the amount was wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong amount'**
+  String get reversalReasonPresetWrongAmount;
+
+  /// Suggested reversal reason: the wrong account was used.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong account'**
+  String get reversalReasonPresetWrongAccount;
+
+  /// Suggested reversal reason: the purchase was cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase cancelled'**
+  String get reversalReasonPresetCancelledPurchase;
+
+  /// Confirm action on the reversal sheet. States what will be added, never 'are you sure'.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the reversing entry'**
+  String get reversalConfirmAction;
+
+  /// Closing note on the reversal sheet explaining the absence of delete.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no delete button in this app, and that is deliberate.'**
+  String get reversalNoDeleteNote;
+
+  /// Heading of the append-only explainer on transaction detail.
+  ///
+  /// In en, this message translates to:
+  /// **'No editing and no deleting.'**
+  String get detailNoEditNoDeleteTitle;
+
+  /// Body of the append-only explainer on transaction detail.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction is a permanent part of the ledger. If it is wrong, we add a reversing entry that refers to it — and both stay visible.'**
+  String get detailNoEditNoDeleteBody;
+
+  /// Heading over the double-entry rows of a posted operation.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger entries — two sides'**
+  String get detailLedgerEntriesTitle;
+
+  /// Heading over the double-entry rows of a reversed original.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger entries — the original'**
+  String get detailLedgerEntriesOriginalTitle;
+
+  /// Explains that a reversed operation's entries are not deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'These entries are still in the ledger — not erased. The reversing entry added two opposing entries, so the net is zero without touching history.'**
+  String get detailEntriesStillInLedgerNote;
+
+  /// Banner title on a reversed operation.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction is reversed'**
+  String get detailReversedBannerTitle;
+
+  /// Shown in the action slot of an already-reversed operation, so the absence of an action is explained rather than mysterious.
+  ///
+  /// In en, this message translates to:
+  /// **'Already reversed — no further action'**
+  String get detailAlreadyReversedNoAction;
+
+  /// Heading of the numbered original-then-reversal lineage.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction chain'**
+  String get detailChainTitle;
+
+  /// Chain step naming the original operation.
+  ///
+  /// In en, this message translates to:
+  /// **'The original'**
+  String get detailChainOriginalLabel;
+
+  /// Chain step naming the reversing operation.
+  ///
+  /// In en, this message translates to:
+  /// **'The reversing entry'**
+  String get detailChainReversalLabel;
+
+  /// Marks which chain step the user is currently viewing.
+  ///
+  /// In en, this message translates to:
+  /// **'You are here'**
+  String get detailChainYouAreHere;
+
+  /// Action opening the other half of a reversal pair.
+  ///
+  /// In en, this message translates to:
+  /// **'Open it'**
+  String get detailChainOpenEntry;
+
+  /// Status badge on an operation that is recorded and not reversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get detailStatusPosted;
+
+  /// Starts a new entry prefilled from this one. Offered beside the reversal because users otherwise reach for edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get transactionRepeatAction;
+
+  /// Net balance effect of the original and its reversal on one account. Always zero, and stated rather than implied.
+  ///
+  /// In en, this message translates to:
+  /// **'Net effect on {account}'**
+  String reversalNetEffectOn(String account);
+
+  /// Banner shown on an operation that has been reversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversed on {date}. The original is unchanged, and its effect on the balance is zero.'**
+  String detailReversedBannerBody(String date);
+
+  /// The reversal's recorded reason and its author, shown on the chain entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason} · by {author}'**
+  String detailChainReasonBy(String reason, String author);
+
+  /// System timestamp at which the operation was written. Distinct from the user-chosen effective date.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded at {timestamp}'**
+  String detailRecordedAt(String timestamp);
+
+  /// Confirmation after a reversal is recorded. Names the net effect so the user sees the correction landed.
+  ///
+  /// In en, this message translates to:
+  /// **'The reversing entry was added. The original stays in the ledger, and the net is now {net}.'**
+  String reversalSavedConfirmation(String net);
+
+  /// Opens the reversal flow from transaction detail. Names what is added, never 'delete' or 'undo'.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reversing entry'**
+  String get detailAddReversalAction;
+
+  /// Heading over the field table on transaction detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get detailSectionTitle;
+
+  /// Numbered chain step naming the original operation and its date.
+  ///
+  /// In en, this message translates to:
+  /// **'{step} · The original — {date}'**
+  String detailChainStepOriginal(String step, String date);
+
+  /// Numbered chain step naming the reversing operation and its date.
+  ///
+  /// In en, this message translates to:
+  /// **'{step} · The reversing entry — {date}'**
+  String detailChainStepReversal(String step, String date);
+
+  /// Date group header for the current day.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get transactionsGroupToday;
+
+  /// Date group header for the previous day.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get transactionsGroupYesterday;
+
+  /// Period summary figure: total inflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transactionsSummaryIncome;
+
+  /// Period summary figure: total outflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transactionsSummaryExpense;
+
+  /// Period summary figure: total moved between the household's own accounts. Labelled and separated because a transfer is not added to income or expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transactionsSummaryTransfer;
+
+  /// Explains why the transfer total sits apart from the other two.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not affect income or expense'**
+  String get transactionsTransferNotCounted;
+
+  /// Meta line on a reversed original in the list, pointing at its counter-entry.
+  ///
+  /// In en, this message translates to:
+  /// **'The original is kept — see the counter-entry'**
+  String get transactionsReversedOriginalMeta;
+
+  /// Empty state when a filter excluded everything. An empty result is a filter problem, never a data problem.
+  ///
+  /// In en, this message translates to:
+  /// **'No transaction matches the filter'**
+  String get transactionsEmptyFilteredTitle;
+
+  /// Error state title on the transaction list.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load transactions'**
+  String get transactionsErrorTitle;
+
+  /// States which currency the period summary covers. A total that mixed currencies would be meaningless, so the summary names its own scope.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency} only · transactions in other currencies are shown below in their own currency'**
+  String transactionsSummaryCurrencyOnly(String currency);
+
+  /// Number of transactions in a date group, shown beside its header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String transactionsGroupCount(String count);
+
+  /// Meta line on a reversing entry in the list: what it answers, and why.
+  ///
+  /// In en, this message translates to:
+  /// **'Refers to the transaction of {date} · Reason: {reason}'**
+  String transactionsReversalRefersTo(String date, String reason);
+
+  /// Names the count the user does have, so an empty filtered result never reads as an empty ledger.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} transactions'**
+  String transactionsCountAvailable(String count);
+
+  /// Title of the filter sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get transactionsFilterTitle;
+
+  /// Filter section: operation type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get transactionsFilterType;
+
+  /// Toggle for reversed history. On by default — hiding it would quietly hide history.
+  ///
+  /// In en, this message translates to:
+  /// **'Show reversed transactions'**
+  String get transactionsFilterShowReversed;
+
+  /// Filter section: amount band.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transactionsFilterAmountRange;
+
+  /// States that the amount band applies within one currency only.
+  ///
+  /// In en, this message translates to:
+  /// **'Per currency — the filter never compares two currencies'**
+  String get transactionsFilterAmountPerCurrency;
+
+  /// Lower bound of the amount band.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get transactionsFilterMin;
+
+  /// Upper bound of the amount band.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get transactionsFilterMax;
+
+  /// Placeholder in the search field, naming what is searched.
+  ///
+  /// In en, this message translates to:
+  /// **'Search descriptions, notes and account names'**
+  String get transactionsSearchHint;
+
+  /// Explains that a search looks across all dates, because someone searching for an amount wants one transaction, not a month.
+  ///
+  /// In en, this message translates to:
+  /// **'Search ignores the selected period'**
+  String get transactionsSearchIgnoresPeriod;
+
+  /// Removes every active filter criterion.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get transactionsClearFilters;
+
+  /// Dismisses the filter sheet without applying changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get transactionsCancel;
+
+  /// Confirm button on the filter sheet. Carries the result count so filtering to nothing is a rare accident rather than the normal way to discover the empty state.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} transactions'**
+  String transactionsFilterApply(String count);
+
+  /// Clears every criterion, naming how many are active.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all ({count})'**
+  String transactionsClearFiltersCount(String count);
+
+  /// Body of the filtered-empty state. Names the count the user does have, so an empty result never reads as an empty ledger.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {total} transactions — but none match this filter.'**
+  String transactionsEmptyFilteredBody(String total);
+
+  /// Account-flow line: money moved into this account from another of the household's own accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer in'**
+  String get reportTransferIn;
+
+  /// Account-flow line: money moved out of this account to another of the household's own accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer out'**
+  String get reportTransferOut;
+
+  /// Home-savings line: money handed to the spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse wallet — funded'**
+  String get reportSpouseWalletFunded;
+
+  /// Home-savings line: money returned from the spouse wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse wallet — returned'**
+  String get reportSpouseWalletReturned;
+
+  /// Protected-withdrawal audit caption when the recorder is unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'For {beneficiary} · {date}'**
+  String reportAuditFor(String beneficiary, String date);
+
+  /// Protected-withdrawal audit caption: who the money was for, who took it, and when. All three are the audit trail.
+  ///
+  /// In en, this message translates to:
+  /// **'For {beneficiary} · by {recordedBy} · {date}'**
+  String reportAuditForBy(String beneficiary, String recordedBy, String date);
+
+  /// Banner on the drill-down list explaining that it is showing a subset chosen by tapping a report figure.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered from the report'**
+  String get reportDrillDownFiltered;
+
+  /// Clears the drill-down filter and shows every transaction in the period.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get reportDrillDownClear;
+
+  /// Shown when an account's period flow fails its own accounting identity. Named plainly rather than as an error code, because the user's question is whether they can trust the table.
+  ///
+  /// In en, this message translates to:
+  /// **'These figures do not add up'**
+  String get reportDoesNotReconcile;
+
+  /// Explains what a failed reconciliation does and does not call into question. Balances are derived from the ledger and remain trustworthy; only the period attribution is suspect.
+  ///
+  /// In en, this message translates to:
+  /// **'The opening balance plus the movements does not equal the closing balance. The balances themselves are correct — the period breakdown is not, so do not rely on these lines until it is checked.'**
+  String get reportDoesNotReconcileBody;
+
+  /// Filter section: transaction category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get transactionsFilterCategory;
+
+  /// Filter section: the account a transaction touched, on either side.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get transactionsFilterAccount;
+
+  /// Filter section: who spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spender'**
+  String get transactionsFilterSpender;
+
+  /// Filter section: expense scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get transactionsFilterScope;
+
+  /// Which currency the amount band applies to. Required, because a band without one would compare across currencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get transactionsFilterCurrency;
+
+  /// Clears the account filter.
+  ///
+  /// In en, this message translates to:
+  /// **'All accounts'**
+  String get transactionsFilterAllAccounts;
+
+  /// Clears the spender filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone'**
+  String get transactionsFilterAnyMember;
+
+  /// Title of the date sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date'**
+  String get datePickerTitle;
+
+  /// Date shortcut: today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get datePickerToday;
+
+  /// Date shortcut: yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get datePickerYesterday;
+
+  /// Date shortcut: the first day of the current month.
+  ///
+  /// In en, this message translates to:
+  /// **'Start of the month'**
+  String get datePickerStartOfMonth;
+
+  /// Confirms the selected date.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get datePickerConfirm;
+
+  /// Explains why future days are disabled when picking the date of something that already happened.
+  ///
+  /// In en, this message translates to:
+  /// **'No transaction is recorded in the future'**
+  String get datePickerNoFuture;
 }
 
 class _AppLocalizationsDelegate

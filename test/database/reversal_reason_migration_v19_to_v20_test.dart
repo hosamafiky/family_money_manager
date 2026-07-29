@@ -105,49 +105,55 @@ List<String> _columnsOf(String path, String table) {
 void main() {
   setUpAll(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = true);
 
-  test('MIG-20. v19 → v20 adds reversal_reason and preserves every row', () async {
-    final path = await _materialiseV19();
-    addTearDown(() async {
-      final dir = Directory(p.dirname(path));
-      if (await dir.exists()) await dir.delete(recursive: true);
-    });
+  test(
+    'MIG-20. v19 → v20 adds reversal_reason and preserves every row',
+    () async {
+      final path = await _materialiseV19();
+      addTearDown(() async {
+        final dir = Directory(p.dirname(path));
+        if (await dir.exists()) await dir.delete(recursive: true);
+      });
 
-    _seed(path);
+      _seed(path);
 
-    // ── Pre-migration ─────────────────────────────────────────────────────
-    final before = sqlite3.sqlite3.open(path);
-    expect(before.select('PRAGMA user_version').first['user_version'], 19);
-    before.close();
-    expect(_columnsOf(path, 'operations'), isNot(contains('reversal_reason')));
+      // ── Pre-migration ─────────────────────────────────────────────────────
+      final before = sqlite3.sqlite3.open(path);
+      expect(before.select('PRAGMA user_version').first['user_version'], 19);
+      before.close();
+      expect(
+        _columnsOf(path, 'operations'),
+        isNot(contains('reversal_reason')),
+      );
 
-    // ── The real migration ────────────────────────────────────────────────
-    final db = AppDatabase.forFile(path);
-    await db.customSelect('SELECT 1').get();
-    await db.close();
+      // ── The real migration ────────────────────────────────────────────────
+      final db = AppDatabase.forFile(path);
+      await db.customSelect('SELECT 1').get();
+      await db.close();
 
-    // ── Post-migration ────────────────────────────────────────────────────
-    final after = sqlite3.sqlite3.open(path);
-    addTearDown(after.close);
+      // ── Post-migration ────────────────────────────────────────────────────
+      final after = sqlite3.sqlite3.open(path);
+      addTearDown(after.close);
 
-    expect(after.select('PRAGMA user_version').first['user_version'], 20);
-    expect(_columnsOf(path, 'operations'), contains('reversal_reason'));
+      expect(after.select('PRAGMA user_version').first['user_version'], 20);
+      expect(_columnsOf(path, 'operations'), contains('reversal_reason'));
 
-    // Nothing was rewritten: both rows survive with their identities and
-    // their reversal lineage intact.
-    final ops = after.select('SELECT * FROM operations ORDER BY id');
-    expect(ops.length, 2);
+      // Nothing was rewritten: both rows survive with their identities and
+      // their reversal lineage intact.
+      final ops = after.select('SELECT * FROM operations ORDER BY id');
+      expect(ops.length, 2);
 
-    final original = ops.firstWhere((r) => r['id'] == 'op-original');
-    expect(original['is_reversed'], 1);
-    expect(original['reversed_by'], 'op-reversal');
-    expect(original['total_amount_minor_units'], 127500);
+      final original = ops.firstWhere((r) => r['id'] == 'op-original');
+      expect(original['is_reversed'], 1);
+      expect(original['reversed_by'], 'op-reversal');
+      expect(original['total_amount_minor_units'], 127500);
 
-    final reversal = ops.firstWhere((r) => r['id'] == 'op-reversal');
-    expect(reversal['type'], 'reversal');
-    // History recorded without a reason keeps NULL. There is no reason to
-    // invent for an entry that was made before the field existed.
-    expect(reversal['reversal_reason'], isNull);
-  });
+      final reversal = ops.firstWhere((r) => r['id'] == 'op-reversal');
+      expect(reversal['type'], 'reversal');
+      // History recorded without a reason keeps NULL. There is no reason to
+      // invent for an entry that was made before the field existed.
+      expect(reversal['reversal_reason'], isNull);
+    },
+  );
 
   test('MIG-20. a recorded reason cannot be edited afterwards', () async {
     final path = await _materialiseV19();
@@ -180,6 +186,11 @@ void main() {
       "UPDATE operations SET is_reversed = 1, updated_at = '2026-07-20' "
       "WHERE id = 'op-reversal'",
     );
-    expect(after.select("SELECT is_reversed FROM operations WHERE id = 'op-reversal'").first['is_reversed'], 1);
+    expect(
+      after
+          .select("SELECT is_reversed FROM operations WHERE id = 'op-reversal'")
+          .first['is_reversed'],
+      1,
+    );
   });
 }

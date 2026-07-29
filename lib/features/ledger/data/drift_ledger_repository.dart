@@ -843,6 +843,12 @@ final class DriftLedgerRepository implements LedgerRepository {
                 params.reason ??
                     'Reversal of operation ${params.originalOperationId}',
               ),
+              // Stored separately from [description] because a reason is an
+              // audit field, not a summary: the detail screen prints it as
+              // "why", and a caller must be able to tell a recorded reason
+              // from a generated fallback. Only ever set on the reversal row,
+              // so the original operation stays untouched (INV-002).
+              reversalReason: Value(params.reason),
               sourceAccountId: Value(original.destinationAccountId),
               destinationAccountId: Value(original.sourceAccountId),
               idempotencyKey: Value(params.reversalOperationId),

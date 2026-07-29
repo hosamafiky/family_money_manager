@@ -169,11 +169,10 @@ class _CertificateCreationScreenState
               subtitle: Text(_dateStr(_startDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: () async {
-                final d = await showDatePicker(
+                final d = await showAppDatePicker(
                   context: context,
                   initialDate: _startDate,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
+                  purpose: DatePurpose.ledgerEntry,
                 );
                 if (d != null) setState(() => _startDate = d);
               },
@@ -183,11 +182,12 @@ class _CertificateCreationScreenState
               subtitle: Text(_dateStr(_maturityDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: () async {
-                final d = await showDatePicker(
+                final d = await showAppDatePicker(
                   context: context,
                   initialDate: _maturityDate,
-                  firstDate: _startDate.add(const Duration(days: 1)),
-                  lastDate: DateTime(2100),
+                  purpose: DatePurpose.futureTarget,
+                  // Maturity is after the start, never on or before it.
+                  earliest: _startDate.add(const Duration(days: 1)),
                 );
                 if (d != null) setState(() => _maturityDate = d);
               },

@@ -750,5 +750,470 @@
         "type": "String"
       }
     }
+  },
+  "errorReversalReasonRequired": "اكتب سبب العكس — مطلوب.",
+  "@errorReversalReasonRequired": {
+    "description": "Validation: a reversal was submitted with an empty reason."
+  },
+  "errorReversalReasonTooLong": "السبب طويل جداً — 280 حرف كحد أقصى.",
+  "@errorReversalReasonTooLong": {
+    "description": "Validation: the reversal reason exceeds the 280-character limit."
+  },
+  "errorReversalConflict": "طلب عكس متعارض. حدّث الصفحة وحاول مجدداً.",
+  "@errorReversalConflict": {
+    "description": "A reversal id collided with a different existing operation."
+  },
+  "errorReversalRequiresProtectedAudit": "عكس الحركة دي هيسحب من مال محمي — لازم تعديه من شاشة السحب المحمي.",
+  "@errorReversalRequiresProtectedAudit": {
+    "description": "The reversal would debit a protected account and needs the protected-withdrawal flow."
+  },
+  "reversalSheetTitle": "عكس حركة — مش حذف",
+  "@reversalSheetTitle": {
+    "description": "Title of the reversal sheet. Names what the action is not, because users arrive looking for delete."
+  },
+  "reversalSheetIntro": "الحركة الأصلية هتفضل في السجل زي ما هي. هنضيف حركة معاكسة تشير إليها، فيبقى التاريخ كامل وقابل للمراجعة.",
+  "@reversalSheetIntro": {
+    "description": "Explains the append-only correction before the user commits to it."
+  },
+  "reversalBeforeAfterTitle": "قبل وبعد",
+  "@reversalBeforeAfterTitle": {
+    "description": "Heading over the two-row before/after preview."
+  },
+  "reversalOriginalStaysLabel": "تبقى — تُعلَّم كمعكوسة",
+  "@reversalOriginalStaysLabel": {
+    "description": "What happens to the original row: it stays and is marked."
+  },
+  "reversalCounterEntryLabel": "حركة عكسية · اليوم",
+  "@reversalCounterEntryLabel": {
+    "description": "Label for the entry that will be added."
+  },
+  "reversalCounterEntryReference": "تشير إلى الحركة أعلاه",
+  "@reversalCounterEntryReference": {
+    "description": "Meta line under the counter-entry naming what it points at."
+  },
+  "reversalReasonLabel": "سبب العكس — مطلوب",
+  "@reversalReasonLabel": {
+    "description": "Label of the required free-text reason field."
+  },
+  "reversalReasonPermanenceNote": "السبب يُسجَّل على الحركة العكسية بشكل دائم ويظهر لأي حد يفتحها.",
+  "@reversalReasonPermanenceNote": {
+    "description": "Tells the user the reason is permanent and public before they type it."
+  },
+  "reversalReasonPresetDuplicate": "أُدخلت مرتين",
+  "@reversalReasonPresetDuplicate": {
+    "description": "Suggested reversal reason: the transaction was entered twice."
+  },
+  "reversalReasonPresetWrongAmount": "مبلغ خطأ",
+  "@reversalReasonPresetWrongAmount": {
+    "description": "Suggested reversal reason: the amount was wrong."
+  },
+  "reversalReasonPresetWrongAccount": "حساب خطأ",
+  "@reversalReasonPresetWrongAccount": {
+    "description": "Suggested reversal reason: the wrong account was used."
+  },
+  "reversalReasonPresetCancelledPurchase": "اتلغت الشرائية",
+  "@reversalReasonPresetCancelledPurchase": {
+    "description": "Suggested reversal reason: the purchase was cancelled."
+  },
+  "reversalConfirmAction": "أضف الحركة العكسية",
+  "@reversalConfirmAction": {
+    "description": "Confirm action on the reversal sheet. States what will be added, never 'are you sure'."
+  },
+  "reversalNoDeleteNote": "مفيش زر حذف في التطبيق، وده مقصود.",
+  "@reversalNoDeleteNote": {
+    "description": "Closing note on the reversal sheet explaining the absence of delete."
+  },
+  "detailNoEditNoDeleteTitle": "مفيش تعديل ومفيش حذف.",
+  "@detailNoEditNoDeleteTitle": {
+    "description": "Heading of the append-only explainer on transaction detail."
+  },
+  "detailNoEditNoDeleteBody": "الحركة دي جزء دائم من السجل. لو فيها غلط، بنضيف حركة عكسية تشير إليها — والاتنين يفضلوا ظاهرين.",
+  "@detailNoEditNoDeleteBody": {
+    "description": "Body of the append-only explainer on transaction detail."
+  },
+  "detailLedgerEntriesTitle": "قيود السجل — طرفان",
+  "@detailLedgerEntriesTitle": {
+    "description": "Heading over the double-entry rows of a posted operation."
+  },
+  "detailLedgerEntriesOriginalTitle": "قيود السجل — الأصل",
+  "@detailLedgerEntriesOriginalTitle": {
+    "description": "Heading over the double-entry rows of a reversed original."
+  },
+  "detailEntriesStillInLedgerNote": "القيود دي لسه في السجل — مش ممسوحة. الحركة العكسية ضافت قيدين مضادين، فبقى الصافي صفر بدون ما نلمس التاريخ.",
+  "@detailEntriesStillInLedgerNote": {
+    "description": "Explains that a reversed operation's entries are not deleted."
+  },
+  "detailReversedBannerTitle": "الحركة دي معكوسة",
+  "@detailReversedBannerTitle": {
+    "description": "Banner title on a reversed operation."
+  },
+  "detailAlreadyReversedNoAction": "الحركة معكوسة بالفعل — مفيش إجراء تاني",
+  "@detailAlreadyReversedNoAction": {
+    "description": "Shown in the action slot of an already-reversed operation, so the absence of an action is explained rather than mysterious."
+  },
+  "detailChainTitle": "سلسلة الحركة",
+  "@detailChainTitle": {
+    "description": "Heading of the numbered original-then-reversal lineage."
+  },
+  "detailChainOriginalLabel": "الأصل",
+  "@detailChainOriginalLabel": {
+    "description": "Chain step naming the original operation."
+  },
+  "detailChainReversalLabel": "الحركة العكسية",
+  "@detailChainReversalLabel": {
+    "description": "Chain step naming the reversing operation."
+  },
+  "detailChainYouAreHere": "أنت هنا",
+  "@detailChainYouAreHere": {
+    "description": "Marks which chain step the user is currently viewing."
+  },
+  "detailChainOpenEntry": "افتحها",
+  "@detailChainOpenEntry": {
+    "description": "Action opening the other half of a reversal pair."
+  },
+  "detailStatusPosted": "مُسجَّلة",
+  "@detailStatusPosted": {
+    "description": "Status badge on an operation that is recorded and not reversed."
+  },
+  "transactionRepeatAction": "تكرار",
+  "@transactionRepeatAction": {
+    "description": "Starts a new entry prefilled from this one. Offered beside the reversal because users otherwise reach for edit."
+  },
+  "reversalNetEffectOn": "صافي الأثر على {account}",
+  "@reversalNetEffectOn": {
+    "description": "Net balance effect of the original and its reversal on one account. Always zero, and stated rather than implied.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "detailReversedBannerBody": "اتعكست في {date}. الأصل باقي كما هو، وأثرها على الرصيد صفر.",
+  "@detailReversedBannerBody": {
+    "description": "Banner shown on an operation that has been reversed.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailChainReasonBy": "السبب: {reason} · بواسطة {author}",
+  "@detailChainReasonBy": {
+    "description": "The reversal's recorded reason and its author, shown on the chain entry.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "detailRecordedAt": "سُجِّلت في {timestamp}",
+  "@detailRecordedAt": {
+    "description": "System timestamp at which the operation was written. Distinct from the user-chosen effective date.",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "reversalSavedConfirmation": "تمت إضافة الحركة العكسية. الأصل باقي في السجل، والصافي بقى {net}.",
+  "@reversalSavedConfirmation": {
+    "description": "Confirmation after a reversal is recorded. Names the net effect so the user sees the correction landed.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "detailAddReversalAction": "أضف حركة عكسية",
+  "@detailAddReversalAction": {
+    "description": "Opens the reversal flow from transaction detail. Names what is added, never 'delete' or 'undo'."
+  },
+  "detailSectionTitle": "التفاصيل",
+  "@detailSectionTitle": {
+    "description": "Heading over the field table on transaction detail."
+  },
+  "detailChainStepOriginal": "{step} · الأصل — {date}",
+  "@detailChainStepOriginal": {
+    "description": "Numbered chain step naming the original operation and its date.",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailChainStepReversal": "{step} · الحركة العكسية — {date}",
+  "@detailChainStepReversal": {
+    "description": "Numbered chain step naming the reversing operation and its date.",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsGroupToday": "اليوم",
+  "@transactionsGroupToday": {
+    "description": "Date group header for the current day."
+  },
+  "transactionsGroupYesterday": "أمس",
+  "@transactionsGroupYesterday": {
+    "description": "Date group header for the previous day."
+  },
+  "transactionsSummaryIncome": "دخل",
+  "@transactionsSummaryIncome": {
+    "description": "Period summary figure: total inflow."
+  },
+  "transactionsSummaryExpense": "مصروف",
+  "@transactionsSummaryExpense": {
+    "description": "Period summary figure: total outflow."
+  },
+  "transactionsSummaryTransfer": "تحويل",
+  "@transactionsSummaryTransfer": {
+    "description": "Period summary figure: total moved between the household's own accounts. Labelled and separated because a transfer is not added to income or expense."
+  },
+  "transactionsTransferNotCounted": "لا يؤثر على الدخل أو المصروف",
+  "@transactionsTransferNotCounted": {
+    "description": "Explains why the transfer total sits apart from the other two."
+  },
+  "transactionsReversedOriginalMeta": "الأصل محفوظ — انظر الحركة المقابلة",
+  "@transactionsReversedOriginalMeta": {
+    "description": "Meta line on a reversed original in the list, pointing at its counter-entry."
+  },
+  "transactionsEmptyFilteredTitle": "مفيش حركة تطابق التصفية",
+  "@transactionsEmptyFilteredTitle": {
+    "description": "Empty state when a filter excluded everything. An empty result is a filter problem, never a data problem."
+  },
+  "transactionsErrorTitle": "تعذّر تحميل الحركات",
+  "@transactionsErrorTitle": {
+    "description": "Error state title on the transaction list."
+  },
+  "transactionsSummaryCurrencyOnly": "{currency} فقط · الحركات بعملات أخرى معروضة أدناه بعملتها",
+  "@transactionsSummaryCurrencyOnly": {
+    "description": "States which currency the period summary covers. A total that mixed currencies would be meaningless, so the summary names its own scope.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsGroupCount": "{count}",
+  "@transactionsGroupCount": {
+    "description": "Number of transactions in a date group, shown beside its header.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsReversalRefersTo": "تشير إلى حركة {date} · السبب: {reason}",
+  "@transactionsReversalRefersTo": {
+    "description": "Meta line on a reversing entry in the list: what it answers, and why.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsCountAvailable": "عندك {count} حركة",
+  "@transactionsCountAvailable": {
+    "description": "Names the count the user does have, so an empty filtered result never reads as an empty ledger.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsFilterTitle": "تصفية",
+  "@transactionsFilterTitle": {
+    "description": "Title of the filter sheet."
+  },
+  "transactionsFilterType": "النوع",
+  "@transactionsFilterType": {
+    "description": "Filter section: operation type."
+  },
+  "transactionsFilterShowReversed": "إظهار الحركات المعكوسة",
+  "@transactionsFilterShowReversed": {
+    "description": "Toggle for reversed history. On by default — hiding it would quietly hide history."
+  },
+  "transactionsFilterAmountRange": "المبلغ",
+  "@transactionsFilterAmountRange": {
+    "description": "Filter section: amount band."
+  },
+  "transactionsFilterAmountPerCurrency": "لكل عملة على حدة — الفلتر لا يقارن بين عملتين",
+  "@transactionsFilterAmountPerCurrency": {
+    "description": "States that the amount band applies within one currency only."
+  },
+  "transactionsFilterMin": "من",
+  "@transactionsFilterMin": {
+    "description": "Lower bound of the amount band."
+  },
+  "transactionsFilterMax": "إلى",
+  "@transactionsFilterMax": {
+    "description": "Upper bound of the amount band."
+  },
+  "transactionsSearchHint": "ابحث في الوصف والملاحظات وأسماء الحسابات",
+  "@transactionsSearchHint": {
+    "description": "Placeholder in the search field, naming what is searched."
+  },
+  "transactionsSearchIgnoresPeriod": "البحث يتجاهل الفترة المحددة",
+  "@transactionsSearchIgnoresPeriod": {
+    "description": "Explains that a search looks across all dates, because someone searching for an amount wants one transaction, not a month."
+  },
+  "transactionsClearFilters": "مسح كل التصفية",
+  "@transactionsClearFilters": {
+    "description": "Removes every active filter criterion."
+  },
+  "transactionsCancel": "إلغاء",
+  "@transactionsCancel": {
+    "description": "Dismisses the filter sheet without applying changes."
+  },
+  "transactionsFilterApply": "عرض {count} حركة",
+  "@transactionsFilterApply": {
+    "description": "Confirm button on the filter sheet. Carries the result count so filtering to nothing is a rare accident rather than the normal way to discover the empty state.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsClearFiltersCount": "مسح الكل ({count})",
+  "@transactionsClearFiltersCount": {
+    "description": "Clears every criterion, naming how many are active.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsEmptyFilteredBody": "عندك {total} حركة — بس مفيش حاجة تطابق التصفية دي.",
+  "@transactionsEmptyFilteredBody": {
+    "description": "Body of the filtered-empty state. Names the count the user does have, so an empty result never reads as an empty ledger.",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTransferIn": "تحويل وارد",
+  "@reportTransferIn": {
+    "description": "Account-flow line: money moved into this account from another of the household's own accounts."
+  },
+  "reportTransferOut": "تحويل صادر",
+  "@reportTransferOut": {
+    "description": "Account-flow line: money moved out of this account to another of the household's own accounts."
+  },
+  "reportSpouseWalletFunded": "محفظة الزوجة — تسليم",
+  "@reportSpouseWalletFunded": {
+    "description": "Home-savings line: money handed to the spouse wallet."
+  },
+  "reportSpouseWalletReturned": "محفظة الزوجة — مرتجع",
+  "@reportSpouseWalletReturned": {
+    "description": "Home-savings line: money returned from the spouse wallet."
+  },
+  "reportAuditFor": "للمستفيد {beneficiary} · {date}",
+  "@reportAuditFor": {
+    "description": "Protected-withdrawal audit caption when the recorder is unknown.",
+    "placeholders": {
+      "beneficiary": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportAuditForBy": "للمستفيد {beneficiary} · بواسطة {recordedBy} · {date}",
+  "@reportAuditForBy": {
+    "description": "Protected-withdrawal audit caption: who the money was for, who took it, and when. All three are the audit trail.",
+    "placeholders": {
+      "beneficiary": {
+        "type": "String"
+      },
+      "recordedBy": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDrillDownFiltered": "معروض بتصفية من التقرير",
+  "@reportDrillDownFiltered": {
+    "description": "Banner on the drill-down list explaining that it is showing a subset chosen by tapping a report figure."
+  },
+  "reportDrillDownClear": "عرض الكل",
+  "@reportDrillDownClear": {
+    "description": "Clears the drill-down filter and shows every transaction in the period."
+  },
+  "reportDoesNotReconcile": "الأرقام دي مش مظبوطة",
+  "@reportDoesNotReconcile": {
+    "description": "Shown when an account's period flow fails its own accounting identity. Named plainly rather than as an error code, because the user's question is whether they can trust the table."
+  },
+  "reportDoesNotReconcileBody": "رصيد أول المدة زائد الحركات لا يساوي رصيد آخر المدة. الأرصدة نفسها صحيحة — المشكلة في تفصيل الفترة، فمتعتمدش على السطور دي لحد ما تتراجع.",
+  "@reportDoesNotReconcileBody": {
+    "description": "Explains what a failed reconciliation does and does not call into question. Balances are derived from the ledger and remain trustworthy; only the period attribution is suspect."
+  },
+  "transactionsFilterCategory": "الفئة",
+  "@transactionsFilterCategory": {
+    "description": "Filter section: transaction category."
+  },
+  "transactionsFilterAccount": "الحساب",
+  "@transactionsFilterAccount": {
+    "description": "Filter section: the account a transaction touched, on either side."
+  },
+  "transactionsFilterSpender": "المنفق",
+  "@transactionsFilterSpender": {
+    "description": "Filter section: who spent."
+  },
+  "transactionsFilterScope": "النطاق",
+  "@transactionsFilterScope": {
+    "description": "Filter section: expense scope."
+  },
+  "transactionsFilterCurrency": "العملة",
+  "@transactionsFilterCurrency": {
+    "description": "Which currency the amount band applies to. Required, because a band without one would compare across currencies."
+  },
+  "transactionsFilterAllAccounts": "كل الحسابات",
+  "@transactionsFilterAllAccounts": {
+    "description": "Clears the account filter."
+  },
+  "transactionsFilterAnyMember": "أي فرد",
+  "@transactionsFilterAnyMember": {
+    "description": "Clears the spender filter."
+  },
+  "datePickerTitle": "اختر تاريخ",
+  "@datePickerTitle": {
+    "description": "Title of the date sheet."
+  },
+  "datePickerToday": "النهاردة",
+  "@datePickerToday": {
+    "description": "Date shortcut: today."
+  },
+  "datePickerYesterday": "إمبارح",
+  "@datePickerYesterday": {
+    "description": "Date shortcut: yesterday."
+  },
+  "datePickerStartOfMonth": "أول الشهر",
+  "@datePickerStartOfMonth": {
+    "description": "Date shortcut: the first day of the current month."
+  },
+  "datePickerConfirm": "اختار",
+  "@datePickerConfirm": {
+    "description": "Confirms the selected date."
+  },
+  "datePickerNoFuture": "مفيش حركة بتتسجّل في المستقبل",
+  "@datePickerNoFuture": {
+    "description": "Explains why future days are disabled when picking the date of something that already happened."
   }
 }

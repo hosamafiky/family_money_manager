@@ -341,6 +341,8 @@ final class WithdrawalAuditSummary {
     required this.reason,
     required this.beneficiaryMemberId,
     required this.isReversed,
+    this.beneficiaryName,
+    this.recordedByName,
   });
 
   final String operationId;
@@ -350,6 +352,19 @@ final class WithdrawalAuditSummary {
   final String reason;
   final String beneficiaryMemberId;
   final bool isReversed;
+
+  /// The beneficiary's display name.
+  ///
+  /// Null only when the member row is gone. The screen falls back to
+  /// [beneficiaryMemberId] then — an id reads as missing data, whereas a
+  /// blank reads as a rendering bug.
+  final String? beneficiaryName;
+
+  /// Display name of whoever recorded the withdrawal.
+  ///
+  /// The other half of an audit trail: what was taken, from whom, and by
+  /// whom. `created_by` was already stored and simply never surfaced.
+  final String? recordedByName;
 }
 
 // ── Drill-down transaction row ─────────────────────────────────────────────────

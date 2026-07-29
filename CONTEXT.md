@@ -3,5481 +3,7156 @@
   ▘▘ ▝▝    ~/Desktop/family_money_manager
 
 
-❯ You are working on an existing Flutter application:                           
+❯ Attached is CONTEXT.md — a handoff summary from a previous conversation. Read 
+  it fully before responding.                                                   
                                                                                 
-  * Repository: `hosamafiky/family_money_manager`                               
-  * Main branch: `main`                                                         
-  * State management: Riverpod                                                  
-  * Localization: Flutter ARB                                                   
-  * Primary locale: Arabic Egypt, `ar_EG`                                       
-  * Primary direction: RTL                                                      
-  * Secondary locale: English, LTR                                              
+  Treat it as authoritative background: the goals, decisions, and constraints   
+  in it are already settled, so don't re-litigate them or ask me to re-explain  
+  what's already there. Anything it doesn't cover, ask me about rather than     
+  assuming.                                                                     
                                                                                 
-  A complete design handoff is available in:                                    
-                                                                                
-  `design_handoff_family_money_manager/`                                        
-                                                                                
-  Read the files in this exact order:                                           
-                                                                                
-  1. `README.md`                                                                
-  2. `designs/09 - D6 handoff & migration.dc.html`                              
-  3. `designs/01 - Design language & components.dc.html`                        
-  4. `designs/19 - D5 adaptive.dc.html`                                         
-  5. The relevant screen specification files before implementing each feature   
-                                                                                
-  The handoff contains 19 HTML documents and approximately 85 annotated         
-  artboards. The HTML files are specifications and visual references, not       
-  source code to copy into Flutter.                                             
-                                                                                
-  ## Primary objective                                                          
-                                                                                
-  Implement the supplied redesign accurately in the existing Flutter            
-  application while producing maintainable, reusable, testable,                 
-  production-quality code.                                                      
-                                                                                
-  Do not recreate screens as large monolithic widgets. Do not port the HTML or  
-  CSS directly. Translate the design language into Flutter theme tokens, shared 
-  presentation components, adaptive layouts, and feature screens that use the   
-  app’s existing domain and Riverpod architecture.                              
-                                                                                
-  The result must:                                                              
-                                                                                
-  * Closely match the supplied artboards.                                       
-  * Work correctly in Arabic RTL first.                                         
-  * Work correctly in English LTR.                                              
-  * Preserve all existing financial and domain behavior.                        
-  * Avoid duplicated styling and duplicated amount-formatting logic.            
-  * Be accessible and responsive.                                               
-  * Keep business logic outside the presentation layer.                         
-  * Pass existing tests and add focused tests for new shared behavior.          
-                                                                                
-  ## First step: inspect before editing                                         
-                                                                                
-  Before making changes:                                                        
-                                                                                
-  1. Inspect the repository structure.                                          
-  2. Read `pubspec.yaml`.                                                       
-  3. Inspect the current theme, routing, localization, shared components,       
-  features, providers, use cases, and tests.                                    
-  4. Search for all usages of:                                                  
-                                                                                
-     * `ThemeData`                                                              
-     * `ColorScheme`                                                            
-     * `AppFinancialColors`                                                     
-     * spacing and radius constants                                             
-     * direct `Colors.*` values                                                 
-     * direct currency formatting                                               
-     * `SnackBar`                                                               
-     * `AlertDialog`                                                            
-     * `showDatePicker`                                                         
-     * `showDateRangePicker`                                                    
-     * navigation shells and bottom navigation                                  
-  5. Compare existing components with the handoff before creating new ones.     
-  6. Reuse or refactor existing abstractions where appropriate instead of       
-  building parallel systems.                                                    
-                                                                                
-  Then produce a concise implementation inventory containing:                   
-                                                                                
-  * Existing architecture you found                                             
-  ──── (515 lines hidden) ───────────────────────────────────────────────────── 
-  ation.                                                                        
-  * Schema migrations.                                                          
-  * Report reconciliation.                                                      
-  * Protected-withdrawal rendering.                                             
-  * Localization completeness.                                                  
-                                                                                
-  Use golden tests if the repository already has a golden-test convention. If   
-  not, do not introduce a huge brittle golden suite immediately. Start with     
-  representative shared components and major screen states.                     
-                                                                                
-  Do not update failing golden files automatically until you have confirmed     
-  that the visual change matches the handoff.                                   
-                                                                                
-  ## Visual verification                                                        
-                                                                                
-  Where the project supports screenshots or golden tests:                       
-                                                                                
-  * Capture the same viewport sizes as the artboards.                           
-  * Verify Arabic RTL first.                                                    
-  * Verify English LTR second.                                                  
-  * Compare spacing, rules, typography, surfaces, and content hierarchy.        
-  * Confirm grayscale readability.                                              
-  * Confirm privacy mode does not cause layout movement.                        
-  * Confirm dark mode retains all financial distinctions.                       
-  * Confirm text scale does not clip or overlap.                                
-                                                                                
-  A visually approximate implementation is not sufficient when the token or     
-  component specification provides an exact value.                              
-                                                                                
-  ## Commands and validation                                                    
-                                                                                
-  Before considering a phase complete, run the project’s established            
-  equivalents of:                                                               
-                                                                                
-  * Formatting.                                                                 
-  * Static analysis.                                                            
-  * Localization generation.                                                    
-  * Code generation.                                                            
-  * Unit tests.                                                                 
-  * Widget tests.                                                               
-  * Integration or migration tests relevant to the phase.                       
-                                                                                
-  Fix root causes rather than suppressing analyzer warnings.                    
-                                                                                
-  Do not add broad ignores, lint exceptions, or test skips unless there is a    
-  documented, narrow reason.                                                    
-                                                                                
-  ## Working style                                                              
-                                                                                
-  Work autonomously and make reasonable decisions based on the handoff and      
-  repository.                                                                   
-                                                                                
-  When uncertainty remains:                                                     
-                                                                                
-  1. Search the repository.                                                     
-  2. Search the handoff.                                                        
-  3. Prefer existing domain behavior.                                           
-  4. Prefer the handoff’s explicit binding rules.                               
-  5. Record any genuinely unresolved product decision separately.               
-                                                                                
-  Do not stop for minor stylistic questions that can be answered by the         
-  specifications.                                                               
-                                                                                
-  Do not invent financial rules, Arabic copy, colors, breakpoints, or component 
-  states.                                                                       
-                                                                                
-  ## Deliverables for each implementation phase                                 
-                                                                                
-  At the end of each phase, provide:                                            
-                                                                                
-  1. What was changed.                                                          
-  2. Why the architecture was chosen.                                           
-  3. Files added, modified, or removed.                                         
-  4. Domain or migration implications.                                          
-  5. Tests added or updated.                                                    
-  6. Commands run and their results.                                            
-  7. Any remaining mismatch against the handoff.                                
-  8. The next recommended phase.                                                
-                                                                                
-  Begin now with repository inspection and the implementation inventory. Do not 
-  modify files until you have read the required handoff documents and mapped    
-  the current architecture.                                                     
-                                                                                
+  Reply with a short confirmation of (a) what you understand the goal to be,    
+  (b) where things currently stand, and (c) what you think the next step is —   
+  then wait for me before doing any work.                                       
 
-⏺ I'll start with the repository structure and the required handoff documents.
+⏺ I don't see CONTEXT.md attached — no file content came through with your
+  message.
 
-  Searched for 1 pattern, read 5 files, listed 1 directory, ran 2 shell commands (ctrl+o to expand)
+  Could you either re-attach it or tell me the path (e.g. ./CONTEXT.md) so I can
+  read it? I haven't read or done anything yet.
 
-⏺ Handoff docs read. Now the repository inspection.
+✻ Worked for 6s
 
-  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+❯ Read ./context.md at the project root before doing anything else. It's a      
+  handoff summary from a previous session.                                      
+                                                                                
+  Treat it as authoritative background — the goals, decisions, and constraints  
+  in it are already settled, so don't re-litigate them or ask me to re-explain  
+  what's in there. If something isn't covered, ask me rather than assuming.     
+                                                                                
+  Reply with a short confirmation of (a) the goal, (b) where things stand, and  
+  (c) what you think the next step is — then wait for me before making changes. 
 
-⏺ No golden tests exist — that answers the handoff's one outstanding question.
-  Reading the theme layer now.
+  Searched for 2 patterns, read 1 file, listed 1 directory, ran 1 shell command (ctrl+o to expand)
 
-  Read 2 files (ctrl+o to expand)
+❯ continue                                                                      
 
-⏺ Theme matches the handoff's description exactly. Now the shared components and
-  the required audit greps.
+  Ran 1 shell command (ctrl+o to expand)
 
-  Read 1 file, ran 13 shell commands (ctrl+o to expand)
+⏺ Read context.md (5,482 lines) plus verified the current repo state against it.
 
-⏺ There is substantial uncommitted work in the tree — I need to know what it
-  does before planning.
+  (a) Goal — Implement the design_handoff_family_money_manager/ redesign into
+  this Flutter app as real architecture, not ported HTML: design tokens in the
+  theme layer, shared presentation components, adaptive layouts, feature screens
+  on the existing Riverpod/go_router/Drift stack. Arabic RTL first, English LTR
+  second, existing financial behavior preserved, no duplicated styling or
+  amount-formatting logic, tests alongside. Executed as the phased plan from D6
+  §04 (phases 0–9), reporting per phase.
+
+  (b) Where things stand
+
+  - Phases 0–5 complete. Tokens (3 new colour roles, AppTextRoles.forLocale,
+  bundled Archivo + IBM Plex Sans Arabic), colour/shape literals, typography,
+  components, list tiles.
+  - Phase 6 complete for the query work and the two dashboard money regions.
+  - Phase 7 complete. Expense form at B1/B2 (numpad-first, printed defaults,
+  full-bleed chip row), all three reviews on the read-back +
+  persistent-AppInlineNotice pattern, expense_submission.dart as the single
+  write path, zero failure snackbars left in lib/features/transactions/.
+  Deferred as polish: repeat tiles, tappable meta line, utility key column,
+  budget preview on review, retiring the /transactions/new chooser, porting the
+  pad to income/transfer forms.
+  - Phase 8 in flight. The v19→v20 reversal_reason migration landed and is
+  committed (app_database.dart:149 is 20, migration test present). The
+  transcript cuts off mid-debug: an earlier migration step rebuilds operations
+  from the current Drift definition, so the column already exists when the new
+  step runs — the fix in progress was making the ALTER idempotent directly
+  rather than gating it on a deferred customSelect. Still not done in phase 8:
+  the /transactions/:operationId/reverse route (absent), detail screens as root
+  pushes (parentNavigatorKey appears 0 times in app_router.dart), and the
+  list/detail/reversal UI itself.
+  - Snackbars still remain in 6 files outside transactions (goals ×3, accounts,
+  budgets, household) — phase 8/9 screens.
+  - Tree is clean on design/redesign-phases-0-2. Two pre-existing test failures
+  were the standing baseline.
+  - Two decisions of yours are still open, and phase 8 touches both: the
+  certificate-principal double classification between protectedBalances and
+  heldByReason, and the spouse-wallet exclusion from the headline balance. Also
+  unresolved: expense scope defaulting to personal in code vs household in the
+  spec — left alone deliberately as a financial-behaviour change.
+
+  (c) Next step I'd take — Confirm the v19→v20 migration is actually green (run
+  the migration test + full suite) since the transcript ends mid-fix, then
+  finish phase 8: the reverse route, root-push detail screens, and the reversal
+  explainer/detail UI. But I'd want your two outstanding decisions first — they
+  surface on account and transaction detail, which is exactly what phase 8
+  rebuilds.
+
+  Waiting on you before touching anything.
+
+✻ Cogitated for 27s
+
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Now the router — the two structural changes phase 8 needs.
+
+  Searched for 6 patterns, read 5 files, listed 2 directories, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Background command "Full suite baseline" completed (exit code 0)
+
+⏺ While that runs, the reversal spec:
 
   Searched for 2 patterns, read 1 file, listed 1 directory, ran 10 shell commands (ctrl+o to expand)
-
-⏺ Test suite is still running (output buffers until completion). Here is the
-  inspection inventory.
-
-  ---
-  Implementation inventory — Family Money Manager redesign
-
-  0. Documents read
-
-  README.md → 09 D6 handoff & migration → 01 Design language & components → 19 
-  D5 adaptive, plus 08 D4 IA & route map §02 (the six router problems, since
-  navigation is in scope). All 19 docs extracted to text for re-opening per
-  screen; I will reopen the specific screen doc when implementing each screen
-  rather than working from memory.
-
-  1. Existing architecture
-
-  Layering — feature-sliced, four layers per feature: domain/ (models, enums,
-  guards), data/ (Drift repositories + query repositories), application/ (use
-  cases, services), presentation/ (screens, providers). 173 lib files, 135 test
-  files.
-
-  Enforced by test, not convention.
-  test/unit/architecture/architecture_boundaries_test.dart already asserts:
-  domain imports no Flutter/Riverpod/Drift; core/financial is framework-free;
-  presentation imports no Drift and never references AppDatabase; screens never
-  construct ledger writes; features never do /100 money scaling on amount lines;
-  authoritative debit writers use the contention retry helper; schemaVersion ==
-  19. This file is the single best asset in the repo for this migration — the
-  presentation-boundary rules in the brief are already machine-checked, and I
-  can extend it rather than invent a parallel mechanism.
-
-  State/nav/l10n — Riverpod 3.3, go_router 17.3 with
-  StatefulShellRoute.indexedStack over five branches, ARB with gen-l10n (507
-  keys, app_ar.arb and app_en.arb are exactly symmetric — zero missing keys in 
-  either direction).
-
-  Theme — AppTheme (spacing/radius/motion/width constants + ThemeData factories)
-  and two ThemeExtensions, AppFinancialColors (16 roles) and AppTextRoles (11
-  roles), reached via context.financialColors / context.textRoles.
-
-  Money — integer minor units everywhere; Money, Currency with minorUnitScale,
-  MoneyInputFormatter as the arithmetic owner. No doubles.
-
-  2. Handoff claims verified against source
-
-  Every material claim in D6 §01 is accurate:
-
-  Claim: 8 of 16 colour roles are derived from ColorScheme.fromSeed(0xFF1A6B3C)
-  Verified: ✅ primaryAction, neutralInfo, mainSurface, secondarySurface,
-  divider, primaryText, secondaryText, disabled — and disabled is
-  onSurface.withValues(alpha: 0.38), not a colour
-  ────────────────────────────────────────
-  Claim: No ground role; scaffold uses mainSurface
-  Verified: ✅ scaffoldBackgroundColor: financial.mainSurface
-  ────────────────────────────────────────
-  Claim: AppTextRoles.fromScheme sets no fontFamily
-  Verified: ✅ — signature change to forLocale is unavoidable
-  ────────────────────────────────────────
-  Claim: space2 / space48 off-scale, deprecated
-  Verified: ✅ both present
-  ────────────────────────────────────────
-  Claim: success is byte-identical to income (#2E7D4F)
-  Verified: ✅ — a "saved" tick is currently indistinguishable from an income
-  amount
-  ────────────────────────────────────────
-  Claim: dark protectedMoney #D7CCC8 reads as disabled; dark goalReserved
-  #80CBC4
-  collides with new income teal
-  Verified: ✅
-  ────────────────────────────────────────
-  Claim: railBreakpoint 840
-  Verified: ✅
-
-  Plus one answer the handoff asked for twelve times and never got: there are no
-  golden or screenshot tests in this repo (grep -rl "matchesGoldenFile" →
-  empty). Per D6 §04 this means phases 1 and 2 collapse into one shippable 
-  phase, and typography (phase 3) is the only expensive one. I'll plan on that
-  basis.
-
-  3. Defect list — all 20 confirmed in source
-
-  Spot-checked every item rather than trusting the list:
-
-  - #1 archive guard — ArchiveMemberUseCase.execute
-  (household_use_cases.dart:173) catches only CannotArchivePrimaryUser /
-  MemberAlreadyArchived / MemberNotFound. No balance check. Domain fix.
-  - #2/#5 hardcoded reason — goal_detail_screen.dart:183-185, literally
-  earlyCompletionReason: 'Completed from goal detail screen' with both flags
-  forced true.
-  - #3 reconciles — defined at report_models.dart:195, zero call sites.
-  - #4 home savings — transfersInMinorUnits/transfersOutMinorUnits exist on the
-  model and are populated by the query, but are rendered only in
-  account_flow_report_screen.dart, never in the home-savings card.
-  - #7 UUID as a name — protected_funds_report_screen.dart:181 prints
-  audit.beneficiaryMemberId raw; createdBy never rendered.
-  - #8 orphaned keys — goalStatusTargetReached (line 1151) and
-  certificateRedeemProfitOnly (line 1500) both present.
-  - #14 ReportAmountText.formatMinorUnits — report_widgets.dart:217 returns
-  '$currencyCode $sign$major.$minor': leading code, ASCII hyphen, no bidi
-  isolation, no tabular figures; its Semantics label is '$text $currencyCode' —
-  duplicating the code. Every report and budget amount goes through it (also
-  used from budgets_list_screen, budget_detail_screen,
-  report_transaction_list_screen).
-  - #15 hardcoded colours — 82 direct Colors.* uses: red 28, orange 17, green
-  16, grey 11, blue 10 (blue is not in the design system at all). Worst offender
-  dashboard_screen.dart (17).
-  - #16 protected withdrawal — isProtectedWithdrawal set by the query at
-  drift_report_query_repository.dart:1051, never read in presentation.
-  - #17 failure snackbars — 39 SnackBar call sites across 9 screens.
-  - #18 Material defaults — 7 showDatePicker + 4 showDateRangePicker (incl.
-  firstDate: DateTime(2020) with no past/future distinction), 6 AlertDialog.
-  - #19 spouse — household_members_screen.dart:49, spouses.isNotEmpty over all
-  spouse rows including archived.
-  - #20 ReportFilter — only ever constructed as const ReportFilter(); no screen
-  sets a dimension, so the drill-down is unreachable.
-
-  Router, from D4 §02, confirmed against app_router.dart: no
-  /transactions/:operationId/reverse; no parentNavigatorKey: rootNavigatorKey on
-  any detail route (so opening an account from Home switches the tab to More
-  and drops Home's scroll); /transactions/new and /transactions/:operationId are
-  order-dependent siblings; preselectedAccountId rides on state.extra.
-
-  4. Files likely to change
-
-  - Tokens (phases 0–3): lib/core/presentation/theme/app_theme_extensions.dart,
-  lib/app/app_theme.dart, lib/app/app.dart (locale→theme; MaterialApp.router
-  already builds inside a build that watches appLocaleProvider, so this is a
-  one-line wiring change, not a restructure), pubspec.yaml (six font files).
-  - Components (phases 4–5): all six files under
-  lib/core/presentation/components/, plus new balance_hero.dart,
-  progress_meter.dart, privacy_scope.dart.
-  - Screens (phases 6–9): 34 files under lib/features/**/presentation/ (11,069
-  lines), led by dashboard_screen.dart (881), expense_form_screen.dart (557),
-  transfer_form_screen.dart / certificate_creation_screen.dart (445 each).
-  - Deleted at phase 9: lib/features/reports/presentation/report_widgets.dart
-  (346).
-  - Domain/query/schema: household_use_cases.dart, dashboard_summary.dart +
-  dashboard query repo, report_models.dart, report query repo, account-ledger
-  query, app_router.dart, both ARB files.
-
-  5. Existing components — reuse, refactor, missing
-
-  Reuse as-is (name and API survive): AppScreenScaffold,
-  ResponsiveContentContainer (already honours
-  formContentMaxWidth/listContentMaxWidth), AppFormSection, AppReviewSection,
-  AppExpandableDetails, PeriodSelector, AccountSelectorField.
-
-  Refactor in place — the handoff names all eleven and renames none:
-  - FinancialAmountText — currently a Text with a colour switch. Must become the
-  sole owner of sign, glyph, currency-code placement, bidi isolation, tabular
-  figures, privacy masking and semantics. FinancialAmountTone already has all
-  seven members including protected — extend, don't replace (D6 phase 4 says so
-  explicitly).
-  - CurrencyAmountRow, FinancialMetric, FinancialSummary — exist but
-  under-specified (no 44 dp min height, no 4-col grid, no hairlines).
-  - AccountListTile — has a bool isSecondary opacity hack; needs the six visual
-  classes with hatched leading edges, and a boolean-free typed API.
-  - TransactionListTile — needs reversal/pressed/masked states and intrinsic
-  height with a 64 dp minimum.
-  - SectionHeader, StatusBadge, FinancialTypeBadge, AppEmptyState,
-  AppErrorState, AppLoadingState, AppInlineNotice, AppBottomActionBar,
-  Primary/Secondary/DestructiveActionButton, AmountEntryField, FilterChipGroup —
-  all present, all need the new state coverage.
-
-  Genuinely missing: BalanceHero, ProgressMeter, PrivacyScope,
-  GuardedConfirmSheet, ReversalExplainer, date-picker surface, category picker,
-  figure table, BarSeries/LineSeries/ShareBar, tabs/segmented control.
-
-  Delete: report_widgets.dart and its ReportAmountText (phase 9). Also collapse
-  GoalMoneyFormatter and CertificateMoneyFormatter — both are already zero-value
-  delegates to NonNegativeMoneyFormatter and add nothing but a name.
-
-  6. Domain / query / schema work that must precede screens
-
-  Work: heldByReason + excludedFromAvailable on DashboardSummary
-  Layer: Query
-  Blocks: Dashboard (phase 6) — confirmed absent from dashboard_summary.dart
-  ────────────────────────────────────────
-  Work: reversal_reason on the reversal row
-  Layer: Schema (v19→v20)
-  Blocks: Reversal (phase 8)
-  ────────────────────────────────────────
-  Work: Windowed running balance in account-ledger query
-  Layer: Query
-  Blocks: Account detail
-  ────────────────────────────────────────
-  Work: statement_balances table
-  Layer: Schema
-  Blocks: Reconciliation
-  ────────────────────────────────────────
-  Work: Member/account name joins on transaction + audit models
-  Layer: Query
-  Blocks: Lists, protected audit (fixes #7)
-  ────────────────────────────────────────
-  Work: Balance guard on ArchiveMemberUseCase
-  Layer: Domain
-  Blocks: Members (fixes #1)
-  ────────────────────────────────────────
-  Work: hasSpouse from active spouses only
-  Layer: Domain
-  Blocks: Members (fixes #19)
-  ────────────────────────────────────────
-  Work: Wire ReportFilter to breakdown rows
-  Layer: Query + presentation
-  Blocks: All reports (fixes #20)
-  ────────────────────────────────────────
-  Work: FundPurpose (11) + AccountOwnerType (5) localisation + 2 helpers
-  Layer: L10n
-  Blocks: Account creation — confirmed: zero matches for fundPurpose/ownerType 
-  in
-  lib/core/localization; enum_label_helpers.dart covers nine enums, neither of
-  these
-
-  Correction to the README on one point: README §3 costs this as "16 new ARB
-  keys" having credited GoalPurpose as already localised. That is right —
-  goalPurpose does return matches (6). So 11 + 5 = 16 keys × 2 locales + 2 
-  helper functions, not 23 and 3. D6 §05's "23 new keys, three helpers" is the
-  stale figure; the README's own correction table supersedes it.
-
-  7. Test implications
-
-  - No goldens → phases 1+2 ship together; no regeneration step exists to budget
-  for.
-  - Phase 3 (typography) is the sole expensive phase: sectionTitle −28% and
-  reportValue +33% will move every height/scroll-offset assertion on dashboard,
-  report tables and review screens. Fix by re-measuring, never by loosening
-  assertions.
-  - Phase 5 tile height moves fixed → intrinsic-with-64-minimum; exact-height
-  assertions get rewritten as minimums.
-  - Phase 8 detail-as-root-push will correctly break every test asserting a
-  bottom nav bar on account/transaction detail.
-  - Phase 9 railBreakpoint 840→905 flips behaviour for any wide-surface test
-  between those widths.
-  - test/helpers/test_helpers.dart already provides buildTestApp({locale}) with
-  fixed locale and theme-mode notifiers — the RTL/LTR harness the brief asks for
-  exists; I extend it rather than build a parallel one.
-  - I'll start goldens only for representative shared components and major
-  screen states, per the brief, since there's no existing convention to inherit.
-
-  8. Mismatches between repo and handoff
-
-  1. Uncommitted in-flight work, unrelated to the redesign. The tree has a
-  domain/query change making certificate principal protection time-dependent
-  (derivedProtectedAccountIds on AccountTotalsService, todayLocal on
-  protectedBalances, new certificate_principal_protection.dart + its test, and a
-  4,790-line churn in goal_repository_test.dart). This touches exactly the
-  query layer phase 6 depends on. I have not modified any of it. It needs to
-  land or be set aside before dashboard work starts — I'd like your call on
-  which.
-  2. pubspec.yaml is locally modified — SDK floor dropped 3.12.2→3.8.0 and a
-  dependency_overrides: meta ^1.17.0 added. Adding font assets means editing
-  this file; I'll add only the flutter: assets/fonts: block and leave both local
-  changes alone.
-  3. Branch is design/tier2-planning-budgets-goals, not main.
-  4. D6 §05's ARB count is stale (23/3 vs the correct 16/2) — see §6 above.
-  5. D1 §01 states "the repo could not be read this turn." Doc 01's component
-  spec is written from the brief's inventory, not the source. Where 01 and 09
-  disagree, 09 was written against the real files and wins; I found no actual
-  conflict, but I'll treat 01's paths as advisory.
-
-  9. Recommended next step
-
-  Phase 0 — structural prep, byte-identical output, exactly as D6 §04 scopes it:
-  - Add ground, recessedSurface, focusRing to AppFinancialColors, initialised to
-  today's mainSurface / secondarySurface / primaryAction so they are invisible.
-  - Add AppTextRoles.forLocale(scheme, locale) returning today's exact metrics;
-  keep fromScheme as a deprecated delegate assuming en.
-  - Bundle Archivo 400/600/800 and IBM Plex Sans Arabic 400/600/700 as assets
-  without applying them.
-  - Add characterization tests pinning current amount formatting and the RTL
-  behaviour of ReportAmountText before it changes.
-
-  Then, because there are no goldens, phases 1+2 as one commit (all 19 colour
-  roles literal, scaffold to ground, focus ring, all radii → 0, space2/space48
-  deleted), leaving phase 3 typography alone as the one dangerous change.
-
-  Two things I need from you before I start writing code:
-
-  1. The in-flight certificate-protection work (§8.1) — land it, stash it, or
-  work around it?
-  2. Literals over a new seed — D6 recommends the eight derived roles take fixed
-  values with ColorScheme keeping a neutral seed purely for stock M3 widgets. I
-  agree and will proceed that way unless you object; flagging it because D6
-  lists it as needing confirmation before phase 1.
-
-  I'll report the baseline test result when the suite finishes.
-
-✻ Cooked for 14m 48s
-
-❯ i've committed changes                                                        
-  Read 1 file, ran 1 shell command (ctrl+o to expand)
-
-⏺ Tree is clean. The earlier test run has produced no output in 25 minutes — let
-  me restart it with a streaming reporter to get a real baseline.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Background command "Run full test suite for baseline" completed (exit code 0)
-
-⏺ Background command "Wait for test output to appear" completed (exit code 0)
-
-⏺ Baseline is re-running. Starting Phase 0 work in parallel — first, whether I
-  can obtain the font binaries.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Network is available. Fetching the OFL font binaries.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Real fonts, correct weights. Adding license attribution and the pubspec
-  declaration.
-
-⏺ Write(assets/fonts/OFL.txt)
-  ⎿  Wrote 29 lines to assets/fonts/OFL.txt
-       1 Bundled font assets — licensing
-       3 
-       4 Both families below are used under the SIL Open Font License, Ve
-         rsion 1.1.
-         e-first
-       6 application, so typography must not depend on network availabili
-       7 replace these with `google_fonts` runtime fetching.
-       8 
-       9 Archivo
-         chivo)
-     … +27 lines (ctrl+o to expand)
-
-⏺ Update(pubspec.yaml)
-  ⎿  Added 22 lines
-      41    uses-material-design: true
-      42    generate: true
-      43  
-      44 +  # Bundled, never fetched at runtime — this is an offline-firs
-         +t app, so                                                      
-      45 +  # typography must not depend on connectivity. Declared here i
-         +n phase 0 but                                                  
-      46 +  # not yet applied by any text role; phase 3 wires them into  
-      47 +  # AppTextRoles.forLocale. See assets/fonts/OFL.txt for licens
-         +ing.                                                           
-      48 +  fonts:                                                       
-      49 +    - family: Archivo                                          
-      50 +      fonts:                                                   
-      51 +        - asset: assets/fonts/Archivo-400.ttf                  
-      52 +          weight: 400                                          
-      53 +        - asset: assets/fonts/Archivo-600.ttf                  
-      54 +          weight: 600                                          
-      55 +        - asset: assets/fonts/Archivo-800.ttf                  
-      56 +          weight: 800                                          
-      57 +    - family: IBM Plex Sans Arabic                             
-      58 +      fonts:                                                   
-      59 +        - asset: assets/fonts/IBMPlexSansArabic-400.ttf        
-      60 +          weight: 400                                          
-      61 +        - asset: assets/fonts/IBMPlexSansArabic-600.ttf        
-      62 +          weight: 600                                          
-      63 +        - asset: assets/fonts/IBMPlexSansArabic-700.ttf        
-      64 +          weight: 700                                          
-      65 +                                                               
-      66  # sqlite3mc hook: build the sqlite3 native library with SQLite3
-          MultipleCiphers
-      67  # encryption support. Accepted in DECISION-004 / PO-2.
-      68  # The database key injection is deferred to the security harden
-          ing phase.
-
-⏺ Now the token types. Adding the three new colour roles, initialised to today's
-  values so output stays pixel-identical.
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 3 lines
-      21      required this.primaryText,
-      22      required this.secondaryText,
-      23      required this.disabled,
-      24 +    required this.ground,                                      
-      25 +    required this.recessedSurface,                             
-      26 +    required this.focusRing,                                   
-      27    });
-      28  
-      29    final Color primaryAction;
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 21 lines
-      43    final Color secondaryText;
-      44    final Color disabled;
-      45  
-      46 +  /// The page itself — `scaffoldBackgroundColor`, and nothing 
-         +else.                                                          
-      47 +  ///                                                          
-      48 +  /// Distinct from [mainSurface] so that a card is separable f
-         +rom the page by                                                
-      49 +  /// value alone. Without it, card separation has to come back
-         + from radius and                                               
-      50 +  /// shadow, both of which the design removes.                
-      51 +  final Color ground;                                          
-      52 +                                                               
-      53 +  /// The held-money region, and only that. One surface, one me
-         +aning.                                                         
-      54 +  ///                                                          
-      55 +  /// Money that is neither spendable nor protected (certificat
-         +e principal,                                                   
-      56 +  /// goal reserves) sits on this surface rather than being mar
-         +ked by a                                                       
-      57 +  /// row-level tint, so the distinction survives greyscale and
-         + privacy mode.                                                 
-      58 +  final Color recessedSurface;                                 
-      59 +                                                               
-      60 +  /// Keyboard focus only — a 2 px ring at 2 px offset, outside
-         + the control.                                                  
-      61 +  ///                                                          
-      62 +  /// Never replaces a control's own border. This is the one pl
-         +ace raw accent                                                 
-      63 +  /// appears outside the [expense] role, because a focus ring 
-         +is chrome, not                                                 
-      64 +  /// money.                                                   
-      65 +  final Color focusRing;                                       
-      66 +                                                               
-      67    static AppFinancialColors light(ColorScheme scheme) => AppFin
-          ancialColors(
-      68      primaryAction: scheme.primary,
-      69      income: const Color(0xFF2E7D4F),
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 5 lines
-      81      primaryText: scheme.onSurface,
-      82      secondaryText: scheme.onSurfaceVariant,
-      83      disabled: scheme.onSurface.withValues(alpha: 0.38),
-      84 +    // Phase 0: seeded to the values these roles are replacing 
-         +so that adding                                                 
-      85 +    // them changes no pixel. Phase 1 gives them their literal 
-         +design values.                                                 
-      86 +    ground: scheme.surface,                                    
-      87 +    recessedSurface: scheme.surfaceContainerLow,               
-      88 +    focusRing: scheme.primary,                                 
-      89    );
-      90  
-      91    static AppFinancialColors dark(ColorScheme scheme) => AppFina
-          ncialColors(
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 7 lines
-      105      primaryText: scheme.onSurface,
-      106      secondaryText: scheme.onSurfaceVariant,
-      107      disabled: scheme.onSurface.withValues(alpha: 0.38),
-      108 +    // Phase 0: see the light factory. Note the existing light
-          +/dark asymmetry                                               
-      109 +    // here — light seeds from surfaceContainerLow, dark from 
-      110 +    // surfaceContainerHigh — which is preserved deliberately 
-          +so this phase                                                 
-      111 +    // stays pixel-identical. Phase 1 removes the asymmetry wi
-          +th literals.                                                  
-      112 +    ground: scheme.surface,                                   
-      113 +    recessedSurface: scheme.surfaceContainerHigh,             
-      114 +    focusRing: scheme.primary,                                
-      115    );
-      116  
-      117    @override
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 3 lines
-      132      Color? primaryText,
-      133      Color? secondaryText,
-      134      Color? disabled,
-      135 +    Color? ground,                                            
-      136 +    Color? recessedSurface,                                   
-      137 +    Color? focusRing,                                         
-      138    }) {
-      139      return AppFinancialColors(
-      140        primaryAction: primaryAction ?? this.primaryAction,
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 3 lines
-      153        primaryText: primaryText ?? this.primaryText,
-      154        secondaryText: secondaryText ?? this.secondaryText,
-      155        disabled: disabled ?? this.disabled,
-      156 +      ground: ground ?? this.ground,                          
-      157 +      recessedSurface: recessedSurface ?? this.recessedSurface
-          +,                                                             
-      158 +      focusRing: focusRing ?? this.focusRing,                 
-      159      );
-      160    }
-      161  
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 3 lines
-      187        primaryText: Color.lerp(primaryText, other.primaryText, 
-           t)!,
-      188        secondaryText: Color.lerp(secondaryText, other.secondary
-           Text, t)!,
-      189        disabled: Color.lerp(disabled, other.disabled, t)!,
-      190 +      ground: Color.lerp(ground, other.ground, t)!,           
-      191 +      recessedSurface: Color.lerp(recessedSurface, other.reces
-          +sedSurface, t)!,                                              
-      192 +      focusRing: Color.lerp(focusRing, other.focusRing, t)!,  
-      193      );
-      194    }
-      195  }
-
-⏺ Now AppTextRoles.forLocale — the signature change that phase 3 depends on,
-  returning today's exact metrics.
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 13 lines, removed 1 line
-      223    final TextStyle statusLabel;
-      224    final TextStyle reportValue;
-      225  
-      226 -  factory AppTextRoles.fromScheme(ColorScheme scheme) {       
-      226 +  /// Builds the eleven semantic text roles for [scheme] and [
-          +locale].                                                      
-      227 +  ///                                                         
-      228 +  /// [locale] is part of the signature from phase 0 onward bu
-          +t does not yet                                                
-      229 +  /// affect the result: this phase ships byte-identical metri
-          +cs so that the                                                
-      230 +  /// typography change lands alone, in phase 3, where it can 
-          +be diagnosed.                                                 
-      231 +  ///                                                         
-      232 +  /// It has to be a parameter rather than something a widget 
-          +resolves later,                                               
-      233 +  /// because Latin and Arabic take genuinely different metric
-          +s per role — not                                              
-      234 +  /// a different font at the same size. `sectionTitle`, for o
-          +ne, is uppercase                                              
-      235 +  /// and letter-spaced in Latin and neither in Arabic, since 
-          +Arabic has no                                                 
-      236 +  /// uppercase and letter-spacing breaks its joins. A single 
-          +[TextStyle]                                                   
-      237 +  /// cannot express both, so the factory has to know the scri
-          +pt.                                                           
-      238 +  factory AppTextRoles.forLocale(ColorScheme scheme, Locale lo
-          +cale) {                                                       
-      239      final on = scheme.onSurface;
-      240      final muted = scheme.onSurfaceVariant;
-      241      return AppTextRoles(
-⏺ Now the deprecated delegate so no call site breaks.
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 9 lines
-      311      );
-      312    }
-      313  
-      314 +  /// Locale-unaware delegate that assumes English.           
-      315 +  ///                                                         
-      316 +  /// Retained so no call site breaks on the day [forLocale] l
-          +ands. Once every                                              
-      317 +  /// caller passes a locale this is deleted — it cannot expre
-          +ss Arabic                                                     
-      318 +  /// metrics, so anything still calling it after phase 3 is a
-          + bug.                                                         
-      319 +  @Deprecated('Use AppTextRoles.forLocale(scheme, locale) inst
-          +ead.')                                                        
-      320 +  factory AppTextRoles.fromScheme(ColorScheme scheme) =>      
-      321 +      AppTextRoles.forLocale(scheme, const Locale('en'));     
-      322 +                                                              
-      323    @override
-      324    AppTextRoles copyWith({
-      325      TextStyle? displayBalance,
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 4 lines, removed 1 line
-      311    AppTextRoles get textRoles {
-      312      final ext = Theme.of(this).extension<AppTextRoles>();
-      313      if (ext != null) return ext;
-      314 -    return AppTextRoles.fromScheme(Theme.of(this).colorScheme)
-          -;                                                             
-      314 +    return AppTextRoles.forLocale(                            
-      315 +      Theme.of(this).colorScheme,                             
-      316 +      Localizations.maybeLocaleOf(this) ?? const Locale('en'),
-      317 +    );                                                        
-      318    }
-      319  }
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 16 lines, removed 3 lines
-      57    static const double listContentMaxWidth = 960.0;
-      58    static const double railBreakpoint = 840.0;
-      59  
-      60 -  static ThemeData light() => _buildTheme(brightness: Brightnes
-         -s.light);                                                      
-      61 -  static ThemeData dark() => _buildTheme(brightness: Brightness
-         -.dark);                                                        
-      60 +  /// Builds the light theme for [locale].                     
-      61 +  ///                                                          
-      62 +  /// [locale] defaults to English so phase 0 changes no output
-         +. Phase 3 makes                                                
-      63 +  /// it the caller's responsibility, at which point [MaterialA
-         +pp] must rebuild                                               
-      64 +  /// its theme when the locale changes — a real behavioural ch
-         +ange, and the                                                  
-      65 +  /// reason this parameter exists ahead of the values that nee
-         +d it.                                                          
-      66 +  static ThemeData light({Locale locale = const Locale('en')}) 
-         +=>                                                             
-      67 +      _buildTheme(brightness: Brightness.light, locale: locale)
-         +;                                                              
-      68  
-      63 -  static ThemeData _buildTheme({required Brightness brightness}
-         -) {                                                            
-      69 +  /// Builds the dark theme for [locale]. See [light].         
-      70 +  static ThemeData dark({Locale locale = const Locale('en')}) =
-         +>                                                              
-      71 +      _buildTheme(brightness: Brightness.dark, locale: locale);
-      72 +                                                               
-      73 +  static ThemeData _buildTheme({                               
-      74 +    required Brightness brightness,                            
-      75 +    required Locale locale,                                    
-      76 +  }) {                                                         
-      77      final colorScheme = ColorScheme.fromSeed(
-      78        seedColor: _seedColor,
-      79        error: _errorColor,
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 1 line, removed 1 line
-      82      final financial = brightness == Brightness.light
-      83          ? AppFinancialColors.light(colorScheme)
-      84          : AppFinancialColors.dark(colorScheme);
-      85 -    final textRoles = AppTextRoles.fromScheme(colorScheme);    
-      85 +    final textRoles = AppTextRoles.forLocale(colorScheme, local
-         +e);                                                            
-      86  
-      87      return ThemeData(
-      88        useMaterial3: true,
-
-⏺ Now analyze and check for other fromScheme callers.
-
-  Read 1 file, ran 2 shell commands (ctrl+o to expand)
-
-⏺ Analyzer is clean. The baseline run is reporting 3 failures — let me see them.
-
-  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
-
-⏺ Three failures. Let me confirm they're pre-existing by running just those
-  files against HEAD without my changes.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Confirmed pre-existing — identical 3 failures on HEAD. Let me verify the tree
-  is intact.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Tree intact. Now the phase 0 characterization tests. Let me look at the
-  formatters I need to pin.
-
-  Read 1 file, listed 1 directory (ctrl+o to expand)
-
-⏺ Writing the phase 0 characterization tests — these pin today's behaviour so
-  phases 1–3 produce loud, deliberate diffs rather than silent drift.
-
-⏺ Write(test/unit/core/presentation/theme/design_token_characterization_test.dar
-       t)
-  ⎿  Wrote 351 lines to test/unit/core/presentation/theme/design_token_char
-     acterization_test.dart
-       1 /// Characterization tests for the design-token layer, pinned at
-       2 ///
-         ld be. Their
-       4 /// job is to make the redesign's phases visible: each phase bel
-       5 /// deliberate value change, and every one of them should break 
-       6 /// here. A failure in this file during phases 1–3 is expected a
-       7 /// to update the expectation — but a failure at any other time 
-         means a token
-       9 ///
-         roles that read
-     … +395 lines (ctrl+o to expand)
-
-  Searched for 1 pattern (ctrl+o to expand)
-  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
-
-⏺ Update(test/unit/core/presentation/theme/design_token_characterization_test.da
-        rt)
-  ⎿  Added 1 line, removed 1 line
-      148        expect(copied.recessedSurface, sentinel);
-      149        expect(copied.focusRing, sentinel);
-      150  
-      151 -      final midpoint = c.lerp(copied, 1.0) as AppFinancialColo
-          -rs;                                                           
-      151 +      final midpoint = c.lerp(copied, 1.0);                   
-      152        expect(midpoint.ground, sentinel);
-      153        expect(midpoint.recessedSurface, sentinel);
-      154        expect(midpoint.focusRing, sentinel);
-
-⏺ Now the amount-formatting characterization — the highest-value pin, since
-  ReportAmountText is what phase 4 replaces.
-
-⏺ Write(test/unit/core/presentation/amount_formatting_characterization_test.dart
-       )
-  ⎿  Wrote 165 lines to test/unit/core/presentation/amount_formatting_chara
-     cterization_test.dart
-       1 /// Characterization tests for money rendering, pinned at phase 
-       2 ///
-       3 /// Three formatters produce user-visible amounts today, and the
-       4 /// each other and with the redesign. This file records exactly 
-       5 /// emits *before* phase 4 consolidates them into a single
-       6 /// `FinancialAmountText`, so that consolidation is a reviewable
-       7 /// than a rewrite nobody can check.
-       8 ///
-         ly rejects.
-         Do not "fix"
-     … +200 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Background command "Run baseline test suite to file" completed (exit code 0)
-⏺ Background command "Wait for baseline test run to finish" completed (exit code
-0)
-
-⏺ All 45 pass. Now the full suite to confirm phase 0 changed nothing.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Baseline is 5 failures, not 3 — two more in shell_push_page_keys_test.dart
-  appeared late in that run, which overlapped my edits. The clean phase-0 run
-  will settle it.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ 1670 passed / 3 failed and it's already past the navigation tests — confirming
-  the baseline's 2 extra failures were caused by my mid-run pubspec edit, not
-  by code. Let me wait for the finish.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ --output=none doesn't write, so let me confirm nothing unintended was touched.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Clean — my files are format-correct, and the 9 unformatted files are all
-  pre-existing (untouched by me). Checking the test run.
-
-  Read 1 file, ran 2 shell commands (ctrl+o to expand)
-
-⏺ Both runs are in flight. Let me wait for them.
-
-  Read 1 file, ran 2 shell commands (ctrl+o to expand)
-
-⏺ The isolation run is contending with the full suite. Killing it so the full
-  run can finish.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Background command "Test the flaky navigation file in isolation" failed with
-exit code 144
-
-⏺ Background command "Run full suite after phase 0" completed (exit code 0)
-
-⏺ Background command "Wait for final phase 0 result" completed (exit code 0)
-
-⏺ Background command "Wait for phase 0 suite completion" completed (exit code 0)
-
-⏺ Background command "Wait for and summarize phase 0 test run" completed (exit
-code 0)
-
-⏺ Background command "Wait for all test runs to settle" completed (exit code 0)
-
-⏺ Background command "Poll both runs" completed (exit code 0)
-
-⏺ Identical failure sets. Let me settle the two navigation failures with a clean
-  isolated run now that nothing is contending.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Phase 0 is verified complete. Report below; the isolated navigation-test
-  diagnosis is still running and I'll fold in the result when it lands.
-
-  ---
-  Phase 0 — structural prep · complete
-
-  Verified outcome: byte-identical output. Baseline +1625 -5 → after +1670 -5.
-  The failure sets diff clean — identical. The +45 are the new characterization
-  tests, all passing.
-
-  1. What changed
-
-  Four things, none of which alter a pixel:
-
-  - Three colour roles added — ground, recessedSurface, focusRing — seeded to
-  mainSurface / secondarySurface / primaryAction so they are currently
-  invisible.
-  - AppTextRoles.forLocale(scheme, locale) added, returning today's exact
-  metrics. fromScheme retained as a @Deprecated delegate assuming en, so no call
-  site breaks.
-  - AppTheme.light({locale}) / .dark({locale}) — optional, defaulting to en.
-  Threading it now keeps phase 3 a pure value change.
-  - Six font files bundled, declared in pubspec.yaml, applied by nothing.
-
-  2. Why this architecture
-
-  forLocale has to be a factory parameter, not something a widget resolves
-  downstream, because Latin and Arabic take genuinely different metrics per role
-  — not the same metrics in a different font. sectionTitle is uppercase and
-  +0.08em tracked in Latin and neither in Arabic (Arabic has no uppercase, and
-  letter-spacing breaks its joins). One TextStyle cannot express both, so the
-  factory must know the script. Introducing the signature now — while it still
-  returns identical output — means phase 3 changes values only, and any failure
-  there is a metric failure rather than a plumbing failure.
-
-  The three colour roles are additive, so no existing construction site breaks.
-  I added them to copyWith and lerp as well, with a test — a ThemeExtension that
-  silently drops a field in lerp fails only mid-theme-animation, which is close
-  to undebuggable.
-
-  Fonts are bundled, not fetched. This is offline-first; google_fonts at runtime
-  would make typography depend on connectivity.
-
-  3. Files
-
-  Added
-  - assets/fonts/Archivo-{400,600,800}.ttf — verified Regular / SemiBold /
-  ExtraBold
-  - assets/fonts/IBMPlexSansArabic-{400,600,700}.ttf — verified Regular /
-  SemiBold / Bold
-  - assets/fonts/OFL.txt — licence attribution for both families (OFL-1.1) and
-  why these two were chosen
-  - test/unit/core/presentation/theme/design_token_characterization_test.dart
-  (32 tests)
-  - test/unit/core/presentation/amount_formatting_characterization_test.dart (13
-  tests)
-
-  Modified
-  - lib/core/presentation/theme/app_theme_extensions.dart
-  - lib/app/app_theme.dart
-  - pubspec.yaml — flutter: fonts: block only; your local SDK-floor and
-  dependency_overrides edits untouched
-
-  Removed — nothing.
-
-  I downloaded the fonts from Google Fonts and verified each file's internal
-  name table rather than trusting the filename. Both families are OFL-1.1.
-
-  4. Domain / migration implications
-
-  None. No schema, query, use-case or repository file was touched. schemaVersion
-  remains 19.
-
-  5. Tests added
-
-  The characterization tests are deliberately written to fail loudly at the 
-  right phase, each group annotated with which phase breaks it:
-
-  - derived roles / literal roles / scaffold → phase 1
-  - shape / spacing → phase 2
-  - text roles → phase 3
-  - the three-formatter disagreement group → phase 4
-
-  Two are worth calling out because they assert defects on purpose:
-
-  - success is currently indistinguishable from income — pins #2E7D4F == #2E7D4F
-  in both themes. Phase 1 inverts it to isNot.
-  - The ReportAmountText group pins 'EGP -382.50' — leading code, ASCII hyphen,
-  no grouping, no isolation — with a comment naming the rule each one breaks.
-  This is the before-picture for the formatter every report amount flows
-  through.
-
-  The last group demonstrates the case for phase 4 concretely: one amount,
-  127500 EGP, renders as three different strings today (EGP 1275.00, 1275.00,
-  1275.00), and on negatives the third refuses to render a number at all.
-
-  6. Commands run
-
-  ┌───────────────────────────┬─────────────────────────────────────────────┐
-  │          Command          │                   Result                    │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ flutter analyze           │ No issues found                             │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ dart format lib test      │ my files clean; 9 pre-existing files are    │
-  │                           │ not format-clean (see §7)                   │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ flutter pub get           │ ok                                          │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ flutter test (baseline,   │ +1625 -5                                    │
-  │ pre-change)               │                                             │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ flutter test              │ +1670 -5, failure set identical             │
-  │ (post-change)             │                                             │
-  ├───────────────────────────┼─────────────────────────────────────────────┤
-  │ flutter test (new tests   │ +45 all passing                             │
-  │ only)                     │                                             │
-  └───────────────────────────┴─────────────────────────────────────────────┘
-
-  7. Remaining mismatches and things you should know
-
-  Five pre-existing test failures, all confirmed on HEAD before I touched 
-  anything (I stashed and re-ran to prove it):
-
-  1. app_config_test.dart — production default locale expected ar_EG, actual
-  en_US. Given ar_EG is the primary locale, this looks like a real config defect
-  rather than a stale test.
-  2. certificate_principal_protection_test.dart — "archived certificate is
-  excluded from totals entirely (INV-015)". This is from the commit you just
-  made.
-  3. budget_creation_screen_test.dart — "Currency dropdown present", finds 0
-  widgets with text EGP.
-  4. & 5. shell_push_page_keys_test.dart — two page-key tests. This file is
-  extremely slow and possibly hanging; I'm still isolating it and will report
-  separately. Either way it predates my change.
-
-  I have not fixed any of these — none is in phase 0's scope, and #1 and #3 in
-  particular deserve their own look. Say the word if you want them addressed
-  before phase 1.
-
-  Formatting: nine files in the repo are not dart format clean, all pre-existing
-  and none touched by me (enum_label_helpers.dart,
-  certificate_detail_screen.dart, report_transaction_list_screen.dart,
-  transaction_detail_screen.dart, transactions_screen.dart, and four test
-  files). I left them alone to keep this diff reviewable, but it's worth a
-  separate formatting commit since it will otherwise contaminate every future
-  phase's diff.
-
-  You're committing directly to main. Phase 1 onward is a large migration; I'd
-  suggest a feature branch before I go further.
-
-  8. Next recommended phase
-
-  Phases 1 + 2 combined — which the golden-test finding earns us. D6 §04 planned
-  for phase 1 to regenerate a golden suite; there isn't one, so phase 1 is
-  nearly free and can ship with phase 2:
-
-  - All 19 colour roles become literals; ColorScheme keeps a neutral seed purely
-  for stock M3 widgets.
-  - Scaffold moves to ground; recessedSurface and focusRing take their real
-  values.
-  - focusedBorder's 1.5 px primaryAction border → 2 px ink bottom rule + 2 px
-  focusRing at 2 px offset.
-  - All radii → 0 (sheet → 2); card gets mainSurface fill + solid 1 px hairline,
-  alpha dropped; card/button elevation removed.
-  - space2 and space48 deleted — I'll grep call sites first; minTouchTarget
-  stays at 48 since it's a target, not a spacing step.
-
-  This leaves typography alone in phase 3, which is the point of the ordering —
-  it's the one change that moves layout metrics everywhere, and mixing it with
-  anything else makes a failing test impossible to diagnose.
-
-  Two decisions I'm proceeding on unless you object: literals over a new seed
-  (D6's recommendation, and I agree — the warm near-grey ground is not something
-  M3's tonal algorithm will produce from any seed), and combining phases 1 and 
-  2 on the strength of the no-goldens finding.
-
-✻ Crunched for 38m 1s
-⏺ Background command "Isolated nav test run, unbuffered to file" completed (exit
-code 0)
-
-⏺ Background command "Isolated run of the navigation test file" failed with exit
-code 144
-
-  Ran 1 shell command (ctrl+o to expand)
-
-❯ go with recommended                                                           
-
-⏺ Proceeding with phases 1+2 combined. First, checking the constants phase 2
-  deletes.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ space2 and space48 have zero real call sites — safe to delete. Now writing
-  phases 1+2. Starting with the colour literals.
+⏺ Background command "Identify failing tests" completed (exit code 0)
+
+⏺ All three share the same shape. Writing the shared helper:
+
+⏺ Write(test/helpers/historical_table_shape.dart)
+  ⎿  Wrote 67 lines to test/helpers/historical_table_shape.dart
+       1 /// Removes columns that did not exist yet from a materialized h
+       2 /// schema file.
+       4 /// The `true_schema_v*` helpers build their table shapes by dum
+       5 /// `CREATE TABLE` DDL from a *current* [AppDatabase] probe. Tha
+       6 /// only sound while no column has been added to a pre-existing 
+         table since the
+         nt asserts
+         xture claiming
+          and the
+         olumn.
+     … +78 lines (ctrl+o to expand)
+
+⏺ Now wire it into the three helpers:
 
   Read 1 file (ctrl+o to expand)
 
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 73 lines, removed 46 lines
-       64    /// money.
-       65    final Color focusRing;
-       66  
-       67 -  static AppFinancialColors light(ColorScheme scheme) => AppFi
-          -nancialColors(                                                
-       68 -    primaryAction: scheme.primary,                            
-       69 -    income: const Color(0xFF2E7D4F),                          
-       70 -    expense: const Color(0xFFB54A3F),                         
-       71 -    transfer: const Color(0xFF4A6670),                        
-       72 -    protectedMoney: const Color(0xFF6B5B3E),                  
-       73 -    goalReserved: const Color(0xFF3D6B8A),                    
-       74 -    certificatePrincipal: const Color(0xFF5A4E7C),            
-       75 -    warning: const Color(0xFFB8831A),                         
-       76 -    success: const Color(0xFF2E7D4F),                         
-       77 -    neutralInfo: scheme.onSurfaceVariant,                     
-       78 -    mainSurface: scheme.surface,                              
-       79 -    secondarySurface: scheme.surfaceContainerLow,             
-       80 -    divider: scheme.outlineVariant,                           
-       81 -    primaryText: scheme.onSurface,                            
-       82 -    secondaryText: scheme.onSurfaceVariant,                   
-       83 -    disabled: scheme.onSurface.withValues(alpha: 0.38),       
-       84 -    // Phase 0: seeded to the values these roles are replacing
-          - so that adding                                               
-       85 -    // them changes no pixel. Phase 1 gives them their literal
-          - design values.                                               
-       86 -    ground: scheme.surface,                                   
-       87 -    recessedSurface: scheme.surfaceContainerLow,              
-       88 -    focusRing: scheme.primary,                                
-       67 +  /// Light palette. Every role is a literal.                 
-       68 +  ///                                                         
-       69 +  /// Eight of these used to read off `ColorScheme.fromSeed`. 
-          +They no longer                                                
-       70 +  /// do, because the design is calibrated against an exact wa
-          +rm near-grey                                                  
-       71 +  /// ground that Material's tonal algorithm will not produce 
-          +from any seed —                                               
-       72 +  /// and leaving surfaces derived puts the whole design at th
-          +e mercy of the                                                
-       73 +  /// palette generator. The [ColorScheme] survives for stock 
-          +M3 widgets only.                                              
-       74 +  ///                                                         
-       75 +  /// Contrast is measured against each role's intended backgr
-          +ound: content                                                 
-       76 +  /// roles against [mainSurface] over [ground].              
-       77 +  static const AppFinancialColors light = AppFinancialColors( 
-       78 +    // Ink, not accent. Modernist puts the primary action on a
-          + solid red fill;                                              
-       79 +    // in a ledger red must mean one thing only, so the primar
-          +y action is ink                                               
-       80 +    // and red is spent exclusively on outflow.               
-       81 +    primaryAction: Color(0xFF201E1D), // 14.9:1               
-       82 +    // Deep teal, not green. This is the most important value 
-          +in the redesign:                                              
-       83 +    // it moves the income/expense axis off the green–red pair
-          + that both                                                    
-       84 +    // common dichromacies collapse, onto the blue–yellow chan
-          +nel they retain.                                              
-       85 +    income: Color(0xFF14555F), // 7.5:1                       
-       86 +    expense: Color(0xFFAE1800), // 6.4:1 — the only red in the
-          + product                                                      
-       87 +    // Achromatic on purpose: a transfer changes no total, so 
-          +it earns no hue.                                              
-       88 +    transfer: Color(0xFF605D5D), // 5.8:1                     
-       89 +    protectedMoney: Color(0xFF6E4A1F), // 7.1:1               
-       90 +    goalReserved: Color(0xFF2B5C8A), // 6.3:1                 
-       91 +    certificatePrincipal: Color(0xFF4A3E70), // 8.5:1         
-       92 +    // Was #B8831A at 3.3:1 — below AA for text. A compliance 
-          +fix, not taste.                                               
-       93 +    warning: Color(0xFF8A5A00), // 5.3:1                      
-       94 +    // Deliberately not the income teal: success confirms a *w
-          +rite*, never a                                                
-       95 +    // value. The two were byte-identical before this phase.  
-       96 +    success: Color(0xFF0E5A44), // 7.3:1                      
-       97 +    // Was identical to secondaryText, so an informational not
-          +ice had no                                                    
-       98 +    // visual identity at all.                                
-       99 +    neutralInfo: Color(0xFF3D4A52), // 8.2:1                  
-      100 +    mainSurface: Color(0xFFFFFFFF),                           
-      101 +    secondarySurface: Color(0xFFEAE9E9),                      
-      102 +    divider: Color(0xFFC3BFBE), // 1 px hairline within a grou
-          +p                                                             
-      103 +    primaryText: Color(0xFF201E1D), // 14.9:1                 
-      104 +    secondaryText: Color(0xFF575351), // 6.8:1                
-      105 +    // Opaque now. As an alpha it composited unpredictably ove
-          +r the hatched                                                 
-      106 +    // held region. Below AA by design, which is why a disable
-          +d control always                                              
-      107 +    // carries a reason line in secondaryText.                
-      108 +    disabled: Color(0xFF9B9797), // 2.6:1 — non-text only     
-      109 +    ground: Color(0xFFF3F2F2),                                
-      110 +    recessedSurface: Color(0xFFDEDBDA),                       
-      111 +    focusRing: Color(0xFFEC3013), // 3.9:1 vs ground — non-tex
-          +t                                                             
-      112    );
-      113  
-       91 -  static AppFinancialColors dark(ColorScheme scheme) => AppFin
-          -ancialColors(                                                 
-       92 -    primaryAction: scheme.primary,                            
-       93 -    income: const Color(0xFF81C784),                          
-       94 -    expense: const Color(0xFFE57373),                         
-       95 -    transfer: const Color(0xFF90A4AE),                        
-       96 -    protectedMoney: const Color(0xFFD7CCC8),                  
-       97 -    goalReserved: const Color(0xFF80CBC4),                    
-       98 -    certificatePrincipal: const Color(0xFFB39DDB),            
-       99 -    warning: const Color(0xFFFFB74D),                         
-      100 -    success: const Color(0xFF81C784),                         
-      101 -    neutralInfo: scheme.onSurfaceVariant,                     
-      102 -    mainSurface: scheme.surface,                              
-      103 -    secondarySurface: scheme.surfaceContainerHigh,            
-      104 -    divider: scheme.outlineVariant,                           
-      105 -    primaryText: scheme.onSurface,                            
-      106 -    secondaryText: scheme.onSurfaceVariant,                   
-      107 -    disabled: scheme.onSurface.withValues(alpha: 0.38),       
-      108 -    // Phase 0: see the light factory. Note the existing light
-          -/dark asymmetry                                               
-      109 -    // here — light seeds from surfaceContainerLow, dark from 
-      110 -    // surfaceContainerHigh — which is preserved deliberately 
-          -so this phase                                                 
-      111 -    // stays pixel-identical. Phase 1 removes the asymmetry wi
-          -th literals.                                                  
-      112 -    ground: scheme.surface,                                   
-      113 -    recessedSurface: scheme.surfaceContainerHigh,             
-      114 -    focusRing: scheme.primary,                                
-      114 +  /// Dark palette. See [light]; every role is a literal for t
-          +he same reasons.                                              
-      115 +  ///                                                         
-      116 +  /// Contrast is measured against the dark [mainSurface].    
-      117 +  static const AppFinancialColors dark = AppFinancialColors(  
-      118 +    primaryAction: Color(0xFFF0EDEB), // 15.3:1               
-      119 +    income: Color(0xFF5FB8B0), // 7.6:1                       
-      120 +    expense: Color(0xFFFF9783), // 8.5:1                      
-      121 +    transfer: Color(0xFFB0ABA9), // 7.9:1                     
-      122 +    // Real fix: the old #D7CCC8 was a near-grey that read as 
-          +disabled rather                                               
-      123 +    // than protected.                                        
-      124 +    protectedMoney: Color(0xFFD6A85C), // 8.2:1               
-      125 +    // Was #80CBC4, a teal that collides with the new income r
-          +ole.                                                          
-      126 +    goalReserved: Color(0xFF7FAFDD), // 7.7:1                 
-      127 +    certificatePrincipal: Color(0xFFA99BD6), // 7.1:1         
-      128 +    warning: Color(0xFFE0AE4A), // 8.8:1                      
-      129 +    success: Color(0xFF63BC94), // 7.8:1                      
-      130 +    neutralInfo: Color(0xFF9DB2BE), // 8.1:1                  
-      131 +    mainSurface: Color(0xFF221F1E),                           
-      132 +    // The old light/dark asymmetry — light derived from surfa
-          +ceContainerLow,                                               
-      133 +    // dark from …High — disappears here.                     
-      134 +    secondarySurface: Color(0xFF2C2928),                      
-      135 +    divider: Color(0xFF4A4645),                               
-      136 +    primaryText: Color(0xFFF0EDEB), // 15.3:1                 
-      137 +    secondaryText: Color(0xFFA8A3A0), // 7.1:1                
-      138 +    disabled: Color(0xFF6B6766), // 2.6:1 — non-text only     
-      139 +    ground: Color(0xFF181716),                                
-      140 +    recessedSurface: Color(0xFF3A3635),                       
-      141 +    focusRing: Color(0xFFFF563C), // 5.2:1 vs dark ground — no
-          +n-text                                                        
-      142    );
-      143  
-      144    @override
+⏺ Update(test/helpers/true_schema_v18.dart)
+  ⎿  Added 1 line
+      47    for (final row in tableRows) {
+      48      raw.execute(row.read<String>('sql'));
+      49    }
+      50 +  stripColumnsNewerThan(raw, 18);                              
+      51    for (final stmt in _splitSqlStatements(objectsSql)) {
+      52      raw.execute(stmt);
+      53    }
 
-⏺ Now pointing the text roles at the literal palette so text colour stops
-  deriving from the seed.
+⏺ Update(test/helpers/true_schema_v18.dart)
+  ⎿  Added 2 lines
+      24  import 'package:path/path.dart' as p;
+      25  import 'package:sqlite3/sqlite3.dart' as sqlite3;
+      26  
+      27 +import 'historical_table_shape.dart';                          
+      28 +                                                               
+      29  /// Materializes a true schema-18 database file without 6B.1.1 
+          triggers.
+      30  Future<String> materializeTrueSchemaV18File() async {
+      31    final dir = await Directory.systemTemp.createTemp('fmm_true_v
+          18_');
 
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 9 lines, removed 2 lines
-      263    /// uppercase and letter-spacing breaks its joins. A single 
-           [TextStyle]
-      264    /// cannot express both, so the factory has to know the scri
-           pt.
-      265    factory AppTextRoles.forLocale(ColorScheme scheme, Locale lo
-           cale) {
-      266 -    final on = scheme.onSurface;                              
-      267 -    final muted = scheme.onSurfaceVariant;                    
-      266 +    // Text colour comes from the literal palette, not from th
-          +e scheme. The                                                 
-      267 +    // scheme is now neutrally seeded for stock M3 widgets, so
-          + deriving text                                                
-      268 +    // colour from it would quietly de-calibrate every role ag
-          +ainst the exact                                               
-      269 +    // ground the design is measured on.                      
-      270 +    final colors = scheme.brightness == Brightness.light      
-      271 +        ? AppFinancialColors.light                            
-      272 +        : AppFinancialColors.dark;                            
-      273 +    final on = colors.primaryText;                            
-      274 +    final muted = colors.secondaryText;                       
-      275      return AppTextRoles(
-      276        displayBalance: TextStyle(
-      277          fontSize: 36,
+  Read 1 file (ctrl+o to expand)
 
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 3 lines, removed 1 line
-      410    AppFinancialColors get financialColors {
-      411      final ext = Theme.of(this).extension<AppFinancialColors>()
-           ;
-      412      if (ext != null) return ext;
-      413 -    return AppFinancialColors.light(Theme.of(this).colorScheme
-          -);                                                            
-      413 +    return Theme.of(this).brightness == Brightness.light      
-      414 +        ? AppFinancialColors.light                            
-      415 +        : AppFinancialColors.dark;                            
-      416    }
-      417  
-      418    AppTextRoles get textRoles {
+⏺ Update(test/helpers/true_schema_v12.dart)
+  ⎿  Added 1 line
+      40    for (final row in tableRows) {
+      41      raw.execute(row.read<String>('sql'));
+      42    }
+      43 +  stripColumnsNewerThan(raw, 12);                              
+      44    for (final stmt in _splitSqlStatements(objectsSql)) {
+      45      raw.execute(stmt);
+      46    }
 
-⏺ Now app_theme.dart — neutral seed, ground scaffold, focus geometry, zero
-  radii, elevation removal.
+  Ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
 
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 12 lines, removed 2 lines
-       7  /// [AppTextRoles]. Feature widgets must not hard-code brand co
-          lors, radii,
-       8  /// or elevations except for rare local semantic needs.
-       9  abstract final class AppTheme {
-      10 -  static const Color _seedColor = Color(0xFF1A6B3C);           
-      11 -  static const Color _errorColor = Color(0xFFBA1A1A);          
-      10 +  /// Seed for stock Material widgets only.                    
-      11 +  ///                                                          
-      12 +  /// Every role the design cares about is now a literal in    
-      13 +  /// [AppFinancialColors]. This seed exists so that M3 compone
-         +nts the app has                                                
-      14 +  /// not restyled still resolve a coherent [ColorScheme] — and
-         + it is ink, so                                                 
-      15 +  /// what they resolve is neutral and cannot introduce a hue t
-         +he design system                                               
-      16 +  /// does not contain.                                        
-      17 +  static const Color _neutralSeedColor = Color(0xFF201E1D);    
-      18  
-      19 +  /// Matches the expense role deliberately: expense is the onl
-         +y red in the                                                   
-      20 +  /// product, and a stock widget's error state must not introd
-         +uce a second.                                                  
-      21 +  static const Color _errorColor = Color(0xFFAE1800);          
-      22 +                                                               
-      23    // ─── Spacing ──────────────────────────────────────────────
-          ─────────────
-      24  
-      25    static const double space4 = 4.0;
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 27 lines, removed 14 lines
-      31    static const double space32 = 32.0;
-      32    static const double space40 = 40.0;
-      33  
-      34 -  /// @Deprecated — prefer [space4]; retained for call-site com
-         -patibility.                                                    
-      35 -  static const double space2 = 2.0;                            
-      36 -                                                               
-      37 -  /// @Deprecated — prefer [space40]; retained for call-site co
-         -mpatibility.                                                   
-      38 -  static const double space48 = 48.0;                          
-      39 -                                                               
-      34 +  /// A tap target, not a spacing step — which is why it surviv
-         +es the deletion                                                
-      35 +  /// of the off-scale `space48` constant it used to share a va
-         +lue with.                                                      
-      36    static const double minTouchTarget = 48.0;
-      37  
-      38    // ─── Shape roles ──────────────────────────────────────────
-          ─────────────
-      39 +  //                                                           
-      40 +  // Zero everywhere. Elevation and radius are replaced by rule
-         +s and tonal                                                    
-      41 +  // fill: a card is a surface plus a 1 px hairline, and a regi
-         +on boundary is                                                 
-      42 +  // a 2 px ink rule. Role names are kept so call sites keep re
-         +ading as                                                       
-      43 +  // intent rather than as a number.                           
-      44  
-      44 -  static const double radiusBadge = 4.0;                       
-      45 -  static const double radiusChip = 8.0;                        
-      46 -  static const double radiusInput = 10.0;                      
-      47 -  static const double radiusButton = 10.0;                     
-      48 -  static const double radiusCard = 12.0;                       
-      49 -  static const double radiusDialog = 16.0;                     
-      50 -  static const double radiusSheet = 20.0;                      
-      45 +  static const double radiusBadge = 0.0;                       
-      46 +  static const double radiusChip = 0.0;                        
-      47 +  static const double radiusInput = 0.0;                       
-      48 +  static const double radiusButton = 0.0;                      
-      49 +  static const double radiusCard = 0.0;                        
-      50 +  static const double radiusDialog = 0.0;                      
-      51  
-      52 -  /// Legacy aliases.                                          
-      52 +  /// The only non-zero radius in the product.                 
-      53 +  ///                                                          
-      54 +  /// Not decoration: a perfectly square sheet edge over a squa
-         +re scaffold                                                    
-      55 +  /// reads as a broken layout rather than as a layer.         
-      56 +  static const double radiusSheet = 2.0;                       
-      57 +                                                               
-      58 +  /// Width of a rule that separates two *regions*, as opposed 
-         +to two rows.                                                   
-      59 +  ///                                                          
-      60 +  /// This is the design's principal hierarchy device — it does
-         + the work M3                                                   
-      61 +  /// assigns to elevation. Rows within a group are separated b
-         +y a 1 px                                                       
-      62 +  /// hairline in `divider`; regions are separated by ink.     
-      63 +  static const double regionRuleWidth = 2.0;                   
-      64 +                                                               
-      65 +  /// Legacy aliases, all resolving to 0. Kept because they are
-         + referenced.                                                   
-      66    static const double radiusSmall = radiusBadge;
-      67    static const double radiusMedium = radiusChip;
-      68    static const double radiusLarge = radiusDialog;
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 3 lines, removed 3 lines
-       98      required Locale locale,
-       99    }) {
-      100      final colorScheme = ColorScheme.fromSeed(
-      101 -      seedColor: _seedColor,                                  
-      101 +      seedColor: _neutralSeedColor,                           
-      102        error: _errorColor,
-      103        brightness: brightness,
-      104      );
-      105      final financial = brightness == Brightness.light
-      106 -        ? AppFinancialColors.light(colorScheme)               
-      107 -        : AppFinancialColors.dark(colorScheme);               
-      106 +        ? AppFinancialColors.light                            
-      107 +        : AppFinancialColors.dark;                            
-      108      final textRoles = AppTextRoles.forLocale(colorScheme, loca
-           le);
-      109  
-      110      return ThemeData(
-
-⏺ Now the ThemeData body — scaffold, card, elevation, borders, focus geometry.
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 14 lines, removed 5 lines
-      112        colorScheme: colorScheme,
-      113        extensions: [financial, textRoles],
-      114        textTheme: _buildTextTheme(colorScheme, textRoles),
-      115 -      scaffoldBackgroundColor: financial.mainSurface,         
-      115 +      // The page is now its own surface, so a card is separab
-          +le from it by                                                 
-      116 +      // value alone rather than by radius and shadow.        
-      117 +      scaffoldBackgroundColor: financial.ground,              
-      118        appBarTheme: AppBarTheme(
-      119          centerTitle: false,
-      120          elevation: 0,
-      119 -        scrolledUnderElevation: 1,                            
-      120 -        backgroundColor: financial.mainSurface,               
-      121 +        // A pinned bar reveals a rule on scroll instead of ga
-          +ining elevation.                                              
-      122 +        // The rule itself is drawn by the bar; what matters h
-          +ere is that no                                                
-      123 +        // shadow appears under it.                           
-      124 +        scrolledUnderElevation: 0,                            
-      125 +        backgroundColor: financial.ground,                    
-      126          foregroundColor: financial.primaryText,
-      127          titleTextStyle: textRoles.screenTitle,
-      128 +        surfaceTintColor: Colors.transparent,                 
-      129        ),
-      130        cardTheme: CardThemeData(
-      131          elevation: 0,
-      126 -        color: financial.secondarySurface,                    
-      132 +        // Fill moves secondarySurface → mainSurface, and the 
-          +half-alpha                                                    
-      133 +        // outline becomes a solid hairline: a card is a surfa
-          +ce plus a rule.                                               
-      134 +        color: financial.mainSurface,                         
-      135 +        surfaceTintColor: Colors.transparent,                 
-      136          shape: RoundedRectangleBorder(
-      137            borderRadius: BorderRadius.circular(radiusCard),
-      129 -          side: BorderSide(color: financial.divider.withValues
-          -(alpha: 0.5)),                                                
-      138 +          side: BorderSide(color: financial.divider),         
-      139          ),
-      140        ),
-      141        navigationBarTheme: NavigationBarThemeData(
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 33 lines, removed 4 lines
-      187            textStyle: textRoles.buttonLabel,
-      188          ),
-      189        ),
-      190 +      // A field is a ruled row, not a rounded box. The focus 
-          +indicator is a                                                
-      191 +      // 2 px ink bottom rule on the field; the offset focusRi
-          +ng that                                                       
-      192 +      // accompanies it lives outside the control and so canno
-          +t be expressed                                                
-      193 +      // here — it is drawn by the field wrapper in a later ph
-          +ase.                                                          
-      194        inputDecorationTheme: InputDecorationTheme(
-      195          filled: true,
-      196          fillColor: financial.secondarySurface,
-     ...
-      198            horizontal: space16,
-      199            vertical: space12,
-      200          ),
-      197 -        border: OutlineInputBorder(                           
-      201 +        border: UnderlineInputBorder(                         
-      202            borderRadius: BorderRadius.circular(radiusInput),
-      203 +          borderSide: BorderSide(color: financial.divider),   
-      204          ),
-      200 -        enabledBorder: OutlineInputBorder(                    
-      205 +        enabledBorder: UnderlineInputBorder(                  
-      206            borderRadius: BorderRadius.circular(radiusInput),
-      207            borderSide: BorderSide(color: financial.divider),
-      208          ),
-      204 -        focusedBorder: OutlineInputBorder(                    
-      209 +        focusedBorder: UnderlineInputBorder(                  
-      210            borderRadius: BorderRadius.circular(radiusInput),
-      206 -          borderSide: BorderSide(color: financial.primaryActio
-          -n, width: 1.5),                                               
-      211 +          borderSide: BorderSide(                             
-      212 +            color: financial.primaryAction,                   
-      213 +            width: regionRuleWidth,                           
-      214 +          ),                                                  
-      215          ),
-      216 +        errorBorder: UnderlineInputBorder(                    
-      217 +          borderRadius: BorderRadius.circular(radiusInput),   
-      218 +          borderSide: BorderSide(                             
-      219 +            color: financial.expense,                         
-      220 +            width: regionRuleWidth,                           
-      221 +          ),                                                  
-      222 +        ),                                                    
-      223 +        focusedErrorBorder: UnderlineInputBorder(             
-      224 +          borderRadius: BorderRadius.circular(radiusInput),   
-      225 +          borderSide: BorderSide(                             
-      226 +            color: financial.expense,                         
-      227 +            width: regionRuleWidth,                           
-      228 +          ),                                                  
-      229 +        ),                                                    
-      230 +        disabledBorder: UnderlineInputBorder(                 
-      231 +          borderRadius: BorderRadius.circular(radiusInput),   
-      232 +          borderSide: BorderSide(color: financial.disabled),  
-      233 +        ),                                                    
-      234        ),
-      235        chipTheme: ChipThemeData(
-      236          shape: RoundedRectangleBorder(
-     ...
-      239          side: BorderSide(color: financial.divider),
-      240        ),
-      241        dialogTheme: DialogThemeData(
-      242 +        elevation: 0,                                         
-      243 +        backgroundColor: financial.mainSurface,               
-      244 +        surfaceTintColor: Colors.transparent,                 
-      245          shape: RoundedRectangleBorder(
-      246            borderRadius: BorderRadius.circular(radiusDialog),
-      247          ),
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 10 lines, removed 3 lines
-      246            borderRadius: BorderRadius.circular(radiusDialog),
-      247          ),
-      248        ),
-      249 -      bottomSheetTheme: const BottomSheetThemeData(           
-      250 -        shape: RoundedRectangleBorder(                        
-      249 +      bottomSheetTheme: BottomSheetThemeData(                 
-      250 +        elevation: 0,                                         
-      251 +        backgroundColor: financial.mainSurface,               
-      252 +        surfaceTintColor: Colors.transparent,                 
-      253 +        shape: const RoundedRectangleBorder(                  
-      254            borderRadius: BorderRadius.vertical(
-      255              top: Radius.circular(radiusSheet),
-      256            ),
-      257          ),
-      258          showDragHandle: true,
-      259        ),
-      257 -      dividerTheme: DividerThemeData(color: financial.divider,
-          - space: 1),                                                   
-      260 +      dividerTheme: DividerThemeData(                         
-      261 +        color: financial.divider,                             
-      262 +        space: 1,                                             
-      263 +        thickness: 1,                                         
-      264 +      ),                                                      
-      265      );
-      266    }
-      267  
+⏺ Update(test/helpers/true_schema_v12.dart)
+  ⎿  Added 3 lines, removed 2 lines
+       9  
+      10  /// Builds a physical SQLite file at schema version 12 from his
+          torical DDL.
+      11  ///
+      12 -/// Tables come from Drift's current CREATE TABLE statements (c
+         -olumns unchanged                                               
+      13 -/// across v12→v14). Triggers/indexes come from                
+      12 +/// Tables come from Drift's current CREATE TABLE statements, w
+         +ith columns                                                    
+      13 +/// added after v12 stripped back off by [stripColumnsNewerThan
+         +].                                                             
+      14 +/// Triggers/indexes come from                                 
+      15  /// `test/fixtures/schema_v12_objects.sql` extracted from commi
+          t `3124346`
+      16  /// onCreate — v13+ objects are never created then deleted.
+      17  Future<String> materializeTrueSchemaV12File() async {
 
   Ran 1 shell command (ctrl+o to expand)
 
-⏺ Exactly the tripwire firing as designed. Updating the characterization test to
-  the phase 1+2 expectations.
+⏺ Update(test/helpers/true_schema_v16.dart)
+  ⎿  Added 2 lines, removed 1 line
+      10  /// Builds a physical SQLite file at schema version 16 from his
+          torical DDL.
+      11  ///
+      12  /// Tables come from Drift's current CREATE TABLE statements (e
+          xcluding
+      13 -/// Phase 6A certificate tables). Triggers/indexes come from   
+      13 +/// Phase 6A certificate tables), with columns added after v16 
+         +stripped back                                                  
+      14 +/// off by [stripColumnsNewerThan]. Triggers/indexes come from 
+      15  /// `test/fixtures/schema_v16_objects.sql` extracted from commi
+          t `86736ca`
+      16  /// onCreate — certificate objects are never created then delet
+          ed.
+      17  Future<String> materializeTrueSchemaV16File() async {
 
-⏺ Write(test/unit/core/presentation/theme/design_token_characterization_test.dar
-       t)
+⏺ Update(test/helpers/true_schema_v18.dart)
+  ⎿  Added 3 lines, removed 2 lines
+       8  /// - Fixture: `test/fixtures/schema_v18_objects.sql` — trigger
+          s/indexes
+       9  ///   dumped from `AppDatabase.forTesting()` onCreate at that c
+          ommit
+      10  ///   (100 objects; eligibility triggers absent).
+      11 -/// - Tables: Drift CREATE TABLE DDL from the *current* probe (
+         -table shapes                                                   
+      12 -///   were unchanged 18→19; only eligibility triggers were adde
+         -d).                                                            
+      11 +/// - Tables: Drift CREATE TABLE DDL from the *current* probe, 
+         +with columns                                                   
+      12 +///   added after v18 stripped back off by [stripColumnsNewerTh
+         +an]. Only                                                      
+      13 +///   eligibility triggers were added 18→19; `reversal_reason` 
+         +arrived at v20.                                                
+      14  ///
+      15  /// This is **not** “open schema 19 then delete triggers”. The 
+          two Phase
+      16  /// 6B.1.1 eligibility triggers are never created on the materi
+          alized file;
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Update(test/database/certificates/phase_6a3_migration_restart_test.dart)
+  ⎿  Added 3 lines, removed 1 line
+      140        (await db.customSelect('PRAGMA user_version').get()).fir
+           st.read<int>(
+      141          'user_version',
+      142        ),
+      143 -      19,                                                     
+      143 +      // The current version, not a literal: the claim under t
+          +est is that a                                                 
+      144 +      // reopen finishes the upgrade, which stays true as vers
+          +ions are added.                                               
+      145 +      db.schemaVersion,                                       
+      146      );
+      147  
+      148      Future<int> objectCount(String type, String name) async =>
+
+⏺ Update(test/database/certificates/certificate_true_migration_v16_to_latest_tes
+        t.dart)
+  ⎿  Added 4 lines, removed 2 lines
+      204        );
+      205        stuck.close();
+      206  
+      207 -      // Reopening with AppDatabase completes onUpgrade from 1
+          -6 → 19.                                                       
+      207 +      // Reopening with AppDatabase completes onUpgrade from 1
+          +6 to current.                                                 
+      208        final db = AppDatabase.forFile(path);
+      209        addTearDown(db.close);
+      210        expect(
+      211          (await db.customSelect('PRAGMA user_version').get()).f
+           irst.read<int>(
+      212            'user_version',
+      213          ),
+      214 -        19,                                                   
+      214 +        // The current version, not a literal: the claim under
+          + test is that a                                               
+      215 +        // reopen finishes the upgrade, which stays true as ve
+          +rsions are added.                                             
+      216 +        db.schemaVersion,                                     
+      217        );
+      218        // createTable IF path: table already existed; triggers 
+           must still install.
+      219        expect(
+
+  Searched for 2 patterns, ran 3 shell commands (ctrl+o to expand)
+⏺ Now the data layer. Persist the reason and expose it end-to-end:
+
+⏺ Update(lib/features/ledger/data/drift_ledger_repository.dart)
+  ⎿  Added 6 lines
+      843                  params.reason ??
+      844                      'Reversal of operation ${params.originalOp
+           erationId}',
+      845                ),
+      846 +              // Stored separately from [description] because 
+          +a reason is an                                                
+      847 +              // audit field, not a summary: the detail screen
+          + prints it as                                                 
+      848 +              // "why", and a caller must be able to tell a re
+          +corded reason                                                 
+      849 +              // from a generated fallback. Only ever set on t
+          +he reversal row,                                              
+      850 +              // so the original operation stays untouched (IN
+          +V-002).                                                       
+      851 +              reversalReason: Value(params.reason),           
+      852                sourceAccountId: Value(original.destinationAccou
+           ntId),
+      853                destinationAccountId: Value(original.sourceAccou
+           ntId),
+      854                idempotencyKey: Value(params.reversalOperationId
+           ),
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Update(lib/features/ledger/data/ledger_write_support.dart)
+  ⎿  Added 1 line
+      262      receiptPath: row.receiptPath,
+      263      isReversed: row.isReversed,
+      264      reversedBy: row.reversedBy,
+      265 +    reversalReason: row.reversalReason,                       
+      266      createdBy: row.createdBy,
+      267      createdAt: row.createdAt,
+      268      updatedAt: row.updatedAt,
+
+⏺ Update(lib/features/ledger/domain/operation.dart)
+  ⎿  Added 1 line
+      36      this.tags = const [],
+      37      this.receiptPath,
+      38      this.reversedBy,
+      39 +    this.reversalReason,                                       
+      40    });
+      41  
+      42    /// Stable client-generated UUID. Used as the idempotency key
+          .
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Update(lib/features/ledger/domain/operation.dart)
+  ⎿  Added 12 lines
+       91    /// The [id] of the reversal [Operation] that cancelled this
+            one.
+       92    final String? reversedBy;
+       93  
+       94 +  /// Why this reversal was recorded. Set only on reversal ope
+          +rations.                                                      
+       95 +  ///                                                         
+       96 +  /// Distinct from [description], which every operation type 
+          +carries as a                                                  
+       97 +  /// summary. A reason is an audit field: it is required when
+          + a reversal is                                                
+       98 +  /// recorded through the app, it is shown verbatim to anyone
+          + who opens the                                                
+       99 +  /// entry, and — like every other column but [isReversed] an
+          +d [reversedBy] —                                              
+      100 +  /// it can never be edited afterwards.                      
+      101 +  ///                                                         
+      102 +  /// Null on non-reversal operations, and on reversals writte
+          +n before                                                      
+      103 +  /// schema 20.                                              
+      104 +  final String? reversalReason;                               
+      105 +                                                              
+      106    final String createdBy;
+      107  
+      108    /// System UTC timestamp of creation. Matches [recordedAt] o
+           n first write.
+
+⏺ Update(lib/features/ledger/domain/operation.dart)
+  ⎿  Added 9 lines
+      627    final String householdId;
+      628    final String effectiveDate;
+      629    final String createdBy;
+      630 +                                                              
+      631 +  /// Why the operation is being reversed.                    
+      632 +  ///                                                         
+      633 +  /// Persisted to `operations.reversal_reason` on the reversa
+          +l row and shown                                               
+      634 +  /// verbatim wherever the reversal appears. Nullable here ra
+          +ther than                                                     
+      635 +  /// required because the ledger is also reversed by internal
+          + flows that have                                              
+      636 +  /// no user-supplied reason; a reversal a *person* initiates
+          + must carry one,                                              
+      637 +  /// and that rule belongs to `ReverseTransactionUseCase`, wh
+          +ich is the only                                               
+      638 +  /// path the UI may take.                                   
+      639    final String? reason;
+      640  }
+
+⏺ Now the use case. Let me check AppResult and the transaction query repository
+  first:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Now the use case:
+
+⏺ Write(lib/features/transactions/application/reverse_transaction_use_case.dart)
+  ⎿  Wrote 127 lines to lib/features/transactions/application/reverse_trans
+     action_use_case.dart
+      1 import 'package:family_money_manager/core/application/app_result.
+      2 import 'package:family_money_manager/features/ledger/data/ledger_
+        repository.dart';
+      3 import 'package:family_money_manager/features/ledger/domain/opera
+      4 
+      5 /// The longest a reversal reason may be.
+      7 /// Long enough for a sentence explaining what went wrong, short 
+        enough that it
+      8 /// renders on one detail row without truncation becoming the nor
+      9 const int maxReversalReasonLength = 280;
+     … +142 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+  ⎿  Found 3 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/application/reverse_transaction_use_case.dart
+        )
+  ⎿  Added 1 line
+      1  import 'package:family_money_manager/core/application/app_result
+         .dart';
+      2  import 'package:family_money_manager/features/ledger/data/ledger
+         _repository.dart';
+      3 +import 'package:family_money_manager/features/ledger/domain/chil
+        +d_withdrawal_audit.dart';                                       
+      4  import 'package:family_money_manager/features/ledger/domain/oper
+         ation.dart';
+      5  
+      6  /// The longest a reversal reason may be.
+
+  Searched for 2 patterns, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/application/reverse_transaction_use_case.dart
+        )
+  ⎿  Added 3 lines, removed 1 line
+       96      } on DuplicateReversalError {
+       97        // The original already carries a reversal. Distinct fro
+           m the id conflict
+       98        // above, and the screen says so — an operation is rever
+           sed once.
+       99 -      return const AppDuplicateConflict(messageKey: 'errorAlre
+          -adyReversed');                                                
+       99 +      return const AppDuplicateConflict(                      
+      100 +        messageKey: 'errorOperationAlreadyReversed',          
+      101 +      );                                                      
+      102      } on MissingProtectedWithdrawalAuditError {
+      103        // Reversing an operation whose reversal would debit a p
+           rotected account
+      104        // needs the protected-withdrawal flow, which this use c
+           ase does not
+
+  Searched for 2 patterns, ran 6 shell commands (ctrl+o to expand)
+
+⏺ Now the router — the reverse route and root-push detail:
+
+⏺ Update(lib/app/app_router.dart)
+  ⎿  Added 11 lines
+      57  /// the same [StatefulShellRoute] page identity — avoiding dupl
+          icate Navigator
+      58  /// page keys when stacking shell destinations via `push`.
+      59  abstract final class AppRouter {
+      60 +  /// Navigator that owns full-screen detail and correction rou
+         +tes.                                                           
+      61 +  ///                                                          
+      62 +  /// Detail screens are pushed above the shell rather than ins
+         +ide a branch.                                                  
+      63 +  /// Without this, opening an account from Home switches the v
+         +isible tab to                                                  
+      64 +  /// More and discards Home's scroll position — the destinatio
+         +n decides which                                                
+      65 +  /// tab you are on, which is backwards. Above the shell there
+         + is no bottom                                                  
+      66 +  /// navigation on a detail screen, and popping returns to whe
+         +rever you came                                                 
+      67 +  /// from with its state intact.                              
+      68 +  static final rootNavigatorKey = GlobalKey<NavigatorState>(); 
+      69 +                                                               
+      70    static GoRouter create(WidgetRef ref) {
+      71      return GoRouter(
+      72 +      navigatorKey: rootNavigatorKey,                          
+      73        initialLocation: '/dashboard',
+      74        debugLogDiagnostics: false,
+      75        errorBuilder: (context, state) => AppErrorScreen(error: s
+          tate.error),
+
+⏺ Update(lib/app/app_router.dart)
+  ⎿  Added 14 lines
+      157                          ),
+      158                        ],
+      159                      ),
+      160 +                    // Declared after 'new' deliberately: go_r
+          +outer matches                                                 
+      161 +                    // siblings in order, and ':operationId' w
+          +ould otherwise                                                
+      162 +                    // swallow '/transactions/new' as an opera
+          +tion id.                                                      
+      163                      GoRoute(
+      164                        path: ':operationId',
+      165 +                      parentNavigatorKey: rootNavigatorKey,   
+      166                        builder: (context, state) => Transaction
+           DetailScreen(
+      167                          operationId: state.pathParameters['ope
+           rationId']!,
+      168                        ),
+      169 +                      routes: [                               
+      170 +                        GoRoute(                              
+      171 +                          path: 'reverse',                    
+      172 +                          parentNavigatorKey: rootNavigatorKey
+          +,                                                             
+      173 +                          builder: (context, state) => Reverse
+          +TransactionScreen(                                            
+      174 +                            operationId:                      
+      175 +                                state.pathParameters['operatio
+          +nId']!,                                                       
+      176 +                          ),                                  
+      177 +                        ),                                    
+      178 +                      ],                                      
+      179                      ),
+      180                    ],
+      181                  ),
+
+⏺ Update(lib/app/app_router.dart)
+  ⎿  Added 1 line
+      338                      ),
+      339                      GoRoute(
+      340                        path: ':accountId',
+      341 +                      parentNavigatorKey: rootNavigatorKey,   
+      342                        builder: (context, state) => AccountDeta
+           ilScreen(
+      343                          accountId: state.pathParameters['accou
+           ntId']!,
+      344                        ),
+
+  Read 1 file, ran 7 shell commands (ctrl+o to expand)
+⏺ Now the reversal screen:
+
+⏺ Write(lib/features/transactions/presentation/reverse_transaction_screen.dart)
+  ⎿  Wrote 341 lines to
+     lib/features/transactions/presentation/reverse_transaction_screen.dart
+       1 /// The append-only correction.
+       3 /// The one screen in the product where the UI has to teach the 
+         data model
+       4 /// rather than hide it: there is no edit and no delete, so a mi
+       5 /// by adding an opposing entry that points at the original, and
+          both stay
+         ded* — before,
+       7 /// after, and the net — instead of asking "are you sure".
+       8 library;
+      10 import 'package:family_money_manager/app/app_theme.dart';
+     … +382 lines (ctrl+o to expand)
+
+⏺ Now the providers and router import:
+
+⏺ Update(lib/features/transactions/presentation/providers/transaction_providers.
+        dart)
+  ⎿  Added 8 lines
+      61    );
+      62  });
+      63  
+      64 +final reverseTransactionUseCaseProvider = Provider<ReverseTrans
+         +actionUseCase>((                                               
+      65 +  ref,                                                         
+      66 +) {                                                            
+      67 +  return ReverseTransactionUseCase(                            
+      68 +    ledgerRepository: ref.watch(ledgerRepositoryProvider),     
+      69 +  );                                                           
+      70 +});                                                            
+      71 +                                                               
+      72  final getTransactionHistoryUseCaseProvider =
+      73      Provider<GetTransactionHistoryUseCase>((ref) {
+      74        return GetTransactionHistoryUseCase(
+  ⎿  Found 8 new diagnostic issues in 1 file (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 10 new diagnostic issues in 2 files (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/presentation/reverse_transaction_screen.dart)
+  ⎿  Added 1 line, removed 1 line
+      86      return AppScreenScaffold(
+      87        title: Text(l10n.reversalSheetTitle),
+      88        body: detailAsync.when(
+      89 -        loading: () => AppLoadingState(label: l10n.loadingLabel
+         -),                                                             
+      89 +        loading: () => AppLoadingState(message: l10n.loadingLab
+         +el),                                                           
+      90          error: (_, _) => AppErrorState(message: l10n.errorGener
+          ic),
+      91          data: (summary) {
+      92            if (summary == null) return AppErrorState(message: l1
+          0n.errorGeneric);
+
+⏺ Update(lib/features/transactions/presentation/reverse_transaction_screen.dart)
+  ⎿  Added 4 lines, removed 5 lines
+      160            // Back to the list, where the counter-entry appears
+            above the
+      161            // original and both stay visible.
+      162            context.go('/transactions');
+      163 -        case AppNotFound():                                   
+      164 -          setState(() => _failure = l10n.errorGeneric);       
+      163          case AppInsufficientFunds():
+      164            setState(() => _failure = l10n.errorInsufficientFund
+           s);
+      167 -        case AppValidationFailure(:final messageKey) ||       
+      168 -            AppDuplicateConflict(:final messageKey):          
+      165 +        case AppValidationFailure(:final messageKey):         
+      166            setState(() => _failure = resolveMessageKey(l10n, me
+           ssageKey));
+      170 -        default:                                              
+      167 +        case AppDuplicateConflict(:final messageKey):         
+      168 +          setState(() => _failure = resolveMessageKey(l10n, me
+          +ssageKey));                                                   
+      169 +        case AppResult<String>():                             
+      170            setState(() => _failure = l10n.errorGeneric);
+      171        }
+      172      } finally {
+
+⏺ Update(lib/features/transactions/presentation/reverse_transaction_screen.dart)
+  ⎿  User rejected      lib/features/transactions/presentation/reverse_transacti
+     update to          on_screen.dart
+
+✻ Churned for 14m 44s
+
+❯ re-ask for the last update                                                    
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Re-requesting the same edit — this is the analyzer's use_null_aware_elements
+  lint on line 302 of reverse_transaction_screen.dart, replacing the if-guarded
+  set element with the null-aware marker:
+
+⏺ Update(lib/features/transactions/presentation/reverse_transaction_screen.dart)
+  ⎿  Added 1 line, removed 1 line
+      299                children: [
+      300                  FilterChipGroup<ReversalReasonPreset>(
+      301                    options: ReversalReasonPreset.values,
+      302 -                  selected: {if (_selectedPreset != null) _sel
+          -ectedPreset!},                                                
+      302 +                  selected: {?_selectedPreset},               
+      303                    labelOf: (preset) => reversalReasonPresetLab
+           el(l10n, preset),
+      304                    onChanged: (selection) {
+      305                      final preset = selection.firstOrNull;
+
+⏺ Now the router import, then analyze:
+
+⏺ Update(lib/app/app_router.dart)
+  ⎿  Added 1 line
+      39  import 'package:family_money_manager/features/transactions/pres
+          entation/expense_review_screen.dart';
+      40  import 'package:family_money_manager/features/transactions/pres
+          entation/income_form_screen.dart';
+      41  import 'package:family_money_manager/features/transactions/pres
+          entation/income_review_screen.dart';
+      42 +import 'package:family_money_manager/features/transactions/pres
+         +entation/reverse_transaction_screen.dart';                     
+      43  import 'package:family_money_manager/features/transactions/pres
+          entation/transaction_detail_screen.dart';
+      44  import 'package:family_money_manager/features/transactions/pres
+          entation/transactions_screen.dart';
+      45  import 'package:family_money_manager/features/transactions/pres
+          entation/transfer_form_screen.dart';
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Analyzer clean. Now the transaction detail screen needs the entry point to the
+  reversal — plus its D1/D2 rebuild:
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(lib/features/transactions/presentation/transaction_detail_screen.dart)
+  ⎿  Added 176 lines, removed 98 lines
+       1 +/// A single operation, and the append-only correction that can
+         + follow it.                                                    
+       2 +///                                                            
+       3 +/// There is no edit and no delete on this screen, and rather t
+         +han hiding that,                                               
+       4 +/// the screen names it: a mistake is fixed by adding a reversi
+         +ng entry that                                                  
+       5 +/// points at this one, and both stay in the ledger. The user l
+         +earns the data                                                 
+       6 +/// model by reading their own transaction.                    
+       7 +library;                                                       
+       8 +                                                               
+       9 +import 'package:family_money_manager/app/app_theme.dart';      
+      10 +import 'package:family_money_manager/core/financial/ledger_enum
+         +s.dart';                                                       
+      11  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+      12  import 'package:family_money_manager/core/localization/enum_lab
+          el_helpers.dart';
+      13 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+      14  import 'package:family_money_manager/core/presentation/theme/ap
+          p_theme_extensions.dart';
+      15  import 'package:family_money_manager/features/transactions/doma
+          in/transaction_summary.dart';
+      16  import 'package:family_money_manager/features/transactions/pres
+          entation/category_label_helper.dart';
+      17  import 'package:family_money_manager/features/transactions/pres
+          entation/providers/transaction_providers.dart';
+      18  import 'package:flutter/material.dart';
+      19  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      20 +import 'package:go_router/go_router.dart';                     
+      21  
+      22  const _householdId = 'household-v1';
+      23  
+     ...
+      34        transactionDetailProvider((operationId, _householdId)),
+      35      );
+      36  
+      25 -    return Scaffold(                                           
+      26 -      appBar: AppBar(title: Text(l10n.transactionDetailTitle)),
+      37 +    return AppScreenScaffold(                                  
+      38 +      title: Text(l10n.transactionDetailTitle),                
+      39        body: detailAsync.when(
+      28 -        loading: () => Center(child: Text(l10n.loadingLabel)), 
+      29 -        error: (_, _) => Center(child: Text(l10n.errorGeneric))
+         -,                                                              
+      40 +        loading: () => AppLoadingState(message: l10n.loadingLab
+         +el),                                                           
+      41 +        error: (_, _) => AppErrorState(message: l10n.errorGener
+         +ic),                                                           
+      42          data: (summary) {
+      31 -          if (summary == null) {                               
+      32 -            return Center(child: Text(l10n.errorGeneric));     
+      33 -          }                                                    
+      43 +          if (summary == null) return AppErrorState(message: l1
+         +0n.errorGeneric);                                              
+      44            return _DetailBody(summary: summary);
+      45          },
+      46        ),
+      47 +      bottomBar: detailAsync.maybeWhen(                        
+      48 +        data: (summary) {                                      
+      49 +          if (summary == null) return null;                    
+      50 +          // An operation is reversed once. The slot states why
+         + the action is                                                 
+      51 +          // gone rather than silently dropping it, so the abse
+         +nce is                                                         
+      52 +          // explained rather than mysterious.                 
+      53 +          if (summary.operation.isReversed) {                  
+      54 +            return AppBottomActionBar(                         
+      55 +              child: AppInlineNotice(                          
+      56 +                message: l10n.detailAlreadyReversedNoAction,   
+      57 +                tone: AppNoticeTone.info,                      
+      58 +              ),                                               
+      59 +            );                                                 
+      60 +          }                                                    
+      61 +          return AppBottomActionBar(                           
+      62 +            child: SecondaryActionButton(                      
+      63 +              label: l10n.detailAddReversalAction,             
+      64 +              onPressed: () =>                                 
+      65 +                  context.push('/transactions/$operationId/reve
+         +rse'),                                                         
+      66 +            ),                                                 
+      67 +          );                                                   
+      68 +        },                                                     
+      69 +        orElse: () => null,                                    
+      70 +      ),                                                       
+      71      );
+      72    }
+      73  }
+     ...
+       80    @override
+       81    Widget build(BuildContext context) {
+       82      final l10n = AppLocalizations.of(context);
+       83 +    final colors = context.financialColors;                   
+       84      final op = summary.operation;
+       85  
+       51 -    return ListView(                                          
+       52 -      padding: const EdgeInsets.all(16),                      
+       53 -      children: [                                             
+       54 -        Card(                                                 
+       55 -          child: Padding(                                     
+       56 -            padding: const EdgeInsets.all(16),                
+       86 +    final direction = switch (op.type) {                      
+       87 +      OperationType.income => FinancialAmountDirection.inflow,
+       88 +      OperationType.transfer => FinancialAmountDirection.inter
+          +nal,                                                          
+       89 +      _ => FinancialAmountDirection.outflow,                  
+       90 +    };                                                        
+       91 +    // A reversed operation's amount goes quiet rather than ke
+          +eping its class                                               
+       92 +    // colour: its effect on every balance is now zero, and co
+          +louring it as                                                 
+       93 +    // live money would contradict the banner directly above i
+          +t.                                                            
+       94 +    final tone = op.isReversed                                
+       95 +        ? FinancialAmountTone.muted                           
+       96 +        : switch (op.type) {                                  
+       97 +            OperationType.income => FinancialAmountTone.income
+          +,                                                             
+       98 +            OperationType.transfer => FinancialAmountTone.tran
+          +sfer,                                                         
+       99 +            _ => FinancialAmountTone.expense,                 
+      100 +          };                                                  
+      101 +                                                              
+      102 +    return ResponsiveContentContainer(                        
+      103 +      child: ListView(                                        
+      104 +        padding: const EdgeInsetsDirectional.only(            
+      105 +          top: AppTheme.space16,                              
+      106 +          bottom: AppTheme.space32,                           
+      107 +        ),                                                    
+      108 +        children: [                                           
+      109 +          if (op.isReversed) ...[                             
+      110 +            Padding(                                          
+      111 +              padding: const EdgeInsets.symmetric(            
+      112 +                horizontal: AppTheme.space16,                 
+      113 +              ),                                              
+      114 +              child: AppInlineNotice(                         
+      115 +                message: l10n.detailReversedBannerBody(op.upda
+          +tedAt),                                                       
+      116 +                tone: AppNoticeTone.info,                     
+      117 +                icon: Icons.undo,                             
+      118 +              ),                                              
+      119 +            ),                                                
+      120 +            const SizedBox(height: AppTheme.space16),         
+      121 +          ],                                                  
+      122 +          Padding(                                            
+      123 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+      124              child: Column(
+      125                crossAxisAlignment: CrossAxisAlignment.start,
+      126                children: [
+       60 -                Row(                                          
+      127 +                Wrap(                                         
+      128 +                  spacing: AppTheme.space8,                   
+      129 +                  runSpacing: AppTheme.space8,                
+      130 +                  crossAxisAlignment: WrapCrossAlignment.cente
+          +r,                                                            
+      131                    children: [
+      132                      Text(
+      133                        operationTypeLabel(l10n, op.type),
+       64 -                      style: Theme.of(context).textTheme.title
+          -Medium?.copyWith(                                             
+       65 -                        fontWeight: FontWeight.bold,          
+       66 -                      ),                                      
+      134 +                      style: context.textRoles.cardTitle,     
+      135                      ),
+       68 -                    const SizedBox(width: 8),                 
+       69 -                    if (op.isReversed)                        
+       70 -                      Container(                              
+       71 -                        padding: const EdgeInsets.symmetric(  
+       72 -                          horizontal: 6,                      
+       73 -                          vertical: 2,                        
+       74 -                        ),                                    
+       75 -                        decoration: BoxDecoration(            
+       76 -                          color: context.financialColors.secon
+          -darySurface,                                                  
+       77 -                          borderRadius: BorderRadius.circular(
+          -4),                                                           
+       78 -                        ),                                    
+       79 -                        child: Text(                          
+       80 -                          l10n.transactionReversed,           
+       81 -                          style: Theme.of(context).textTheme.l
+          -abelSmall                                                     
+       82 -                              ?.copyWith(                     
+       83 -                                color: context.financialColors
+          -.secondaryText,                                               
+       84 -                              ),                              
+       85 -                        ),                                    
+       86 -                      ),                                      
+      136 +                    StatusBadge(                              
+      137 +                      label: op.isReversed                    
+      138 +                          ? l10n.transactionReversed          
+      139 +                          : l10n.detailStatusPosted,          
+      140 +                      foreground: op.isReversed               
+      141 +                          ? colors.secondaryText              
+      142 +                          : colors.success,                   
+      143 +                    ),                                        
+      144                    ],
+      145                  ),
+       89 -                const SizedBox(height: 12),                   
+       90 -                Text(                                         
+       91 -                  '${op.totalAmountMinorUnits} ${op.currencyCo
+          -de}',                                                         
+       92 -                  style: Theme.of(context).textTheme.headlineM
+          -edium,                                                        
+      146 +                const SizedBox(height: AppTheme.space12),     
+      147 +                // Was previously rendered as raw minor units 
+          +— 382.50 EGP                                                  
+      148 +                // printed as "38250 EGP". The one component t
+          +hat turns a                                                   
+      149 +                // number into pixels owns the scale, the sign
+          +, the bidi                                                    
+      150 +                // isolation and the screen-reader phrasing.  
+      151 +                FinancialAmountText(                          
+      152 +                  minorUnits: op.totalAmountMinorUnits,       
+      153 +                  currencyCode: op.currencyCode,              
+      154 +                  tone: tone,                                 
+      155 +                  direction: direction,                       
+      156 +                  size: FinancialAmountSize.display,          
+      157 +                  isStruckThrough: op.isReversed,             
+      158                  ),
+      159                ],
+      160              ),
+      161            ),
+       97 -        ),                                                    
+       98 -        const SizedBox(height: 12),                           
+       99 -        _infoTile(context, l10n.fieldEffectiveDate, op.effecti
+          -veDate),                                                      
+      100 -        if (summary.categoryCode != null)                     
+      101 -          _infoTile(                                          
+      102 -            context,                                          
+      103 -            l10n.fieldCategory,                               
+      104 -            categoryLabelFromCode(l10n, summary.categoryCode!)
+          -,                                                             
+      162 +          const SizedBox(height: AppTheme.space24),           
+      163 +          AppReviewSection(                                   
+      164 +            title: l10n.detailsLabel,                         
+      165 +            rows: [                                           
+      166 +              AppReviewRowData(                               
+      167 +                label: l10n.fieldEffectiveDate,               
+      168 +                value: op.effectiveDate,                      
+      169 +              ),                                              
+      170 +              if (summary.categoryCode case final String code)
+      171 +                AppReviewRowData(                             
+      172 +                  label: l10n.fieldCategory,                  
+      173 +                  value: categoryLabelFromCode(l10n, code),   
+      174 +                ),                                            
+      175 +              if (op.sourceAccountId case final String id)    
+      176 +                AppReviewRowData(label: l10n.fieldSourceAccoun
+          +t, value: id),                                                
+      177 +              if (op.destinationAccountId case final String id
+          +)                                                             
+      178 +                AppReviewRowData(                             
+      179 +                  label: l10n.fieldDestinationAccount,        
+      180 +                  value: id,                                  
+      181 +                ),                                            
+      182 +              if (summary.spenderMemberId case final String id
+          +)                                                             
+      183 +                AppReviewRowData(label: l10n.fieldSpender, val
+          +ue: id),                                                      
+      184 +              if (summary.beneficiaryMemberId case final Strin
+          +g id)                                                         
+      185 +                AppReviewRowData(label: l10n.fieldBeneficiary,
+          + value: id),                                                  
+      186 +              if (summary.scope case final scope?)            
+      187 +                AppReviewRowData(                             
+      188 +                  label: l10n.fieldScope,                     
+      189 +                  value: expenseScopeLabel(l10n, scope),      
+      190 +                ),                                            
+      191 +              AppReviewRowData(                               
+      192 +                label: l10n.fieldRecurring,                   
+      193 +                value: summary.isRecurring                    
+      194 +                    ? l10n.recurringYes                       
+      195 +                    : l10n.recurringOneTime,                  
+      196 +              ),                                              
+      197 +              if (summary.note case final String note)        
+      198 +                AppReviewRowData(label: l10n.fieldNote, value:
+          + note),                                                       
+      199 +              // The reversal's own reason, shown wherever the
+          + reversal is                                                  
+      200 +              // opened. This is the audit value of an append-
+          +only correction:                                              
+      201 +              // "reversed" says nothing, "entered twice" says
+          + everything.                                                  
+      202 +              if (op.reversalReason case final String reason) 
+      203 +                AppReviewRowData(label: l10n.reversalReasonLab
+          +el, value: reason),                                           
+      204 +            ],                                                
+      205            ),
+      106 -        if (op.sourceAccountId != null)                       
+      107 -          _infoTile(context, l10n.fieldSourceAccount, op.sourc
+          -eAccountId!),                                                 
+      108 -        if (op.destinationAccountId != null)                  
+      109 -          _infoTile(                                          
+      110 -            context,                                          
+      111 -            l10n.fieldDestinationAccount,                     
+      112 -            op.destinationAccountId!,                         
+      113 -          ),                                                  
+      114 -        if (summary.spenderMemberId != null)                  
+      115 -          _infoTile(context, l10n.fieldSpender, summary.spende
+          -rMemberId!),                                                  
+      116 -        if (summary.beneficiaryMemberId != null)              
+      117 -          _infoTile(                                          
+      118 -            context,                                          
+      119 -            l10n.fieldBeneficiary,                            
+      120 -            summary.beneficiaryMemberId!,                     
+      121 -          ),                                                  
+      122 -        if (summary.scope != null)                            
+      123 -          _infoTile(                                          
+      124 -            context,                                          
+      125 -            l10n.fieldScope,                                  
+      126 -            expenseScopeLabel(l10n, summary.scope!),          
+      127 -          ),                                                  
+      128 -        _infoTile(                                            
+      129 -          context,                                            
+      130 -          l10n.fieldRecurring,                                
+      131 -          summary.isRecurring ? l10n.recurringYes : l10n.recur
+          -ringOneTime,                                                  
+      132 -        ),                                                    
+      133 -        if (summary.note != null)                             
+      134 -          _infoTile(context, l10n.fieldNote, summary.note!),  
+      135 -      ],                                                      
+      136 -    );                                                        
+      137 -  }                                                           
+      138 -                                                              
+      139 -  Widget _infoTile(BuildContext context, String label, String 
+          -value) {                                                      
+      140 -    return Padding(                                           
+      141 -      padding: const EdgeInsets.symmetric(vertical: 6),       
+      142 -      child: Row(                                             
+      143 -        crossAxisAlignment: CrossAxisAlignment.start,         
+      144 -        children: [                                           
+      145 -          SizedBox(                                           
+      146 -            width: 150,                                       
+      206 +          const SizedBox(height: AppTheme.space24),           
+      207 +          Padding(                                            
+      208 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+      209              child: Text(
+      148 -              label,                                          
+      149 -              style: Theme.of(context).textTheme.bodyMedium?.c
+          -opyWith(                                                      
+      150 -                color: Theme.of(context).colorScheme.outline, 
+      210 +              l10n.detailRecordedAt(op.recordedAt.toIso8601Str
+          +ing()),                                                       
+      211 +              style: context.textRoles.supportingMeta.copyWith
+          +(                                                             
+      212 +                color: colors.secondaryText,                  
+      213                ),
+      214              ),
+      215            ),
+      154 -          Expanded(                                           
+      155 -            child: Text(                                      
+      156 -              value,                                          
+      157 -              style: Theme.of(                                
+      158 -                context,                                      
+      159 -              ).textTheme.bodyMedium?.copyWith(fontWeight: Fon
+          -tWeight.w600),                                                
+      216 +          const SizedBox(height: AppTheme.space24),           
+      217 +          // The append-only explainer. Permanent, not conditi
+          +onal: it is how                                               
+      218 +          // the screen answers "where is edit" before the use
+          +r goes looking.                                               
+      219 +          Padding(                                            
+      220 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+      221 +            child: Column(                                    
+      222 +              crossAxisAlignment: CrossAxisAlignment.start,   
+      223 +              children: [                                     
+      224 +                Text(                                         
+      225 +                  l10n.detailNoEditNoDeleteTitle,             
+      226 +                  style: context.textRoles.sectionTitle,      
+      227 +                ),                                            
+      228 +                const SizedBox(height: AppTheme.space8),      
+      229 +                Text(                                         
+      230 +                  op.isReversed                               
+      231 +                      ? l10n.detailEntriesStillInLedgerNote   
+      232 +                      : l10n.detailNoEditNoDeleteBody,        
+      233 +                  style: context.textRoles.body.copyWith(     
+      234 +                    color: colors.secondaryText,              
+      235 +                  ),                                          
+      236 +                ),                                            
+      237 +              ],                                              
+      238              ),
+      239            ),
+      240          ],
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Now tests for the new behaviour:
+
+  Ran 1 shell command (ctrl+o to expand)
+⏺ Write(test/unit/features/transactions/reverse_transaction_use_case_test.dart)
+  ⎿  Wrote 189 lines to
+     test/unit/features/transactions/reverse_transaction_use_case_test.dart
+       1 /// The one path a user-initiated reversal takes into the ledger
+       2 ///
+         n ledger must
+       4 /// say why. The repository will reverse without a reason becaus
+       5 /// flows need that; this use case is what makes the reason non-
+       6 /// what turns every low-level failure into something a screen c
+       7 library;
+       8 
+         .dart';
+         _repository.dart';
+     … +204 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Update(test/unit/features/transactions/reverse_transaction_use_case_test.dart)
+  ⎿  Added 5 lines, removed 1 line
+      16  import '../../../helpers/fake_ledger_repository.dart';
+      17  
+      18  /// A fake that records what it was asked to do and can be told
+           to fail.
+      19 -final class _RecordingLedgerRepository extends FakeLedgerReposi
+         -tory {                                                         
+      19 +///                                                            
+      20 +/// Only [reverseOperation] is implemented. Every other member 
+         +throws through                                                 
+      21 +/// [noSuchMethod], so a use case that reaches for anything els
+         +e fails loudly                                                 
+      22 +/// instead of silently receiving an empty result.             
+      23 +final class _RecordingLedgerRepository implements LedgerReposit
+         +ory {                                                          
+      24    final List<ReverseOperationParams> reversals = [];
+      25  
+      26    IdempotentOperationResult result = IdempotentOperationResult.
+          created;
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ 14/14. Now a DB test proving the reason actually persists, and a widget test
+  for the screen:
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Write(test/database/reversal_reason_persistence_db_test.dart)
+  ⎿  Wrote 151 lines to
+     test/database/reversal_reason_persistence_db_test.dart
+       1 /// The reversal reason survives the round trip, and cannot be e
+       2 ///
+         roves it is
+       4 /// actually written, read back on the domain object, kept off t
+       5 /// and frozen by the append-only guard — which together are wha
+       6 /// reason an audit field rather than a form value that happens 
+       7 library;
+       8 
+         dart';
+         s.dart';
+     … +163 lines (ctrl+o to expand)
+
+  Searched for 1 pattern, ran 6 shell commands (ctrl+o to expand)
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Update(test/database/reversal_reason_persistence_db_test.dart)
+  ⎿  Added 1 line, removed 1 line
+      61        ),
+      62      );
+      63      await ledgerRepo.recordIncome(
+      64 -      const RecordIncomeParams(                                
+      64 +      RecordIncomeParams(                                      
+      65          operationId: 'op-fund',
+      66          householdId: _householdId,
+      67          destinationAccountId: 'acc-reason',
+
+⏺ Now the widget test for the reversal screen:
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Write(test/widget/features/transactions/reverse_transaction_screen_test.dart)
+  ⎿  Wrote 270 lines to
+     test/widget/features/transactions/reverse_transaction_screen_test.dart
+       1 /// The reversal screen.
+       3 /// What is being asserted is the teaching, not the plumbing: th
+         e screen shows
+          not submit
+         he missing
+       6 /// action instead of hiding it, and a failed write stays on scr
+       7 library;
+       8 
+         .dart';
+         dart';
+     … +303 lines (ctrl+o to expand)
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Update(test/widget/features/transactions/reverse_transaction_screen_test.dart)
+  ⎿  Added 3 lines
+      173      tester,
+      174    ) async {
+      175      await tester.pumpWidget(_buildApp(summary: _summary()));
+      176 +    // Twice: the operation resolves on the first frame, the a
+          +ccount name it                                                
+      177 +    // is labelled with on the second.                        
+      178      await tester.pump();
+      179 +    await tester.pump();                                      
+      180  
+      181      final l10n = _l10n(tester);
+      182      expect(
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ All 8 pass. Now a detail-screen test covering the amount fix and the route
+  entry point:
+
+⏺ Write(test/widget/features/transactions/transaction_detail_screen_test.dart)
+  ⎿  Wrote 185 lines to
+     test/widget/features/transactions/transaction_detail_screen_test.dart
+       1 /// Transaction detail.
+       3 /// Two claims are under test. The amount is money, not a raw in
+         teger — this
+         een answers
+       5 /// "where is edit" out loud: the append-only explainer is perma
+       6 /// reversal is offered once, and an already-reversed operation 
+         says why the
+       8 library;
+       9 
+         .dart';
+     … +203 lines (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Analyzer clean across the whole project. Full suite:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Implemented
+
+  Fixed the six migration regressions that the committed v19→v20 change had left
+  behind. The true_schema_v{12,16,18} helpers build their table shapes by
+  dumping CREATE TABLE DDL from a current database probe, so every "historical"
+  fixture already carried reversal_reason and the migration under test died on a
+  duplicate column. Fixed in the fixtures, not by making the production ALTER
+  tolerant — a v19 database in the field genuinely lacks the column, and a
+  fixture that has it is lying. New test/helpers/historical_table_shape.dart
+  strips post-version columns from the freshly created tables; add an entry
+  there whenever a migration calls addColumn. Two further failures were
+  hardcoded 19 assertions, now db.schemaVersion.
+
+  The reversal write path. reversal_reason is now actually written (nothing
+  wrote it before), exposed on Operation, and kept off the original — a reason
+  belongs to the correction. New ReverseTransactionUseCase is the only path the
+  UI may take: it requires a non-empty reason, trims it, caps it at 280, and
+  maps every low-level error to a renderable AppResult. The repository stays
+  reason-optional because internal flows reverse without one.
+
+  /transactions/:operationId/reverse, plus a rootNavigatorKey so transaction and
+  account detail push above the shell — opening an account from Home no longer
+  switches the tab to More and discards Home's scroll.
+
+  ReverseTransactionScreen (D3): what will be added rather than "are you sure",
+  before/after rows, the net stated as 0.00, four preset reasons that seed an
+  editable field, destructive confirm, persistent inline failure.
+  TransactionDetailScreen rebuilt around the append-only explainer with the
+  reversal entry point; its amount now goes through FinancialAmountText — it was
+  printing 382.50 EGP as 38250 EGP.
+
+  38 new ARB keys in both locales (symmetric, 575 each), five registered in
+  resolveMessageKey.
+
+  Validation
+
+  - flutter analyze — No issues found (whole project)
+  - dart format --set-exit-if-changed lib test — clean, 338 files
+  - flutter test — +1822 −2, from a baseline of +1785 −8
+
+  The two remaining failures are the ones the handoff already recorded as
+  pre-existing: budget_creation_screen_test "Currency dropdown present", and
+  certificate_principal_protection_test INV-015. Neither is touched by this
+  work.
+
+  37 new tests: 14 use-case, 4 DB persistence (including that a recorded reason
+  cannot be edited afterwards), 8 reversal screen, 5 detail screen, plus the
+  repaired migration tests.
+
+  Notes
+
+  - Scope boundary I drew: root-push applied to transaction and account detail
+  only — the two screens phase 8 touches. Budgets/goals/certificates detail
+  routes still switch tabs; that's the navigation phase, where the shell/back
+  tests get rewritten together. Flagging it because the app is inconsistent
+  until then.
+  - Not yet done in phase 8: the D1/D2 double-entry rows and the numbered
+  lineage chain need an entriesForOperation query that doesn't exist, plus
+  member/account name joins — the detail screen still prints raw UUIDs for
+  accounts and members. The C1–C6 list is untouched. Both are the next chunk.
+  - Your two decisions are still open and phase 8 has now put both on screen:
+  the certificate-principal double classification, and the spouse-wallet
+  exclusion from the headline balance.
+
+✻ Churned for 9m 37s
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Now the read model:
+
+⏺ Write(lib/features/transactions/domain/transaction_detail.dart)
+  ⎿  Wrote 110 lines to
+     lib/features/transactions/domain/transaction_detail.dart
+       1 import 'package:family_money_manager/core/financial/ledger_enums
+       2 import 'package:family_money_manager/features/transactions/domai
+       3 import 'package:meta/meta.dart';
+       4 
+         med.
+       7 /// [TransactionSummary] carries account and member *ids*; a det
+       8 /// to render "ةيصخش ةيدقن ةظفحم", not a UUID. Resolving that in
+          the query is
+         d one they
+          join instead
+     … +120 lines (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/data/transaction_query_repository.dart)
+  ⎿  Added 12 lines
+      31      required String householdId,
+      32    });
+      33  
+      34 +  /// Returns [operationDetail] plus its ledger lines, resolved
+         + names, and the                                                
+      35 +  /// other half of its reversal pair when it has one.         
+      36 +  ///                                                          
+      37 +  /// Separate from [operationDetail] because it costs three mo
+         +re joins: list                                                 
+      38 +  /// callers that only need the summary should not pay for the
+         +m.                                                             
+      39 +  ///                                                          
+      40 +  /// Returns `null` when no matching operation exists in [hous
+         +eholdId].                                                      
+      41 +  Future<TransactionDetail?> operationDetailWithLedger({       
+      42 +    required String operationId,                               
+      43 +    required String householdId,                               
+      44 +  });                                                          
+      45 +                                                               
+      46    /// Computes a spouse-wallet summary for a given date range.
+      47    ///
+      48    /// - [totalFunded]: sum of all transferIn credits to the spo
+          use account.
+
+⏺ Update(lib/features/transactions/data/transaction_query_repository.dart)
+  ⎿  Added 1 line
+      1 +import 'package:family_money_manager/features/transactions/domai
+        +n/transaction_detail.dart';                                     
+      2  import 'package:family_money_manager/features/transactions/domai
+         n/transaction_filter.dart';
+      3  import 'package:family_money_manager/features/transactions/domai
+         n/transaction_summary.dart';
+      4  import 'package:meta/meta.dart';
+
+⏺ Now the Drift implementation:
+
+⏺ Update(lib/features/transactions/data/drift_transaction_query_repository.dart)
+  ⎿  Added 210 lines
+      149      return rows.isEmpty ? null : _rowToSummary(rows.first);
+      150    }
+      151  
+      152 +  // ── operationDetailWithLedger ────────────────────────────
+          +──────────────────                                            
+      153 +                                                              
+      154 +  @override                                                   
+      155 +  Future<TransactionDetail?> operationDetailWithLedger({      
+      156 +    required String operationId,                              
+      157 +    required String householdId,                              
+      158 +  }) async {                                                  
+      159 +    final summary = await operationDetail(                    
+      160 +      operationId: operationId,                               
+      161 +      householdId: householdId,                               
+      162 +    );                                                        
+      163 +    if (summary == null) return null;                         
+      164 +                                                              
+      165 +    final op = summary.operation;                             
+      166 +                                                              
+      167 +    // Debits before credits, then a stable tiebreak. The doub
+          +le entry reads                                                
+      168 +    // as a pair, and a pair that reorders between rebuilds is
+          + unreadable.                                                  
+      169 +    final entryRows = await _db                               
+      170 +        .customSelect(                                        
+      171 +          '''                                                 
+      172 +      SELECT                                                  
+      173 +        le.id, le.direction, le.account_id, le.amount_minor_un
+          +its,                                                          
+      174 +        le.currency_code, le.entry_type,                      
+      175 +        fa.name AS account_name                               
+      176 +      FROM ledger_entries le                                  
+      177 +      LEFT JOIN financial_accounts fa                         
+      178 +        ON fa.id = le.account_id AND fa.household_id = le.hous
+          +ehold_id                                                      
+      179 +      WHERE le.operation_id = ? AND le.household_id = ?       
+      180 +      ORDER BY CASE le.direction WHEN 'debit' THEN 0 ELSE 1 EN
+          +D, le.id                                                      
+      181 +    ''',                                                      
+      182 +          variables: [                                        
+      183 +            Variable.withString(operationId),                 
+      184 +            Variable.withString(householdId),                 
+      185 +          ],                                                  
+      186 +        )                                                     
+      187 +        .get();                                               
+      188 +                                                              
+      189 +    final ledgerLines = entryRows                             
+      190 +        .map(                                                 
+      191 +          (row) => OperationLedgerLine(                       
+      192 +            entryId: row.read<String>('id'),                  
+      193 +            direction: LedgerDirection.fromCode(row.read<Strin
+          +g>('direction')),                                             
+      194 +            accountId: row.read<String>('account_id'),        
+      195 +            // Falls back to the id rather than to blank: a na
+          +meless row reads                                              
+      196 +            // as a rendering bug, an id reads as a missing ac
+          +count.                                                        
+      197 +            accountName:                                      
+      198 +                row.readNullable<String>('account_name') ??   
+      199 +                row.read<String>('account_id'),               
+      200 +            amountMinorUnits: row.read<int>('amount_minor_unit
+          +s'),                                                          
+      201 +            currencyCode: row.read<String>('currency_code'),  
+      202 +            entryType: LedgerEntryType.fromCode(row.read<Strin
+          +g>('entry_type')),                                            
+      203 +          ),                                                  
+      204 +        )                                                     
+      205 +        .toList();                                            
+      206 +                                                              
+      207 +    final accountNames = await _accountNames(householdId, {   
+      208 +      ?op.sourceAccountId,                                    
+      209 +      ?op.destinationAccountId,                               
+      210 +    });                                                       
+      211 +    final memberNames = await _memberNames(householdId, {     
+      212 +      ?summary.spenderMemberId,                               
+      213 +      ?summary.beneficiaryMemberId,                           
+      214 +      op.createdBy,                                           
+      215 +    });                                                       
+      216 +                                                              
+      217 +    return TransactionDetail(                                 
+      218 +      summary: summary,                                       
+      219 +      ledgerLines: ledgerLines,                               
+      220 +      sourceAccountName: accountNames[op.sourceAccountId],    
+      221 +      destinationAccountName: accountNames[op.destinationAccou
+          +ntId],                                                        
+      222 +      spenderName: memberNames[summary.spenderMemberId],      
+      223 +      beneficiaryName: memberNames[summary.beneficiaryMemberId
+          +],                                                            
+      224 +      createdByName: memberNames[op.createdBy],               
+      225 +      counterpart: await _counterpart(summary, householdId),  
+      226 +    );                                                        
+      227 +  }                                                           
+      228 +                                                              
+      229 +  /// The other half of a reversal pair, from whichever side i
+          +s being viewed.                                               
+      230 +  Future<ReversalCounterpart?> _counterpart(                  
+      231 +    TransactionSummary summary,                               
+      232 +    String householdId,                                       
+      233 +  ) async {                                                   
+      234 +    final op = summary.operation;                             
+      235 +                                                              
+      236 +    // Viewing the original: `reversedBy` names the correction
+          + directly.                                                    
+      237 +    // Viewing the reversal: nothing points forward, so the or
+          +iginal is found                                               
+      238 +    // by the link the reversal's own row carries back.       
+      239 +    final (counterpartId, isReversingEntry) = switch (op) {   
+      240 +      Operation(reversedBy: final String id) => (id, true),   
+      241 +      Operation(type: OperationType.reversal) => (            
+      242 +        await _originalOf(op.id, householdId),                
+      243 +        false,                                                
+      244 +      ),                                                      
+      245 +      _ => (null, false),                                     
+      246 +    };                                                        
+      247 +    if (counterpartId == null) return null;                   
+      248 +                                                              
+      249 +    final rows = await _db                                    
+      250 +        .customSelect(                                        
+      251 +          '''                                                 
+      252 +      SELECT                                                  
+      253 +        o.id, o.effective_date, o.total_amount_minor_units, o.
+          +currency_code,                                                
+      254 +        o.reversal_reason, o.created_by,                      
+      255 +        hm.display_name AS author_name                        
+      256 +      FROM operations o                                       
+      257 +      LEFT JOIN household_members hm                          
+      258 +        ON hm.id = o.created_by AND hm.household_id = o.househ
+          +old_id                                                        
+      259 +      WHERE o.id = ? AND o.household_id = ?                   
+      260 +      LIMIT 1                                                 
+      261 +    ''',                                                      
+      262 +          variables: [                                        
+      263 +            Variable.withString(counterpartId),               
+      264 +            Variable.withString(householdId),                 
+      265 +          ],                                                  
+      266 +        )                                                     
+      267 +        .get();                                               
+      268 +    if (rows.isEmpty) return null;                            
+      269 +                                                              
+      270 +    final row = rows.first;                                   
+      271 +    // The reason lives on the reversing entry, so it is read 
+          +from whichever                                                
+      272 +    // of the two rows that is.                               
+      273 +    final reason = isReversingEntry                           
+      274 +        ? row.readNullable<String>('reversal_reason')         
+      275 +        : op.reversalReason;                                  
+      276 +                                                              
+      277 +    return ReversalCounterpart(                               
+      278 +      operationId: row.read<String>('id'),                    
+      279 +      effectiveDate: row.read<String>('effective_date'),      
+      280 +      totalAmountMinorUnits: row.read<int>('total_amount_minor
+          +_units'),                                                     
+      281 +      currencyCode: row.read<String>('currency_code'),        
+      282 +      isReversingEntry: isReversingEntry,                     
+      283 +      reason: reason,                                         
+      284 +      authorName: row.readNullable<String>('author_name'),    
+      285 +    );                                                        
+      286 +  }                                                           
+      287 +                                                              
+      288 +  /// The operation a reversal answers, via the entry-level ba
+          +ck link.                                                      
+      289 +  ///                                                         
+      290 +  /// `operations` carries no forward pointer from a reversal 
+          +to its original —                                             
+      291 +  /// only `ledger_entries.reversal_of_entry_id` does — so the
+          + walk is entry →                                              
+      292 +  /// original entry → its operation.                         
+      293 +  Future<String?> _originalOf(String reversalId, String househ
+          +oldId) async {                                                
+      294 +    final rows = await _db                                    
+      295 +        .customSelect(                                        
+      296 +          '''                                                 
+      297 +      SELECT original.operation_id AS original_operation_id   
+      298 +      FROM ledger_entries rev                                 
+      299 +      JOIN ledger_entries original ON original.id = rev.revers
+          +al_of_entry_id                                                
+      300 +      WHERE rev.operation_id = ? AND rev.household_id = ?     
+      301 +        AND rev.reversal_of_entry_id IS NOT NULL              
+      302 +      LIMIT 1                                                 
+      303 +    ''',                                                      
+      304 +          variables: [                                        
+      305 +            Variable.withString(reversalId),                  
+      306 +            Variable.withString(householdId),                 
+      307 +          ],                                                  
+      308 +        )                                                     
+      309 +        .get();                                               
+      310 +    return rows.isEmpty                                       
+      311 +        ? null                                                
+      312 +        : rows.first.read<String>('original_operation_id');   
+      313 +  }                                                           
+      314 +                                                              
+      315 +  Future<Map<String, String>> _accountNames(                  
+      316 +    String householdId,                                       
+      317 +    Set<String> ids,                                          
+      318 +  ) => _namesById(                                            
+      319 +    ids: ids,                                                 
+      320 +    householdId: householdId,                                 
+      321 +    table: 'financial_accounts',                              
+      322 +    nameColumn: 'name',                                       
+      323 +  );                                                          
+      324 +                                                              
+      325 +  Future<Map<String, String>> _memberNames(                   
+      326 +    String householdId,                                       
+      327 +    Set<String> ids,                                          
+      328 +  ) => _namesById(                                            
+      329 +    ids: ids,                                                 
+      330 +    householdId: householdId,                                 
+      331 +    table: 'household_members',                               
+      332 +    nameColumn: 'display_name',                               
+      333 +  );                                                          
+      334 +                                                              
+      335 +  /// One `IN` query per table rather than one query per id.  
+      336 +  ///                                                         
+      337 +  /// [table] and [nameColumn] are literals from this file, ne
+          +ver caller input.                                             
+      338 +  Future<Map<String, String>> _namesById({                    
+      339 +    required Set<String> ids,                                 
+      340 +    required String householdId,                              
+      341 +    required String table,                                    
+      342 +    required String nameColumn,                               
+      343 +  }) async {                                                  
+      344 +    if (ids.isEmpty) return const {};                         
+      345 +    final placeholders = List.filled(ids.length, '?').join(', 
+          +');                                                           
+      346 +    final rows = await _db                                    
+      347 +        .customSelect(                                        
+      348 +          'SELECT id, $nameColumn AS resolved_name FROM $table
+          + '                                                            
+      349 +          'WHERE household_id = ? AND id IN ($placeholders)', 
+      350 +          variables: [                                        
+      351 +            Variable.withString(householdId),                 
+      352 +            ...ids.map(Variable.withString),                  
+      353 +          ],                                                  
+      354 +        )                                                     
+      355 +        .get();                                               
+      356 +    return {                                                  
+      357 +      for (final row in rows)                                 
+      358 +        row.read<String>('id'): row.read<String>('resolved_nam
+          +e'),                                                          
+      359 +    };                                                        
+      360 +  }                                                           
+      361 +                                                              
+      362    // ── spouseWalletSummary ──────────────────────────────────
+           ──────────────────
+      363  
+      364    @override
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the provider, and a DB test proving the joins:
+
+⏺ Update(lib/features/transactions/presentation/providers/transaction_providers.
+        dart)
+  ⎿  Added 15 lines
+      108        );
+      109      });
+      110  
+      111 +/// The detail screen's read: the operation, its ledger lines,
+          + resolved names,                                              
+      112 +/// and the other half of its reversal pair.                  
+      113 +///                                                           
+      114 +/// Kept separate from [transactionDetailProvider] so list cal
+          +lers, which only                                              
+      115 +/// need the summary, do not pay for the extra joins.         
+      116 +final transactionDetailWithLedgerProvider =                   
+      117 +    FutureProvider.family<TransactionDetail?, (String, String)
+          +>((ref, args) {                                               
+      118 +      final (operationId, householdId) = args;                
+      119 +      final repo = ref.watch(transactionQueryRepositoryProvide
+          +r);                                                           
+      120 +      return repo.operationDetailWithLedger(                  
+      121 +        operationId: operationId,                             
+      122 +        householdId: householdId,                             
+      123 +      );                                                      
+      124 +    });                                                       
+      125 +                                                              
+      126  // ── Spouse wallet summary provider ─────────────────────────
+           ───────────────────
+      127  
+      128  typedef SpouseWalletArgs = ({
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the DB test for the query:
+
+⏺ Write(test/database/transaction_detail_with_ledger_db_test.dart)
+  ⎿  Wrote 231 lines to
+     test/database/transaction_detail_with_ledger_db_test.dart
+       1 /// The detail query: ledger lines, resolved names, and the reve
+       2 ///
+         and had no way
+       4 /// to show the two sides of a double entry at all. These tests 
+       5 /// that fix both, and the walk between the halves of a reversal
+       6 /// what makes an append-only ledger navigable rather than merel
+       7 library;
+       8 
+         dart';
+         s.dart';
+     … +246 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The DB test caught a real gap — the query repo's mapper never read the new
+  column:
+
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Now rebuild the detail screen on the richer read — the D1 ledger rows and the
+  D2 chain:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(lib/features/transactions/presentation/transaction_detail_screen.dart)
+  ⎿  Added 209 lines, removed 51 lines
+       1 -/// A single operation, and the append-only correction that can
+         - follow it.                                                    
+       1 +/// A single operation, its real double entry, and the append-o
+         +nly correction                                                 
+       2 +/// that can follow it.                                        
+       3  ///
+       4  /// There is no edit and no delete on this screen, and rather t
+          han hiding that,
+       5  /// the screen names it: a mistake is fixed by adding a reversi
+          ng entry that
+       5 -/// points at this one, and both stay in the ledger. The user l
+         -earns the data                                                 
+       6 -/// model by reading their own transaction.                    
+       6 +/// points at this one, and both stay in the ledger. Showing th
+         +e debit and the                                                
+       7 +/// credit is what makes "balances are derived, never stored" l
+         +egible — the                                                   
+       8 +/// user learns the data model by reading their own transaction
+         +.                                                              
+       9  library;
+      10  
+      11  import 'package:family_money_manager/app/app_theme.dart';
+     ...
+      14  import 'package:family_money_manager/core/localization/enum_lab
+          el_helpers.dart';
+      15  import 'package:family_money_manager/core/presentation/componen
+          ts/components.dart';
+      16  import 'package:family_money_manager/core/presentation/theme/ap
+          p_theme_extensions.dart';
+      15 -import 'package:family_money_manager/features/transactions/doma
+         -in/transaction_summary.dart';                                  
+      17 +import 'package:family_money_manager/features/transactions/doma
+         +in/transaction_detail.dart';                                   
+      18  import 'package:family_money_manager/features/transactions/pres
+          entation/category_label_helper.dart';
+      19  import 'package:family_money_manager/features/transactions/pres
+          entation/providers/transaction_providers.dart';
+      20  import 'package:flutter/material.dart';
+     ...
+      23  
+      24  const _householdId = 'household-v1';
+      25  
+      24 -/// Shows full detail for a single operation with context metad
+         -ata.                                                           
+      26 +/// Shows full detail for a single operation with its ledger en
+         +tries.                                                         
+      27  class TransactionDetailScreen extends ConsumerWidget {
+      28    const TransactionDetailScreen({required this.operationId, sup
+          er.key});
+      29  
+     ...
+      33    Widget build(BuildContext context, WidgetRef ref) {
+      34      final l10n = AppLocalizations.of(context);
+      35      final detailAsync = ref.watch(
+      34 -      transactionDetailProvider((operationId, _householdId)),  
+      36 +      transactionDetailWithLedgerProvider((operationId, _househ
+         +oldId)),                                                       
+      37      );
+      38  
+      39      return AppScreenScaffold(
+     ...
+      41        body: detailAsync.when(
+      42          loading: () => AppLoadingState(message: l10n.loadingLab
+          el),
+      43          error: (_, _) => AppErrorState(message: l10n.errorGener
+          ic),
+      42 -        data: (summary) {                                      
+      43 -          if (summary == null) return AppErrorState(message: l1
+         -0n.errorGeneric);                                              
+      44 -          return _DetailBody(summary: summary);                
+      44 +        data: (detail) {                                       
+      45 +          if (detail == null) return AppErrorState(message: l10
+         +n.errorGeneric);                                               
+      46 +          return _DetailBody(detail: detail);                  
+      47          },
+      48        ),
+      49        bottomBar: detailAsync.maybeWhen(
+      48 -        data: (summary) {                                      
+      49 -          if (summary == null) return null;                    
+      50 +        data: (detail) {                                       
+      51 +          if (detail == null) return null;                     
+      52            // An operation is reversed once. The slot states why
+           the action is
+      53            // gone rather than silently dropping it, so the abse
+          nce is
+      54            // explained rather than mysterious.
+      53 -          if (summary.operation.isReversed) {                  
+      55 +          if (detail.isNeutralised) {                          
+      56              return AppBottomActionBar(
+      57                child: AppInlineNotice(
+      58                  message: l10n.detailAlreadyReversedNoAction,
+     ...
+       75  }
+       76  
+       77  class _DetailBody extends StatelessWidget {
+       76 -  const _DetailBody({required this.summary});                 
+       78 +  const _DetailBody({required this.detail});                  
+       79  
+       78 -  final TransactionSummary summary;                           
+       80 +  final TransactionDetail detail;                             
+       81  
+       82    @override
+       83    Widget build(BuildContext context) {
+       84      final l10n = AppLocalizations.of(context);
+       85      final colors = context.financialColors;
+       86 +    final summary = detail.summary;                           
+       87      final op = summary.operation;
+       88 +    final isReversedOriginal = op.isReversed;                 
+       89  
+       90      final direction = switch (op.type) {
+       91        OperationType.income => FinancialAmountDirection.inflow,
+       92        OperationType.transfer => FinancialAmountDirection.inter
+           nal,
+       93 +      OperationType.reversal => FinancialAmountDirection.inflo
+          +w,                                                            
+       94        _ => FinancialAmountDirection.outflow,
+       95      };
+       91 -    // A reversed operation's amount goes quiet rather than ke
+          -eping its class                                               
+       92 -    // colour: its effect on every balance is now zero, and co
+          -louring it as                                                 
+       93 -    // live money would contradict the banner directly above i
+          -t.                                                            
+       94 -    final tone = op.isReversed                                
+       96 +    // A neutralised operation's amount goes quiet rather than
+          + keeping its                                                  
+       97 +    // class colour: its effect on every balance is now zero, 
+          +and colouring it                                              
+       98 +    // as live money would contradict the banner directly abov
+          +e it.                                                         
+       99 +    final tone = detail.isNeutralised                         
+      100          ? FinancialAmountTone.muted
+      101          : switch (op.type) {
+      102              OperationType.income => FinancialAmountTone.income
+           ,
+     ...
+      111            bottom: AppTheme.space32,
+      112          ),
+      113          children: [
+      109 -          if (op.isReversed) ...[                             
+      110 -            Padding(                                          
+      111 -              padding: const EdgeInsets.symmetric(horizontal: 
+          -AppTheme.space16),                                            
+      112 -              child: AppInlineNotice(                         
+      114 +          if (isReversedOriginal) ...[                        
+      115 +            _horizontal(                                      
+      116 +              AppInlineNotice(                                
+      117                  message: l10n.detailReversedBannerBody(op.upda
+           tedAt),
+      118                  tone: AppNoticeTone.info,
+      119                  icon: Icons.undo,
+     ...
+      121              ),
+      122              const SizedBox(height: AppTheme.space16),
+      123            ],
+      120 -          Padding(                                            
+      121 -            padding: const EdgeInsets.symmetric(horizontal: Ap
+          -pTheme.space16),                                              
+      122 -            child: Column(                                    
+      124 +          _horizontal(                                        
+      125 +            Column(                                           
+      126                crossAxisAlignment: CrossAxisAlignment.start,
+      127                children: [
+      128                  Wrap(
+     ...
+      135                        style: context.textRoles.cardTitle,
+      136                      ),
+      137                      StatusBadge(
+      135 -                      label: op.isReversed                    
+      138 +                      label: isReversedOriginal               
+      139                            ? l10n.transactionReversed
+      140                            : l10n.detailStatusPosted,
+      138 -                      foreground: op.isReversed               
+      141 +                      foreground: isReversedOriginal          
+      142                            ? colors.secondaryText
+      143                            : colors.success,
+      144                      ),
+      145                    ],
+      146                  ),
+      147                  const SizedBox(height: AppTheme.space12),
+      145 -                // Was previously rendered as raw minor units 
+          -— 382.50 EGP                                                  
+      146 -                // printed as "38250 EGP". The one component t
+          -hat turns a                                                   
+      147 -                // number into pixels owns the scale, the sign
+          -, the bidi                                                    
+      148 -                // isolation and the screen-reader phrasing.  
+      148 +                // The one component that turns a number into 
+          +pixels owns the                                               
+      149 +                // scale, the sign, the bidi isolation and the
+          + phrasing. This                                               
+      150 +                // screen printed raw minor units before — 382
+          +.50 as "38250".                                               
+      151                  FinancialAmountText(
+      152                    minorUnits: op.totalAmountMinorUnits,
+      153                    currencyCode: op.currencyCode,
+      154                    tone: tone,
+      155                    direction: direction,
+      156                    size: FinancialAmountSize.display,
+      155 -                  isStruckThrough: op.isReversed,             
+      157 +                  isStruckThrough: isReversedOriginal,        
+      158                  ),
+      159                ],
+      160              ),
+      161            ),
+      162 +          if (detail.counterpart case final ReversalCounterpar
+          +t counterpart)                                                
+      163 +            ..._chain(context, l10n, counterpart),            
+      164 +          if (detail.ledgerLines.isNotEmpty) ...[             
+      165 +            const SizedBox(height: AppTheme.space24),         
+      166 +            SectionHeader(                                    
+      167 +              title: isReversedOriginal                       
+      168 +                  ? l10n.detailLedgerEntriesOriginalTitle     
+      169 +                  : l10n.detailLedgerEntriesTitle,            
+      170 +            ),                                                
+      171 +            // The two sides, stated as debit and credit rathe
+          +r than implied by                                             
+      172 +            // a sign. Both use CurrencyAmountRow — no new com
+          +ponent.                                                       
+      173 +            for (final line in detail.ledgerLines)            
+      174 +              CurrencyAmountRow(                              
+      175 +                label: line.direction == LedgerDirection.debit
+      176 +                    ? l10n.reviewDebitLabel(line.accountName) 
+      177 +                    : l10n.reviewCreditLabel(line.accountName)
+          +,                                                             
+      178 +                minorUnits: line.amountMinorUnits,            
+      179 +                currencyCode: line.currencyCode,              
+      180 +                tone: detail.isNeutralised                    
+      181 +                    ? FinancialAmountTone.muted               
+      182 +                    : FinancialAmountTone.neutral,            
+      183 +              ),                                              
+      184 +            if (isReversedOriginal) ...[                      
+      185 +              const SizedBox(height: AppTheme.space12),       
+      186 +              _horizontal(                                    
+      187 +                Text(                                         
+      188 +                  l10n.detailEntriesStillInLedgerNote,        
+      189 +                  style: context.textRoles.supportingMeta.copy
+          +With(                                                         
+      190 +                    color: colors.secondaryText,              
+      191 +                  ),                                          
+      192 +                ),                                            
+      193 +              ),                                              
+      194 +            ],                                                
+      195 +          ],                                                  
+      196            const SizedBox(height: AppTheme.space24),
+      197            AppReviewSection(
+      198              title: l10n.detailSectionTitle,
+     ...
+      206                    label: l10n.fieldCategory,
+      207                    value: categoryLabelFromCode(l10n, code),
+      208                  ),
+      209 +              // Names, not UUIDs. The id remains the fallback
+          + so a missing                                                 
+      210 +              // join reads as missing data rather than as a b
+          +lank row.                                                     
+      211                if (op.sourceAccountId case final String id)
+      174 -                AppReviewRowData(label: l10n.fieldSourceAccoun
+          -t, value: id),                                                
+      212 +                AppReviewRowData(                             
+      213 +                  label: l10n.fieldSourceAccount,             
+      214 +                  value: detail.sourceAccountName ?? id,      
+      215 +                ),                                            
+      216                if (op.destinationAccountId case final String id
+           )
+      217                  AppReviewRowData(
+      218                    label: l10n.fieldDestinationAccount,
+      178 -                  value: id,                                  
+      219 +                  value: detail.destinationAccountName ?? id, 
+      220                  ),
+      221                if (summary.spenderMemberId case final String id
+           )
+      181 -                AppReviewRowData(label: l10n.fieldSpender, val
+          -ue: id),                                                      
+      222 +                AppReviewRowData(                             
+      223 +                  label: l10n.fieldSpender,                   
+      224 +                  value: detail.spenderName ?? id,            
+      225 +                ),                                            
+      226                if (summary.beneficiaryMemberId case final Strin
+           g id)
+      183 -                AppReviewRowData(label: l10n.fieldBeneficiary,
+          - value: id),                                                  
+      227 +                AppReviewRowData(                             
+      228 +                  label: l10n.fieldBeneficiary,               
+      229 +                  value: detail.beneficiaryName ?? id,        
+      230 +                ),                                            
+      231                if (summary.scope case final scope?)
+      232                  AppReviewRowData(
+      233                    label: l10n.fieldScope,
+     ...
+      242                if (summary.note case final String note)
+      243                  AppReviewRowData(label: l10n.fieldNote, value:
+            note),
+      244                // The reversal's own reason, shown wherever the
+            reversal is
+      198 -              // opened. This is the audit value of an append-
+          -only correction:                                              
+      199 -              // "reversed" says nothing, "entered twice" says
+          - everything.                                                  
+      245 +              // opened: "reversed" says nothing, "entered twi
+          +ce" says                                                      
+      246 +              // everything.                                  
+      247                if (op.reversalReason case final String reason)
+      201 -                AppReviewRowData(                             
+      202 -                  label: l10n.reversalReasonLabel,            
+      203 -                  value: reason,                              
+      204 -                ),                                            
+      248 +                AppReviewRowData(label: l10n.reversalReasonLab
+          +el, value: reason),                                           
+      249              ],
+      250            ),
+      251            const SizedBox(height: AppTheme.space24),
+      208 -          Padding(                                            
+      209 -            padding: const EdgeInsets.symmetric(horizontal: Ap
+          -pTheme.space16),                                              
+      210 -            child: Text(                                      
+      252 +          _horizontal(                                        
+      253 +            Text(                                             
+      254                l10n.detailRecordedAt(op.recordedAt.toIso8601Str
+           ing()),
+      255                style: context.textRoles.supportingMeta.copyWith
+           (
+      256                  color: colors.secondaryText,
+     ...
+      260            const SizedBox(height: AppTheme.space24),
+      261            // The append-only explainer. Permanent, not conditi
+           onal: it is how
+      262            // the screen answers "where is edit" before the use
+           r goes looking.
+      220 -          Padding(                                            
+      221 -            padding: const EdgeInsets.symmetric(horizontal: Ap
+          -pTheme.space16),                                              
+      222 -            child: Column(                                    
+      263 +          _horizontal(                                        
+      264 +            Column(                                           
+      265                crossAxisAlignment: CrossAxisAlignment.start,
+      266                children: [
+      267                  Text(
+     ...
+      270                  ),
+      271                  const SizedBox(height: AppTheme.space8),
+      272                  Text(
+      231 -                  op.isReversed                               
+      232 -                      ? l10n.detailEntriesStillInLedgerNote   
+      233 -                      : l10n.detailNoEditNoDeleteBody,        
+      273 +                  l10n.detailNoEditNoDeleteBody,              
+      274                    style: context.textRoles.body.copyWith(
+      275                      color: colors.secondaryText,
+      276                    ),
+     ...
+      282        ),
+      283      );
+      284    }
+      285 +                                                              
+      286 +  /// The lineage, numbered, with "you are here" on the step b
+          +eing viewed.                                                  
+      287 +  ///                                                         
+      288 +  /// Two steps and a stated net of zero. Which step is which 
+          +depends on which                                              
+      289 +  /// half the user opened, so the pair is assembled from the 
+          +counterpart                                                   
+      290 +  /// rather than assuming the original is always first on scr
+          +een.                                                          
+      291 +  List<Widget> _chain(                                        
+      292 +    BuildContext context,                                     
+      293 +    AppLocalizations l10n,                                    
+      294 +    ReversalCounterpart counterpart,                          
+      295 +  ) {                                                         
+      296 +    final op = detail.summary.operation;                      
+      297 +    final viewingOriginal = counterpart.isReversingEntry;     
+      298 +                                                              
+      299 +    final here = _ChainStep(                                  
+      300 +      step: viewingOriginal ? '1' : '2',                      
+      301 +      title: viewingOriginal                                  
+      302 +          ? l10n.detailChainStepOriginal('1', op.effectiveDate
+          +)                                                             
+      303 +          : l10n.detailChainStepReversal('2', op.effectiveDate
+          +),                                                            
+      304 +      caption: l10n.detailChainYouAreHere,                    
+      305 +      minorUnits: op.totalAmountMinorUnits,                   
+      306 +      currencyCode: op.currencyCode,                          
+      307 +      direction: viewingOriginal                              
+      308 +          ? FinancialAmountDirection.outflow                  
+      309 +          : FinancialAmountDirection.inflow,                  
+      310 +      operationId: null,                                      
+      311 +    );                                                        
+      312 +                                                              
+      313 +    final other = _ChainStep(                                 
+      314 +      step: viewingOriginal ? '2' : '1',                      
+      315 +      title: viewingOriginal                                  
+      316 +          ? l10n.detailChainStepReversal('2', counterpart.effe
+          +ctiveDate)                                                    
+      317 +          : l10n.detailChainStepOriginal('1', counterpart.effe
+          +ctiveDate),                                                   
+      318 +      caption: _counterpartCaption(l10n, counterpart),        
+      319 +      minorUnits: counterpart.totalAmountMinorUnits,          
+      320 +      currencyCode: counterpart.currencyCode,                 
+      321 +      direction: viewingOriginal                              
+      322 +          ? FinancialAmountDirection.inflow                   
+      323 +          : FinancialAmountDirection.outflow,                 
+      324 +      operationId: counterpart.operationId,                   
+      325 +    );                                                        
+      326 +                                                              
+      327 +    final steps = viewingOriginal ? [here, other] : [other, he
+          +re];                                                          
+      328 +                                                              
+      329 +    return [                                                  
+      330 +      const SizedBox(height: AppTheme.space24),               
+      331 +      SectionHeader(title: l10n.detailChainTitle),            
+      332 +      for (final step in steps) step,                         
+      333 +      // The net is stated, not implied: it is the whole claim
+          + of an                                                        
+      334 +      // append-only correction.                              
+      335 +      CurrencyAmountRow(                                      
+      336 +        label: l10n.reversalNetEffectOn(                      
+      337 +          detail.sourceAccountName ?? detail.destinationAccoun
+          +tName ?? '',                                                  
+      338 +        ),                                                    
+      339 +        minorUnits: 0,                                        
+      340 +        currencyCode: op.currencyCode,                        
+      341 +        isEmphasised: true,                                   
+      342 +        showDivider: false,                                   
+      343 +      ),                                                      
+      344 +    ];                                                        
+      345 +  }                                                           
+      346 +                                                              
+      347 +  String? _counterpartCaption(                                
+      348 +    AppLocalizations l10n,                                    
+      349 +    ReversalCounterpart counterpart,                          
+      350 +  ) {                                                         
+      351 +    // Only the reversing half carries a reason and an author 
+          +worth naming.                                                 
+      352 +    if (!counterpart.isReversingEntry) return null;           
+      353 +    if (counterpart.reason case final String reason) {        
+      354 +      return l10n.detailChainReasonBy(reason, counterpart.auth
+          +orName ?? '');                                                
+      355 +    }                                                         
+      356 +    return null;                                              
+      357 +  }                                                           
+      358 +                                                              
+      359 +  Widget _horizontal(Widget child) => Padding(                
+      360 +    padding: const EdgeInsets.symmetric(horizontal: AppTheme.s
+          +pace16),                                                      
+      361 +    child: child,                                             
+      362 +  );                                                          
+      363  }
+      364 +                                                              
+      365 +/// One step of the reversal lineage.                         
+      366 +class _ChainStep extends StatelessWidget {                    
+      367 +  const _ChainStep({                                          
+      368 +    required this.step,                                       
+      369 +    required this.title,                                      
+      370 +    required this.caption,                                    
+      371 +    required this.minorUnits,                                 
+      372 +    required this.currencyCode,                               
+      373 +    required this.direction,                                  
+      374 +    required this.operationId,                                
+      375 +  });                                                         
+      376 +                                                              
+      377 +  final String step;                                          
+      378 +  final String title;                                         
+      379 +  final String? caption;                                      
+      380 +  final int minorUnits;                                       
+      381 +  final String currencyCode;                                  
+      382 +  final FinancialAmountDirection direction;                   
+      383 +                                                              
+      384 +  /// Null for the step being viewed; otherwise the half to op
+          +en.                                                           
+      385 +  final String? operationId;                                  
+      386 +                                                              
+      387 +  @override                                                   
+      388 +  Widget build(BuildContext context) {                        
+      389 +    final row = CurrencyAmountRow(                            
+      390 +      label: title,                                           
+      391 +      caption: caption,                                       
+      392 +      minorUnits: minorUnits,                                 
+      393 +      currencyCode: currencyCode,                             
+      394 +      tone: FinancialAmountTone.muted,                        
+      395 +      direction: direction,                                   
+      396 +    );                                                        
+      397 +    if (operationId == null) return row;                      
+      398 +    return InkWell(                                           
+      399 +      onTap: () => context.push('/transactions/$operationId'),
+      400 +      child: row,                                             
+      401 +    );                                                        
+      402 +  }                                                           
+      403 +}                                                             
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now update the detail screen test to the new provider and cover the chain:
+
+⏺ Write(test/widget/features/transactions/transaction_detail_screen_test.dart)
+  ⎿  Added 197 lines, removed 33 lines
+       1  /// Transaction detail.
+       2  ///
+       3 -/// Two claims are under test. The amount is money, not a raw i
+         -nteger — this                                                  
+       4 -/// screen printed 382.50 EGP as "38250 EGP" before. And the sc
+         -reen answers                                                   
+       5 -/// "where is edit" out loud: the append-only explainer is perm
+         -anent, the                                                     
+       6 -/// reversal is offered once, and an already-reversed operation
+         - says why the                                                  
+       7 -/// action is gone.                                            
+       3 +/// Three claims are under test. The amount is money, not a raw
+         + integer — this                                                
+       4 +/// screen printed 382.50 EGP as "38250 EGP" before. Accounts a
+         +nd members are                                                 
+       5 +/// named, not UUIDs. And the screen answers "where is edit" ou
+         +t loud: the                                                    
+       6 +/// double entry is shown, the append-only explainer is permane
+         +nt, and a                                                      
+       7 +/// reversed operation renders the lineage instead of a second 
+         +reversal.                                                      
+       8  library;
+       9  
+      10  import 'package:family_money_manager/core/database/app_database
+          .dart';
+     ...
+      13  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+      14  import 'package:family_money_manager/core/presentation/componen
+          ts/components.dart';
+      15  import 'package:family_money_manager/features/ledger/domain/ope
+          ration.dart';
+      16 +import 'package:family_money_manager/features/transactions/doma
+         +in/transaction_detail.dart';                                   
+      17  import 'package:family_money_manager/features/transactions/doma
+          in/transaction_summary.dart';
+      18  import 'package:family_money_manager/features/transactions/pres
+          entation/providers/transaction_providers.dart';
+      19  import 'package:family_money_manager/features/transactions/pres
+          entation/transaction_detail_screen.dart';
+     ...
+      24  import 'package:go_router/go_router.dart';
+      25  
+      26  const _operationId = 'op-1';
+      27 +const _walletName = 'ةيصخش ةيدقن ةظفحم';                       
+      28 +const _spenderName = 'نمحرلا دبع ءانه';                        
+      29  
+      27 -TransactionSummary _summary({                                  
+      30 +TransactionDetail _detail({                                    
+      31    bool isReversed = false,
+      32    String? reversalReason,
+      33    OperationType type = OperationType.expense,
+      31 -}) => TransactionSummary(                                      
+      32 -  operation: Operation(                                        
+      33 -    id: _operationId,                                          
+      34 -    householdId: 'household-v1',                               
+      35 -    type: type,                                                
+      36 -    effectiveDate: '2026-07-25',                               
+      37 -    recordedAt: DateTime.utc(2026, 7, 25, 14, 21),             
+      38 -    totalAmountMinorUnits: 38250,                              
+      39 -    currencyCode: 'EGP',                                       
+      40 -    createdBy: 'member-primary-v1',                            
+      41 -    createdAt: '2026-07-25T14:21:00Z',                         
+      42 -    updatedAt: '2026-07-25T14:21:00Z',                         
+      43 -    isReversed: isReversed,                                    
+      44 -    reversalReason: reversalReason,                            
+      45 -    sourceAccountId: 'acc-1',                                  
+      34 +  ReversalCounterpart? counterpart,                            
+      35 +  List<OperationLedgerLine> ledgerLines = const [              
+      36 +    OperationLedgerLine(                                       
+      37 +      entryId: 'entry-debit',                                  
+      38 +      direction: LedgerDirection.debit,                        
+      39 +      accountId: 'acc-1',                                      
+      40 +      accountName: _walletName,                                
+      41 +      amountMinorUnits: 38250,                                 
+      42 +      currencyCode: 'EGP',                                     
+      43 +      entryType: LedgerEntryType.expenseDebit,                 
+      44 +    ),                                                         
+      45 +  ],                                                           
+      46 +}) => TransactionDetail(                                       
+      47 +  summary: TransactionSummary(                                 
+      48 +    operation: Operation(                                      
+      49 +      id: _operationId,                                        
+      50 +      householdId: 'household-v1',                             
+      51 +      type: type,                                              
+      52 +      effectiveDate: '2026-07-25',                             
+      53 +      recordedAt: DateTime.utc(2026, 7, 25, 14, 21),           
+      54 +      totalAmountMinorUnits: 38250,                            
+      55 +      currencyCode: 'EGP',                                     
+      56 +      createdBy: 'member-hana',                                
+      57 +      createdAt: '2026-07-25T14:21:00Z',                       
+      58 +      updatedAt: '2026-07-25T14:21:00Z',                       
+      59 +      isReversed: isReversed,                                  
+      60 +      reversalReason: reversalReason,                          
+      61 +      sourceAccountId: 'acc-1',                                
+      62 +    ),                                                         
+      63 +    categoryCode: 'groceries',                                 
+      64 +    spenderMemberId: 'member-hana',                            
+      65 +    isRecurring: false,                                        
+      66    ),
+      47 -  categoryCode: 'groceries',                                   
+      48 -  isRecurring: false,                                          
+      67 +  ledgerLines: ledgerLines,                                    
+      68 +  sourceAccountName: _walletName,                              
+      69 +  spenderName: _spenderName,                                   
+      70 +  createdByName: _spenderName,                                 
+      71 +  counterpart: counterpart,                                    
+      72  );
+      73  
+      51 -Widget _buildApp(TransactionSummary summary) {                 
+      74 +Widget _buildApp(TransactionDetail detail) {                   
+      75    final router = GoRouter(
+      76      initialLocation: '/transactions/$_operationId',
+      77      routes: [
+     ...
+      103          ref.onDispose(db.close);
+      104          return db;
+      105        }),
+       83 -      transactionDetailProvider.overrideWith((ref, _) async =>
+          - summary),                                                    
+      106 +      transactionDetailWithLedgerProvider.overrideWith((ref, _
+          +) async => detail),                                           
+      107      ],
+      108      child: MaterialApp.router(
+      109        locale: const Locale('ar'),
+     ...
+      138    testWidgets('the amount goes through the money component, no
+           t raw units', (
+      139      tester,
+      140    ) async {
+      118 -    await tester.pumpWidget(_buildApp(_summary()));           
+      141 +    await tester.pumpWidget(_buildApp(_detail()));            
+      142      await tester.pump();
+      143  
+      144      final amount = tester.widget<FinancialAmountText>(
+      122 -      find.byType(FinancialAmountText),                       
+      145 +      find.byType(FinancialAmountText).first,                 
+      146      );
+      147      expect(amount.minorUnits, 38250);
+      148      expect(amount.currencyCode, 'EGP');
+     ...
+      151      expect(find.text('38250 EGP'), findsNothing);
+      152    });
+      153  
+      154 +  testWidgets('the double entry is shown, named and labelled b
+          +y side', (                                                    
+      155 +    tester,                                                   
+      156 +  ) async {                                                   
+      157 +    await tester.pumpWidget(                                  
+      158 +      _buildApp(                                              
+      159 +        _detail(                                              
+      160 +          ledgerLines: const [                                
+      161 +            OperationLedgerLine(                              
+      162 +              entryId: 'entry-debit',                         
+      163 +              direction: LedgerDirection.debit,               
+      164 +              accountId: 'cat-groceries',                     
+      165 +              accountName: 'ةلاقب',                           
+      166 +              amountMinorUnits: 38250,                        
+      167 +              currencyCode: 'EGP',                            
+      168 +              entryType: LedgerEntryType.expenseDebit,        
+      169 +            ),                                                
+      170 +            OperationLedgerLine(                              
+      171 +              entryId: 'entry-credit',                        
+      172 +              direction: LedgerDirection.credit,              
+      173 +              accountId: 'acc-1',                             
+      174 +              accountName: _walletName,                       
+      175 +              amountMinorUnits: 38250,                        
+      176 +              currencyCode: 'EGP',                            
+      177 +              entryType: LedgerEntryType.expenseCredit,       
+      178 +            ),                                                
+      179 +          ],                                                  
+      180 +        ),                                                    
+      181 +      ),                                                      
+      182 +    );                                                        
+      183 +    await tester.pump();                                      
+      184 +                                                              
+      185 +    final l10n = _l10n(tester);                               
+      186 +    expect(find.text(l10n.detailLedgerEntriesTitle), findsOneW
+          +idget);                                                       
+      187 +    expect(find.text(l10n.reviewDebitLabel('ةلاقب')), findsOne
+          +Widget);                                                      
+      188 +    expect(find.text(l10n.reviewCreditLabel(_walletName)), fin
+          +dsOneWidget);                                                 
+      189 +  });                                                         
+      190 +                                                              
+      191 +  testWidgets('accounts and members are named, never UUIDs', (
+          +tester) async {                                               
+      192 +    await tester.pumpWidget(_buildApp(_detail()));            
+      193 +    await tester.pump();                                      
+      194 +                                                              
+      195 +    expect(find.text(_walletName), findsWidgets);             
+      196 +    expect(find.text(_spenderName), findsOneWidget);          
+      197 +    expect(find.text('acc-1'), findsNothing);                 
+      198 +    expect(find.text('member-hana'), findsNothing);           
+      199 +  });                                                         
+      200 +                                                              
+      201    testWidgets('the append-only explainer is always present', (
+           tester) async {
+      132 -    await tester.pumpWidget(_buildApp(_summary()));           
+      202 +    await tester.pumpWidget(_buildApp(_detail()));            
+      203      await tester.pump();
+      204  
+      205      final l10n = _l10n(tester);
+     ...
+      208    });
+      209  
+      210    testWidgets('the reversal action opens the reversal route', 
+           (tester) async {
+      141 -    await tester.pumpWidget(_buildApp(_summary()));           
+      211 +    await tester.pumpWidget(_buildApp(_detail()));            
+      212      await tester.pump();
+      213  
+      214      final l10n = _l10n(tester);
+     ...
+      219    });
+      220  
+      221    testWidgets(
+      152 -    'a reversed operation is struck through, banners why, and 
+          -offers no '                                                   
+      222 +    'a reversed original is struck through, keeps its entries,
+          + and offers no '                                              
+      223      'second reversal',
+      224      (tester) async {
+      155 -      await tester.pumpWidget(_buildApp(_summary(isReversed: t
+          -rue)));                                                       
+      225 +      await tester.pumpWidget(                                
+      226 +        _buildApp(                                            
+      227 +          _detail(                                            
+      228 +            isReversed: true,                                 
+      229 +            counterpart: const ReversalCounterpart(           
+      230 +              operationId: 'op-rev',                          
+      231 +              effectiveDate: '2026-07-25',                    
+      232 +              totalAmountMinorUnits: 38250,                   
+      233 +              currencyCode: 'EGP',                            
+      234 +              isReversingEntry: true,                         
+      235 +              reason: 'نيترم تلخدأُ',                         
+      236 +              authorName: 'دمحأ',                             
+      237 +            ),                                                
+      238 +          ),                                                  
+      239 +        ),                                                    
+      240 +      );                                                      
+      241        await tester.pump();
+      242  
+      243        final l10n = _l10n(tester);
+      244        final amount = tester.widget<FinancialAmountText>(
+      160 -        find.byType(FinancialAmountText),                     
+      245 +        find.byType(FinancialAmountText).first,               
+      246        );
+      247        expect(amount.isStruckThrough, isTrue);
+      248        expect(amount.tone, FinancialAmountTone.muted);
+      249  
+      250        expect(find.text(l10n.detailAlreadyReversedNoAction), fi
+           ndsOneWidget);
+      251        expect(find.text(l10n.detailAddReversalAction), findsNot
+           hing);
+      252 +      // The entries are still there — they were answered, not
+          + erased.                                                      
+      253 +      expect(find.text(l10n.detailLedgerEntriesOriginalTitle),
+          + findsOneWidget);                                             
+      254        expect(find.text(l10n.detailEntriesStillInLedgerNote), f
+           indsOneWidget);
+      255      },
+      256    );
+      257  
+      258 +  testWidgets(                                                
+      259 +    'the lineage is numbered, marks where you are, and states 
+          +the net as zero',                                             
+      260 +    (tester) async {                                          
+      261 +      await tester.pumpWidget(                                
+      262 +        _buildApp(                                            
+      263 +          _detail(                                            
+      264 +            isReversed: true,                                 
+      265 +            counterpart: const ReversalCounterpart(           
+      266 +              operationId: 'op-rev',                          
+      267 +              effectiveDate: '2026-07-26',                    
+      268 +              totalAmountMinorUnits: 38250,                   
+      269 +              currencyCode: 'EGP',                            
+      270 +              isReversingEntry: true,                         
+      271 +              reason: 'نيترم تلخدأُ',                         
+      272 +              authorName: 'دمحأ',                             
+      273 +            ),                                                
+      274 +          ),                                                  
+      275 +        ),                                                    
+      276 +      );                                                      
+      277 +      await tester.pump();                                    
+      278 +                                                              
+      279 +      final l10n = _l10n(tester);                             
+      280 +      expect(find.text(l10n.detailChainTitle), findsOneWidget)
+          +;                                                             
+      281 +      expect(                                                 
+      282 +        find.text(l10n.detailChainStepOriginal('1', '2026-07-2
+          +5')),                                                         
+      283 +        findsOneWidget,                                       
+      284 +      );                                                      
+      285 +      expect(                                                 
+      286 +        find.text(l10n.detailChainStepReversal('2', '2026-07-2
+          +6')),                                                         
+      287 +        findsOneWidget,                                       
+      288 +      );                                                      
+      289 +      expect(find.text(l10n.detailChainYouAreHere), findsOneWi
+          +dget);                                                        
+      290 +      // The reason and its author ride on the reversing step 
+          +itself.                                                       
+      291 +      expect(                                                 
+      292 +        find.text(l10n.detailChainReasonBy('حأ' ,'نيترم تلخدأُ
+          +                                                        ,))'دم
+      293 +        findsOneWidget,                                       
+      294 +      );                                                      
+      295 +                                                              
+      296 +      final netRow = tester.widget<CurrencyAmountRow>(        
+      297 +        find.ancestor(                                        
+      298 +          of: find.text(l10n.reversalNetEffectOn(_walletName))
+          +,                                                             
+      299 +          matching: find.byType(CurrencyAmountRow),           
+      300 +        ),                                                    
+      301 +      );                                                      
+      302 +      expect(netRow.minorUnits, 0);                           
+      303 +    },                                                        
+      304 +  );                                                          
+      305 +                                                              
+      306 +  testWidgets('the other half of the pair is reachable from th
+          +e chain', (                                                   
+      307 +    tester,                                                   
+      308 +  ) async {                                                   
+      309 +    await tester.pumpWidget(                                  
+      310 +      _buildApp(                                              
+      311 +        _detail(                                              
+      312 +          isReversed: true,                                   
+      313 +          counterpart: const ReversalCounterpart(             
+      314 +            operationId: 'op-rev',                            
+      315 +            effectiveDate: '2026-07-26',                      
+      316 +            totalAmountMinorUnits: 38250,                     
+      317 +            currencyCode: 'EGP',                              
+      318 +            isReversingEntry: true,                           
+      319 +            reason: 'نيترم تلخدأُ',                           
+      320 +            authorName: 'دمحأ',                               
+      321 +          ),                                                  
+      322 +        ),                                                    
+      323 +      ),                                                      
+      324 +    );                                                        
+      325 +    await tester.pump();                                      
+      326 +                                                              
+      327 +    final l10n = _l10n(tester);                               
+      328 +    await tester.tap(find.text(l10n.detailChainStepReversal('2
+          +', '2026-07-26')));                                           
+      329 +    await tester.pumpAndSettle();                             
+      330 +                                                              
+      331 +    // A second detail screen is now on top, opened on the oth
+          +er half.                                                      
+      332 +    expect(find.byType(TransactionDetailScreen), findsNWidgets
+          +(2));                                                         
+      333 +  });                                                         
+      334 +                                                              
+      335    testWidgets('a recorded reversal reason is shown verbatim', 
+           (tester) async {
+      336      await tester.pumpWidget(
+      337        _buildApp(
+      174 -        _summary(                                             
+      338 +        _detail(                                              
+      339            type: OperationType.reversal,
+      340            reversalReason: 'أطخلاب نيترم تلخدأُ',
+      341          ),
+
+  Ran 4 shell commands (ctrl+o to expand)
+  ⎿  Found 6 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Update(test/widget/features/transactions/transaction_detail_screen_test.dart)
+  ⎿  Added 15 lines, removed 2 lines
+      332      );
+      333      await tester.pumpAndSettle();
+      334  
+      335 -    // A second detail screen is now on top, opened on the oth
+          -er half.                                                      
+      336 -    expect(find.byType(TransactionDetailScreen), findsNWidgets
+          -(2));                                                         
+      335 +    // A second detail screen is now on top, opened on the oth
+          +er half. The                                                  
+      336 +    // first is still mounted underneath, which is why offstag
+          +e is included.                                                
+      337 +    expect(                                                   
+      338 +      find.byType(TransactionDetailScreen, skipOffstage: false
+          +),                                                            
+      339 +      findsNWidgets(2),                                       
+      340 +    );                                                        
+      341 +    expect(                                                   
+      342 +      tester                                                  
+      343 +          .widgetList<TransactionDetailScreen>(               
+      344 +            find.byType(TransactionDetailScreen, skipOffstage:
+          + false),                                                      
+      345 +          )                                                   
+      346 +          .last                                               
+      347 +          .operationId,                                       
+      348 +      'op-rev',                                               
+      349 +    );                                                        
+      350    });
+      351  
+      352    testWidgets('a recorded reversal reason is shown verbatim', 
+           (tester) async {
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ +1834 −2 — still only the two pre-existing failures. Analyzer and formatter
+  clean.
+
+  Implemented (this turn)
+
+  The detail query. New operationDetailWithLedger on TransactionQueryRepository,
+  returning a TransactionDetail read model: the operation's real ledger lines
+  with account names joined, source/destination/spender/beneficiary/author names
+  resolved, and the other half of its reversal pair. Kept separate from
+  operationDetail so list callers don't pay for three extra joins. Names resolve
+  with one IN query per table, not one per id; a missing join falls back to the
+  id rather than to blank, so missing data doesn't read as a rendering bug.
+
+  The counterpart walk goes both ways: from an original, reversedBy names the
+  correction directly; from a reversal, nothing points forward, so it walks
+  ledger_entries.reversal_of_entry_id back to the original's operation.
+
+  The DB test caught a real bug in my own previous turn's work — _rowToSummary
+  never read reversal_reason, so every operation coming out of the transactions
+  query had a null reason no matter what was stored. The widget test had passed
+  because it constructs Operation directly. Fixed: the column is now in all
+  three SELECT lists and the mapper.
+
+  Detail screen rebuilt on D1/D2. The double entry rendered as debit and credit
+  rows via CurrencyAmountRow — no new component, per the spec. The numbered
+  lineage with "you are here", the reversing step carrying its reason and
+  author, the net stated as 0.00, and the other half tappable. Accounts and
+  members are named. A reversed original keeps its entries under "the original"
+  heading with the note explaining they were answered, not erased.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 340 files
+  - flutter test — +1834 −2 (was +1785 −8 at the start of this session)
+
+  New this turn: 8 DB tests on the query (including household isolation and both
+  directions of the pair walk), 9 widget tests on the rebuilt screen. Two ARB
+  keys added for the chain steps; both locales still symmetric.
+
+  Notes
+
+  - Known inconsistency I left alone: drift_dashboard_query_repository also
+  builds Operations and doesn't read reversal_reason. Nothing on the dashboard
+  renders a reason today, and widening its recent-activity query for unused data
+  would be speculative — flagging rather than fixing.
+  - Still open in phase 8: the C1–C6 transaction list. That's the last piece —
+  sticky date groups, the reversed pair as two adjacent rows, per-currency
+  summaries, the filter sheet with its result count, and the "filtered to
+  nothing" empty state. It needs the same name joins on the list query, which
+  now exist as a pattern to follow.
+  - Also still deferred, as before: budgets/goals/certificates detail routes are
+  not yet root pushes, and your two open decisions (certificate-principal
+  double classification, spouse-wallet exclusion).
+
+✻ Crunched for 8m 33s
+
+❯ go ahead                                                                      
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/domain/transaction_summary.dart)
+  ⎿  Added 5 lines
+      18      this.scope,
+      19      required this.isRecurring,
+      20      this.note,
+      21 +    this.spenderName,                                          
+      22 +    this.beneficiaryName,                                      
+      23 +    this.sourceAccountName,                                    
+      24 +    this.destinationAccountName,                               
+      25 +    this.createdByName,                                        
+      26    });
+      27  
+      28    /// The underlying financial operation (type, amount, date, a
+          ccounts, etc.).
+
+⏺ Update(lib/features/transactions/domain/transaction_summary.dart)
+  ⎿  Added 19 lines
+      45  
+      46    /// Optional free-text note.
+      47    final String? note;
+      48 +                                                               
+      49 +  // ── Resolved display names ────────────────────────────────
+         +─────────────────                                              
+      50 +  //                                                           
+      51 +  // The ids above are the stable identity; these are what a pe
+         +rson reads. A                                                  
+      52 +  // row that says "ةيدقن ةظفحم · ءانه" is buildable, one that 
+         +says                                                           
+      53 +  // "member-7f3a · acc-91c2" is not — and resolving it in the 
+         +query is one                                                   
+      54 +  // join rather than N lookups per rendered row.              
+      55 +  //                                                           
+      56 +  // Null when the referenced row is missing or the query did n
+         +ot ask for                                                     
+      57 +  // names. Callers fall back to the id, never to blank: a blan
+         +k reads as a                                                   
+      58 +  // rendering bug, an id reads as missing data.               
+      59 +                                                               
+      60 +  final String? spenderName;                                   
+      61 +  final String? beneficiaryName;                               
+      62 +  final String? sourceAccountName;                             
+      63 +  final String? destinationAccountName;                        
+      64 +                                                               
+      65 +  /// Display name of whoever recorded the operation.          
+      66 +  final String? createdByName;                                 
+      67  }
+
+⏺ Now the joins in all three list/detail queries:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now drop the duplicated name fields from TransactionDetail:
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+⏺ Now the list screen itself:
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(lib/features/transactions/presentation/transaction_list_grouping.dart)
+  ⎿  Wrote 129 lines to
+     lib/features/transactions/presentation/transaction_list_grouping.dart
+       1 /// Turning a flat list of operations into what the list screen 
+       2 ///
+       3 /// Kept out of the widget deliberately: grouping by date and re
+       4 /// two currencies together are decisions about money, and they 
+         are far easier
+       6 library;
+       7 
+         .dart';
+       9 import 'package:family_money_manager/features/transactions/domai
+      10 import 'package:meta/meta.dart';
+     … +138 lines (ctrl+o to expand)
+
+⏺ Write(lib/features/transactions/presentation/transactions_screen.dart)
+  ⎿  Added 257 lines, removed 51 lines
+       1 +/// The transaction list.                                      
+       2 +///                                                            
+       3 +/// Built for hundreds of rows: fixed-geometry tiles, sticky da
+         +te headers, and                                                
+       4 +/// a period summary that never adds two currencies together. A
+         + reversed pair                                                 
+       5 +/// appears as two adjacent rows — hiding the original would ma
+         +ke the ledger a                                                
+       6 +/// lie, and hiding the correction would make the balance incom
+         +prehensible.                                                   
+       7 +library;                                                       
+       8 +                                                               
+       9 +import 'package:family_money_manager/app/app_theme.dart';      
+      10  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+      11  import 'package:family_money_manager/core/financial/ledger_enum
+          s.dart';
+      12  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+      13  import 'package:family_money_manager/core/localization/enum_lab
+          el_helpers.dart';
+      14  import 'package:family_money_manager/core/presentation/componen
+          ts/components.dart';
+      15 +import 'package:family_money_manager/core/presentation/theme/ap
+         +p_theme_extensions.dart';                                      
+      16  import 'package:family_money_manager/features/transactions/doma
+          in/transaction_filter.dart';
+      17  import 'package:family_money_manager/features/transactions/doma
+          in/transaction_summary.dart';
+      18  import 'package:family_money_manager/features/transactions/pres
+          entation/category_label_helper.dart';
+      19  import 'package:family_money_manager/features/transactions/pres
+          entation/providers/transaction_providers.dart';
+      20 +import 'package:family_money_manager/features/transactions/pres
+         +entation/transaction_list_grouping.dart';                      
+      21  import 'package:flutter/material.dart';
+      22  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      23  import 'package:go_router/go_router.dart';
+     ...
+       36        transactionListProvider((_householdId, filter)),
+       37      );
+       38  
+       28 -    return Scaffold(                                          
+       29 -      appBar: AppBar(title: Text(l10n.transactionsTitle)),    
+       39 +    return AppScreenScaffold(                                 
+       40 +      title: Text(l10n.transactionsTitle),                    
+       41        floatingActionButton: FloatingActionButton(
+       42          heroTag: 'fab_transactions',
+       43          onPressed: () => context.push('/transactions/new'),
+       44          child: const Icon(Icons.add),
+       45        ),
+       46        body: transactionsAsync.when(
+       36 -        loading: () => AppLoadingState(message: l10n.loadingLa
+          -bel),                                                         
+       37 -        error: (_, _) => AppErrorState(message: l10n.errorGene
+          -ric),                                                         
+       38 -        data: (result) {                                      
+       39 -          return switch (result) {                            
+       40 -            AppOk(:final value) =>                            
+       41 -              value.isEmpty                                   
+       42 -                  ? AppEmptyState(                            
+       43 -                      title: l10n.transactionsEmpty,          
+       44 -                      actionLabel: l10n.actionRecordExpense,  
+       45 -                      onAction: () => context.push('/transacti
+          -ons/new'),                                                    
+       46 -                    )                                         
+       47 -                  : RefreshIndicator(                         
+       48 -                      onRefresh: () async {                   
+       49 -                        ref.invalidate(                       
+       50 -                          transactionListProvider((_householdI
+          -d, filter)),                                                  
+       51 -                        );                                    
+       52 -                      },                                      
+       53 -                      child: ListView.separated(              
+       54 -                        itemCount: value.length,              
+       55 -                        separatorBuilder: (_, _) => const Divi
+          -der(height: 1),                                               
+       56 -                        itemBuilder: (context, i) =>          
+       57 -                            _TransactionTile(summary: value[i]
+          -),                                                            
+       58 -                      ),                                      
+       59 -                    ),                                        
+       60 -            _ => AppErrorState(message: l10n.errorGeneric),   
+       61 -          };                                                  
+       47 +        // A skeleton at the real row pitch, not a spinner: th
+          +e list's geometry                                             
+       48 +        // is already known, so nothing moves when the data la
+          +nds.                                                          
+       49 +        loading: () => const AppSkeletonList(),               
+       50 +        error: (_, _) => AppErrorState(message: l10n.transacti
+          +onsErrorTitle),                                               
+       51 +        data: (result) => switch (result) {                   
+       52 +          AppOk(:final value) when value.isEmpty => AppEmptySt
+          +ate(                                                          
+       53 +            title: l10n.transactionsEmpty,                    
+       54 +            actionLabel: l10n.actionRecordExpense,            
+       55 +            onAction: () => context.push('/transactions/new'),
+       56 +          ),                                                  
+       57 +          AppOk(:final value) => RefreshIndicator(            
+       58 +            onRefresh: () async {                             
+       59 +              ref.invalidate(transactionListProvider((_househo
+          +ldId, filter)));                                              
+       60 +            },                                                
+       61 +            child: _GroupedList(transactions: value),         
+       62 +          ),                                                  
+       63 +          _ => AppErrorState(message: l10n.transactionsErrorTi
+          +tle),                                                         
+       64          },
+       65        ),
+       66      );
+       67    }
+       68  }
+       69  
+       70 +class _GroupedList extends StatelessWidget {                  
+       71 +  const _GroupedList({required this.transactions});           
+       72 +                                                              
+       73 +  final List<TransactionSummary> transactions;                
+       74 +                                                              
+       75 +  @override                                                   
+       76 +  Widget build(BuildContext context) {                        
+       77 +    final groups = groupByEffectiveDate(transactions);        
+       78 +    final totals = totalsByCurrency(transactions);            
+       79 +                                                              
+       80 +    return ResponsiveContentContainer(                        
+       81 +      child: CustomScrollView(                                
+       82 +        slivers: [                                            
+       83 +          if (totals.isNotEmpty)                              
+       84 +            SliverToBoxAdapter(child: _PeriodSummary(totals: t
+          +otals)),                                                      
+       85 +          for (final group in groups) ...[                    
+       86 +            // Sticky, so the day a row belongs to is never of
+          +f-screen while                                                
+       87 +            // its rows are.                                  
+       88 +            SliverPersistentHeader(                           
+       89 +              pinned: true,                                   
+       90 +              delegate: _DateHeaderDelegate(                  
+       91 +                date: group.effectiveDate,                    
+       92 +                count: group.transactions.length,             
+       93 +              ),                                              
+       94 +            ),                                                
+       95 +            SliverList.builder(                               
+       96 +              itemCount: group.transactions.length,           
+       97 +              itemBuilder: (context, index) =>                
+       98 +                  _TransactionTile(summary: group.transactions
+          +[index]),                                                     
+       99 +            ),                                                
+      100 +          ],                                                  
+      101 +          const SliverToBoxAdapter(child: SizedBox(height: App
+          +Theme.space32)),                                              
+      102 +        ],                                                    
+      103 +      ),                                                      
+      104 +    );                                                        
+      105 +  }                                                           
+      106 +}                                                             
+      107 +                                                              
+      108 +/// Period figures, one block per currency.                   
+      109 +class _PeriodSummary extends StatelessWidget {                
+      110 +  const _PeriodSummary({required this.totals});               
+      111 +                                                              
+      112 +  final List<TransactionPeriodTotals> totals;                 
+      113 +                                                              
+      114 +  @override                                                   
+      115 +  Widget build(BuildContext context) {                        
+      116 +    final l10n = AppLocalizations.of(context);                
+      117 +    final colors = context.financialColors;                   
+      118 +                                                              
+      119 +    return Column(                                            
+      120 +      crossAxisAlignment: CrossAxisAlignment.stretch,         
+      121 +      children: [                                             
+      122 +        for (final total in totals)                           
+      123 +          Padding(                                            
+      124 +            padding: const EdgeInsets.fromLTRB(               
+      125 +              AppTheme.space16,                               
+      126 +              AppTheme.space16,                               
+      127 +              AppTheme.space16,                               
+      128 +              AppTheme.space8,                                
+      129 +            ),                                                
+      130 +            child: Column(                                    
+      131 +              crossAxisAlignment: CrossAxisAlignment.start,   
+      132 +              children: [                                     
+      133 +                FinancialSummary(                             
+      134 +                  metrics: [                                  
+      135 +                    FinancialMetricData(                      
+      136 +                      label: l10n.transactionsSummaryIncome,  
+      137 +                      minorUnits: total.incomeMinorUnits,     
+      138 +                      currencyCode: total.currencyCode,       
+      139 +                      tone: FinancialAmountTone.income,       
+      140 +                      direction: FinancialAmountDirection.infl
+          +ow,                                                           
+      141 +                    ),                                        
+      142 +                    FinancialMetricData(                      
+      143 +                      label: l10n.transactionsSummaryExpense, 
+      144 +                      minorUnits: total.expenseMinorUnits,    
+      145 +                      currencyCode: total.currencyCode,       
+      146 +                      tone: FinancialAmountTone.expense,      
+      147 +                      direction: FinancialAmountDirection.outf
+          +low,                                                          
+      148 +                    ),                                        
+      149 +                    // Third and labelled, never folded into t
+          +he first two.                                                 
+      150 +                    FinancialMetricData(                      
+      151 +                      label: l10n.transactionsSummaryTransfer,
+      152 +                      minorUnits: total.transferMinorUnits,   
+      153 +                      currencyCode: total.currencyCode,       
+      154 +                      tone: FinancialAmountTone.transfer,     
+      155 +                      direction: FinancialAmountDirection.inte
+          +rnal,                                                         
+      156 +                    ),                                        
+      157 +                  ],                                          
+      158 +                ),                                            
+      159 +                const SizedBox(height: AppTheme.space8),      
+      160 +                // The summary states its own scope. Only one 
+          +currency is                                                   
+      161 +                // being totalled, and rows in others are stil
+          +l in the list                                                 
+      162 +                // below carrying their own code.             
+      163 +                Text(                                         
+      164 +                  totals.length > 1                           
+      165 +                      ? l10n.transactionsSummaryCurrencyOnly(t
+          +otal.currencyCode)                                            
+      166 +                      : l10n.transactionsTransferNotCounted,  
+      167 +                  style: context.textRoles.supportingMeta.copy
+          +With(                                                         
+      168 +                    color: colors.secondaryText,              
+      169 +                  ),                                          
+      170 +                ),                                            
+      171 +              ],                                              
+      172 +            ),                                                
+      173 +          ),                                                  
+      174 +      ],                                                      
+      175 +    );                                                        
+      176 +  }                                                           
+      177 +}                                                             
+      178 +                                                              
+      179 +/// A pinned day header carrying that day's row count.        
+      180 +class _DateHeaderDelegate extends SliverPersistentHeaderDelega
+          +te {                                                          
+      181 +  const _DateHeaderDelegate({required this.date, required this
+          +.count});                                                     
+      182 +                                                              
+      183 +  final String date;                                          
+      184 +  final int count;                                            
+      185 +                                                              
+      186 +  static const double _height = 40;                           
+      187 +                                                              
+      188 +  @override                                                   
+      189 +  double get minExtent => _height;                            
+      190 +                                                              
+      191 +  @override                                                   
+      192 +  double get maxExtent => _height;                            
+      193 +                                                              
+      194 +  @override                                                   
+      195 +  Widget build(                                               
+      196 +    BuildContext context,                                     
+      197 +    double shrinkOffset,                                      
+      198 +    bool overlapsContent,                                     
+      199 +  ) {                                                         
+      200 +    final l10n = AppLocalizations.of(context);                
+      201 +    final colors = context.financialColors;                   
+      202 +    return Container(                                         
+      203 +      height: _height,                                        
+      204 +      // Opaque: a pinned header that rows scroll through has 
+          +to hide them.                                                 
+      205 +      color: colors.mainSurface,                              
+      206 +      padding: const EdgeInsets.symmetric(horizontal: AppTheme
+          +.space16),                                                    
+      207 +      alignment: AlignmentDirectional.centerStart,            
+      208 +      child: Row(                                             
+      209 +        children: [                                           
+      210 +          Expanded(                                           
+      211 +            child: Text(                                      
+      212 +              _label(l10n),                                   
+      213 +              style: context.textRoles.sectionTitle,          
+      214 +            ),                                                
+      215 +          ),                                                  
+      216 +          Text(                                               
+      217 +            l10n.transactionsGroupCount('$count'),            
+      218 +            style: context.textRoles.supportingMeta.copyWith( 
+      219 +              color: colors.secondaryText,                    
+      220 +            ),                                                
+      221 +          ),                                                  
+      222 +        ],                                                    
+      223 +      ),                                                      
+      224 +    );                                                        
+      225 +  }                                                           
+      226 +                                                              
+      227 +  /// "Today" and "Yesterday" carry more than a date does; any
+          +thing older is                                                
+      228 +  /// better served by the date itself.                       
+      229 +  String _label(AppLocalizations l10n) {                      
+      230 +    final now = DateTime.now();                               
+      231 +    final today = _iso(now);                                  
+      232 +    final yesterday = _iso(now.subtract(const Duration(days: 1
+          +)));                                                          
+      233 +    if (date == today) return '${l10n.transactionsGroupToday} 
+          +· $date';                                                     
+      234 +    if (date == yesterday) return '${l10n.transactionsGroupYes
+          +terday} · $date';                                             
+      235 +    return date;                                              
+      236 +  }                                                           
+      237 +                                                              
+      238 +  String _iso(DateTime value) =>                              
+      239 +      '${value.year}-${value.month.toString().padLeft(2, '0')}
+          +-'                                                            
+      240 +      '${value.day.toString().padLeft(2, '0')}';              
+      241 +                                                              
+      242 +  @override                                                   
+      243 +  bool shouldRebuild(_DateHeaderDelegate oldDelegate) =>      
+      244 +      oldDelegate.date != date || oldDelegate.count != count; 
+      245 +}                                                             
+      246 +                                                              
+      247  class _TransactionTile extends StatelessWidget {
+      248    const _TransactionTile({required this.summary});
+      249  
+     ...
+      253    Widget build(BuildContext context) {
+      254      final l10n = AppLocalizations.of(context);
+      255      final op = summary.operation;
+       77 -    final kind = _typeKind(op.type);                          
+      256 +                                                              
+      257 +    // Names, not ids. The id stays as the fallback so a missi
+          +ng join reads as                                              
+      258 +    // missing data rather than as a blank row.               
+      259 +    final source = summary.sourceAccountName ?? op.sourceAccou
+          +ntId;                                                         
+      260 +    final destination =                                       
+      261 +        summary.destinationAccountName ?? op.destinationAccoun
+          +tId;                                                          
+      262      final accountOrDirection = switch (op.type) {
+       79 -      OperationType.transfer =>                               
+       80 -        '${op.sourceAccountId ?? '—'} → ${op.destinationAccoun
+          -tId ?? '—'}',                                                 
+      263 +      OperationType.transfer => '${source ?? '—'} → ${destinat
+          +ion ?? '—'}',                                                 
+      264        OperationType.income || OperationType.openingBalance =>
+       82 -        op.destinationAccountId ?? op.currencyCode,           
+       83 -      _ => op.sourceAccountId ?? op.currencyCode,             
+      265 +        destination ?? op.currencyCode,                       
+      266 +      _ => source ?? op.currencyCode,                         
+      267      };
+      268  
+      269      return TransactionListTile(
+      270        typeLabel: operationTypeLabel(l10n, op.type),
+       88 -      typeKind: kind,                                         
+       89 -      primaryDescription: op.description?.trim().isNotEmpty ==
+          - true                                                         
+       90 -          ? op.description!                                   
+       91 -          : (summary.note?.trim().isNotEmpty == true          
+       92 -                ? summary.note!                               
+       93 -                : operationTypeLabel(l10n, op.type)),         
+      271 +      typeKind: _typeKind(op.type),                           
+      272 +      primaryDescription: _description(l10n),                 
+      273        accountOrDirection: accountOrDirection,
+      274        effectiveDate: op.effectiveDate,
+      275        minorUnits: op.totalAmountMinorUnits,
+      276        currencyCode: op.currencyCode,
+       98 -      memberOrCategory: summary.categoryCode != null          
+       99 -          ? categoryLabelFromCode(l10n, summary.categoryCode!)
+      100 -          : null,                                             
+      277 +      // The spender is who the row is about; the category is 
+          +what it was for.                                              
+      278 +      // Prefer the person, because "who spent this" is the qu
+          +estion a                                                      
+      279 +      // household asks of its own ledger first.              
+      280 +      memberOrCategory: summary.spenderName ?? _categoryLabel(
+          +l10n),                                                        
+      281 +      associationLabel: _reversalMeta(l10n),                  
+      282        isReversed: op.isReversed,
+      283        reversedLabel: op.isReversed ? l10n.transactionReversed 
+           : null,
+      284        onTap: () => context.push('/transactions/${op.id}'),
+      285      );
+      286    }
+      287  
+      107 -  FinancialTypeKind _typeKind(OperationType type) {           
+      108 -    return switch (type) {                                    
+      109 -      OperationType.income => FinancialTypeKind.income,       
+      110 -      OperationType.expense => FinancialTypeKind.expense,     
+      111 -      OperationType.transfer => FinancialTypeKind.transfer,   
+      112 -      OperationType.reversal => FinancialTypeKind.reversal,   
+      113 -      OperationType.adjustment => FinancialTypeKind.adjustment
+          -,                                                             
+      114 -      _ => FinancialTypeKind.other,                           
+      115 -    };                                                        
+      288 +  String _description(AppLocalizations l10n) {                
+      289 +    final op = summary.operation;                             
+      290 +    if (op.description?.trim().isNotEmpty ?? false) return op.
+          +description!;                                                 
+      291 +    if (summary.note?.trim().isNotEmpty ?? false) return summa
+          +ry.note!;                                                     
+      292 +    return _categoryLabel(l10n) ?? operationTypeLabel(l10n, op
+          +.type);                                                       
+      293    }
+      294 +                                                              
+      295 +  String? _categoryLabel(AppLocalizations l10n) =>            
+      296 +      summary.categoryCode == null                            
+      297 +      ? null                                                  
+      298 +      : categoryLabelFromCode(l10n, summary.categoryCode!);   
+      299 +                                                              
+      300 +  /// What makes the reversed pair legible in the list itself.
+      301 +  ///                                                         
+      302 +  /// The original says its counter-entry exists; the reversin
+          +g entry says what                                             
+      303 +  /// it answers and why. Read together, the two adjacent rows
+          + explain a                                                    
+      304 +  /// balance that would otherwise look like a duplicate.     
+      305 +  String? _reversalMeta(AppLocalizations l10n) {              
+      306 +    final op = summary.operation;                             
+      307 +    if (op.isReversed) return l10n.transactionsReversedOrigina
+          +lMeta;                                                        
+      308 +    if (op.type != OperationType.reversal) return null;       
+      309 +    if (op.reversalReason case final String reason) {         
+      310 +      return l10n.transactionsReversalRefersTo(op.effectiveDat
+          +e, reason);                                                   
+      311 +    }                                                         
+      312 +    return null;                                              
+      313 +  }                                                           
+      314 +                                                              
+      315 +  FinancialTypeKind _typeKind(OperationType type) => switch (t
+          +ype) {                                                        
+      316 +    OperationType.income => FinancialTypeKind.income,         
+      317 +    OperationType.expense => FinancialTypeKind.expense,       
+      318 +    OperationType.transfer => FinancialTypeKind.transfer,     
+      319 +    OperationType.reversal => FinancialTypeKind.reversal,     
+      320 +    OperationType.adjustment => FinancialTypeKind.adjustment, 
+      321 +    _ => FinancialTypeKind.other,                             
+      322 +  };                                                          
+      323  }
+
+  Ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 3 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Now tests — the grouping logic as pure functions, and the list screen:
+
+⏺ Write(test/unit/features/transactions/transaction_list_grouping_test.dart)
+  ⎿  Wrote 167 lines to
+     test/unit/features/transactions/transaction_list_grouping_test.dart
+       1 /// Grouping and totalling the transaction list.
+       3 /// The rule these exist to protect: a total never crosses a cur
+         rency, and a
+         ak by adding a
+         enshot.
+       6 library;
+       8 import 'package:family_money_manager/core/financial/ledger_enums
+         .dart';
+         ation.dart';
+         n/transaction_summary.dart';
+     … +182 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the list screen widget test:
+
+⏺ Write(test/widget/features/transactions/transactions_screen_test.dart)
+  ⎿  Wrote 335 lines to
+     test/widget/features/transactions/transactions_screen_test.dart
+       1 /// The transaction list.
+       3 /// The claims under test are the ones the design insists on: ro
+         ws name people
+          the transfer
+         reversed pair
+       6 /// appears as two adjacent rows that between them explain the b
+       7 library;
+       8 
+         .dart';
+         dart';
+     … +369 lines (ctrl+o to expand)
+
+  Ran 5 shell commands (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Implemented
+
+  Names on the list query. Five LEFT JOINs on the three summary queries resolve
+  spender, beneficiary, source/destination account, and author names — every
+  join keyed on a primary key and scoped to the same household, so a row can
+  never pick up a name from another family's data. TransactionSummary now
+  carries the resolved names alongside the ids, with the id as the fallback so a
+  missing join reads as missing data rather than a blank row.
+
+  This also let me collapse the duplication I introduced last turn:
+  TransactionDetail had its own copy of those five name fields plus a
+  hand-rolled _namesById helper. Both are gone — the detail read model is now
+  just summary + ledgerLines + counterpart, and names come from one place.
+
+  Grouping and totalling extracted as pure functions
+  (transaction_list_grouping.dart). Two rules live there because they're rules
+  about money, not about pixels: totals are computed per currency with no
+  combined figure and no default currency; and a reversed original and its
+  reversing entry are both excluded — their net is zero by construction, and
+  counting both would double the error.
+
+  The list screen rebuilt. Sticky per-day headers with row counts,
+  Today/Yesterday labels, AppSkeletonList at the real row pitch instead of a
+  spinner, and a period summary where the transfer figure sits third, labelled,
+  and explicitly outside income and expense. Reversed pairs render as two
+  adjacent rows: the original says its counter-entry exists, the reversing entry
+  says what it answers and why. Rows now show ةيصخش ةيدقن ةظفحم · ءانه where
+  they showed UUIDs.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 343 files
+  - flutter test — +1852 −2 (started this session at +1785 −8)
+
+  18 new tests: 9 unit on the grouping/totalling rules, 9 widget on the list. 13
+  ARB keys added; both locales symmetric at 592.
+
+  Notes
+
+  - Not done from doc 04: C2 the filter sheet (with its
+  result-count-on-the-button), C3 search, and the C5 "filtered to nothing" empty
+  state — that state needs the filter to exist first, so the empty state
+  currently only handles a genuinely empty ledger. Also deferred: the
+  pagination-failure banner that vouches for already-loaded rows, and the 200 ms
+  insert animation on a new counter-entry. These are a coherent next chunk and
+  all sit on top of TransactionFilter, which is still only ever constructed as
+  const TransactionFilter().
+  - Same two carried-over items as before: budgets/goals/certificates detail
+  routes aren't root pushes yet, and the dashboard query still doesn't read
+  reversal_reason (nothing there renders it).
+  - Your two open decisions are unchanged — certificate-principal double
+  classification, and spouse-wallet exclusion from the headline balance.
+
+✻ Worked for 8m 30s
+
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, read 1 file, ran 1 shell command (ctrl+o to expand)
+⏺ Write(lib/features/transactions/domain/transaction_filter.dart)
+  ⎿  Added 161 lines
+       2  import 'package:family_money_manager/core/financial/ledger_enum
+          s.dart';
+       3  import 'package:meta/meta.dart';
+       4  
+       5 +/// An amount band, in one currency.                           
+       6 +///                                                            
+       7 +/// The currency is required rather than optional because a ran
+         +ge without one                                                 
+       8 +/// is a mixed-currency comparison: "over 5,000" would silently
+         + match a USD                                                   
+       9 +/// transaction against an EGP threshold. That is the same erro
+         +r as a mixed                                                   
+      10 +/// total, and it is prevented here by making the invalid state
+      11 +/// unrepresentable rather than by checking for it later.      
+      12 +@immutable                                                     
+      13 +final class TransactionAmountRange {                           
+      14 +  const TransactionAmountRange({                               
+      15 +    required this.currencyCode,                                
+      16 +    this.minMinorUnits,                                        
+      17 +    this.maxMinorUnits,                                        
+      18 +  });                                                          
+      19 +                                                               
+      20 +  final String currencyCode;                                   
+      21 +                                                               
+      22 +  /// Inclusive lower bound. Null means no lower bound.        
+      23 +  final int? minMinorUnits;                                    
+      24 +                                                               
+      25 +  /// Inclusive upper bound. Null means no upper bound.        
+      26 +  final int? maxMinorUnits;                                    
+      27 +                                                               
+      28 +  /// True when neither bound is set, in which case the range r
+         +estricts                                                       
+      29 +  /// nothing and only the currency would apply.               
+      30 +  bool get isUnbounded => minMinorUnits == null && maxMinorUnit
+         +s == null;                                                     
+      31 +                                                               
+      32 +  @override                                                    
+      33 +  bool operator ==(Object other) =>                            
+      34 +      identical(this, other) ||                                
+      35 +      other is TransactionAmountRange &&                       
+      36 +          other.currencyCode == currencyCode &&                
+      37 +          other.minMinorUnits == minMinorUnits &&              
+      38 +          other.maxMinorUnits == maxMinorUnits;                
+      39 +                                                               
+      40 +  @override                                                    
+      41 +  int get hashCode => Object.hash(currencyCode, minMinorUnits, 
+         +maxMinorUnits);                                                
+      42 +}                                                              
+      43 +                                                               
+      44  /// Filter parameters for transaction history queries.
+      45  ///
+      46  /// All fields are optional; omitting a field means "no restric
+          tion".
+     ...
+      55      this.scope,
+      56      this.fromDate,
+      57      this.toDate,
+      58 +    this.amountRange,                                          
+      59 +    this.searchQuery,                                          
+      60 +    this.includeReversed = true,                               
+      61      this.pageSize = 50,
+      62      this.offsetId,
+      63    });
+     ...
+       86    /// Inclusive end date "YYYY-MM-DD". Null means no upper bou
+           nd.
+       87    final String? toDate;
+       88  
+       89 +  /// Restrict to an amount band in one currency.             
+       90 +  final TransactionAmountRange? amountRange;                  
+       91 +                                                              
+       92 +  /// Free text matched against description, note and account 
+          +names.                                                        
+       93 +  ///                                                         
+       94 +  /// Deliberately does *not* imply a date restriction: someon
+          +e searching for                                               
+       95 +  /// an amount is looking for one specific transaction, not b
+          +rowsing a month.                                              
+       96 +  /// Callers that want the active period respected pass it in
+          + the date                                                     
+       97 +  /// fields as usual.                                        
+       98 +  final String? searchQuery;                                  
+       99 +                                                              
+      100 +  /// Whether reversed originals and reversing entries are inc
+          +luded.                                                        
+      101 +  ///                                                         
+      102 +  /// Defaults to true, and the UI defaults its toggle on: exc
+          +luding them by                                                
+      103 +  /// default would quietly hide history, which is the one thi
+          +ng an                                                         
+      104 +  /// append-only ledger exists to prevent.                   
+      105 +  final bool includeReversed;                                 
+      106 +                                                              
+      107    /// Maximum number of results to return. Defaults to 50.
+      108    final int pageSize;
+      109  
+     ...
+      111    /// When provided, results begin after the operation with th
+           is ID in the
+      112    /// canonical ordering.
+      113    final String? offsetId;
+      114 +                                                              
+      115 +  /// How many restrictions the user has applied.             
+      116 +  ///                                                         
+      117 +  /// Drives the "clear all (3)" affordance, so it counts what
+          + a person would                                               
+      118 +  /// call a filter — not [pageSize] or [offsetId], which are 
+          +plumbing, and                                                 
+      119 +  /// not [searchQuery], which has its own visible field.     
+      120 +  int get activeCriteriaCount => [                            
+      121 +    accountId != null,                                        
+      122 +    operationType != null,                                    
+      123 +    categoryCode != null,                                     
+      124 +    spenderMemberId != null,                                  
+      125 +    beneficiaryMemberId != null,                              
+      126 +    scope != null,                                            
+      127 +    fromDate != null || toDate != null,                       
+      128 +    amountRange != null,                                      
+      129 +    !includeReversed,                                         
+      130 +  ].where((isActive) => isActive).length;                     
+      131 +                                                              
+      132 +  bool get hasActiveCriteria => activeCriteriaCount > 0;      
+      133 +                                                              
+      134 +  /// Copies with overrides. Pass a `clear*` flag to unset a f
+          +ield, since a                                                 
+      135 +  /// null argument cannot be told apart from "not supplied". 
+      136 +  TransactionFilter copyWith({                                
+      137 +    String? accountId,                                        
+      138 +    OperationType? operationType,                             
+      139 +    String? categoryCode,                                     
+      140 +    String? spenderMemberId,                                  
+      141 +    String? beneficiaryMemberId,                              
+      142 +    ExpenseScope? scope,                                      
+      143 +    String? fromDate,                                         
+      144 +    String? toDate,                                           
+      145 +    TransactionAmountRange? amountRange,                      
+      146 +    String? searchQuery,                                      
+      147 +    bool? includeReversed,                                    
+      148 +    int? pageSize,                                            
+      149 +    String? offsetId,                                         
+      150 +    bool clearAccountId = false,                              
+      151 +    bool clearOperationType = false,                          
+      152 +    bool clearCategoryCode = false,                           
+      153 +    bool clearSpenderMemberId = false,                        
+      154 +    bool clearBeneficiaryMemberId = false,                    
+      155 +    bool clearScope = false,                                  
+      156 +    bool clearDates = false,                                  
+      157 +    bool clearAmountRange = false,                            
+      158 +    bool clearSearchQuery = false,                            
+      159 +  }) => TransactionFilter(                                    
+      160 +    accountId: clearAccountId ? null : accountId ?? this.accou
+          +ntId,                                                         
+      161 +    operationType: clearOperationType                         
+      162 +        ? null                                                
+      163 +        : operationType ?? this.operationType,                
+      164 +    categoryCode: clearCategoryCode ? null : categoryCode ?? t
+          +his.categoryCode,                                             
+      165 +    spenderMemberId: clearSpenderMemberId                     
+      166 +        ? null                                                
+      167 +        : spenderMemberId ?? this.spenderMemberId,            
+      168 +    beneficiaryMemberId: clearBeneficiaryMemberId             
+      169 +        ? null                                                
+      170 +        : beneficiaryMemberId ?? this.beneficiaryMemberId,    
+      171 +    scope: clearScope ? null : scope ?? this.scope,           
+      172 +    fromDate: clearDates ? null : fromDate ?? this.fromDate,  
+      173 +    toDate: clearDates ? null : toDate ?? this.toDate,        
+      174 +    amountRange: clearAmountRange ? null : amountRange ?? this
+          +.amountRange,                                                 
+      175 +    searchQuery: clearSearchQuery ? null : searchQuery ?? this
+          +.searchQuery,                                                 
+      176 +    includeReversed: includeReversed ?? this.includeReversed, 
+      177 +    pageSize: pageSize ?? this.pageSize,                      
+      178 +    offsetId: offsetId ?? this.offsetId,                      
+      179 +  );                                                          
+      180 +                                                              
+      181 +  @override                                                   
+      182 +  bool operator ==(Object other) =>                           
+      183 +      identical(this, other) ||                               
+      184 +      other is TransactionFilter &&                           
+      185 +          other.accountId == accountId &&                     
+      186 +          other.operationType == operationType &&             
+      187 +          other.categoryCode == categoryCode &&               
+      188 +          other.spenderMemberId == spenderMemberId &&         
+      189 +          other.beneficiaryMemberId == beneficiaryMemberId && 
+      190 +          other.scope == scope &&                             
+      191 +          other.fromDate == fromDate &&                       
+      192 +          other.toDate == toDate &&                           
+      193 +          other.amountRange == amountRange &&                 
+      194 +          other.searchQuery == searchQuery &&                 
+      195 +          other.includeReversed == includeReversed &&         
+      196 +          other.pageSize == pageSize &&                       
+      197 +          other.offsetId == offsetId;                         
+      198 +                                                              
+      199 +  @override                                                   
+      200 +  int get hashCode => Object.hash(                            
+      201 +    accountId,                                                
+      202 +    operationType,                                            
+      203 +    categoryCode,                                             
+      204 +    spenderMemberId,                                          
+      205 +    beneficiaryMemberId,                                      
+      206 +    scope,                                                    
+      207 +    fromDate,                                                 
+      208 +    toDate,                                                   
+      209 +    amountRange,                                              
+      210 +    searchQuery,                                              
+      211 +    includeReversed,                                          
+      212 +    pageSize,                                                 
+      213 +    offsetId,                                                 
+      214 +  );                                                          
+      215  }
+
+⏺ Now apply the new criteria in the query, plus a count for the sheet's button:
+
+⏺ Update(lib/features/transactions/data/drift_transaction_query_repository.dart)
+  ⎿  Added 58 lines
+      465        where.write(' AND $tablePrefix.effective_date <= ?');
+      466        args.add(filter.toDate);
+      467      }
+      468 +    if (filter.accountId case final String accountId) {       
+      469 +      where.write(                                            
+      470 +        ' AND ($tablePrefix.source_account_id = ?'            
+      471 +        ' OR $tablePrefix.destination_account_id = ?)',       
+      472 +      );                                                      
+      473 +      args                                                    
+      474 +        ..add(accountId)                                      
+      475 +        ..add(accountId);                                     
+      476 +    }                                                         
+      477 +    if (filter.amountRange case final TransactionAmountRange r
+          +ange) {                                                       
+      478 +      // The currency is always part of the comparison, never 
+          +optional: an                                                  
+      479 +      // amount band that spanned currencies would match a USD
+          + row against an                                               
+      480 +      // EGP threshold.                                       
+      481 +      where.write(' AND $tablePrefix.currency_code = ?');     
+      482 +      args.add(range.currencyCode);                           
+      483 +      if (range.minMinorUnits case final int min) {           
+      484 +        where.write(' AND $tablePrefix.total_amount_minor_unit
+          +s >= ?');                                                     
+      485 +        args.add(min);                                        
+      486 +      }                                                       
+      487 +      if (range.maxMinorUnits case final int max) {           
+      488 +        where.write(' AND $tablePrefix.total_amount_minor_unit
+          +s <= ?');                                                     
+      489 +        args.add(max);                                        
+      490 +      }                                                       
+      491 +    }                                                         
+      492 +    if (!filter.includeReversed) {                            
+      493 +      // Both halves go: the original whose effect was cancell
+          +ed, and the                                                   
+      494 +      // entry that cancelled it.                             
+      495 +      where.write(                                            
+      496 +        ' AND $tablePrefix.is_reversed = 0 AND $tablePrefix.ty
+          +pe != ?',                                                     
+      497 +      );                                                      
+      498 +      args.add(OperationType.reversal.code);                  
+      499 +    }                                                         
+      500 +    if (filter.searchQuery?.trim() case final String query    
+      501 +        when query.isNotEmpty) {                              
+      502 +      // Description, note and both account names. `LIKE` is c
+          +ase-insensitive                                               
+      503 +      // for ASCII only in SQLite, which is why the Arabic sid
+          +e matches                                                     
+      504 +      // literally — correct for Arabic, where there is no cas
+          +e to fold.                                                    
+      505 +      where.write(                                            
+      506 +        ' AND ($tablePrefix.description LIKE ?'               
+      507 +        ' OR $contextPrefix.note LIKE ?'                      
+      508 +        ' OR src.name LIKE ?'                                 
+      509 +        ' OR dst.name LIKE ?)',                               
+      510 +      );                                                      
+      511 +      // Escaped so a user typing % or _ searches for those ch
+          +aracters rather                                               
+      512 +      // than turning their query into a wildcard.            
+      513 +      final pattern = '%${_escapeLike(query)}%';              
+      514 +      args                                                    
+      515 +        ..add(pattern)                                        
+      516 +        ..add(pattern)                                        
+      517 +        ..add(pattern)                                        
+      518 +        ..add(pattern);                                       
+      519 +    }                                                         
+      520    }
+      521  
+      522 +  /// Escapes SQL `LIKE` metacharacters. Paired with `ESCAPE` 
+          +below.                                                        
+      523 +  String _escapeLike(String value) => value                   
+      524 +      .replaceAll(r'\', r'\\')                                
+      525 +      .replaceAll('%', r'\%')                                 
+      526 +      .replaceAll('_', r'\_');                                
+      527 +                                                              
+      528    List<Variable<Object>> _toVariables(List<Object?> args) {
+      529      return args.map((a) {
+      530        if (a is String) return Variable.withString(a);
+
+⏺ Update(lib/features/transactions/data/drift_transaction_query_repository.dart)
+  ⎿  Added 8 lines, removed 4 lines
+      503        // for ASCII only in SQLite, which is why the Arabic sid
+           e matches
+      504        // literally — correct for Arabic, where there is no cas
+           e to fold.
+      505        where.write(
+      506 -        ' AND ($tablePrefix.description LIKE ?'               
+      507 -        ' OR $contextPrefix.note LIKE ?'                      
+      508 -        ' OR src.name LIKE ?'                                 
+      509 -        ' OR dst.name LIKE ?)',                               
+      506 +        r" AND (" +                                           
+      507 +            tablePrefix +                                     
+      508 +            r".description LIKE ? ESCAPE '\'"                 
+      509 +                r' OR ' +                                     
+      510 +            contextPrefix +                                   
+      511 +            r".note LIKE ? ESCAPE '\'"                        
+      512 +                r" OR src.name LIKE ? ESCAPE '\'"             
+      513 +                r" OR dst.name LIKE ? ESCAPE '\')",           
+      514        );
+      515        // Escaped so a user typing % or _ searches for those ch
+           aracters rather
+      516        // than turning their query into a wildcard.
+
+⏺ Now the count method for the sheet's button:
+
+⏺ Update(lib/features/transactions/data/transaction_query_repository.dart)
+  ⎿  Added 11 lines
+      32      required String householdId,
+      33    });
+      34  
+      35 +  /// Counts every operation matching [filter], ignoring its pa
+         +ge size.                                                       
+      36 +  ///                                                          
+      37 +  /// Exists so the filter sheet can put the result count on it
+         +s own confirm                                                  
+      38 +  /// button: knowing a filter matches 87 of 1,248 *before* com
+         +mitting to it                                                  
+      39 +  /// makes filtering to nothing a rare accident rather than th
+         +e normal way to                                                
+      40 +  /// discover the empty state.                                
+      41 +  Future<int> countOperations({                                
+      42 +    required String householdId,                               
+      43 +    TransactionFilter filter = const TransactionFilter(),      
+      44 +  });                                                          
+      45 +                                                               
+      46    /// Returns [operationDetail] plus its ledger lines, resolved
+           names, and the
+      47    /// other half of its reversal pair when it has one.
+      48    ///
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/data/drift_transaction_query_repository.dart)
+  ⎿  Added 5 lines, removed 8 lines
+      502        // Description, note and both account names. `LIKE` is c
+           ase-insensitive
+      503        // for ASCII only in SQLite, which is why the Arabic sid
+           e matches
+      504        // literally — correct for Arabic, where there is no cas
+           e to fold.
+      505 +      const escape = r"ESCAPE '\'";                           
+      506        where.write(
+      506 -        r" AND (" +                                           
+      507 -            tablePrefix +                                     
+      508 -            r".description LIKE ? ESCAPE '\'"                 
+      509 -                r' OR ' +                                     
+      510 -            contextPrefix +                                   
+      511 -            r".note LIKE ? ESCAPE '\'"                        
+      512 -                r" OR src.name LIKE ? ESCAPE '\'"             
+      513 -                r" OR dst.name LIKE ? ESCAPE '\')",           
+      507 +        ' AND ($tablePrefix.description LIKE ? $escape'       
+      508 +        ' OR $contextPrefix.note LIKE ? $escape'              
+      509 +        ' OR src.name LIKE ? $escape'                         
+      510 +        ' OR dst.name LIKE ? $escape)',                       
+      511        );
+      512        // Escaped so a user typing % or _ searches for those ch
+           aracters rather
+      513        // than turning their query into a wildcard.
+
+⏺ Update(lib/features/transactions/data/drift_transaction_query_repository.dart)
+  ⎿  Added 38 lines
+      216      return rows.isEmpty ? null : _rowToSummary(rows.first);
+      217    }
+      218  
+      219 +  // ── countOperations ──────────────────────────────────────
+          +──────────────────                                            
+      220 +                                                              
+      221 +  @override                                                   
+      222 +  Future<int> countOperations({                               
+      223 +    required String householdId,                              
+      224 +    TransactionFilter filter = const TransactionFilter(),     
+      225 +  }) async {                                                  
+      226 +    final whereClause = StringBuffer('o.household_id = ?');   
+      227 +    final args = <Object?>[householdId];                      
+      228 +                                                              
+      229 +    _applyFilterClauses(                                      
+      230 +      whereClause,                                            
+      231 +      args,                                                   
+      232 +      filter,                                                 
+      233 +      tablePrefix: 'o',                                       
+      234 +      contextPrefix: 'oc',                                    
+      235 +    );                                                        
+      236 +                                                              
+      237 +    // The same joins as the list, because the filter can rest
+          +rict on account                                               
+      238 +    // names. No LIMIT: the point of this query is the total t
+          +he page size                                                  
+      239 +    // would otherwise hide.                                  
+      240 +    final rows = await _db                                    
+      241 +        .customSelect('''                                     
+      242 +      SELECT COUNT(*) AS matching_count                       
+      243 +      FROM operations o                                       
+      244 +      LEFT JOIN operation_contexts oc ON oc.operation_id = o.i
+          +d                                                             
+      245 +      LEFT JOIN financial_accounts src                        
+      246 +        ON src.id = o.source_account_id AND src.household_id =
+          + o.household_id                                               
+      247 +      LEFT JOIN financial_accounts dst                        
+      248 +        ON dst.id = o.destination_account_id                  
+      249 +       AND dst.household_id = o.household_id                  
+      250 +      WHERE $whereClause                                      
+      251 +    ''', variables: _toVariables(args))                       
+      252 +        .get();                                               
+      253 +                                                              
+      254 +    return rows.first.read<int>('matching_count');            
+      255 +  }                                                           
+      256 +                                                              
+      257    // ── operationDetailWithLedger ────────────────────────────
+           ──────────────────
+      258  
+      259    @override
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now a DB test for the filter semantics before wiring the UI:
+
+⏺ Write(test/database/transaction_filter_db_test.dart)
+  ⎿  Wrote 331 lines to test/database/transaction_filter_db_test.dart
+       1 /// Filtering and searching the transaction list.
+       3 /// Three rules carry real weight here. An amount band never cro
+         sses a
+         rately asks
+       5 /// otherwise. And the count the filter sheet promises is the co
+       6 /// then shows — a button that says "87" and produces 40 is wors
+         e than no
+       8 library;
+       9 
+         dart';
+     … +353 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ 14/14. Now the filter sheet and search on the screen:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(lib/features/transactions/presentation/transaction_filter_sheet.dart)
+  ⎿  Wrote 287 lines to
+     lib/features/transactions/presentation/transaction_filter_sheet.dart
+       1 /// The filter sheet.
+       3 /// Its one structural idea: the result count rides on the confi
+         rm button. You
+       4 /// know a filter matches 87 of 1,248 before committing to it, w
+       5 /// filtering to nothing into a rare accident rather than the no
+         rmal way to
+       7 library;
+       8 
+       9 import 'package:family_money_manager/app/app_theme.dart';
+         .dart';
+     … +310 lines (ctrl+o to expand)
+
+⏺ Update(lib/features/transactions/presentation/providers/transaction_providers.
+        dart)
+  ⎿  Added 11 lines
+       97        return useCase.execute(householdId: householdId, filter:
+            filter);
+       98      });
+       99  
+      100 +/// How many operations a filter matches, ignoring its page si
+          +ze.                                                           
+      101 +///                                                           
+      102 +/// Watched by the filter sheet so its confirm button can carr
+          +y the count.                                                  
+      103 +final transactionCountProvider =                              
+      104 +    FutureProvider.family<int, (String, TransactionFilter)>((r
+          +ef, args) {                                                   
+      105 +      final (householdId, filter) = args;                     
+      106 +      return ref                                              
+      107 +          .watch(transactionQueryRepositoryProvider)          
+      108 +          .countOperations(householdId: householdId, filter: f
+          +ilter);                                                       
+      109 +    });                                                       
+      110 +                                                              
+      111  // ── Transaction detail provider ────────────────────────────
+           ───────────────────
+      112  
+      113  final transactionDetailProvider =
+  ⎿  Found 6 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ Now wire the sheet and search into the list screen:
+
+⏺ Update(lib/features/transactions/presentation/transactions_screen.dart)
+  ⎿  Added 204 lines, removed 23 lines
+       25  const _householdId = 'household-v1';
+       26  
+       27  /// Main transactions screen showing recent operation history.
+       28 -class TransactionsScreen extends ConsumerWidget {             
+       28 +class TransactionsScreen extends ConsumerStatefulWidget {     
+       29    const TransactionsScreen({super.key});
+       30  
+       31    @override
+       32 -  Widget build(BuildContext context, WidgetRef ref) {         
+       32 +  ConsumerState<TransactionsScreen> createState() => _Transact
+          +ionsScreenState();                                            
+       33 +}                                                             
+       34 +                                                              
+       35 +class _TransactionsScreenState extends ConsumerState<Transacti
+          +onsScreen> {                                                  
+       36 +  TransactionFilter _filter = const TransactionFilter();      
+       37 +  final _searchController = TextEditingController();          
+       38 +  bool _isSearching = false;                                  
+       39 +                                                              
+       40 +  @override                                                   
+       41 +  void dispose() {                                            
+       42 +    _searchController.dispose();                              
+       43 +    super.dispose();                                          
+       44 +  }                                                           
+       45 +                                                              
+       46 +  @override                                                   
+       47 +  Widget build(BuildContext context) {                        
+       48      final l10n = AppLocalizations.of(context);
+       34 -    const filter = TransactionFilter();                       
+       49      final transactionsAsync = ref.watch(
+       36 -      transactionListProvider((_householdId, filter)),        
+       50 +      transactionListProvider((_householdId, _filter)),       
+       51      );
+       52 +    // What the ledger holds regardless of the filter. An empt
+          +y result has to                                               
+       53 +    // be able to say "you have 1,248 transactions, none match
+          + this".                                                       
+       54 +    final unfilteredCount = ref                               
+       55 +        .watch(                                               
+       56 +          transactionCountProvider((_householdId, const Transa
+          +ctionFilter())),                                              
+       57 +        )                                                     
+       58 +        .valueOrNull;                                         
+       59  
+       60      return AppScreenScaffold(
+       40 -      title: Text(l10n.transactionsTitle),                    
+       61 +      title: _isSearching                                     
+       62 +          ? _SearchField(                                     
+       63 +              controller: _searchController,                  
+       64 +              onChanged: _applySearch,                        
+       65 +              onClose: _closeSearch,                          
+       66 +            )                                                 
+       67 +          : Text(l10n.transactionsTitle),                     
+       68 +      actions: [                                              
+       69 +        if (!_isSearching)                                    
+       70 +          IconButton(                                         
+       71 +            icon: const Icon(Icons.search),                   
+       72 +            tooltip: l10n.transactionsSearchHint,             
+       73 +            onPressed: () => setState(() => _isSearching = tru
+          +e),                                                           
+       74 +          ),                                                  
+       75 +        IconButton(                                           
+       76 +          icon: Badge(                                        
+       77 +            isLabelVisible: _filter.hasActiveCriteria,        
+       78 +            label: Text('${_filter.activeCriteriaCount}'),    
+       79 +            child: const Icon(Icons.filter_list),             
+       80 +          ),                                                  
+       81 +          tooltip: l10n.transactionsFilterTitle,              
+       82 +          onPressed: _openFilterSheet,                        
+       83 +        ),                                                    
+       84 +      ],                                                      
+       85        floatingActionButton: FloatingActionButton(
+       86          heroTag: 'fab_transactions',
+       87          onPressed: () => context.push('/transactions/new'),
+       88          child: const Icon(Icons.add),
+       89        ),
+       46 -      body: transactionsAsync.when(                           
+       47 -        // A skeleton at the real row pitch, not a spinner: th
+          -e list's geometry                                             
+       48 -        // is already known, so nothing moves when the data la
+          -nds.                                                          
+       49 -        loading: () => const AppSkeletonList(),               
+       50 -        error: (_, _) => AppErrorState(message: l10n.transacti
+          -onsErrorTitle),                                               
+       51 -        data: (result) => switch (result) {                   
+       52 -          AppOk(:final value) when value.isEmpty => AppEmptySt
+          -ate(                                                          
+       53 -            title: l10n.transactionsEmpty,                    
+       54 -            actionLabel: l10n.actionRecordExpense,            
+       55 -            onAction: () => context.push('/transactions/new'),
+       90 +      body: Column(                                           
+       91 +        children: [                                           
+       92 +          if (_isSearching)                                   
+       93 +            // Said out loud rather than left to be discovered
+          +: a search that                                               
+       94 +            // silently spanned or silently respected the peri
+          +od would be                                                   
+       95 +            // equally confusing, so the screen states which i
+          +t does.                                                       
+       96 +            Padding(                                          
+       97 +              padding: const EdgeInsets.symmetric(            
+       98 +                horizontal: AppTheme.space16,                 
+       99 +                vertical: AppTheme.space8,                    
+      100 +              ),                                              
+      101 +              child: Text(                                    
+      102 +                l10n.transactionsSearchIgnoresPeriod,         
+      103 +                style: context.textRoles.supportingMeta.copyWi
+          +th(                                                           
+      104 +                  color: context.financialColors.secondaryText
+          +,                                                             
+      105 +                ),                                            
+      106 +              ),                                              
+      107 +            ),                                                
+      108 +          Expanded(                                           
+      109 +            child: transactionsAsync.when(                    
+      110 +              // A skeleton at the real row pitch, not a spinn
+          +er: the list's                                                
+      111 +              // geometry is already known, so nothing moves w
+          +hen data lands.                                               
+      112 +              loading: () => const AppSkeletonList(),         
+      113 +              error: (_, _) =>                                
+      114 +                  AppErrorState(message: l10n.transactionsErro
+          +rTitle),                                                      
+      115 +              data: (result) => switch (result) {             
+      116 +                AppOk(:final value) when value.isEmpty => _Emp
+          +tyState(                                                      
+      117 +                  isFiltered:                                 
+      118 +                      _filter.hasActiveCriteria ||            
+      119 +                      (_filter.searchQuery?.isNotEmpty ?? fals
+          +e),                                                           
+      120 +                  unfilteredCount: unfilteredCount,           
+      121 +                  onClearFilters: _clearFilters,              
+      122 +                ),                                            
+      123 +                AppOk(:final value) => RefreshIndicator(      
+      124 +                  onRefresh: () async {                       
+      125 +                    ref.invalidate(                           
+      126 +                      transactionListProvider((_householdId, _
+          +filter)),                                                     
+      127 +                    );                                        
+      128 +                  },                                          
+      129 +                  child: _GroupedList(transactions: value),   
+      130 +                ),                                            
+      131 +                _ => AppErrorState(message: l10n.transactionsE
+          +rrorTitle),                                                   
+      132 +              },                                              
+      133 +            ),                                                
+      134            ),
+       57 -          AppOk(:final value) => RefreshIndicator(            
+       58 -            onRefresh: () async {                             
+       59 -              ref.invalidate(transactionListProvider((_househo
+          -ldId, filter)));                                              
+       60 -            },                                                
+       61 -            child: _GroupedList(transactions: value),         
+       62 -          ),                                                  
+       63 -          _ => AppErrorState(message: l10n.transactionsErrorTi
+          -tle),                                                         
+       64 -        },                                                    
+      135 +        ],                                                    
+      136        ),
+      137      );
+      138    }
+      139 +                                                              
+      140 +  /// Search deliberately drops the date bounds.              
+      141 +  ///                                                         
+      142 +  /// Someone searching for an amount is looking for one speci
+          +fic transaction,                                              
+      143 +  /// not browsing a month — a search that silently honoured t
+          +he active period                                              
+      144 +  /// would report "not found" for a transaction that exists. 
+      145 +  void _applySearch(String query) {                           
+      146 +    setState(() {                                             
+      147 +      _filter = query.trim().isEmpty                          
+      148 +          ? _filter.copyWith(clearSearchQuery: true)          
+      149 +          : _filter.copyWith(searchQuery: query, clearDates: t
+          +rue);                                                         
+      150 +    });                                                       
+      151 +  }                                                           
+      152 +                                                              
+      153 +  void _closeSearch() {                                       
+      154 +    _searchController.clear();                                
+      155 +    setState(() {                                             
+      156 +      _isSearching = false;                                   
+      157 +      _filter = _filter.copyWith(clearSearchQuery: true);     
+      158 +    });                                                       
+      159 +  }                                                           
+      160 +                                                              
+      161 +  void _clearFilters() {                                      
+      162 +    _searchController.clear();                                
+      163 +    setState(() {                                             
+      164 +      _filter = const TransactionFilter();                    
+      165 +      _isSearching = false;                                   
+      166 +    });                                                       
+      167 +  }                                                           
+      168 +                                                              
+      169 +  Future<void> _openFilterSheet() async {                     
+      170 +    final updated = await showTransactionFilterSheet(         
+      171 +      context: context,                                       
+      172 +      initial: _filter,                                       
+      173 +      householdId: _householdId,                              
+      174 +    );                                                        
+      175 +    if (updated == null || !mounted) return;                  
+      176 +    setState(() => _filter = updated);                        
+      177 +  }                                                           
+      178  }
+      179  
+      180 +class _SearchField extends StatelessWidget {                  
+      181 +  const _SearchField({                                        
+      182 +    required this.controller,                                 
+      183 +    required this.onChanged,                                  
+      184 +    required this.onClose,                                    
+      185 +  });                                                         
+      186 +                                                              
+      187 +  final TextEditingController controller;                     
+      188 +  final ValueChanged<String> onChanged;                       
+      189 +  final VoidCallback onClose;                                 
+      190 +                                                              
+      191 +  @override                                                   
+      192 +  Widget build(BuildContext context) {                        
+      193 +    final l10n = AppLocalizations.of(context);                
+      194 +    return TextField(                                         
+      195 +      controller: controller,                                 
+      196 +      autofocus: true,                                        
+      197 +      // The field is a first-strong isolate by virtue of the 
+          +app's direction;                                              
+      198 +      // a query like «382 ةلاقب» keeps its Latin numeric run 
+          +intact because                                                
+      199 +      // nothing here re-orders it.                           
+      200 +      decoration: InputDecoration(                            
+      201 +        hintText: l10n.transactionsSearchHint,                
+      202 +        border: InputBorder.none,                             
+      203 +        suffixIcon: IconButton(                               
+      204 +          icon: const Icon(Icons.close),                      
+      205 +          onPressed: onClose,                                 
+      206 +        ),                                                    
+      207 +      ),                                                      
+      208 +      onChanged: onChanged,                                   
+      209 +    );                                                        
+      210 +  }                                                           
+      211 +}                                                             
+      212 +                                                              
+      213 +/// Empty because the ledger is, or empty because a filter exc
+          +luded everything.                                             
+      214 +///                                                           
+      215 +/// The two are different problems and get different copy: a f
+          +iltered-empty                                                 
+      216 +/// result names the count the user does have and offers to dr
+          +op the filter,                                                
+      217 +/// because an empty result is a filter problem, never a data 
+          +problem.                                                      
+      218 +class _EmptyState extends StatelessWidget {                   
+      219 +  const _EmptyState({                                         
+      220 +    required this.isFiltered,                                 
+      221 +    required this.unfilteredCount,                            
+      222 +    required this.onClearFilters,                             
+      223 +  });                                                         
+      224 +                                                              
+      225 +  final bool isFiltered;                                      
+      226 +  final int? unfilteredCount;                                 
+      227 +  final VoidCallback onClearFilters;                          
+      228 +                                                              
+      229 +  @override                                                   
+      230 +  Widget build(BuildContext context) {                        
+      231 +    final l10n = AppLocalizations.of(context);                
+      232 +    if (!isFiltered) {                                        
+      233 +      return AppEmptyState(                                   
+      234 +        title: l10n.transactionsEmpty,                        
+      235 +        actionLabel: l10n.actionRecordExpense,                
+      236 +        onAction: () => context.push('/transactions/new'),    
+      237 +      );                                                      
+      238 +    }                                                         
+      239 +    return AppEmptyState(                                     
+      240 +      title: l10n.transactionsEmptyFilteredTitle,             
+      241 +      message: unfilteredCount == null                        
+      242 +          ? null                                              
+      243 +          : l10n.transactionsEmptyFilteredBody('$unfilteredCou
+          +nt'),                                                         
+      244 +      actionLabel: l10n.transactionsClearFilters,             
+      245 +      onAction: onClearFilters,                               
+      246 +      icon: Icons.filter_list_off,                            
+      247 +    );                                                        
+      248 +  }                                                           
+      249 +}                                                             
+      250 +                                                              
+      251  class _GroupedList extends StatelessWidget {
+      252    const _GroupedList({required this.transactions});
+      253  
+
+  Ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Now extend the list screen tests for filter and search:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Update(test/widget/features/transactions/transactions_screen_test.dart)
+  ⎿  Error editing file
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+⏺ Update(test/widget/features/transactions/transactions_screen_test.dart)
+  ⎿  Added 3 lines, removed 10 lines
+      427        await tester.pumpAndSettle();
+      428        await tester.tap(find.text(l10n.transactionsFilterShowRe
+           versed));
+      429        await tester.pumpAndSettle();
+      430 -      await tester.tap(                                       
+      431 -        find.textContaining(                                  
+      432 -          l10n                                                
+      433 -              .transactionsFilterApply('')                    
+      434 -              .replaceAll('{count}', '')                      
+      435 -              .trim()                                         
+      436 -              .split(' ')                                     
+      437 -              .first,                                         
+      438 -        ),                                                    
+      439 -      );                                                      
+      430 +      // By type, because the confirm label carries a count th
+          +at moves with                                                 
+      431 +      // the draft — asserting on the text here would re-test 
+          +the count.                                                    
+      432 +      await tester.tap(find.byType(PrimaryActionButton));     
+      433        await tester.pumpAndSettle();
+      434  
+      435        expect(requestedFilters.last.includeReversed, isFalse);
+
+  Read 1 file, ran 7 shell commands (ctrl+o to expand)
+
+⏺ Update(test/widget/features/transactions/transactions_screen_test.dart)
+  ⎿  Added 1 line, removed 3 lines
+      387          // Nothing selected yet: the count is the whole ledger
+           .
+      388          expect(find.text(l10n.transactionsFilterApply('1248'))
+           , findsOneWidget);
+      389  
+      390 -        await tester.tap(                                     
+      391 -          find.text(operationTypeLabel(l10n, OperationType.exp
+          -ense)),                                                       
+      392 -        );                                                    
+      390 +        await tester.tap(_typeChip(l10n, OperationType.expense
+          +));                                                           
+      391          await tester.pumpAndSettle();
+      392  
+      393          // Selecting a type changes the promised count before 
+           it is applied.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ All 15 pass. Full check:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ The architecture boundary test caught my filter sheet doing raw /100 money
+  scaling. Fixing it properly:
+
+  Searched for 1 pattern, ran 5 shell commands (ctrl+o to expand)
+
+⏺ +1872 −2 — back to only the two pre-existing failures.
+
+  Implemented
+
+  TransactionFilter grown up. It gained an amount band, search, a
+  reversed-history toggle, value equality, and copyWith with explicit clear*
+  flags. Two design decisions are enforced by the types rather than by checks:
+
+  - TransactionAmountRange requires a currency. A band without one silently
+  compares a USD row against an EGP threshold — the same error as a mixed total
+  — so the invalid state is unrepresentable rather than validated after the
+  fact.
+  - includeReversed defaults to true. Hiding reversed history by default is the
+  one thing an append-only ledger exists to prevent.
+
+  Query support: account, amount band, reversed-history opt-out, and search
+  across description, note and both account names — with LIKE metacharacters
+  escaped, so typing % searches for % instead of matching everything. Plus
+  countOperations, which runs the same joins with no LIMIT.
+
+  The filter sheet puts the result count on its own confirm button: you see
+  "show 87 transactions" before committing, so filtering to nothing becomes a
+  rare accident rather than the normal way to find the empty state. The count
+  updates live as the draft changes.
+
+  Search drops the date bounds and says so on screen — someone searching for an
+  amount wants one transaction, not a month, and a search that silently honoured
+  the period would report "not found" for something that exists.
+
+  The filtered-empty state is distinct from the empty-ledger one: it names the
+  count you do have ("you have 1,248 transactions — none match this filter") and
+  offers to clear, because an empty result is a filter problem, never a data
+  problem.
+
+  The repo's own architecture test caught me
+
+  architecture_boundaries_test flagged my filter sheet doing value * 100 /
+  minorUnits / 100 to convert typed bounds. That was a real defect, not a lint:
+  the bounds would have disagreed with the amounts they're compared against for
+  any non-2-scale currency, and would have rejected Arabic-Indic digits the rest
+  of the app accepts. Both bounds now go through MoneyInputFormatter, and the
+  input filter allows ٩–٠ and ٫/، to match what the parser handles.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 345 files
+  - flutter test — +1872 −2
+
+  20 new tests: 14 DB on filter semantics (currency isolation, inclusive bounds,
+  both halves of a reversal excluded together, wildcard escaping,
+  count-matches-list, household isolation), 6 widget on the sheet and search. 14
+  ARB keys; both locales symmetric.
+
+  Notes
+
+  - Deliberately not built: category/account/member/scope pickers in the sheet —
+  the filter supports them and the query applies them, but each needs its own
+  picker surface, and the sheet is honest about offering only what it can
+  actually set. Also not built: saved searches, the "nearest result without the
+  amount condition" hint from C5, and the C6 pagination-failure banner.
+  - The amount band is offered in EGP only; the sheet has no currency selector
+  yet. It reads the currency from an existing band, so it round-trips correctly,
+  but a user can't presently set a USD band.
+  - Carried over unchanged: budgets/goals/certificates detail routes aren't root
+  pushes; the dashboard query doesn't read reversal_reason; and your two open
+  decisions (certificate-principal double classification, spouse-wallet
+  exclusion).
+
+✻ Crunched for 14m 19s
+
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, read 2 files, ran 1 shell command (ctrl+o to expand)
+
+⏺ Phase 9. Starting with the highest-value item — deleting ReportAmountText,
+  which every report and budget amount currently flows through:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now migrate the call sites. Income/expense first, as the template:
+
+⏺ Write(lib/features/reports/presentation/income_expense_report_screen.dart)
+  ⎿  Added 126 lines, removed 108 lines
+       1  /// Income & Expense report screen.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       7 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+       9  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+       9 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      10 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      11  import 'package:flutter/material.dart';
+      12  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      13  
+     ...
+      21      final req = ref.watch(reportRequestProvider);
+      22      final reportAsync = ref.watch(incomeExpenseReportProvider(r
+          eq));
+      23  
+      23 -    return Scaffold(                                           
+      24 -      appBar: AppBar(                                          
+      25 -        title: Text(l10n.reportIncomeExpenseTitle),            
+      26 -        actions: [                                             
+      27 -          IconButton(                                          
+      28 -            icon: const Icon(Icons.refresh),                   
+      29 -            tooltip: l10n.reportRefresh,                       
+      30 -            onPressed: () => ref.invalidate(incomeExpenseReport
+         -Provider(req)),                                                
+      31 -          ),                                                   
+      32 -        ],                                                     
+      33 -      ),                                                       
+      24 +    void retry() => ref.invalidate(incomeExpenseReportProvider(
+         +req));                                                         
+      25 +                                                               
+      26 +    return AppScreenScaffold(                                  
+      27 +      title: Text(l10n.reportIncomeExpenseTitle),              
+      28 +      actions: [                                               
+      29 +        IconButton(                                            
+      30 +          icon: const Icon(Icons.refresh),                     
+      31 +          tooltip: l10n.reportRefresh,                         
+      32 +          onPressed: retry,                                    
+      33 +        ),                                                     
+      34 +      ],                                                       
+      35        body: Column(
+      36          crossAxisAlignment: CrossAxisAlignment.start,
+      37          children: [
+     ...
+      39            const Divider(height: 1),
+      40            Expanded(
+      41              child: reportAsync.when(
+      41 -              loading: () => const ReportLoading(),            
+      42 -              error: (_, _) => ReportErrorState(               
+      43 -                onRetry: () => ref.invalidate(incomeExpenseRepo
+         -rtProvider(req)),                                              
+      42 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      43 +              error: (_, _) => AppErrorState(                  
+      44 +                message: l10n.reportError,                     
+      45 +                onRetry: retry,                                
+      46 +                retryLabel: l10n.reportRefresh,                
+      47                ),
+      48                data: (result) {
+      49                  if (result is! AppOk<List<CurrencyFlowSummary>>
+          ) {
+      47 -                  return ReportErrorState(                     
+      48 -                    onRetry: () =>                             
+      49 -                        ref.invalidate(incomeExpenseReportProvi
+         -der(req)),                                                     
+      50 +                  return AppErrorState(                        
+      51 +                    message: l10n.reportError,                 
+      52 +                    onRetry: retry,                            
+      53 +                    retryLabel: l10n.reportRefresh,            
+      54                    );
+      55                  }
+      56                  final flows = result.value;
+      53 -                if (flows.isEmpty) return const ReportEmptyStat
+         -e();                                                           
+      57 +                if (flows.isEmpty) {                           
+      58 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      59 +                }                                              
+      60                  return _IncomeExpenseContent(flows: flows, l10n
+          : l10n);
+      61                },
+      62              ),
+     ...
+       75  
+       76    @override
+       77    Widget build(BuildContext context) {
+       72 -    return ListView(                                          
+       73 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       74 -      children: [                                             
+       75 -        ReportInfoNote(text: l10n.reportTransferNote),        
+       76 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       77 -        for (final flow in flows) ...[                        
+       78 -          CurrencyHeader(currencyCode: flow.currencyCode),    
+       79 -          _FlowCard(flow: flow, l10n: l10n),                  
+       78 +    return ResponsiveContentContainer(                        
+       79 +      child: ListView(                                        
+       80 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       81 +        children: [                                           
+       82 +          Padding(                                            
+       83 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       84 +            child: Column(                                    
+       85 +              children: [                                     
+       86 +                AppInlineNotice(message: l10n.reportTransferNo
+          +te),                                                          
+       87 +                const SizedBox(height: AppTheme.space8),      
+       88 +                AppInlineNotice(message: l10n.reportCurrencySe
+          +parate),                                                      
+       89 +              ],                                              
+       90 +            ),                                                
+       91 +          ),                                                  
+       92 +          for (final flow in flows) ...[                      
+       93 +            // One section per currency, never a combined tota
+          +l: adding two                                                 
+       94 +            // currencies produces a figure that is true of no
+          +thing.                                                        
+       95 +            SectionHeader(title: flow.currencyCode),          
+       96 +            _FlowRows(flow: flow, l10n: l10n),                
+       97 +          ],                                                  
+       98 +          const SizedBox(height: AppTheme.space24),           
+       99          ],
+       81 -        const SizedBox(height: 24),                           
+       82 -      ],                                                      
+      100 +      ),                                                      
+      101      );
+      102    }
+      103  }
+      104  
+       87 -class _FlowCard extends StatelessWidget {                     
+       88 -  const _FlowCard({required this.flow, required this.l10n});  
+      105 +class _FlowRows extends StatelessWidget {                     
+      106 +  const _FlowRows({required this.flow, required this.l10n});  
+      107  
+      108    final CurrencyFlowSummary flow;
+      109    final AppLocalizations l10n;
+      110  
+      111    @override
+      112    Widget build(BuildContext context) {
+       95 -    final colors = context.financialColors;                   
+      113      final hasReversals = flow.hasReversalEffect;
+      114  
+       98 -    return Card(                                              
+       99 -      margin: const EdgeInsets.symmetric(vertical: 4),        
+      100 -      child: Padding(                                         
+      101 -        padding: const EdgeInsets.all(12),                    
+      102 -        child: Column(                                        
+      103 -          crossAxisAlignment: CrossAxisAlignment.start,       
+      104 -          children: [                                         
+      105 -            // Income section                                 
+      106 -            ReportAmountRow(                                  
+      107 -              label: l10n.reportGrossIncome,                  
+      108 -              minorUnits: flow.grossIncomeMinorUnits,         
+      109 -              currencyCode: flow.currencyCode,                
+      110 -              color: colors.income,                           
+      111 -              icon: Icons.arrow_downward,                     
+      112 -            ),                                                
+      113 -            if (flow.incomeReversalMinorUnits != 0)           
+      114 -              ReportAmountRow(                                
+      115 -                label: l10n.reportReversalEffect,             
+      116 -                minorUnits: -flow.incomeReversalMinorUnits,   
+      117 -                currencyCode: flow.currencyCode,              
+      118 -                color: colors.secondaryText,                  
+      119 -                icon: Icons.undo,                             
+      120 -              ),                                              
+      121 -            if (hasReversals)                                 
+      122 -              ReportAmountRow(                                
+      123 -                label: l10n.reportNetIncome,                  
+      124 -                minorUnits: flow.netIncomeMinorUnits,         
+      125 -                currencyCode: flow.currencyCode,              
+      126 -                color: colors.income,                         
+      127 -                icon: Icons.arrow_downward,                   
+      128 -                bold: true,                                   
+      129 -              ),                                              
+      130 -            const Divider(height: 12),                        
+      131 -            // Expense section                                
+      132 -            ReportAmountRow(                                  
+      133 -              label: l10n.reportGrossExpense,                 
+      134 -              minorUnits: flow.grossExpenseMinorUnits,        
+      135 -              currencyCode: flow.currencyCode,                
+      136 -              color: colors.expense,                          
+      137 -              icon: Icons.arrow_upward,                       
+      138 -            ),                                                
+      139 -            if (flow.expenseReversalMinorUnits != 0)          
+      140 -              ReportAmountRow(                                
+      141 -                label: l10n.reportReversalEffect,             
+      142 -                minorUnits: -flow.expenseReversalMinorUnits,  
+      143 -                currencyCode: flow.currencyCode,              
+      144 -                color: colors.secondaryText,                  
+      145 -                icon: Icons.undo,                             
+      146 -              ),                                              
+      147 -            if (hasReversals)                                 
+      148 -              ReportAmountRow(                                
+      149 -                label: l10n.reportNetExpense,                 
+      150 -                minorUnits: flow.netExpenseMinorUnits,        
+      151 -                currencyCode: flow.currencyCode,              
+      152 -                color: colors.expense,                        
+      153 -                icon: Icons.arrow_upward,                     
+      154 -                bold: true,                                   
+      155 -              ),                                              
+      156 -            const Divider(height: 12),                        
+      157 -            // Net cash flow                                  
+      158 -            ReportAmountRow(                                  
+      159 -              label: l10n.reportNetCashFlow,                  
+      160 -              minorUnits: flow.netCashFlowMinorUnits,         
+      161 -              currencyCode: flow.currencyCode,                
+      162 -              color: flow.netCashFlowMinorUnits >= 0          
+      163 -                  ? colors.income                             
+      164 -                  : colors.expense,                           
+      165 -              bold: true,                                     
+      166 -            ),                                                
+      167 -            if (hasReversals) ...[                            
+      168 -              const SizedBox(height: 4),                      
+      169 -              ReportInfoNote(text: l10n.reportReversalNote),  
+      170 -            ],                                                
+      171 -          ],                                                  
+      115 +    return Column(                                            
+      116 +      crossAxisAlignment: CrossAxisAlignment.stretch,         
+      117 +      children: [                                             
+      118 +        CurrencyAmountRow(                                    
+      119 +          label: l10n.reportGrossIncome,                      
+      120 +          minorUnits: flow.grossIncomeMinorUnits,             
+      121 +          currencyCode: flow.currencyCode,                    
+      122 +          tone: FinancialAmountTone.income,                   
+      123 +          direction: FinancialAmountDirection.inflow,         
+      124          ),
+      173 -      ),                                                      
+      125 +        if (flow.incomeReversalMinorUnits != 0)               
+      126 +          CurrencyAmountRow(                                  
+      127 +            label: l10n.reportReversalEffect,                 
+      128 +            minorUnits: flow.incomeReversalMinorUnits,        
+      129 +            currencyCode: flow.currencyCode,                  
+      130 +            // Reversing an income removes money that had been
+          + counted as                                                   
+      131 +            // arriving, so it reads as an outflow — quietly, 
+          +because a                                                     
+      132 +            // correction is not a threshold.                 
+      133 +            tone: FinancialAmountTone.muted,                  
+      134 +            direction: FinancialAmountDirection.outflow,      
+      135 +          ),                                                  
+      136 +        if (hasReversals)                                     
+      137 +          CurrencyAmountRow(                                  
+      138 +            label: l10n.reportNetIncome,                      
+      139 +            minorUnits: flow.netIncomeMinorUnits,             
+      140 +            currencyCode: flow.currencyCode,                  
+      141 +            tone: FinancialAmountTone.income,                 
+      142 +            direction: FinancialAmountDirection.inflow,       
+      143 +            isEmphasised: true,                               
+      144 +          ),                                                  
+      145 +        CurrencyAmountRow(                                    
+      146 +          label: l10n.reportGrossExpense,                     
+      147 +          minorUnits: flow.grossExpenseMinorUnits,            
+      148 +          currencyCode: flow.currencyCode,                    
+      149 +          tone: FinancialAmountTone.expense,                  
+      150 +          direction: FinancialAmountDirection.outflow,        
+      151 +        ),                                                    
+      152 +        if (flow.expenseReversalMinorUnits != 0)              
+      153 +          CurrencyAmountRow(                                  
+      154 +            label: l10n.reportReversalEffect,                 
+      155 +            minorUnits: flow.expenseReversalMinorUnits,       
+      156 +            currencyCode: flow.currencyCode,                  
+      157 +            // The mirror of the line above: reversing an expe
+          +nse returns                                                   
+      158 +            // money that had been counted as spent.          
+      159 +            tone: FinancialAmountTone.muted,                  
+      160 +            direction: FinancialAmountDirection.inflow,       
+      161 +          ),                                                  
+      162 +        if (hasReversals)                                     
+      163 +          CurrencyAmountRow(                                  
+      164 +            label: l10n.reportNetExpense,                     
+      165 +            minorUnits: flow.netExpenseMinorUnits,            
+      166 +            currencyCode: flow.currencyCode,                  
+      167 +            tone: FinancialAmountTone.expense,                
+      168 +            direction: FinancialAmountDirection.outflow,      
+      169 +            isEmphasised: true,                               
+      170 +          ),                                                  
+      171 +        // Weight, not colour. This figure was previously tint
+          +ed green or red                                               
+      172 +        // by its own sign, which puts a verdict on a derived 
+          +number; the sign                                              
+      173 +        // and the glyph already say which way it went.       
+      174 +        CurrencyAmountRow(                                    
+      175 +          label: l10n.reportNetCashFlow,                      
+      176 +          minorUnits: flow.netCashFlowMinorUnits.abs(),       
+      177 +          currencyCode: flow.currencyCode,                    
+      178 +          direction: flow.netCashFlowMinorUnits >= 0          
+      179 +              ? FinancialAmountDirection.inflow               
+      180 +              : FinancialAmountDirection.outflow,             
+      181 +          isEmphasised: true,                                 
+      182 +          showDivider: false,                                 
+      183 +        ),                                                    
+      184 +        if (hasReversals) ...[                                
+      185 +          const SizedBox(height: AppTheme.space8),            
+      186 +          Padding(                                            
+      187 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+      188 +            child: AppInlineNotice(message: l10n.reportReversa
+          +lNote),                                                       
+      189 +          ),                                                  
+      190 +        ],                                                    
+      191 +      ],                                                      
+      192      );
+      193    }
+      194  }
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Template works. Now the remaining nine files:
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/category_report_screen.dart)
+  ⎿  Added 52 lines, removed 62 lines
+       1  /// Category report screen — expense and income by category.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       7 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/applicati
+          on/get_category_report_use_case.dart';
+       9  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+      10  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+      10 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:family_money_manager/features/transactions/doma
+          in/transaction_category.dart';
+      13  import 'package:family_money_manager/features/transactions/pres
+          entation/category_label_helper.dart';
+      14  import 'package:flutter/material.dart';
+     ...
+      23      final req = ref.watch(reportRequestProvider);
+      24      final reportAsync = ref.watch(categoryReportProvider(req));
+      25  
+      25 -    return Scaffold(                                           
+      26 -      appBar: AppBar(                                          
+      27 -        title: Text(l10n.reportCategoriesTitle),               
+      28 -        actions: [                                             
+      29 -          IconButton(                                          
+      30 -            icon: const Icon(Icons.refresh),                   
+      31 -            tooltip: l10n.reportRefresh,                       
+      32 -            onPressed: () => ref.invalidate(categoryReportProvi
+         -der(req)),                                                     
+      33 -          ),                                                   
+      34 -        ],                                                     
+      35 -      ),                                                       
+      26 +    void retry() => ref.invalidate(categoryReportProvider(req))
+         +;                                                              
+      27 +                                                               
+      28 +    return AppScreenScaffold(                                  
+      29 +      title: Text(l10n.reportCategoriesTitle),                 
+      30 +      actions: [                                               
+      31 +        IconButton(                                            
+      32 +          icon: const Icon(Icons.refresh),                     
+      33 +          tooltip: l10n.reportRefresh,                         
+      34 +          onPressed: retry,                                    
+      35 +        ),                                                     
+      36 +      ],                                                       
+      37        body: Column(
+      38          children: [
+      39            const ReportPeriodSelector(),
+      40            const Divider(height: 1),
+      41            Expanded(
+      42              child: reportAsync.when(
+      42 -              loading: () => const ReportLoading(),            
+      43 -              error: (_, _) => ReportErrorState(               
+      44 -                onRetry: () => ref.invalidate(categoryReportPro
+         -vider(req)),                                                   
+      43 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      44 +              error: (_, _) => AppErrorState(                  
+      45 +                message: l10n.reportError,                     
+      46 +                onRetry: retry,                                
+      47 +                retryLabel: l10n.reportRefresh,                
+      48                ),
+      49                data: (result) {
+      50                  if (result is! AppOk<CategoryReport>) {
+      48 -                  return ReportErrorState(                     
+      49 -                    onRetry: () => ref.invalidate(categoryRepor
+         -tProvider(req)),                                               
+      51 +                  return AppErrorState(                        
+      52 +                    message: l10n.reportError,                 
+      53 +                    onRetry: retry,                            
+      54 +                    retryLabel: l10n.reportRefresh,            
+      55                    );
+      56                  }
+      57                  final report = result.value;
+      58                  if (report.expenseByCategory.isEmpty &&
+      59                      report.incomeByCategory.isEmpty) {
+      55 -                  return const ReportEmptyState();             
+      60 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      61                  }
+      62                  return _CategoryContent(report: report, l10n: l
+          10n);
+      63                },
+     ...
+       77  
+       78    @override
+       79    Widget build(BuildContext context) {
+       75 -    return ListView(                                          
+       76 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       77 -      children: [                                             
+       78 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       79 -        if (report.expenseByCategory.isNotEmpty) ...[         
+       80 -          _SectionHeader(title: l10n.reportGrossExpense),     
+       81 -          for (final item in report.expenseByCategory)        
+       82 -            _CategoryRow(item: item, l10n: l10n),             
+       80 +    return ResponsiveContentContainer(                        
+       81 +      child: ListView(                                        
+       82 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       83 +        children: [                                           
+       84 +          Padding(                                            
+       85 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       86 +            child: AppInlineNotice(message: l10n.reportCurrenc
+          +ySeparate),                                                   
+       87 +          ),                                                  
+       88 +          if (report.expenseByCategory.isNotEmpty) ...[       
+       89 +            SectionHeader(title: l10n.reportGrossExpense),    
+       90 +            for (final item in report.expenseByCategory)      
+       91 +              _CategoryRow(item: item, l10n: l10n),           
+       92 +          ],                                                  
+       93 +          if (report.incomeByCategory.isNotEmpty) ...[        
+       94 +            SectionHeader(title: l10n.reportGrossIncome),     
+       95 +            for (final item in report.incomeByCategory)       
+       96 +              _CategoryRow(item: item, l10n: l10n),           
+       97 +          ],                                                  
+       98 +          const SizedBox(height: AppTheme.space24),           
+       99          ],
+       84 -        if (report.incomeByCategory.isNotEmpty) ...[          
+       85 -          _SectionHeader(title: l10n.reportGrossIncome),      
+       86 -          for (final item in report.incomeByCategory)         
+       87 -            _CategoryRow(item: item, l10n: l10n),             
+       88 -        ],                                                    
+       89 -        const SizedBox(height: 24),                           
+       90 -      ],                                                      
+       91 -    );                                                        
+       92 -  }                                                           
+       93 -}                                                             
+       94 -                                                              
+       95 -class _SectionHeader extends StatelessWidget {                
+       96 -  const _SectionHeader({required this.title});                
+       97 -  final String title;                                         
+       98 -                                                              
+       99 -  @override                                                   
+      100 -  Widget build(BuildContext context) {                        
+      101 -    return Padding(                                           
+      102 -      padding: const EdgeInsets.only(top: 16, bottom: 4),     
+      103 -      child: Text(                                            
+      104 -        title,                                                
+      105 -        style: Theme.of(                                      
+      106 -          context,                                            
+      107 -        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeigh
+          -t.bold),                                                      
+      100        ),
+      101      );
+      102    }
+     ...
+      110  
+      111    @override
+      112    Widget build(BuildContext context) {
+      121 -    final colors = context.financialColors;                   
+      113      final isExpense = item.categoryType == CategoryType.expens
+           e;
+      123 -    return ListTile(                                          
+      124 -      contentPadding: EdgeInsets.zero,                        
+      125 -      leading: const Icon(Icons.label_outline),               
+      126 -      title: Text(categoryLabelFromCode(l10n, item.categoryCod
+          -e)),                                                          
+      127 -      subtitle: Text(l10n.reportTransactionCount(item.transact
+          -ionCount)),                                                   
+      128 -      trailing: ReportAmountText(                             
+      129 -        minorUnits: item.totalMinorUnits,                     
+      130 -        currencyCode: item.currencyCode,                      
+      131 -        color: isExpense ? colors.expense : colors.income,    
+      132 -      ),                                                      
+      114 +    return CurrencyAmountRow(                                 
+      115 +      label: categoryLabelFromCode(l10n, item.categoryCode),  
+      116 +      caption: l10n.reportTransactionCount(item.transactionCou
+          +nt),                                                          
+      117 +      minorUnits: item.totalMinorUnits,                       
+      118 +      currencyCode: item.currencyCode,                        
+      119 +      tone: isExpense ? FinancialAmountTone.expense : Financia
+          +lAmountTone.income,                                           
+      120 +      direction: isExpense                                    
+      121 +          ? FinancialAmountDirection.outflow                  
+      122 +          : FinancialAmountDirection.inflow,                  
+      123      );
+      124    }
+      125  }
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/report_flow_row.dart)
+  ⎿  Wrote 76 lines to
+     lib/features/reports/presentation/report_flow_row.dart
+       1 /// One movement line in an account's period flow.
+       3 /// Not a new component — it returns a [CurrencyAmountRow] and a
+       4 /// of its own. What it owns is the one decision the report scre
+         ens kept
+         ned depending
+         a *magnitude*
+         ed value to it
+       8 /// renders a double negative; passing a positive value to a lin
+       9 /// represents a subtraction renders a lie. Deciding it once, he
+      10 /// both flow reports can be read as arithmetic.
+     … +80 lines (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/account_flow_report_screen.dart)
+  ⎿  Error writing file
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/account_flow_report_screen.dart)  ⎿  Added 105 lines, removed 105 lines
+       1  /// Account flow report screen — income/expense/transfer flows 
+          per account.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       7 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+       9  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+       9 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      10 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_flow_row.dart';                                     
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:flutter/material.dart';
+      13  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      14  
+     ...
+      21      final req = ref.watch(reportRequestProvider);
+      22      final reportAsync = ref.watch(accountFlowReportProvider(req
+          ));
+      23  
+      22 -    return Scaffold(                                           
+      23 -      appBar: AppBar(                                          
+      24 -        title: Text(l10n.reportAccountsTitle),                 
+      25 -        actions: [                                             
+      26 -          IconButton(                                          
+      27 -            icon: const Icon(Icons.refresh),                   
+      28 -            tooltip: l10n.reportRefresh,                       
+      29 -            onPressed: () => ref.invalidate(accountFlowReportPr
+         -ovider(req)),                                                  
+      30 -          ),                                                   
+      31 -        ],                                                     
+      32 -      ),                                                       
+      24 +    void retry() => ref.invalidate(accountFlowReportProvider(re
+         +q));                                                           
+      25 +                                                               
+      26 +    return AppScreenScaffold(                                  
+      27 +      title: Text(l10n.reportAccountsTitle),                   
+      28 +      actions: [                                               
+      29 +        IconButton(                                            
+      30 +          icon: const Icon(Icons.refresh),                     
+      31 +          tooltip: l10n.reportRefresh,                         
+      32 +          onPressed: retry,                                    
+      33 +        ),                                                     
+      34 +      ],                                                       
+      35        body: Column(
+      36          children: [
+      37            const ReportPeriodSelector(),
+      38            const Divider(height: 1),
+      39            Expanded(
+      40              child: reportAsync.when(
+      39 -              loading: () => const ReportLoading(),            
+      40 -              error: (_, _) => ReportErrorState(               
+      41 -                onRetry: () => ref.invalidate(accountFlowReport
+         -Provider(req)),                                                
+      41 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      42 +              error: (_, _) => AppErrorState(                  
+      43 +                message: l10n.reportError,                     
+      44 +                onRetry: retry,                                
+      45 +                retryLabel: l10n.reportRefresh,                
+      46                ),
+      47                data: (result) {
+      48                  if (result is! AppOk<List<AccountFlowBreakdown>
+          >) {
+      45 -                  return ReportErrorState(                     
+      46 -                    onRetry: () =>                             
+      47 -                        ref.invalidate(accountFlowReportProvide
+         -r(req)),                                                       
+      49 +                  return AppErrorState(                        
+      50 +                    message: l10n.reportError,                 
+      51 +                    onRetry: retry,                            
+      52 +                    retryLabel: l10n.reportRefresh,            
+      53                    );
+      54                  }
+      55                  final accounts = result.value;
+      51 -                if (accounts.isEmpty) return const ReportEmptyS
+         -tate();                                                        
+      56 +                if (accounts.isEmpty) {                        
+      57 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      58 +                }                                              
+      59                  return _AccountFlowContent(accounts: accounts, 
+          l10n: l10n);
+      60                },
+      61              ),
+     ...
+       74  
+       75    @override
+       76    Widget build(BuildContext context) {
+       70 -    return ListView(                                          
+       71 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       72 -      children: [                                             
+       73 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       74 -        for (final account in accounts) ...[                  
+       75 -          _AccountCard(account: account, l10n: l10n),         
+       76 -          const SizedBox(height: 8),                          
+       77 +    return ResponsiveContentContainer(                        
+       78 +      child: ListView(                                        
+       79 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       80 +        children: [                                           
+       81 +          Padding(                                            
+       82 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       83 +            child: AppInlineNotice(message: l10n.reportCurrenc
+          +ySeparate),                                                   
+       84 +          ),                                                  
+       85 +          for (final account in accounts)                     
+       86 +            _AccountFlow(account: account, l10n: l10n),       
+       87 +          const SizedBox(height: AppTheme.space24),           
+       88          ],
+       78 -        const SizedBox(height: 24),                           
+       79 -      ],                                                      
+       89 +      ),                                                      
+       90      );
+       91    }
+       92  }
+       93  
+       84 -class _AccountCard extends StatelessWidget {                  
+       85 -  const _AccountCard({required this.account, required this.l10
+          -n});                                                          
+       94 +class _AccountFlow extends StatelessWidget {                  
+       95 +  const _AccountFlow({required this.account, required this.l10
+          +n});                                                          
+       96  
+       97    final AccountFlowBreakdown account;
+       98    final AppLocalizations l10n;
+       99  
+      100    @override
+      101    Widget build(BuildContext context) {
+       92 -    final colors = context.financialColors;                   
+       93 -    return Card(                                              
+       94 -      margin: EdgeInsets.zero,                                
+       95 -      child: Padding(                                         
+       96 -        padding: const EdgeInsets.all(12),                    
+       97 -        child: Column(                                        
+       98 -          crossAxisAlignment: CrossAxisAlignment.start,       
+       99 -          children: [                                         
+      100 -            Text(                                             
+      101 -              account.accountName,                            
+      102 -              style: Theme.of(context).textTheme.titleSmall,  
+      103 -            ),                                                
+      104 -            const SizedBox(height: 8),                        
+      105 -            ReportAmountRow(                                  
+      106 -              label: l10n.reportOpeningBalance,               
+      107 -              minorUnits: account.openingBalanceMinorUnits,   
+      108 -              currencyCode: account.currencyCode,             
+      109 -            ),                                                
+      110 -            if (account.incomeMinorUnits != 0)                
+      111 -              ReportAmountRow(                                
+      112 -                label: l10n.dashboardPeriodIncome,            
+      113 -                minorUnits: account.incomeMinorUnits,         
+      114 -                currencyCode: account.currencyCode,           
+      115 -                color: colors.income,                         
+      116 -                icon: Icons.arrow_downward,                   
+      117 -              ),                                              
+      118 -            if (account.expenseMinorUnits != 0)               
+      119 -              ReportAmountRow(                                
+      120 -                label: l10n.dashboardPeriodExpenses,          
+      121 -                minorUnits: -account.expenseMinorUnits,       
+      122 -                currencyCode: account.currencyCode,           
+      123 -                color: colors.expense,                        
+      124 -                icon: Icons.arrow_upward,                     
+      125 -              ),                                              
+      126 -            if (account.transfersInMinorUnits != 0)           
+      127 -              ReportAmountRow(                                
+      128 -                label: '${l10n.transactionTypeTransfer} (+)', 
+      129 -                minorUnits: account.transfersInMinorUnits,    
+      130 -                currencyCode: account.currencyCode,           
+      131 -                color: colors.transfer,                       
+      132 -                icon: Icons.south_west,                       
+      133 -              ),                                              
+      134 -            if (account.transfersOutMinorUnits != 0)          
+      135 -              ReportAmountRow(                                
+      136 -                label: '${l10n.transactionTypeTransfer} (-)', 
+      137 -                minorUnits: -account.transfersOutMinorUnits,  
+      138 -                currencyCode: account.currencyCode,           
+      139 -                color: colors.transfer,                       
+      140 -                icon: Icons.north_east,                       
+      141 -              ),                                              
+      142 -            if (account.adjustmentsMinorUnits != 0)           
+      143 -              ReportAmountRow(                                
+      144 -                label: l10n.transactionTypeAdjustment,        
+      145 -                minorUnits: account.adjustmentsMinorUnits,    
+      146 -                currencyCode: account.currencyCode,           
+      147 -                icon: Icons.tune,                             
+      148 -              ),                                              
+      149 -            if (account.reversalEffectMinorUnits != 0)        
+      150 -              ReportAmountRow(                                
+      151 -                label: l10n.reportReversalEffect,             
+      152 -                minorUnits: account.reversalEffectMinorUnits, 
+      153 -                currencyCode: account.currencyCode,           
+      154 -                color: colors.secondaryText,                  
+      155 -                icon: Icons.undo,                             
+      156 -              ),                                              
+      157 -            const Divider(height: 12),                        
+      158 -            ReportAmountRow(                                  
+      159 -              label: l10n.reportClosingBalance,               
+      160 -              minorUnits: account.closingBalanceMinorUnits,   
+      161 -              currencyCode: account.currencyCode,             
+      162 -              bold: true,                                     
+      163 -            ),                                                
+      164 -          ],                                                  
+      102 +    return Column(                                            
+      103 +      crossAxisAlignment: CrossAxisAlignment.stretch,         
+      104 +      children: [                                             
+      105 +        SectionHeader(title: account.accountName),            
+      106 +        balanceRow(                                           
+      107 +          label: l10n.reportOpeningBalance,                   
+      108 +          minorUnits: account.openingBalanceMinorUnits,       
+      109 +          currencyCode: account.currencyCode,                 
+      110          ),
+      166 -      ),                                                      
+      111 +        if (account.incomeMinorUnits != 0)                    
+      112 +          flowRow(                                            
+      113 +            label: l10n.dashboardPeriodIncome,                
+      114 +            magnitudeMinorUnits: account.incomeMinorUnits,    
+      115 +            currencyCode: account.currencyCode,               
+      116 +            direction: FinancialAmountDirection.inflow,       
+      117 +            tone: FinancialAmountTone.income,                 
+      118 +          ),                                                  
+      119 +        if (account.expenseMinorUnits != 0)                   
+      120 +          flowRow(                                            
+      121 +            label: l10n.dashboardPeriodExpenses,              
+      122 +            magnitudeMinorUnits: account.expenseMinorUnits,   
+      123 +            currencyCode: account.currencyCode,               
+      124 +            direction: FinancialAmountDirection.outflow,      
+      125 +            tone: FinancialAmountTone.expense,                
+      126 +          ),                                                  
+      127 +        // Transfers keep the internal glyph rather than a plu
+          +s or a minus: a                                               
+      128 +        // transfer changes no household total, and the label 
+          +already says                                                  
+      129 +        // which way it went for this account.                
+      130 +        if (account.transfersInMinorUnits != 0)               
+      131 +          flowRow(                                            
+      132 +            label: l10n.reportTransferIn,                     
+      133 +            magnitudeMinorUnits: account.transfersInMinorUnits
+          +,                                                             
+      134 +            currencyCode: account.currencyCode,               
+      135 +            direction: FinancialAmountDirection.internal,     
+      136 +            tone: FinancialAmountTone.transfer,               
+      137 +          ),                                                  
+      138 +        if (account.transfersOutMinorUnits != 0)              
+      139 +          flowRow(                                            
+      140 +            label: l10n.reportTransferOut,                    
+      141 +            magnitudeMinorUnits: account.transfersOutMinorUnit
+          +s,                                                            
+      142 +            currencyCode: account.currencyCode,               
+      143 +            direction: FinancialAmountDirection.internal,     
+      144 +            tone: FinancialAmountTone.transfer,               
+      145 +          ),                                                  
+      146 +        if (account.adjustmentsMinorUnits != 0)               
+      147 +          signedFlowRow(                                      
+      148 +            label: l10n.transactionTypeAdjustment,            
+      149 +            signedMinorUnits: account.adjustmentsMinorUnits,  
+      150 +            currencyCode: account.currencyCode,               
+      151 +          ),                                                  
+      152 +        if (account.reversalEffectMinorUnits != 0)            
+      153 +          signedFlowRow(                                      
+      154 +            label: l10n.reportReversalEffect,                 
+      155 +            signedMinorUnits: account.reversalEffectMinorUnits
+          +,                                                             
+      156 +            currencyCode: account.currencyCode,               
+      157 +            tone: FinancialAmountTone.muted,                  
+      158 +          ),                                                  
+      159 +        balanceRow(                                           
+      160 +          label: l10n.reportClosingBalance,                   
+      161 +          minorUnits: account.closingBalanceMinorUnits,       
+      162 +          currencyCode: account.currencyCode,                 
+      163 +          isEmphasised: true,                                 
+      164 +          showDivider: false,                                 
+      165 +        ),                                                    
+      166 +      ],                                                      
+      167      );
+      168    }
+      169  }
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Four down, six to go:
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/home_savings_report_screen.dart)
   ⎿  Error writing file
 
   Read 1 file (ctrl+o to expand)
 
-⏺ Now rewriting it with the phase 1+2 expectations.
-⏺ Write(test/unit/core/presentation/theme/design_token_characterization_test.dar
-       t)
-  ⎿  Added 270 lines, removed 160 lines
-       1 -/// Characterization tests for the design-token layer, pinned a
-         -t phase 0.                                                     
-       1 +/// Characterization tests for the design-token layer.         
-       2  ///
-       3 -/// These assert what the tokens *are today*, not what they sho
-         -uld be. Their                                                  
-       4 -/// job is to make the redesign's phases visible: each phase be
-         -low is a                                                       
-       5 -/// deliberate value change, and every one of them should break
-         - a named group                                                 
-       6 -/// here. A failure in this file during phases 1–3 is expected 
-         -and the fix is                                                 
-       7 -/// to update the expectation — but a failure at any other time
-         - means a token                                                 
-       8 -/// moved by accident.                                         
-       3 +/// These assert what the tokens *are*, so that a token can nev
-         +er move by                                                     
-       4 +/// accident. Each group names the migration phase that last se
-         +ttled it.                                                      
-       5  ///
-      10 -///   * `derived roles` — breaks in **phase 1**, when the eight
-         - roles that read                                               
-      11 -///     off `ColorScheme.fromSeed` stop deriving and take liter
-         -als.                                                           
-      12 -///   * `literal roles` — breaks in **phase 1**, when the finan
-         -cial hues move.                                                
-      13 -///   * `surfaces` / `scaffold` — breaks in **phase 1**, when `
-         -ground` and                                                    
-      14 -///     `recessedSurface` separate from `mainSurface` / `second
-         -arySurface`.                                                   
-      15 -///   * `shape` / `spacing` — breaks in **phase 2** (all radii 
-         -to 0, sheet to 2,                                              
-      16 -///     `space2` and `space48` deleted).                       
-      17 -///   * `text roles` — breaks in **phase 3**, the typography ph
-         -ase.                                                           
-       6 +///   * colour roles — **settled in phase 1**. All 19 are liter
-         +als.                                                           
-       7 +///   * shape / spacing — **settled in phase 2**.              
-       8 +///   * text roles — metrics are still at their pre-redesign va
-         +lues; **phase 3**                                              
-       9 +///     replaces every one of them and applies the bundled font
-         +s.                                                             
-      10  ///
-      19 -/// Phase 0 itself must break none of them: it adds three colou
-         -r roles and one                                                
-      20 -/// factory signature, and changes no output.                  
-      11 +/// A failure outside phase 3 means something drifted.         
-      12  library;
-      13  
-      14  import 'package:family_money_manager/app/app_theme.dart';
-     ...
-       17  import 'package:flutter_test/flutter_test.dart';
-       18  
-       19  void main() {
-       29 -  ColorScheme schemeOf(Brightness brightness) => ColorScheme.f
-          -romSeed(                                                      
-       30 -    seedColor: const Color(0xFF1A6B3C),                       
-       31 -    error: const Color(0xFFBA1A1A),                           
-       32 -    brightness: brightness,                                   
-       33 -  );                                                          
-       34 -                                                              
-       35 -  group('AppFinancialColors — derived roles', () {            
-       36 -    // Phase 1 replaces every expectation in this group with a
-          - literal. Until                                               
-       37 -    // then, these roles are at the mercy of Material's palett
-          -e generator,                                                  
-       38 -    // which is the argument for the change.                  
-       39 -    test('light: eight roles read off the seeded ColorScheme',
-          - () {                                                         
-       40 -      final scheme = schemeOf(Brightness.light);              
-       41 -      final c = AppFinancialColors.light(scheme);             
-       42 -                                                              
-       43 -      expect(c.primaryAction, scheme.primary);                
-       44 -      expect(c.neutralInfo, scheme.onSurfaceVariant);         
-       45 -      expect(c.mainSurface, scheme.surface);                  
-       46 -      expect(c.secondarySurface, scheme.surfaceContainerLow); 
-       47 -      expect(c.divider, scheme.outlineVariant);               
-       48 -      expect(c.primaryText, scheme.onSurface);                
-       49 -      expect(c.secondaryText, scheme.onSurfaceVariant);       
-       50 -      expect(c.disabled, scheme.onSurface.withValues(alpha: 0.
-          -38));                                                         
-       20 +  group('AppFinancialColors — nothing derives from a seed', ()
-          + {                                                            
-       21 +    // The whole point of phase 1. Eight roles used to read of
-          +f                                                             
-       22 +    // ColorScheme.fromSeed, which left the design at the merc
-          +y of Material's                                               
-       23 +    // palette generator. A literal cannot drift when Flutter 
-          +retunes its                                                   
-       24 +    // tonal algorithm.                                       
-       25 +    test('light palette is exactly the specified 19 values', (
-          +) {                                                           
-       26 +      const c = AppFinancialColors.light;                     
-       27 +      expect(c.primaryAction, const Color(0xFF201E1D));       
-       28 +      expect(c.income, const Color(0xFF14555F));              
-       29 +      expect(c.expense, const Color(0xFFAE1800));             
-       30 +      expect(c.transfer, const Color(0xFF605D5D));            
-       31 +      expect(c.protectedMoney, const Color(0xFF6E4A1F));      
-       32 +      expect(c.goalReserved, const Color(0xFF2B5C8A));        
-       33 +      expect(c.certificatePrincipal, const Color(0xFF4A3E70));
-       34 +      expect(c.warning, const Color(0xFF8A5A00));             
-       35 +      expect(c.success, const Color(0xFF0E5A44));             
-       36 +      expect(c.neutralInfo, const Color(0xFF3D4A52));         
-       37 +      expect(c.mainSurface, const Color(0xFFFFFFFF));         
-       38 +      expect(c.secondarySurface, const Color(0xFFEAE9E9));    
-       39 +      expect(c.divider, const Color(0xFFC3BFBE));             
-       40 +      expect(c.primaryText, const Color(0xFF201E1D));         
-       41 +      expect(c.secondaryText, const Color(0xFF575351));       
-       42 +      expect(c.disabled, const Color(0xFF9B9797));            
-       43 +      expect(c.ground, const Color(0xFFF3F2F2));              
-       44 +      expect(c.recessedSurface, const Color(0xFFDEDBDA));     
-       45 +      expect(c.focusRing, const Color(0xFFEC3013));           
-       46      });
-       47  
-       53 -    test('dark: same eight roles, with the secondarySurface as
-          -ymmetry', () {                                                
-       54 -      final scheme = schemeOf(Brightness.dark);               
-       55 -      final c = AppFinancialColors.dark(scheme);              
-       56 -                                                              
-       57 -      expect(c.primaryAction, scheme.primary);                
-       58 -      expect(c.neutralInfo, scheme.onSurfaceVariant);         
-       59 -      expect(c.mainSurface, scheme.surface);                  
-       60 -      // Light derives from surfaceContainerLow, dark from …Hi
-          -gh. Phase 1                                                   
-       61 -      // removes this asymmetry; it is pinned so the removal i
-          -s intentional.                                                
-       62 -      expect(c.secondarySurface, scheme.surfaceContainerHigh);
-       63 -      expect(c.divider, scheme.outlineVariant);               
-       64 -      expect(c.primaryText, scheme.onSurface);                
-       65 -      expect(c.secondaryText, scheme.onSurfaceVariant);       
-       66 -      expect(c.disabled, scheme.onSurface.withValues(alpha: 0.
-          -38));                                                         
-       48 +    test('dark palette is exactly the specified 19 values', ()
-          + {                                                            
-       49 +      const c = AppFinancialColors.dark;                      
-       50 +      expect(c.primaryAction, const Color(0xFFF0EDEB));       
-       51 +      expect(c.income, const Color(0xFF5FB8B0));              
-       52 +      expect(c.expense, const Color(0xFFFF9783));             
-       53 +      expect(c.transfer, const Color(0xFFB0ABA9));            
-       54 +      expect(c.protectedMoney, const Color(0xFFD6A85C));      
-       55 +      expect(c.goalReserved, const Color(0xFF7FAFDD));        
-       56 +      expect(c.certificatePrincipal, const Color(0xFFA99BD6));
-       57 +      expect(c.warning, const Color(0xFFE0AE4A));             
-       58 +      expect(c.success, const Color(0xFF63BC94));             
-       59 +      expect(c.neutralInfo, const Color(0xFF9DB2BE));         
-       60 +      expect(c.mainSurface, const Color(0xFF221F1E));         
-       61 +      expect(c.secondarySurface, const Color(0xFF2C2928));    
-       62 +      expect(c.divider, const Color(0xFF4A4645));             
-       63 +      expect(c.primaryText, const Color(0xFFF0EDEB));         
-       64 +      expect(c.secondaryText, const Color(0xFFA8A3A0));       
-       65 +      expect(c.disabled, const Color(0xFF6B6766));            
-       66 +      expect(c.ground, const Color(0xFF181716));              
-       67 +      expect(c.recessedSurface, const Color(0xFF3A3635));     
-       68 +      expect(c.focusRing, const Color(0xFFFF563C));           
-       69      });
-       70  
-       69 -    test('disabled is an alpha, not a colour', () {           
-       70 -      // Phase 1 makes it opaque, because alpha over the hatch
-          -ed held region                                                
-       71 -      // produced unpredictable contrast.                     
-       72 -      final c = AppFinancialColors.light(schemeOf(Brightness.l
-          -ight));                                                       
-       73 -      expect(c.disabled.a, closeTo(0.38, 0.001));             
-       71 +    test('every role is fully opaque', () {                   
-       72 +      // disabled used to be onSurface at alpha 0.38. Alpha ov
-          +er the hatched                                                
-       73 +      // held region composited unpredictably, so it is now an
-          + opaque value.                                                
-       74 +      for (final c in [AppFinancialColors.light, AppFinancialC
-          +olors.dark]) {                                                
-       75 +        for (final role in _allRoles(c)) {                    
-       76 +          expect(role.a, 1.0, reason: 'every financial role mu
-          +st be opaque');                                               
-       77 +        }                                                     
-       78 +      }                                                       
-       79      });
-       80    });
-       81  
-       77 -  group('AppFinancialColors — literal roles', () {            
-       78 -    test('light financial hues', () {                         
-       79 -      final c = AppFinancialColors.light(schemeOf(Brightness.l
-          -ight));                                                       
-       80 -      expect(c.income, const Color(0xFF2E7D4F));              
-       81 -      expect(c.expense, const Color(0xFFB54A3F));             
-       82 -      expect(c.transfer, const Color(0xFF4A6670));            
-       83 -      expect(c.protectedMoney, const Color(0xFF6B5B3E));      
-       84 -      expect(c.goalReserved, const Color(0xFF3D6B8A));        
-       85 -      expect(c.certificatePrincipal, const Color(0xFF5A4E7C));
-       86 -      expect(c.warning, const Color(0xFFB8831A));             
-       87 -      expect(c.success, const Color(0xFF2E7D4F));             
-       88 -    });                                                       
-       82 +  group('AppFinancialColors — the distinctions the design depe
-          +nds on', () {                                                 
-       83 +    // The properties that make the palette work. A future val
-          +ue change that                                                
-       84 +    // kept the hex codes plausible but broke one of these wou
-          +ld be a                                                       
-       85 +    // regression the literal assertions above could not catch
-          +.                                                             
-       86  
-       90 -    test('dark financial hues', () {                          
-       91 -      final c = AppFinancialColors.dark(schemeOf(Brightness.da
-          -rk));                                                         
-       92 -      expect(c.income, const Color(0xFF81C784));              
-       93 -      expect(c.expense, const Color(0xFFE57373));             
-       94 -      expect(c.transfer, const Color(0xFF90A4AE));            
-       95 -      expect(c.protectedMoney, const Color(0xFFD7CCC8));      
-       96 -      expect(c.goalReserved, const Color(0xFF80CBC4));        
-       97 -      expect(c.certificatePrincipal, const Color(0xFFB39DDB));
-       98 -      expect(c.warning, const Color(0xFFFFB74D));             
-       99 -      expect(c.success, const Color(0xFF81C784));             
-       87 +    test('success is distinct from income in both themes', () 
-          +{                                                             
-       88 +      // Before phase 1 these were byte-identical, so a "saved
-          +" tick was                                                    
-       89 +      // indistinguishable from an income amount — confirmatio
-          +n of a *write*                                                
-       90 +      // looked like confirmation of a *value*.               
-       91 +      for (final c in [AppFinancialColors.light, AppFinancialC
-          +olors.dark]) {                                                
-       92 +        expect(c.success, isNot(c.income));                   
-       93 +      }                                                       
-       94      });
-       95  
-      102 -    test('success is currently indistinguishable from income',
-          - () {                                                         
-      103 -      // Not a tautology — this is the defect. A "saved" tick 
-          -renders in the                                                
-      104 -      // same colour as an income amount, so confirmation of a
-          - *write* looks                                                
-      105 -      // like confirmation of a *value*. Phase 1 separates the
-          -m, and this                                                   
-      106 -      // expectation inverts to expect(success, isNot(income))
-          -.                                                             
-      107 -      for (final c in [                                       
-      108 -        AppFinancialColors.light(schemeOf(Brightness.light)), 
-      109 -        AppFinancialColors.dark(schemeOf(Brightness.dark)),   
-      110 -      ]) {                                                    
-      111 -        expect(c.success, c.income);                          
-       96 +    test('the three surfaces are distinct in both themes', () 
-          +{                                                             
-       97 +      // ground / main / recessed carry the spendable-vs-held 
-          +separation. If                                                
-       98 +      // any two collapse, the held-money region stops being a
-          + region.                                                      
-       99 +      for (final c in [AppFinancialColors.light, AppFinancialC
-          +olors.dark]) {                                                
-      100 +        expect({c.ground, c.mainSurface, c.recessedSurface}, h
-          +asLength(3));                                                 
-      101        }
-      102      });
-      114 -  });                                                         
-      103  
-      116 -  group('AppFinancialColors — phase 0 additions are invisible'
-          -, () {                                                        
-      117 -    // The three new roles exist so phase 1 is a pure value ch
-          -ange. Until then                                              
-      118 -    // they must be indistinguishable from the roles they will
-          - replace,                                                     
-      119 -    // otherwise phase 0 has shipped a visual change it promis
-          -ed not to.                                                    
-      120 -    test('light: ground, recessedSurface and focusRing are see
-          -ded', () {                                                    
-      121 -      final scheme = schemeOf(Brightness.light);              
-      122 -      final c = AppFinancialColors.light(scheme);             
-      123 -      expect(c.ground, c.mainSurface);                        
-      124 -      expect(c.recessedSurface, c.secondarySurface);          
-      125 -      expect(c.focusRing, c.primaryAction);                   
-      104 +    test('the direction axis is not green-vs-red', () {       
-      105 +      // The old palette put income and expense on precisely t
-          +he axis both                                                  
-      106 +      // common dichromacies collapse. income is now a deep te
-          +al, which                                                     
-      107 +      // separates from the red on the blue–yellow channel the
-          +y retain.                                                     
-      108 +      const light = AppFinancialColors.light;                 
-      109 +      expect(light.income.b, greaterThan(light.income.r));    
-      110 +      expect(light.expense.r, greaterThan(light.expense.b));  
-      111      });
-      112  
-      128 -    test('dark: ground, recessedSurface and focusRing are seed
-          -ed', () {                                                     
-      129 -      final scheme = schemeOf(Brightness.dark);               
-      130 -      final c = AppFinancialColors.dark(scheme);              
-      131 -      expect(c.ground, c.mainSurface);                        
-      132 -      expect(c.recessedSurface, c.secondarySurface);          
-      133 -      expect(c.focusRing, c.primaryAction);                   
-      113 +    test('transfer is achromatic — it changes no total, so it 
-          +earns no hue', () {                                           
-      114 +      for (final c in [AppFinancialColors.light, AppFinancialC
-          +olors.dark]) {                                                
-      115 +        expect(c.transfer.r, closeTo(c.transfer.g, 0.05));    
-      116 +        expect(c.transfer.g, closeTo(c.transfer.b, 0.05));    
-      117 +      }                                                       
-      118      });
-      119  
-      136 -    test('copyWith and lerp carry the three new roles', () {  
-      120 +    test('focusRing is not the expense red', () {             
-      121 +      // The ring is the one place raw accent appears outside 
-          +the expense                                                   
-      122 +      // role, because a focus ring is chrome, not money. Were
-          + they equal, a                                                
-      123 +      // focused field would read as an error.                
-      124 +      for (final c in [AppFinancialColors.light, AppFinancialC
-          +olors.dark]) {                                                
-      125 +        expect(c.focusRing, isNot(c.expense));                
-      126 +      }                                                       
-      127 +    });                                                       
-      128 +                                                              
-      129 +    test('copyWith and lerp carry the roles added in phase 0',
-          + () {                                                         
-      130        // A ThemeExtension that drops a field in copyWith or le
-           rp fails silently
-      131        // and only during a theme animation, which is close to 
-           undebuggable.
-      139 -      final c = AppFinancialColors.light(schemeOf(Brightness.l
-          -ight));                                                       
-      132 +      const c = AppFinancialColors.light;                     
-      133        const sentinel = Color(0xFF123456);
-      134  
-      135        final copied = c.copyWith(
-     ...
-      141        expect(copied.recessedSurface, sentinel);
-      142        expect(copied.focusRing, sentinel);
-      143  
-      151 -      final midpoint = c.lerp(copied, 1.0);                   
-      152 -      expect(midpoint.ground, sentinel);                      
-      153 -      expect(midpoint.recessedSurface, sentinel);             
-      154 -      expect(midpoint.focusRing, sentinel);                   
-      144 +      final end = c.lerp(copied, 1.0);                        
-      145 +      expect(end.ground, sentinel);                           
-      146 +      expect(end.recessedSurface, sentinel);                  
-      147 +      expect(end.focusRing, sentinel);                        
-      148      });
-      149    });
-      150  
-      158 -  group('AppTextRoles — current metrics', () {                
-      159 -    // Every expectation here moves in phase 3. sectionTitle s
-          -hrinks 18 → 13                                                
-      160 -    // and reportValue grows 15 → 20, which is why that phase 
-          -ships alone.                                                  
-      151 +  group('AppTextRoles — metrics (phase 3 replaces all of these
-          +)', () {                                                      
-      152      final roles = AppTextRoles.forLocale(
-      162 -      schemeOf(Brightness.light),                             
-      153 +      AppTheme.light().colorScheme,                           
-      154        const Locale('en'),
-      155      );
-      156  
-     ...
-      159        expect(roles.displayBalance.fontWeight, FontWeight.w600)
-           ;
-      160        expect(roles.displayBalance.height, 1.25);
-      161        expect(roles.displayBalance.letterSpacing, -0.5);
-      171 -      // Phase 3 adds tabular figures here; today they are mis
-          -sing, though                                                  
-      162 +      // Phase 3 adds tabular figures; today they are missing 
-          +here even though                                              
-      163        // financialAmount already has them.
-      164        expect(roles.displayBalance.fontFeatures, isNull);
-      165      });
-     ...
-      231      });
-      232  
-      233      test('no role carries a font family yet', () {
-      243 -      // The whole point of bundling fonts in phase 0 without 
-          -applying them.                                                
-      244 -      // Phase 3 flips every one of these to Archivo or IBM Pl
-          -ex Sans Arabic.                                               
-      245 -      final all = <TextStyle>[                                
-      246 -        roles.displayBalance,                                 
-      247 -        roles.screenTitle,                                    
-      248 -        roles.sectionTitle,                                   
-      249 -        roles.cardTitle,                                      
-      250 -        roles.body,                                           
-      251 -        roles.financialAmount,                                
-      252 -        roles.supportingMeta,                                 
-      253 -        roles.formLabel,                                      
-      254 -        roles.buttonLabel,                                    
-      255 -        roles.statusLabel,                                    
-      256 -        roles.reportValue,                                    
-      257 -      ];                                                      
-      258 -      for (final style in all) {                              
-      234 +      // The fonts are bundled but unapplied. Phase 3 flips ev
-          +ery one of these                                              
-      235 +      // to Archivo or IBM Plex Sans Arabic.                  
-      236 +      for (final style in _allTextRoles(roles)) {             
-      237          expect(style.fontFamily, isNull);
-      238        }
-      239      });
-      240  
-      263 -    test('forLocale returns identical metrics for ar and en at
-          - phase 0', () {                                               
-      264 -      // Phase 3 breaks this deliberately: Arabic line height 
-          -is +0.30 across                                               
-      265 -      // every role, and sectionTitle diverges further still. 
-      241 +    test('forLocale returns identical metrics for ar and en un
-          +til phase 3', () {                                            
-      242        final ar = AppTextRoles.forLocale(
-      267 -        schemeOf(Brightness.light),                           
-      243 +        AppTheme.light().colorScheme,                         
-      244          const Locale('ar', 'EG'),
-      245        );
-      246        expect(ar.body.height, roles.body.height);
-     ...
-      249      });
-      250    });
-      251  
-      276 -  group('AppTheme — shape, spacing, motion, widths', () {     
-      277 -    test('radii are non-zero today; phase 2 takes all but the 
-          -sheet to 0', () {                                             
-      278 -      expect(AppTheme.radiusBadge, 4.0);                      
-      279 -      expect(AppTheme.radiusChip, 8.0);                       
-      280 -      expect(AppTheme.radiusInput, 10.0);                     
-      281 -      expect(AppTheme.radiusButton, 10.0);                    
-      282 -      expect(AppTheme.radiusCard, 12.0);                      
-      283 -      expect(AppTheme.radiusDialog, 16.0);                    
-      284 -      expect(AppTheme.radiusSheet, 20.0);                     
-      252 +  group('AppTextRoles — colour no longer derives from the seed
-          +', () {                                                       
-      253 +    test('text roles take their colour from the literal palett
-          +e', () {                                                      
-      254 +      // Were these to derive from the neutrally-seeded ColorS
-          +cheme, every text                                             
-      255 +      // role would be de-calibrated against the exact ground 
-          +the design is                                                 
-      256 +      // measured on.                                         
-      257 +      final light = AppTextRoles.forLocale(                   
-      258 +        AppTheme.light().colorScheme,                         
-      259 +        const Locale('en'),                                   
-      260 +      );                                                      
-      261 +      expect(light.body.color, AppFinancialColors.light.primar
-          +yText);                                                       
-      262 +      expect(light.supportingMeta.color, AppFinancialColors.li
-          +ght.secondaryText);                                           
-      263 +                                                              
-      264 +      final dark = AppTextRoles.forLocale(                    
-      265 +        AppTheme.dark().colorScheme,                          
-      266 +        const Locale('en'),                                   
-      267 +      );                                                      
-      268 +      expect(dark.body.color, AppFinancialColors.dark.primaryT
-          +ext);                                                         
-      269 +      expect(dark.supportingMeta.color, AppFinancialColors.dar
-          +k.secondaryText);                                             
-      270      });
-      271 +  });                                                         
-      272  
-      287 -    test('the approved spacing scale is present', () {        
-      273 +  group('AppTheme — shape and spacing (settled in phase 2)', (
-          +) {                                                           
-      274 +    test('every radius is zero except the sheet', () {        
-      275 +      expect(AppTheme.radiusBadge, 0.0);                      
-      276 +      expect(AppTheme.radiusChip, 0.0);                       
-      277 +      expect(AppTheme.radiusInput, 0.0);                      
-      278 +      expect(AppTheme.radiusButton, 0.0);                     
-      279 +      expect(AppTheme.radiusCard, 0.0);                       
-      280 +      expect(AppTheme.radiusDialog, 0.0);                     
-      281 +      // The one exception: a perfectly square sheet edge over
-          + a square                                                     
-      282 +      // scaffold reads as a broken layout rather than as a la
-          +yer.                                                          
-      283 +      expect(AppTheme.radiusSheet, 2.0);                      
-      284 +    });                                                       
-      285 +                                                              
-      286 +    test('legacy radius aliases still resolve', () {          
-      287 +      expect(AppTheme.radiusSmall, 0.0);                      
-      288 +      expect(AppTheme.radiusMedium, 0.0);                     
-      289 +      expect(AppTheme.radiusLarge, 0.0);                      
-      290 +      expect(AppTheme.radiusXLarge, AppTheme.radiusSheet);    
-      291 +    });                                                       
-      292 +                                                              
-      293 +    test('the approved spacing scale, and only it', () {      
-      294        expect(
-      295          [
-      296            AppTheme.space4,
-     ...
-      306        );
-      307      });
-      308  
-      303 -    test('two off-scale constants still exist; phase 2 deletes
-          - them', () {                                                  
-      304 -      expect(AppTheme.space2, 2.0);                           
-      305 -      expect(AppTheme.space48, 48.0);                         
-      306 -      // minTouchTarget is also 48 and *stays* — it is a targe
-          -t, not a step.                                                
-      309 +    test('minTouchTarget survives the deletion of space48', ()
-          + {                                                            
-      310 +      // They shared a value, but one is a tap target and the 
-          +other was a                                                   
-      311 +      // spacing step off the approved scale. Only the spacing
-          + step went.                                                   
-      312        expect(AppTheme.minTouchTarget, 48.0);
-      313      });
-      314  
-      315 +    test('a region rule is 2 px', () {                        
-      316 +      // The design's principal hierarchy device — it does the
-          + work M3 assigns                                              
-      317 +      // to elevation. Rows get a 1 px hairline; regions get i
-          +nk.                                                           
-      318 +      expect(AppTheme.regionRuleWidth, 2.0);                  
-      319 +    });                                                       
-      320 +                                                              
-      321      test('motion and content widths', () {
-      322        expect(AppTheme.motionFast, const Duration(milliseconds:
-            150));
-      323        expect(AppTheme.motionStandard, const Duration(milliseco
-           nds: 220));
-      313 -      // Phase 3 takes this to 280 — 320 is noticeably slow on
-          - the app's most                                               
-      314 -      // repeated transition.                                 
-      324 +      // Phase 3 takes this to 280.                           
-      325        expect(AppTheme.motionEmphasized, const Duration(millise
-           conds: 320));
-      326  
-      327        expect(AppTheme.formContentMaxWidth, 720.0);
-     ...
-      332    });
-      333  
-      334    group('AppTheme — ThemeData wiring', () {
-      325 -    test('the scaffold is currently the same colour as a card'
-          -, () {                                                        
-      326 -      // This is the defect `ground` exists to fix: with the p
-          -age and a card on                                             
-      327 -      // one colour, card separation has to come from radius a
-          -nd shadow, both                                               
-      328 -      // of which the design removes. Phase 1 moves this to gr
-          -ound.                                                         
-      335 +    test('the scaffold is the ground, and a card is not', () {
-      336 +      // This is what `ground` was added for. With the page an
-          +d a card on one                                               
-      337 +      // colour, card separation had to come from radius and s
-          +hadow, both of                                                
-      338 +      // which the design removes.                            
-      339        for (final theme in [AppTheme.light(), AppTheme.dark()])
-            {
-      340          final financial = theme.extension<AppFinancialColors>(
-           )!;
-      331 -        expect(theme.scaffoldBackgroundColor, financial.mainSu
-          -rface);                                                       
-      341 +        expect(theme.scaffoldBackgroundColor, financial.ground
-          +);                                                            
-      342 +        expect(theme.scaffoldBackgroundColor, isNot(financial.
-          +mainSurface));                                                
-      343 +        expect(theme.cardTheme.color, financial.mainSurface); 
-      344        }
-      345      });
-      346  
-      347 +    test('no component carries elevation', () {               
-      348 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      349 +        expect(theme.cardTheme.elevation, 0);                 
-      350 +        expect(theme.appBarTheme.elevation, 0);               
-      351 +        expect(theme.appBarTheme.scrolledUnderElevation, 0);  
-      352 +        expect(theme.dialogTheme.elevation, 0);               
-      353 +        expect(theme.bottomSheetTheme.elevation, 0);          
-      354 +      }                                                       
-      355 +    });                                                       
-      356 +                                                              
-      357 +    test('the card outline is a solid hairline, not half-alpha
-          +', () {                                                       
-      358 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      359 +        final financial = theme.extension<AppFinancialColors>(
-          +)!;                                                           
-      360 +        final shape = theme.cardTheme.shape! as RoundedRectang
-          +leBorder;                                                     
-      361 +        expect(shape.side.color, financial.divider);          
-      362 +        expect(shape.side.color.a, 1.0);                      
-      363 +        expect(shape.borderRadius, BorderRadius.zero);        
-      364 +      }                                                       
-      365 +    });                                                       
-      366 +                                                              
-      367 +    test('focus is a 2 px ink bottom rule, not a 1.5 px box', 
-          +() {                                                          
-      368 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      369 +        final financial = theme.extension<AppFinancialColors>(
-          +)!;                                                           
-      370 +        final focused = theme.inputDecorationTheme.focusedBord
-          +er!;                                                          
-      371 +        expect(focused, isA<UnderlineInputBorder>());         
-      372 +        expect(focused.borderSide.width, AppTheme.regionRuleWi
-          +dth);                                                         
-      373 +        expect(focused.borderSide.color, financial.primaryActi
-          +on);                                                          
-      374 +      }                                                       
-      375 +    });                                                       
-      376 +                                                              
-      377 +    test('an errored field rules in the expense role', () {   
-      378 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      379 +        final financial = theme.extension<AppFinancialColors>(
-          +)!;                                                           
-      380 +        expect(                                               
-      381 +          theme.inputDecorationTheme.errorBorder!.borderSide.c
-          +olor,                                                         
-      382 +          financial.expense,                                  
-      383 +        );                                                    
-      384 +      }                                                       
-      385 +    });                                                       
-      386 +                                                              
-      387 +    test('the ColorScheme is neutral — it introduces no hue of
-          + its own', () {                                               
-      388 +      // It exists only so that stock M3 widgets resolve somet
-          +hing coherent.                                                
-      389 +      // Were it to carry a hue, an unrestyled widget could pu
-          +t an untokenised                                              
-      390 +      // colour on screen.                                    
-      391 +      final scheme = AppTheme.light().colorScheme;            
-      392 +      expect(scheme.primary.r, closeTo(scheme.primary.g, 0.08)
-          +);                                                            
-      393 +      expect(scheme.primary.g, closeTo(scheme.primary.b, 0.08)
-          +);                                                            
-      394 +    });                                                       
-      395 +                                                              
-      396 +    test('the stock error colour is the one product red', () {
-      397 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      398 +        expect(theme.colorScheme.error, const Color(0xFFAE1800
-          +));                                                           
-      399 +      }                                                       
-      400 +    });                                                       
-      401 +                                                              
-      402      test('both extensions are registered on both themes', () {
-      403        for (final theme in [AppTheme.light(), AppTheme.dark()])
-            {
-      404          expect(theme.extension<AppFinancialColors>(), isNotNul
-           l);
-     ...
-      406        }
-      407      });
-      408  
-      342 -    test('locale parameter defaults to English and changes not
-          -hing yet', () {                                               
-      409 +    test('light and dark resolve different palettes', () {    
-      410 +      expect(                                                 
-      411 +        AppTheme.light().extension<AppFinancialColors>()!.grou
-          +nd,                                                           
-      412 +        isNot(AppTheme.dark().extension<AppFinancialColors>()!
-          +.ground),                                                     
-      413 +      );                                                      
-      414 +    });                                                       
-      415 +                                                              
-      416 +    test('locale parameter still changes no metric until phase
-          + 3', () {                                                     
-      417        final byDefault = AppTheme.light();
-      418        final arabic = AppTheme.light(locale: const Locale('ar',
-            'EG'));
-      419        expect(
-     ...
-      423      });
-      424    });
-      425  }
-      426 +                                                              
-      427 +List<Color> _allRoles(AppFinancialColors c) => [              
-      428 +  c.primaryAction,                                            
-      429 +  c.income,                                                   
-      430 +  c.expense,                                                  
-      431 +  c.transfer,                                                 
-      432 +  c.protectedMoney,                                           
-      433 +  c.goalReserved,                                             
-      434 +  c.certificatePrincipal,                                     
-      435 +  c.warning,                                                  
-      436 +  c.success,                                                  
-      437 +  c.neutralInfo,                                              
-      438 +  c.mainSurface,                                              
-      439 +  c.secondarySurface,                                         
-      440 +  c.divider,                                                  
-      441 +  c.primaryText,                                              
-      442 +  c.secondaryText,                                            
-      443 +  c.disabled,                                                 
-      444 +  c.ground,                                                   
-      445 +  c.recessedSurface,                                          
-      446 +  c.focusRing,                                                
-      447 +];                                                            
-      448 +                                                              
-      449 +List<TextStyle> _allTextRoles(AppTextRoles r) => [            
-      450 +  r.displayBalance,                                           
-      451 +  r.screenTitle,                                              
-      452 +  r.sectionTitle,                                             
-      453 +  r.cardTitle,                                                
-      454 +  r.body,                                                     
-      455 +  r.financialAmount,                                          
-      456 +  r.supportingMeta,                                           
-      457 +  r.formLabel,                                                
-      458 +  r.buttonLabel,                                              
-      459 +  r.statusLabel,                                              
-      460 +  r.reportValue,                                              
-      461 +];                                                            
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ The neutral-seed assertion was wrong — M3 generates a hued primary even from
-  an ink seed. The better fix is to align the ColorScheme to the literal palette
-  directly, which is what the brief actually requires.
-
-  Read 1 file (ctrl+o to expand)
-
-⏺ Update(lib/app/app_theme.dart)
-  ⎿  Added 28 lines, removed 5 lines
-       97      required Brightness brightness,
-       98      required Locale locale,
-       99    }) {
-      100 -    final colorScheme = ColorScheme.fromSeed(                 
-      101 -      seedColor: _neutralSeedColor,                           
-      102 -      error: _errorColor,                                     
-      103 -      brightness: brightness,                                 
-      104 -    );                                                        
-      100      final financial = brightness == Brightness.light
-      101          ? AppFinancialColors.light
-      102          : AppFinancialColors.dark;
-      103 +                                                              
-      104 +    // The seed fills in the long tail of M3 roles nothing in 
-          +this app names.                                               
-      105 +    // Every role a stock widget can actually put on screen is
-          + then pinned to                                               
-      106 +    // the literal palette — otherwise an unrestyled Material 
-          +widget would                                                  
-      107 +    // render a tone the design system does not contain. Note 
-          +that seeding                                                  
-      108 +    // from ink is not by itself enough: M3's tonal algorithm 
-          +derives a                                                     
-      109 +    // chromatic primary from any seed, including a near-black
-          + one.                                                         
-      110 +    final colorScheme =                                       
-      111 +        ColorScheme.fromSeed(                                 
-      112 +          seedColor: _neutralSeedColor,                       
-      113 +          error: _errorColor,                                 
-      114 +          brightness: brightness,                             
-      115 +        ).copyWith(                                           
-      116 +          primary: financial.primaryAction,                   
-      117 +          onPrimary: financial.mainSurface,                   
-      118 +          surface: financial.mainSurface,                     
-      119 +          onSurface: financial.primaryText,                   
-      120 +          onSurfaceVariant: financial.secondaryText,          
-      121 +          surfaceContainerLowest: financial.mainSurface,      
-      122 +          surfaceContainerLow: financial.secondarySurface,    
-      123 +          surfaceContainer: financial.secondarySurface,       
-      124 +          surfaceContainerHigh: financial.secondarySurface,   
-      125 +          surfaceContainerHighest: financial.recessedSurface, 
-      126 +          outline: financial.divider,                         
-      127 +          outlineVariant: financial.divider,                  
-      128 +          error: financial.expense,                           
-      129 +          onError: financial.mainSurface,                     
-      130 +        );                                                    
-      131      final textRoles = AppTextRoles.forLocale(colorScheme, loca
-           le);
-      132  
-      133      return ThemeData(
-
-⏺ Update(test/unit/core/presentation/theme/design_token_characterization_test.da
-        rt)
-  ⎿  Added 21 lines, removed 7 lines
-      390        }
-      391      });
-      392  
-      393 -    test('the ColorScheme is neutral — it introduces no hue of
-          - its own', () {                                               
-      394 -      // It exists only so that stock M3 widgets resolve somet
-          -hing coherent.                                                
-      395 -      // Were it to carry a hue, an unrestyled widget could pu
-          -t an untokenised                                              
-      396 -      // colour on screen.                                    
-      397 -      final scheme = AppTheme.light().colorScheme;            
-      398 -      expect(scheme.primary.r, closeTo(scheme.primary.g, 0.08)
-          -);                                                            
-      399 -      expect(scheme.primary.g, closeTo(scheme.primary.b, 0.08)
-          -);                                                            
-      393 +    test('every ColorScheme role a stock widget can paint is p
-          +inned', () {                                                  
-      394 +      // Seeding alone is not enough — M3 derives a chromatic 
-          +primary from any                                              
-      395 +      // seed, including ink. Without these overrides an unres
-          +tyled Material                                                
-      396 +      // widget would render a tone the design system does not
-          + contain.                                                     
-      397 +      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          + {                                                            
-      398 +        final s = theme.colorScheme;                          
-      399 +        final f = theme.extension<AppFinancialColors>()!;     
-      400 +        expect(s.primary, f.primaryAction);                   
-      401 +        expect(s.surface, f.mainSurface);                     
-      402 +        expect(s.onSurface, f.primaryText);                   
-      403 +        expect(s.onSurfaceVariant, f.secondaryText);          
-      404 +        expect(s.outline, f.divider);                         
-      405 +        expect(s.outlineVariant, f.divider);                  
-      406 +        expect(s.error, f.expense);                           
-      407 +      }                                                       
-      408      });
-      409  
-      410 +    test('the scheme primary is achromatic, because it is ink'
-          +, () {                                                        
-      411 +      final s = AppTheme.light().colorScheme;                 
-      412 +      expect(s.primary.r, closeTo(s.primary.g, 0.02));        
-      413 +      expect(s.primary.g, closeTo(s.primary.b, 0.02));        
-      414 +    });                                                       
-      415 +                                                              
-      416      test('the stock error colour is the one product red', () {
-      417        for (final theme in [AppTheme.light(), AppTheme.dark()])
-            {
-      418          expect(theme.colorScheme.error, const Color(0xFFAE1800
-           ));
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ My test was wrong — dark theme's error correctly resolves to the dark expense
-  role, not the light one.
-
-⏺ Update(test/unit/core/presentation/theme/design_token_characterization_test.da
-        rt)
-  ⎿  Added 6 lines, removed 4 lines
-      413        expect(s.primary.g, closeTo(s.primary.b, 0.02));
-      414      });
-      415  
-      416 -    test('the stock error colour is the one product red', () {
-      417 -      for (final theme in [AppTheme.light(), AppTheme.dark()])
-          - {                                                            
-      418 -        expect(theme.colorScheme.error, const Color(0xFFAE1800
-          -));                                                           
-      419 -      }                                                       
-      416 +    test('the stock error colour is the one product red, per t
-          +heme', () {                                                   
-      417 +      // Each theme takes its own expense value — the dark red
-          + is lighter so it                                             
-      418 +      // clears AA on the dark surface. What matters is that n
-          +either theme                                                  
-      419 +      // introduces a *second* red.                           
-      420 +      expect(AppTheme.light().colorScheme.error, const Color(0
-          +xFFAE1800));                                                  
-      421 +      expect(AppTheme.dark().colorScheme.error, const Color(0x
-          +FFFF9783));                                                   
-      422      });
-      423  
-      424      test('both extensions are registered on both themes', () {
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All 40 token tests pass. Now the full suite to see what phases 1+2 moved.
-
-  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
-
-⏺ The nav test hangs on its first case — a genuine pre-existing problem,
-  unrelated to my changes. Waiting on the full suite.
-
-  Read 1 file, ran 3 shell commands (ctrl+o to expand)
-
-⏺ 1681 passing, 3 failures — the same pre-existing three. No colour or radius
-  assertion broke anywhere in the app. Waiting for the hanging nav file to time
-  out.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The token change is inert until the 82 feature-level Colors.* call sites stop
-  bypassing it — the accessibility fix is invisible otherwise. That's defect #15
-  and part of phase 1. Let me map every site.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now I need the semantic meaning of each site. Reading the report screens,
-  which share a pattern.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Mapping is clear for the report rows. Checking the remaining ambiguous sites.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ All contexts understood. Executing the replacement — starting with the
-  exactly-repeated error-message pattern.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now the report screens, which share the income/expense/transfer/reversal row
-  pattern.
-
-  Ran 1 shell command (ctrl+o to expand)
-⏺ Now each of those needs colors in scope. Let me find where.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Background command "Poll phases 1+2 progress" completed (exit code 0)
-
-⏺ Reports are clean. Now the remaining files.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Update(lib/features/reports/presentation/report_transaction_list_screen.dart)
-  ⎿  Added 1 line, removed 1 line
-      101  
-      102    @override
-      103    Widget build(BuildContext context) {
-      104 -    final color = _color();                                   
-      104 +    final color = _color(context.financialColors);            
-      105      return Semantics(
-      106        label: '${operationTypeLabel(l10n, row.operationType)} $
-           {ReportAmountText.formatMinorUnits(row.amountMinorUnits, row.c
-           urrencyCode)} ${row.effectiveDate}',
-      107        button: true,
-
-⏺ Now the two largest remaining: dashboard_screen.dart (17 sites) and
-  account_detail_screen.dart (6).
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The generic replacement caught that icon and left it const with a non-const
-  value. Fixing it properly.
-
-⏺ Update(lib/features/dashboard/presentation/dashboard_screen.dart)
-  ⎿  Added 3 lines, removed 2 lines
-      755            if (balance.isNegative) ...[
-      756              Semantics(
-      757                label: negativeWarningLabel,
-      758 -              child: const Icon(                              
-      758 +              // `warning` sits on the notice, never on the am
-          +ount itself.                                                  
-      759 +              child: Icon(                                    
-      760                  Icons.warning_amber_outlined,
-      761                  size: 16,
-      761 -                color: context.financialColors.expense,       
-      762 +                color: context.financialColors.warning,       
-      763                ),
-      764              ),
-      765              const SizedBox(width: 4),
-
-⏺ Now the last three files.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Update(lib/features/certificates/presentation/certificates_list_screen.dart)
-  ⎿  Added 1 line
-      86    @override
-      87    Widget build(BuildContext context, WidgetRef ref) {
-      88      final l10n = AppLocalizations.of(context);
-      89 +    final colors = context.financialColors;                    
-      90      final progressAsync = ref.watch(certificateProgressProvider
-          (cert.id));
-      91  
-      92      final termState = progressAsync.when(
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Two stragglers left. Let me find them case-sensitively.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Update(lib/features/reports/presentation/report_transaction_list_screen.dart)
-  ⎿  Added 1 line, removed 1 line
-      139                  l10n.reportReversalEffect,
-      140                  style: Theme.of(
-      141                    context,
-      142 -                ).textTheme.labelSmall?.copyWith(color: Colors
-          -.orange),                                                     
-      142 +                ).textTheme.labelSmall?.copyWith(color: color)
-          +,                                                             
-      143                ),
-      144            ],
-      145          ),
-
-⏺ Background command "Isolated nav test, no timeout wrapper" completed (exit
-code 0)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Update(lib/features/transactions/presentation/transaction_detail_screen.dart)
-  ⎿  Added 3 lines, removed 1 line
-      80                            l10n.transactionReversed,
-      81                            style: Theme.of(
-      82                              context,
-      83 -                          ).textTheme.labelSmall?.copyWith(colo
-         -r: Colors.grey),                                               
-      83 +                          ).textTheme.labelSmall?.copyWith(    
-      84 +                            color: context.financialColors.seco
-         +ndaryText,                                                     
-      85 +                          ),                                   
-      86                          ),
-      87                        ),
-      88                    ],
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All raw palette colours are gone. Let me lock that in with an architecture
-  rule, since this repo already enforces boundaries by test.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Update(test/unit/architecture/architecture_boundaries_test.dart)
-  ⎿  Added 42 lines
-      113      expect(violations, isEmpty, reason: violations.join('\n'))
-           ;
-      114    });
-      115  
-      116 +  test('no feature paints a raw Material palette colour', () {
-      117 +    // Financial state is carried by semantic roles on AppFina
-          +ncialColors, and                                              
-      118 +    // a raw hue bypasses every guarantee those roles make: th
-          +e income/expense                                              
-      119 +    // axis stays off the green–red pair both common dichromac
-          +ies collapse,                                                 
-      120 +    // dark mode gets a value that actually clears AA, and the
-          +re is exactly one                                             
-      121 +    // red in the product. Colors.transparent is not a hue and
-          + is allowed.                                                  
-      122 +    final violations = <String>[];                            
-      123 +    final pattern = RegExp(                                   
-      124 +      r'\bColors\.(red|green|orange|blue|grey|gray|amber|purpl
-          +e|teal|yellow'                                                
-      125 +      r'|pink|cyan|indigo|brown|lime|deepOrange|deepPurple|lig
-          +htBlue'                                                       
-      126 +      r'|lightGreen|blueGrey)\b',                             
-      127 +    );                                                        
-      128 +    for (final file in [                                      
-      129 +      ...dartFilesUnder('features'),                          
-      130 +      ...dartFilesUnder('core/presentation'),                 
-      131 +    ]) {                                                      
-      132 +      final src = file.readAsStringSync();                    
-      133 +      for (final line in src.split('\n')) {                   
-      134 +        final trimmed = line.trim();                          
-      135 +        if (trimmed.startsWith('//') || trimmed.startsWith('*'
-          +)) continue;                                                  
-      136 +        if (pattern.hasMatch(line)) violations.add('${file.pat
-          +h}: $trimmed');                                               
-      137 +      }                                                       
-      138 +    }                                                         
-      139 +    expect(violations, isEmpty, reason: violations.join('\n'))
-          +;                                                             
-      140 +  });                                                         
-      141 +                                                              
-      142 +  test('features do not build their own ThemeData or ColorSche
-          +me', () {                                                     
-      143 +    // Both belong to AppTheme. A feature-local theme would fo
-          +rk the token                                                  
-      144 +    // system, which is the failure the shared kit exists to p
-          +revent.                                                       
-      145 +    final violations = <String>[];                            
-      146 +    final pattern = RegExp(r'\b(ThemeData\(|ColorScheme\.fromS
-          +eed\()');                                                     
-      147 +    for (final file in dartFilesUnder('features')) {          
-      148 +      final src = file.readAsStringSync();                    
-      149 +      for (final line in src.split('\n')) {                   
-      150 +        final trimmed = line.trim();                          
-      151 +        if (trimmed.startsWith('//') || trimmed.startsWith('*'
-          +)) continue;                                                  
-      152 +        if (pattern.hasMatch(line)) violations.add('${file.pat
-          +h}: $trimmed');                                               
-      153 +      }                                                       
-      154 +    }                                                         
-      155 +    expect(violations, isEmpty, reason: violations.join('\n'))
-          +;                                                             
-      156 +  });                                                         
-      157 +                                                              
-      158    test('authoritative debit writers use contention retry helpe
-           r', () {
-      159      for (final path in [
-      160        'lib/features/ledger/data/drift_ledger_repository.dart',
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Full suite now, to confirm the whole phase.
-
-  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
-⏺ Definitive: those 2 navigation tests each hang and time out after 10 minutes —
-  a pre-existing defect, and the reason the suite takes 20+ minutes. Waiting on
-  the full run.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Three files show diffs I didn't intend — dart format lib normalised
-  pre-existing unformatted files. Let me confirm those are whitespace-only.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Those are pure dart format line-wrapping — semantically identical. Checking
-  the suite.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ 1683 passing, 3 real failures — same pre-existing set. Waiting for the two
-  hanging nav tests to time out so I can report the final number.
-
-  Read 2 files, ran 7 shell commands (ctrl+o to expand)
-
-⏺ Background command "Full suite after phases 1+2" completed (exit code 0)
-
-⏺ Background command "Final phases 1+2 result" completed (exit code 0)
-
-⏺ Background command "Wait for phases 1+2 suite" completed (exit code 0)
-
-⏺ Background command "Wait then read final line" completed (exit code 0)
-
-⏺ Background command "Full suite after phases 1+2 complete" completed (exit code
-0)
-
-⏺ Background command "Final phase 1+2 result" completed (exit code 0)
-
-⏺ Background command "Confirm final result matches baseline" completed (exit
-code 0)
-
-⏺ Background command "Wait for final phase 1+2 suite" completed (exit code 0)
-
-⏺ Phases 1 + 2 — colour, surface, shape · complete
-
-  +1683 -5, failure set byte-identical to the +1625 -5 baseline. Zero
-  regressions across a change that replaced every colour and every radius in the
-  product.
-
-  1. What changed
-
-  Phase 1 — colour
-  - All 19 AppFinancialColors roles are now literals. The eight that read off
-  ColorScheme.fromSeed no longer derive.
-  - Scaffold moved to ground; recessedSurface and focusRing took their real
-  values.
-  - Text-role colour now comes from the literal palette rather than the scheme.
-  - The ColorScheme is seeded from ink and then every role a stock widget can 
-  paint is pinned to the literal palette.
-  - All 82 raw Colors.* call sites across 19 feature files were replaced with 
-  semantic roles.
-
-  Phase 2 — shape and elevation
-  - Every radius → 0, except the sheet at 2.
-  - Card: fill secondarySurface → mainSurface, half-alpha outline → solid 1 px
-  hairline.
-  - Elevation removed from card, app bar, dialog and sheet; surfaceTintColor
-  cleared so M3 stops tinting surfaces.
-  - Inputs became ruled rows: UnderlineInputBorder throughout, focus as a 2 px
-  ink bottom rule, error in the expense role.
-  - space2 and space48 deleted — both had zero real call sites.
-  - Added regionRuleWidth = 2.0, the hierarchy device that replaces elevation.
-
-  2. Why — three judgement calls worth flagging
-
-  The seed alone was not enough. I initially asserted that seeding from ink
-  yields a neutral scheme. It doesn't — M3's tonal algorithm derives a chromatic
-  primary from any seed, including near-black. My test caught it. The fix is
-  stronger than the original plan: the scheme is now explicitly overridden
-  role-by-role, so an unrestyled Material widget cannot put an untokenised tone
-  on screen. This is what the brief's "do not leave critical surfaces derived
-  unpredictably" actually requires.
-
-  Doing the 82 call sites now, rather than deferring to phases 6–9. D6 scopes
-  phase 1 to the two token files. But the token change is inert while features
-  call Colors.green directly — the redesign's single most important change,
-  moving the income/expense axis off the green–red pair both common dichromacies
-  collapse, would not have appeared anywhere in the app. Your brief's phase 1
-  says "eliminate direct feature-level color constants," so I did.
-
-  Three mappings that are not mechanical:
-  - Colors.orange on reversal rows → secondaryText, not warning. warning is
-  specified as "never on an amount — on the notice around it," and a reversal
-  effect is an amount. The design renders a reversed entry in grey ink with the
-  undo glyph. Non-colour encoding is preserved by the icon that was already
-  there.
-  - Colors.orange on the account-detail protected chip → protectedMoney. That
-  orange meant "protected," not "warning" — mapping it to warning would have
-  been the obvious wrong answer.
-  - The expense and transfer buttons on account detail carried
-  Colors.red.shade700 / Colors.blue.shade700 backgrounds. I removed the 
-  overrides entirely rather than remapping them: primary actions are ink, and
-  colouring a control red spends the one product red on something that isn't
-  money leaving.
-
-  3. Files
-
-  Modified (25). app_theme.dart, app_theme_extensions.dart, pubspec.yaml,
-  architecture_boundaries_test.dart, plus 19 feature screens and 2 incidental
-  reformats.
-
-  Two files — enum_label_helpers.dart and transactions_screen.dart — appear in
-  the diff only because dart format lib normalised them; they were among the 9
-  pre-existing unformatted files. The changes are pure line-wrapping. That
-  reduces the pre-existing formatting debt from 9 files to 7.
-
-  4. Domain / migration implications
-
-  None. No schema, query, use-case or repository file touched. schemaVersion
-  remains 19.
-
-  5. Tests
-
-  Added two architecture rules — this repo enforces boundaries by test, so
-  that's where the guarantee belongs rather than in a convention no one reads:
-  - no feature paints a raw Material palette colour — scans features/ and
-  core/presentation/ for 20 palette hues. Colors.transparent is allowed; it
-  isn't a hue.
-  - features do not build their own ThemeData or ColorScheme.
-
-  Rewrote the token characterization test (32 → 40 tests). Beyond pinning all 38
-  literal values, it now asserts the properties the palette depends on, which
-  the hex assertions alone can't protect: success ≠ income, the three surfaces
-  are mutually distinct, the direction axis is not green-vs-red, transfer is
-  achromatic, focusRing ≠ expense, and every role is opaque.
-
-  6. Commands
-
-  ┌──────────────────────┬──────────────────────────────────────────────┐
-  │       Command        │                    Result                    │
-  ├──────────────────────┼──────────────────────────────────────────────┤
-  │ flutter analyze      │ No issues found                              │
-  ├──────────────────────┼──────────────────────────────────────────────┤
-  │ dart format lib test │ clean                                        │
-  ├──────────────────────┼──────────────────────────────────────────────┤
-  │ flutter test         │ +1683 -5 — failure set identical to baseline │
-  └──────────────────────┴──────────────────────────────────────────────┘
-
-  7. The 5 failures — now fully diagnosed
-
-  All predate my work; I confirmed the first three on a stashed HEAD.
-
-  1. app_config_test — production default locale expects ar_EG, gets en_US.
-  Given ar_EG is the primary locale, this reads as a real config defect.
-  2. certificate_principal_protection_test — from your last commit.
-  3. budget_creation_screen_test — currency dropdown finds no EGP.
-  4. & 5. shell_push_page_keys_test — I isolated these: both tests hang and time
-  out after exactly 10 minutes each. Not flaky, not slow — hung. They are why
-  the suite takes 21 minutes; the other ~1,683 tests finish in about 90 seconds.
-  Worth fixing on its own merits.
-
-  8. Remaining mismatch against the handoff
-
-  - The 2 px region rule now has a width token but no shared drawing helper. D6
-  explicitly forbids a second divider colour token ("a region boundary is ink,
-  and that is the point"), so the light value is primaryText. Doc 01 gives dark
-  as #8D8886, which is not the dark primaryText. I've left this unresolved
-  rather than invent a token — it belongs with the component work in phase 4/5,
-  where something actually draws it.
-  - Input fields became underline-style app-wide. That matches the spec's
-  ruled-form-row language and AmountEntryField's "2 px bottom rule," but it's
-  the one change here that alters more than colour and shape, and it'll be
-  visible immediately.
-  - The offset focus ring can't be expressed in InputDecorationTheme — it lives
-  outside the control. The token is in place; the ring gets drawn by the field
-  wrapper in phase 4.
-
-  9. Next: phase 3 — typography, alone
-
-  The dangerous one, and deliberately isolated. All 11 roles take new metrics
-  with real font families per script; sectionTitle −28% and reportValue +33%
-  will move height and scroll-offset assertions on dashboard, report tables and
-  review screens. MaterialApp starts rebuilding its theme on locale change.
-  motionEmphasized 320→280 rides along.
-
-  The plumbing is already in place from phase 0 — forLocale and the
-  AppTheme.light({locale}) parameter — so phase 3 is a pure value change plus
-  one line in app.dart. I'll fix failures by re-measuring, not by loosening
-  assertions.
-
-  Two things worth deciding before I start: you're still committing to main
-  directly, and this is now a substantial migration — I'd branch. And the
-  21-minute suite is going to make phase 3 painful to iterate on; fixing those
-  two hung navigation tests first would pay for itself immediately. Say the word
-  and I'll take either on.
-
-✻ Baked for 36m 16s
-
-❯ take either on                                                                
-
-⏺ I'll do both — branch first (quick), then the hung tests.
-
-  Read 1 file, ran 1 shell command (ctrl+o to expand)
-
-⏺ pumpAndSettle hangs when something animates forever — almost always an
-  indefinite progress indicator. Let me confirm where.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Many indefinite spinners. Let me empirically find which navigation step hangs.
-
-⏺ Write(test/widget/navigation/_diag_test.dart)
-  ⎿  Wrote 84 lines to test/widget/navigation/_diag_test.dart
-       1 import 'package:family_money_manager/app/app_config.dart';
-       3 import 'package:family_money_manager/app/app_router.dart';
-       4 import 'package:family_money_manager/app/app_theme.dart';
-         dart';
-       6 import 'package:family_money_manager/core/database/database_prov
-       7 import 'package:family_money_manager/core/localization/app_local
-         izations.dart';
-         ft_household_repository.dart';
-       9 import 'package:flutter/material.dart';
-         ';
-     … +80 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The grep pipeline is buffering. Rerunning straight to a file.
-
-  Ran 2 shell commands (ctrl+o to expand)
-⏺ Background command "Run diagnostic to find hanging screen" failed with exit
-code 144
-
-⏺ /planning settles cleanly; /budgets never returns — that smells like an
-  infinite rebuild loop, not a slow query. Checking the budgets screen's
-  provider arguments.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Background command "Run diagnostic to file" failed with exit code 144
-
-⏺ Providers use value-equal String keys, so no argument-identity loop. Let me
-  instrument at finer granularity.
-
-⏺ Write(test/widget/navigation/_diag_test.dart)
-  ⎿  Added 32 lines, removed 24 lines
-      12  import 'package:flutter_test/flutter_test.dart';
-      13  import 'package:go_router/go_router.dart';
-      14  
-      15 +void log(String m) {                                           
-      16 +  // ignore: avoid_print                                       
-      17 +  print('DIAG $m');                                            
-      18 +}                                                              
-      19 +                                                               
-      20  void main() {
-      21    testWidgets('diag', (tester) async {
-      22      late AppDatabase db;
-     ...
-      50          ),
-      51        ),
-      52      );
-      53 +    log('pumpWidget done');                                    
-      54  
-      55      await DriftHouseholdRepository(db).createHousehold(
-      56        id: 'household-v1',
-     ...
-      58        currencyCode: 'EGP',
-      59        ownerUserId: 'owner-1',
-      60      );
-      61 +    log('household created');                                  
-      62  
-      56 -    Future<void> step(String label, Future<void> Function() nav
-         -) async {                                                      
-      57 -      await nav();                                             
-      58 -      for (var i = 0; i < 60; i++) {                           
-      59 -        await tester.pump(const Duration(milliseconds: 100));  
-      60 -      }                                                        
-      61 -      final spinners = tester                                  
-      62 -          .widgetList(find.byType(CircularProgressIndicator))  
-      63 -          .length;                                             
-      64 -      final bars = tester                                      
-      65 -          .widgetList(find.byType(LinearProgressIndicator))    
-      66 -          .length;                                             
-      67 -      // ignore: avoid_print                                   
-      68 -      print('STEP $label -> circular=$spinners linear=$bars'); 
-      69 -    }                                                          
-      63 +    router.go('/planning');                                    
-      64 +    log('go /planning issued');                                
-      65 +    await tester.pump();                                       
-      66 +    log('planning pump 1');                                    
-      67 +    await tester.pump(const Duration(milliseconds: 300));      
-      68 +    log('planning pump 2');                                    
-      69  
-      71 -    await step('/planning', () async => router.go('/planning'))
-         -;                                                              
-      72 -    await step('/budgets', () async => router.push('/budgets'))
-         -;                                                              
-      73 -    await step(                                                
-      74 -      '/transactions/op-repro-1',                              
-      75 -      () async => router.push('/transactions/op-repro-1'),     
-      70 +    await router.push('/budgets');                             
-      71 +    log('push /budgets RETURNED');                             
-      72 +    await tester.pump();                                       
-      73 +    log('budgets pump 1');                                     
-      74 +    await tester.pump(const Duration(milliseconds: 300));      
-      75 +    log('budgets pump 2');                                     
-      76 +    log(                                                       
-      77 +      'budgets spinners circular='                             
-      78 +      '${tester.widgetList(find.byType(CircularProgressIndicato
-         +r)).length} '                                                  
-      79 +      'linear=${tester.widgetList(find.byType(LinearProgressInd
-         +icator)).length}',                                             
-      80      );
-      77 -    await step('/more', () async => router.go('/more'));       
-      78 -    await step('/accounts', () async => router.push('/accounts'
-         -));                                                            
-      79 -    await step(                                                
-      80 -      '/transactions/new/income',                              
-      81 -      () async => router.push('/transactions/new/income'),     
-      81 +                                                               
-      82 +    for (var i = 0; i < 10; i++) {                             
-      83 +      await tester.pump(const Duration(milliseconds: 200));    
-      84 +    }                                                          
-      85 +    log('budgets 10 more pumps done');                         
-      86 +    log(                                                       
-      87 +      'budgets spinners now circular='                         
-      88 +      '${tester.widgetList(find.byType(CircularProgressIndicato
-         +r)).length} '                                                  
-      89 +      'linear=${tester.widgetList(find.byType(LinearProgressInd
-         +icator)).length}',                                             
-      90      );
-      91    });
-      92  }
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Found it. GoRouter.push() returns a Future that completes when the pushed 
-  route is popped — so await router.push(...) blocks forever by construction.
-  Both tests hang on their first push.
-
-⏺ Update(test/widget/navigation/shell_push_page_keys_test.dart)
-  ⎿  Added 2 lines
-      1 +import 'dart:async';                                            
-      2 +                                                                
-      3  import 'package:family_money_manager/app/app_config.dart';
-      4  import 'package:family_money_manager/app/app_providers.dart';
-      5  import 'package:family_money_manager/app/app_router.dart';
-
-⏺ Update(test/widget/navigation/shell_push_page_keys_test.dart)
-  ⎿  Added 7 lines
-      17  /// Regression for Navigator `!keyReservation.contains(key)` wh
-          en shell
-      18  /// destinations were previously registered as root siblings an
-          d stacked via
-      19  /// `push` (duplicate StatefulShellRoute page keys).
-      20 +///                                                            
-      21 +/// Note on `unawaited`: `GoRouter.push` returns a future that 
-         +completes when                                                 
-      22 +/// the pushed route is *popped*, not when it is displayed. Awa
-         +iting it here                                                  
-      23 +/// would block until something pops the page, which nothing in
-         + these tests                                                   
-      24 +/// ever does — so the await never returns and the test dies on
-         + the framework                                                 
-      25 +/// timeout. The navigation itself is synchronous; `pumpAndSett
-         +le` is what                                                    
-      26 +/// makes the pushed page observable.                          
-      27  void main() {
-      28    testWidgets(
-      29      'planning → budgets → transaction detail does not duplicate
-           page keys',
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Both pass in 1 second instead of hanging for 20 minutes. Running the full
-  suite to confirm the new baseline.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Background command "Run fine-grained diagnostic" completed (exit code 0)
-
-⏺ Both done.
-
-  1. Branch
-
-  Work is now on design/redesign-phases-0-2, off main. Nothing committed yet —
-  33 changed entries staged in the working tree, ready when you want them.
-
-  2. The hung navigation tests — fixed
-
-  Root cause: GoRouter.push() returns a Future that completes when the pushed
-  route is popped, not when it's displayed. Both tests did:
-
-  await router.push('/budgets');
-
-  Nothing in either test ever pops that page, so the await could never return.
-  The tests weren't slow or flaky — they were deadlocked by construction, and
-  died on the framework's 10-minute timeout.
-
-  I found it by bisecting with a throwaway diagnostic test that logged between
-  each step. The log ended at go /planning issued → pump 2 and never printed
-  push /budgets RETURNED, which ruled out my first hypothesis (an indefinite
-  spinner blocking pumpAndSettle) and pointed straight at the push itself.
-
-  Fix: unawaited(router.push(...)), with a comment explaining the future's
-  semantics so nobody reintroduces the await. The navigation is synchronous;
-  pumpAndSettle is what makes the pushed page observable. No production code
-  changed, and the tests still assert exactly what they were written to assert —
-  no duplicate StatefulShellRoute page keys.
-
-  I deleted the diagnostic file.
-
-  3. Result
-
-  ┌───────────────┬────────┬───────┐
-  │               │ Before │ After │
-  ├───────────────┼────────┼───────┤
-  │ Suite runtime │ 21:44  │ 2:48  │
-  ├───────────────┼────────┼───────┤
-  │ Passing       │ 1683   │ 1689  │
-  ├───────────────┼────────┼───────┤
-  │ Failing       │ 5      │ 3     │
-  └───────────────┴────────┴───────┘
-
-  flutter analyze: no issues.
-
-  The two tests now pass in 1 second combined. That's ~19 minutes back on every
-  run, which matters a lot going into phase 3 — the typography phase will need
-  many iterations.
-
-  4. Remaining 3 failures
-
-  All pre-existing, all unrelated to the redesign, and all now cheap to
-  investigate given the suite runs in under three minutes:
-
-  1. app_config_test — production default locale expects ar_EG, gets en_US.
-  Since ar_EG is the primary locale and the whole design targets RTL-first, this
-  looks like a genuine config defect rather than a stale test, and it's the one
-  I'd fix next.
-  2. certificate_principal_protection_test — "archived certificate is excluded
-  from totals entirely (INV-015)", from your last commit.
-  3. budget_creation_screen_test — currency dropdown finds no EGP.
-
-  5. One loose end
-
-  dart format still reports 5 pre-existing files as unformatted (down from 9 —
-  four got normalised incidentally during phase 1+2). They're untouched by my
-  work. Worth a standalone formatting commit so they stop appearing in future
-  diffs, but I've left them alone to keep this branch's diff honest.
-
-  Next up is phase 3 — typography, unless you'd rather I clear the three
-  remaining failures first. Given #1 is a locale defect in an Arabic-first app,
-  my instinct is to fix that one before doing the typography work that's
-  specifically about Arabic metrics — the two are related, and it'd be good to
-  know the app actually boots in ar_EG before I start measuring Arabic line
-  heights.
-
-✻ Cogitated for 15m 55s
-
-❯ go ahead                                                                      
-
-⏺ Starting with the locale defect, then phase 3.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Confirmed a regression: it was ar_EG since Phase 1 and got flipped to en_US in
-  commit fa68388. Checking whether staging/dev were flipped too.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All three configs were flipped in that commit. Restoring the primary locale.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Update(lib/app/app_config.dart)
-  ⎿  Added 5 lines
-      59    final String currencyCode;
-      60  
-      61    /// The locale used on first launch before the user changes i
-          t.
-      62 +  ///                                                          
-      63 +  /// `ar_EG` in every configuration, including development: Ar
-         +abic is the                                                    
-      64 +  /// primary locale and RTL the primary direction, so a develo
-         +per running the                                                
-      65 +  /// app must see what the household sees. Defaulting to Engli
-         +sh here is how                                                 
-      66 +  /// RTL layout defects reach production unnoticed.           
-      67    final Locale defaultLocale;
-      68  
-      69    final bool isProduction;
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Locale fix is clean — 1690 passing, 2 failures, no collateral damage. Now
-  phase 3 — typography.
-  Read 1 file, ran 1 shell command (ctrl+o to expand)
-
-⏺ Replacing the factory with the script-aware implementation.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Now the font-family constants and the app.dart locale wiring.
-
-⏺ Update(lib/core/presentation/theme/app_theme_extensions.dart)
-  ⎿  Added 8 lines
-      221    }
-      222  }
-      223  
-      224 +/// Latin family. Bundled as a local asset — see `assets/fonts
-          +/OFL.txt`.                                                    
-      225 +const String latinFontFamily = 'Archivo';                     
-      226 +                                                              
-      227 +/// Arabic family. A naskh-grotesque chosen for its lining tab
-          +ular numerals,                                                
-      228 +/// and because it shares an x-height with [latinFontFamily] —
-          + so a mixed                                                   
-      229 +/// Arabic-with-Latin-numerals run does not visibly change fon
-          +t mid-line.                                                   
-      230 +const String arabicFontFamily = 'IBM Plex Sans Arabic';       
-      231 +                                                              
-      232  /// Semantic text styles for financial UI.
-      233  @immutable
-      234  class AppTextRoles extends ThemeExtension<AppTextRoles> {
-
-⏺ Update(lib/app/app.dart)
-  ⎿  Added 5 lines, removed 2 lines
-      44          GlobalWidgetsLocalizations.delegate,
-      45          GlobalCupertinoLocalizations.delegate,
-      46        ],
-      47 -      theme: AppTheme.light(),                                 
-      48 -      darkTheme: AppTheme.dark(),                              
-      47 +      // The theme is locale-dependent from phase 3 onward: Lat
-         +in and Arabic                                                  
-      48 +      // take different metrics per text role, so changing lang
-         +uage has to                                                    
-      49 +      // rebuild the theme, not just re-resolve strings.       
-      50 +      theme: AppTheme.light(locale: locale),                   
-      51 +      darkTheme: AppTheme.dark(locale: locale),                
-      52        themeMode: themeMode,
-      53      );
-      54    }
-
-⏺ Now the theme-level defaults: base font family and the motion change.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Now updating the characterization test to the phase 3 expectations.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ The motion assertion and the stale locale test both need updating.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ ThemeData.fontFamily is constructor-only with no getter — asserting via the
-  resolved text theme instead.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All 44 token tests pass. Now the full suite — this is where phase 3's layout
-  fallout shows up.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Phase 3 landed with zero new failures. One gap worth closing: widget tests use
-  a stub font, so nothing yet proves the bundled assets actually load.
-
-⏺ Write(test/unit/core/presentation/theme/bundled_fonts_test.dart)
-  ⎿  Wrote 91 lines to
-     test/unit/core/presentation/theme/bundled_fonts_test.dart
-       1 /// Verifies the bundled font assets actually exist, parse, and 
-       2 /// under the family names the theme asks for.
-       3 ///
-       4 /// This is not covered by any other test: widget tests render w
-       5 /// stub font regardless of what the theme requests, so a wrong 
-         path in
-          suite and
-       7 /// only surface as fallback glyphs on a real device.
-       8 library;
-      10 import 'dart:io';
-     … +95 lines (ctrl+o to expand)
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Locale fix + Phase 3 (typography) — complete
-
-  +1698 -2, analyzer clean, repo fully dart format-clean, all on branch
-  design/redesign-phases-0-2.
-
-  ---
-  A. The locale defect
-
-  It was a regression, not a stale test. git log -L on the line shows
-  defaultLocale was ar_EG from "Phase 1: project foundation" and got flipped to
-  en_US in commit fa68388 — across all three configs (production, staging,
-  development), inside a commit titled "enhance localization and error
-  handling." The test was never updated, which is exactly why it started
-  failing.
-
-  Restored all three to ar_EG, with a comment explaining why development gets it
-  too: a developer running the app must see what the household sees, and
-  defaulting to English is how RTL layout defects reach production unnoticed.
-
-  No collateral damage — 1690 passing, and I verified this before starting phase
-  3 precisely because measuring Arabic line heights is meaningless if the app
-  doesn't boot in Arabic.
-
-  ---
-  B. Phase 3 — typography
-
-  What changed
-
-  - All 11 text roles now take script-divergent metrics and a bundled family.
-  sectionTitle 18→13, reportValue 15→20, body 16→15, and so on.
-  - Both families applied, each naming the other as fontFamilyFallback.
-  - displayBalance gained tabular figures — it was the one money role missing
-  them.
-  - All money roles now carry lining figures as well as tabular.
-  - app.dart passes the watched locale into AppTheme.light/dark, so the theme
-  rebuilds on language change.
-  - App-bar title became a separate 18/600 style; screenTitle is now free to
-  move into the body.
-  - motionEmphasized 320 → 280 ms.
-
-  Two judgement calls
-
-  1. No uppercase transform on sectionTitle. Doc 01 specifies Latin sectionTitle
-  as UPPER. Your brief says the opposite — "Strong section labels expressed 
-  through weight and rules, not uppercase transformations." I followed the
-  brief. Weight (w800) and the +0.08em tracking still land; only the case
-  transform is dropped. It's also the more consistent outcome, since Arabic has
-  no uppercase and would have diverged anyway.
-
-  2. fontFamilyFallback in both directions. The app's most common string is
-  Arabic with Latin numerals and an ISO currency code. Without a named fallback,
-  a mixed run drops to a system font mid-line — which would change metrics
-  inside a single amount. Naming the other bundled family keeps the run
-  metrically stable.
-
-  Letter-spacing values are converted from em to logical pixels (-0.02em at 40
-  px → -0.8), with the em value in a comment at each site.
-
-  Why the predicted failure storm didn't happen
-
-  D6 forecast "the largest batch of failures in the project." Zero new failures.
-  Two reasons, and the second is a real caveat:
-
-  1. There are no golden tests, and this suite has essentially no
-  rendered-height or overflow assertions — the sizes moved and nothing was
-  watching.
-  2. flutter_test renders with a stub font regardless of what the theme 
-  requests. So the suite validates the metrics (sizes, weights, heights are real
-  numbers in real TextStyles) but not the typefaces. Real-font metric
-  differences are genuinely uncovered.
-
-  I closed the part of that gap I could: a new bundled_fonts_test.dart asserts
-  every declared file exists, is a real sfnt font (checks the magic number — a
-  failed download lands as an HTML error page with a .ttf name), and that both 
-  families load under the exact constants the theme requests. A wrong path in
-  pubspec.yaml would otherwise pass the entire suite and only surface as
-  fallback glyphs on a device.
-
-  What that still doesn't cover is how the two scripts actually look and fit at
-  the artboard viewports. That needs the visual verification step, and it's the
-  honest remaining risk in this phase.
-
-  Tests
-
-  - Rewrote the text-role group for script-divergent metrics (Latin and Arabic
-  asserted separately).
-  - Added a cross-script rules group asserting the invariants rather than just
-  the numbers: Arabic never letter-spaced (any role), Arabic line height exceeds
-  Latin wherever they differ, every role carries a bundled family plus the
-  other as fallback, every money role tabular+lining in both scripts.
-  - Added bundled_fonts_test.dart (4 tests).
-  - Token tests: 40 → 44, plus the 4 font tests.
-
-  ---
-  C. Commands
-
-  ┌──────────────────┬──────────────────────────────────────────────────────┐
-  │                  │                        Result                        │
-  ├──────────────────┼──────────────────────────────────────────────────────┤
-  │ flutter analyze  │ No issues found                                      │
-  ├──────────────────┼──────────────────────────────────────────────────────┤
-  │ dart format lib  │ ALL FORMAT-CLEAN — the 5 remaining legacy files are  │
-  │ test             │ now normalised too                                   │
-  ├──────────────────┼──────────────────────────────────────────────────────┤
-  │ flutter test     │ +1698 -2                                             │
-  ├──────────────────┼──────────────────────────────────────────────────────┤
-  │ Suite runtime    │ 1:35 (was 21:44 before the nav fix)                  │
-  └──────────────────┴──────────────────────────────────────────────────────┘
-
-  D. Remaining 2 failures
-
-  Both pre-existing, neither touched by this work:
-  1. certificate_principal_protection_test — "archived certificate is excluded
-  from totals entirely (INV-015)", from your commit.
-  2. budget_creation_screen_test — currency dropdown finds no EGP.
-
-  E. Where this leaves the migration
-
-  Phases 0–3 are done. Tokens are settled: 19 literal colour roles, zero radii
-  except the sheet, 11 script-aware text roles on bundled fonts. Everything from
-  here is components and screens.
-
-  Next is phase 4 — money primitives, and it's the one that finally makes the
-  amount formatting honest: FinancialAmountText becomes the single place a
-  number becomes pixels, absorbing the three disagreeing formatters my phase-0
-  characterization test pinned (EGP -1275.00 vs -1275.00 vs — for the same
-  value). That's where bidi isolation, sign placement, the trailing currency
-  code, privacy masking and screen-reader phrasing all land — plus BalanceHero,
-  ProgressMeter and PrivacyScope.
-
-  One thing worth flagging before I start: phase 4 is where I'd want at least a
-  small golden suite, because sign placement in RTL and privacy-mask width
-  preservation are visual properties that unit assertions describe only
-  indirectly. You have no golden convention today. I'd propose a narrow one —
-  the shared money primitives only, RTL and LTR, light and dark — rather than
-  screen-level goldens, which would be brittle while screens are still being
-  rebuilt. Tell me if you'd rather I skip goldens entirely and rely on
-  widget-level assertions.
-
-✻ Baked for 16m 39s
-
-❯ go ahead                                                                      
-
-⏺ Starting phase 4. First, checking the ARB vocabulary the primitives will need.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Good — the direction vocabulary exists. Adding the small set of new keys the
-  primitives need.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now the shared number formatter — the single replacement for the three that
-  disagree.
-
-⏺ Write(lib/core/presentation/amount_display_formatter.dart)
-  ⎿  Wrote 106 lines to lib/core/presentation/amount_display_formatter.dart
-      1 /// The one place integer minor units become a displayable number
-      2 ///
-      3 /// It produces the *number only* — no sign, no currency code, no
-      4 /// glyph. Those are composed by `FinancialAmountText`, which is 
-        the only
-        is way is
-      6 /// deliberate: a formatter that emitted `'EGP -1275.00'` as one 
-      7 /// exactly how the previous implementation ended up with a leadi
-        ng currency
-      9 library;
-     … +120 lines (ctrl+o to expand)
-⏺ Now PrivacyScope — masking state inherited once, so no other component can
-  implement its own.
-
-⏺ Write(lib/core/presentation/components/privacy_scope.dart)
-  ⎿  Wrote 36 lines to lib/core/presentation/components/privacy_scope.dart
-      1 /// Privacy mode, inherited once and read by exactly one widget.
-      2 ///
-      3 /// `FinancialAmountText` is the only reader. No other component 
-      4 /// masking: the moment two widgets can each decide to hide a num
-        ber, the
-      5 /// guarantee that *every* derived monetary value is concealed be
-        comes a claim
-      7 library;
-      8 
-      9 import 'package:flutter/widgets.dart';
-     … +38 lines (ctrl+o to expand)
-
-⏺ Now the core of the phase — FinancialAmountText, the single point where a
-  number becomes pixels.
-
-⏺ Write(lib/core/presentation/components/financial_amount_text.dart)
-  ⎿  Added 230 lines, removed 139 lines
-       1 +/// The money primitives. Everything else in the app delegates 
-         +to these.                                                      
-       2 +library;                                                       
-       3 +                                                               
-       4  import 'package:family_money_manager/app/app_theme.dart';
-       5 +import 'package:family_money_manager/core/localization/app_loca
-         +lizations.dart';                                               
-       6 +import 'package:family_money_manager/core/presentation/amount_d
-         +isplay_formatter.dart';                                        
+⏺ Write(lib/features/reports/presentation/home_savings_report_screen.dart)
+  ⎿  Added 117 lines, removed 113 lines
+       1  /// Home savings flow report screen.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
        7 +import 'package:family_money_manager/core/presentation/componen
-         +ts/privacy_scope.dart';                                        
-       8  import 'package:family_money_manager/core/presentation/theme/ap
-          p_theme_extensions.dart';
-       9  import 'package:flutter/material.dart';
-      10  
-       5 -/// Displays a pre-formatted money string (presentation only). 
-       6 -class FinancialAmountText extends StatelessWidget {            
-       7 -  const FinancialAmountText({                                  
-       8 -    required this.formattedAmount,                             
-       9 -    super.key,                                                 
-      10 -    this.style,                                                
-      11 -    this.semanticsLabel,                                       
-      12 -    this.tone = FinancialAmountTone.neutral,                   
-      13 -    this.isDisplay = false,                                    
-      14 -  });                                                          
-      15 -                                                               
-      16 -  final String formattedAmount;                                
-      17 -  final TextStyle? style;                                      
-      18 -  final String? semanticsLabel;                                
-      19 -  final FinancialAmountTone tone;                              
-      20 -  final bool isDisplay;                                        
-      21 -                                                               
-      22 -  @override                                                    
-      23 -  Widget build(BuildContext context) {                         
-      24 -    final colors = context.financialColors;                    
-      25 -    final roles = context.textRoles;                           
-      26 -    final Color color = switch (tone) {                        
-      27 -      FinancialAmountTone.income => colors.income,             
-      28 -      FinancialAmountTone.expense => colors.expense,           
-      29 -      FinancialAmountTone.transfer => colors.transfer,         
-      30 -      FinancialAmountTone.protected => colors.protectedMoney,  
-      31 -      FinancialAmountTone.goal => colors.goalReserved,         
-      32 -      FinancialAmountTone.certificate => colors.certificatePrin
-         -cipal,                                                         
-      33 -      FinancialAmountTone.neutral => colors.primaryText,       
-      34 -    };                                                         
-      35 -    final base = isDisplay ? roles.displayBalance : roles.finan
-         -cialAmount;                                                    
-      36 -    return Text(                                               
-      37 -      formattedAmount,                                         
-      38 -      style: (style ?? base).copyWith(color: color),           
-      39 -      semanticsLabel: semanticsLabel ?? formattedAmount,       
-      40 -      textAlign: TextAlign.start,                              
-      41 -    );                                                         
-      42 -  }                                                            
-      43 -}                                                              
-      44 -                                                               
-      11 +/// Which *class* of money this is — what it is, not what it is
-         + doing.                                                        
-      12 +///                                                            
-      13 +/// Drives colour only. Orthogonal to [FinancialAmountDirection
-         +]: a protected                                                 
-      14 +/// withdrawal is `protected` money moving `outflow`, and a tra
-         +nsfer fee is                                                   
-      15 +/// `expense` money inside a transfer.                         
-      16  enum FinancialAmountTone {
-      17    neutral,
-      18    income,
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+       9  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+       9 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      10 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_flow_row.dart';                                     
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:flutter/material.dart';
+      13  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      14  
      ...
-       21    protected,
-       22    goal,
-       23    certificate,
-       24 +                                                              
-       25 +  /// Reversed entries and other corrections: present, readabl
-          +e, and                                                        
-       26 +  /// deliberately quiet. A correction is not a threshold, so 
-          +it is grey ink                                                
-       27 +  /// rather than the warning role.                           
-       28 +  muted,                                                      
-       29  }
-       30  
-       55 -class CurrencyAmountRow extends StatelessWidget {             
-       56 -  const CurrencyAmountRow({                                   
-       57 -    required this.label,                                      
-       58 -    required this.formattedAmount,                            
-       31 +/// What the money is *doing* — what it is, is [FinancialAmoun
-          +tTone].                                                       
-       32 +///                                                           
-       33 +/// Drives the sign and the direction glyph, which are two of 
-          +the four                                                      
-       34 +/// redundant channels that make a money row readable without 
-          +colour.                                                       
-       35 +enum FinancialAmountDirection {                               
-       36 +  /// A stated balance. No sign, no glyph — a balance is not a
-          + movement.                                                    
-       37 +  none,                                                       
-       38 +                                                              
-       39 +  /// Into the household. Always `+` and `↓`.                 
-       40 +  inflow,                                                     
-       41 +                                                              
-       42 +  /// Out of the household. Always `−` (U+2212) and `↑`.      
-       43 +  outflow,                                                    
-       44 +                                                              
-       45 +  /// Between the household's own accounts. `⇄`, and never a s
-          +ign: a transfer                                               
-       46 +  /// changes no total, so it is neither positive nor negative
-          +.                                                             
-       47 +  internal,                                                   
-       48 +                                                              
-       49 +  /// Money that exists but cannot be spent. No sign; carries 
-          +the lock.                                                     
-       50 +  held,                                                       
-       51 +}                                                             
-       52 +                                                              
-       53 +/// One amount, one class, one direction.                     
-       54 +///                                                           
-       55 +/// The single point in the app where a number becomes pixels,
-          + and therefore                                                
-       56 +/// the only place sign placement, bidi isolation, tabular fig
-          +ures, privacy                                                 
-       57 +/// masking and screen-reader phrasing are implemented. A feat
-          +ure that renders                                              
-       58 +/// an amount with `Text` has bypassed all five.              
-       59 +///                                                           
-       60 +/// Callers pass the magnitude in minor units and let the comp
-          +onent decide                                                  
-       61 +/// everything about its presentation. They never pre-sign a s
-          +tring, never                                                  
-       62 +/// append a currency code, and never colour it at the call si
-          +te.                                                           
-       63 +class FinancialAmountText extends StatelessWidget {           
-       64 +  const FinancialAmountText({                                 
-       65 +    required this.minorUnits,                                 
-       66 +    required this.currencyCode,                               
-       67      super.key,
-       60 -    this.currencyCode,                                        
-       68      this.tone = FinancialAmountTone.neutral,
-       69 +    this.direction = FinancialAmountDirection.none,           
-       70 +    this.size = FinancialAmountSize.standard,                 
-       71 +    this.isStruckThrough = false,                             
-       72 +    this.semanticsContext,                                    
-       73    });
+      21      final req = ref.watch(reportRequestProvider);
+      22      final reportAsync = ref.watch(homeSavingsReportProvider(req
+          ));
+      23  
+      22 -    return Scaffold(                                           
+      23 -      appBar: AppBar(                                          
+      24 -        title: Text(l10n.reportHomeSavingsTitle),              
+      25 -        actions: [                                             
+      26 -          IconButton(                                          
+      27 -            icon: const Icon(Icons.refresh),                   
+      28 -            tooltip: l10n.reportRefresh,                       
+      29 -            onPressed: () => ref.invalidate(homeSavingsReportPr
+         -ovider(req)),                                                  
+      30 -          ),                                                   
+      31 -        ],                                                     
+      32 -      ),                                                       
+      24 +    void retry() => ref.invalidate(homeSavingsReportProvider(re
+         +q));                                                           
+      25 +                                                               
+      26 +    return AppScreenScaffold(                                  
+      27 +      title: Text(l10n.reportHomeSavingsTitle),                
+      28 +      actions: [                                               
+      29 +        IconButton(                                            
+      30 +          icon: const Icon(Icons.refresh),                     
+      31 +          tooltip: l10n.reportRefresh,                         
+      32 +          onPressed: retry,                                    
+      33 +        ),                                                     
+      34 +      ],                                                       
+      35        body: Column(
+      36          children: [
+      37            const ReportPeriodSelector(),
+      38            const Divider(height: 1),
+      39            Expanded(
+      40              child: reportAsync.when(
+      39 -              loading: () => const ReportLoading(),            
+      40 -              error: (_, _) => ReportErrorState(               
+      41 -                onRetry: () => ref.invalidate(homeSavingsReport
+         -Provider(req)),                                                
+      41 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      42 +              error: (_, _) => AppErrorState(                  
+      43 +                message: l10n.reportError,                     
+      44 +                onRetry: retry,                                
+      45 +                retryLabel: l10n.reportRefresh,                
+      46                ),
+      47                data: (result) {
+      48                  if (result is! AppOk<List<HomeSavingsFlowSummar
+          y>>) {
+      45 -                  return ReportErrorState(                     
+      46 -                    onRetry: () =>                             
+      47 -                        ref.invalidate(homeSavingsReportProvide
+         -r(req)),                                                       
+      49 +                  return AppErrorState(                        
+      50 +                    message: l10n.reportError,                 
+      51 +                    onRetry: retry,                            
+      52 +                    retryLabel: l10n.reportRefresh,            
+      53                    );
+      54                  }
+      55                  final accounts = result.value;
+      51 -                if (accounts.isEmpty) return const ReportEmptyS
+         -tate();                                                        
+      56 +                if (accounts.isEmpty) {                        
+      57 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      58 +                }                                              
+      59                  return _HomeSavingsContent(accounts: accounts, 
+          l10n: l10n);
+      60                },
+      61              ),
+     ...
        74  
-       64 -  final String label;                                         
-       65 -  final String formattedAmount;                               
-       66 -  final String? currencyCode;                                 
-       75 +  /// The magnitude. The sign is taken from [direction], not f
-          +rom this value,                                               
-       76 +  /// so callers cannot accidentally render a double negative 
-          +by passing a                                                  
-       77 +  /// negative number to an outflow.                          
-       78 +  final int minorUnits;                                       
-       79 +                                                              
-       80 +  final String currencyCode;                                  
-       81    final FinancialAmountTone tone;
-       82 +  final FinancialAmountDirection direction;                   
-       83 +  final FinancialAmountSize size;                             
-       84  
-       85 +  /// A reversed entry keeps its amount in place and strikes i
-          +t through — the                                               
-       86 +  /// original is never removed from the ledger.              
-       87 +  final bool isStruckThrough;                                 
-       88 +                                                              
-       89 +  /// Extra context for screen readers, spoken after the amoun
-          +t: the account,                                               
-       90 +  /// the beneficiary, the reason it is held. Must already be 
-          +localised.                                                    
-       91 +  final String? semanticsContext;                             
-       92 +                                                              
-       93    @override
-       94    Widget build(BuildContext context) {
-       95 +    final l10n = AppLocalizations.of(context);                
-       96 +    final colors = context.financialColors;                   
-       97      final roles = context.textRoles;
-       72 -    return Padding(                                           
-       73 -      padding: const EdgeInsets.symmetric(vertical: AppTheme.s
-          -pace8),                                                       
-       98 +    final masked = PrivacyScope.isMasked(context);            
-       99 +                                                              
-      100 +    final style = switch (size) {                             
-      101 +      FinancialAmountSize.display => roles.displayBalance,    
-      102 +      FinancialAmountSize.report => roles.reportValue,        
-      103 +      FinancialAmountSize.standard => roles.financialAmount,  
-      104 +    }.copyWith(color: _color(colors), decoration: _decoration)
-          +;                                                             
-      105 +                                                              
-      106 +    final formatted = AmountDisplayFormatter.format(minorUnits
-          +, currencyCode);                                              
-      107 +    final sign = _sign;                                       
-      108 +    final glyph = _glyph;                                     
-      109 +                                                              
-      110 +    return Semantics(                                         
-      111 +      // The amount is announced as one phrase; its parts must
-          + not be read as                                               
-      112 +      // separate nodes, or a screen reader says "minus" and t
-          +he number in                                                  
-      113 +      // whichever order the layout happened to produce.      
-      114 +      container: true,                                        
-      115 +      excludeSemantics: true,                                 
-      116 +      label: _semanticsLabel(l10n, formatted, masked: masked),
-      117        child: Row(
-      118 +        mainAxisSize: MainAxisSize.min,                       
-      119 +        crossAxisAlignment: CrossAxisAlignment.center,        
-      120          children: [
-       76 -          Expanded(child: Text(label, style: roles.body)),    
-       77 -          if (currencyCode != null) ...[                      
-       78 -            Text(currencyCode!, style: roles.supportingMeta), 
-       79 -            const SizedBox(width: AppTheme.space8),           
-      121 +          if (glyph != null) ...[                             
-      122 +            Text(glyph, style: style),                        
-      123 +            const SizedBox(width: AppTheme.space4),           
-      124            ],
-       81 -          FinancialAmountText(formattedAmount: formattedAmount
-          -, tone: tone),                                                
-      125 +          if (direction == FinancialAmountDirection.held) ...[
-      126 +            Icon(Icons.lock_outline, size: _lockSize, color: _
-          +color(colors)),                                               
-      127 +            const SizedBox(width: AppTheme.space4),           
-      128 +          ],                                                  
-      129 +          if (sign != null) ...[                              
-      130 +            Text(sign, style: style),                         
-      131 +            const SizedBox(width: AppTheme.space4),           
-      132 +          ],                                                  
-      133 +          // The number is its own child rather than part of a
-          + single string,                                               
-      134 +          // which is what keeps the sign on the correct side 
-          +in RTL: its                                                   
-      135 +          // position is a layout fact, not an outcome of the 
-          +bidi algorithm.                                               
-      136 +          // The isolate then stops the digits themselves from
-          + reordering.                                                  
-      137 +          if (masked)                                         
-      138 +            _MaskedDigits(formatted: formatted, style: style) 
-      139 +          else                                                
-      140 +            Text(_isolate(formatted), style: style),          
-      141 +          const SizedBox(width: AppTheme.space4),             
-      142 +          // The code trails the number in both scripts. Becau
-          +se this is a Row                                              
-      143 +          // under the ambient direction, "trails" resolves co
-          +rrectly on its                                                
-      144 +          // own: leftmost in RTL, rightmost in LTR.          
-      145 +          Text(                                               
-      146 +            currencyCode,                                     
-      147 +            style: roles.supportingMeta.copyWith(color: colors
-          +.secondaryText),                                              
-      148 +          ),                                                  
-      149          ],
-      150        ),
-      151      );
-      152    }
-       86 -}                                                             
-      153  
-       88 -class FinancialMetric extends StatelessWidget {               
-       89 -  const FinancialMetric({                                     
-       90 -    required this.label,                                      
-       91 -    required this.formattedAmount,                            
-       92 -    super.key,                                                
-       93 -    this.caption,                                             
-       94 -    this.tone = FinancialAmountTone.neutral,                  
-       95 -    this.icon,                                                
-       96 -  });                                                         
-      154 +  double get _lockSize => switch (size) {                     
-      155 +    FinancialAmountSize.display => 24,                        
-      156 +    FinancialAmountSize.report => 18,                         
-      157 +    FinancialAmountSize.standard => 16,                       
-      158 +  };                                                          
-      159  
-       98 -  final String label;                                         
-       99 -  final String formattedAmount;                               
-      100 -  final String? caption;                                      
-      101 -  final FinancialAmountTone tone;                             
-      102 -  final IconData? icon;                                       
-      160 +  TextDecoration? get _decoration =>                          
-      161 +      isStruckThrough ? TextDecoration.lineThrough : null;    
-      162  
-      104 -  @override                                                   
-      105 -  Widget build(BuildContext context) {                        
-      106 -    final roles = context.textRoles;                          
-      107 -    return Column(                                            
-      108 -      crossAxisAlignment: CrossAxisAlignment.start,           
-      109 -      children: [                                             
-      110 -        Row(                                                  
-      111 -          children: [                                         
-      112 -            if (icon != null) ...[                            
-      113 -              Icon(                                           
-      114 -                icon,                                         
-      115 -                size: 18,                                     
-      116 -                color: context.financialColors.secondaryText, 
-      117 -              ),                                              
-      118 -              const SizedBox(width: AppTheme.space8),         
-      119 -            ],                                                
-      120 -            Expanded(child: Text(label, style: roles.supportin
-          -gMeta)),                                                      
-      121 -          ],                                                  
-      122 -        ),                                                    
-      123 -        const SizedBox(height: AppTheme.space4),              
-      124 -        FinancialAmountText(formattedAmount: formattedAmount, 
-          -tone: tone),                                                  
-      125 -        if (caption != null) ...[                             
-      126 -          const SizedBox(height: AppTheme.space4),            
-      127 -          Text(caption!, style: roles.supportingMeta),        
-      128 -        ],                                                    
-      129 -      ],                                                      
-      130 -    );                                                        
-      163 +  Color _color(AppFinancialColors colors) => switch (tone) {  
-      164 +    FinancialAmountTone.neutral => colors.primaryText,        
-      165 +    FinancialAmountTone.income => colors.income,              
-      166 +    FinancialAmountTone.expense => colors.expense,            
-      167 +    FinancialAmountTone.transfer => colors.transfer,          
-      168 +    FinancialAmountTone.protected => colors.protectedMoney,   
-      169 +    FinancialAmountTone.goal => colors.goalReserved,          
-      170 +    FinancialAmountTone.certificate => colors.certificatePrinc
-          +ipal,                                                         
-      171 +    FinancialAmountTone.muted => colors.secondaryText,        
-      172 +  };                                                          
-      173 +                                                              
-      174 +  /// U+2212 MINUS SIGN, not an ASCII hyphen: the hyphen is bi
-          +di-neutral and                                                
-      175 +  /// visually short beside tabular figures.                  
-      176 +  String? get _sign => switch (direction) {                   
-      177 +    FinancialAmountDirection.inflow => '+',                   
-      178 +    FinancialAmountDirection.outflow => '−',                  
-      179 +    FinancialAmountDirection.internal => null,                
-      180 +    FinancialAmountDirection.held => null,                    
-      181 +    FinancialAmountDirection.none => null,                    
-      182 +  };                                                          
-      183 +                                                              
-      184 +  /// Describes money entering or leaving *the household*, not
-          + a direction on                                               
-      185 +  /// screen — so these are never mirrored in RTL. `⇄` is symm
-          +etric anyway.                                                 
-      186 +  String? get _glyph => switch (direction) {                  
-      187 +    FinancialAmountDirection.inflow => '↓',                   
-      188 +    FinancialAmountDirection.outflow => '↑',                  
-      189 +    FinancialAmountDirection.internal => '⇄',                 
-      190 +    FinancialAmountDirection.held => null,                    
-      191 +    FinancialAmountDirection.none => null,                    
-      192 +  };                                                          
-      193 +                                                              
-      194 +  /// Wraps a numeric run in FIRST STRONG ISOLATE … POP DIRECT
-          +IONAL ISOLATE.                                                
-      195 +  ///                                                         
-      196 +  /// Without it, a date or a grouped number embedded in Arabi
-          +c text can be                                                 
-      197 +  /// reordered by the bidi algorithm.                        
-      198 +  static String _isolate(String value) => '�$value�';           
-      199 +                                                              
-      200 +  String _semanticsLabel(                                     
-      201 +    AppLocalizations l10n,                                    
-      202 +    String formatted, {                                       
-      203 +    required bool masked,                                     
-      204 +  }) {                                                        
-      205 +    final parts = <String>[                                   
-      206 +      // The class leads, so a screen-reader user learns wheth
-          +er the money is                                               
-      207 +      // spendable before hearing what it is worth.           
-      208 +      switch (direction) {                                    
-      209 +        FinancialAmountDirection.inflow => l10n.transactionTyp
-          +eIncome,                                                      
-      210 +        FinancialAmountDirection.outflow => l10n.transactionTy
-          +peExpense,                                                    
-      211 +        FinancialAmountDirection.internal => l10n.transactionT
-          +ypeTransfer,                                                  
-      212 +        FinancialAmountDirection.held =>                      
-      213 +          '${l10n.amountHeld}, ${l10n.amountNotSpendable}',   
-      214 +        FinancialAmountDirection.none => '',                  
-      215 +      },                                                      
-      216 +      // Masked amounts expose that a value exists and is hidd
-          +en — never the                                                
-      217 +      // value, and never a placeholder that could be mistaken
-          + for one. The                                                 
-      218 +      // currency code is not repeated here; it is already in 
-          +the label above.                                              
-      219 +      if (masked) l10n.amountHidden else '$formatted $currency
-          +Code',                                                        
-      220 +      if (semanticsContext case final String extra) extra,    
-      221 +    ];                                                        
-      222 +    return parts.where((p) => p.isNotEmpty).join(', ');       
-      223    }
-      224  }
-      225  
-      134 -class FinancialSummary extends StatelessWidget {              
-      135 -  const FinancialSummary({                                    
-      136 -    required this.title,                                      
-      137 -    required this.formattedAmount,                            
-      138 -    super.key,                                                
-      139 -    this.subtitle,                                            
-      140 -    this.tone = FinancialAmountTone.neutral,                  
-      141 -    this.child,                                               
-      142 -  });                                                         
-      226 +/// Which type role an amount renders at. Not a font size — a 
-          +position in the                                               
-      227 +/// hierarchy, of which only one `display` is allowed per scre
-          +en.                                                           
-      228 +enum FinancialAmountSize { standard, report, display }        
-      229  
-      144 -  final String title;                                         
-      145 -  final String formattedAmount;                               
-      146 -  final String? subtitle;                                     
-      147 -  final FinancialAmountTone tone;                             
-      148 -  final Widget? child;                                        
-      230 +/// Solid ink bars, one per digit group, at the exact width of
-          + the digits they                                              
-      231 +/// conceal.                                                  
-      232 +///                                                           
-      233 +/// Bars rather than blur: blur is expensive down a long list,
-          + survives                                                     
-      234 +/// screenshots imperfectly, and still leaks magnitude. Bars l
-          +eak the number of                                             
-      235 +/// digit groups, which is the same information the layout wid
-          +th already gives                                              
-      236 +/// away, and nothing more.                                   
-      237 +class _MaskedDigits extends StatelessWidget {                 
-      238 +  const _MaskedDigits({required this.formatted, required this.
-          +style});                                                      
-      239  
-      240 +  final String formatted;                                     
-      241 +  final TextStyle style;                                      
-      242 +                                                              
-      243    @override
-      244    Widget build(BuildContext context) {
-      152 -    final roles = context.textRoles;                          
-      153 -    final colors = context.financialColors;                   
-      154 -    return Container(                                         
-      155 -      width: double.infinity,                                 
-      156 -      padding: const EdgeInsets.all(AppTheme.space20),        
-      157 -      decoration: BoxDecoration(                              
-      158 -        color: colors.secondarySurface,                       
-      159 -        borderRadius: BorderRadius.circular(AppTheme.radiusCar
-          -d),                                                           
-      160 -        border: Border.all(color: colors.divider.withValues(al
-          -pha: 0.6)),                                                   
-      161 -      ),                                                      
-      162 -      child: Column(                                          
-      163 -        crossAxisAlignment: CrossAxisAlignment.start,         
-      164 -        children: [                                           
-      165 -          Text(title, style: roles.supportingMeta),           
-      166 -          const SizedBox(height: AppTheme.space8),            
-      167 -          FinancialAmountText(                                
-      168 -            formattedAmount: formattedAmount,                 
-      169 -            tone: tone,                                       
-      170 -            isDisplay: true,                                  
-      245 +    final groups = AmountDisplayFormatter.digitGroups(formatte
-          +d);                                                           
-      246 +    final barHeight = (style.fontSize ?? 16) * 0.62;          
-      247 +    final scaler = MediaQuery.textScalerOf(context);          
-      248 +                                                              
-      249 +    return Row(                                               
-      250 +      mainAxisSize: MainAxisSize.min,                         
-      251 +      children: [                                             
-      252 +        for (var i = 0; i < groups.length; i++) ...[          
-      253 +          if (i > 0) const SizedBox(width: AppTheme.space4),  
-      254 +          Container(                                          
-      255 +            width: _widthOf(groups[i], scaler),               
-      256 +            height: barHeight,                                
-      257 +            color: style.color,                               
-      258            ),
-      172 -          if (subtitle != null) ...[                          
-      173 -            const SizedBox(height: AppTheme.space8),          
-      174 -            Text(subtitle!, style: roles.supportingMeta),     
-      175 -          ],                                                  
-      176 -          if (child != null) ...[                             
-      177 -            const SizedBox(height: AppTheme.space16),         
-      178 -            child!,                                           
-      179 -          ],                                                  
-      259          ],
+       75    @override
+       76    Widget build(BuildContext context) {
+       70 -    return ListView(                                          
+       71 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       72 -      children: [                                             
+       73 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       74 -        ReportInfoNote(text: l10n.reportTransferNote),        
+       75 -        for (final account in accounts) ...[                  
+       76 -          _HomeSavingsCard(account: account, l10n: l10n),     
+       77 -          const SizedBox(height: 8),                          
+       77 +    return ResponsiveContentContainer(                        
+       78 +      child: ListView(                                        
+       79 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       80 +        children: [                                           
+       81 +          Padding(                                            
+       82 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       83 +            child: Column(                                    
+       84 +              children: [                                     
+       85 +                AppInlineNotice(message: l10n.reportCurrencySe
+          +parate),                                                      
+       86 +                const SizedBox(height: AppTheme.space8),      
+       87 +                AppInlineNotice(message: l10n.reportTransferNo
+          +te),                                                          
+       88 +              ],                                              
+       89 +            ),                                                
+       90 +          ),                                                  
+       91 +          for (final account in accounts)                     
+       92 +            _HomeSavingsFlow(account: account, l10n: l10n),   
+       93 +          const SizedBox(height: AppTheme.space24),           
+       94          ],
+       79 -        const SizedBox(height: 24),                           
+       80 -      ],                                                      
+       95 +      ),                                                      
+       96      );
+       97    }
+       98  }
+       99  
+       85 -class _HomeSavingsCard extends StatelessWidget {              
+       86 -  const _HomeSavingsCard({required this.account, required this
+          -.l10n});                                                      
+      100 +class _HomeSavingsFlow extends StatelessWidget {              
+      101 +  const _HomeSavingsFlow({required this.account, required this
+          +.l10n});                                                      
+      102  
+      103    final HomeSavingsFlowSummary account;
+      104    final AppLocalizations l10n;
+      105  
+      106    @override
+      107    Widget build(BuildContext context) {
+       93 -    final colors = context.financialColors;                   
+       94 -    return Card(                                              
+       95 -      margin: EdgeInsets.zero,                                
+       96 -      child: Padding(                                         
+       97 -        padding: const EdgeInsets.all(12),                    
+       98 -        child: Column(                                        
+       99 -          crossAxisAlignment: CrossAxisAlignment.start,       
+      100 -          children: [                                         
+      101 -            Text(                                             
+      102 -              account.accountName,                            
+      103 -              style: Theme.of(context).textTheme.titleSmall,  
+      104 -            ),                                                
+      105 -            const SizedBox(height: 8),                        
+      106 -            ReportAmountRow(                                  
+      107 -              label: l10n.reportOpeningBalance,               
+      108 -              minorUnits: account.openingBalanceMinorUnits,   
+      109 -              currencyCode: account.currencyCode,             
+      110 -            ),                                                
+      111 -            if (account.directIncomeMinorUnits != 0)          
+      112 -              ReportAmountRow(                                
+      113 -                label: l10n.dashboardPeriodIncome,            
+      114 -                minorUnits: account.directIncomeMinorUnits,   
+      115 -                currencyCode: account.currencyCode,           
+      116 -                color: colors.income,                         
+      117 -                icon: Icons.arrow_downward,                   
+      118 -              ),                                              
+      119 -            if (account.directExpenseMinorUnits != 0)         
+      120 -              ReportAmountRow(                                
+      121 -                label: l10n.dashboardPeriodExpenses,          
+      122 -                minorUnits: -account.directExpenseMinorUnits, 
+      123 -                currencyCode: account.currencyCode,           
+      124 -                color: colors.expense,                        
+      125 -                icon: Icons.arrow_upward,                     
+      126 -              ),                                              
+      127 -            if (account.spouseWalletFundingMinorUnits != 0)   
+      128 -              ReportAmountRow(                                
+      129 -                label: '${l10n.reportSpouseWalletTitle} (${l10
+          -n.reportFunded})',                                            
+      130 -                minorUnits: -account.spouseWalletFundingMinorU
+          -nits,                                                         
+      131 -                currencyCode: account.currencyCode,           
+      132 -                color: colors.transfer,                       
+      133 -                icon: Icons.north_east,                       
+      134 -              ),                                              
+      135 -            if (account.spouseWalletReturnMinorUnits != 0)    
+      136 -              ReportAmountRow(                                
+      137 -                label:                                        
+      138 -                    '${l10n.reportSpouseWalletTitle} (${l10n.r
+          -eportReturned})',                                             
+      139 -                minorUnits: account.spouseWalletReturnMinorUni
+          -ts,                                                           
+      140 -                currencyCode: account.currencyCode,           
+      141 -                color: colors.transfer,                       
+      142 -                icon: Icons.south_west,                       
+      143 -              ),                                              
+      144 -            if (account.adjustmentsMinorUnits != 0)           
+      145 -              ReportAmountRow(                                
+      146 -                label: l10n.transactionTypeAdjustment,        
+      147 -                minorUnits: account.adjustmentsMinorUnits,    
+      148 -                currencyCode: account.currencyCode,           
+      149 -                icon: Icons.tune,                             
+      150 -              ),                                              
+      151 -            if (account.reversalEffectMinorUnits != 0)        
+      152 -              ReportAmountRow(                                
+      153 -                label: l10n.reportReversalEffect,             
+      154 -                minorUnits: account.reversalEffectMinorUnits, 
+      155 -                currencyCode: account.currencyCode,           
+      156 -                color: colors.secondaryText,                  
+      157 -                icon: Icons.undo,                             
+      158 -              ),                                              
+      159 -            const Divider(height: 12),                        
+      160 -            ReportAmountRow(                                  
+      161 -              label: l10n.reportPeriodClosingBalance,         
+      162 -              minorUnits: account.closingBalanceMinorUnits,   
+      163 -              currencyCode: account.currencyCode,             
+      164 -              bold: true,                                     
+      165 -            ),                                                
+      166 -            ReportAmountRow(                                  
+      167 -              label: l10n.reportCurrentBalance,               
+      168 -              minorUnits: account.currentBalanceMinorUnits,   
+      169 -              currencyCode: account.currencyCode,             
+      170 -              bold: true,                                     
+      171 -            ),                                                
+      172 -          ],                                                  
+      108 +    return Column(                                            
+      109 +      crossAxisAlignment: CrossAxisAlignment.stretch,         
+      110 +      children: [                                             
+      111 +        SectionHeader(title: account.accountName),            
+      112 +        balanceRow(                                           
+      113 +          label: l10n.reportOpeningBalance,                   
+      114 +          minorUnits: account.openingBalanceMinorUnits,       
+      115 +          currencyCode: account.currencyCode,                 
+      116          ),
+      174 -      ),                                                      
+      117 +        if (account.directIncomeMinorUnits != 0)              
+      118 +          flowRow(                                            
+      119 +            label: l10n.dashboardPeriodIncome,                
+      120 +            magnitudeMinorUnits: account.directIncomeMinorUnit
+          +s,                                                            
+      121 +            currencyCode: account.currencyCode,               
+      122 +            direction: FinancialAmountDirection.inflow,       
+      123 +            tone: FinancialAmountTone.income,                 
+      124 +          ),                                                  
+      125 +        if (account.directExpenseMinorUnits != 0)             
+      126 +          flowRow(                                            
+      127 +            label: l10n.dashboardPeriodExpenses,              
+      128 +            magnitudeMinorUnits: account.directExpenseMinorUni
+          +ts,                                                           
+      129 +            currencyCode: account.currencyCode,               
+      130 +            direction: FinancialAmountDirection.outflow,      
+      131 +            tone: FinancialAmountTone.expense,                
+      132 +          ),                                                  
+      133 +        // Funding a spouse wallet moves money between the hou
+          +sehold's own                                                  
+      134 +        // accounts, so both legs carry the internal glyph and
+          + neither is                                                   
+      135 +        // spending. The label says which leg it is.          
+      136 +        if (account.spouseWalletFundingMinorUnits != 0)       
+      137 +          flowRow(                                            
+      138 +            label: l10n.reportSpouseWalletFunded,             
+      139 +            magnitudeMinorUnits: account.spouseWalletFundingMi
+          +norUnits,                                                     
+      140 +            currencyCode: account.currencyCode,               
+      141 +            direction: FinancialAmountDirection.internal,     
+      142 +            tone: FinancialAmountTone.transfer,               
+      143 +          ),                                                  
+      144 +        if (account.spouseWalletReturnMinorUnits != 0)        
+      145 +          flowRow(                                            
+      146 +            label: l10n.reportSpouseWalletReturned,           
+      147 +            magnitudeMinorUnits: account.spouseWalletReturnMin
+          +orUnits,                                                      
+      148 +            currencyCode: account.currencyCode,               
+      149 +            direction: FinancialAmountDirection.internal,     
+      150 +            tone: FinancialAmountTone.transfer,               
+      151 +          ),                                                  
+      152 +        if (account.adjustmentsMinorUnits != 0)               
+      153 +          signedFlowRow(                                      
+      154 +            label: l10n.transactionTypeAdjustment,            
+      155 +            signedMinorUnits: account.adjustmentsMinorUnits,  
+      156 +            currencyCode: account.currencyCode,               
+      157 +          ),                                                  
+      158 +        if (account.reversalEffectMinorUnits != 0)            
+      159 +          signedFlowRow(                                      
+      160 +            label: l10n.reportReversalEffect,                 
+      161 +            signedMinorUnits: account.reversalEffectMinorUnits
+          +,                                                             
+      162 +            currencyCode: account.currencyCode,               
+      163 +            tone: FinancialAmountTone.muted,                  
+      164 +          ),                                                  
+      165 +        balanceRow(                                           
+      166 +          label: l10n.reportPeriodClosingBalance,             
+      167 +          minorUnits: account.closingBalanceMinorUnits,       
+      168 +          currencyCode: account.currencyCode,                 
+      169 +          isEmphasised: true,                                 
+      170 +        ),                                                    
+      171 +        balanceRow(                                           
+      172 +          label: l10n.reportCurrentBalance,                   
+      173 +          minorUnits: account.currentBalanceMinorUnits,       
+      174 +          currencyCode: account.currencyCode,                 
+      175 +          isEmphasised: true,                                 
+      176 +          showDivider: false,                                 
+      177 +        ),                                                    
+      178 +      ],                                                      
+      179      );
+      180    }
+      181  }
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/spouse_wallet_report_screen.dart)
+  ⎿  Added 114 lines, removed 100 lines
+       1  /// Spouse wallet report screen.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       7 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+       9  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+       9 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      10 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_flow_row.dart';                                     
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:flutter/material.dart';
+      13  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      14  
+     ...
+      21      final req = ref.watch(reportRequestProvider);
+      22      final reportAsync = ref.watch(spouseWalletReportProvider(re
+          q));
+      23  
+      22 -    return Scaffold(                                           
+      23 -      appBar: AppBar(                                          
+      24 -        title: Text(l10n.reportSpouseWalletTitle),             
+      25 -        actions: [                                             
+      26 -          IconButton(                                          
+      27 -            icon: const Icon(Icons.refresh),                   
+      28 -            tooltip: l10n.reportRefresh,                       
+      29 -            onPressed: () => ref.invalidate(spouseWalletReportP
+         -rovider(req)),                                                 
+      30 -          ),                                                   
+      31 -        ],                                                     
+      32 -      ),                                                       
+      24 +    void retry() => ref.invalidate(spouseWalletReportProvider(r
+         +eq));                                                          
+      25 +                                                               
+      26 +    return AppScreenScaffold(                                  
+      27 +      title: Text(l10n.reportSpouseWalletTitle),               
+      28 +      actions: [                                               
+      29 +        IconButton(                                            
+      30 +          icon: const Icon(Icons.refresh),                     
+      31 +          tooltip: l10n.reportRefresh,                         
+      32 +          onPressed: retry,                                    
+      33 +        ),                                                     
+      34 +      ],                                                       
+      35        body: Column(
+      36          children: [
+      37            const ReportPeriodSelector(),
+      38            const Divider(height: 1),
+      39            Expanded(
+      40              child: reportAsync.when(
+      39 -              loading: () => const ReportLoading(),            
+      40 -              error: (_, _) => ReportErrorState(               
+      41 -                onRetry: () => ref.invalidate(spouseWalletRepor
+         -tProvider(req)),                                               
+      41 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      42 +              error: (_, _) => AppErrorState(                  
+      43 +                message: l10n.reportError,                     
+      44 +                onRetry: retry,                                
+      45 +                retryLabel: l10n.reportRefresh,                
+      46                ),
+      47                data: (result) {
+      48                  if (result is! AppOk<List<SpouseWalletReport>>)
+           {
+      45 -                  return ReportErrorState(                     
+      46 -                    onRetry: () =>                             
+      47 -                        ref.invalidate(spouseWalletReportProvid
+         -er(req)),                                                      
+      49 +                  return AppErrorState(                        
+      50 +                    message: l10n.reportError,                 
+      51 +                    onRetry: retry,                            
+      52 +                    retryLabel: l10n.reportRefresh,            
+      53                    );
+      54                  }
+      55                  final wallets = result.value;
+      51 -                if (wallets.isEmpty) return const ReportEmptySt
+         -ate();                                                         
+      56 +                if (wallets.isEmpty) {                         
+      57 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      58 +                }                                              
+      59                  return _SpouseWalletContent(wallets: wallets, l
+          10n: l10n);
+      60                },
+      61              ),
+     ...
+       74  
+       75    @override
+       76    Widget build(BuildContext context) {
+       70 -    return ListView(                                          
+       71 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       72 -      children: [                                             
+       73 -        ReportInfoNote(text: l10n.reportTransferNote),        
+       74 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       75 -        for (final wallet in wallets) ...[                    
+       76 -          _WalletCard(wallet: wallet, l10n: l10n),            
+       77 -          const SizedBox(height: 8),                          
+       77 +    return ResponsiveContentContainer(                        
+       78 +      child: ListView(                                        
+       79 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       80 +        children: [                                           
+       81 +          Padding(                                            
+       82 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       83 +            child: Column(                                    
+       84 +              children: [                                     
+       85 +                AppInlineNotice(message: l10n.reportTransferNo
+          +te),                                                          
+       86 +                const SizedBox(height: AppTheme.space8),      
+       87 +                AppInlineNotice(message: l10n.reportCurrencySe
+          +parate),                                                      
+       88 +              ],                                              
+       89 +            ),                                                
+       90 +          ),                                                  
+       91 +          for (final wallet in wallets)                       
+       92 +            _WalletFlow(wallet: wallet, l10n: l10n),          
+       93 +          const SizedBox(height: AppTheme.space24),           
+       94          ],
+       79 -        const SizedBox(height: 24),                           
+       80 -      ],                                                      
+       95 +      ),                                                      
+       96      );
+       97    }
+       98  }
+       99  
+       85 -class _WalletCard extends StatelessWidget {                   
+       86 -  const _WalletCard({required this.wallet, required this.l10n}
+          -);                                                            
+      100 +class _WalletFlow extends StatelessWidget {                   
+      101 +  const _WalletFlow({required this.wallet, required this.l10n}
+          +);                                                            
+      102  
+      103    final SpouseWalletReport wallet;
+      104    final AppLocalizations l10n;
+      105  
+      106    @override
+      107    Widget build(BuildContext context) {
+       93 -    final colors = context.financialColors;                   
+      108      return Semantics(
+      109        label: wallet.accountName,
+       96 -      child: Card(                                            
+       97 -        margin: EdgeInsets.zero,                              
+       98 -        child: Padding(                                       
+       99 -          padding: const EdgeInsets.all(12),                  
+      100 -          child: Column(                                      
+      101 -            crossAxisAlignment: CrossAxisAlignment.start,     
+      102 -            children: [                                       
+      103 -              Text(                                           
+      104 -                wallet.accountName,                           
+      105 -                style: Theme.of(context).textTheme.titleSmall,
+      106 -              ),                                              
+      107 -              const SizedBox(height: 8),                      
+      108 -              ReportAmountRow(                                
+      109 -                label: l10n.reportOpeningBalance,             
+      110 -                minorUnits: wallet.openingBalanceMinorUnits,  
+      111 -                currencyCode: wallet.currencyCode,            
+      112 -              ),                                              
+      113 -              if (wallet.periodFundedMinorUnits != 0)         
+      114 -                ReportAmountRow(                              
+      115 -                  label: l10n.reportFunded,                   
+      116 -                  minorUnits: wallet.periodFundedMinorUnits,  
+      117 -                  currencyCode: wallet.currencyCode,          
+      118 -                  color: colors.income,                       
+      119 -                  icon: Icons.south_west,                     
+      120 -                ),                                            
+      121 -              if (wallet.periodSpentMinorUnits != 0)          
+      122 -                ReportAmountRow(                              
+      123 -                  label: l10n.reportSpent,                    
+      124 -                  minorUnits: -wallet.periodSpentMinorUnits,  
+      125 -                  currencyCode: wallet.currencyCode,          
+      126 -                  color: colors.expense,                      
+      127 -                  icon: Icons.arrow_upward,                   
+      128 -                ),                                            
+      129 -              if (wallet.periodReturnedMinorUnits != 0)       
+      130 -                ReportAmountRow(                              
+      131 -                  label: l10n.reportReturned,                 
+      132 -                  minorUnits: -wallet.periodReturnedMinorUnits
+          -,                                                             
+      133 -                  currencyCode: wallet.currencyCode,          
+      134 -                  color: colors.transfer,                     
+      135 -                  icon: Icons.north_east,                     
+      136 -                ),                                            
+      137 -              if (wallet.periodReversalEffectMinorUnits != 0) 
+      138 -                ReportAmountRow(                              
+      139 -                  label: l10n.reportReversalEffect,           
+      140 -                  minorUnits: wallet.periodReversalEffectMinor
+          -Units,                                                        
+      141 -                  currencyCode: wallet.currencyCode,          
+      142 -                  color: colors.secondaryText,                
+      143 -                  icon: Icons.undo,                           
+      144 -                ),                                            
+      145 -              const Divider(height: 12),                      
+      146 -              ReportAmountRow(                                
+      147 -                label: l10n.reportPeriodClosingBalance,       
+      148 -                minorUnits: wallet.periodClosingBalanceMinorUn
+          -its,                                                          
+      149 -                currencyCode: wallet.currencyCode,            
+      150 -                bold: true,                                   
+      151 -              ),                                              
+      152 -              ReportAmountRow(                                
+      153 -                label: l10n.reportCurrentBalance,             
+      154 -                minorUnits: wallet.currentBalanceMinorUnits,  
+      155 -                currencyCode: wallet.currencyCode,            
+      156 -                bold: true,                                   
+      157 -              ),                                              
+      158 -              if (wallet.periodClosingBalanceMinorUnits !=    
+      159 -                  wallet.currentBalanceMinorUnits)            
+      160 -                ReportInfoNote(text: l10n.reportReversalNote),
+      161 -            ],                                                
+      110 +      child: Column(                                          
+      111 +        crossAxisAlignment: CrossAxisAlignment.stretch,       
+      112 +        children: [                                           
+      113 +          SectionHeader(title: wallet.accountName),           
+      114 +          balanceRow(                                         
+      115 +            label: l10n.reportOpeningBalance,                 
+      116 +            minorUnits: wallet.openingBalanceMinorUnits,      
+      117 +            currencyCode: wallet.currencyCode,                
+      118            ),
+      163 -        ),                                                    
+      119 +          // Funding and returning are both moves between the 
+          +household's own                                               
+      120 +          // accounts. Only the middle line is real spending —
+          + which is the                                                 
+      121 +          // whole point of this report, and was previously ob
+          +scured by                                                     
+      122 +          // funding being tinted as income.                  
+      123 +          if (wallet.periodFundedMinorUnits != 0)             
+      124 +            flowRow(                                          
+      125 +              label: l10n.reportFunded,                       
+      126 +              magnitudeMinorUnits: wallet.periodFundedMinorUni
+          +ts,                                                           
+      127 +              currencyCode: wallet.currencyCode,              
+      128 +              direction: FinancialAmountDirection.internal,   
+      129 +              tone: FinancialAmountTone.transfer,             
+      130 +            ),                                                
+      131 +          if (wallet.periodSpentMinorUnits != 0)              
+      132 +            flowRow(                                          
+      133 +              label: l10n.reportSpent,                        
+      134 +              magnitudeMinorUnits: wallet.periodSpentMinorUnit
+          +s,                                                            
+      135 +              currencyCode: wallet.currencyCode,              
+      136 +              direction: FinancialAmountDirection.outflow,    
+      137 +              tone: FinancialAmountTone.expense,              
+      138 +            ),                                                
+      139 +          if (wallet.periodReturnedMinorUnits != 0)           
+      140 +            flowRow(                                          
+      141 +              label: l10n.reportReturned,                     
+      142 +              magnitudeMinorUnits: wallet.periodReturnedMinorU
+          +nits,                                                         
+      143 +              currencyCode: wallet.currencyCode,              
+      144 +              direction: FinancialAmountDirection.internal,   
+      145 +              tone: FinancialAmountTone.transfer,             
+      146 +            ),                                                
+      147 +          if (wallet.periodReversalEffectMinorUnits != 0)     
+      148 +            signedFlowRow(                                    
+      149 +              label: l10n.reportReversalEffect,               
+      150 +              signedMinorUnits: wallet.periodReversalEffectMin
+          +orUnits,                                                      
+      151 +              currencyCode: wallet.currencyCode,              
+      152 +              tone: FinancialAmountTone.muted,                
+      153 +            ),                                                
+      154 +          balanceRow(                                         
+      155 +            label: l10n.reportPeriodClosingBalance,           
+      156 +            minorUnits: wallet.periodClosingBalanceMinorUnits,
+      157 +            currencyCode: wallet.currencyCode,                
+      158 +            isEmphasised: true,                               
+      159 +          ),                                                  
+      160 +          balanceRow(                                         
+      161 +            label: l10n.reportCurrentBalance,                 
+      162 +            minorUnits: wallet.currentBalanceMinorUnits,      
+      163 +            currencyCode: wallet.currencyCode,                
+      164 +            isEmphasised: true,                               
+      165 +            showDivider: false,                               
+      166 +          ),                                                  
+      167 +          if (wallet.periodClosingBalanceMinorUnits !=        
+      168 +              wallet.currentBalanceMinorUnits) ...[           
+      169 +            const SizedBox(height: AppTheme.space8),          
+      170 +            Padding(                                          
+      171 +              padding: const EdgeInsets.symmetric(            
+      172 +                horizontal: AppTheme.space16,                 
+      173 +              ),                                              
+      174 +              child: AppInlineNotice(message: l10n.reportRever
+          +salNote),                                                     
+      175 +            ),                                                
+      176 +          ],                                                  
+      177 +        ],                                                    
+      178        ),
+      179      );
+      180    }
+
+  Searched for 3 patterns, read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ Fixing defect #7 — the beneficiary and the recorder are printed as raw UUIDs:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the protected funds screen, surfacing the joined names:
+
+⏺ Write(lib/features/reports/presentation/protected_funds_report_screen.dart)
+  ⎿  Added 116 lines, removed 117 lines
+       1  /// Protected funds report screen.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       6 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       7 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       8  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+       9  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+       9 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      10 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_flow_row.dart';                                     
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:flutter/material.dart';
+      13  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      14  
+     ...
+      21      final req = ref.watch(reportRequestProvider);
+      22      final reportAsync = ref.watch(protectedFundsReportProvider(
+          req));
+      23  
+      22 -    return Scaffold(                                           
+      23 -      appBar: AppBar(                                          
+      24 -        title: Text(l10n.reportProtectedFundsTitle),           
+      25 -        actions: [                                             
+      26 -          IconButton(                                          
+      27 -            icon: const Icon(Icons.refresh),                   
+      28 -            tooltip: l10n.reportRefresh,                       
+      29 -            onPressed: () => ref.invalidate(protectedFundsRepor
+         -tProvider(req)),                                               
+      30 -          ),                                                   
+      31 -        ],                                                     
+      32 -      ),                                                       
+      24 +    void retry() => ref.invalidate(protectedFundsReportProvider
+         +(req));                                                        
+      25 +                                                               
+      26 +    return AppScreenScaffold(                                  
+      27 +      title: Text(l10n.reportProtectedFundsTitle),             
+      28 +      actions: [                                               
+      29 +        IconButton(                                            
+      30 +          icon: const Icon(Icons.refresh),                     
+      31 +          tooltip: l10n.reportRefresh,                         
+      32 +          onPressed: retry,                                    
+      33 +        ),                                                     
+      34 +      ],                                                       
+      35        body: Column(
+      36          children: [
+      37            const ReportPeriodSelector(),
+      38            const Divider(height: 1),
+      39            Expanded(
+      40              child: reportAsync.when(
+      39 -              loading: () => const ReportLoading(),            
+      40 -              error: (_, _) => ReportErrorState(               
+      41 -                onRetry: () =>                                 
+      42 -                    ref.invalidate(protectedFundsReportProvider
+         -(req)),                                                        
+      41 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      42 +              error: (_, _) => AppErrorState(                  
+      43 +                message: l10n.reportError,                     
+      44 +                onRetry: retry,                                
+      45 +                retryLabel: l10n.reportRefresh,                
+      46                ),
+      47                data: (result) {
+      48                  if (result is! AppOk<List<ProtectedFundsSummary
+          >>) {
+      46 -                  return ReportErrorState(                     
+      47 -                    onRetry: () =>                             
+      48 -                        ref.invalidate(protectedFundsReportProv
+         -ider(req)),                                                    
+      49 +                  return AppErrorState(                        
+      50 +                    message: l10n.reportError,                 
+      51 +                    onRetry: retry,                            
+      52 +                    retryLabel: l10n.reportRefresh,            
+      53                    );
+      54                  }
+      55                  final funds = result.value;
+      52 -                if (funds.isEmpty) return const ReportEmptyStat
+         -e();                                                           
+      56 +                if (funds.isEmpty) {                           
+      57 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      58 +                }                                              
+      59                  return _ProtectedFundsContent(funds: funds, l10
+          n: l10n);
+      60                },
+      61              ),
+     ...
+       74  
+       75    @override
+       76    Widget build(BuildContext context) {
+       71 -    return ListView(                                          
+       72 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       73 -      children: [                                             
+       74 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       75 -        for (final fund in funds) ...[                        
+       76 -          _FundCard(fund: fund, l10n: l10n),                  
+       77 -          const SizedBox(height: 8),                          
+       77 +    return ResponsiveContentContainer(                        
+       78 +      child: ListView(                                        
+       79 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       80 +        children: [                                           
+       81 +          Padding(                                            
+       82 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       83 +            child: AppInlineNotice(message: l10n.reportCurrenc
+          +ySeparate),                                                   
+       84 +          ),                                                  
+       85 +          for (final fund in funds) _FundFlow(fund: fund, l10n
+          +: l10n),                                                      
+       86 +          const SizedBox(height: AppTheme.space24),           
+       87          ],
+       79 -        const SizedBox(height: 24),                           
+       80 -      ],                                                      
+       88 +      ),                                                      
+       89      );
+       90    }
+       91  }
+       92  
+       85 -class _FundCard extends StatelessWidget {                     
+       86 -  const _FundCard({required this.fund, required this.l10n});  
+       93 +class _FundFlow extends StatelessWidget {                     
+       94 +  const _FundFlow({required this.fund, required this.l10n});  
+       95  
+       96    final ProtectedFundsSummary fund;
+       97    final AppLocalizations l10n;
+       98  
+       99    @override
+      100    Widget build(BuildContext context) {
+       93 -    final colors = context.financialColors;                   
+       94 -    return Card(                                              
+       95 -      margin: EdgeInsets.zero,                                
+       96 -      child: Padding(                                         
+       97 -        padding: const EdgeInsets.all(12),                    
+       98 -        child: Column(                                        
+       99 -          crossAxisAlignment: CrossAxisAlignment.start,       
+      100 -          children: [                                         
+      101 -            Text(                                             
+      102 -              fund.accountName,                               
+      103 -              style: Theme.of(context).textTheme.titleSmall,  
+      104 -            ),                                                
+      105 -            const SizedBox(height: 8),                        
+      106 -            ReportAmountRow(                                  
+      107 -              label: l10n.reportOpeningBalance,               
+      108 -              minorUnits: fund.openingBalanceMinorUnits,      
+      109 -              currencyCode: fund.currencyCode,                
+      110 -            ),                                                
+      111 -            if (fund.fundingMinorUnits != 0)                  
+      112 -              ReportAmountRow(                                
+      113 -                label: l10n.reportFunded,                     
+      114 -                minorUnits: fund.fundingMinorUnits,           
+      115 -                currencyCode: fund.currencyCode,              
+      116 -                color: colors.income,                         
+      117 -                icon: Icons.arrow_downward,                   
+      118 -              ),                                              
+      119 -            if (fund.withdrawalMinorUnits != 0)               
+      120 -              ReportAmountRow(                                
+      121 -                label: l10n.reportWithdrawals,                
+      122 -                minorUnits: -fund.withdrawalMinorUnits,       
+      123 -                currencyCode: fund.currencyCode,              
+      124 -                color: colors.expense,                        
+      125 -                icon: Icons.arrow_upward,                     
+      126 -              ),                                              
+      127 -            if (fund.reversalEffectMinorUnits != 0)           
+      128 -              ReportAmountRow(                                
+      129 -                label: l10n.reportReversalEffect,             
+      130 -                minorUnits: fund.reversalEffectMinorUnits,    
+      131 -                currencyCode: fund.currencyCode,              
+      132 -                color: colors.secondaryText,                  
+      133 -                icon: Icons.undo,                             
+      134 -              ),                                              
+      135 -            const Divider(height: 12),                        
+      136 -            ReportAmountRow(                                  
+      137 -              label: l10n.reportPeriodClosingBalance,         
+      138 -              minorUnits: fund.closingBalanceMinorUnits,      
+      139 -              currencyCode: fund.currencyCode,                
+      140 -              bold: true,                                     
+      141 -            ),                                                
+      142 -            ReportAmountRow(                                  
+      143 -              label: l10n.reportCurrentBalance,               
+      144 -              minorUnits: fund.currentBalanceMinorUnits,      
+      145 -              currencyCode: fund.currencyCode,                
+      146 -              bold: true,                                     
+      147 -            ),                                                
+      148 -            if (fund.withdrawalAudits.isNotEmpty) ...[        
+      149 -              const SizedBox(height: 8),                      
+      150 -              Text(                                           
+      151 -                l10n.reportWithdrawals,                       
+      152 -                style: Theme.of(context).textTheme.labelMedium
+          -,                                                             
+      153 -              ),                                              
+      154 -              ...fund.withdrawalAudits.map(                   
+      155 -                (audit) => _AuditRow(audit: audit, l10n: l10n)
+          -,                                                             
+      156 -              ),                                              
+      157 -            ],                                                
+      158 -          ],                                                  
+      101 +    return Column(                                            
+      102 +      crossAxisAlignment: CrossAxisAlignment.stretch,         
+      103 +      children: [                                             
+      104 +        SectionHeader(title: fund.accountName),               
+      105 +        // Protected money is stated as held: it exists, and i
+          +t cannot be                                                   
+      106 +        // spent. That is a different thing from a spendable b
+          +alance, and the                                               
+      107 +        // component says so with the lock rather than with a 
+          +colour.                                                       
+      108 +        balanceRow(                                           
+      109 +          label: l10n.reportOpeningBalance,                   
+      110 +          minorUnits: fund.openingBalanceMinorUnits,          
+      111 +          currencyCode: fund.currencyCode,                    
+      112          ),
+      160 -      ),                                                      
+      113 +        if (fund.fundingMinorUnits != 0)                      
+      114 +          flowRow(                                            
+      115 +            label: l10n.reportFunded,                         
+      116 +            magnitudeMinorUnits: fund.fundingMinorUnits,      
+      117 +            currencyCode: fund.currencyCode,                  
+      118 +            direction: FinancialAmountDirection.inflow,       
+      119 +            tone: FinancialAmountTone.protected,              
+      120 +          ),                                                  
+      121 +        if (fund.withdrawalMinorUnits != 0)                   
+      122 +          flowRow(                                            
+      123 +            label: l10n.reportWithdrawals,                    
+      124 +            magnitudeMinorUnits: fund.withdrawalMinorUnits,   
+      125 +            currencyCode: fund.currencyCode,                  
+      126 +            direction: FinancialAmountDirection.outflow,      
+      127 +            tone: FinancialAmountTone.protected,              
+      128 +          ),                                                  
+      129 +        if (fund.reversalEffectMinorUnits != 0)               
+      130 +          signedFlowRow(                                      
+      131 +            label: l10n.reportReversalEffect,                 
+      132 +            signedMinorUnits: fund.reversalEffectMinorUnits,  
+      133 +            currencyCode: fund.currencyCode,                  
+      134 +            tone: FinancialAmountTone.muted,                  
+      135 +          ),                                                  
+      136 +        balanceRow(                                           
+      137 +          label: l10n.reportPeriodClosingBalance,             
+      138 +          minorUnits: fund.closingBalanceMinorUnits,          
+      139 +          currencyCode: fund.currencyCode,                    
+      140 +          isEmphasised: true,                                 
+      141 +        ),                                                    
+      142 +        balanceRow(                                           
+      143 +          label: l10n.reportCurrentBalance,                   
+      144 +          minorUnits: fund.currentBalanceMinorUnits,          
+      145 +          currencyCode: fund.currencyCode,                    
+      146 +          isEmphasised: true,                                 
+      147 +          showDivider: false,                                 
+      148 +        ),                                                    
+      149 +        if (fund.withdrawalAudits.isNotEmpty) ...[            
+      150 +          const SizedBox(height: AppTheme.space16),           
+      151 +          SectionHeader(title: l10n.reportWithdrawals),       
+      152 +          for (final audit in fund.withdrawalAudits)          
+      153 +            _AuditRow(audit: audit, l10n: l10n),              
+      154 +        ],                                                    
+      155 +      ],                                                      
+      156      );
+      157    }
+      158  }
+     ...
+      165  
+      166    @override
+      167    Widget build(BuildContext context) {
+      173 -    final colors = context.financialColors;                   
+      174 -    return ListTile(                                          
+      175 -      contentPadding: EdgeInsets.zero,                        
+      176 -      dense: true,                                            
+      177 -      leading: Icon(                                          
+      178 -        audit.isReversed ? Icons.undo : Icons.arrow_upward,   
+      179 -        color: audit.isReversed ? colors.secondaryText : color
+          -s.expense,                                                    
+      180 -        size: 18,                                             
       181 -      ),                                                      
-      260 +      ],                                                      
-      261      );
-      262    }
-      263 +                                                              
-      264 +  /// Measured, not estimated. Preserving the exact width is t
-          +he whole point:                                               
-      265 +  /// toggling privacy must not move a single row, or the cont
-          +rol feels like                                                
-      266 +  /// it is doing something to the data rather than to the dis
-          +play.                                                         
-      267 +  double _widthOf(String digits, TextScaler scaler) {         
-      268 +    final painter = TextPainter(                              
-      269 +      text: TextSpan(text: digits, style: style),             
-      270 +      textDirection: TextDirection.ltr,                       
-      271 +      textScaler: scaler,                                     
-      272 +    )..layout();                                              
-      273 +    return painter.width;                                     
-      274 +  }                                                           
-      275  }
-
-⏺ The old layout primitives lived in that file and call sites depend on them.
-  Let me measure the blast radius before deciding the migration.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ The kit was built but never adopted — only a smoke test uses it. That gives me
-  a clean hand to redesign. Writing the layout primitives.
-
-⏺ Write(lib/core/presentation/components/money_layout.dart)
-  ⎿  Wrote 241 lines to lib/core/presentation/components/money_layout.dart
-       1 /// Layout primitives for money. The only sanctioned ways to pla
-       2 /// label-and-amount pair, a labelled figure, or a group of figu
-         res.
-       4 /// None of them formats anything: each delegates its number to
-       5 /// [FinancialAmountText], which is why privacy masking, bidi is
-       6 /// screen-reader phrasing arrive for free and identically in al
-         l three.
-       8 
-       9 import 'package:family_money_manager/app/app_theme.dart';
-         s/financial_amount_text.dart';
-     … +257 lines (ctrl+o to expand)
-
-⏺ Now ProgressMeter — the one that must work in greyscale.
-
-⏺ Write(lib/core/presentation/components/progress_meter.dart)
-  ⎿  Wrote 249 lines to
-     lib/core/presentation/components/progress_meter.dart
-       1 /// Consumption of a plan — a budget or a goal — encoded so that
-          colour
-       3 library;
-       4 
-       5 import 'dart:math' as math;
-       7 import 'package:family_money_manager/app/app_theme.dart';
-       8 import 'package:family_money_manager/core/presentation/component
-         s/financial_amount_text.dart';
-         _theme_extensions.dart';
-      10 import 'package:flutter/material.dart';
-     … +266 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Now updating the two consumers — TransactionListTile and the smoke test.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ That call site was rendering raw minor units with a hand-built sign (−127500 
-  EGP) — exactly what the primitive eliminates.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Analyzer clean. Now the behavioural tests that are the point of this phase.
-
-⏺ Write(test/widget/presentation/financial_amount_text_test.dart)
-  ⎿  Wrote 472 lines to
-     test/widget/presentation/financial_amount_text_test.dart
-       1 /// Behavioural guarantees for the single point where a number b
-       2 ///
-       3 /// Each group corresponds to a defect the previous implementati
-       4 /// a leading currency code, an ASCII hyphen that reordered in R
-         TL, no bidi
-          masking that
-       6 /// did not exist at all.
-       8 
-       9 import 'package:family_money_manager/app/app_theme.dart';
-         izations.dart';
-     … +530 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Three real issues, all worth fixing properly. The mask must measure the full
-  string, and the amount needs to wrap rather than overflow — both are what the
-  spec actually calls for.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ The 2.5 px gap is TextPainter vs RenderParagraph rounding. Making the width
-  identical by construction instead.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Two clear causes: CrossAxisAlignment.stretch needs a bounded height, and the
-  mask test asserts absence of text that now exists at zero opacity.
+      182 -      title: Text(audit.reason, maxLines: 1, overflow: TextOve
+          -rflow.ellipsis),                                              
+      183 -      subtitle: Text(                                         
+      184 -        '${l10n.reportBeneficiary}: ${audit.beneficiaryMemberI
+          -d}  •  ${audit.effectiveDate}',                               
+      185 -      ),                                                      
+      186 -      trailing: ReportAmountText(                             
+      187 -        minorUnits: audit.amountMinorUnits,                   
+      188 -        currencyCode: audit.currencyCode,                     
+      189 -        color: audit.isReversed ? colors.secondaryText : color
+          -s.expense,                                                    
+      190 -      ),                                                      
+      168 +    // The caption is the audit trail: who it was for, who rec
+          +orded it, when.                                               
+      169 +    // It printed a raw UUID for the beneficiary before, and n
+          +ever named the                                                
+      170 +    // recorder at all even though the column was already stor
+          +ed.                                                           
+      171 +    final beneficiary = audit.beneficiaryName ?? audit.benefic
+          +iaryMemberId;                                                 
+      172 +    final caption = audit.recordedByName == null              
+      173 +        ? l10n.reportAuditFor(beneficiary, audit.effectiveDate
+          +)                                                             
+      174 +        : l10n.reportAuditForBy(                              
+      175 +            beneficiary,                                      
+      176 +            audit.recordedByName!,                            
+      177 +            audit.effectiveDate,                              
+      178 +          );                                                  
+      179 +                                                              
+      180 +    return CurrencyAmountRow(                                 
+      181 +      label: audit.reason,                                    
+      182 +      caption: caption,                                       
+      183 +      minorUnits: audit.amountMinorUnits,                     
+      184 +      currencyCode: audit.currencyCode,                       
+      185 +      tone: audit.isReversed                                  
+      186 +          ? FinancialAmountTone.muted                         
+      187 +          : FinancialAmountTone.protected,                    
+      188 +      direction: FinancialAmountDirection.outflow,            
+      189 +      semanticsContext: beneficiary,                          
+      190      );
+      191    }
+      192  }
 
   Ran 1 shell command (ctrl+o to expand)
 
-⏺ All 25 pass. Now the ProgressMeter tests and the narrow golden suite I
-  proposed.
-
-⏺ Write(test/widget/presentation/progress_meter_test.dart)  ⎿  Wrote 163 lines to test/widget/presentation/progress_meter_test.dart
-       1 /// The meter has to be readable with colour contributing nothin
-       2 /// to refuse to invent a threshold. Both are tested here.
-       3 library;
-       4 
-       6 import 'package:family_money_manager/core/localization/app_local
-         izations.dart';
-         s/components.dart';
-       8 import 'package:flutter/material.dart';
-       9 import 'package:flutter_localizations/flutter_localizations.dart
-      10 import 'package:flutter_test/flutter_test.dart';
-     … +164 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now the narrow golden suite — shared primitives only, in the four combinations
-  that matter.
-
-⏺ Write(test/widget/presentation/goldens/money_primitives_golden_test.dart)
-  ⎿  Wrote 214 lines to
-     test/widget/presentation/goldens/money_primitives_golden_test.dart
-       1 /// Golden coverage for the shared money primitives, and nothing
-       2 ///
-         worthless while
-       4 /// screens are still being rebuilt phase by phase, and a large 
-       5 /// trains people to regenerate without looking. These cover the
-       6 /// that are genuinely visual and that unit assertions can only 
-       7 /// indirectly: where the sign sits in RTL, that a masked run oc
-         cupies the same
-         le with colour
-      10 ///
-     … +226 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Baselines generated. The brief requires me to actually verify these against
-  the handoff rather than accept them blindly — let me look.
+⏺ Two report screens and two budget screens left:
 
   Read 1 file (ctrl+o to expand)
 
-⏺ The stub font draws glyphs as boxes, but the geometry is exactly right —
-  reading right-to-left in RTL: glyph, sign, number, then the currency code
-  trailing at the far left. Colours are correct per role. The frame is mostly
-  empty though, which makes review harder. Tightening it.
+⏺ Write(lib/features/reports/presentation/spending_attribution_report_screen.dar
+       t)
+  ⎿  Added 81 lines, removed 129 lines
+       1  /// Spending attribution report screen — by spender, beneficiar
+          y, and scope.
+       2  library;
+       3  
+       4 +import 'package:family_money_manager/app/app_theme.dart';      
+       5  import 'package:family_money_manager/core/application/app_resul
+          t.dart';
+       5 -import 'package:family_money_manager/core/financial/account_enu
+         -ms.dart';                                                      
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       7  import 'package:family_money_manager/core/localization/enum_lab
+          el_helpers.dart';
+       8 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       8 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       9  import 'package:family_money_manager/features/reports/applicati
+          on/get_spending_attribution_report_use_case.dart';
+      10  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+      11 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:flutter/material.dart';
+      13  import 'package:flutter_riverpod/flutter_riverpod.dart';
+      14  
+     ...
+      22      final req = ref.watch(reportRequestProvider);
+      23      final reportAsync = ref.watch(spendingAttributionReportProv
+          ider(req));
+      24  
+      25 -    return Scaffold(                                           
+      26 -      appBar: AppBar(                                          
+      27 -        title: Text(l10n.reportAttributionTitle),              
+      28 -        actions: [                                             
+      29 -          IconButton(                                          
+      30 -            icon: const Icon(Icons.refresh),                   
+      31 -            tooltip: l10n.reportRefresh,                       
+      32 -            onPressed: () =>                                   
+      33 -                ref.invalidate(spendingAttributionReportProvide
+         -r(req)),                                                       
+      34 -          ),                                                   
+      35 -        ],                                                     
+      36 -      ),                                                       
+      25 +    void retry() => ref.invalidate(spendingAttributionReportPro
+         +vider(req));                                                   
+      26 +                                                               
+      27 +    return AppScreenScaffold(                                  
+      28 +      title: Text(l10n.reportAttributionTitle),                
+      29 +      actions: [                                               
+      30 +        IconButton(                                            
+      31 +          icon: const Icon(Icons.refresh),                     
+      32 +          tooltip: l10n.reportRefresh,                         
+      33 +          onPressed: retry,                                    
+      34 +        ),                                                     
+      35 +      ],                                                       
+      36        body: Column(
+      37          children: [
+      38            const ReportPeriodSelector(),
+      39            const Divider(height: 1),
+      40            Expanded(
+      41              child: reportAsync.when(
+      43 -              loading: () => const ReportLoading(),            
+      44 -              error: (_, _) => ReportErrorState(               
+      45 -                onRetry: () =>                                 
+      46 -                    ref.invalidate(spendingAttributionReportPro
+         -vider(req)),                                                   
+      42 +              loading: () => AppLoadingState(message: l10n.load
+         +ingLabel),                                                     
+      43 +              error: (_, _) => AppErrorState(                  
+      44 +                message: l10n.reportError,                     
+      45 +                onRetry: retry,                                
+      46 +                retryLabel: l10n.reportRefresh,                
+      47                ),
+      48                data: (result) {
+      49                  if (result is! AppOk<SpendingAttributionReport>
+          ) {
+      50 -                  return ReportErrorState(                     
+      51 -                    onRetry: () =>                             
+      52 -                        ref.invalidate(spendingAttributionRepor
+         -tProvider(req)),                                               
+      50 +                  return AppErrorState(                        
+      51 +                    message: l10n.reportError,                 
+      52 +                    onRetry: retry,                            
+      53 +                    retryLabel: l10n.reportRefresh,            
+      54                    );
+      55                  }
+      56                  final report = result.value;
+     ...
+      58                      report.bySpender.isNotEmpty ||
+      59                      report.byBeneficiary.isNotEmpty ||
+      60                      report.byScope.isNotEmpty;
+      60 -                if (!hasData) return const ReportEmptyState(); 
+      61 +                if (!hasData) {                                
+      62 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      63 +                }                                              
+      64                  return _AttributionContent(report: report, l10n
+          : l10n);
+      65                },
+      66              ),
+     ...
+       79  
+       80    @override
+       81    Widget build(BuildContext context) {
+       79 -    return ListView(                                          
+       80 -      padding: const EdgeInsets.symmetric(horizontal: 16, vert
+          -ical: 8),                                                     
+       81 -      children: [                                             
+       82 -        ReportInfoNote(text: l10n.reportCurrencySeparate),    
+       83 -        // By Spender                                         
+       84 -        if (report.bySpender.isNotEmpty) ...[                 
+       85 -          _SectionHeader(title: l10n.reportSpenderSection),   
+       86 -          for (final item in report.bySpender)                
+       87 -            _MemberRow(                                       
+       88 -              memberName: item.memberDisplayName,             
+       89 -              totalMinorUnits: item.totalMinorUnits,          
+       90 -              currencyCode: item.currencyCode,                
+       91 -              transactionCount: item.transactionCount,        
+       92 -              l10n: l10n,                                     
+       93 -            ),                                                
+       82 +    return ResponsiveContentContainer(                        
+       83 +      child: ListView(                                        
+       84 +        padding: const EdgeInsets.symmetric(vertical: AppTheme
+          +.space8),                                                     
+       85 +        children: [                                           
+       86 +          Padding(                                            
+       87 +            padding: const EdgeInsets.symmetric(horizontal: Ap
+          +pTheme.space16),                                              
+       88 +            child: AppInlineNotice(message: l10n.reportCurrenc
+          +ySeparate),                                                   
+       89 +          ),                                                  
+       90 +          if (report.bySpender.isNotEmpty) ...[               
+       91 +            SectionHeader(title: l10n.reportSpenderSection),  
+       92 +            for (final item in report.bySpender)              
+       93 +              _AttributionRow(                                
+       94 +                label: item.memberDisplayName,                
+       95 +                totalMinorUnits: item.totalMinorUnits,        
+       96 +                currencyCode: item.currencyCode,              
+       97 +                transactionCount: item.transactionCount,      
+       98 +                l10n: l10n,                                   
+       99 +              ),                                              
+      100 +          ],                                                  
+      101 +          if (report.byBeneficiary.isNotEmpty) ...[           
+      102 +            SectionHeader(title: l10n.reportBeneficiarySection
+          +),                                                            
+      103 +            for (final item in report.byBeneficiary)          
+      104 +              _AttributionRow(                                
+      105 +                label: item.memberDisplayName,                
+      106 +                totalMinorUnits: item.totalMinorUnits,        
+      107 +                currencyCode: item.currencyCode,              
+      108 +                transactionCount: item.transactionCount,      
+      109 +                l10n: l10n,                                   
+      110 +              ),                                              
+      111 +          ],                                                  
+      112 +          if (report.byScope.isNotEmpty) ...[                 
+      113 +            SectionHeader(title: l10n.reportScopeSection),    
+      114 +            for (final item in report.byScope)                
+      115 +              _AttributionRow(                                
+      116 +                label: expenseScopeDashboardLabel(l10n, item.s
+          +cope),                                                        
+      117 +                totalMinorUnits: item.totalMinorUnits,        
+      118 +                currencyCode: item.currencyCode,              
+      119 +                transactionCount: item.transactionCount,      
+      120 +                l10n: l10n,                                   
+      121 +              ),                                              
+      122 +          ],                                                  
+      123 +          const SizedBox(height: AppTheme.space24),           
+      124          ],
+       95 -        // By Beneficiary                                     
+       96 -        if (report.byBeneficiary.isNotEmpty) ...[             
+       97 -          _SectionHeader(title: l10n.reportBeneficiarySection)
+          -,                                                             
+       98 -          for (final item in report.byBeneficiary)            
+       99 -            _MemberRow(                                       
+      100 -              memberName: item.memberDisplayName,             
+      101 -              totalMinorUnits: item.totalMinorUnits,          
+      102 -              currencyCode: item.currencyCode,                
+      103 -              transactionCount: item.transactionCount,        
+      104 -              l10n: l10n,                                     
+      105 -            ),                                                
+      106 -        ],                                                    
+      107 -        // By Scope                                           
+      108 -        if (report.byScope.isNotEmpty) ...[                   
+      109 -          _SectionHeader(title: l10n.reportScopeSection),     
+      110 -          for (final item in report.byScope)                  
+      111 -            _ScopeRow(                                        
+      112 -              scope: item.scope,                              
+      113 -              totalMinorUnits: item.totalMinorUnits,          
+      114 -              currencyCode: item.currencyCode,                
+      115 -              transactionCount: item.transactionCount,        
+      116 -              l10n: l10n,                                     
+      117 -            ),                                                
+      118 -        ],                                                    
+      119 -        const SizedBox(height: 24),                           
+      120 -      ],                                                      
+      121 -    );                                                        
+      122 -  }                                                           
+      123 -}                                                             
+      124 -                                                              
+      125 -class _SectionHeader extends StatelessWidget {                
+      126 -  const _SectionHeader({required this.title});                
+      127 -  final String title;                                         
+      128 -                                                              
+      129 -  @override                                                   
+      130 -  Widget build(BuildContext context) {                        
+      131 -    return Padding(                                           
+      132 -      padding: const EdgeInsets.only(top: 16, bottom: 4),     
+      133 -      child: Text(                                            
+      134 -        title,                                                
+      135 -        style: Theme.of(                                      
+      136 -          context,                                            
+      137 -        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeigh
+          -t.bold),                                                      
+      125        ),
+      126      );
+      127    }
+      128  }
+      129  
+      143 -class _MemberRow extends StatelessWidget {                    
+      144 -  const _MemberRow({                                          
+      145 -    required this.memberName,                                 
+      130 +/// One attributed total. The three sections differ only in wh
+          +at the label is,                                              
+      131 +/// so they share a row rather than duplicating one per dimens
+          +ion.                                                          
+      132 +class _AttributionRow extends StatelessWidget {               
+      133 +  const _AttributionRow({                                     
+      134 +    required this.label,                                      
+      135      required this.totalMinorUnits,
+      136      required this.currencyCode,
+      137      required this.transactionCount,
+      138      required this.l10n,
+      139    });
+      140  
+      152 -  final String memberName;                                    
+      141 +  final String label;                                         
+      142    final int totalMinorUnits;
+      143    final String currencyCode;
+      144    final int transactionCount;
+     ...
+      146  
+      147    @override
+      148    Widget build(BuildContext context) {
+      160 -    final colors = context.financialColors;                   
+      161 -    return ListTile(                                          
+      162 -      contentPadding: EdgeInsets.zero,                        
+      163 -      title: Text(memberName),                                
+      164 -      subtitle: Text(l10n.reportTransactionCount(transactionCo
+          -unt)),                                                        
+      165 -      trailing: ReportAmountText(                             
+      166 -        minorUnits: totalMinorUnits,                          
+      167 -        currencyCode: currencyCode,                           
+      168 -        color: colors.expense,                                
+      169 -      ),                                                      
+      149 +    return CurrencyAmountRow(                                 
+      150 +      label: label,                                           
+      151 +      caption: l10n.reportTransactionCount(transactionCount), 
+      152 +      minorUnits: totalMinorUnits,                            
+      153 +      currencyCode: currencyCode,                             
+      154 +      tone: FinancialAmountTone.expense,                      
+      155 +      direction: FinancialAmountDirection.outflow,            
+      156      );
+      157    }
+      158  }
+      173 -                                                              
+      174 -class _ScopeRow extends StatelessWidget {                     
+      175 -  const _ScopeRow({                                           
+      176 -    required this.scope,                                      
+      177 -    required this.totalMinorUnits,                            
+      178 -    required this.currencyCode,                               
+      179 -    required this.transactionCount,                           
+      180 -    required this.l10n,                                       
+      181 -  });                                                         
+      182 -                                                              
+      183 -  final ExpenseScope scope;                                   
+      184 -  final int totalMinorUnits;                                  
+      185 -  final String currencyCode;                                  
+      186 -  final int transactionCount;                                 
+      187 -  final AppLocalizations l10n;                                
+      188 -                                                              
+      189 -  String _scopeLabel(AppLocalizations l10n) =>                
+      190 -      expenseScopeDashboardLabel(l10n, scope);                
+      191 -                                                              
+      192 -  @override                                                   
+      193 -  Widget build(BuildContext context) {                        
+      194 -    final colors = context.financialColors;                   
+      195 -    return ListTile(                                          
+      196 -      contentPadding: EdgeInsets.zero,                        
+      197 -      title: Text(_scopeLabel(l10n)),                         
+      198 -      subtitle: Text(l10n.reportTransactionCount(transactionCo
+          -unt)),                                                        
+      199 -      trailing: ReportAmountText(                             
+      200 -        minorUnits: totalMinorUnits,                          
+      201 -        currencyCode: currencyCode,                           
+      202 -        color: colors.expense,                                
+      203 -      ),                                                      
+      204 -    );                                                        
+      205 -  }                                                           
+      206 -}                                                             
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(lib/features/reports/presentation/report_transaction_list_screen.dart)
+  ⎿  Added 60 lines, removed 84 lines
+       5  import 'package:family_money_manager/core/financial/ledger_enum
+          s.dart';
+       6  import 'package:family_money_manager/core/localization/app_loca
+          lizations.dart';
+       7  import 'package:family_money_manager/core/localization/enum_lab
+          el_helpers.dart';
+       8 -import 'package:family_money_manager/core/presentation/theme/ap
+         -p_theme_extensions.dart';                                      
+       8 +import 'package:family_money_manager/core/presentation/componen
+         +ts/components.dart';                                           
+       9  import 'package:family_money_manager/features/reports/domain/re
+          port_models.dart';
+      10  import 'package:family_money_manager/features/reports/presentat
+          ion/providers/report_providers.dart';
+      11 -import 'package:family_money_manager/features/reports/presentat
+         -ion/report_widgets.dart';                                      
+      11 +import 'package:family_money_manager/features/reports/presentat
+         +ion/report_period_selector.dart';                              
+      12  import 'package:family_money_manager/features/transactions/pres
+          entation/category_label_helper.dart';
+      13  import 'package:flutter/material.dart';
+      14  import 'package:flutter_riverpod/flutter_riverpod.dart';
+     ...
+      26      final req = ref.watch(reportRequestProvider);
+      27      final reportAsync = ref.watch(reportTransactionsProvider(re
+          q));
+      28  
+      29 -    return Scaffold(                                           
+      30 -      appBar: AppBar(                                          
+      31 -        title: Text(l10n.reportDrillDown),                     
+      32 -        actions: [                                             
+      33 -          IconButton(                                          
+      34 -            icon: const Icon(Icons.refresh),                   
+      35 -            tooltip: l10n.reportRefresh,                       
+      36 -            onPressed: () => ref.invalidate(reportTransactionsP
+         -rovider(req)),                                                 
+      37 -          ),                                                   
+      38 -        ],                                                     
+      39 -      ),                                                       
+      29 +    void retry() => ref.invalidate(reportTransactionsProvider(r
+         +eq));                                                          
+      30 +                                                               
+      31 +    return AppScreenScaffold(                                  
+      32 +      title: Text(l10n.reportDrillDown),                       
+      33 +      actions: [                                               
+      34 +        IconButton(                                            
+      35 +          icon: const Icon(Icons.refresh),                     
+      36 +          tooltip: l10n.reportRefresh,                         
+      37 +          onPressed: retry,                                    
+      38 +        ),                                                     
+      39 +      ],                                                       
+      40        body: Column(
+      41          children: [
+      42            const ReportPeriodSelector(),
+      43            const Divider(height: 1),
+      44            Expanded(
+      45              child: reportAsync.when(
+      46 -              loading: () => const ReportLoading(),            
+      47 -              error: (_, _) => ReportErrorState(               
+      48 -                onRetry: () => ref.invalidate(reportTransaction
+         -sProvider(req)),                                               
+      46 +              loading: () => const AppSkeletonList(),          
+      47 +              error: (_, _) => AppErrorState(                  
+      48 +                message: l10n.reportError,                     
+      49 +                onRetry: retry,                                
+      50 +                retryLabel: l10n.reportRefresh,                
+      51                ),
+      52                data: (result) {
+      53                  if (result is! AppOk<List<ReportTransactionRow>
+          >) {
+      52 -                  return ReportErrorState(                     
+      53 -                    onRetry: () =>                             
+      54 -                        ref.invalidate(reportTransactionsProvid
+         -er(req)),                                                      
+      54 +                  return AppErrorState(                        
+      55 +                    message: l10n.reportError,                 
+      56 +                    onRetry: retry,                            
+      57 +                    retryLabel: l10n.reportRefresh,            
+      58                    );
+      59                  }
+      60                  final rows = result.value;
+      58 -                if (rows.isEmpty) return const ReportEmptyState
+         -();                                                            
+      61 +                if (rows.isEmpty) {                            
+      62 +                  return AppEmptyState(title: l10n.reportEmpty)
+         +;                                                              
+      63 +                }                                              
+      64                  return _TransactionList(rows: rows, l10n: l10n)
+          ;
+      65                },
+      66              ),
+     ...
+      79  
+      80    @override
+      81    Widget build(BuildContext context) {
+      77 -    return ListView.separated(                                 
+      78 -      padding: const EdgeInsets.symmetric(vertical: 4),        
+      79 -      itemCount: rows.length,                                  
+      80 -      separatorBuilder: (_, _) => const Divider(height: 1),    
+      81 -      itemBuilder: (context, index) {                          
+      82 -        return _TransactionRow(row: rows[index], l10n: l10n);  
+      83 -      },                                                       
+      82 +    return ResponsiveContentContainer(                         
+      83 +      child: ListView.builder(                                 
+      84 +        itemCount: rows.length,                                
+      85 +        itemBuilder: (context, index) =>                       
+      86 +            _TransactionRow(row: rows[index], l10n: l10n),     
+      87 +      ),                                                       
+      88      );
+      89    }
+      90  }
+     ...
+       95    final ReportTransactionRow row;
+       96    final AppLocalizations l10n;
+       97  
+       94 -  IconData _icon() => switch (row.operationType) {            
+       95 -    OperationType.income => Icons.arrow_downward,             
+       96 -    OperationType.expense ||                                  
+       97 -    OperationType.childFundWithdrawal => Icons.arrow_upward,  
+       98 -    OperationType.transfer => Icons.swap_horiz,               
+       99 -    OperationType.reversal => Icons.undo,                     
+      100 -    OperationType.openingBalance => Icons.flag_outlined,      
+      101 -    _ => Icons.receipt_outlined,                              
+      102 -  };                                                          
+      103 -                                                              
+      104 -  Color _color(AppFinancialColors colors) => switch (row.opera
+          -tionType) {                                                   
+      105 -    OperationType.income => colors.income,                    
+      106 -    OperationType.expense ||                                  
+      107 -    OperationType.childFundWithdrawal => colors.expense,      
+      108 -    OperationType.transfer => colors.transfer,                
+      109 -    // A reversal is a correction, not a threshold — grey ink 
+          -plus the undo                                                 
+      110 -    // glyph, never the warning role, which belongs on notices
+          -.                                                             
+      111 -    OperationType.reversal => colors.secondaryText,           
+      112 -    _ => colors.secondaryText,                                
+      113 -  };                                                          
+      114 -                                                              
+       98 +  /// The same tile the transaction list uses.                
+       99 +  ///                                                         
+      100 +  /// Arriving at a transaction from a report used to show a d
+          +ifferent row                                                  
+      101 +  /// than arriving at it from the list — different geometry, 
+          +different                                                     
+      102 +  /// grammar, a raw amount string. One row model means the dr
+          +ill-down reads                                                
+      103 +  /// like what it drills into.                               
+      104    @override
+      105    Widget build(BuildContext context) {
+      117 -    final color = _color(context.financialColors);            
+      118 -    return Semantics(                                         
+      119 -      label:                                                  
+      120 -          '${operationTypeLabel(l10n, row.operationType)} ${Re
+          -portAmountText.formatMinorUnits(row.amountMinorUnits, row.curr
+          -encyCode)} ${row.effectiveDate}',                             
+      121 -      button: true,                                           
+      122 -      child: ListTile(                                        
+      123 -        leading: CircleAvatar(                                
+      124 -          backgroundColor: color.withAlpha(30),               
+      125 -          child: Icon(_icon(), color: color, size: 18),       
+      126 -        ),                                                    
+      127 -        title: Text(row.accountName),                         
+      128 -        subtitle: Column(                                     
+      129 -          crossAxisAlignment: CrossAxisAlignment.start,       
+      130 -          children: [                                         
+      131 -            Text(row.effectiveDate),                          
+      132 -            if (row.categoryCode != null)                     
+      133 -              Text(                                           
+      134 -                categoryLabelFromCode(l10n, row.categoryCode!)
+          -,                                                             
+      135 -                style: Theme.of(context).textTheme.bodySmall, 
+      136 -              ),                                              
+      137 -            if (row.isReversed)                               
+      138 -              Text(                                           
+      139 -                l10n.reportReversalEffect,                    
+      140 -                style: Theme.of(                              
+      141 -                  context,                                    
+      142 -                ).textTheme.labelSmall?.copyWith(color: color)
+          -,                                                             
+      143 -              ),                                              
+      144 -          ],                                                  
+      145 -        ),                                                    
+      146 -        trailing: ReportAmountText(                           
+      147 -          minorUnits: row.amountMinorUnits,                   
+      148 -          currencyCode: row.currencyCode,                     
+      149 -          color: color,                                       
+      150 -        ),                                                    
+      151 -        onTap: () => context.push('/transactions/${row.operati
+          -onId}'),                                                      
+      152 -      ),                                                      
+      106 +    final typeKind = switch (row.operationType) {             
+      107 +      OperationType.income => FinancialTypeKind.income,       
+      108 +      OperationType.expense ||                                
+      109 +      OperationType.childFundWithdrawal => FinancialTypeKind.e
+          +xpense,                                                       
+      110 +      OperationType.transfer => FinancialTypeKind.transfer,   
+      111 +      OperationType.reversal => FinancialTypeKind.reversal,   
+      112 +      OperationType.adjustment => FinancialTypeKind.adjustment
+          +,                                                             
+      113 +      _ => FinancialTypeKind.other,                           
+      114 +    };                                                        
+      115 +                                                              
+      116 +    return TransactionListTile(                               
+      117 +      typeLabel: operationTypeLabel(l10n, row.operationType), 
+      118 +      typeKind: typeKind,                                     
+      119 +      primaryDescription: row.categoryCode == null            
+      120 +          ? operationTypeLabel(l10n, row.operationType)       
+      121 +          : categoryLabelFromCode(l10n, row.categoryCode!),   
+      122 +      accountOrDirection: row.accountName,                    
+      123 +      effectiveDate: row.effectiveDate,                       
+      124 +      minorUnits: row.amountMinorUnits,                       
+      125 +      currencyCode: row.currencyCode,                         
+      126 +      isReversed: row.isReversed,                             
+      127 +      reversedLabel: row.isReversed ? l10n.transactionReversed
+          + : null,                                                      
+      128 +      onTap: () => context.push('/transactions/${row.operation
+          +Id}'),                                                        
+      129      );
+      130    }
+      131  }
+
+  Searched for 2 patterns, ran 2 shell commands (ctrl+o to expand)
+
+⏺ lib/ is clean. Now the characterization test that pinned the old formatter has
+  to be updated — it exists precisely to make this change loud:
+
+  Searched for 2 patterns, ran 11 shell commands (ctrl+o to expand)
+
+⏺ Budget detail is green; the remaining budget failure is the pre-existing one.
+  Full suite:
 
   Ran 1 shell command (ctrl+o to expand)
 
-⏺ Now verifying the privacy pair — the two images must have identical geometry.
+⏺ +1872 −2 — back to the two pre-existing failures.
 
-  Read 2 files (ctrl+o to expand)
+  Implemented
 
-⏺ The privacy pair is exactly right: identical extents, one bar per digit group,
-  sign/glyph/code all preserved. Running the full suite.
+  Phase 9 opened by deleting report_widgets.dart (352 lines). It held a second,
+  weaker copy of components the design system already owned — amount text,
+  amount rows, currency headers, loading/error/empty states, info notes — and
+  every copy had drifted. Only the period selector was genuinely
+  report-specific; it moved to its own file.
+
+  Defect #14 is closed. ReportAmountText.formatMinorUnits was behind every
+  report, budget and drill-down amount, and broke four rules at once: currency
+  code leading the number, an ASCII hyphen inside the numeric run (which RTL
+  bidi moved to the wrong side), no thousands grouping, and a silent scale-2
+  fallback for unknown codes. All ten call-site files now go through
+  FinancialAmountText / CurrencyAmountRow / AmountDisplayFormatter.
+
+  Two real rendering bugs surfaced while migrating, both from the old API's
+  color: parameter letting call sites paint whatever they liked:
+
+  - Net cash flow was tinted green or red by its own sign — a colour verdict on
+  a derived figure, which the design forbids. It's weight now; the sign and
+  glyph already say which way it went.
+  - On the spouse-wallet report, funding was tinted as income. Funding a wallet
+  moves money between the household's own accounts; tinting it as income
+  obscured the one line on that screen that is real spending.
+
+  Defect #7 is closed. The protected-funds audit printed beneficiaryMemberId raw
+  — a UUID where a child's name belongs. Both the beneficiary and the person
+  who recorded the withdrawal are now joined to their names; created_by was
+  already stored and simply never surfaced. An audit row now reads "for Yousuf ·
+  by Ahmed · 2026-07-24".
+
+  report_flow_row.dart centralises the one thing the reports kept getting subtly
+  wrong: some stored figures are signed and some aren't, while
+  FinancialAmountText takes a magnitude and derives the sign from direction.
+  Passing a pre-negated value rendered a double negative.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 346 files
+  - flutter test — +1872 −2
+
+  The phase-0 characterization test did its job: it was written to fail loudly
+  at exactly this change. Rewritten from before-picture to after-picture — each
+  assertion that pinned a defect is now inverted, and it documents which
+  formatter owns which job so a future "simplification" has to argue with a
+  test. One budget test that pinned 'EGP 400.00' updated to '400.00' /
+  '1,000.00'.
+
+  6 ARB keys added (transfer in/out, spouse wallet funded/returned, two audit
+  captions); both locales symmetric.
+
+  Notes
+
+  - Still open in phase 9: defect #20 — ReportFilter is still only ever const 
+  ReportFilter(), so the drill-down screen exists but nothing navigates to it
+  with a dimension set. Report rows need to become tappable, which means
+  CurrencyAmountRow gaining an onTap or being wrapped. That's the next piece.
+  Also untouched: defect #3 (reconciles defined, zero call sites) and the charts
+  from doc 13–15.
+  - The budget screens got the minimum honest fix — string composition moved to
+  AmountDisplayFormatter — rather than a full redesign; budgets are their own
+  chunk.
+  - Carried over: budgets/goals/certificates detail routes aren't root pushes;
+  dashboard query doesn't read reversal_reason; and your two open decisions.
+
+✻ Churned for 17m 41s
+
+❯ go ahead                                                                      
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ Now defect #20 — the drill-down that's unreachable. First, making a money row
+  genuinely tappable:
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Now the drill-down action on the request notifier, and wiring the report rows:
 
   Ran 2 shell commands (ctrl+o to expand)
 
-⏺ Phase 4 — money primitives · complete
+⏺ Now wire the rows to actually drill down:
 
-  +1735 -2 (was +1698 -2), analyzer clean, format clean, 10 golden baselines
-  generated and visually verified.
+  Ran 3 shell commands (ctrl+o to expand)
 
-  ---
-  1. What changed
+⏺ Now replace the ad-hoc InkWell in the transaction detail chain with the
+  component's own onTap:
 
-  New
-  - AmountDisplayFormatter — the one place minor units become a number string.
-  Emits the number only: no sign, no code, no glyph. Integer arithmetic
-  throughout, grouped (1,275.00), per-currency scale, Western digits in both
-  locales.
-  - PrivacyScope — an InheritedWidget read by exactly one widget.
-  - ProgressMeter — ink fill, hatched remainder, hatched overshoot band carrying
-  the role.
-  - money_layout.dart — CurrencyAmountRow, FinancialMetric, FinancialSummary,
-  all delegating their numbers to FinancialAmountText.
+  Ran 1 shell command (ctrl+o to expand)
 
-  Rewritten
-  - FinancialAmountText — now owns sign, glyph, lock, currency-code placement,
-  bidi isolation, tabular figures, privacy masking and screen-reader phrasing.
+⏺ Now tests for the drill-down:
 
-  Migrated — TransactionListTile and transactions_screen, plus 4 new ARB keys
-  (both locales, still symmetric at 511).
+⏺ Write(test/widget/features/reports/report_drill_down_test.dart)
+  ⎿  Wrote 222 lines to
+     test/widget/features/reports/report_drill_down_test.dart
+       1 /// The report drill-down.
+       3 /// `ReportFilter` supported every dimension from the start and 
+         no screen ever
+         ach it. These
+       5 /// tests pin the wiring: a breakdown figure is a claim about a 
+       6 /// transactions, tapping it filters to that set, and the period
+          it was
+       8 library;
+       9 
+         .dart';
+     … +242 lines (ctrl+o to expand)
 
-  2. Design decisions worth your attention
+  Ran 3 shell commands (ctrl+o to expand)
+  ⎿  Found 2 new diagnostic issues in 1 file (ctrl+o to expand)
 
-  Two orthogonal enums, not one. FinancialAmountTone (what the money is →
-  colour) and FinancialAmountDirection (what it's doing → sign and glyph). They
-  genuinely vary independently: a protected withdrawal is protected money moving
-  outflow; a transfer fee is expense money inside a transfer. Collapsing them
-  into one enum would have made those two unrepresentable.
+❯ continue                                                                      
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
 
-  The caller passes a magnitude; the direction owns the sign. So an
-  already-negative expense can't render a double negative. There's a test for
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ +1877 −2 — the same two pre-existing failures.
+
+  Implemented
+
+  Defect #20 is closed. ReportFilter supported eight dimensions from day one and
+  no screen ever set one, so the drill-down list existed but nothing could
+  reach it.
+
+  - CurrencyAmountRow gained an onTap. When set, the row takes a chevron, a
+  tonal press (not a ripple) and button semantics — a row that is tappable and
+  doesn't look it is worse than one that isn't tappable at all. The chevron
+  flips by Directionality rather than trusting the icon font, since Flutter's
+  chevrons don't mirror on their own and a chevron pointing the wrong way in
+  Arabic reads as "back".
+  - ReportRequestNotifier.drillDown(...) narrows to one dimension and carries
+  the period over. It replaces the whole filter rather than adding to it — two
+  dimensions chained by accident would produce a list matching neither figure
+  the user tapped. clearFilter() is the way back.
+  - Category, spender, beneficiary and scope rows are now wired. The drill-down
+  screen states that it's showing a subset and offers "show all" — the
+  difference between "these are my transactions" and "these are some of them".
+
+  This also let me remove the ad-hoc InkWell I'd wrapped around the
+  reversal-chain row two turns ago; that screen now uses the component's own
+  onTap and gets the chevron and press treatment for free.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 347 files
+  - flutter test — +1877 −2
+
+  5 new widget tests: each dimension drills to itself and nothing else, the
+  period survives, and a tappable row announces itself (chevron + isButton). 2
+  ARB keys; locales symmetric.
+
+  Notes
+
+  - Account-flow drill-down not wired: on that screen the account is a section
+  header, not a breakdown row, so there's no figure to tap. It needs a
+  header-level affordance, which is a different shape from the row work —
+  flagged rather than bolted on.
+  - Still open in phase 9: defect #3 (AccountFlowBreakdown.reconciles is defined
+  with zero call sites — the reconciliation invariant is computed and never
+  checked), and the charts from docs 13–15 (BarSeries / LineSeries / ShareBar
+  don't exist).
+  - Carried over, unchanged: budgets/goals/certificates detail routes aren't
+  root pushes; the dashboard query doesn't read reversal_reason; the transaction
+  filter sheet has no category/account/member pickers and no currency selector.
+  - Your two decisions are still open — certificate-principal double
+  classification, and spouse-wallet exclusion from the headline balance. Phase 9
+  has now put the spouse wallet on screen in two reports, so the second one is
+  getting more visible, not less.
+
+✻ Cogitated for 19m 53s
+
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+⏺ Correcting the handoff's framing: reconciles isn't unused — it's tested but
+  never shown. A user reading a flow table that doesn't add up gets no signal:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(test/widget/features/reports/account_flow_reconciliation_test.dart)
+  ⎿  Wrote 145 lines to
+     test/widget/features/reports/account_flow_reconciliation_test.dart
+       1 /// The account-flow report tells you when its own figures do no
+       2 ///
+       3 /// `AccountFlowBreakdown.reconciles` has always been able to ch
+       4 /// accounting identity, and until now nothing above the domain 
+       5 /// it. A period breakdown whose lines do not sum to its own clo
+         sing balance
+       7 library;
+       8 
+         .dart';
+         dart';
+     … +159 lines (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ +1881 −2.
+
+  Implemented
+
+  Defect #3 — but the handoff's framing was wrong, and worth correcting:
+  AccountFlowBreakdown.reconciles is not unused. It's asserted in
+  report_account_flow_db_test.dart:286. The real gap was that nothing above the 
+  domain layer ever asked it, so a period breakdown whose lines don't sum to its
+  own closing balance would be shown in silence.
+
+  The account-flow report now checks the identity and says so when it fails.
+  Three deliberate choices in how:
+
+  - Warning tone, not error. Nothing in the ledger is broken and there's nothing
+  to retry; the error role belongs to failures the user caused.
+  - The copy separates what's suspect from what isn't. Balances are derived from
+  the ledger and stay correct — only the period attribution is in doubt. Saying
+  just "these don't add up" would call the balances into question too.
+  - The figures stay on screen. Hiding them would leave the user warned about
+  something they can't see.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 348 files
+  - flutter test — +1881 −2, still only the two pre-existing failures
+
+  4 new tests, including one that pins the identity itself so the check can't
+  quietly become a no-op. 2 ARB keys; locales symmetric.
+
+  Where things stand
+
+  Phase 9's defect work is done: #14 (the report formatter), #7 (UUIDs in the
+  protected-funds audit), #20 (unreachable drill-down), #3 (unsurfaced
+  reconciliation). Phases 0–8 complete; phase 9 complete except the charts.
+
+  Remaining, in the order I'd take them:
+
+  1. Charts (docs 13–15) — BarSeries, LineSeries, ShareBar don't exist. The
+  largest single remaining piece of the handoff.
+  2. Navigation phase — budgets/goals/certificates detail routes as root pushes,
+  with the shell/back tests rewritten together.
+  3. Transaction filter polish — category/account/member pickers and a currency
+  selector for the amount band.
+  4. Budget and goal screens — they got the minimum honest fix during the
+  formatter migration, not a redesign.
+
+  Two decisions of yours are still outstanding and I've now flagged them across
+  five turns: the certificate-principal double classification between
+  protectedBalances and heldByReason, and the spouse-wallet exclusion from the
+  headline balance. The spouse wallet is now rendered in two reports and the
+  dashboard, so the second one is getting steadily more expensive to change. I
+  can keep going without them, but they're the only things blocking a coherent
+  answer to "what is my money doing".
+
+✻ Churned for 4m 0s
+
+❯ go ahead                                                                      
+
+  Ran 2 shell commands (ctrl+o to expand)
+⏺ Skill(dataviz)
+  ⎿  Successfully loaded skill
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Now the three primitives:
+
+⏺ Write(lib/core/presentation/components/chart_primitives.dart)
+  ⎿  Wrote 541 lines to
+     lib/core/presentation/components/chart_primitives.dart
+       1 /// Three chart primitives, and no more.
+       3 /// All ink. A chart in this product has no palette: a bar is no
+         t a colour, it
+         a hatch
+         hat is
+       6 /// [ProgressMeter]'s rule extended to charts, and it is what ke
+       7 /// of them legible in greyscale, under dichromacy, and in force
+         d-colours mode
+       9 ///
+         compared by
+     … +597 lines (ctrl+o to expand)
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+  ⎿  Found 1 new diagnostic issue in 1 file (ctrl+o to expand)
+
+⏺ Now tests for the primitives — the rules they exist to enforce:
+
+⏺ Write(test/widget/presentation/chart_primitives_test.dart)
+  ⎿  Wrote 251 lines to test/widget/presentation/chart_primitives_test.dart
+       1 /// The three chart primitives.
+       3 /// What is worth testing about a chart is not its pixels but it
+         s promises:
+       4 /// that it never shows a number its own labels do not carry, th
+       5 /// with the language, that a bar cannot draw past its own track
+         , and that a
+         e are the ways
+       7 /// a chart lies, and none of them is visible in a screenshot.
+       8 library;
+      10 import 'package:family_money_manager/app/app_theme.dart';
+     … +270 lines (ctrl+o to expand)
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ Now put them to work — the category report's table gains its chart:
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ +1896 −2.
+
+  Implemented
+
+  The three chart primitives from doc 18 (AJ1): ShareBar, BarSeries, LineSeries
+  — additive, since no report drew a chart before.
+
+  They're all ink. That's the handoff's rule, not a shortcut: a bar isn't a
+  colour, it's a length on a shared baseline, and colour enters only as a hatch
+  carrying an exception — ProgressMeter's rule extended to charts. No pie, ever.
+  Lines get points joined by a thin line, no smoothing: a curve asserts values
+  between measurements, and in a ledger every value between two month-end
+  snapshots is a fiction.
+
+  On the dataviz skill — I loaded it as instructed. Its colour procedure (steps
+  2–3, the CVD validator, categorical hue order) doesn't apply here: there is no
+  categorical palette to validate, and monochrome is trivially CVD-safe. Its
+  structural guidance did apply and I followed it: ≤24 px bar thickness, 4 px
+  rounded data-end square at the baseline, 2 px round-capped lines, ≥8 px
+  markers with a 2 px surface ring rather than a stroke, hairline solid
+  gridlines, surface gaps between neighbours. Two of its checks are satisfied
+  structurally rather than by feature — "a table view exists" and "texture
+  available for the CVD/print case" are what the handoff mandates outright.
+
+  Each primitive mirrors with the language: the bar grows from the leading edge,
+  time runs leading-to-trailing.
+
+  Three ways a chart lies, closed by construction: a share above its own whole
+  is clamped rather than overdrawn (so the wrong number stays visible);
+  BarSeries takes an explicit maxValue so two series can be compared instead of
+  each being normalised to its own maximum; and every mark carries its own
+  formatted figure.
+
+  The category report is the first consumer — table first, then the picture of
   it.
 
-  Sign and number are separate widget children, not one string. This is what
-  actually fixes the RTL defect: the sign's position becomes a layout fact
-  rather than a bidi outcome. The isolate (U+2068/U+2069) then only has to stop
-  the digits reordering internally. The old formatter's single string is why EGP
-  382.50− happened.
+  Validation
 
-  A Wrap, not a Row. The spec makes amount and currency code a flex-wrap pair so
-  the code drops below the number at 200% text scale instead of truncating. My
-  first attempt used a Row and overflowed the 186 dp column the handoff
-  explicitly claims survives 200% — the test caught it.
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 350 files
+  - flutter test — +1896 −2, still only the two pre-existing failures
 
-  The masked run is sized by the real text at zero opacity. I first measured
-  with TextPainter, which came out 2.5 dp narrower than the rendered text —
-  enough to shift a column on toggle. Sizing from the actual Text makes the
-  widths identical by construction. Nothing is rasterised at zero opacity and
-  the parent Semantics excludes descendants, so no value reaches the screen or a
-  screen reader.
+  15 new tests. They assert the promises, not the pixels — clamping, the
+  zero-span and empty-series guards, both text directions, screen-reader
+  phrasing (a chart reads as its figures, not as a rectangle), and one that pins
+  the governing rule: the chart's bars can never outnumber or exceed the table 
+  above it.
 
-  One interpretation I made, flag it if you disagree: masked bars keep their
-  role colour rather than being literal ink. Doc 01 says "one solid ink bar";
-  your brief's list says a masked amount must "preserve … financial role", and
-  19 · AK4b says "sign and role tint kept". I read "ink" as "solid, not blurred"
-  and kept the tint, since it preserves the role more strongly. One-line change
-  if you'd rather they were primaryText.
+  Notes
 
-  3. Tests
+  - ShareBar and LineSeries are built and tested but not yet placed on a screen
+  — ShareBar belongs on the attribution report and LineSeries needs a
+  month-over-month query that doesn't exist yet. I'd rather say that than wire a
+  chart to data I'd have to invent.
+  - Remaining from the handoff, roughly in order: the navigation phase
+  (budgets/goals/certificates detail routes as root pushes, with shell/back
+  tests rewritten together); the transaction filter's missing pickers and
+  currency selector; budget and goal screens, which got the minimum honest fix
+  during the formatter migration rather than a redesign; and doc 18's other
+  components (date picker, category picker, tabs/segments).
+  - Your two decisions are still open — certificate-principal double
+  classification, and spouse-wallet exclusion from the headline balance. Nothing
+  I've done depends on them, but they're the last things standing between the
+  app and a coherent answer to "what is my money doing", and the spouse wallet
+  now appears in three places rather than one.
 
-  - financial_amount_text_test.dart — 22 tests across number formatting,
-  sign/glyph channels, bidi, privacy, semantics, resilience. Each group maps to
-  a defect the old implementation shipped.
-  - progress_meter_test.dart — 8 tests, including that percentages truncate (68,
-  never 69) and that the meter never derives its own state label.
-  - Golden suite — 10 baselines: direction grammar (RTL/LTR × light/dark), the
-  privacy pair, meters, summary. Captured on a RepaintBoundary so each image is
-  the component rather than 800×600 of empty scaffold.
-
-  I inspected the goldens rather than accepting them. The stub font draws glyphs
-  as boxes, but geometry is readable and correct: in RTL, reading
-  right-to-left, the order is glyph → sign → number → currency code trailing at
-  the far left. The privacy pair has pixel-identical extents, with each
-  continuous bar replaced by exactly three (18 / 400 / 00), sign, glyph, lock
-  and code all intact.
-
-  4. Honest status on adoption
-
-  The primitives exist and are correct, but most screens have not migrated yet —
-  that's phases 5–9 by design:
-
-  ┌───────────────────────────────────┬──────────────────────┐
-  │         Legacy formatter          │ Call sites remaining │
-  ├───────────────────────────────────┼──────────────────────┤
-  │ ReportAmountText.formatMinorUnits │ 9                    │
-  ├───────────────────────────────────┼──────────────────────┤
-  │ CertificateMoneyFormatter         │ 6                    │
-  ├───────────────────────────────────┼──────────────────────┤
-  │ MoneyInputFormatter.format        │ 5                    │
-  ├───────────────────────────────────┼──────────────────────┤
-  │ GoalMoneyFormatter                │ 4                    │
-  └───────────────────────────────────┴──────────────────────┘
-
-  So the three-way disagreement my phase-0 characterization test pinned is not 
-  yet resolved in the product — it's resolved in the component that will replace
-  them. I did not add an architecture rule forbidding manual formatting,
-  because it would fail today against legitimate not-yet-migrated code. That
-  rule belongs at the end of phase 9, when report_widgets.dart is deleted.
-
-  NonNegativeMoneyFormatter now has 0 direct call sites outside its two thin
-  delegates — those three files collapse into nothing once goals and
-  certificates migrate.
-
-  5. Deferred
-
-  BalanceHero — D6 lists it in phase 4, but it is blocked on heldByReason +
-  excludedFromAvailable in the dashboard query, which don't exist. Building it
-  now would mean either a component with no data or presentation code inventing
-  balance math. It lands in phase 6 with its query work.
-
-  6. Commands
-
-  ┌──────────────────────┬─────────────────┐
-  │                      │     Result      │
-  ├──────────────────────┼─────────────────┤
-  │ flutter analyze      │ No issues found │
-  ├──────────────────────┼─────────────────┤
-  │ dart format lib test │ clean           │
-  ├──────────────────────┼─────────────────┤
-  │ flutter test         │ +1735 -2        │
-  ├──────────────────────┼─────────────────┤
-  │ Suite runtime        │ 2:29            │
-  └──────────────────────┴─────────────────┘
-
-  The 2 failures are the same pre-existing pair
-  (certificate_principal_protection, budget_creation_screen).
-
-  7. Next
-
-  Phase 5 — list tiles and state components: the six account visual classes with
-  hatched leading edges, skeleton loading replacing spinners, and errors that
-  state what happened to the data before offering retry. It's also where
-  AccountListTile's bool isSecondary opacity hack gets replaced with a typed
-  class, and where tile height moves from fixed to intrinsic-with-64-minimum.
-
-  After that, phase 6 (dashboard) is the first one gated on query work —
-  heldByReason and excludedFromAvailable. Worth deciding soon whether I do that
-  query work myself or you'd rather scope it separately, since it's domain/data
-  rather than presentation and it blocks both BalanceHero and the dashboard
-  rebuild.
-
-✻ Churned for 18m 54s
+✻ Brewed for 7m 26s
 
 ❯ go ahead                                                                      
 
-⏺ Starting phase 5. Reading the current tiles and state components in full.
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+⏺ Now the router change — the remaining detail routes as root pushes:
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Now a test for what root-pushing actually buys — the behaviour, not the
+  wiring:
+
+⏺ Write(test/widget/navigation/detail_routes_above_shell_test.dart)
+  ⎿  Wrote 164 lines to
+     test/widget/navigation/detail_routes_above_shell_test.dart
+       1 /// Detail screens sit above the shell, not inside a tab.
+       3 /// The behaviour this buys, and the reason it was worth a route
+         r change:
+         tab to More
+       5 /// and discards Home's scroll position. A destination should no
+       6 /// tab you are on. The observable consequence is that a detail 
+         screen has no
+         ally were.
+       8 library;
+      10 import 'dart:async';
+     … +173 lines (ctrl+o to expand)
+
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
+  ⎿  Found 3 new diagnostic issues in 1 file (ctrl+o to expand)
+
+⏺ All three pass, including the behaviour that motivated the change. Full check:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ +1899 −2. The navigation phase is done — this was the last thing I'd been
+  carrying forward across turns.
+
+  Implemented
+
+  All ten detail and detail-action routes now push above the shell: transaction
+  detail and reverse, account detail, budget detail, goal detail with fund and
+  release, certificate detail with profit and redeem.
+
+  The key has to be set on each route individually, including children of an
+  already-root-pushed route — go_router resolves the navigator per route rather
+  than inheriting from the parent. A goal's "fund" screen without it would slide
+  the bottom bar back in halfway through the flow. That's documented on the key
+  itself, since it's the kind of thing the next person adding a route gets
+  wrong.
+
+  Validation
+
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 351 files
+  - flutter test — +1899 −2
+
+  3 new tests, written against the behaviour rather than the wiring:
+
+  - Every root-pushed route shows no bottom navigation — driven off a list, so a
+  route added without the key fails with the path in the reason.
+  - Every shell destination keeps its bottom navigation — the other half, so
+  "fix" the first test by root-pushing everything and this one catches you.
+  - Home → account detail → back lands on Home. That's the actual defect: an
+  account lives on the More branch, so opening one from Home used to switch the
+  visible tab and discard Home's scroll position.
+
+  The two existing shell tests still pass unchanged — the page-key regression
+  they guard is untouched.
+
+  Where things stand
+
+  Phases 0–9 complete, plus navigation. All the numbered defects from the
+  handoff's list that I've been tracking are closed.
+
+  Remaining, in the order I'd take them:
+
+  1. Transaction filter pickers — category, account, member and scope selectors,
+  plus a currency selector for the amount band. The filter and query support
+  all of them; only the sheet doesn't offer them.
+  2. Budget and goal screens — they got the minimum honest fix during the
+  formatter migration, not the redesign docs 07 and 11 specify.
+  3. Doc 18's other components — date picker, category picker, tabs/segments
+  (currently still Material defaults; that's defect #18).
+  4. ShareBar and LineSeries placement — built and tested, not yet on a screen.
+  LineSeries needs a month-over-month query that doesn't exist.
+
+  And your two decisions are still open. I've flagged them every turn for six
+  turns now and nothing I've built depends on them, but they are genuinely the
+  last product questions in the redesign: the certificate-principal double
+  classification between protectedBalances and heldByReason, and whether the
+  spouse wallet is excluded from the headline balance. If you'd rather I just
+  pick defensible answers and note them as assumptions, say so and I will —
+  otherwise I'll keep working around them.
+
+✻ Worked for 4m 26s
+
+❯ go ahead                                                                      
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+⏺ Now the pickers. Adding four dimensions and a currency selector to the filter
+  sheet:
 
   Read 1 file, ran 2 shell commands (ctrl+o to expand)
 
-⏺ One hardcoded 'Retry' — a real localization defect. Adding the generic keys
-  phase 5 needs.
+⏺ Now the two menu pickers:
 
-  Ran 1 shell command (ctrl+o to expand)
+  Ran 3 shell commands (ctrl+o to expand)
 
-⏺ Now extracting the hatch pattern, since both the meter and the tile edges need
-  it.
-
-⏺ Write(lib/core/presentation/components/hatch_pattern.dart)
-  ⎿  Wrote 63 lines to lib/core/presentation/components/hatch_pattern.dart
-       1 /// The 45° hatch, in one place.
-       3 /// Hatching is load-bearing in this design: it is what says "he
-         ld, not
-       4 /// spendable" on a leading edge, "remaining" on a progress mete
-       5 /// "overshoot" past a meter's mark. All three must be the same 
-         texture, or the
-         y lives here
-       7 /// rather than being redrawn per component.
+⏺ Write(test/widget/features/transactions/transaction_filter_sheet_test.dart)
+  ⎿  Wrote 302 lines to
+     test/widget/features/transactions/transaction_filter_sheet_test.dart
+       1 /// The filter sheet's pickers.
+       3 /// The filter and the query supported every one of these dimens
+         ions from the
+         ing is the
+       5 /// part that can go wrong: that each control writes the dimensi
+       6 /// to, that clearing means cleared rather than "first option", 
+         and that the
        8 library;
-      10 import 'package:flutter/rendering.dart';
-     … +63 lines (ctrl+o to expand)
-
-⏺ Now the account tile with its six visual classes.
-
-⏺ Write(lib/core/presentation/components/account_list_tile.dart)
-  ⎿  Wrote 327 lines to
-     lib/core/presentation/components/account_list_tile.dart
-      1 /// The account tile, and the six visual classes that make "can I
-         spend this?"
-      3 library;
-      4 
-      5 import 'package:family_money_manager/app/app_theme.dart';
-        /financial_amount_text.dart';
-      7 import 'package:family_money_manager/core/presentation/components
-        /hatch_pattern.dart';
-        theme_extensions.dart';
-      9 import 'package:flutter/material.dart';
-     … +356 lines (ctrl+o to expand)
-
-⏺ Now the state components: skeletons replacing spinners, and errors that say
-  what happened to the data.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Removing the old AccountListTile and giving TransactionListTile the same
-  intrinsic-height treatment.
-
-  Ran 1 shell command (ctrl+o to expand)
-⏺ Analyzer clean. Now making ProgressMeter use the shared hatch, and adding
-  phase 5 tests.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All still passing — the shared hatch is geometrically identical by design. Now
-  phase 5 tests.
-
-⏺ Write(test/widget/presentation/account_list_tile_test.dart)
-  ⎿  Wrote 229 lines to
-     test/widget/presentation/account_list_tile_test.dart
-       1 /// The account tile's job is to answer "can I spend this?" with
-       2 /// without reading, and without the tile ever working it out fo
-         r itself.
-       4 
-       5 import 'package:family_money_manager/app/app_theme.dart';
-         izations.dart';
-       7 import 'package:family_money_manager/core/presentation/component
-       8 import 'package:flutter/material.dart';
-       9 import 'package:flutter_localizations/flutter_localizations.dart
-      10 import 'package:flutter_test/flutter_test.dart';
-     … +250 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The amount was taking unbounded width in the Row, squeezing the name. Making
-  it flexible so it shrinks and wraps instead.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The component is right — it grows to the design's 3-line cap. My test's
-  "short" name wasn't short enough in Arabic to be one line. Fixing the
-  proportions and the test.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ IntrinsicHeight around a Wrap is pathological — it measures as if fully
-  wrapped. Replacing it with a full-height edge strip in a Stack.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ All 54 pass. Adding goldens for the six account classes, then the full suite.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Seven tiles exceed the default 600 dp test surface. Giving that board its own
-  surface size.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Let me verify the six-class board actually reads without colour.
-
-  Read 1 file (ctrl+o to expand)
-
-⏺ The board reads correctly without colour — but one thing is wrong: on a 4 dp
-  edge, the protected class's 2 px frame swallows its own hatch, so it renders
-  as a solid bar. The frame belongs on the tile, not the edge.
-
-  Read 1 file, ran 3 shell commands (ctrl+o to expand)
-
-⏺ The protected row now carries a bronze frame around the whole tile with its
-  hatch intact — the only framed row on the board. Running the full suite.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ 8 new failures — exactly the phase-5 breakage D6 predicted. Let me see what
-  they assert.
-
-  Ran 9 shell commands (ctrl+o to expand)
-
-⏺ No underlying exception — so the screen isn't being reached at all. Checking
-  the test's navigation setup.
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Let me get ground truth on what's actually rendered.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ The screen is stuck in the loading state — pumpAndSettle now returns
-  immediately because the skeleton is static, where the old spinner's endless
-  animation kept pumping frames until the future resolved. Let me confirm the
-  fix.
-
-  Ran 5 shell commands (ctrl+o to expand)
-
-⏺ Definitive: the spinner's endless animation was what kept pumpAndSettle
-  pumping until the provider resolved. The static skeleton is correct per the
-  design; the tests depended on the animation. Let me find a robust wait.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ I've spent enough on this harness quirk. The right call is to scope it
-  honestly: keep the skeleton as a component, but don't swap it into
-  AppLoadingState until each screen's own phase, where its tests get rewritten
-  anyway.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Phase 5 — list tiles and state components · complete
-
-  +1750 -2 (was +1735 -2), analyzer clean, format clean, 14 golden baselines.
-
-  ---
-  1. What changed
-
-  New
-  - AccountVisualClass — the six classes, each carrying its region, edge
-  treatment and glyph as enum data. AccountRegion makes "held never appears in
-  the spendable list" a type-level fact rather than a convention.
-  - AccountListTile — full rewrite. Leading edge (solid / hatched), lock on held
-  money, role-coloured amount, archived treatment, intrinsic height with a 64
-  dp minimum.
-  - hatch_pattern.dart — the 45° hatch in one place, with a HatchDensity enum.
-  ProgressMeter now delegates to it, so the texture that means "held" on an edge
-  is byte-identically the texture that means "remaining" on a meter.
-  - AppSkeletonList — loading drawn as the shape of the content arriving.
-
-  Rewritten
-  - TransactionListTile — off ListTile onto an intrinsic-height row with a 64 dp
-  minimum, tonal press instead of a ripple.
-  - AppErrorState — now states what happened to the data before offering a
-  retry, with an optional error code. Fixed a hardcoded English 'Retry' (defect
-  #5 category); it now falls back to l10n.actionRetry.
-
-  5 new ARB keys, both locales, still symmetric at 516.
-
-  2. Three problems the tests caught
-
-  IntrinsicHeight around a Wrap is pathological. My first tile used
-  IntrinsicHeight so the leading edge could stretch full height. IntrinsicHeight
-  asks children how tall they want to be at minimum width, and
-  FinancialAmountText is a Wrap — which answers "one line per element". Every
-  tile came out as tall as its most pessimistic wrap (157 dp for a one-line
-  row). Replaced with a Stack + PositionedDirectional edge: full height, no
-  intrinsic pass, and it mirrors in RTL for free.
-
-  A non-flexible child in a Row is measured against unbounded width. The
-  trailing amount took whatever it liked and starved the account name into a
-  wrapped column. Now Flexible, with the name at flex: 5 and the amount at flex:
-  3.
-
-  The protected class's frame was swallowing its own hatch. On a 4 dp edge a 2
-  px stroke consumes the whole width, so protectedFund rendered as a solid bar —
-  visually identical to a spendable solid edge, the exact opposite of intent. I
-  moved the frame onto the tile: hatched edge like the other held classes, plus
-  a 2 px protectedMoney border around the row. Nothing else in the product has
-  a coloured frame, which is what makes it read as "this money is different". I 
-  caught this by looking at the golden, not from a failing assertion.
-
-  3. Scope reduction — please read
-
-  AppLoadingState still uses a spinner. I built AppSkeletonList and initially
-  swapped it in, which broke 8 tests across goals, budgets, certificates and
-  dashboard. I chased it down properly rather than papering over it, and the
-  cause is not what it looks like:
-
-  Those screens' tests rely on the spinner's ticker to keep pumpAndSettle
-  pumping frames long enough for their provider futures to resolve. With a
-  static skeleton, pumpAndSettle returns after one frame — still in the loading
-  state — so even the error-state tests fail. I verified this decisively by
-  re-inserting a CircularProgressIndicator into the skeleton: the error state
-  immediately appeared. I tried 200 pumps, runAsync with real delays, and
-  async-throwing overrides; none resolve the future. Only an animating widget
-  does.
-
-  So the tests aren't asserting a spinner — they're depending on one to advance 
-  async state, which is a latent fragility in the existing harness, not
-  something phase 5 should fix by weakening either the design or the tests.
-
-  AppSkeletonList is therefore available and tested, and each screen adopts it
-  during its own phase, where its tests are rewritten against real providers
-  anyway (D6 already says the dashboard's tests are "largely rewritten"). I
-  documented this on AppLoadingState so the next person doesn't re-trip it. This
-  is the one piece of phase 5 I did not finish, and it's deliberate.
-
-  4. Tests
-
-  - account_list_tile_test.dart — 11 tests: region invariants, exactly six
-  classes, lock only on held, edge fixed at 4 dp, 64 dp minimum, growth for long
-  Arabic names, 200% scale, archived keeps its figure, tonal press.
-  - Goldens — 14 baselines (was 10), adding the seven-row account board in
-  RTL/LTR × light/dark.
-
-  I inspected the RTL board again after the frame fix. It reads correctly with
-  colour contributing nothing: rows 1–3 solid ink edge, rows 4–6 hatched, row 6
-  additionally framed in bronze, row 7 outline-only and disabled-grey.
-
-  5. Commands
-
-  ┌──────────────────────┬─────────────────┐
-  │                      │     Result      │
-  ├──────────────────────┼─────────────────┤
-  │ flutter analyze      │ No issues found │
-  ├──────────────────────┼─────────────────┤
-  │ dart format lib test │ clean           │
-  ├──────────────────────┼─────────────────┤
-  │ flutter test         │ +1750 -2        │
-  └──────────────────────┴─────────────────┘
-
-  Same 2 pre-existing failures; no new ones.
-
-  6. Next
-
-  Phase 6 — dashboard, and it's the first phase gated on work outside
-  presentation. It needs heldByReason and excludedFromAvailable on
-  DashboardSummary, which don't exist. BalanceHero has been waiting on the same
-  thing since phase 4.
-
-  That's a query change (drift_dashboard_query_repository, dashboard_summary,
-  the use case, and the fake repository in tests) — domain/data work rather than
-  presentation, and it sits right next to the certificate-protection code you
-  committed earlier. Two options:
-
-  1. I do it — implement the query fields, then build BalanceHero and the
-  dashboard on top in the same phase.
-  2. You scope it separately — I skip to phase 7 (entry flows:
-  expense/income/transfer forms and reviews), which needs no new query work, and
-  come back to the dashboard once the query lands.
-
-  I'd suggest option 1 so BalanceHero stops being blocked, but it does mean I'd
-  be writing balance-derivation code next to a domain area you've been working
-  in yourself — so it's worth you choosing.
-
-✻ Crunched for 26m 51s
-
-❯ `go ahead                                                                     
-
-⏺ Proceeding with option 1. Reading the dashboard query layer before touching
-  it.
-
-  Read 1 file, ran 4 shell commands (ctrl+o to expand)
-
-⏺ Implementing additively — no existing query's semantics change. Adding the
-  domain models first.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Now the repository interface and the Drift implementation.
-
-  Ran 5 shell commands (ctrl+o to expand)
-
-⏺ Now the DB tests that prove the partition — the invariant that makes this
-  safe.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Write(test/database/dashboard_held_money_db_test.dart)
-  ⎿  Wrote 292 lines to test/database/dashboard_held_money_db_test.dart
-      1 /// DB tests for the third state of money.
-      3 /// `availableToSpend`, `excludedFromAvailable` and `heldByReason
-        ` partition
-      4 /// every non-archived account exactly once. The partition is the
-      5 /// property: money that fell out of all three would simply not a
-        ppear on the
-        ertificate
-      7 /// principal and goal reserves were in neither the spendable nor
-         the protected
-      9 library;
-     … +339 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-⏺ The partition invariant holds. Running the full suite.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Phase 6a — the dashboard query work · complete
-
-  +1761 -2 (was +1750 -2), analyzer clean. This unblocks BalanceHero and the
-  dashboard rebuild.
-
-  ---
-  1. What changed
-
-  Three new query methods, all purely additive — no existing query's semantics 
-  changed:
-
-  ┌───────────────────────┬──────────────────────────────────────────────────┐
-  │        Method         │                     Returns                      │
-  ├───────────────────────┼──────────────────────────────────────────────────┤
-  │ availableToSpend      │ the headline figure: spendable minus everything  │
-  │                       │ excluded                                         │
-  ├───────────────────────┼──────────────────────────────────────────────────┤
-  │ excludedFromAvailable │ spendable money deliberately left out, with the  │
-  │                       │ reason (spouse wallets)                          │
-  ├───────────────────────┼──────────────────────────────────────────────────┤
-  │ heldByReason          │ non-archived money that can't be spent, grouped  │
-  │                       │ by why                                           │
-  └───────────────────────┴──────────────────────────────────────────────────┘
-
-  New domain types: HeldReason (childProtected, goalReserve,
-  certificatePrincipal, other), ExclusionReason (spouseWallet),
-  HeldAmountSummary, ExcludedAmountSummary. DashboardSummary gains three fields
-  plus hasHeldBalance / hasExcludedBalance.
-
-  2. The design decision that makes this safe
-
-  The three buckets partition every non-archived account exactly once, built
-  from one shared SQL predicate reused three ways:
-
-  availableToSpend      = spendable AND NOT excluded
-  excludedFromAvailable = spendable AND excluded
-  heldByReason          = NOT spendable          → grouped by account type
-
-  heldByReason is the literal SQL complement of spendableBalances, so the two
-  can neither double-count nor leave money unreported. That's exactly the
-  failure being fixed: a goalReserve account is is_spendable = 0 and
-  is_protected = 0, so it was in neither existing bucket and had no figure
-  anywhere on the dashboard.
-
-  I wrote a test that asserts the partition directly — seven accounts of every
-  type, and the three buckets must sum to the total credited. If a future
-  account type slips through all three predicates, that test fails rather than
-  the money quietly vanishing.
-
-  HeldReason.other exists for the same reason: an account type with no specific
-  vocabulary still gets a figure instead of being dropped.
-
-  availableToSpend is computed in SQL, not by subtracting in a widget.
-  Subtracting one balance from another is ledger arithmetic and belongs where
-  the ledger is.
-
-  3. Two things you should look at
-
-  1. Your certificate-protection commit and the handoff disagree. Your
-  protectedBalances change classifies pre-maturity certificate principal as
-  protected money. The handoff's binding rule #4 treats it as the third state —
-  "spendable, protected, and neither (certificate principal, goal reserves)". D6
-  is explicit: "Certificate principal and goal reserves are non-spendable and
-  non-protected, so they're in neither existing bucket."
-
-  I did not overturn your commit. protectedBalances is untouched, and
-  heldByReason reports certificate principal under its own reason independently.
-  The consequence is that a pre-maturity certificate currently appears in both
-  protectedBalances and heldByReason — correct for each query in isolation, but
-  the dashboard must render one region or the other, not add them. I'll wire the
-  held region from heldByReason only. Worth your call on whether
-  protectedBalances should narrow to child funds.
-
-  2. The spouse-wallet exclusion is a stated assumption, not a fact from the 
-  repo. Doc 01 lists it under "Open questions — assumptions I made": "Spouse 
-  wallet is excluded from 'available to spend'. The brief says 'contextually'. I
-  assumed excluded." I implemented the exclusion but left spendableBalances
-  intact, so the old behaviour is still available and reversing the decision is
-  a one-line change to _excludedPredicate.
-
-  4. Tests
-
-  dashboard_held_money_db_test.dart — 11 DB tests against a real AppDatabase:
-  each reason reported correctly, goal reserves invisible to both old buckets,
-  archived excluded, currencies never combined, spouse wallet excluded from the
-  headline, the partition sums, held is the exact complement of spendable, and
-  an empty household reports nothing rather than zeroes.
-
-  FakeDashboardQueryRepository gained the three methods with settable results,
-  so widget tests can drive the new regions.
-
-  5. Commands
-
-  ┌──────────────────────┬─────────────────────────────────────────┐
-  │                      │                 Result                  │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter analyze      │ No issues found                         │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ dart format lib test │ clean                                   │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter test         │ +1761 -2 — same 2 pre-existing failures │
-  └──────────────────────┴─────────────────────────────────────────┘
-
-  6. What I deliberately stopped short of
-
-  I've done the query half of phase 6 and stopped before BalanceHero and the
-  dashboard screen rebuild. Two reasons: this is domain work in an area you've
-  been editing yourself, and it carries the two decisions above that are
-  genuinely yours rather than mine. Building the screen on top before you've
-  seen them would mean rework if you rule differently on either.
-
-  Phase 6b is the presentation half and is ready to go the moment you're happy:
-  BalanceHero (primary currency at displayBalance, secondary currencies at
-  reportValue, the "no combined total" refusal line), the held region on
-  recessedSurface below a 2 px rule with per-reason rows, the spouse band, and
-  the pinned action bar — replacing the current 881-line dashboard_screen.dart.
-
-  Tell me to continue and I'll take 6b as it stands, or say which way you want
-  the two questions resolved first.
-
-✻ Brewed for 8m 30s
-
-❯ go ahead                                                                      
-
-⏺ Reading the dashboard specification before building.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Adding the ARB vocabulary the dashboard regions need, with a proper plural.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now BalanceHero — the component that's been blocked since phase 4.
-
-⏺ Write(lib/core/presentation/components/balance_hero.dart)
-  ⎿  Wrote 181 lines to lib/core/presentation/components/balance_hero.dart
-       1 /// The dominant region of the dashboard and of every account de
-       2 library;
-       3 
-       4 import 'package:family_money_manager/app/app_theme.dart';
-         izations.dart';
-       6 import 'package:family_money_manager/core/presentation/component
-       7 import 'package:family_money_manager/core/presentation/theme/app
-         _theme_extensions.dart';
-       8 import 'package:flutter/material.dart';
-      10 /// One currency's contribution to a balance hero.
-     … +198 lines (ctrl+o to expand)
-
-⏺ Now the held region — the component the query work exists for.
-
-⏺ Write(lib/core/presentation/components/held_money_region.dart)
-  ⎿  Wrote 232 lines to
-     lib/core/presentation/components/held_money_region.dart
-       1 /// The held-money region: everything the household owns but can
-       2 library;
-       3 
-       5 import 'package:family_money_manager/core/localization/app_local
-         izations.dart';
-         s/financial_amount_text.dart';
-       7 import 'package:family_money_manager/core/presentation/theme/app
-       8 import 'package:flutter/material.dart';
        9 
-         y the screen.
-     … +244 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now wiring both into the dashboard, replacing the two balance sections.
-
-  Ran 6 shell commands (ctrl+o to expand)
-
-⏺ 4 failures — the tests seed the old buckets, which the screen no longer reads.
-  Updating them to the new contract.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Test 17 caught a real regression — I dropped the negative-balance warning when
-  I deleted the old row widget. Restoring it in BalanceHero.
-
-  Ran 5 shell commands (ctrl+o to expand)
-
-⏺ The dashboard-side wiring silently didn't apply. Adding it against the current
-  text.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Negative-balance warning restored. Now the two tests asserting the old
-  headings and icon.
-
-  Ran 9 shell commands (ctrl+o to expand)
-
-⏺ All dashboard tests pass. Running the full suite.
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Phase 6b — BalanceHero and the held-money region · complete
-
-  +1761 -2, analyzer clean, format clean. The two long-blocked components are
-  built and wired.
-
-  ---
-  1. What changed
-
-  New components
-  - BalanceHero — primary currency at displayBalance, secondary currencies at
-  reportValue on hairline-separated rows, a 2 px ink rule, then the refusal
-  line. No switcher: hiding a currency behind a control is how money gets
-  forgotten.
-  - HeldMoneyRegion — a recessed region below a 2 px ink rule, with per-reason
-  rows, a per-currency subtotal, and the line stating the subtotal is not part
-  of the available balance.
-
-  Dashboard rewired — _SpendableBalancesSection, _ProtectedBalancesSection,
-  _HeldBalancesHint and _BalanceRow deleted; the hero now reads availableToSpend
-  and the held region reads heldByReason. The scroll became full-bleed for the
-  two money regions (a region is defined by its surface and its edge rule — an
-  inset margin breaks both) with every other section keeping the screen margin.
-
-  11 new ARB keys including two plurals with proper Arabic forms
-  (zero/one/two/few/many/other for account and holding counts).
-
-  2. Two things worth calling out
-
-  The refusal line is now real. Where a grand total would sit, the hero prints
-   ;Users read a missing total as a bug .»ةلقتسم ةلمع لك — دحّوم يلامجإ دجوي ال«
-  a stated refusal teaches the invariant instead. There's a test asserting it
-  renders.
-
-  I caught a regression I'd introduced. Deleting the old _BalanceRow silently
-  dropped the negative-balance warning that the dashboard has always shown. Test
-  17 failed and I restored it properly — as a notice inside BalanceHero, with
-  the warning role on the notice and never on the amount. That's the design's
-  rule, and it's better placed than where it was.
-
-  3. Tests
-
-  Four dashboard tests were asserting the old structure. I rewrote rather than
-  relaxed them:
-
-  - Test 5 now asserts what actually matters: BalanceHero and HeldMoneyRegion
-  are separate regions with separate headings, and the refusal line is present —
-  instead of grepping for two old section titles.
-  - Test 16 now asserts a protected fund lands in the held region, is named by
-  its reason, and carries the lock — instead of matching a heading string.
-  Colour is deliberately not one of the assertions.
-
-  The test factory now seeds availableToSpend/heldByReason from the older
-  spendable/protected params, so the other 14 tests keep working unchanged, with
-  new named params for tests that need the buckets to differ.
-
-  These tests default to Arabic, so the assertions are Arabic — which is the
-  right way round for an RTL-first product.
-
-  4. Commands
-
-  ┌──────────────────────┬─────────────────────────────────────────┐
-  │                      │                 Result                  │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter analyze      │ No issues found                         │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ dart format lib test │ clean                                   │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter test         │ +1761 -2 — same 2 pre-existing failures │
-  └──────────────────────┴─────────────────────────────────────────┘
-
-  5. What phase 6 does not include
-
-  I did the two regions the query work unblocked. The dashboard still has, from
-  A1–A6, unbuilt:
-
-  - The counted attention region («)2( كهابتنا جاتحي») — needs budget-threshold
-  and upcoming-recurrence data that no query provides.
-  - The pinned bottom action bar — this is phase 7's territory (it replaces the
-  /transactions/new chooser) and changing it now would collide with that work.
-  - The first-run empty state with the three suggested account types, and the
-  partial-failure error that keeps recent activity visible.
-  - App-bar actions are still 4–5, not the specified 2.
-
-  So the dashboard is materially closer to A1 but not finished. I'd rather say
-  that plainly than claim the screen is done.
-
-  6. Standing decisions still open
-
-  Both from phase 6a, still unanswered and both cheap to change:
-
-  1. Certificate principal is currently double-classified — protectedBalances
-  (your commit) counts it as protected, heldByReason counts it as the third
-  state. The dashboard renders only the held region, so nothing double-counts on
-  screen, but the two queries disagree about what it is.
-  2. Spouse-wallet exclusion from the headline is the handoff's stated
-  assumption, not a repo fact.
-
-  7. Next
-
-  Phase 7 — entry flows: expense_form_screen (22.5 KB), review, income,
-  transfer, and retiring the /transactions/new chooser. That's the numpad-first
-  sheet, the sentence read-back, the protected-source guard, and the pinned
-  action bar the dashboard is waiting on. record_expense_use_case stays
-  untouched, so idempotency and validation survive.
-
-  It's the app's highest-frequency flow and the largest single screen in the
-  codebase, so I'd take it in two passes: the expense form and its review first,
-  then income and transfer against the same pattern.
-
-✻ Cooked for 12m 14s
-
-❯ go ahead                                                                      
-  note: i want padding for horizontal lists be inside the scroll not outside it 
-
-⏺ Noted — horizontal lists should scroll edge-to-edge with padding on the scroll
-  view itself, not wrapped around it. Let me record that and audit existing
-  violations.
-
-  Ran 5 shell commands, wrote 1 memory (ctrl+o to expand)
-
-⏺ Now the dashboard period selector, which my inset() wrapper had made
-  non-full-bleed.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Padding rule applied repo-wide and green. Now phase 7, starting with the entry
-  primitives B1 depends on.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Write(lib/core/presentation/components/amount_keypad.dart)
-  ⎿  Wrote 185 lines to lib/core/presentation/components/amount_keypad.dart
-       1 /// The numeric keypad every entry flow opens with.
-       2 library;
-       3 
-       5 import 'package:family_money_manager/core/presentation/theme/app
-         _theme_extensions.dart';
-       6 import 'package:flutter/material.dart';
-       7 import 'package:flutter/services.dart';
-       9 /// A key on the pad. Typed rather than a raw string so a caller
-          cannot invent
-      10 /// a key the amount parser has no rule for.
-     … +194 lines (ctrl+o to expand)
-
-⏺ Now AmountEntryField to spec — 56 dp, fixed trailing currency code, 2 px rule,
-  persistent error.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now tests for both entry primitives.
-
-⏺ Write(test/widget/presentation/amount_entry_test.dart)
-  ⎿  Wrote 226 lines to test/widget/presentation/amount_entry_test.dart
-       1 /// The entry primitives: the pad every flow opens with, and the
-       2 /// drives.
-       3 library;
-       5 import 'package:family_money_manager/app/app_theme.dart';
-       6 import 'package:family_money_manager/core/localization/app_local
-       7 import 'package:family_money_manager/core/presentation/component
-         s/components.dart';
-         _theme_extensions.dart';
-       9 import 'package:flutter/material.dart';
-         ';
-     … +241 lines (ctrl+o to expand)
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ My expectation listed the pad's visual order, not the tap order. Fixing the
-  test.
-
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Done. +1772 -2, analyzer and format clean.
-
-  1. Your padding note — applied and recorded
-
-  Fixed everywhere it was wrong:
-
-  - report_widgets.dart — the period chip row was wrapped in a Padding; the
-  margin moved onto the SingleChildScrollView.
-  - dashboard_screen.dart — my own inset() wrapper from phase 6b had made the
-  period selector non-full-bleed. It's now full-bleed, with the label taking its
-  own margin and the chip row taking padding on the scroll view.
-  - PeriodSelector in the shared kit gained a horizontalPadding param applied
-  inside the scroll view, so callers never need to wrap it.
-
-  I added a repo audit for the pattern (Padding supplying horizontal margin
-  directly above a horizontal scroller) — it now reports none.
-
-  I also saved this as a durable preference in project memory, with the
-  reasoning: an outer Padding shrinks the viewport so the row stops short of the
-  screen edge instead of running under it, which is exactly what makes a chip
-  row stop feeling like it continues off-screen.
-
-  2. Phase 7 — started: the entry primitives
-
-  Both pieces B1 is built on:
-
-  AmountKeypad — fixed 3×4 pad, 56 dp keys, tonal press. Keys are a sealed type
-  (DigitKey / DecimalSeparatorKey / BackspaceKey) rather than raw strings, so a
-  caller can't emit a key the amount parser has no rule for. The separator key
-  is suppressed for zero-scale currencies but holds its place, so the pad
-  doesn't reflow mid-entry when the currency changes.
-
-  AmountEntryField rebuilt to spec — 56 dp, label above the field (never a
-  placeholder that vanishes when needed), currency code pinned at the trailing
-  edge so a long amount can't push it off the row, and the 2 px rule is the
-  field: ink at rest, expense on error. The error is persistent, at its cause,
-  with liveRegion so a screen reader announces it. A disabled field carries a
-  reason line, because disabled is 2.6:1 and can't convey its own state.
-
-  12 tests, including that an error replaces the helper rather than stacking,
-  and that the code sits trailing of the digits.
-
-  3. Where phase 7 stands
-
-  Done: the two entry primitives. Not yet done: expense_form_screen (557 lines),
-  its review with the sentence read-back, the protected-source guard, the
-  drag-to-expand sheet, and retiring the /transactions/new chooser — plus income
-  and transfer against the same pattern.
-
-  I stopped at the primitives deliberately rather than half-rebuilding the form.
-  The form is the app's highest-frequency flow and the largest screen in the
-  codebase; starting it and leaving it mid-rewrite would be worse than a clean
-  boundary. The primitives are shared, tested, and the form can now be assembled
-  from them.
-
-  4. Commands
-
-  ┌──────────────────────┬─────────────────────────────────────────┐
-  │                      │                 Result                  │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter analyze      │ No issues found                         │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ dart format lib test │ clean                                   │
-  ├──────────────────────┼─────────────────────────────────────────┤
-  │ flutter test         │ +1772 -2 — same 2 pre-existing failures │
-  └──────────────────────┴─────────────────────────────────────────┘
-
-  Next turn I'd take the expense form and its review end to end.
-
-✻ Sautéed for 8m 3s
-
-❯ go ahead                                                                      
-
-  Ran 5 shell commands (ctrl+o to expand)
-
-⏺ Now the ARB for the sentence read-back and the ledger-effect section.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now rebuilding the review screen: sentence read-back, double-entry rows, and a
-  persistent error instead of a snackbar.
-
-  Ran 6 shell commands (ctrl+o to expand)
-
-⏺ Now a test for the review screen's new behaviour — the read-back and the
-  persistent failure.
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Write(test/widget/features/transactions/expense_review_screen_test.dart)
-  ⎿  Wrote 198 lines to
-     test/widget/features/transactions/expense_review_screen_test.dart
-       1 /// The expense review screen.
-       3 /// Two things are being asserted that the previous screen did n
-         ot do: the
-         a failed write
-          snackbar.
-       6 library;
-       8 import 'package:family_money_manager/core/application/app_result
          .dart';
-         dart';
-         iders.dart';
-     … +220 lines (ctrl+o to expand)
-
-  Ran 7 shell commands (ctrl+o to expand)
-
-⏺ All four pass. Full suite.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Phase 7 (continued) — the expense review screen
-
-  +1776 -2, analyzer and format clean. Same two pre-existing failures.
-
-  1. What changed
-
-  expense_review_screen.dart rebuilt around B3:
-
-  - The sentence read-back replaces the label table. «ةلاقب ىلع م.ج 382.50 تفرص 
-  One sentence catches "wrong ».ةرسألا باسحل ءانه اهتقفنأ — ةيصخش ةيدقن ةظفحم نم
-  account" and "wrong spender" faster than six labelled rows, because it reads
-  the way the user would say it. It's a single parameterised ARB message with
-  five placeholders — assembled by ARB, never concatenated in code, so the word
-  order is the translator's to decide.
-  - The double entry is now shown, using CurrencyAmountRow: debit named by
-  category with the outflow grammar, credit named by account. Both sides stated
-  as debit and credit rather than implied by a sign.
-  - The permanent consequence line under the confirm action: «نكمي ال ظفحلا دعب 
-   AppBottomActionBar gained a ».لجسلا يف ىقبت ةيسكع ةكرحب نوكي حيحصتلا — فذحلا
-  consequenceLabel for this — it's not conditional, because it's how the app
-  teaches append-only before someone goes looking for a delete button.
-
-  Defect #17 fixed here. The screen became a ConsumerStatefulWidget so a failed
-  write holds _failure and renders it as a persistent AppInlineNotice at the top
-  of the review. Every failure branch — insufficient funds, validation,
-  duplicate, generic — now lands on screen instead of in a self-dismissing
-  snackbar. Success still navigates away.
-
-  record_expense_use_case is untouched, so idempotency and validation are
-  exactly as they were.
-
-  2. Tests
-
-  Four new tests in expense_review_screen_test.dart, a file that didn't exist:
-  - the read-back is one sentence containing amount, account and spender;
-  - the ledger effect names both debit and credit;
-  - the consequence line is always present;
-  - a write failure produces no SnackBar, shows an inline notice, and leaves the
-  user on the review screen able to act on it.
-
-  3. Where phase 7 stands
-
-  Done: AmountKeypad, AmountEntryField (previous turn), and the expense review
-  screen.
-
-  Not done: expense_form_screen itself — the numpad-first sheet with the
-  drag-to-expand full field set, the printed defaults meta line, the repeat
-  tiles, and the protected-source guard. Also income/transfer review (same
-  snackbar defect, same read-back pattern), the budget-consumption preview on
-  review (needs a provider read), and retiring the /transactions/new chooser.
-
-  The form is the last big piece. I took the review first deliberately: it's
-  where the append-only teaching and the failure-handling defect live, it's
-  self-contained, and it establishes the read-back pattern that income and
-  transfer will copy.
-
-  4. One thing I'd flag
-
-  The review still shows a residual AppReviewSection with beneficiary, scope,
-  recurrence, date, note and withdrawal reason. B3 doesn't show those rows — the
-  sentence plus the double entry is the whole board. I kept them because
-  dropping them would remove information with no replacement while the form
-  still can't set some of it visibly. They should go when the form lands and the
-  meta line makes those defaults visible during entry.
-
-  Next turn: the expense form end to end, then income and transfer against the
-  same pattern.
-
-✻ Baked for 8m 1s
-
-❯ go ahead                                                                      
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Now the form itself — numpad-first with the printed defaults line and a
-  category chip row.
+     … +332 lines (ctrl+o to expand)
 
   Ran 2 shell commands (ctrl+o to expand)
 
-⏺ Now the layout — collapsed pad view with the defaults line and chip row, and
-  the pinned keypad.
+⏺ Two real bugs, both caught by the tests — a controlled-value problem and a
+  crash:
 
-  Ran 4 shell commands (ctrl+o to expand)
+  Ran 2 shell commands (ctrl+o to expand)
 
-⏺ Now pinning the keypad above the action bar and adding the consequence line.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Now tests for the new form behaviour.
-
-⏺ Write(test/widget/features/transactions/expense_form_pad_test.dart)
-  ⎿  Wrote 235 lines to
-     test/widget/features/transactions/expense_form_pad_test.dart
-       1 /// The numpad-first expense form.
-       3 /// The behaviour under test is B1's claim: the sheet opens with
-          the pad up,
-         the full field
-         creen.
-       6 library;
-       8 import 'package:family_money_manager/core/application/app_result
-         .dart';
-         dart';
-         iders.dart';
-     … +253 lines (ctrl+o to expand)
+⏺ All 10 pass. Full check:
 
   Ran 1 shell command (ctrl+o to expand)
 
-⏺ The chip row is bounded by ResponsiveContentContainer (correctly), so my width
-  assertion was wrong. Fixing both tests.
+⏺ +1909 −2.
 
-  Ran 4 shell commands (ctrl+o to expand)
+  Implemented
 
-⏺ Phase 7 — the expense form · complete
+  The filter sheet now offers every dimension the query already supported.
+  Category and scope as chips (closed sets the app defines); account and spender
+  as menus (household data of unknown size and unknown name length — a chip row
+  of a dozen long Arabic names is a wall, not a control). Plus a currency
+  selector on the amount band.
 
-  +1785 -2, analyzer and format clean. Same two pre-existing failures.
+  Two design points worth naming:
 
-  1. What changed
+  - The category chip writes the code, not the label. The query matches on the
+  stable code; a localised label would match nothing, and would match
+  differently per locale.
+  - Switching the band's currency re-parses the typed text at the new scale
+  rather than reinterpreting the stored minor units, which would silently move
+  the threshold the user set.
 
-  expense_form_screen.dart restructured to B1/B2. The sheet now opens in pad 
-  mode:
+  Archived members stay selectable — they spent money that's still in the
+  ledger, and a filter that couldn't reach it would make that history
+  unsearchable.
 
-  - Amount at the top with the keypad pinned above the action bar — chrome, not
-  a field in the scroll, so the amount stays visible while typing.
-  AmountEntryField goes readOnly while the pad is up, so the system keyboard
-  doesn't stack a second number row on screen.
-  - The defaults line under the amount: «25-07-2026 · ةيصخش ةيدقن ةظفحم نم · 
-   Every default the flow applied is printed rather .»ةرسألا قاطن · دمحأ قفنملا
-  than hidden — that's what makes the three-tap path honest instead of merely
-  fast.
-  - Category is a chip row, full-bleed, with the margin on the scroll view — per
-  your note.
-  - "More detail" expands to the full field set on the same sheet. The pad
-  retires, nothing else changes, and there's no navigation. All existing fields,
-  validation and the protected-withdrawal block are preserved verbatim behind
+  Two bugs the tests caught in my own picker
+
+  Both were real, and neither was visible without writing the test:
+
+  1. A crash. Reopening the sheet with an account filter already active, before
+  the async account list arrived, tripped DropdownButton's "exactly one matching
+  item" assertion. Now the value is only passed when the list can actually show
   it.
-  - The append-only consequence line under the action bar.
+  2. An uncontrolled control. I'd used DropdownButtonFormField's initialValue,
+  which is read once on first build — so "clear all" would clear the draft while
+  the menu kept displaying the old selection. Both pickers are now fully
+  controlled by value, with the draft as the single source of truth.
 
-  The spender-≠-owner nudge is non-blocking. The spec explicitly withdrew the
-  rule that required a note in that case — it taxed the household's single most
-  common entry, a spouse spending from a wallet in the primary user's name,
-  which is exactly the case the three-tap goal exists for. It's a warning-toned
-  notice that blocks nothing.
+  Validation
 
-  The pad respects currency scale. It refuses a third decimal on EGP and hides
-  the separator key entirely for JPY, rather than accepting digits the ledger
-  would round away.
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 352 files
+  - flutter test — +1909 −2, still only the two pre-existing failures
 
-  2. Tests
+  10 new tests: each control writes the dimension it claims to, re-tapping a
+  chip clears rather than re-selects, the band always carries a currency and
+  disappears entirely when both bounds are emptied (not a band with two nulls,
+  which would still pin the filter to one currency), "clear all" restores
+  includeReversed to the default the ledger insists on, and cancelling changes
+  nothing. 7 ARB keys; locales symmetric.
 
-  9 new tests in expense_form_pad_test.dart: the pad is up on open and the field
-  set isn't; typing fills the amount; backspace; digits past the currency scale
-  are refused; a zero-scale currency has no separator; the defaults are
-  printed; the chip row's viewport is as wide as the list it sits in (an outer
-  Padding would make it narrower — this is your rule, now enforced by a test);
-  "more detail" reveals the fields and retires the pad on the same screen; the
-  consequence line is always present.
+  Remaining
 
-  One of those two failures taught me something: my first width assertion
-  compared against the Scaffold and got 688 vs 800. That was the test being
-  wrong, not the layout — ResponsiveContentContainer caps the content measure,
-  so full-bleed means "as wide as its list", not "as wide as the window".
+  1. Budget and goal screens — docs 07 and 11. They got the minimum honest fix
+  during the formatter migration, not the redesign.
+  2. Doc 18's other components — date picker, category picker surface,
+  tabs/segments. Still Material defaults; that's defect #18, the last one open.
+  3. ShareBar and LineSeries placement — built and tested, unplaced. LineSeries
+  needs a month-over-month query that doesn't exist.
 
-  3. What's still open in phase 7
+  I'll stop re-listing your two open product decisions each turn — they're
+  noted, nothing I'm building depends on them, and I'll raise them again only
+  when something actually blocks on them.
 
-  - Direct save from the form. The spec's tap 3 is «ظفح»; the form still routes
-  through Review only. Adding it means a second write path, and I'd rather
-  extract one shared submit helper than duplicate the use-case call — that's the
-  next thing I'd do here.
-  - Income and transfer reviews still deliver failures by SnackBar (6 and 1 call
-  sites) and still use the label table instead of a read-back. The expense
-  review is now the pattern for both.
-  - Repeat tiles, the tappable meta line (each word opening its own picker), the
-  utility key column, the budget preview on review, and retiring the
-  /transactions/new chooser.
-
-  The form is materially at B1 now; it isn't finished.
-
-  4. Where the migration stands overall
-
-  Phases 0–5 done, 6 done for the query work and the two money regions, 7
-  substantially underway. The largest remaining blocks are the rest of the entry
-  flows, then transactions/detail/reversal (phase 8, which needs the
-  reversal_reason schema change), reports (phase 9), and navigation last.
-
-  Two decisions of yours are still outstanding and both now affect more code
-  than when I raised them: the certificate-principal double classification, and
-  the spouse-wallet exclusion from the headline balance.
-
-✻ Baked for 10m 20s
+✻ Sautéed for 8m 57s
 
 ❯ go ahead                                                                      
 
-  Ran 2 shell commands (ctrl+o to expand)
+  Searched for 1 pattern, ran 3 shell commands (ctrl+o to expand)
 
-⏺ Both follow the same shape. Converting them to persistent failures with the
-  same pattern.
+⏺ Write(lib/core/presentation/components/app_date_picker.dart)
+  ⎿  Wrote 202 lines to
+     lib/core/presentation/components/app_date_picker.dart
+       1 /// The date sheet.
+       3 /// A sheet from the bottom, like every other choice in this app
+         , rather than
+       5 ///
+         three
+       7 /// shortcuts: almost every date this app asks for is today, yes
+       8 /// start of the month, and the calendar grid is the fallback ra
+         ther than the
+         abled or
+         ppen in the
+     … +232 lines (ctrl+o to expand)
 
-  Ran 2 shell commands (ctrl+o to expand)
+  Ran 1 shell command (ctrl+o to expand)
 
-⏺ All failure snackbars are gone from the entry flows. Adding read-back
-  sentences to income and transfer.
+⏺ Now migrate the seven showDatePicker call sites:
 
-  Ran 3 shell commands (ctrl+o to expand)
+  Searched for 1 pattern, ran 2 shell commands (ctrl+o to expand)
 
-⏺ Now extending the review test to cover all three flows uniformly.
+⏺ All seven migrated. Now tests, including the defect that motivated this:
 
-  Ran 4 shell commands (ctrl+o to expand)
-
-⏺ Phase 7 — entry flows · substantially complete
-
-  +1788 -2, analyzer and format clean.
-
-  1. What changed
-
-  All three entry reviews now share one pattern:
-
-  ┌─────────────────┬──────────────────────┬───────────────────────────────┐
-  │                 │        Before        │             After             │
-  ├─────────────────┼──────────────────────┼───────────────────────────────┤
-  │ Failure         │ SnackBar             │ persistent AppInlineNotice at │
-  │ delivery        │ (auto-dismisses)     │  its cause                    │
-  ├─────────────────┼──────────────────────┼───────────────────────────────┤
-  │ Primary check   │ table of labelled    │ one-sentence read-back        │
-  │                 │ rows                 │                               │
-  ├─────────────────┼──────────────────────┼───────────────────────────────┤
-  │ Append-only     │ absent               │ permanent consequence line    │
-  │ teaching        │                      │ under the action              │
-  └─────────────────┴──────────────────────┴───────────────────────────────┘
-
-  Defect #17 is now closed across the entry flows. Expense, income and transfer
-  reviews all became ConsumerStatefulWidgets holding a _failure, and every
-  branch — insufficient funds, validation, duplicate, generic — renders on
-  screen. There are zero showSnackBar calls left in lib/features/transactions/.
-
-  The read-backs are parameterised ARB messages, never concatenated:
-  ».يتظفحم يف بتار نم م.ج 100.00 تملتسا« -
-  ».رامثتسا ةداهش ىلإ رصم كنب نم م.ج 47,900.00 تلوّح« -
-
-  The transfer sentence deliberately carries no direction sign — a transfer
-  changes no total, so it's neither positive nor negative.
-
-  2. Tests
-
-  Three more on the income review, mirroring the expense set: the read-back is
-  one sentence, the consequence line is always shown, and a write failure 
-  produces no SnackBar and leaves the user on the review screen. Combined with
-  the expense form and review suites, the entry flows now have 35 passing widget
-  tests.
-
-  3. Honest status
-
-  Snackbars remain in six other files — accounts, budgets, goals ×3, household.
-  Those are phases 8–9 screens and I haven't touched them; the defect is fixed
-  where phase 7 reaches, not app-wide. Worth knowing if you were reading defect
-  #17 as closed.
-
-  Still open inside phase 7:
-  - Direct save from the form (spec's tap 3). It needs one shared submit helper
-  rather than a second write path, and I'd rather do that as a deliberate
-  extraction than bolt on a duplicate.
-  - Repeat tiles, the tappable meta line, the utility key column, budget preview
-  on review, retiring the /transactions/new chooser.
-  - Income and transfer forms still use the old field-stack layout; only their
-  reviews were updated. The pad pattern from the expense form is what they'd
-  adopt.
-
-  4. Where the migration stands
-
-  Phases 0–5 complete. Phase 6 complete for the query work and the two dashboard
-  money regions. Phase 7 has the entry primitives, the expense form at B1, and
-  all three reviews on the new pattern.
-
-  Remaining: the rest of phase 7, then phase 8 (transactions list, detail,
-  reversal — which needs the reversal_reason schema change and a migration),
-  phase 9 (reports, deleting report_widgets.dart), and navigation last.
-
-  Your two outstanding decisions still stand, and both keep getting more
-  expensive to change: the certificate-principal double classification between
-  protectedBalances and heldByReason, and the spouse-wallet exclusion from the
-  headline balance. Neither blocks me, but phase 8 starts touching account
-  detail, where both become visible again.
-✻ Cooked for 5m 51s
-
-❯ go ahead                                                                      
-
-⏺ Finishing phase 7's three-tap goal properly — one shared submit path, not a
-  duplicate.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Write(lib/features/transactions/presentation/expense_submission.dart)
-  ⎿  Wrote 64 lines to
-     lib/features/transactions/presentation/expense_submission.dart
-       1 /// The one path an expense takes into the ledger.
-       3 /// Both the form's direct save and the review screen's confirm 
-         go through
-         what happens
-       5 /// after a duplicate conflict, and they would drift.
+⏺ Write(test/widget/presentation/app_date_picker_test.dart)
+  ⎿  Wrote 210 lines to test/widget/presentation/app_date_picker_test.dart
+       1 /// The date sheet.
+       3 /// The rule under test is the one the stock picker could not ex
+         press: bounds
+         vent its own
+       5 /// pair, and one of them let an expense be recorded a year in t
+       6 library;
        7 
-       8 import 'package:family_money_manager/core/application/app_result
        9 import 'package:family_money_manager/core/localization/app_local
          izations.dart';
-         essage_key.dart';
-     … +70 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Now the form: split validation from navigation, default the attribution
-  fields, and add direct save.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Now wiring Save into the action bar, defaulting the attribution fields, and
-  surfacing the error.
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Two SecondaryActionButtons now exist (Review and More detail), so the test's
-  finder is ambiguous. Targeting by label.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Adding a test that direct save actually reaches the ledger path.
+         s/components.dart';
+     … +224 lines (ctrl+o to expand)
 
   Ran 4 shell commands (ctrl+o to expand)
+  ⎿  Found 23 new diagnostic issues in 1 file (ctrl+o to expand)
 
-⏺ Phase 7 — entry flows · complete
+⏺ +1919 −2.
 
-  +1789 -2, analyzer and format clean.
+  Implemented
 
-  1. The three-tap path now works
+  showAppDatePicker — a bottom sheet like every other choice in the app,
+  replacing all seven showDatePicker calls. No stock date dialog remains in
+  lib/.
 
-  expense_submission.dart — one write path for expenses, used by both the form's
-  direct save and the review's confirm. It's a sealed ExpenseSaved /
-  ExpenseRejected, and it owns the three things that must happen together on
-  success: regenerate the idempotency key, clear the staged context, invalidate
-  the money providers. Forgetting one of those is the kind of bug that only
-  shows up on the second save, which is exactly why it shouldn't live in two
-  screens.
+  The design point that mattered: callers state what the date is for, not what
+  its bounds are. DatePurpose.ledgerEntry versus DatePurpose.futureTarget. Every
+  call site previously invented its own pair — DateTime(2000)/DateTime(2100),
+  DateTime(2020)/DateTime(2050), now + 365 days — and the expense, income and
+  transfer forms all let you record a transaction up to a year in the future. A
+  ledger records what happened; that's now unrepresentable rather than merely
+  discouraged.
 
-  The form now saves directly. Save is primary, Review is secondary beside it —
-  the review became an optional stop rather than a toll on every entry. Amount →
-  category chip → save is three taps.
+  Two smaller things worth noting:
 
-  Attribution fields are defaulted so that path is actually reachable: spender
-  defaults to the primary user, beneficiary follows the spender, account to the
-  first eligible one. All of it prints in the meta line, so nothing is applied
-  invisibly.
+  - The sheet explains why the greyed days are grey. An explained constraint is
+  a rule; an unexplained one is a bug the user works around.
+  - A stored date outside its own bounds is clamped rather than asserted on —
+  data written before the bound existed opens on a valid day instead of
+  crashing.
 
-  A rejected write lands above the amount, persistent, where the eye already is
-  — the same rule as the review screens.
+  The three shortcuts (today, yesterday, start of month) come before the grid,
+  because they answer the question most of the time. A shortcut outside the
+  caller's bounds is dropped rather than offered and refused.
 
-  2. One default I did not change
+  What I did not do
 
-  The spec says scope defaults to household; the code defaults to personal. I
-  left it.
+  Month and weekday names still come from Flutter's own bundle via
+  CalendarDatePicker, not the ARB. That's the one part of doc 18's AJ2 spec not
+  met — it objects on provenance grounds, since every other string in the
+  project comes from the ARB. Meeting it means hand-building the calendar grid,
+  which is a larger piece than the fix that was actually load-bearing. It's
+  marked in the source at the point it applies.
 
-  Scope determines which bucket an expense lands in for reporting and
-  attribution, so changing its default silently shifts reported figures for
-  every future entry. That's a financial-behaviour change, and the brief's rule
-  is to prefer existing domain behaviour and surface the conflict rather than
-  resolve it myself. The meta line prints whatever the actual default is, so
-  it's visible either way. Say the word and it's a one-line change.
+  Validation
 
-  3. Tests
+  - flutter analyze — No issues found
+  - dart format --set-exit-if-changed lib test — clean, 354 files
+  - flutter test — +1919 −2, still the two pre-existing failures
 
-  10 in expense_form_pad_test.dart, including the new one: save is reachable 
-  from the pad without visiting review, and its failure lands on the form rather
-  than in a snackbar.
+  10 new tests: the grid stops at today for a ledger entry and runs past it for
+  a target, the warning appears only where there's something to warn about, a
+  stored future date clamps instead of asserting, a caller's own floor is
+  honoured, out-of-bounds shortcuts are dropped, and dismiss/confirm return what
+  they should.
 
-  4. Phase 7 status
+  Remaining
 
-  Done: entry primitives, expense form at B1/B2, all three reviews on the
-  read-back + persistent-failure pattern, one shared submit path, zero failure
-  snackbars in lib/features/transactions/.
+  - Doc 18's other components — category picker surface, tabs/segments, and the
+  6 AlertDialog sites. That's the rest of defect #18.
+  - Budget and goal screens (docs 07, 11) — still the minimum fix, not the
+  redesign.
+  - ShareBar / LineSeries placement — LineSeries needs a month-over-month query
+  that doesn't exist.
+  - The two showDateRangePicker sites (dashboard, report period selector) still
+  use the Material range dialog. A range sheet is a different component from a
+  single-date one; I'd rather build it deliberately than stretch this one.
 
-  Deferred, and I'd call these polish rather than blockers: repeat tiles, the
-  tappable meta line (each word opening its own picker), the utility key column,
-  budget preview on review, retiring the /transactions/new chooser, and porting
-  the pad layout to the income and transfer forms (their reviews are already
-  done).
+✻ Crunched for 9m 34s
 
-  5. Next
-
-  Phase 8 — transactions list, detail, reversal. It's the first phase needing a
-  schema change: reversal_reason on the reversal row, which means a migration
-  from v19 to v20 with a migration test. It also adds
-  /transactions/:operationId/reverse and moves detail screens to root pushes,
-  which will correctly break tests asserting a bottom nav bar on detail screens.
-
-  Before I start it: phase 8 touches account detail and transaction detail,
-  where both of your outstanding decisions become visible again — the
-  certificate-principal double classification, and the spouse-wallet exclusion.
-  A schema migration is also the point where changing your mind gets
-  meaningfully more expensive. Worth resolving them now rather than after.
-
-✻ Sautéed for 6m 49s
-
-❯ go ahead                                                                      
-
-⏺ Phase 8 starts with a schema change, so let me read the migration conventions
-  first.
-
-  Ran 8 shell commands (ctrl+o to expand)
-
-⏺ Implementing the v19 → v20 migration.
-
-  Ran 3 shell commands (ctrl+o to expand)
-
-⏺ Now the migration test — a real v19 file upgraded in place.
-
-⏺ Write(test/database/reversal_reason_migration_v19_to_v20_test.dart)
-  ⎿  Wrote 190 lines to
-     test/database/reversal_reason_migration_v19_to_v20_test.dart
-       1 /// Authentic v19 → v20 migration: a reason column on the revers
-       2 ///
-       3 /// Flow:
-         ersion = 19`)
-          via raw sqlite3
-       6 /// 3. Assert pre-migration: version 19, no `reversal_reason` co
-       7 /// 4. Open the current [AppDatabase] so the real `onUpgrade` ru
-         ns
-          reads NULL,
-      10 library;
-     … +217 lines (ctrl+o to expand)
-
-  Ran 2 shell commands (ctrl+o to expand)
-
-⏺ Migration verified. Full suite.
-
-  Ran 1 shell command (ctrl+o to expand)
-
-⏺ Expected fallout from the version bump. Let me see exactly what each asserts.
-
-  Ran 4 shell commands (ctrl+o to expand)
-⏺ A earlier migration step rebuilds operations from the current Drift
-  definition, so the column already exists by the time my step runs. Making the
-  add idempotent.
-
-  Ran 5 shell commands (ctrl+o to expand)
-
-⏺ The guarded customSelect runs deferred during onUpgrade, so it can't gate the
-  ALTER. Making the add idempotent directly instead.
-
-  Ran 1 shell command (ctrl+o to expand)
+※ recap: You're implementing the Figma-style design handoff into the Flutter app; phases 0–9 plus navigation are done, and I just replaced all seven date pickers with a purpose-bounded sheet. Suite is +1919 −2 (both pre-existing). Next: doc 18's category picker and tabs. (disable recaps in /config)

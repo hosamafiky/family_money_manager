@@ -57,11 +57,12 @@ class _GoalCreationScreenState extends ConsumerState<GoalCreationScreen> {
   }
 
   Future<void> _pickTargetDate() async {
-    final picked = await showDatePicker(
+    final picked = await showAppDatePicker(
       context: context,
       initialDate: _targetDate ?? DateTime.now().add(const Duration(days: 365)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2050),
+      purpose: DatePurpose.futureTarget,
+      // A goal cannot be aimed at a date already past.
+      earliest: DateTime.now(),
     );
     if (picked != null) setState(() => _targetDate = picked);
   }

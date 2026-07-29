@@ -77,6 +77,11 @@ String resolveMessageKey(AppLocalizations l10n, String key) {
     'errorInsufficientFunds' => l10n.errorInsufficientFunds,
     'errorLifecycleEventConflict' => l10n.errorLifecycleEventConflict,
     'errorOperationAlreadyReversed' => l10n.errorOperationAlreadyReversed,
+    'errorReversalConflict' => l10n.errorReversalConflict,
+    'errorReversalReasonRequired' => l10n.errorReversalReasonRequired,
+    'errorReversalReasonTooLong' => l10n.errorReversalReasonTooLong,
+    'errorReversalRequiresProtectedAudit' =>
+      l10n.errorReversalRequiresProtectedAudit,
     'errorSameAccount' => l10n.errorSameAccount,
     'errorSpenderRequired' => l10n.errorSpenderRequired,
     'errorValidationGeneric' => l10n.errorValidationGeneric,

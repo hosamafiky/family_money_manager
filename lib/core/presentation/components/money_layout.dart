@@ -26,6 +26,7 @@ class CurrencyAmountRow extends StatelessWidget {
     this.isEmphasised = false,
     this.showDivider = true,
     this.semanticsContext,
+    this.onTap,
   });
 
   final String label;
@@ -44,6 +45,15 @@ class CurrencyAmountRow extends StatelessWidget {
 
   final bool showDivider;
   final String? semanticsContext;
+
+  /// Opens whatever this figure is a summary of.
+  ///
+  /// A breakdown row is a claim about a set of transactions, and the only
+  /// honest way to check a claim is to see what it was computed from. When
+  /// set, the row gains a chevron, a tonal press and button semantics — a
+  /// row that is tappable and does not look it is worse than one that is
+  /// not tappable at all.
+  final VoidCallback? onTap;
 
   /// Below this much room for the label, label and amount stop sharing a
   /// baseline and stack instead. Long Arabic names and 200% text otherwise
@@ -68,7 +78,7 @@ class CurrencyAmountRow extends StatelessWidget {
       semanticsContext: semanticsContext,
     );
 
-    return Container(
+    final row = Container(
       constraints: const BoxConstraints(minHeight: 44),
       decoration: showDivider
           ? BoxDecoration(
@@ -108,9 +118,38 @@ class CurrencyAmountRow extends StatelessWidget {
               Expanded(child: labelBlock),
               const SizedBox(width: AppTheme.space12),
               amount,
+              if (onTap != null) ...[
+                const SizedBox(width: AppTheme.space4),
+                Icon(
+                  // Flipped explicitly rather than left to the icon font:
+                  // Flutter's chevrons do not mirror on their own, and a
+                  // chevron pointing the wrong way in Arabic reads as "back".
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left
+                      : Icons.chevron_right,
+                  size: 18,
+                  color: colors.secondaryText,
+                ),
+              ],
             ],
           );
         },
+      ),
+    );
+
+    if (onTap == null) return row;
+    return Semantics(
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          // A tonal press, never a ripple: an expanding circle contradicts a
+          // square system and reads as something happening to the money.
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: colors.secondarySurface,
+          child: row,
+        ),
       ),
     );
   }

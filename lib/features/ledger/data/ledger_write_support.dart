@@ -262,6 +262,7 @@ final class LedgerWriteSupport {
     receiptPath: row.receiptPath,
     isReversed: row.isReversed,
     reversedBy: row.reversedBy,
+    reversalReason: row.reversalReason,
     createdBy: row.createdBy,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

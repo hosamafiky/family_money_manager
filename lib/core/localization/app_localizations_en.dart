@@ -1770,4 +1770,327 @@ class AppLocalizationsEn extends AppLocalizations {
   String transferReadBack(String amount, String source, String destination) {
     return 'You moved $amount from $source to $destination.';
   }
+
+  @override
+  String get errorReversalReasonRequired =>
+      'A reason is required to reverse a transaction.';
+
+  @override
+  String get errorReversalReasonTooLong =>
+      'The reason is too long — 280 characters maximum.';
+
+  @override
+  String get errorReversalConflict =>
+      'Conflicting reversal request. Refresh and try again.';
+
+  @override
+  String get errorReversalRequiresProtectedAudit =>
+      'Reversing this would withdraw from protected money — use the protected-withdrawal flow.';
+
+  @override
+  String get reversalSheetTitle => 'Reverse a transaction — not delete';
+
+  @override
+  String get reversalSheetIntro =>
+      'The original transaction stays in the ledger exactly as it is. We add an opposing entry that refers to it, so the history stays complete and auditable.';
+
+  @override
+  String get reversalBeforeAfterTitle => 'Before and after';
+
+  @override
+  String get reversalOriginalStaysLabel => 'Stays — marked as reversed';
+
+  @override
+  String get reversalCounterEntryLabel => 'Reversing entry · today';
+
+  @override
+  String get reversalCounterEntryReference => 'Refers to the transaction above';
+
+  @override
+  String get reversalReasonLabel => 'Reason for reversal — required';
+
+  @override
+  String get reversalReasonPermanenceNote =>
+      'The reason is recorded permanently on the reversing entry and is shown to anyone who opens it.';
+
+  @override
+  String get reversalReasonPresetDuplicate => 'Entered twice';
+
+  @override
+  String get reversalReasonPresetWrongAmount => 'Wrong amount';
+
+  @override
+  String get reversalReasonPresetWrongAccount => 'Wrong account';
+
+  @override
+  String get reversalReasonPresetCancelledPurchase => 'Purchase cancelled';
+
+  @override
+  String get reversalConfirmAction => 'Add the reversing entry';
+
+  @override
+  String get reversalNoDeleteNote =>
+      'There is no delete button in this app, and that is deliberate.';
+
+  @override
+  String get detailNoEditNoDeleteTitle => 'No editing and no deleting.';
+
+  @override
+  String get detailNoEditNoDeleteBody =>
+      'This transaction is a permanent part of the ledger. If it is wrong, we add a reversing entry that refers to it — and both stay visible.';
+
+  @override
+  String get detailLedgerEntriesTitle => 'Ledger entries — two sides';
+
+  @override
+  String get detailLedgerEntriesOriginalTitle =>
+      'Ledger entries — the original';
+
+  @override
+  String get detailEntriesStillInLedgerNote =>
+      'These entries are still in the ledger — not erased. The reversing entry added two opposing entries, so the net is zero without touching history.';
+
+  @override
+  String get detailReversedBannerTitle => 'This transaction is reversed';
+
+  @override
+  String get detailAlreadyReversedNoAction =>
+      'Already reversed — no further action';
+
+  @override
+  String get detailChainTitle => 'Transaction chain';
+
+  @override
+  String get detailChainOriginalLabel => 'The original';
+
+  @override
+  String get detailChainReversalLabel => 'The reversing entry';
+
+  @override
+  String get detailChainYouAreHere => 'You are here';
+
+  @override
+  String get detailChainOpenEntry => 'Open it';
+
+  @override
+  String get detailStatusPosted => 'Posted';
+
+  @override
+  String get transactionRepeatAction => 'Repeat';
+
+  @override
+  String reversalNetEffectOn(String account) {
+    return 'Net effect on $account';
+  }
+
+  @override
+  String detailReversedBannerBody(String date) {
+    return 'Reversed on $date. The original is unchanged, and its effect on the balance is zero.';
+  }
+
+  @override
+  String detailChainReasonBy(String reason, String author) {
+    return 'Reason: $reason · by $author';
+  }
+
+  @override
+  String detailRecordedAt(String timestamp) {
+    return 'Recorded at $timestamp';
+  }
+
+  @override
+  String reversalSavedConfirmation(String net) {
+    return 'The reversing entry was added. The original stays in the ledger, and the net is now $net.';
+  }
+
+  @override
+  String get detailAddReversalAction => 'Add a reversing entry';
+
+  @override
+  String get detailSectionTitle => 'Details';
+
+  @override
+  String detailChainStepOriginal(String step, String date) {
+    return '$step · The original — $date';
+  }
+
+  @override
+  String detailChainStepReversal(String step, String date) {
+    return '$step · The reversing entry — $date';
+  }
+
+  @override
+  String get transactionsGroupToday => 'Today';
+
+  @override
+  String get transactionsGroupYesterday => 'Yesterday';
+
+  @override
+  String get transactionsSummaryIncome => 'Income';
+
+  @override
+  String get transactionsSummaryExpense => 'Expense';
+
+  @override
+  String get transactionsSummaryTransfer => 'Transfer';
+
+  @override
+  String get transactionsTransferNotCounted =>
+      'Does not affect income or expense';
+
+  @override
+  String get transactionsReversedOriginalMeta =>
+      'The original is kept — see the counter-entry';
+
+  @override
+  String get transactionsEmptyFilteredTitle =>
+      'No transaction matches the filter';
+
+  @override
+  String get transactionsErrorTitle => 'Couldn\'t load transactions';
+
+  @override
+  String transactionsSummaryCurrencyOnly(String currency) {
+    return '$currency only · transactions in other currencies are shown below in their own currency';
+  }
+
+  @override
+  String transactionsGroupCount(String count) {
+    return '$count';
+  }
+
+  @override
+  String transactionsReversalRefersTo(String date, String reason) {
+    return 'Refers to the transaction of $date · Reason: $reason';
+  }
+
+  @override
+  String transactionsCountAvailable(String count) {
+    return 'You have $count transactions';
+  }
+
+  @override
+  String get transactionsFilterTitle => 'Filter';
+
+  @override
+  String get transactionsFilterType => 'Type';
+
+  @override
+  String get transactionsFilterShowReversed => 'Show reversed transactions';
+
+  @override
+  String get transactionsFilterAmountRange => 'Amount';
+
+  @override
+  String get transactionsFilterAmountPerCurrency =>
+      'Per currency — the filter never compares two currencies';
+
+  @override
+  String get transactionsFilterMin => 'From';
+
+  @override
+  String get transactionsFilterMax => 'To';
+
+  @override
+  String get transactionsSearchHint =>
+      'Search descriptions, notes and account names';
+
+  @override
+  String get transactionsSearchIgnoresPeriod =>
+      'Search ignores the selected period';
+
+  @override
+  String get transactionsClearFilters => 'Clear all filters';
+
+  @override
+  String get transactionsCancel => 'Cancel';
+
+  @override
+  String transactionsFilterApply(String count) {
+    return 'Show $count transactions';
+  }
+
+  @override
+  String transactionsClearFiltersCount(String count) {
+    return 'Clear all ($count)';
+  }
+
+  @override
+  String transactionsEmptyFilteredBody(String total) {
+    return 'You have $total transactions — but none match this filter.';
+  }
+
+  @override
+  String get reportTransferIn => 'Transfer in';
+
+  @override
+  String get reportTransferOut => 'Transfer out';
+
+  @override
+  String get reportSpouseWalletFunded => 'Spouse wallet — funded';
+
+  @override
+  String get reportSpouseWalletReturned => 'Spouse wallet — returned';
+
+  @override
+  String reportAuditFor(String beneficiary, String date) {
+    return 'For $beneficiary · $date';
+  }
+
+  @override
+  String reportAuditForBy(String beneficiary, String recordedBy, String date) {
+    return 'For $beneficiary · by $recordedBy · $date';
+  }
+
+  @override
+  String get reportDrillDownFiltered => 'Filtered from the report';
+
+  @override
+  String get reportDrillDownClear => 'Show all';
+
+  @override
+  String get reportDoesNotReconcile => 'These figures do not add up';
+
+  @override
+  String get reportDoesNotReconcileBody =>
+      'The opening balance plus the movements does not equal the closing balance. The balances themselves are correct — the period breakdown is not, so do not rely on these lines until it is checked.';
+
+  @override
+  String get transactionsFilterCategory => 'Category';
+
+  @override
+  String get transactionsFilterAccount => 'Account';
+
+  @override
+  String get transactionsFilterSpender => 'Spender';
+
+  @override
+  String get transactionsFilterScope => 'Scope';
+
+  @override
+  String get transactionsFilterCurrency => 'Currency';
+
+  @override
+  String get transactionsFilterAllAccounts => 'All accounts';
+
+  @override
+  String get transactionsFilterAnyMember => 'Anyone';
+
+  @override
+  String get datePickerTitle => 'Choose a date';
+
+  @override
+  String get datePickerToday => 'Today';
+
+  @override
+  String get datePickerYesterday => 'Yesterday';
+
+  @override
+  String get datePickerStartOfMonth => 'Start of the month';
+
+  @override
+  String get datePickerConfirm => 'Choose';
+
+  @override
+  String get datePickerNoFuture => 'No transaction is recorded in the future';
 }

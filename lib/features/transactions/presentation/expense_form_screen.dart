@@ -592,13 +592,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                           const SizedBox(height: AppTheme.space12),
                           InkWell(
                             onTap: () async {
-                              final picked = await showDatePicker(
+                              final picked = await showAppDatePicker(
                                 context: context,
                                 initialDate: _effectiveDate,
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 365),
-                                ),
+                                purpose: DatePurpose.ledgerEntry,
                               );
                               if (picked != null) {
                                 setState(() => _effectiveDate = picked);

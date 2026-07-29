@@ -1,71 +1,72 @@
-/// Characterization tests for money rendering, pinned at phase 0.
+/// How money becomes a string, and which formatter owns which job.
 ///
-/// Three formatters produce user-visible amounts today, and they disagree with
-/// each other and with the redesign. This file records exactly what each one
-/// emits *before* phase 4 consolidates them into a single
-/// `FinancialAmountText`, so that consolidation is a reviewable diff rather
-/// than a rewrite nobody can check.
-///
-/// Several expectations below assert output the design explicitly rejects.
-/// They are labelled DEFECT and each names the rule it breaks. Do not "fix"
-/// them here — they are the before-picture, and phase 4 is where they change.
+/// This began as the phase-0 before-picture: three formatters disagreeing on
+/// the same amount, with the report one breaking four rules at once. That one
+/// is gone. What remains pins the division of labour — display groups and
+/// drops the sign, entry echoes what was typed, and the non-negative
+/// formatter refuses a value it should never receive — so a future
+/// "simplification" that collapses them has to argue with a test first.
 library;
 
 import 'package:family_money_manager/core/financial/currency.dart';
 import 'package:family_money_manager/core/financial/money.dart';
+import 'package:family_money_manager/core/presentation/amount_display_formatter.dart';
 import 'package:family_money_manager/core/presentation/money_input_formatter.dart';
 import 'package:family_money_manager/core/presentation/non_negative_money_formatter.dart';
-import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('ReportAmountText.formatMinorUnits — every report amount', () {
-    // This is the single formatter behind all report, budget and drill-down
-    // amounts, and it breaks four rules at once.
+  group('AmountDisplayFormatter — the one formatter reports now use', () {
+    // `ReportAmountText.formatMinorUnits` used to sit behind every report,
+    // budget and drill-down amount, and broke four rules at once: it led with
+    // the currency code, used an ASCII hyphen inside the numeric run, emitted
+    // no thousands grouping, and silently fell back to scale 2 for an unknown
+    // code. It is deleted. These tests are the after-picture — each one
+    // inverts an assertion that used to pin a defect.
 
-    test('DEFECT: currency code leads the number', () {
-      // The design requires the code to *trail* the amount in both scripts.
-      expect(ReportAmountText.formatMinorUnits(38250, 'EGP'), 'EGP 382.50');
-    });
-
-    test('DEFECT: ASCII hyphen, and it lands inside the run', () {
-      // In RTL this renders as "EGP 382.50-": the bidi algorithm moves an
-      // unisolated ASCII hyphen to the wrong side of the numeric run. The fix
-      // is a first-strong isolate plus a real minus glyph, in phase 4.
-      expect(ReportAmountText.formatMinorUnits(-38250, 'EGP'), 'EGP -382.50');
-    });
-
-    test('DEFECT: no thousands grouping', () {
-      // A ledger is a column of numbers; ungrouped digits cannot be scanned.
+    test('the currency code is not part of the string at all', () {
+      // Placement is a layout decision, so it belongs to the widget, not to
+      // the formatter. Trailing in both scripts, and never baked into the
+      // number.
+      expect(AmountDisplayFormatter.format(38250, 'EGP'), '382.50');
       expect(
-        ReportAmountText.formatMinorUnits(999999999, 'EGP'),
-        'EGP 9999999.99',
+        AmountDisplayFormatter.format(38250, 'EGP'),
+        isNot(contains('EGP')),
       );
     });
 
+    test('the sign is not part of the string either', () {
+      // The old formatter emitted "EGP -382.50", which the bidi algorithm
+      // rendered as "EGP 382.50-" in RTL. The magnitude is formatted here and
+      // the sign is positioned by FinancialAmountText, inside an isolate.
+      expect(AmountDisplayFormatter.format(-38250, 'EGP'), '382.50');
+      expect(
+        AmountDisplayFormatter.format(-38250, 'EGP'),
+        isNot(contains('-')),
+      );
+    });
+
+    test('thousands are grouped, so a column can be scanned', () {
+      expect(AmountDisplayFormatter.format(999999999, 'EGP'), '9,999,999.99');
+    });
+
     test('zero and sub-unit values', () {
-      expect(ReportAmountText.formatMinorUnits(0, 'EGP'), 'EGP 0.00');
-      expect(ReportAmountText.formatMinorUnits(5, 'EGP'), 'EGP 0.05');
-      expect(ReportAmountText.formatMinorUnits(-5, 'EGP'), 'EGP -0.05');
+      expect(AmountDisplayFormatter.format(0, 'EGP'), '0.00');
+      expect(AmountDisplayFormatter.format(5, 'EGP'), '0.05');
+      expect(AmountDisplayFormatter.format(-5, 'EGP'), '0.05');
     });
 
-    test('respects per-currency minor-unit scale', () {
-      expect(ReportAmountText.formatMinorUnits(10000, 'JPY'), 'JPY 10000');
-      expect(ReportAmountText.formatMinorUnits(10000, 'KWD'), 'KWD 10.000');
-      expect(ReportAmountText.formatMinorUnits(320000, 'USD'), 'USD 3200.00');
+    test('per-currency minor-unit scale, including scale 0 and scale 3', () {
+      expect(AmountDisplayFormatter.format(10000, 'JPY'), '10,000');
+      expect(AmountDisplayFormatter.format(10000, 'KWD'), '10.000');
+      expect(AmountDisplayFormatter.format(320000, 'USD'), '3,200.00');
     });
 
-    test('DEFECT: a zero-scale currency loses its sign handling path', () {
-      // The scale-0 branch interpolates minorUnits directly, so the sign comes
-      // from Dart's int formatting rather than the deliberate sign logic used
-      // for every other currency. Same visible result today, different code
-      // path — and phase 4 unifies them.
-      expect(ReportAmountText.formatMinorUnits(-10000, 'JPY'), 'JPY -10000');
-    });
-
-    test('unknown currency codes silently fall back to scale 2', () {
-      // No throw, no marker. A typo'd code renders as a plausible amount.
-      expect(ReportAmountText.formatMinorUnits(38250, 'XXX'), 'XXX 382.50');
+    test('a zero-scale currency takes the same path as every other', () {
+      // The old formatter had a separate scale-0 branch that interpolated the
+      // signed int directly, so JPY got its sign from Dart rather than from
+      // the deliberate sign logic. There is one path now.
+      expect(AmountDisplayFormatter.format(-10000, 'JPY'), '10,000');
     });
   });
 
@@ -79,9 +80,10 @@ void main() {
       );
     });
 
-    test('DEFECT: also ungrouped, and disagrees with nothing else', () {
-      // Same number, three formatters, three strings: '1275.00' here,
-      // 'EGP 1275.00' from ReportAmountText. Phase 4 leaves one.
+    test('stays ungrouped, because a text field echoes what was typed', () {
+      // MoneyInputFormatter is the *entry* formatter: it round-trips what a
+      // user typed, so it stays ungrouped on purpose. Display grouping is
+      // AmountDisplayFormatter's job, and the two are no longer confusable.
       expect(
         MoneyInputFormatter.format(
           const Money(minorUnits: 127500, currency: Currency.egp),
@@ -134,31 +136,53 @@ void main() {
     });
   });
 
-  group('the three formatters disagree — the reason phase 4 exists', () {
-    test('one amount, three different strings', () {
+  group('the formatters that remain, and what each is for', () {
+    test('display and entry differ only in grouping, and deliberately so', () {
       const minor = 127500;
-      final report = ReportAmountText.formatMinorUnits(minor, 'EGP');
-      final entry = MoneyInputFormatter.format(
-        const Money(minorUnits: minor, currency: Currency.egp),
-      );
-      final nonNegative = NonNegativeMoneyFormatter.format(minor, 'EGP');
 
-      expect(report, 'EGP 1275.00');
-      expect(entry, '1275.00');
-      expect(nonNegative, '1275.00');
-      expect(report, isNot(entry));
+      // What a reader sees.
+      expect(AmountDisplayFormatter.format(minor, 'EGP'), '1,275.00');
+      // What a typist round-trips. Grouping separators in a text field
+      // fight the cursor, so entry stays ungrouped on purpose.
+      expect(
+        MoneyInputFormatter.format(
+          const Money(minorUnits: minor, currency: Currency.egp),
+        ),
+        '1275.00',
+      );
     });
 
-    test('and they disagree on negatives more sharply still', () {
+    test('none of them bakes a currency code into the string any more', () {
+      const minor = 127500;
+      expect(AmountDisplayFormatter.format(minor, 'EGP'), isNot(contains('E')));
+      expect(
+        MoneyInputFormatter.format(
+          const Money(minorUnits: minor, currency: Currency.egp),
+        ),
+        isNot(contains('E')),
+      );
+      expect(
+        NonNegativeMoneyFormatter.format(minor, 'EGP'),
+        isNot(contains('E')),
+      );
+    });
+
+    test('on a negative, each does the one thing it exists to do', () {
       const minor = -127500;
-      expect(ReportAmountText.formatMinorUnits(minor, 'EGP'), 'EGP -1275.00');
+
+      // Display drops the sign: FinancialAmountText positions it, inside an
+      // isolate, from the direction rather than from the value.
+      expect(AmountDisplayFormatter.format(minor, 'EGP'), '1,275.00');
+      // Entry keeps it, because it is echoing input.
       expect(
         MoneyInputFormatter.format(
           const Money(minorUnits: minor, currency: Currency.egp),
         ),
         '-1275.00',
       );
-      // The third refuses to render it at all.
+      // And the non-negative formatter still refuses, which is its whole
+      // point: a balance that cannot be negative renders an em dash rather
+      // than a number nobody should trust.
       expect(NonNegativeMoneyFormatter.format(minor, 'EGP'), '—');
     });
   });

@@ -167,10 +167,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // formatMinorUnits(40000, 'EGP') → 'EGP 400.00'
-      // formatMinorUnits(100000, 'EGP') → 'EGP 1000.00'
-      expect(find.textContaining('EGP 400.00'), findsWidgets);
-      expect(find.textContaining('EGP 1000.00'), findsWidgets);
+      // The currency code is no longer baked into the amount string — it is
+      // positioned by the widget — and thousands are grouped.
+      expect(find.textContaining('400.00'), findsWidgets);
+      expect(find.textContaining('1,000.00'), findsWidgets);
     });
 
     testWidgets('3. Remaining label shown', (tester) async {

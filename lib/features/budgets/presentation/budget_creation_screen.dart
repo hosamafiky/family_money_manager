@@ -49,11 +49,11 @@ class _BudgetCreationScreenState extends ConsumerState<BudgetCreationScreen> {
               (_startDate?.add(const Duration(days: 30)) ??
                   DateTime.now().add(const Duration(days: 30))));
 
-    final picked = await showDatePicker(
+    final picked = await showAppDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2050),
+      // A budget period runs forward, so its bounds are not a ledger entry's.
+      purpose: DatePurpose.futureTarget,
     );
     if (picked == null) return;
     setState(() {

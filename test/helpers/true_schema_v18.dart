@@ -8,8 +8,9 @@
 /// - Fixture: `test/fixtures/schema_v18_objects.sql` — triggers/indexes
 ///   dumped from `AppDatabase.forTesting()` onCreate at that commit
 ///   (100 objects; eligibility triggers absent).
-/// - Tables: Drift CREATE TABLE DDL from the *current* probe (table shapes
-///   were unchanged 18→19; only eligibility triggers were added).
+/// - Tables: Drift CREATE TABLE DDL from the *current* probe, with columns
+///   added after v18 stripped back off by [stripColumnsNewerThan]. Only
+///   eligibility triggers were added 18→19; `reversal_reason` arrived at v20.
 ///
 /// This is **not** “open schema 19 then delete triggers”. The two Phase
 /// 6B.1.1 eligibility triggers are never created on the materialized file;
@@ -23,6 +24,8 @@ import 'package:family_money_manager/core/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
+
+import 'historical_table_shape.dart';
 
 /// Materializes a true schema-18 database file without 6B.1.1 triggers.
 Future<String> materializeTrueSchemaV18File() async {
@@ -47,6 +50,7 @@ Future<String> materializeTrueSchemaV18File() async {
   for (final row in tableRows) {
     raw.execute(row.read<String>('sql'));
   }
+  stripColumnsNewerThan(raw, 18);
   for (final stmt in _splitSqlStatements(objectsSql)) {
     raw.execute(stmt);
   }

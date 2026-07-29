@@ -140,7 +140,9 @@ CREATE TABLE savings_certificates (
       (await db.customSelect('PRAGMA user_version').get()).first.read<int>(
         'user_version',
       ),
-      19,
+      // The current version, not a literal: the claim under test is that a
+      // reopen finishes the upgrade, which stays true as versions are added.
+      db.schemaVersion,
     );
 
     Future<int> objectCount(String type, String name) async =>

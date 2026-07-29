@@ -36,6 +36,7 @@ final class Operation {
     this.tags = const [],
     this.receiptPath,
     this.reversedBy,
+    this.reversalReason,
   });
 
   /// Stable client-generated UUID. Used as the idempotency key.
@@ -89,6 +90,18 @@ final class Operation {
 
   /// The [id] of the reversal [Operation] that cancelled this one.
   final String? reversedBy;
+
+  /// Why this reversal was recorded. Set only on reversal operations.
+  ///
+  /// Distinct from [description], which every operation type carries as a
+  /// summary. A reason is an audit field: it is required when a reversal is
+  /// recorded through the app, it is shown verbatim to anyone who opens the
+  /// entry, and — like every other column but [isReversed] and [reversedBy] —
+  /// it can never be edited afterwards.
+  ///
+  /// Null on non-reversal operations, and on reversals written before
+  /// schema 20.
+  final String? reversalReason;
 
   final String createdBy;
 
@@ -614,5 +627,14 @@ final class ReverseOperationParams {
   final String householdId;
   final String effectiveDate;
   final String createdBy;
+
+  /// Why the operation is being reversed.
+  ///
+  /// Persisted to `operations.reversal_reason` on the reversal row and shown
+  /// verbatim wherever the reversal appears. Nullable here rather than
+  /// required because the ledger is also reversed by internal flows that have
+  /// no user-supplied reason; a reversal a *person* initiates must carry one,
+  /// and that rule belongs to `ReverseTransactionUseCase`, which is the only
+  /// path the UI may take.
   final String? reason;
 }

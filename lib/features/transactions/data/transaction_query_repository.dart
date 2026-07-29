@@ -1,3 +1,4 @@
+import 'package:family_money_manager/features/transactions/domain/transaction_detail.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
 import 'package:meta/meta.dart';
@@ -27,6 +28,29 @@ abstract interface class TransactionQueryRepository {
   ///
   /// Returns `null` when no matching operation exists in [householdId].
   Future<TransactionSummary?> operationDetail({
+    required String operationId,
+    required String householdId,
+  });
+
+  /// Counts every operation matching [filter], ignoring its page size.
+  ///
+  /// Exists so the filter sheet can put the result count on its own confirm
+  /// button: knowing a filter matches 87 of 1,248 *before* committing to it
+  /// makes filtering to nothing a rare accident rather than the normal way to
+  /// discover the empty state.
+  Future<int> countOperations({
+    required String householdId,
+    TransactionFilter filter = const TransactionFilter(),
+  });
+
+  /// Returns [operationDetail] plus its ledger lines, resolved names, and the
+  /// other half of its reversal pair when it has one.
+  ///
+  /// Separate from [operationDetail] because it costs three more joins: list
+  /// callers that only need the summary should not pay for them.
+  ///
+  /// Returns `null` when no matching operation exists in [householdId].
+  Future<TransactionDetail?> operationDetailWithLedger({
     required String operationId,
     required String householdId,
   });

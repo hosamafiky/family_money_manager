@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
+import 'historical_table_shape.dart';
+
 /// Builds a physical SQLite file at schema version 12 from historical DDL.
 ///
-/// Tables come from Drift's current CREATE TABLE statements (columns unchanged
-/// across v12→v14). Triggers/indexes come from
+/// Tables come from Drift's current CREATE TABLE statements, with columns
+/// added after v12 stripped back off by [stripColumnsNewerThan].
+/// Triggers/indexes come from
 /// `test/fixtures/schema_v12_objects.sql` extracted from commit `3124346`
 /// onCreate — v13+ objects are never created then deleted.
 Future<String> materializeTrueSchemaV12File() async {
@@ -40,6 +43,7 @@ Future<String> materializeTrueSchemaV12File() async {
   for (final row in tableRows) {
     raw.execute(row.read<String>('sql'));
   }
+  stripColumnsNewerThan(raw, 12);
   for (final stmt in _splitSqlStatements(objectsSql)) {
     raw.execute(stmt);
   }

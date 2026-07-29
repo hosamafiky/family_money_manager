@@ -2275,5 +2275,470 @@
         "type": "String"
       }
     }
+  },
+  "errorReversalReasonRequired": "A reason is required to reverse a transaction.",
+  "@errorReversalReasonRequired": {
+    "description": "Validation: a reversal was submitted with an empty reason."
+  },
+  "errorReversalReasonTooLong": "The reason is too long — 280 characters maximum.",
+  "@errorReversalReasonTooLong": {
+    "description": "Validation: the reversal reason exceeds the 280-character limit."
+  },
+  "errorReversalConflict": "Conflicting reversal request. Refresh and try again.",
+  "@errorReversalConflict": {
+    "description": "A reversal id collided with a different existing operation."
+  },
+  "errorReversalRequiresProtectedAudit": "Reversing this would withdraw from protected money — use the protected-withdrawal flow.",
+  "@errorReversalRequiresProtectedAudit": {
+    "description": "The reversal would debit a protected account and needs the protected-withdrawal flow."
+  },
+  "reversalSheetTitle": "Reverse a transaction — not delete",
+  "@reversalSheetTitle": {
+    "description": "Title of the reversal sheet. Names what the action is not, because users arrive looking for delete."
+  },
+  "reversalSheetIntro": "The original transaction stays in the ledger exactly as it is. We add an opposing entry that refers to it, so the history stays complete and auditable.",
+  "@reversalSheetIntro": {
+    "description": "Explains the append-only correction before the user commits to it."
+  },
+  "reversalBeforeAfterTitle": "Before and after",
+  "@reversalBeforeAfterTitle": {
+    "description": "Heading over the two-row before/after preview."
+  },
+  "reversalOriginalStaysLabel": "Stays — marked as reversed",
+  "@reversalOriginalStaysLabel": {
+    "description": "What happens to the original row: it stays and is marked."
+  },
+  "reversalCounterEntryLabel": "Reversing entry · today",
+  "@reversalCounterEntryLabel": {
+    "description": "Label for the entry that will be added."
+  },
+  "reversalCounterEntryReference": "Refers to the transaction above",
+  "@reversalCounterEntryReference": {
+    "description": "Meta line under the counter-entry naming what it points at."
+  },
+  "reversalReasonLabel": "Reason for reversal — required",
+  "@reversalReasonLabel": {
+    "description": "Label of the required free-text reason field."
+  },
+  "reversalReasonPermanenceNote": "The reason is recorded permanently on the reversing entry and is shown to anyone who opens it.",
+  "@reversalReasonPermanenceNote": {
+    "description": "Tells the user the reason is permanent and public before they type it."
+  },
+  "reversalReasonPresetDuplicate": "Entered twice",
+  "@reversalReasonPresetDuplicate": {
+    "description": "Suggested reversal reason: the transaction was entered twice."
+  },
+  "reversalReasonPresetWrongAmount": "Wrong amount",
+  "@reversalReasonPresetWrongAmount": {
+    "description": "Suggested reversal reason: the amount was wrong."
+  },
+  "reversalReasonPresetWrongAccount": "Wrong account",
+  "@reversalReasonPresetWrongAccount": {
+    "description": "Suggested reversal reason: the wrong account was used."
+  },
+  "reversalReasonPresetCancelledPurchase": "Purchase cancelled",
+  "@reversalReasonPresetCancelledPurchase": {
+    "description": "Suggested reversal reason: the purchase was cancelled."
+  },
+  "reversalConfirmAction": "Add the reversing entry",
+  "@reversalConfirmAction": {
+    "description": "Confirm action on the reversal sheet. States what will be added, never 'are you sure'."
+  },
+  "reversalNoDeleteNote": "There is no delete button in this app, and that is deliberate.",
+  "@reversalNoDeleteNote": {
+    "description": "Closing note on the reversal sheet explaining the absence of delete."
+  },
+  "detailNoEditNoDeleteTitle": "No editing and no deleting.",
+  "@detailNoEditNoDeleteTitle": {
+    "description": "Heading of the append-only explainer on transaction detail."
+  },
+  "detailNoEditNoDeleteBody": "This transaction is a permanent part of the ledger. If it is wrong, we add a reversing entry that refers to it — and both stay visible.",
+  "@detailNoEditNoDeleteBody": {
+    "description": "Body of the append-only explainer on transaction detail."
+  },
+  "detailLedgerEntriesTitle": "Ledger entries — two sides",
+  "@detailLedgerEntriesTitle": {
+    "description": "Heading over the double-entry rows of a posted operation."
+  },
+  "detailLedgerEntriesOriginalTitle": "Ledger entries — the original",
+  "@detailLedgerEntriesOriginalTitle": {
+    "description": "Heading over the double-entry rows of a reversed original."
+  },
+  "detailEntriesStillInLedgerNote": "These entries are still in the ledger — not erased. The reversing entry added two opposing entries, so the net is zero without touching history.",
+  "@detailEntriesStillInLedgerNote": {
+    "description": "Explains that a reversed operation's entries are not deleted."
+  },
+  "detailReversedBannerTitle": "This transaction is reversed",
+  "@detailReversedBannerTitle": {
+    "description": "Banner title on a reversed operation."
+  },
+  "detailAlreadyReversedNoAction": "Already reversed — no further action",
+  "@detailAlreadyReversedNoAction": {
+    "description": "Shown in the action slot of an already-reversed operation, so the absence of an action is explained rather than mysterious."
+  },
+  "detailChainTitle": "Transaction chain",
+  "@detailChainTitle": {
+    "description": "Heading of the numbered original-then-reversal lineage."
+  },
+  "detailChainOriginalLabel": "The original",
+  "@detailChainOriginalLabel": {
+    "description": "Chain step naming the original operation."
+  },
+  "detailChainReversalLabel": "The reversing entry",
+  "@detailChainReversalLabel": {
+    "description": "Chain step naming the reversing operation."
+  },
+  "detailChainYouAreHere": "You are here",
+  "@detailChainYouAreHere": {
+    "description": "Marks which chain step the user is currently viewing."
+  },
+  "detailChainOpenEntry": "Open it",
+  "@detailChainOpenEntry": {
+    "description": "Action opening the other half of a reversal pair."
+  },
+  "detailStatusPosted": "Posted",
+  "@detailStatusPosted": {
+    "description": "Status badge on an operation that is recorded and not reversed."
+  },
+  "transactionRepeatAction": "Repeat",
+  "@transactionRepeatAction": {
+    "description": "Starts a new entry prefilled from this one. Offered beside the reversal because users otherwise reach for edit."
+  },
+  "reversalNetEffectOn": "Net effect on {account}",
+  "@reversalNetEffectOn": {
+    "description": "Net balance effect of the original and its reversal on one account. Always zero, and stated rather than implied.",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "detailReversedBannerBody": "Reversed on {date}. The original is unchanged, and its effect on the balance is zero.",
+  "@detailReversedBannerBody": {
+    "description": "Banner shown on an operation that has been reversed.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailChainReasonBy": "Reason: {reason} · by {author}",
+  "@detailChainReasonBy": {
+    "description": "The reversal's recorded reason and its author, shown on the chain entry.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "detailRecordedAt": "Recorded at {timestamp}",
+  "@detailRecordedAt": {
+    "description": "System timestamp at which the operation was written. Distinct from the user-chosen effective date.",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "reversalSavedConfirmation": "The reversing entry was added. The original stays in the ledger, and the net is now {net}.",
+  "@reversalSavedConfirmation": {
+    "description": "Confirmation after a reversal is recorded. Names the net effect so the user sees the correction landed.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "detailAddReversalAction": "Add a reversing entry",
+  "@detailAddReversalAction": {
+    "description": "Opens the reversal flow from transaction detail. Names what is added, never 'delete' or 'undo'."
+  },
+  "detailSectionTitle": "Details",
+  "@detailSectionTitle": {
+    "description": "Heading over the field table on transaction detail."
+  },
+  "detailChainStepOriginal": "{step} · The original — {date}",
+  "@detailChainStepOriginal": {
+    "description": "Numbered chain step naming the original operation and its date.",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailChainStepReversal": "{step} · The reversing entry — {date}",
+  "@detailChainStepReversal": {
+    "description": "Numbered chain step naming the reversing operation and its date.",
+    "placeholders": {
+      "step": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsGroupToday": "Today",
+  "@transactionsGroupToday": {
+    "description": "Date group header for the current day."
+  },
+  "transactionsGroupYesterday": "Yesterday",
+  "@transactionsGroupYesterday": {
+    "description": "Date group header for the previous day."
+  },
+  "transactionsSummaryIncome": "Income",
+  "@transactionsSummaryIncome": {
+    "description": "Period summary figure: total inflow."
+  },
+  "transactionsSummaryExpense": "Expense",
+  "@transactionsSummaryExpense": {
+    "description": "Period summary figure: total outflow."
+  },
+  "transactionsSummaryTransfer": "Transfer",
+  "@transactionsSummaryTransfer": {
+    "description": "Period summary figure: total moved between the household's own accounts. Labelled and separated because a transfer is not added to income or expense."
+  },
+  "transactionsTransferNotCounted": "Does not affect income or expense",
+  "@transactionsTransferNotCounted": {
+    "description": "Explains why the transfer total sits apart from the other two."
+  },
+  "transactionsReversedOriginalMeta": "The original is kept — see the counter-entry",
+  "@transactionsReversedOriginalMeta": {
+    "description": "Meta line on a reversed original in the list, pointing at its counter-entry."
+  },
+  "transactionsEmptyFilteredTitle": "No transaction matches the filter",
+  "@transactionsEmptyFilteredTitle": {
+    "description": "Empty state when a filter excluded everything. An empty result is a filter problem, never a data problem."
+  },
+  "transactionsErrorTitle": "Couldn't load transactions",
+  "@transactionsErrorTitle": {
+    "description": "Error state title on the transaction list."
+  },
+  "transactionsSummaryCurrencyOnly": "{currency} only · transactions in other currencies are shown below in their own currency",
+  "@transactionsSummaryCurrencyOnly": {
+    "description": "States which currency the period summary covers. A total that mixed currencies would be meaningless, so the summary names its own scope.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsGroupCount": "{count}",
+  "@transactionsGroupCount": {
+    "description": "Number of transactions in a date group, shown beside its header.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsReversalRefersTo": "Refers to the transaction of {date} · Reason: {reason}",
+  "@transactionsReversalRefersTo": {
+    "description": "Meta line on a reversing entry in the list: what it answers, and why.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsCountAvailable": "You have {count} transactions",
+  "@transactionsCountAvailable": {
+    "description": "Names the count the user does have, so an empty filtered result never reads as an empty ledger.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsFilterTitle": "Filter",
+  "@transactionsFilterTitle": {
+    "description": "Title of the filter sheet."
+  },
+  "transactionsFilterType": "Type",
+  "@transactionsFilterType": {
+    "description": "Filter section: operation type."
+  },
+  "transactionsFilterShowReversed": "Show reversed transactions",
+  "@transactionsFilterShowReversed": {
+    "description": "Toggle for reversed history. On by default — hiding it would quietly hide history."
+  },
+  "transactionsFilterAmountRange": "Amount",
+  "@transactionsFilterAmountRange": {
+    "description": "Filter section: amount band."
+  },
+  "transactionsFilterAmountPerCurrency": "Per currency — the filter never compares two currencies",
+  "@transactionsFilterAmountPerCurrency": {
+    "description": "States that the amount band applies within one currency only."
+  },
+  "transactionsFilterMin": "From",
+  "@transactionsFilterMin": {
+    "description": "Lower bound of the amount band."
+  },
+  "transactionsFilterMax": "To",
+  "@transactionsFilterMax": {
+    "description": "Upper bound of the amount band."
+  },
+  "transactionsSearchHint": "Search descriptions, notes and account names",
+  "@transactionsSearchHint": {
+    "description": "Placeholder in the search field, naming what is searched."
+  },
+  "transactionsSearchIgnoresPeriod": "Search ignores the selected period",
+  "@transactionsSearchIgnoresPeriod": {
+    "description": "Explains that a search looks across all dates, because someone searching for an amount wants one transaction, not a month."
+  },
+  "transactionsClearFilters": "Clear all filters",
+  "@transactionsClearFilters": {
+    "description": "Removes every active filter criterion."
+  },
+  "transactionsCancel": "Cancel",
+  "@transactionsCancel": {
+    "description": "Dismisses the filter sheet without applying changes."
+  },
+  "transactionsFilterApply": "Show {count} transactions",
+  "@transactionsFilterApply": {
+    "description": "Confirm button on the filter sheet. Carries the result count so filtering to nothing is a rare accident rather than the normal way to discover the empty state.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsClearFiltersCount": "Clear all ({count})",
+  "@transactionsClearFiltersCount": {
+    "description": "Clears every criterion, naming how many are active.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsEmptyFilteredBody": "You have {total} transactions — but none match this filter.",
+  "@transactionsEmptyFilteredBody": {
+    "description": "Body of the filtered-empty state. Names the count the user does have, so an empty result never reads as an empty ledger.",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTransferIn": "Transfer in",
+  "@reportTransferIn": {
+    "description": "Account-flow line: money moved into this account from another of the household's own accounts."
+  },
+  "reportTransferOut": "Transfer out",
+  "@reportTransferOut": {
+    "description": "Account-flow line: money moved out of this account to another of the household's own accounts."
+  },
+  "reportSpouseWalletFunded": "Spouse wallet — funded",
+  "@reportSpouseWalletFunded": {
+    "description": "Home-savings line: money handed to the spouse wallet."
+  },
+  "reportSpouseWalletReturned": "Spouse wallet — returned",
+  "@reportSpouseWalletReturned": {
+    "description": "Home-savings line: money returned from the spouse wallet."
+  },
+  "reportAuditFor": "For {beneficiary} · {date}",
+  "@reportAuditFor": {
+    "description": "Protected-withdrawal audit caption when the recorder is unknown.",
+    "placeholders": {
+      "beneficiary": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportAuditForBy": "For {beneficiary} · by {recordedBy} · {date}",
+  "@reportAuditForBy": {
+    "description": "Protected-withdrawal audit caption: who the money was for, who took it, and when. All three are the audit trail.",
+    "placeholders": {
+      "beneficiary": {
+        "type": "String"
+      },
+      "recordedBy": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDrillDownFiltered": "Filtered from the report",
+  "@reportDrillDownFiltered": {
+    "description": "Banner on the drill-down list explaining that it is showing a subset chosen by tapping a report figure."
+  },
+  "reportDrillDownClear": "Show all",
+  "@reportDrillDownClear": {
+    "description": "Clears the drill-down filter and shows every transaction in the period."
+  },
+  "reportDoesNotReconcile": "These figures do not add up",
+  "@reportDoesNotReconcile": {
+    "description": "Shown when an account's period flow fails its own accounting identity. Named plainly rather than as an error code, because the user's question is whether they can trust the table."
+  },
+  "reportDoesNotReconcileBody": "The opening balance plus the movements does not equal the closing balance. The balances themselves are correct — the period breakdown is not, so do not rely on these lines until it is checked.",
+  "@reportDoesNotReconcileBody": {
+    "description": "Explains what a failed reconciliation does and does not call into question. Balances are derived from the ledger and remain trustworthy; only the period attribution is suspect."
+  },
+  "transactionsFilterCategory": "Category",
+  "@transactionsFilterCategory": {
+    "description": "Filter section: transaction category."
+  },
+  "transactionsFilterAccount": "Account",
+  "@transactionsFilterAccount": {
+    "description": "Filter section: the account a transaction touched, on either side."
+  },
+  "transactionsFilterSpender": "Spender",
+  "@transactionsFilterSpender": {
+    "description": "Filter section: who spent."
+  },
+  "transactionsFilterScope": "Scope",
+  "@transactionsFilterScope": {
+    "description": "Filter section: expense scope."
+  },
+  "transactionsFilterCurrency": "Currency",
+  "@transactionsFilterCurrency": {
+    "description": "Which currency the amount band applies to. Required, because a band without one would compare across currencies."
+  },
+  "transactionsFilterAllAccounts": "All accounts",
+  "@transactionsFilterAllAccounts": {
+    "description": "Clears the account filter."
+  },
+  "transactionsFilterAnyMember": "Anyone",
+  "@transactionsFilterAnyMember": {
+    "description": "Clears the spender filter."
+  },
+  "datePickerTitle": "Choose a date",
+  "@datePickerTitle": {
+    "description": "Title of the date sheet."
+  },
+  "datePickerToday": "Today",
+  "@datePickerToday": {
+    "description": "Date shortcut: today."
+  },
+  "datePickerYesterday": "Yesterday",
+  "@datePickerYesterday": {
+    "description": "Date shortcut: yesterday."
+  },
+  "datePickerStartOfMonth": "Start of the month",
+  "@datePickerStartOfMonth": {
+    "description": "Date shortcut: the first day of the current month."
+  },
+  "datePickerConfirm": "Choose",
+  "@datePickerConfirm": {
+    "description": "Confirms the selected date."
+  },
+  "datePickerNoFuture": "No transaction is recorded in the future",
+  "@datePickerNoFuture": {
+    "description": "Explains why future days are disabled when picking the date of something that already happened."
   }
 }

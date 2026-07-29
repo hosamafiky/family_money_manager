@@ -1742,4 +1742,321 @@ class AppLocalizationsAr extends AppLocalizations {
   String transferReadBack(String amount, String source, String destination) {
     return 'حوّلت $amount من $source إلى $destination.';
   }
+
+  @override
+  String get errorReversalReasonRequired => 'اكتب سبب العكس — مطلوب.';
+
+  @override
+  String get errorReversalReasonTooLong =>
+      'السبب طويل جداً — 280 حرف كحد أقصى.';
+
+  @override
+  String get errorReversalConflict =>
+      'طلب عكس متعارض. حدّث الصفحة وحاول مجدداً.';
+
+  @override
+  String get errorReversalRequiresProtectedAudit =>
+      'عكس الحركة دي هيسحب من مال محمي — لازم تعديه من شاشة السحب المحمي.';
+
+  @override
+  String get reversalSheetTitle => 'عكس حركة — مش حذف';
+
+  @override
+  String get reversalSheetIntro =>
+      'الحركة الأصلية هتفضل في السجل زي ما هي. هنضيف حركة معاكسة تشير إليها، فيبقى التاريخ كامل وقابل للمراجعة.';
+
+  @override
+  String get reversalBeforeAfterTitle => 'قبل وبعد';
+
+  @override
+  String get reversalOriginalStaysLabel => 'تبقى — تُعلَّم كمعكوسة';
+
+  @override
+  String get reversalCounterEntryLabel => 'حركة عكسية · اليوم';
+
+  @override
+  String get reversalCounterEntryReference => 'تشير إلى الحركة أعلاه';
+
+  @override
+  String get reversalReasonLabel => 'سبب العكس — مطلوب';
+
+  @override
+  String get reversalReasonPermanenceNote =>
+      'السبب يُسجَّل على الحركة العكسية بشكل دائم ويظهر لأي حد يفتحها.';
+
+  @override
+  String get reversalReasonPresetDuplicate => 'أُدخلت مرتين';
+
+  @override
+  String get reversalReasonPresetWrongAmount => 'مبلغ خطأ';
+
+  @override
+  String get reversalReasonPresetWrongAccount => 'حساب خطأ';
+
+  @override
+  String get reversalReasonPresetCancelledPurchase => 'اتلغت الشرائية';
+
+  @override
+  String get reversalConfirmAction => 'أضف الحركة العكسية';
+
+  @override
+  String get reversalNoDeleteNote => 'مفيش زر حذف في التطبيق، وده مقصود.';
+
+  @override
+  String get detailNoEditNoDeleteTitle => 'مفيش تعديل ومفيش حذف.';
+
+  @override
+  String get detailNoEditNoDeleteBody =>
+      'الحركة دي جزء دائم من السجل. لو فيها غلط، بنضيف حركة عكسية تشير إليها — والاتنين يفضلوا ظاهرين.';
+
+  @override
+  String get detailLedgerEntriesTitle => 'قيود السجل — طرفان';
+
+  @override
+  String get detailLedgerEntriesOriginalTitle => 'قيود السجل — الأصل';
+
+  @override
+  String get detailEntriesStillInLedgerNote =>
+      'القيود دي لسه في السجل — مش ممسوحة. الحركة العكسية ضافت قيدين مضادين، فبقى الصافي صفر بدون ما نلمس التاريخ.';
+
+  @override
+  String get detailReversedBannerTitle => 'الحركة دي معكوسة';
+
+  @override
+  String get detailAlreadyReversedNoAction =>
+      'الحركة معكوسة بالفعل — مفيش إجراء تاني';
+
+  @override
+  String get detailChainTitle => 'سلسلة الحركة';
+
+  @override
+  String get detailChainOriginalLabel => 'الأصل';
+
+  @override
+  String get detailChainReversalLabel => 'الحركة العكسية';
+
+  @override
+  String get detailChainYouAreHere => 'أنت هنا';
+
+  @override
+  String get detailChainOpenEntry => 'افتحها';
+
+  @override
+  String get detailStatusPosted => 'مُسجَّلة';
+
+  @override
+  String get transactionRepeatAction => 'تكرار';
+
+  @override
+  String reversalNetEffectOn(String account) {
+    return 'صافي الأثر على $account';
+  }
+
+  @override
+  String detailReversedBannerBody(String date) {
+    return 'اتعكست في $date. الأصل باقي كما هو، وأثرها على الرصيد صفر.';
+  }
+
+  @override
+  String detailChainReasonBy(String reason, String author) {
+    return 'السبب: $reason · بواسطة $author';
+  }
+
+  @override
+  String detailRecordedAt(String timestamp) {
+    return 'سُجِّلت في $timestamp';
+  }
+
+  @override
+  String reversalSavedConfirmation(String net) {
+    return 'تمت إضافة الحركة العكسية. الأصل باقي في السجل، والصافي بقى $net.';
+  }
+
+  @override
+  String get detailAddReversalAction => 'أضف حركة عكسية';
+
+  @override
+  String get detailSectionTitle => 'التفاصيل';
+
+  @override
+  String detailChainStepOriginal(String step, String date) {
+    return '$step · الأصل — $date';
+  }
+
+  @override
+  String detailChainStepReversal(String step, String date) {
+    return '$step · الحركة العكسية — $date';
+  }
+
+  @override
+  String get transactionsGroupToday => 'اليوم';
+
+  @override
+  String get transactionsGroupYesterday => 'أمس';
+
+  @override
+  String get transactionsSummaryIncome => 'دخل';
+
+  @override
+  String get transactionsSummaryExpense => 'مصروف';
+
+  @override
+  String get transactionsSummaryTransfer => 'تحويل';
+
+  @override
+  String get transactionsTransferNotCounted => 'لا يؤثر على الدخل أو المصروف';
+
+  @override
+  String get transactionsReversedOriginalMeta =>
+      'الأصل محفوظ — انظر الحركة المقابلة';
+
+  @override
+  String get transactionsEmptyFilteredTitle => 'مفيش حركة تطابق التصفية';
+
+  @override
+  String get transactionsErrorTitle => 'تعذّر تحميل الحركات';
+
+  @override
+  String transactionsSummaryCurrencyOnly(String currency) {
+    return '$currency فقط · الحركات بعملات أخرى معروضة أدناه بعملتها';
+  }
+
+  @override
+  String transactionsGroupCount(String count) {
+    return '$count';
+  }
+
+  @override
+  String transactionsReversalRefersTo(String date, String reason) {
+    return 'تشير إلى حركة $date · السبب: $reason';
+  }
+
+  @override
+  String transactionsCountAvailable(String count) {
+    return 'عندك $count حركة';
+  }
+
+  @override
+  String get transactionsFilterTitle => 'تصفية';
+
+  @override
+  String get transactionsFilterType => 'النوع';
+
+  @override
+  String get transactionsFilterShowReversed => 'إظهار الحركات المعكوسة';
+
+  @override
+  String get transactionsFilterAmountRange => 'المبلغ';
+
+  @override
+  String get transactionsFilterAmountPerCurrency =>
+      'لكل عملة على حدة — الفلتر لا يقارن بين عملتين';
+
+  @override
+  String get transactionsFilterMin => 'من';
+
+  @override
+  String get transactionsFilterMax => 'إلى';
+
+  @override
+  String get transactionsSearchHint =>
+      'ابحث في الوصف والملاحظات وأسماء الحسابات';
+
+  @override
+  String get transactionsSearchIgnoresPeriod => 'البحث يتجاهل الفترة المحددة';
+
+  @override
+  String get transactionsClearFilters => 'مسح كل التصفية';
+
+  @override
+  String get transactionsCancel => 'إلغاء';
+
+  @override
+  String transactionsFilterApply(String count) {
+    return 'عرض $count حركة';
+  }
+
+  @override
+  String transactionsClearFiltersCount(String count) {
+    return 'مسح الكل ($count)';
+  }
+
+  @override
+  String transactionsEmptyFilteredBody(String total) {
+    return 'عندك $total حركة — بس مفيش حاجة تطابق التصفية دي.';
+  }
+
+  @override
+  String get reportTransferIn => 'تحويل وارد';
+
+  @override
+  String get reportTransferOut => 'تحويل صادر';
+
+  @override
+  String get reportSpouseWalletFunded => 'محفظة الزوجة — تسليم';
+
+  @override
+  String get reportSpouseWalletReturned => 'محفظة الزوجة — مرتجع';
+
+  @override
+  String reportAuditFor(String beneficiary, String date) {
+    return 'للمستفيد $beneficiary · $date';
+  }
+
+  @override
+  String reportAuditForBy(String beneficiary, String recordedBy, String date) {
+    return 'للمستفيد $beneficiary · بواسطة $recordedBy · $date';
+  }
+
+  @override
+  String get reportDrillDownFiltered => 'معروض بتصفية من التقرير';
+
+  @override
+  String get reportDrillDownClear => 'عرض الكل';
+
+  @override
+  String get reportDoesNotReconcile => 'الأرقام دي مش مظبوطة';
+
+  @override
+  String get reportDoesNotReconcileBody =>
+      'رصيد أول المدة زائد الحركات لا يساوي رصيد آخر المدة. الأرصدة نفسها صحيحة — المشكلة في تفصيل الفترة، فمتعتمدش على السطور دي لحد ما تتراجع.';
+
+  @override
+  String get transactionsFilterCategory => 'الفئة';
+
+  @override
+  String get transactionsFilterAccount => 'الحساب';
+
+  @override
+  String get transactionsFilterSpender => 'المنفق';
+
+  @override
+  String get transactionsFilterScope => 'النطاق';
+
+  @override
+  String get transactionsFilterCurrency => 'العملة';
+
+  @override
+  String get transactionsFilterAllAccounts => 'كل الحسابات';
+
+  @override
+  String get transactionsFilterAnyMember => 'أي فرد';
+
+  @override
+  String get datePickerTitle => 'اختر تاريخ';
+
+  @override
+  String get datePickerToday => 'النهاردة';
+
+  @override
+  String get datePickerYesterday => 'إمبارح';
+
+  @override
+  String get datePickerStartOfMonth => 'أول الشهر';
+
+  @override
+  String get datePickerConfirm => 'اختار';
+
+  @override
+  String get datePickerNoFuture => 'مفيش حركة بتتسجّل في المستقبل';
 }

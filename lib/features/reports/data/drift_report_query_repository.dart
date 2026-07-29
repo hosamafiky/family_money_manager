@@ -848,12 +848,23 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
       WHERE account_id = ? AND household_id = ?
     ''';
 
+    // The beneficiary and the person who recorded the withdrawal are joined
+    // to their names here. An audit row that says "member-7f3a took 1,200
+    // from Yousuf's money" is not an audit anyone can act on; the whole value
+    // of this table is that a human can read it later.
     const auditSql = '''
       SELECT
         cwa.operation_id, cwa.amount_minor_units, cwa.reason,
-        cwa.beneficiary, o.effective_date, o.currency_code, o.is_reversed
+        cwa.beneficiary, o.effective_date, o.currency_code, o.is_reversed,
+        beneficiary_member.display_name AS beneficiary_name,
+        recorder.display_name AS recorded_by_name
       FROM child_withdrawal_audits cwa
       JOIN operations o ON o.id = cwa.operation_id
+      LEFT JOIN household_members beneficiary_member
+        ON beneficiary_member.id = cwa.beneficiary
+       AND beneficiary_member.household_id = cwa.household_id
+      LEFT JOIN household_members recorder
+        ON recorder.id = o.created_by AND recorder.household_id = o.household_id
       WHERE cwa.account_id = ?
         AND cwa.household_id = ?
       ORDER BY o.effective_date DESC, cwa.id DESC
@@ -936,6 +947,8 @@ final class DriftReportQueryRepository implements ReportQueryRepository {
           currencyCode: r.read<String>('currency_code'),
           reason: r.read<String>('reason'),
           beneficiaryMemberId: r.read<String>('beneficiary'),
+          beneficiaryName: r.readNullable<String>('beneficiary_name'),
+          recordedByName: r.readNullable<String>('recorded_by_name'),
           isReversed: r.read<int>('is_reversed') == 1,
         );
       }).toList();

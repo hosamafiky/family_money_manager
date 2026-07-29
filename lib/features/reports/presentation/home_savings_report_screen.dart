@@ -1,12 +1,14 @@
 /// Home savings flow report screen.
 library;
 
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
-import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
-import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
+import 'package:family_money_manager/features/reports/presentation/report_flow_row.dart';
+import 'package:family_money_manager/features/reports/presentation/report_period_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,36 +21,41 @@ class HomeSavingsReportScreen extends ConsumerWidget {
     final req = ref.watch(reportRequestProvider);
     final reportAsync = ref.watch(homeSavingsReportProvider(req));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.reportHomeSavingsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.reportRefresh,
-            onPressed: () => ref.invalidate(homeSavingsReportProvider(req)),
-          ),
-        ],
-      ),
+    void retry() => ref.invalidate(homeSavingsReportProvider(req));
+
+    return AppScreenScaffold(
+      title: Text(l10n.reportHomeSavingsTitle),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          tooltip: l10n.reportRefresh,
+          onPressed: retry,
+        ),
+      ],
       body: Column(
         children: [
           const ReportPeriodSelector(),
           const Divider(height: 1),
           Expanded(
             child: reportAsync.when(
-              loading: () => const ReportLoading(),
-              error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(homeSavingsReportProvider(req)),
+              loading: () => AppLoadingState(message: l10n.loadingLabel),
+              error: (_, _) => AppErrorState(
+                message: l10n.reportError,
+                onRetry: retry,
+                retryLabel: l10n.reportRefresh,
               ),
               data: (result) {
                 if (result is! AppOk<List<HomeSavingsFlowSummary>>) {
-                  return ReportErrorState(
-                    onRetry: () =>
-                        ref.invalidate(homeSavingsReportProvider(req)),
+                  return AppErrorState(
+                    message: l10n.reportError,
+                    onRetry: retry,
+                    retryLabel: l10n.reportRefresh,
                   );
                 }
                 final accounts = result.value;
-                if (accounts.isEmpty) return const ReportEmptyState();
+                if (accounts.isEmpty) {
+                  return AppEmptyState(title: l10n.reportEmpty);
+                }
                 return _HomeSavingsContent(accounts: accounts, l10n: l10n);
               },
             ),
@@ -67,111 +74,108 @@ class _HomeSavingsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      children: [
-        ReportInfoNote(text: l10n.reportCurrencySeparate),
-        ReportInfoNote(text: l10n.reportTransferNote),
-        for (final account in accounts) ...[
-          _HomeSavingsCard(account: account, l10n: l10n),
-          const SizedBox(height: 8),
+    return ResponsiveContentContainer(
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: AppTheme.space8),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16),
+            child: Column(
+              children: [
+                AppInlineNotice(message: l10n.reportCurrencySeparate),
+                const SizedBox(height: AppTheme.space8),
+                AppInlineNotice(message: l10n.reportTransferNote),
+              ],
+            ),
+          ),
+          for (final account in accounts)
+            _HomeSavingsFlow(account: account, l10n: l10n),
+          const SizedBox(height: AppTheme.space24),
         ],
-        const SizedBox(height: 24),
-      ],
+      ),
     );
   }
 }
 
-class _HomeSavingsCard extends StatelessWidget {
-  const _HomeSavingsCard({required this.account, required this.l10n});
+class _HomeSavingsFlow extends StatelessWidget {
+  const _HomeSavingsFlow({required this.account, required this.l10n});
 
   final HomeSavingsFlowSummary account;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.financialColors;
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              account.accountName,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            ReportAmountRow(
-              label: l10n.reportOpeningBalance,
-              minorUnits: account.openingBalanceMinorUnits,
-              currencyCode: account.currencyCode,
-            ),
-            if (account.directIncomeMinorUnits != 0)
-              ReportAmountRow(
-                label: l10n.dashboardPeriodIncome,
-                minorUnits: account.directIncomeMinorUnits,
-                currencyCode: account.currencyCode,
-                color: colors.income,
-                icon: Icons.arrow_downward,
-              ),
-            if (account.directExpenseMinorUnits != 0)
-              ReportAmountRow(
-                label: l10n.dashboardPeriodExpenses,
-                minorUnits: -account.directExpenseMinorUnits,
-                currencyCode: account.currencyCode,
-                color: colors.expense,
-                icon: Icons.arrow_upward,
-              ),
-            if (account.spouseWalletFundingMinorUnits != 0)
-              ReportAmountRow(
-                label: '${l10n.reportSpouseWalletTitle} (${l10n.reportFunded})',
-                minorUnits: -account.spouseWalletFundingMinorUnits,
-                currencyCode: account.currencyCode,
-                color: colors.transfer,
-                icon: Icons.north_east,
-              ),
-            if (account.spouseWalletReturnMinorUnits != 0)
-              ReportAmountRow(
-                label:
-                    '${l10n.reportSpouseWalletTitle} (${l10n.reportReturned})',
-                minorUnits: account.spouseWalletReturnMinorUnits,
-                currencyCode: account.currencyCode,
-                color: colors.transfer,
-                icon: Icons.south_west,
-              ),
-            if (account.adjustmentsMinorUnits != 0)
-              ReportAmountRow(
-                label: l10n.transactionTypeAdjustment,
-                minorUnits: account.adjustmentsMinorUnits,
-                currencyCode: account.currencyCode,
-                icon: Icons.tune,
-              ),
-            if (account.reversalEffectMinorUnits != 0)
-              ReportAmountRow(
-                label: l10n.reportReversalEffect,
-                minorUnits: account.reversalEffectMinorUnits,
-                currencyCode: account.currencyCode,
-                color: colors.secondaryText,
-                icon: Icons.undo,
-              ),
-            const Divider(height: 12),
-            ReportAmountRow(
-              label: l10n.reportPeriodClosingBalance,
-              minorUnits: account.closingBalanceMinorUnits,
-              currencyCode: account.currencyCode,
-              bold: true,
-            ),
-            ReportAmountRow(
-              label: l10n.reportCurrentBalance,
-              minorUnits: account.currentBalanceMinorUnits,
-              currencyCode: account.currencyCode,
-              bold: true,
-            ),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: account.accountName),
+        balanceRow(
+          label: l10n.reportOpeningBalance,
+          minorUnits: account.openingBalanceMinorUnits,
+          currencyCode: account.currencyCode,
         ),
-      ),
+        if (account.directIncomeMinorUnits != 0)
+          flowRow(
+            label: l10n.dashboardPeriodIncome,
+            magnitudeMinorUnits: account.directIncomeMinorUnits,
+            currencyCode: account.currencyCode,
+            direction: FinancialAmountDirection.inflow,
+            tone: FinancialAmountTone.income,
+          ),
+        if (account.directExpenseMinorUnits != 0)
+          flowRow(
+            label: l10n.dashboardPeriodExpenses,
+            magnitudeMinorUnits: account.directExpenseMinorUnits,
+            currencyCode: account.currencyCode,
+            direction: FinancialAmountDirection.outflow,
+            tone: FinancialAmountTone.expense,
+          ),
+        // Funding a spouse wallet moves money between the household's own
+        // accounts, so both legs carry the internal glyph and neither is
+        // spending. The label says which leg it is.
+        if (account.spouseWalletFundingMinorUnits != 0)
+          flowRow(
+            label: l10n.reportSpouseWalletFunded,
+            magnitudeMinorUnits: account.spouseWalletFundingMinorUnits,
+            currencyCode: account.currencyCode,
+            direction: FinancialAmountDirection.internal,
+            tone: FinancialAmountTone.transfer,
+          ),
+        if (account.spouseWalletReturnMinorUnits != 0)
+          flowRow(
+            label: l10n.reportSpouseWalletReturned,
+            magnitudeMinorUnits: account.spouseWalletReturnMinorUnits,
+            currencyCode: account.currencyCode,
+            direction: FinancialAmountDirection.internal,
+            tone: FinancialAmountTone.transfer,
+          ),
+        if (account.adjustmentsMinorUnits != 0)
+          signedFlowRow(
+            label: l10n.transactionTypeAdjustment,
+            signedMinorUnits: account.adjustmentsMinorUnits,
+            currencyCode: account.currencyCode,
+          ),
+        if (account.reversalEffectMinorUnits != 0)
+          signedFlowRow(
+            label: l10n.reportReversalEffect,
+            signedMinorUnits: account.reversalEffectMinorUnits,
+            currencyCode: account.currencyCode,
+            tone: FinancialAmountTone.muted,
+          ),
+        balanceRow(
+          label: l10n.reportPeriodClosingBalance,
+          minorUnits: account.closingBalanceMinorUnits,
+          currencyCode: account.currencyCode,
+          isEmphasised: true,
+        ),
+        balanceRow(
+          label: l10n.reportCurrentBalance,
+          minorUnits: account.currentBalanceMinorUnits,
+          currencyCode: account.currencyCode,
+          isEmphasised: true,
+          showDivider: false,
+        ),
+      ],
     );
   }
 }

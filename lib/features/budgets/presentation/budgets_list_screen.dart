@@ -1,10 +1,10 @@
 import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/amount_display_formatter.dart';
 import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
-import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -165,11 +165,11 @@ class _ProgressSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final consumed = ReportAmountText.formatMinorUnits(
+    final consumed = AmountDisplayFormatter.format(
       progress.consumedMinorUnits,
       progress.currencyCode,
     );
-    final limit = ReportAmountText.formatMinorUnits(
+    final limit = AmountDisplayFormatter.format(
       progress.limitMinorUnits,
       progress.currencyCode,
     );

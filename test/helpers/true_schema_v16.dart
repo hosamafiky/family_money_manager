@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
+import 'historical_table_shape.dart';
+
 /// Builds a physical SQLite file at schema version 16 from historical DDL.
 ///
 /// Tables come from Drift's current CREATE TABLE statements (excluding
-/// Phase 6A certificate tables). Triggers/indexes come from
+/// Phase 6A certificate tables), with columns added after v16 stripped back
+/// off by [stripColumnsNewerThan]. Triggers/indexes come from
 /// `test/fixtures/schema_v16_objects.sql` extracted from commit `86736ca`
 /// onCreate — certificate objects are never created then deleted.
 Future<String> materializeTrueSchemaV16File() async {
@@ -38,6 +41,7 @@ Future<String> materializeTrueSchemaV16File() async {
   for (final row in tableRows) {
     raw.execute(row.read<String>('sql'));
   }
+  stripColumnsNewerThan(raw, 16);
   for (final stmt in _splitSqlStatements(objectsSql)) {
     raw.execute(stmt);
   }

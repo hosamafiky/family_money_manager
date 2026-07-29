@@ -18,6 +18,11 @@ final class TransactionSummary {
     this.scope,
     required this.isRecurring,
     this.note,
+    this.spenderName,
+    this.beneficiaryName,
+    this.sourceAccountName,
+    this.destinationAccountName,
+    this.createdByName,
   });
 
   /// The underlying financial operation (type, amount, date, accounts, etc.).
@@ -40,4 +45,23 @@ final class TransactionSummary {
 
   /// Optional free-text note.
   final String? note;
+
+  // ── Resolved display names ─────────────────────────────────────────────────
+  //
+  // The ids above are the stable identity; these are what a person reads. A
+  // row that says "هناء · محفظة نقدية" is buildable, one that says
+  // "member-7f3a · acc-91c2" is not — and resolving it in the query is one
+  // join rather than N lookups per rendered row.
+  //
+  // Null when the referenced row is missing or the query did not ask for
+  // names. Callers fall back to the id, never to blank: a blank reads as a
+  // rendering bug, an id reads as missing data.
+
+  final String? spenderName;
+  final String? beneficiaryName;
+  final String? sourceAccountName;
+  final String? destinationAccountName;
+
+  /// Display name of whoever recorded the operation.
+  final String? createdByName;
 }

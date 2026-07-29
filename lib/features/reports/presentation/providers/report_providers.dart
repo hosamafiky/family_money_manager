@@ -3,6 +3,7 @@ library;
 
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/database/database_providers.dart';
+import 'package:family_money_manager/core/financial/account_enums.dart';
 import 'package:family_money_manager/core/financial/dashboard_period.dart';
 import 'package:family_money_manager/features/dashboard/presentation/providers/dashboard_providers.dart';
 import 'package:family_money_manager/features/reports/application/get_account_flow_report_use_case.dart';
@@ -15,6 +16,7 @@ import 'package:family_money_manager/features/reports/application/get_spending_a
 import 'package:family_money_manager/features/reports/application/get_spouse_wallet_report_use_case.dart';
 import 'package:family_money_manager/features/reports/data/drift_report_query_repository.dart';
 import 'package:family_money_manager/features/reports/data/report_query_repository.dart';
+import 'package:family_money_manager/features/reports/domain/report_filter.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -96,6 +98,45 @@ class ReportRequestNotifier extends Notifier<FinancialReportRequest> {
 
   /// Replace the active request (period + filters).
   void update(FinancialReportRequest request) => state = request;
+
+  /// Narrows the current request to one dimension and keeps the period.
+  ///
+  /// This is what makes a breakdown row checkable: tapping "groceries —
+  /// 3,240.00" sets the filter that produced that figure, so the drill-down
+  /// list shows exactly the transactions behind it. The period is deliberately
+  /// carried over — a drill-down that silently changed the date range would
+  /// show a different set than the number it came from.
+  ///
+  /// Replaces the whole filter rather than adding to it: two dimensions
+  /// chained by accident would produce a list that matches neither figure the
+  /// user tapped.
+  void drillDown({
+    String? categoryCode,
+    String? accountId,
+    String? spenderMemberId,
+    String? beneficiaryMemberId,
+    ExpenseScope? scope,
+  }) {
+    state = FinancialReportRequest(
+      householdId: state.householdId,
+      period: state.period,
+      filter: ReportFilter(
+        categoryCodes: [?categoryCode],
+        accountIds: [?accountId],
+        spenderMemberIds: [?spenderMemberId],
+        beneficiaryMemberIds: [?beneficiaryMemberId],
+        scopes: [?scope],
+      ),
+    );
+  }
+
+  /// Drops every filter, keeping the period.
+  void clearFilter() {
+    state = FinancialReportRequest(
+      householdId: state.householdId,
+      period: state.period,
+    );
+  }
 }
 
 /// The currently selected report request (period + filters).

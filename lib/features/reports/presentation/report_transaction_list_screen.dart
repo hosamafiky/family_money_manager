@@ -1,14 +1,15 @@
 /// Generic drill-down transaction list screen.
 library;
 
+import 'package:family_money_manager/app/app_theme.dart';
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/financial/ledger_enums.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
 import 'package:family_money_manager/core/localization/enum_label_helpers.dart';
-import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
+import 'package:family_money_manager/core/presentation/components/components.dart';
 import 'package:family_money_manager/features/reports/domain/report_models.dart';
 import 'package:family_money_manager/features/reports/presentation/providers/report_providers.dart';
-import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
+import 'package:family_money_manager/features/reports/presentation/report_period_selector.dart';
 import 'package:family_money_manager/features/transactions/presentation/category_label_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,36 +27,69 @@ class ReportTransactionListScreen extends ConsumerWidget {
     final req = ref.watch(reportRequestProvider);
     final reportAsync = ref.watch(reportTransactionsProvider(req));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.reportDrillDown),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.reportRefresh,
-            onPressed: () => ref.invalidate(reportTransactionsProvider(req)),
-          ),
-        ],
-      ),
+    void retry() => ref.invalidate(reportTransactionsProvider(req));
+
+    return AppScreenScaffold(
+      title: Text(l10n.reportDrillDown),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          tooltip: l10n.reportRefresh,
+          onPressed: retry,
+        ),
+      ],
       body: Column(
         children: [
           const ReportPeriodSelector(),
+          // Arriving here by tapping a report figure means this list is a
+          // subset. Saying so — with the way out — is the difference between
+          // "these are my transactions" and "these are some of them".
+          if (!req.filter.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.space16,
+                0,
+                AppTheme.space16,
+                AppTheme.space8,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AppInlineNotice(
+                      message: l10n.reportDrillDownFiltered,
+                      icon: Icons.filter_list,
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.space8),
+                  TextButton(
+                    onPressed: () =>
+                        ref.read(reportRequestProvider.notifier).clearFilter(),
+                    child: Text(l10n.reportDrillDownClear),
+                  ),
+                ],
+              ),
+            ),
           const Divider(height: 1),
           Expanded(
             child: reportAsync.when(
-              loading: () => const ReportLoading(),
-              error: (_, _) => ReportErrorState(
-                onRetry: () => ref.invalidate(reportTransactionsProvider(req)),
+              loading: () => const AppSkeletonList(),
+              error: (_, _) => AppErrorState(
+                message: l10n.reportError,
+                onRetry: retry,
+                retryLabel: l10n.reportRefresh,
               ),
               data: (result) {
                 if (result is! AppOk<List<ReportTransactionRow>>) {
-                  return ReportErrorState(
-                    onRetry: () =>
-                        ref.invalidate(reportTransactionsProvider(req)),
+                  return AppErrorState(
+                    message: l10n.reportError,
+                    onRetry: retry,
+                    retryLabel: l10n.reportRefresh,
                   );
                 }
                 final rows = result.value;
-                if (rows.isEmpty) return const ReportEmptyState();
+                if (rows.isEmpty) {
+                  return AppEmptyState(title: l10n.reportEmpty);
+                }
                 return _TransactionList(rows: rows, l10n: l10n);
               },
             ),
@@ -74,13 +108,12 @@ class _TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      itemCount: rows.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        return _TransactionRow(row: rows[index], l10n: l10n);
-      },
+    return ResponsiveContentContainer(
+      child: ListView.builder(
+        itemCount: rows.length,
+        itemBuilder: (context, index) =>
+            _TransactionRow(row: rows[index], l10n: l10n),
+      ),
     );
   }
 }
@@ -91,65 +124,37 @@ class _TransactionRow extends StatelessWidget {
   final ReportTransactionRow row;
   final AppLocalizations l10n;
 
-  IconData _icon() => switch (row.operationType) {
-    OperationType.income => Icons.arrow_downward,
-    OperationType.expense ||
-    OperationType.childFundWithdrawal => Icons.arrow_upward,
-    OperationType.transfer => Icons.swap_horiz,
-    OperationType.reversal => Icons.undo,
-    OperationType.openingBalance => Icons.flag_outlined,
-    _ => Icons.receipt_outlined,
-  };
-
-  Color _color(AppFinancialColors colors) => switch (row.operationType) {
-    OperationType.income => colors.income,
-    OperationType.expense ||
-    OperationType.childFundWithdrawal => colors.expense,
-    OperationType.transfer => colors.transfer,
-    // A reversal is a correction, not a threshold — grey ink plus the undo
-    // glyph, never the warning role, which belongs on notices.
-    OperationType.reversal => colors.secondaryText,
-    _ => colors.secondaryText,
-  };
-
+  /// The same tile the transaction list uses.
+  ///
+  /// Arriving at a transaction from a report used to show a different row
+  /// than arriving at it from the list — different geometry, different
+  /// grammar, a raw amount string. One row model means the drill-down reads
+  /// like what it drills into.
   @override
   Widget build(BuildContext context) {
-    final color = _color(context.financialColors);
-    return Semantics(
-      label:
-          '${operationTypeLabel(l10n, row.operationType)} ${ReportAmountText.formatMinorUnits(row.amountMinorUnits, row.currencyCode)} ${row.effectiveDate}',
-      button: true,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withAlpha(30),
-          child: Icon(_icon(), color: color, size: 18),
-        ),
-        title: Text(row.accountName),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(row.effectiveDate),
-            if (row.categoryCode != null)
-              Text(
-                categoryLabelFromCode(l10n, row.categoryCode!),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            if (row.isReversed)
-              Text(
-                l10n.reportReversalEffect,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: color),
-              ),
-          ],
-        ),
-        trailing: ReportAmountText(
-          minorUnits: row.amountMinorUnits,
-          currencyCode: row.currencyCode,
-          color: color,
-        ),
-        onTap: () => context.push('/transactions/${row.operationId}'),
-      ),
+    final typeKind = switch (row.operationType) {
+      OperationType.income => FinancialTypeKind.income,
+      OperationType.expense ||
+      OperationType.childFundWithdrawal => FinancialTypeKind.expense,
+      OperationType.transfer => FinancialTypeKind.transfer,
+      OperationType.reversal => FinancialTypeKind.reversal,
+      OperationType.adjustment => FinancialTypeKind.adjustment,
+      _ => FinancialTypeKind.other,
+    };
+
+    return TransactionListTile(
+      typeLabel: operationTypeLabel(l10n, row.operationType),
+      typeKind: typeKind,
+      primaryDescription: row.categoryCode == null
+          ? operationTypeLabel(l10n, row.operationType)
+          : categoryLabelFromCode(l10n, row.categoryCode!),
+      accountOrDirection: row.accountName,
+      effectiveDate: row.effectiveDate,
+      minorUnits: row.amountMinorUnits,
+      currencyCode: row.currencyCode,
+      isReversed: row.isReversed,
+      reversedLabel: row.isReversed ? l10n.transactionReversed : null,
+      onTap: () => context.push('/transactions/${row.operationId}'),
     );
   }
 }

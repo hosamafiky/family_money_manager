@@ -1,9 +1,9 @@
 import 'package:family_money_manager/core/application/app_result.dart';
 import 'package:family_money_manager/core/localization/app_localizations.dart';
+import 'package:family_money_manager/core/presentation/amount_display_formatter.dart';
 import 'package:family_money_manager/core/presentation/theme/app_theme_extensions.dart';
 import 'package:family_money_manager/features/budgets/domain/budget.dart';
 import 'package:family_money_manager/features/budgets/presentation/providers/budget_providers.dart';
-import 'package:family_money_manager/features/reports/presentation/report_widgets.dart';
 import 'package:family_money_manager/features/transactions/presentation/category_label_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,15 +94,15 @@ class _DetailBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final plan = progress.budget;
     final currency = progress.currencyCode;
-    final consumed = ReportAmountText.formatMinorUnits(
+    final consumed = AmountDisplayFormatter.format(
       progress.consumedMinorUnits,
       currency,
     );
-    final limit = ReportAmountText.formatMinorUnits(
+    final limit = AmountDisplayFormatter.format(
       progress.limitMinorUnits,
       currency,
     );
-    final remaining = ReportAmountText.formatMinorUnits(
+    final remaining = AmountDisplayFormatter.format(
       progress.remainingMinorUnits.abs(),
       currency,
     );
@@ -242,7 +242,7 @@ class _DetailBody extends ConsumerWidget {
                 size: 20,
               ),
               title: Text(
-                ReportAmountText.formatMinorUnits(
+                AmountDisplayFormatter.format(
                   row.amountMinorUnits,
                   row.currencyCode,
                 ),
@@ -304,11 +304,11 @@ class _PreviousPeriodsSection extends ConsumerWidget {
         }
         return Column(
           children: previousMonths.map((p) {
-            final consumed = ReportAmountText.formatMinorUnits(
+            final consumed = AmountDisplayFormatter.format(
               p.consumedMinorUnits,
               p.currencyCode,
             );
-            final limit = ReportAmountText.formatMinorUnits(
+            final limit = AmountDisplayFormatter.format(
               p.limitMinorUnits,
               p.currencyCode,
             );

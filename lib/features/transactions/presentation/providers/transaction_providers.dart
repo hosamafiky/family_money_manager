@@ -9,9 +9,11 @@ import 'package:family_money_manager/features/transactions/application/get_spous
 import 'package:family_money_manager/features/transactions/application/get_transaction_history_use_case.dart';
 import 'package:family_money_manager/features/transactions/application/record_expense_use_case.dart';
 import 'package:family_money_manager/features/transactions/application/record_income_use_case.dart';
+import 'package:family_money_manager/features/transactions/application/reverse_transaction_use_case.dart';
 import 'package:family_money_manager/features/transactions/data/drift_transaction_query_repository.dart';
 import 'package:family_money_manager/features/transactions/data/transaction_query_repository.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_context.dart';
+import 'package:family_money_manager/features/transactions/domain/transaction_detail.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_filter.dart';
 import 'package:family_money_manager/features/transactions/domain/transaction_summary.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,6 +63,14 @@ final executeTransferUseCaseProvider = Provider<ExecuteTransferUseCase>((ref) {
   );
 });
 
+final reverseTransactionUseCaseProvider = Provider<ReverseTransactionUseCase>((
+  ref,
+) {
+  return ReverseTransactionUseCase(
+    ledgerRepository: ref.watch(ledgerRepositoryProvider),
+  );
+});
+
 final getTransactionHistoryUseCaseProvider =
     Provider<GetTransactionHistoryUseCase>((ref) {
       return GetTransactionHistoryUseCase(
@@ -87,6 +97,17 @@ final transactionListProvider =
       return useCase.execute(householdId: householdId, filter: filter);
     });
 
+/// How many operations a filter matches, ignoring its page size.
+///
+/// Watched by the filter sheet so its confirm button can carry the count.
+final transactionCountProvider =
+    FutureProvider.family<int, (String, TransactionFilter)>((ref, args) {
+      final (householdId, filter) = args;
+      return ref
+          .watch(transactionQueryRepositoryProvider)
+          .countOperations(householdId: householdId, filter: filter);
+    });
+
 // ── Transaction detail provider ───────────────────────────────────────────────
 
 final transactionDetailProvider =
@@ -94,6 +115,21 @@ final transactionDetailProvider =
       final (operationId, householdId) = args;
       final repo = ref.watch(transactionQueryRepositoryProvider);
       return repo.operationDetail(
+        operationId: operationId,
+        householdId: householdId,
+      );
+    });
+
+/// The detail screen's read: the operation, its ledger lines, resolved names,
+/// and the other half of its reversal pair.
+///
+/// Kept separate from [transactionDetailProvider] so list callers, which only
+/// need the summary, do not pay for the extra joins.
+final transactionDetailWithLedgerProvider =
+    FutureProvider.family<TransactionDetail?, (String, String)>((ref, args) {
+      final (operationId, householdId) = args;
+      final repo = ref.watch(transactionQueryRepositoryProvider);
+      return repo.operationDetailWithLedger(
         operationId: operationId,
         householdId: householdId,
       );
@@ -170,6 +206,23 @@ class TransferFormKeyNotifier extends Notifier<String> {
 final transferFormKeyProvider =
     NotifierProvider.autoDispose<TransferFormKeyNotifier, String>(
       TransferFormKeyNotifier.new,
+    );
+
+/// Idempotency key for the reversal currently being confirmed.
+///
+/// The reversal operation's id *is* its idempotency key, so a retried confirm
+/// — a double tap, a rebuild mid-write — appends one counter-entry, not two.
+/// Regenerated only after a reversal is recorded.
+class ReversalKeyNotifier extends Notifier<String> {
+  @override
+  String build() => const Uuid().v4();
+
+  void regenerateKey() => state = const Uuid().v4();
+}
+
+final reversalKeyProvider =
+    NotifierProvider.autoDispose<ReversalKeyNotifier, String>(
+      ReversalKeyNotifier.new,
     );
 
 // ── Submission state ──────────────────────────────────────────────────────────

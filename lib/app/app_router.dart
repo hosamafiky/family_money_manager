@@ -39,6 +39,7 @@ import 'package:family_money_manager/features/transactions/presentation/expense_
 import 'package:family_money_manager/features/transactions/presentation/expense_review_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/income_form_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/income_review_screen.dart';
+import 'package:family_money_manager/features/transactions/presentation/reverse_transaction_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/transaction_detail_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/transactions_screen.dart';
 import 'package:family_money_manager/features/transactions/presentation/transfer_form_screen.dart';
@@ -56,9 +57,28 @@ import 'package:go_router/go_router.dart';
 /// paths (`/budgets`, `/accounts`, …) while ensuring those destinations share
 /// the same [StatefulShellRoute] page identity — avoiding duplicate Navigator
 /// page keys when stacking shell destinations via `push`.
+///
+/// Every *detail* route, and every action reached from one, is pushed above
+/// the shell instead. See [AppRouter.rootNavigatorKey] for why.
 abstract final class AppRouter {
+  /// Navigator that owns full-screen detail and correction routes.
+  ///
+  /// Detail screens are pushed above the shell rather than inside a branch.
+  /// Without this, opening an account from Home switches the visible tab to
+  /// More and discards Home's scroll position — the destination decides which
+  /// tab you are on, which is backwards. Above the shell there is no bottom
+  /// navigation on a detail screen, and popping returns to wherever you came
+  /// from with its state intact.
+  ///
+  /// It has to be set on each route individually, including children of an
+  /// already-root-pushed route: go_router resolves the navigator per route,
+  /// so a child does not inherit its parent's. A goal's "fund" screen without
+  /// it would slide the bottom bar back in halfway through the flow.
+  static final rootNavigatorKey = GlobalKey<NavigatorState>();
+
   static GoRouter create(WidgetRef ref) {
     return GoRouter(
+      navigatorKey: rootNavigatorKey,
       initialLocation: '/dashboard',
       debugLogDiagnostics: false,
       errorBuilder: (context, state) => AppErrorScreen(error: state.error),
@@ -146,11 +166,24 @@ abstract final class AppRouter {
                         ),
                       ],
                     ),
+                    // Declared after 'new' deliberately: go_router matches
+                    // siblings in order, and ':operationId' would otherwise
+                    // swallow '/transactions/new' as an operation id.
                     GoRoute(
                       path: ':operationId',
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) => TransactionDetailScreen(
                         operationId: state.pathParameters['operationId']!,
                       ),
+                      routes: [
+                        GoRoute(
+                          path: 'reverse',
+                          parentNavigatorKey: rootNavigatorKey,
+                          builder: (context, state) => ReverseTransactionScreen(
+                            operationId: state.pathParameters['operationId']!,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -173,6 +206,7 @@ abstract final class AppRouter {
                     ),
                     GoRoute(
                       path: ':budgetId',
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) => BudgetDetailScreen(
                         budgetId: state.pathParameters['budgetId']!,
                       ),
@@ -189,18 +223,21 @@ abstract final class AppRouter {
                     ),
                     GoRoute(
                       path: ':goalId',
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) => GoalDetailScreen(
                         goalId: state.pathParameters['goalId']!,
                       ),
                       routes: [
                         GoRoute(
                           path: 'fund',
+                          parentNavigatorKey: rootNavigatorKey,
                           builder: (context, state) => FundGoalScreen(
                             goalId: state.pathParameters['goalId']!,
                           ),
                         ),
                         GoRoute(
                           path: 'release',
+                          parentNavigatorKey: rootNavigatorKey,
                           builder: (context, state) => ReleaseGoalScreen(
                             goalId: state.pathParameters['goalId']!,
                           ),
@@ -220,12 +257,14 @@ abstract final class AppRouter {
                     ),
                     GoRoute(
                       path: ':certificateId',
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) => CertificateDetailScreen(
                         certificateId: state.pathParameters['certificateId']!,
                       ),
                       routes: [
                         GoRoute(
                           path: 'profit',
+                          parentNavigatorKey: rootNavigatorKey,
                           builder: (context, state) =>
                               RecordCertificateProfitScreen(
                                 certificateId:
@@ -234,6 +273,7 @@ abstract final class AppRouter {
                         ),
                         GoRoute(
                           path: 'redeem',
+                          parentNavigatorKey: rootNavigatorKey,
                           builder: (context, state) => RedeemCertificateScreen(
                             certificateId:
                                 state.pathParameters['certificateId']!,
@@ -313,6 +353,7 @@ abstract final class AppRouter {
                     ),
                     GoRoute(
                       path: ':accountId',
+                      parentNavigatorKey: rootNavigatorKey,
                       builder: (context, state) => AccountDetailScreen(
                         accountId: state.pathParameters['accountId']!,
                       ),
